@@ -30,8 +30,7 @@ namespace BaiShengGuangDianWeb.Base.Filter
             {
                 CookieHelper.DelCookie("token", context.HttpContext.Response);
                 //未通过验证则跳转到无权限提示页
-                var content = new RedirectToActionResult("Login", "Account", null);
-                context.Result = content;
+                context.Result = new RedirectToActionResult("Login", "Account", null); ;
             }
         }
     }

@@ -5,12 +5,6 @@
         increaseArea: '20%' // optional
     });
 
-    var token = GetCookie("token")
-    //if ( isTokenValid())  {
-    //    $("#tipinfo").show();
-    //    $("#tipinfo").text("已有账号登录，重登会覆盖。")
-    //}
-
     $("#loginBtn").click(function () {
         var acc = $("#Account").val();
         var pwd = $("#Password").val();

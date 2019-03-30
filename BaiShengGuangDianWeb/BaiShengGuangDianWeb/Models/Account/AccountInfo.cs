@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace BaiShengGuangDianWeb.Models.Account
 {
@@ -16,11 +14,16 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public string Password { get; set; }
         public string Name { get; set; }
+        [JsonIgnore]
+        public int Role { get; set; }
+        public string RoleName { get; set; }
+
         public string EmailAddress { get; set; }
         [JsonIgnore]
         public bool IsDeleted { get; set; }
         [JsonIgnore]
         public string SelfPermissions { get; set; }
         public string Permissions { get; set; }
+        public IEnumerable<int> PermissionsList => Permissions.Split(',').Select(int.Parse).Distinct();
     }
 }

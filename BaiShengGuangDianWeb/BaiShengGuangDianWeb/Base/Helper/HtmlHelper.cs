@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BaiShengGuangDianWeb.Base.Helpers
 {
-    public static class HtmlHelpers
+    public static class HtmlHelper
     {
         public static string IsSelected(this IHtmlHelper html, string controller = null, string action = null, string cssClass = null)
         {
-            if (String.IsNullOrEmpty(cssClass))
+            if (string.IsNullOrEmpty(cssClass))
                 cssClass = "active";
 
             if (controller != null) controller = controller.ToLower();
@@ -16,14 +16,14 @@ namespace BaiShengGuangDianWeb.Base.Helpers
             string currentAction = (string)html.ViewContext.RouteData.Values["action"];
             string currentController = (string)html.ViewContext.RouteData.Values["controller"];
 
-            if (String.IsNullOrEmpty(controller))
+            if (string.IsNullOrEmpty(controller))
                 controller = currentController;
 
-            if (String.IsNullOrEmpty(action))
+            if (string.IsNullOrEmpty(action))
                 action = currentAction;
 
             return controller == currentController && action == currentAction ?
-                cssClass : String.Empty;
+                cssClass : string.Empty;
         }
 
         public static string PageClass(this IHtmlHelper htmlHelper)

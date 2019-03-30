@@ -104,10 +104,10 @@ function ajaxPost(url, data, func) {
         data = {}
     }
 
-    var token = GetCookie("token")
-    if (!isStrEmptyOrUndefined(token)) {
-        data.token = token
-    }
+    //var token = GetCookie("token")
+    //if (!isStrEmptyOrUndefined(token)) {
+    //    data.token = token
+    //}
 
     $.post(url, data, func);
 
@@ -120,10 +120,10 @@ function ajaxGet(url, data, func) {
         data = {}
     }
 
-    var token = GetCookie("token");
-    if (!isStrEmptyOrUndefined(token)) {
-        data.token = token;
-    }
+    //var token = GetCookie("token");
+    //if (!isStrEmptyOrUndefined(token)) {
+    //    data.token = token;
+    //}
 
     var paramstr = "";
     for (var key in data) {

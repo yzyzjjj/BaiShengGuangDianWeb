@@ -5,10 +5,10 @@
         <!-- Sidebar user panel -->
         <div class="user-panel">
             <div class="pull-left image">
-                <img src="~/lib/AdminLTE-2.3.11/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                <img src="~/lib/AdminLTE-2.3.11/dist/img/avatar5.png" class="img-circle" alt="User Image">
             </div>
             <div class="pull-left info">
-                <p>Alexander Pierce</p>
+                <p id="nuser_role"></p>
                 <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
         </div>
@@ -30,6 +30,74 @@
             <!-- Add new comment here (FR) -->
             @*@await Component.InvokeAsync("ControllerList")*@
             <vc:controller-list></vc:controller-list>
+
+            @*<li class="treeview">
+                <a href="#">
+                    <i class="fa fa-laptop"></i> <span>组织管理</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a class="menuitem" href="@Url.Action("Index","AccountManagement")"><i class="fa fa-circle-o"></i> 组织结构管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("Users","AccountManagement")"><i class="fa fa-circle-o"></i> 用户管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("Roles","AccountManagement")"><i class="fa fa-circle-o"></i> 角色管理</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a class="menuitem" href="@Url.Action("Index","RepairManagement")">
+                    <i class="fa fa-edit"></i> <span>维修管理</span>
+                    <span class="pull-right-container"></span>
+                </a>
+            </li>
+
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-cubes"></i> <span>设备管理</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a class="menuitem" href="@Url.Action("Index","DeviceManagement")"><i class="fa fa-circle-o"></i> 设备管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("DeviceModel","DeviceManagement")"><i class="fa fa-circle-o"></i> 设备型号库管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("Site","DeviceManagement")"><i class="fa fa-circle-o"></i> 场地库管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("FirmwareLibrary","DeviceManagement")"><i class="fa fa-circle-o"></i> 固件库管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("HardwareLibrary","DeviceManagement")"><i class="fa fa-circle-o"></i> 硬件库管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("DeviceCategory","DeviceManagement")"><i class="fa fa-circle-o"></i> 设备类型库管理</a></li>
+                    <li><a class="menuitem" href="@Url.Action("ProcessLibrary","DeviceManagement")"><i class="fa fa-circle-o"></i> 流程库管理</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a class="menuitem" href="@Url.Action("Index","FlowCardManagement")">
+                    <i class="fa fa-clone"></i> <span>流程卡管理</span>
+                    <span class="pull-right-container"></span>
+                </a>
+            </li>
+
+            <li>
+                <a href="@Url.Action("Index","ProcessManagement")">
+                    <i class="fa fa-edit"></i> <span>工艺管理</span>
+                    <span class="pull-right-container"></span>
+                </a>
+            </li>
+
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-pie-chart"></i> <span>数据统计</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a class="menuitem"><i class="fa fa-circle-o"></i> 数据统计1</a></li>
+                    <li><a class="menuitem"><i class="fa fa-circle-o"></i> 数据统计2</a></li>
+                    <li><a class="menuitem"><i class="fa fa-circle-o"></i> 数据统计3</a></li>
+                </ul>
+            </li>*@
+
 
             @*<li class="treeview">
                     <a href="#">

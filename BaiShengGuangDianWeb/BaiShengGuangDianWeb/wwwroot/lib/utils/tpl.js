@@ -7,6 +7,7 @@ var commonfunc = function () {
 
     var tkinfo = getCookieTokenInfo()
     $("#nuser_name").text(tkinfo.name)
+    $("#nuser_role").text(tkinfo.role)
     $("#user_name").prepend(tkinfo.name)
     $("#user_email").text(tkinfo.email)
 
@@ -20,7 +21,7 @@ var commonfunc = function () {
     })
 
     //控制左侧菜单栏的权限控制
-    $(".sidebar-menu li").empty().append('<li class="header">功能列表</li>')
+    $(".sidebar-menu li.mli").remove()
     ajaxGet("/Account/Pages",
         null,
         function (ret) {
@@ -28,37 +29,59 @@ var commonfunc = function () {
                 layer.msg(ret.msg)
                 return
             }
-            //监听 treeview 打开事件
-            /** add active class and stay opened when selected */
 
-            //id
-            //name
-            //order
-            //parent
-            //url
+            var mMenu1 = '<li class="mli">' +
+                '   <a class="menuitem">' +
+                '       <i class="mi fa"></i> <span class="mt"></span>' +
+                '   </a>' +
+                '</li>'
 
-            $(".sidebar-menu").append('<li>' +
-                '<a class="menuitem" href="/RepairManagement">' +
-                '    <i class="fa fa-edit"></i> <span>维修管理</span>' +
-                '    <span class="pull-right-container"></span>' +
-                '</a>')
-            var html = ""
+            var mMenu2 = '<li class="mli treeview">' +
+                '    <a href="#">' +
+                '        <i class="mi fa"></i> <span class="mt"></span>' +
+                '        <span class="pull-right-container">' +
+                '           <i class="fa fa-angle-left pull-right"></i>' +
+                '        </span>' +
+                '    </a>' +
+                '    <ul class="treeview-menu">' +
+                '    </ul>' +
+                '</li>'
+
+            var mMenu3 = '<li>' +
+                '   <a class="menuitem" > <i class="fa fa-circle-o"></i><span></span></a>' +
+                '</li >'
+
             var datas = ret.datas
             var parents = getParent(datas)
             for (var i = 0; i < parents.length; i++) {
                 var childs = getChild(datas, parents[i])
                 for (var j = 0; j < childs.length; j++) {
-                    if (childs.url == "") {
-
+                    var child = childs[j]
+                    var option = null
+                    if (child.parent == 0) {
+                        if (child.url == "") {
+                            option = $(mMenu2).clone()
+                            option.find('.treeview-menu').attr('id', child.id)
+                            option.find('i.mi').addClass(child.icon)
+                            option.find('span.mt').text(child.name)
+                            $(".sidebar-menu").append(option)
+                        } else {
+                            option = $(mMenu1).clone()
+                            option.find('.menuitem').attr('id', child.id)
+                            option.find('.menuitem').attr('href', child.url)
+                            option.find('i.mi').addClass(child.icon)
+                            option.find('span.mt').text(child.name)
+                            $(".sidebar-menu").append(option)
+                        }
                     } else {
-
-
-
-
+                        option = $(mMenu3).clone()
+                        option.find('.treeview-menu').attr('id', child.id)
+                        option.find('a').attr('href', child.url)
+                        option.find('span').text(child.name)
+                        $(".sidebar-menu").find('[id=' + child.parent + ']').append(option)
                     }
                 }
             }
-            $(".sidebar-menu").append(html)
 
             var url = window.location
 
@@ -68,6 +91,14 @@ var commonfunc = function () {
             }).parent().addClass("active").parent().parent().addClass("active")
         })
 }
+
+function rule(a, b) {
+    if (a.order == b.order) {
+        return a.id > b.id
+    }
+    return a.order > b.order
+}
+
 function getParent(list) {
     var result = new Array();
     for (var i = 0; i < list.length; i++) {
@@ -77,12 +108,6 @@ function getParent(list) {
         }
     }
 
-    function rule(a, b) {
-        if (a.order == b.order) {
-            return a.id > b.id
-        }
-        return a.order > b.order
-    }
     return result.sort(rule)
 }
 
@@ -96,19 +121,13 @@ function getChild(list, parentId) {
         }
     }
 
-    function rule(a, b) {
-        if (a.order == b.order) {
-            return a.id > b.id
-        }
-        return a.order > b.order
-    }
     return result.sort(rule)
 }
 
 $(function () {
     commonfunc()
-    if (typeof (pageready) != "undefined") {
-        pageready()
+    if (typeof (pageReady) != "undefined") {
+        pageReady()
         $(".form_date,.form_month").attr("readonly", true)
     }
 })

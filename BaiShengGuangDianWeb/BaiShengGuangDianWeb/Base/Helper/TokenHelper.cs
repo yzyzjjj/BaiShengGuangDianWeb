@@ -31,7 +31,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <summary>
         /// 创建jwt token 字符串
         /// </summary>
-        /// <param name="accountId"></param>
+        /// <param name="accountInfo"></param>
         /// <returns></returns>
         public static string CreateJwtToken(AccountInfo accountInfo)
         {
@@ -39,6 +39,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             {
                 new Claim("id", accountInfo.Id.ToString()),
                 new Claim("name", accountInfo.Name),
+                new Claim("role", accountInfo.RoleName),
                 new Claim("account", accountInfo.Account),
                 new Claim("email", accountInfo.EmailAddress),
                 new Claim("permissions", accountInfo.Permissions)
@@ -80,14 +81,15 @@ namespace BaiShengGuangDianWeb.Base.Helper
             {
                 try
                 {
-                    AccountHelper.CurrentUser = new AccountInfo
-                    {
-                        Id = int.Parse(payLoad["id"].ToString()),
-                        Name = (string)payLoad["name"],
-                        Account = (string)payLoad["account"],
-                        EmailAddress = (string)payLoad["email"],
-                        Permissions = (string)payLoad["permissions"],
-                    };
+                    //AccountHelper.CurrentUser = new AccountInfo
+                    //{
+                    //    Id = int.Parse(payLoad["id"].ToString()),
+                    //    Name = (string)payLoad["name"],
+                    //    Account = (string)payLoad["account"],
+                    //    EmailAddress = (string)payLoad["email"],
+                    //    Permissions = (string)payLoad["permissions"],
+                    //};
+                    AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
                 }
                 catch (Exception e)
                 {

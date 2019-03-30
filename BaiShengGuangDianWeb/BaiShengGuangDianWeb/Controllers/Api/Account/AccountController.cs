@@ -1,16 +1,19 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
-using BaiShengGuangDianWeb.Base.Server;
 using BaiShengGuangDianWeb.Models.RequestBody;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.ServerConfig.Enum;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
+using ServiceStack;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Account
 {
-    [Route("Account")]
+    /// <summary>
+    /// 登陆/权限相关
+    /// </summary>
+    [Microsoft.AspNetCore.Mvc.Route("Account")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -28,64 +31,85 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             var accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
             if (accountInfo == null)
             {
-                return Result.GenError<CommonResult>(Error.AccountNotExist);
+                return Result.GenError<Result>(Error.AccountNotExist);
             }
 
-            var pwd = AccountHelper.GenAccountPwd(accountInfo.Id, loginBody.Password);
+            var pwd = AccountHelper.GenAccountPwd(accountInfo.Account, loginBody.Password);
             if (accountInfo.Password != pwd)
             {
-                return Result.GenError<CommonResult>(Error.PasswordError);
+                return Result.GenError<Result>(Error.PasswordError);
             }
 
             var token = TokenHelper.CreateJwtToken(accountInfo);
             CookieHelper.SetCookie("token", token, Response);
-            return Result.GenError<CommonResult>(Error.Success);
+            OperateLogHelper.Log(accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
+            return Result.GenError<Result>(Error.Success);
         }
 
         [HttpPost("Logout")]
         public Result Logout()
         {
+            var accountInfo = AccountHelper.CurrentUser;
+            if (accountInfo == null)
+            {
+                return Result.GenError<Result>(Error.AccountNotExist);
+            }
             CookieHelper.DelCookie("token", Response);
+            OperateLogHelper.Log(accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登出系统");
             return Result.GenError<Result>(Error.Success);
         }
 
         [HttpGet("Permission")]
         public CommonResult Permission()
         {
-            var accountInfo = AccountHelper.GetAccountInfo(AccountHelper.CurrentUser.Account);
+            var accountInfo = AccountHelper.CurrentUser;
             if (accountInfo == null)
             {
                 return Result.GenError<CommonResult>(Error.AccountNotExist);
             }
 
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<CommonResult>(Error.NoAuth);
+            }
             var result = new CommonResult { data = accountInfo.Permissions };
+            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
         [HttpGet("Permissions")]
         public DataResult Permissions()
         {
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<DataResult>(Error.NoAuth);
+            }
             var result = new DataResult();
-            result.datas.AddRange(ServerConfig.WebDb.Query<dynamic>("SELECT Id, `Name` FROM `permissions` WHERE IsDelete = 0;"));
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Select(x => new { x.Id, x.Name }));
+            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
         [HttpGet("Pages")]
         public DataResult Pages()
         {
-            var accountInfo = AccountHelper.GetAccountInfo(AccountHelper.CurrentUser.Account);
+            var accountInfo = AccountHelper.CurrentUser;
             if (accountInfo == null)
             {
                 return Result.GenError<DataResult>(Error.AccountNotExist);
             }
 
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<DataResult>(Error.NoAuth);
+            }
+
             var result = new DataResult();
-            result.datas.AddRange(ServerConfig.WebDb.Query<Models.Account.Page>("SELECT Id, `Name`, Url, Parent, `Order`, `Icon` FROM `permissions` " +
-                                                                    "WHERE IsDelete = 0 AND IsPage = 1 AND IsMenu = 1 AND FIND_IN_SET(Id, @Permissions);", new
-                                                                    {
-                                                                        Permissions = accountInfo.Permissions + ","
-                                                                    }));
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values
+                .Where(x => !x.IsDelete && x.IsPage && x.IsMenu && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Icon, x.Order, x.Parent }));
+            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
+
     }
 }

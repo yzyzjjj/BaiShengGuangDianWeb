@@ -14,15 +14,8 @@ namespace BaiShengGuangDianWeb.Models.Account
         public bool IsMenu { get; set; }
         public int Parent { get; set; }
         public int Order { get; set; }
+        public string Icon { get; set; }
         public bool IsDelete { get; set; }
 
-    }
-    public class Page
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public int Parent { get; set; }
-        public int Order { get; set; }
     }
 }

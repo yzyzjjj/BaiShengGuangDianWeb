@@ -6,9 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\新文件夹\**" />
+    <Content Remove="wwwroot\新文件夹\**" />
+    <EmbeddedResource Remove="wwwroot\新文件夹\**" />
+    <None Remove="wwwroot\新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+    <PackageReference Include="ServiceStack.Redis" Version="5.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,10 +27,11 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\utils\" />
+    <Folder Include="wwwroot\mjs\AccountManagement\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\mjs\Login.js" />
+    <None Include="wwwroot\mjs\Account\Login.js" />
   </ItemGroup>
 
   <ItemGroup>

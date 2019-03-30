@@ -15,7 +15,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
     [Authorize]
     public class RelayController : ControllerBase
     {
-        [HttpPost("post")]
+        [HttpPost("Post")]
         public object Post([FromBody] object param)
         {
             
