@@ -34,7 +34,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var result = new DataResult();
             result.datas.AddRange(OrganizationUnitHelper.GetOrganizationUnit());
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -83,7 +83,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             };
             OrganizationUnitHelper.AddOrganizationUnit(organizationUnit);
             var logParam = $"组织名:{name}";
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -118,7 +118,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
 
             OrganizationUnitHelper.DeleteOrganizationUnit(organizationUnit);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -161,7 +161,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             organizationUnit.Name = nameStr;
 
             OrganizationUnitHelper.UpdateOrganizationUnit(organizationUnit);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"组织ID:{organizationUnit.Id},组织名:{oldName},新组织名:{organizationUnit.Name}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"组织ID:{organizationUnit.Id},组织名:{oldName},新组织名:{organizationUnit.Name}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -207,7 +207,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
 
             OrganizationUnitHelper.MoveOrganizationUnit(parent, child);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value,
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
                 $"上级组织ID:{parent.Id},组织名:{parent.Name},下级组织ID:{child.Id},组织名:{child.Name}");
             return Result.GenError<Result>(Error.Success);
         }
@@ -245,7 +245,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var result = new DataResult();
             result.datas.AddRange(OrganizationUnitHelper.MemberList(organizationUnit));
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -291,7 +291,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             OrganizationUnitHelper.AddMember(organizationUnit, member);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value,
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
                 $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}");
             return Result.GenError<Result>(Error.Success);
         }
@@ -338,7 +338,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             OrganizationUnitHelper.DeleteMember(organizationUnit, member);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value,
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
                 $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}");
             return Result.GenError<Result>(Error.Success);
         }

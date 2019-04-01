@@ -31,7 +31,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var result = new DataResult();
             result.datas.AddRange(RoleHelper.GetRoleInfo());
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -75,7 +75,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
 
             RoleHelper.AddRoleInfo(roleInfo);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色名:{roleInfo.Name},权限列表:{roleInfo.Permissions}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色名:{roleInfo.Name},权限列表:{roleInfo.Permissions}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -109,7 +109,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.RoleNotExist);
             }
             RoleHelper.DeleteRoleInfo(id);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色ID:{roleInfo.Id},角色名:{roleInfo.Name}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色ID:{roleInfo.Id},角色名:{roleInfo.Name}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -166,7 +166,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
 
             RoleHelper.UpdateRoleInfo(roleInfo);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
     }

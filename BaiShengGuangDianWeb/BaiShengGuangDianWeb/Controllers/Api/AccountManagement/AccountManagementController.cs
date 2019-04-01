@@ -43,7 +43,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 result.datas.Add(AccountHelper.GetAccountInfo(id));
             }
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -114,7 +114,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 SelfPermissions = permissions
             };
             AccountHelper.AddAccountInfo(info);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -161,7 +161,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             AccountHelper.DeleteAccountInfo(accountInfo.Id);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -270,7 +270,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
             AccountHelper.UpdateAccountInfo(accountInfo);
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
     }

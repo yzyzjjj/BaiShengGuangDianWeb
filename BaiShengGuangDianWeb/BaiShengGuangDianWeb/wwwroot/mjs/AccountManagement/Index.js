@@ -46,13 +46,11 @@ function getOrganizationUnits() {
 
         });
 }
+
 var op = function (data, type, row) {
     var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showDevice(\'' +
         row.Id + '\',\'' + row.Name + '\',\'' + row.RoleName +
         '\')">删除</button>';
-    html += '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showDevice(\'' +
-        row.Id + '\',\'' + row.Name + '\',\'' + row.RoleName +
-        '\')">修改</button>';
     return html;
 }
 

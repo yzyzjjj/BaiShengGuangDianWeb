@@ -1,7 +1,9 @@
 ﻿using BaiShengGuangDianWeb.Base.Server;
 using BaiShengGuangDianWeb.Models.Account;
+using Microsoft.AspNetCore.Http;
 using ServiceStack;
 using System;
+using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Base.Helper
 {
@@ -13,13 +15,15 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <summary>
         /// 根据权限ID
         /// </summary>
+        /// <param name="request"></param>
         /// <param name="accountId"></param>
         /// <param name="operateType"></param>
         /// <param name="param"></param>
         /// <param name="opAccountId"></param>
         /// <param name="operateDesc"></param>
-        public static void Log(int accountId, int operateType, string param = "", int opAccountId = 0, string operateDesc = "")
+        public static void Log(HttpRequest request, int accountId, int operateType, string param = "", int opAccountId = 0, string operateDesc = "")
         {
+
             if (operateDesc.IsNullOrEmpty())
             {
                 var permission = PermissionHelper.Get(operateType);
@@ -33,8 +37,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 opAccountInfo = AccountHelper.GetAccountInfo(accountId);
             }
             ServerConfig.WebDb.Execute(
-                "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `Param`) " +
-                "VALUES (@AccountId, @AccountName, @OperateAccountId, @OperateAccountName, @OperateType, @OperateDesc, @OperateTime, @Param);", new
+                "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `IP`, `Param`) " +
+                "VALUES (@AccountId, @AccountName, @OperateAccountId, @OperateAccountName, @OperateType, @OperateDesc, @OperateTime, @IP, @Param);", new
                 {
                     AccountId = accountInfo.Id,
                     AccountName = accountInfo.Name,
@@ -43,6 +47,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                     OperateType = operateType,
                     OperateDesc = operateDesc,
                     OperateTime = DateTime.Now,
+                    IP = request.GetIp(),
                     Param = param
                 });
 
@@ -51,12 +56,13 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <summary>
         /// 根据请求路径
         /// </summary>
+        /// <param name="request"></param>
         /// <param name="accountId"></param>
         /// <param name="url"></param>
         /// <param name="param"></param>
         /// <param name="opAccountId"></param>
         /// <param name="operateDesc"></param>
-        public static void Log(int accountId, string url, string param = "", int opAccountId = 0, string operateDesc = "")
+        public static void Log(HttpRequest request, int accountId, string url, string param = "", int opAccountId = 0, string operateDesc = "")
         {
             var permission = PermissionHelper.Get(url);
             if (operateDesc.IsNullOrEmpty())
@@ -71,8 +77,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 opAccountInfo = AccountHelper.GetAccountInfo(accountId);
             }
             ServerConfig.WebDb.Execute(
-                "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `Param`) " +
-                "VALUES (@AccountId, @AccountName, @OperateAccountId, @OperateAccountName, @OperateType, @OperateDesc, @OperateTime, @Param);", new
+                "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `IP`, `Param`) " +
+                "VALUES (@AccountId, @AccountName, @OperateAccountId, @OperateAccountName, @OperateType, @OperateDesc, @OperateTime, @IP, @Param);", new
                 {
                     AccountId = accountInfo.Id,
                     AccountName = accountInfo.Name,
@@ -81,6 +87,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                     OperateType = permission.Id,
                     OperateDesc = operateDesc,
                     OperateTime = DateTime.Now,
+                    IP = request.GetIp(),
                     Param = param
                 });
         }

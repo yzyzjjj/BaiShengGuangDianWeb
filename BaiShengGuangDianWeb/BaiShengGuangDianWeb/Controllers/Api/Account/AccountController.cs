@@ -42,7 +42,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
 
             var token = TokenHelper.CreateJwtToken(accountInfo);
             CookieHelper.SetCookie("token", token, Response);
-            OperateLogHelper.Log(accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
+            OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -55,7 +55,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             CookieHelper.DelCookie("token", Response);
-            OperateLogHelper.Log(accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登出系统");
+            OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登出系统");
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -73,7 +73,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<CommonResult>(Error.NoAuth);
             }
             var result = new CommonResult { data = accountInfo.Permissions };
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -86,7 +86,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             }
             var result = new DataResult();
             result.datas.AddRange(PermissionHelper.PermissionsList.Values.Select(x => new { x.Id, x.Name }));
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
@@ -107,7 +107,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             var result = new DataResult();
             result.datas.AddRange(PermissionHelper.PermissionsList.Values
                 .Where(x => !x.IsDelete && x.IsPage && x.IsMenu && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Icon, x.Order, x.Parent }));
-            OperateLogHelper.Log(AccountHelper.CurrentUser.Id, Request.Path.Value);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
