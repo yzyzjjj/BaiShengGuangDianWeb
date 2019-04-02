@@ -1,11 +1,11 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using ModelBase.Base.Utils;
 using ServiceStack;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BaiShengGuangDianWeb.Base.Filter
 {
@@ -30,7 +30,7 @@ namespace BaiShengGuangDianWeb.Base.Filter
             {
                 CookieHelper.DelCookie("token", context.HttpContext.Response);
                 //未通过验证则跳转到无权限提示页
-                context.Result = new RedirectToActionResult("Login", "Account", null); ;
+                context.Result = new RedirectToActionResult("Login", "Account", null);
             }
         }
     }

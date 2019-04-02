@@ -12,5 +12,10 @@ namespace BaiShengGuangDianWeb.Controllers.Page.Setting
         {
             return View();
         }
+        public IActionResult ApiTesting()
+        {
+            return View();
+        }
+
     }
 }
