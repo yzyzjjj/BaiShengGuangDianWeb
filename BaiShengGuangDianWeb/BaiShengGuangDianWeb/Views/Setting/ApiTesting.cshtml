@@ -19,7 +19,14 @@
             <div class="box">
                 <div class="box-header">设备管理</div>
                 <div class="box-body">
-
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceLibrary()">获取所有设备信息</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleDeviceLibrary()">获取单个设备信息</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateDeviceLibrary()">更新设备信息</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddDeviceLibrary()">添加新设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteDeviceLibrary()">删除设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceModel()">获取设备型号</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetScriptVersion()">根据设备型号获取脚本版本</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDataNameDictionary()">根据设备型号和脚本版本获取变量配置</button>
                 </div>
             </div>
             <div class="box">

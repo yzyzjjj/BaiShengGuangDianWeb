@@ -2,8 +2,160 @@
 }
 
 //设备管理
+function GetDeviceLibrary() {
+    var data = {}
+    data.opType = 100
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
+function GetSingleDeviceLibrary() {
+    var data = {}
+    data.opType = 101
+    data.opData = JSON.stringify({
+        id: 1
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
+function UpdateDeviceLibrary() {
+    var data = {}
+    data.opType = 102
+    data.opData = JSON.stringify({
+        id: 20,
+        //机台号
+        Code: "测试",
+        //设备名
+        DeviceName: "测试",
+        //设备MAC地址
+        MacAddress: "测试",
+        //IP
+        Ip: "192.168.1.10",
+        //端口
+        Port: 60000,
+        //端口
+        Identifier: "测试",
+        //设备型号编号
+        DeviceModelId: 2,
+        //设备固件版本编号
+        FirmwareId: 2,
+        //设备流程版本编号
+        ProcessId: 2,
+        //设备硬件版本编号
+        HardwareId: 2,
+        //设备所在场地编号
+        SiteId: 1,
+        //设备管理员用户
+        AdministratorUser: "测试1",
+        //备注
+        Remark: "测试1"
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
+function AddDeviceLibrary() {
+    var data = {}
+    data.opType = 103
+    data.opData = JSON.stringify({
+        //机台号
+        Code: "测试1",
+        //设备名
+        DeviceName: "测试1",
+        //设备MAC地址
+        MacAddress: "测试1",
+        //IP
+        Ip: "192.168.1.10",
+        //端口
+        Port: 60000,
+        //端口
+        Identifier: "测试1",
+        //设备型号编号
+        DeviceModelId: 1,
+        //设备固件版本编号
+        FirmwareId: 1,
+        //设备流程版本编号
+        ProcessId: 1,
+        //设备硬件版本编号
+        HardwareId: 1,
+        //设备所在场地编号
+        SiteId: 1,
+        //设备管理员用户
+        AdministratorUser: "测试1",
+        //备注
+        Remark: "测试1"
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
+function DeleteDeviceLibrary() {
+    var data = {}
+    data.opType = 104
+    data.opData = JSON.stringify({
+        id: 20
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
 
-
+function GetScriptVersion() {
+    var data = {}
+    data.opType = 105
+    data.opData = JSON.stringify({
+        id: 1
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
+function GetDataNameDictionary() {
+    var data = {}
+    data.opType = 106
+    data.opData = JSON.stringify({
+        id: 1
+    })
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            console.log(ret);
+        });
+}
 
 
 
