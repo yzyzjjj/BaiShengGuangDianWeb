@@ -292,7 +292,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             OrganizationUnitHelper.AddMember(organizationUnit, member);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
-                $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}");
+                $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}", member.Id);
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -339,7 +339,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             OrganizationUnitHelper.DeleteMember(organizationUnit, member);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
-                $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}");
+                $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}", member.Id);
             return Result.GenError<Result>(Error.Success);
         }
     }

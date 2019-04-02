@@ -47,7 +47,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
-            var result = HttpServer.Result(url, permission.Verb, opData);
+            var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")
             {
                 return Result.GenError<Result>(Error.Fail);
@@ -55,11 +55,16 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 
             try
             {
+                var logParam = new
+                {
+                    opName = permission.Name, opData,
+                };
+                OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam.ToJSON());
                 return JObject.Parse(result);
             }
             catch (Exception e)
             {
-                Log.ErrorFormat($"RelayController Error：{result}");
+                Log.ErrorFormat($"RelayController Error：{result},Message：{e.Message}");
                 return Result.GenError<Result>(Error.Fail);
             }
         }

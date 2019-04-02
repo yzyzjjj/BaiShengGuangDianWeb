@@ -1,11 +1,11 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using ModelBase.Base.Utils;
 using ServiceStack;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 
 namespace BaiShengGuangDianWeb.Base.Filter
 {
@@ -26,11 +26,18 @@ namespace BaiShengGuangDianWeb.Base.Filter
             }
 
             var token = CookieHelper.GetCookie("token", context.HttpContext.Request);
-            if (token.IsNullOrEmpty() || !TokenHelper.Validate(token))
+            var needUpdate = false;
+            if (token.IsNullOrEmpty() || !TokenHelper.Validate(token, out needUpdate))
             {
                 CookieHelper.DelCookie("token", context.HttpContext.Response);
                 //未通过验证则跳转到无权限提示页
                 context.Result = new RedirectToActionResult("Login", "Account", null);
+            }
+
+            if (needUpdate)
+            {
+                var newToken = TokenHelper.CreateJwtToken(AccountHelper.CurrentUser);
+                CookieHelper.SetCookie("token", newToken, context.HttpContext.Response);
             }
         }
     }

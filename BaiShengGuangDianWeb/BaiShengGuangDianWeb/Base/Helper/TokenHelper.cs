@@ -59,11 +59,13 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// 验证身份 验证签名的有效性,
         /// </summary>
         /// <param name="token"></param>
+        /// <param name="needUpdate">是否更新</param>
         /// 例如：payLoad["aud"]?.ToString() == "roberAuddience";
         /// 例如：验证是否过期 等
         /// <returns></returns>
-        public static bool Validate(string token)
+        public static bool Validate(string token, out bool needUpdate)
         {
+            needUpdate = false;
             var jwtArr = token.Split('.');
             var header = JsonConvert.DeserializeObject<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwtArr[0]));
             var payLoad = JsonConvert.DeserializeObject<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwtArr[1]));
@@ -76,27 +78,21 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 return false;//签名不正确直接返回
             }
             //其次验证是否在有效期内（也应该必须）
-            success = DateTime.UtcNow.ToUnixTime() < long.Parse(payLoad["exp"].ToString());
-            if (success)
+            var left = long.Parse(payLoad["exp"].ToString()) - DateTime.UtcNow.ToUnixTime();
+            if (left > 0)
             {
+                needUpdate = left < 10 * 60;
                 try
                 {
-                    //AccountHelper.CurrentUser = new AccountInfo
-                    //{
-                    //    Id = int.Parse(payLoad["id"].ToString()),
-                    //    Name = (string)payLoad["name"],
-                    //    Account = (string)payLoad["account"],
-                    //    EmailAddress = (string)payLoad["email"],
-                    //    Permissions = (string)payLoad["permissions"],
-                    //};
                     AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
+                    return true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    return false;
+                    needUpdate = false;
                 }
             }
-            return success;
+            return false;
         }
     }
 }
