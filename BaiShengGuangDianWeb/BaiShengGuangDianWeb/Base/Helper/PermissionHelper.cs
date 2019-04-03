@@ -13,7 +13,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
 
         public static void LoadConfig()
         {
-            PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions`;").ToDictionary(x => x.Id);
+            PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
         }
 
         public static bool CheckPermission(string url)
@@ -34,7 +34,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
 
         public static Permission Get(int id)
         {
-            return PermissionsList[id];
+            return PermissionsList.ContainsKey(id) ? PermissionsList[id] : null;
         }
 
         public static Permission Get(string url)

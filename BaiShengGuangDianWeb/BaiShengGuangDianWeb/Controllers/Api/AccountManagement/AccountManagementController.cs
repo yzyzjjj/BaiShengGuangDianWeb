@@ -161,7 +161,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             AccountHelper.DeleteAccountInfo(accountInfo.Id);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}", accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -270,7 +270,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
             AccountHelper.UpdateAccountInfo(accountInfo);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam, accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }
     }

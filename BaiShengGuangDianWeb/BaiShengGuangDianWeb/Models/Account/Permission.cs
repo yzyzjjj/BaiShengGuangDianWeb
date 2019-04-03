@@ -16,6 +16,8 @@ namespace BaiShengGuangDianWeb.Models.Account
         public int Order { get; set; }
         public string Icon { get; set; }
         public bool IsDelete { get; set; }
-
+        public int HostId { get; set; }
+        public string Verb { get; set; }
     }
+
 }

@@ -35,25 +35,7 @@ namespace BaiShengGuangDianWeb
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            //添加jwt验证：
-            TokenHelper.Init(Configuration);
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuer = true,//是否验证Issuer
-            //            ValidateAudience = true,//是否验证Audience
-            //            ValidateLifetime = true,//是否验证失效时间
-            //            ValidateIssuerSigningKey = true,//是否验证SecurityKey
-            //            ValidAudience = TokenHelper.Audience,
-            //            ValidIssuer = TokenHelper.Issuer,
-            //            IssuerSigningKey = TokenHelper.SecurityKey
-            //        };
-            //    });
 
             //注册过滤器
             services.AddMvc(options =>
@@ -61,7 +43,10 @@ namespace BaiShengGuangDianWeb
                 options.Filters.Add<TokenFilterAttribute>();
                 options.Filters.Add<HttpGlobalExceptionFilter>();
             });
-            ;
+
+            //添加jwt验证：
+            TokenHelper.Init(Configuration);
+
             ServerConfig.Init(Configuration);
         }
 

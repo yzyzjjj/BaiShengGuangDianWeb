@@ -22,6 +22,7 @@ namespace BaiShengGuangDianWeb.Base.Server
             Loads = new Dictionary<string, Action>
             {
                 {PermissionHelper.TableName, PermissionHelper.LoadConfig},
+                {ManagementServerHelper.TableName, ManagementServerHelper.LoadConfig},
             };
 
             foreach (var action in Loads.Values)
