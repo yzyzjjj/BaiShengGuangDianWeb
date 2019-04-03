@@ -6,10 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Home\css\**" />
     <Compile Remove="wwwroot\新文件夹\**" />
+    <Content Remove="Views\Home\css\**" />
     <Content Remove="wwwroot\新文件夹\**" />
+    <EmbeddedResource Remove="Views\Home\css\**" />
     <EmbeddedResource Remove="wwwroot\新文件夹\**" />
+    <None Remove="Views\Home\css\**" />
     <None Remove="wwwroot\新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\Home\img\bg2.jpg" />
   </ItemGroup>
 
   <ItemGroup>
