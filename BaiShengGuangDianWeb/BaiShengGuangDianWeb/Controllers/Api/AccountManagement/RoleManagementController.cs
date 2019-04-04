@@ -102,7 +102,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<DataResult>(Error.NoAuth);
             }
-
+            
             var param = Request.GetRequestParams();
             var idStr = param.GetValue("id");
             if (!int.TryParse(idStr, out var id))
@@ -114,6 +114,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             if (roleInfo == null)
             {
                 return Result.GenError<Result>(Error.RoleNotExist);
+            }
+
+            if (roleInfo.Default)
+            {
+                return Result.GenError<Result>(Error.RoleNotOperate);
             }
             RoleHelper.DeleteRoleInfo(id);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色ID:{roleInfo.Id},角色名:{roleInfo.Name}");
@@ -151,6 +156,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.RoleNotExist);
             }
 
+            if (roleInfo.Default)
+            {
+                return Result.GenError<Result>(Error.RoleNotOperate);
+            }
             var logParam = $"角色ID:{roleInfo.Id}";
             var name = param.GetValue("name");
             if (!name.IsNullOrEmpty())
