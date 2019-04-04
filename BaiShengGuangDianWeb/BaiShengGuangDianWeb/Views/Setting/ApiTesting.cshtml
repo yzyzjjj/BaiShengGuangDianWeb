@@ -4,18 +4,17 @@
     ViewBag.Title = "Api测试";
     Layout = "_Layout";
 }
-
 <h2>Api测试</h2>
 <script src="~/mjs/Setting/ApiTest.js"></script>
 <section class="content">
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#div_device" data-toggle="tab">设备管理相关</a></li>
+        <li><a href="#div_device" data-toggle="tab">设备管理相关</a></li>
         <li><a href="#div_flowcard" data-toggle="tab">流程卡管理相关</a></li>
-        <li><a href="#div_process" data-toggle="tab">工艺管理相关</a></li>
+        <li class="active"><a href="#div_process" data-toggle="tab">工艺管理相关</a></li>
         <li><a href="#div_repaire" data-toggle="tab">维修管理相关</a></li>
     </ul>
     <div id="myTabContent" class="tab-content">
-        <div id="div_device" class="tab-pane active in">
+        <div id="div_device" class="tab-pane fade">
             <div class="box">
                 <div class="box-header">设备管理</div>
                 <div class="box-body">
@@ -32,7 +31,7 @@
             <div class="box">
                 <div class="box-header">设备型号</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceModel()">获取设备型号库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceModel()">获取所有设备型号</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleDeviceModel()">获取单个设备型号</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateDeviceModel()">更新设备型号</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddDeviceModel()">添加新设备型号</button>
@@ -42,7 +41,7 @@
             <div class="box">
                 <div class="box-header">场地库</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSite()">获取场地库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSite()">获取所有场地</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleSite()">获取单个场地</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateSite()">更新场地</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddSite()">添加新场地</button>
@@ -52,7 +51,7 @@
             <div class="box">
                 <div class="box-header">固件库</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFirmwareLibrary()">获取固件库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFirmwareLibrary()">获取所有固件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleFirmwareLibrary()">获取单个固件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateFirmwareLibrary()">更新固件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddFirmwareLibrary()">添加新固件</button>
@@ -62,7 +61,7 @@
             <div class="box">
                 <div class="box-header">硬件库</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetHardwareLibrary()">获取硬件库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetHardwareLibrary()">获取所有硬件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleHardwareLibrary()">获取单个硬件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateHardwareLibrary()">更新硬件</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddHardwareLibrary()">添加新硬件</button>
@@ -72,7 +71,7 @@
             <div class="box">
                 <div class="box-header">设备类型</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceCategory()">获取设备类型库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetDeviceCategory()">获取所有设备类型</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleDeviceCategory()">获取单个设备类型</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateDeviceCategory()">更新设备类型</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddDeviceCategory()">添加新设备类型</button>
@@ -82,7 +81,7 @@
             <div class="box">
                 <div class="box-header">流程库</div>
                 <div class="box-body">
-                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessLibrary()">获取流程库</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessLibrary()">获取所有流程</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleProcessLibrary()">获取单个流程</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="UpdateProcessLibrary()">更新流程</button>
                     <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="AddProcessLibrary()">添加新流程</button>
@@ -92,10 +91,107 @@
         </div>
 
         <div id="div_flowcard" class="box tab-pane fade">
+            <div class="box">
+                <div class="box-header">流程卡</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowCardLibrary()">获取所有流程卡</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryById()">获取流程卡(流程卡ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryByFlowCardName()">获取流程卡(流程卡号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryByProductionProcessName()">获取流程卡(计划号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryByRawMateriaName()">获取流程卡(原料批号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryByProcessorName()">获取流程卡(加工人)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFlowcardLibraryBySurveyorName()">获取流程卡(检验员)</button>
 
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutFlowcardLibraryById()">更新流程卡(流程卡ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutFlowcardLibraryByFlowCardName()">更新流程卡(流程卡号)</button>
+
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFlowcardLibrary()">添加流程卡</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFlowcardLibraries()">批量添加流程卡</button>
+
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFlowcardLibraryById()">删除流程卡(流程卡ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFlowcardLibraryByFlowCardName()">删除流程卡(流程卡号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFlowcardLibraryByProductionProcessName()">删除流程卡(计划号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFlowcardLibraryByRawMateriaName()">删除流程卡(原料批号)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">计划号</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProductionProcessLibrary()">获取所有计划号</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProductionProcessLibraryById()">获取计划号(计划号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProductionProcessLibraryByProductionProcessName()">获取计划号(计划号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProductionProcessLibraryById()">更新计划号(计划号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProductionProcessLibraryByProductionProcessName()">更新计划号(计划号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProductionProcessLibrary()">添加新计划号</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProductionProcessLibraryById()">删除计划号(计划号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProductionProcessLibraryByProductionProcessName()">删除计划号(计划号)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">工序详情</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessStepByProductionProcessName()">获取工序(计划号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessStepByProcessorName()">获取工序(加工人)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessStepBySurveyorName()">获取工序(检验员)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessStepByCode()">获取工序(机台号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessStepById()">更新工序(工序ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessStep()">添加新工序</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessSteps()">批量添加新工序</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessStepById()">删除工序(工序ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessStepByProductionProcessName()">删除工序(计划号)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">原料</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRawMateria()">获取所有原料</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRawMateriaByById()">获取原料(原料ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRawMateriaByRawMateriaName()">获取原料(原料批号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutRawMateriaById()">更新原料(原料ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutRawMateriaByRawMateriaName()">更新原料(原料批号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostRawMateria()">添加新原料</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostRawMaterias()">批量添加新原料</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteRawMateriaById()">删除原料(原料ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteRawMateriaByRawMateriaName()">删除原料(原料批号)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">原料规格</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRawMateriaSpecificationById()">获取原料规格(原料规格ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRawMateriaSpecificationByRawMateriaName()">获取原料规格(原料批号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutRawMateriaSpecification()">更新原料规格</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostRawMateriaSpecification()">添加新原料规格</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostRawMateriaSpecifications()">批量添加新原料规格</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteRawMateriaSpecificationById()">删除原料规格(原料规格ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteRawMateriaSpecificationByRawMateriaName()">删除原料规格(原料批号)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">加工人</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessor()">获取所有加工人</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleProcessor()">获取单个加工人</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessor()">更新加工人信息</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessor()">添加新加工人</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessors()">批量添加新加工人</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessor()">删除加工人</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">检验员</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSurveyor()">获取所有检验员</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleSurveyor()">获取单个检验员</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutSurveyor()">更新检验员信息</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostSurveyor()">添加新检验员</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostSurveyors()">添加新检验员</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteSurveyor()">删除检验员</button>
+                </div>
+            </div>
         </div>
 
-        <div id="div_process" class="box tab-pane fade">
+        <div id="div_process" class="box tab-pane  active in">
 
         </div>
 
@@ -104,3 +200,4 @@
         </div>
     </div>
 </section>
+

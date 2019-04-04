@@ -96,9 +96,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 try
                 {
-                    permissions = permissions.Split(',').Distinct().Where(x => !roleInfo.Permissions.Contains(x)).ToJSON();
+                    var permissionList = permissions.Split(',').Select(int.Parse).ToList();
+                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).ToJSON();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }
@@ -257,14 +259,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 try
                 {
                     var roleInfo = RoleHelper.GetRoleInfo(accountInfo.Role);
-                    permissions = permissions.Split(',').Distinct().Where(x => !roleInfo.Permissions.Contains(x)).ToJSON();
+
+                    var permissionList = permissions.Split(',').Select(int.Parse).ToList();
+                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).ToJSON();
                     if (!permissions.IsNullOrEmpty())
                     {
                         accountInfo.Permissions = permissions;
                         logParam += $",新特殊权限列表: {accountInfo.Permissions}";
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }

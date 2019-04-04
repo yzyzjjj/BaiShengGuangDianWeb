@@ -11,6 +11,7 @@ namespace BaiShengGuangDianWeb.Models.Account
         public string Name { get; set; }
         public bool IsDeleted { get; set; }
         public string Permissions { get; set; }
+        public IEnumerable<int> PermissionsList => Permissions.Split(',').Select(int.Parse).Distinct();
 
     }
 }

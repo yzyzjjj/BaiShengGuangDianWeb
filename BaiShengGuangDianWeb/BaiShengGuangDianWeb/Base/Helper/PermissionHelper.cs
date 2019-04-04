@@ -41,5 +41,10 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             return PermissionsList.Values.FirstOrDefault(x => x.Url == url);
         }
+
+        public static IEnumerable<int> GetDefault()
+        {
+            return PermissionsList.Values.Where(x => x.Type == 0).Select(x => x.Id);
+        }
     }
 }

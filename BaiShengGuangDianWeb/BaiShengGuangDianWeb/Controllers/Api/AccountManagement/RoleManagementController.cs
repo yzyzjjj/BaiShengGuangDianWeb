@@ -6,6 +6,7 @@ using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
 using System;
+using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 {
@@ -16,6 +17,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
     [ApiController]
     public class RoleManagementController : ControllerBase
     {
+        /// <summary>
+        /// 获取角色列表
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("List")]
         public DataResult List()
         {
@@ -63,13 +68,15 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             RoleInfo roleInfo;
             try
             {
+                var permissionList = permissions.Split(',').Select(int.Parse).ToList();
+                permissionList.AddRange(PermissionHelper.GetDefault());
                 roleInfo = new RoleInfo
                 {
                     Name = name,
-                    Permissions = permissions.Split(',').ToJSON()
+                    Permissions = permissionList.Distinct().ToJSON()
                 };
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
@@ -156,10 +163,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 try
                 {
-                    roleInfo.Permissions = permissions.Split(',').ToJSON();
+                    var permissionList = permissions.Split(',').Select(int.Parse).ToList();
+                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    roleInfo.Permissions = permissionList.Distinct().ToJSON();
                     logParam += $",新权限列表: {roleInfo.Permissions}";
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }

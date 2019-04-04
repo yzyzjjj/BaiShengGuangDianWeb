@@ -24,8 +24,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             var param = Request.GetRequestParams();
             var loginBody = new LoginBody
             {
-                Account = param.GetValue("Account"),
-                Password = param.GetValue("Password")
+                Account = param.GetValue("account"),
+                Password = param.GetValue("password")
             };
 
             var accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
@@ -85,11 +85,36 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<DataResult>(Error.NoAuth);
             }
             var result = new DataResult();
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Select(x => new { x.Id, x.Name }));
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name }));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
 
+        [HttpGet("OtherPermissions")]
+        public DataResult OtherPermissions()
+        {
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<DataResult>(Error.NoAuth);
+            }
+            var param = Request.GetRequestParams();
+            var roleStr = param.GetValue("role");
+            if (!int.TryParse(roleStr, out var role))
+            {
+                return Result.GenError<DataResult>(Error.ParamError);
+            }
+
+            var roleInfo = RoleHelper.GetRoleInfo(role);
+            if (roleInfo == null)
+            {
+                return Result.GenError<DataResult>(Error.RoleNotExist);
+            }
+
+            var result = new DataResult();
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !roleInfo.PermissionsList.Contains(x.Id)).Select(x => new { x.Id, x.Name }));
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+            return result;
+        }
         [HttpGet("Pages")]
         public DataResult Pages()
         {

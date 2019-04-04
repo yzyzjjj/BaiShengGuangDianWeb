@@ -6,8 +6,8 @@
     });
 
     $("#loginBtn").click(function () {
-        var acc = $("#Account").val();
-        var pwd = $("#Password").val();
+        var acc = $("#account").val();
+        var pwd = $("#password").val();
 
         if (acc == "") {
             $("#tipinfo").show();
@@ -24,8 +24,8 @@
         var pwdMd5 = window.md5(window.md5(pwd));
 
         var data = {}
-        data.Account = acc;
-        data.Password = pwdMd5;
+        data.account = acc;
+        data.password = pwdMd5;
 
         ajaxPost("/Account/Login", data,
             function (ret) {

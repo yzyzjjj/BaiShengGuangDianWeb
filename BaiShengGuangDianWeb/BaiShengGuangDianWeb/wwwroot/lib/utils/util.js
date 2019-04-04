@@ -97,6 +97,10 @@ function checkHaveRole(role) {
     return false;
 }
 
+function reLogin() {
+    window.location.href = const_loginurl
+}
+
 //ajax 包装 data 必须是张表，或者null,带token
 function ajaxPost(url, data, func) {
 
@@ -109,7 +113,7 @@ function ajaxPost(url, data, func) {
     //    data.token = token
     //}
 
-    $.post(url, data, func);
+    $.post(url, data, func).error(reLogin);
 
 }
 
@@ -138,7 +142,7 @@ function ajaxGet(url, data, func) {
 
 
     url = url + paramstr;
-    $.get(url, func);
+    $.get(url, func).error(reLogin);
 
 }
 
