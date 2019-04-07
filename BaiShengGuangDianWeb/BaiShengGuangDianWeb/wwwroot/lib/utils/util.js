@@ -98,7 +98,8 @@ function checkHaveRole(role) {
 }
 
 function reLogin() {
-    window.location.href = const_loginurl
+    //window.location.href = const_loginurl
+    console.log("err")
 }
 
 //ajax 包装 data 必须是张表，或者null,带token
@@ -648,8 +649,6 @@ function imgShowBig(id)
     
 }
 
-
-
 //创建img图片
 function creat() {
     var that = this;
@@ -670,8 +669,6 @@ function creat() {
 ImgCreated.prototype.dataType = dataType;
 ImgCreated.prototype.creat = creat;
 
-
-
 //添加菊花效果
 function addCover() {
     var html = '<div id="body-cover"><div class="spinner"> <div class="spinner-container container1"><div class="circle1"></div><div class="circle2"></div> <div class="circle3"></div><div class="circle4"></div>  </div> <div class="spinner-container container2"><div class="circle1"></div> <div class="circle2"></div><div class="circle3"></div> <div class="circle4"></div> </div><div class="spinner-container container3"><div class="circle1"></div> <div class="circle2"></div>  <div class="circle3"></div> <div class="circle4"></div></div></div></div>'
@@ -682,257 +679,13 @@ function removeCover() {
     $('#body-cover').remove();
 }
 
-
-//查询统一接口
-function CommonTabel(option) {
-    this.id = option.id;
-    this.value = option.value;
-    this.dataId = option.dataId;
-    this.state = option.state;
-    this.button = option.button ? option.button : '确定'
-    this.show = option.show;
-    this.fifter = option.fifter;
-    this.condition = option.condition;
-    this.getData()
-}
-
-//同一个借口数据
-function getData() {
-    var that = this;
-    ajaxGet("account/search", {
-        value: this.value
-    }, function (res) {
-        if (res.errmsg === 'success') {
-            var data = res.accounts.filter(function (val) {
-                return that.condition.indexOf(val[that.fifter]) < 0
-
-            })
-            that.createTable(data);
-            that.show.modal("show");
-        } else {
-            that.fail(res.errmsg)
-        }
-    })
-}
-//生成表格
-function createTable(data) {
-    var idKey = this.dataId;
-    var state = this.state;
-    var button = this.button;
-    var accTypeRender = function (data, type, row) {
-        return ['', '用户', '商户', '代理'][data.AccountType]
-    }
-    var opRender = function (data, type, row) {
-        return '<button type="button" class="btn btn-primary" onclick="addToList(this)" data-id="' + data[idKey] + '" data-state="' + state + '">' + button + '</button>';
-    }
-    this.id.DataTable({
-        "paging": true,
-        "searching": false,
-        "aaSorting": [[0, "desc"]],
-        "language": { "url": "../content/datatables_language.json" },
-        //"dom": 'Bfrtip',
-        //"buttons": ['copy', 'csv', 'excel', 'pdf', 'print'],//excel,pdf Chrome需要打开flash，否则不显示
-        //"dataSrc": "",
-        "destroy": true,
-        "columns": [
-            { "data": "AccountId", "title": "账号ID" },
-            { "data": "Name", "title": "姓名" },
-            { "data": null, "title": "身份", "render": accTypeRender },
-            { "data": "Phone", "title": "账号" },
-            { "data": null, "title": "操作", "render": opRender },
-        ],
-        "data": data
+function showConfirm(text, func) {
+    layer.confirm("是否确定" + text, {
+        btn: ["确定", "取消"]
+    }, function (index) {
+        layer.close(index);
+        func();
+    }, function (index) {
+        layer.close(index);
     });
 }
-//失败
-function fail(e) {
-    layer.alert(e)
-}
-
-CommonTabel.prototype.getData = getData;
-CommonTabel.prototype.fail = fail;
-CommonTabel.prototype.createTable = createTable;
-
-
-//状态判断
-var all_status = [{
-    text: '',
-    color: '',
-    index: 0
-}, {
-    text: '封号',
-    color: '',
-    index: 1
-}, {
-    text: '解封',
-    color: '',
-    index: 2
-}, {
-    text: '商户入驻请求通过',
-    color: '',
-    index: 3
-}, {
-    text: '重新实名',
-    color: '',
-    index: 4
-}, {
-    text: '加入提现白名单',
-    color: '',
-    index: 5
-}, {
-    text: '加入提现黑名单',
-    color: '',
-    index: 6
-}, {
-    text: '删除提现控制，从黑名单或白名单中移除',
-    color: '',
-    index: 7
-}, {
-    text: '全服提现控制设置',
-    color: '',
-    index: 8
-}, {
-    text: '商户返利设置',
-    color: '',
-    index: 9
-}, {
-    text: '资金成本比例设置',
-    color: '',
-    index: 10
-}, {
-    text: '手续费比例设置',
-    color: '',
-    index: 11
-}, {
-    text: '管理费比例设置',
-    color: '',
-    index: 12
-}, {
-    text: '最高管理费比例设置',
-    color: '',
-    index: 13
-}, {
-    text: '',
-    color: '',
-    index: 14
-}, {
-    text: '',
-    color: '',
-    index: 15
-}, {
-    text: '',
-    color: '',
-    index: 15
-}, {
-    text: '',
-    color: '',
-    index: 17
-}, {
-    text: '退保退款',
-    color: '',
-    index: 18
-}, {
-    text: '线下充值确认',
-    color: '',
-    index: 19
-}, {
-    text: '线下充值打回',
-    color: '',
-    index: 20
-}, {
-    text: '线下充值撤回',
-    color: '',
-    index: 21
-}, {
-    text: '滞纳金比例设置',
-    color: '',
-    index: 22
-}, {
-    text: '对公用户重新上传营业执照照片',
-    color: '',
-    index: 23
-}, {
-    text: '用户提现审核',
-    color: '',
-    index: 24
-}, {
-    text: '提现审核通过',
-    color: 'green'
-}, {
-    text: '提现审核打回',
-    color: 'red'
-}, {
-    text: '提现成功',
-    color: 'green'
-}, {
-    text: '提现失败',
-    color: 'red'
-}, {
-    text: '重新提现',
-    color: 'rgb(255,166,77)'
-}, {
-    text: '商户提现审核',
-    color: ''
-}, {
-    text: '分期转不分期申请',
-    color: ''
-}, {
-    text: '分期转不分期重新申请',
-    color: ''
-}, {
-    text: '分期转不分期打回',
-    color: ''
-}, {
-    text: '分期转不分期通过',
-    color: ''
-}, {
-    text: '基础授信额度设置',
-    color: ''
-}, {
-    text: '商家实际授信额度设置',
-    color: ''
-}, {
-    text: '授信天数设置',
-    color: ''
-}, {
-    text: '授信额度警戒线设置',
-    color: ''
-}, {
-    text: '修改账号密码',
-    color: ''
-}, {
-    text: '修改管理账号密码',
-    color: ''
-}, {
-    text: '用户账号私转公',
-    color: ''
-}, {
-    text: '修改开票信息',
-    color: ''
-}, {
-    text: '保险类型设置',
-    color: ''
-}, {
-    text: '删除下级商户',
-    color: ''
-}, {
-    text: '删除上级商户',
-    color: ''
-}, {
-    text: '添加下级商户',
-    color: ''
-}, {
-    text: '添加上级商户',
-    color: ''
-}, {
-    text: '管理账号登录',
-    color: ''
-}]
-
-
-//商户账号管理，和用户账号管理，对公账号，公司信息页面中
-var account_state = [{
-    text: ''
-}, {
-    text: '对公打款中'
-}]

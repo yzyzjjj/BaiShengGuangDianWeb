@@ -5,13 +5,16 @@
     Layout = "_Layout";
 }
 <h2>Api测试</h2>
-<script src="~/mjs/Setting/ApiTest.js"></script>
+<script src="~/mjs/Setting/DeviceApiTest.js"></script>
+<script src="~/mjs/Setting/FlowCardApiTest.js"></script>
+<script src="~/mjs/Setting/ProcessApiTest.js"></script>
+<script src="~/mjs/Setting/RepairApiTest.js"></script>
 <section class="content">
     <ul class="nav nav-tabs">
         <li><a href="#div_device" data-toggle="tab">设备管理相关</a></li>
         <li><a href="#div_flowcard" data-toggle="tab">流程卡管理相关</a></li>
-        <li class="active"><a href="#div_process" data-toggle="tab">工艺管理相关</a></li>
-        <li><a href="#div_repaire" data-toggle="tab">维修管理相关</a></li>
+        <li><a href="#div_process" data-toggle="tab">工艺管理相关</a></li>
+        <li class="active"><a href="#div_repaire" data-toggle="tab">维修管理相关</a></li>
     </ul>
     <div id="myTabContent" class="tab-content">
         <div id="div_device" class="tab-pane fade">
@@ -191,12 +194,83 @@
             </div>
         </div>
 
-        <div id="div_process" class="box tab-pane  active in">
-
+        <div id="div_process" class="box tab-pane fade">
+            <div class="box">
+                <div class="box-header">工艺数据</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessDataByProcessNumber()">获取工艺数据(工艺编号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessDataById()">获取工艺数据(工艺数据ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessData()">更新工艺数据</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessData()">添加新工艺数据</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessDatas()">批量添加新工艺数据</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessDataByProcessNumber()">删除工艺数据(工艺编号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessDataById()">删除工艺数据(工艺数据ID)</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">工艺编号</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementOrderProcessNumber()">按工艺编号显示</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementOrderProductionProcessName()">按产品型号显示</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementOrderModelName()">按设备型号显示</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementOrderCode()">按机台号显示</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementById()">获取工艺编号(工艺编号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetProcessManagementByProcessNumber()">获取工艺编号(工艺编号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessManagementById()">更新工艺编号(工艺编号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessManagementByProcessNumber()">更新工艺编号(工艺编号)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutProcessManagementDeviceId()">指定机台号添加工艺编号</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostProcessManagement()">添加新工艺编号</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessManagementById()">删除工艺编号(工艺编号ID)</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteProcessManagementByProcessNumber()">删除工艺编号(工艺编号)</button>
+                </div>
+            </div>
         </div>
 
-        <div id="div_repaire" class="box tab-pane fade">
-
+        <div id="div_repaire" class="box tab-pane active in">
+            <div class="box">
+                <div class="box-header">常见故障</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetUsuallyFault()">获取所有常见故障</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleUsuallyFault()">获取单个常见故障</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutUsuallyFault()">更新常见故障</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostUsuallyFault()">添加常见故障</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostUsuallyFaults()">批量添加常见故障</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteUsuallyFault()">删除常见故障</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">故障类型</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFaultType()">获取所有故障类型</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleFaultType()">获取单个故障类型</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutFaultType()">更新故障类型</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFaultType()">添加故障类型</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFaultTypes()">批量添加故障类型</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFaultType()">删除故障类型</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">故障记录</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetRepairRecord()">获取所有故障记录</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetSingleRepairRecord()">获取单个故障记录</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutRepairRecord()">更新故障记录</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostRepairRecord()">添加故障记录</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteRepairRecord()">删除故障记录</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">故障设备</div>
+                <div class="box-body">
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFaultDevice()">获取所有故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFaultDeviceById()">获取单个故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="GetFaultDeviceByCode()">获取单个故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PutFaultDevice()">更新故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFaultDevice()">添加故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="PostFaultDevices()">批量添加故障设备</button>
+                    <button type="button" class="btn btn-primary" style="margin-left: 10px" onclick="DeleteFaultDevice()">删除故障设备</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
