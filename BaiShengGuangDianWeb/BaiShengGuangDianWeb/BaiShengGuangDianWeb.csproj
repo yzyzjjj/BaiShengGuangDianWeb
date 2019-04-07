@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\utils\" />
-    <Folder Include="wwwroot\mjs\AccountManagement\" />
   </ItemGroup>
 
   <ItemGroup>

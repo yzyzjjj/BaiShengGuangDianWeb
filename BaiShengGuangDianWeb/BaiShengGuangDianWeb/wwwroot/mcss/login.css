@@ -3,13 +3,13 @@
 
 
 .mHome {
-    background-image: url('../mimages/bg2.jpg');
+    background-image:url(mimages/bg2.jpg)
     background: #ffffff2e;
     width: 100%;
     position: absolute;
     /*top: 0;*/
     line-height: 80px;
-    left: 0px;
+    left: 400px;
     right: 0px;
     color: red;
     text-align: left;
