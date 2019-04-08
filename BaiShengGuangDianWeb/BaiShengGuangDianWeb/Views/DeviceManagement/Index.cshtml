@@ -139,29 +139,93 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">设备型号信息</h4>
-                    <label class="hidden" id="updateId"></label>
+                    <h4 class="modal-title">设备信息</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box">
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label" for="addCode">机台号：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateSelect"></select>
+                                        <input class="form-control" id="updateCode" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateCodeTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label" for="updateDeviceName">设备名：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateModelName">
+                                        <input class="form-control" id="updateDeviceName" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateDeviceNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label" for="updateMacAddress">MAC地址：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateDesc">
+                                        <input class="form-control" id="updateMacAddress" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateMacAddressTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateIp">IP地址：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updateIp" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateIpTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updatePort">端口：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updatePort" placeholder="默认60000" value="60000" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updatePortTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateIdentifier">识别码：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updateIdentifier" onfocusin="focusIn($(this))">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateDeviceModel">设备型号：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="updateDeviceModel"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateFirmware">固件版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="updateFirmware"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateProcess">流程版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="updateProcess"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateHardware">硬件版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="updateHardware"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateSite">所在场地：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="updateSite"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateAdministratorUser">管理员用户：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updateAdministratorUser">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateRemark">备注：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updateRemark">
                                     </div>
                                 </div>
                             </form>
@@ -170,7 +234,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="UpdateModel()">修改</button>
+                    <button type="button" class="btn btn-primary" onclick="updateDevice()">添加</button>
                 </div>
             </div>
         </div>

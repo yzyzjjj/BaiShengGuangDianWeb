@@ -3,11 +3,22 @@
 }
 
 var op = function (data, type, row) {
-    var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showUpdateModel(\'' +
-        row.Id + '\',\'' + row.DeviceCategoryId + '\',\'' + row.ModelName + '\',\'' + row.Description + '\')">修改</button>';
-    html += '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="DeleteDeviceModel(' + row.Id + ',\'' + row.ModelName + '\')">删除</button>';
+    var html = '<div class="btn-group">' +
+        '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+        '        <span class="caret"></span>' +
+        '        <span class="sr-only">Toggle Dropdown</span>' +
+        '    </button>' +
+        '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+        '    </ul>' +
+        '</div>';
 
+    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, data.ModelName, data.Description);
+    var deleteLi = '<li><a onclick="DeleteDeviceModel({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ModelName);
 
+    html = html.format(
+        checkPermission(122) ? updateLi : "",
+        checkPermission(124) ? deleteLi : "");
 
     return html;
 }

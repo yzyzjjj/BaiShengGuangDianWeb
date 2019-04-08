@@ -228,8 +228,48 @@ function showControlModel(parameters) {
 
 }
 
-function showUpdateModel(parameters) {
-
+function showUpdateModel() {
+    var opType = 107;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            };
+            $("#updateDeviceModel").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.deviceModels.length; i++) {
+                var data = ret.deviceModels[i];
+                $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
+            }
+            $("#updateFirmware").empty();
+            for (var i = 0; i < ret.firmwareLibraries.length; i++) {
+                var data = ret.firmwareLibraries[i];
+                $("#updateFirmware").append(option.format(data.Id, data.FirmwareName));
+            }
+            $("#updateProcess").empty();
+            for (var i = 0; i < ret.processLibraries.length; i++) {
+                var data = ret.processLibraries[i];
+                $("#updateProcess").append(option.format(data.Id, data.ProcessName));
+            }
+            $("#updateHardware").empty();
+            for (var i = 0; i < ret.hardwareLibraries.length; i++) {
+                var data = ret.hardwareLibraries[i];
+                $("#updateHardware").append(option.format(data.Id, data.HardwareName));
+            }
+            $("#updateSite").empty();
+            for (var i = 0; i < ret.sites.length; i++) {
+                var data = ret.sites[i];
+                $("#updateSite").append(option.format(data.Id, data.SiteName));
+            }
+            $("#updateModel").modal("show");
+        });
 }
 
 function showUpgradeModel(parameters) {
