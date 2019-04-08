@@ -30,7 +30,9 @@ function getDeviceList() {
                     '</div>';
 
                 var detailLi = '<li><a onclick="showDetailModel({0})">详情</a></li>'.format(data.Id);
-                var updateLi = '<li><a onclick="showUpdateModel({0})">修改</a></li>'.format(data.Id);
+                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\', \'{9}\', \'{10}\', \'{11}\', \'{12}\', \'{13}\', \'{14}\')">修改</a></li>'
+                    .format(data.Id, data.DeviceName, data.Code, data.MacAddress, data.Ip, data.Port, data.Identifier, data.DeviceModelId,
+                        data.FirmwareId, data.ProcessId, data.HardwareId, data.SiteId, data.AdministratorUser, data.Remark);
                 var upgradeLi = '<li><a onclick="showUpgradeModel({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="DeleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.Code);
 
@@ -43,13 +45,13 @@ function getDeviceList() {
                 return html;
             }
             var ip = function (data, type, row) {
-                return row.Ip + ':' + row.Port;
+                return data.Ip + ':' + data.Port;
             }
 
             var state = function (data, type, row) {
-                if (row.StateStr == '连接正常')
-                    return '<span class="text-green">' + row.StateStr + '</span>';
-                return '<span class="text-red">' + row.StateStr + '</span>';
+                if (data.StateStr == '连接正常')
+                    return '<span class="text-green">' + data.StateStr + '</span>';
+                return '<span class="text-red">' + data.StateStr + '</span>';
             }
             $("#deviceList")
                 .DataTable({
@@ -90,30 +92,38 @@ function showAddModel() {
             };
             $("#addDeviceModel").empty();
             var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.deviceModels.length; i++) {
-                var data = ret.deviceModels[i];
+            var i;
+            var data;
+            for (i = 0; i < ret.deviceModels.length; i++) {
+                data = ret.deviceModels[i];
                 $("#addDeviceModel").append(option.format(data.Id, data.ModelName));
             }
             $("#addFirmware").empty();
-            for (var i = 0; i < ret.firmwareLibraries.length; i++) {
-                var data = ret.firmwareLibraries[i];
+            for (i = 0; i < ret.firmwareLibraries.length; i++) {
+                data = ret.firmwareLibraries[i];
                 $("#addFirmware").append(option.format(data.Id, data.FirmwareName));
             }
             $("#addProcess").empty();
-            for (var i = 0; i < ret.processLibraries.length; i++) {
-                var data = ret.processLibraries[i];
+            for (i = 0; i < ret.processLibraries.length; i++) {
+                data = ret.processLibraries[i];
                 $("#addProcess").append(option.format(data.Id, data.ProcessName));
             }
             $("#addHardware").empty();
-            for (var i = 0; i < ret.hardwareLibraries.length; i++) {
-                var data = ret.hardwareLibraries[i];
+            for (i = 0; i < ret.hardwareLibraries.length; i++) {
+                data = ret.hardwareLibraries[i];
                 $("#addHardware").append(option.format(data.Id, data.HardwareName));
             }
             $("#addSite").empty();
-            for (var i = 0; i < ret.sites.length; i++) {
-                var data = ret.sites[i];
+            for (i = 0; i < ret.sites.length; i++) {
+                data = ret.sites[i];
                 $("#addSite").append(option.format(data.Id, data.SiteName));
             }
+
+            hideTip($("#addCodeTip"));
+            hideTip($("#addDeviceNameTip"));
+            hideTip($("#addMacAddressTip"));
+            hideTip($("#addIpTip"));
+            hideTip($("#addPortTip"));
             $("#addModel").modal("show");
         });
 }
@@ -127,35 +137,30 @@ function addDevice() {
     var add = true;
     //机台号
     var code = $("#addCode").val();
-    hideTip($("#addCodeTip"));
     if (isStrEmptyOrUndefined(code)) {
         showTip($("#addCodeTip"), "机台号不能为空");
         add = false;
     }
     //设备名
     var deviceName = $("#addDeviceName").val();
-    hideTip($("#addDeviceNameTip"));
     if (isStrEmptyOrUndefined(deviceName)) {
         showTip($("#addDeviceNameTip"), "设备名不能为空");
         add = false;
     }
     //设备MAC地址
     var macAddress = $("#addMacAddress").val();
-    hideTip($("#addMacAddressTip"));
     if (isStrEmptyOrUndefined(macAddress)) {
         showTip($("#addMacAddressTip"), "MAC地址不能为空");
         add = false;
     }
     //IP
     var ip = $("#addIp").val();
-    hideTip($("#addIpTip"));
     if (!isIp(ip)) {
         showTip($("#addIpTip"), "IP非法");
         add = false;
     }
     //端口
     var port = $("#addPort").val();
-    hideTip($("#addPortTip"));
     if (!isPort(port)) {
         showTip($("#addPortTip"), "端口非法");
         add = false;
@@ -179,6 +184,7 @@ function addDevice() {
     if (!add)
         return;
     var doSth = function () {
+        $("#addModel").modal("hide");
 
         var data = {}
         data.opType = opType;
@@ -220,15 +226,8 @@ function addDevice() {
     }
     showConfirm("添加机台号：" + code, doSth);
 }
-function showDetailModel(parameters) {
 
-}
-
-function showControlModel(parameters) {
-
-}
-
-function showUpdateModel() {
+function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, firmwareId, processId, hardwareId, siteId, administratorUser, remark) {
     var opType = 107;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -244,40 +243,171 @@ function showUpdateModel() {
             };
             $("#updateDeviceModel").empty();
             var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.deviceModels.length; i++) {
-                var data = ret.deviceModels[i];
+            var i;
+            var data;
+            for (i = 0; i < ret.deviceModels.length; i++) {
+                data = ret.deviceModels[i];
                 $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
             }
             $("#updateFirmware").empty();
-            for (var i = 0; i < ret.firmwareLibraries.length; i++) {
-                var data = ret.firmwareLibraries[i];
+            for (i = 0; i < ret.firmwareLibraries.length; i++) {
+                data = ret.firmwareLibraries[i];
                 $("#updateFirmware").append(option.format(data.Id, data.FirmwareName));
             }
             $("#updateProcess").empty();
-            for (var i = 0; i < ret.processLibraries.length; i++) {
-                var data = ret.processLibraries[i];
+            for (i = 0; i < ret.processLibraries.length; i++) {
+                data = ret.processLibraries[i];
                 $("#updateProcess").append(option.format(data.Id, data.ProcessName));
             }
             $("#updateHardware").empty();
-            for (var i = 0; i < ret.hardwareLibraries.length; i++) {
-                var data = ret.hardwareLibraries[i];
+            for (i = 0; i < ret.hardwareLibraries.length; i++) {
+                data = ret.hardwareLibraries[i];
                 $("#updateHardware").append(option.format(data.Id, data.HardwareName));
             }
             $("#updateSite").empty();
-            for (var i = 0; i < ret.sites.length; i++) {
-                var data = ret.sites[i];
+            for (i = 0; i < ret.sites.length; i++) {
+                data = ret.sites[i];
                 $("#updateSite").append(option.format(data.Id, data.SiteName));
             }
+
+            $("#updateId").html(id);
+            $("#updateDeviceName").val(deviceName);
+            $("#updateCode").val(code);
+            $("#updateMacAddress").val(macAddress);
+            $("#updateIp").val(ip);
+            $("#updatePort").val(port);
+            $("#updateIdentifier").val(identifier);
+            $("#updateDeviceModel").val(deviceModelId);
+            $("#updateFirmware").val(firmwareId);
+            $("#updateProcess").val(processId);
+            $("#updateHardware").val(hardwareId);
+            $("#updateSite").val(siteId);
+            $("#updateAdministratorUser").val(administratorUser);
+            $("#updateRemark").val(remark);
+
+            hideTip($("#updateCodeTip"));
+            hideTip($("#updateDeviceNameTip"));
+            hideTip($("#updateMacAddressTip"));
+            hideTip($("#updateIpTip"));
+            hideTip($("#updatePortTip"));
             $("#updateModel").modal("show");
         });
 }
 
-function showUpgradeModel(parameters) {
+function updateDevice() {
+    var opType = 102;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var id = parseInt($("#updateId").html());
+    var update = true;
+    //机台号
+    var code = $("#updateCode").val();
+    if (isStrEmptyOrUndefined(code)) {
+        showTip($("#updateCodeTip"), "机台号不能为空");
+        update = false;
+    }
+    //设备名
+    var deviceName = $("#updateDeviceName").val();
+    if (isStrEmptyOrUndefined(deviceName)) {
+        showTip($("#updateDeviceNameTip"), "设备名不能为空");
+        update = false;
+    }
+    //设备MAC地址
+    var macAddress = $("#updateMacAddress").val();
+    if (isStrEmptyOrUndefined(macAddress)) {
+        showTip($("#updateMacAddressTip"), "MAC地址不能为空");
+        update = false;
+    }
+    //IP
+    var ip = $("#updateIp").val();
+    if (!isIp(ip)) {
+        showTip($("#updateIpTip"), "IP非法");
+        update = false;
+    }
+    //端口
+    var port = $("#updatePort").val();
+    if (!isPort(port)) {
+        showTip($("#updatePortTip"), "端口非法");
+        update = false;
+    }
+    //识别码
+    var identifier = $("#updateIdentifier").val();
+    //设备型号编号
+    var deviceModelId = $("#updateDeviceModel").val();
+    //设备固件版本编号
+    var firmwareId = $("#updateFirmware").val();
+    //设备流程版本编号
+    var processId = $("#updateProcess").val();
+    //设备硬件版本编号
+    var hardwareId = $("#updateHardware").val();
+    //设备所在场地编号
+    var siteId = $("#updateSite").val();
+    //设备管理员用户
+    var administratorUser = $("#updateAdministratorUser").val();
+    //备注
+    var remark = $("#updateRemark").val();
+    if (!update)
+        return;
+    var doSth = function () {
+        $("#updateModel").modal("hide");
+
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id,
+            //机台号
+            Code: code,
+            //设备名
+            DeviceName: deviceName,
+            //设备MAC地址
+            MacAddress: macAddress,
+            //IP
+            Ip: ip,
+            //端口
+            Port: port,
+            //识别码
+            Identifier: identifier,
+            //设备型号编号
+            DeviceModelId: deviceModelId,
+            //设备固件版本编号
+            FirmwareId: firmwareId,
+            //设备流程版本编号
+            ProcessId: processId,
+            //设备硬件版本编号
+            HardwareId: hardwareId,
+            //设备所在场地编号
+            SiteId: siteId,
+            //设备管理员用户
+            AdministratorUser: administratorUser,
+            //备注
+            Remark: remark
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getDeviceList();
+                }
+            });
+    }
+    showConfirm("修改", doSth);
+}
+
+function showDetailModel(id) {
 
 }
 
+function showControlModel(id) {
 
-function showUpgradeModel(parameters) {
+}
+
+function showUpgradeModel(id) {
+
+}
+
+function showUpgradeModel(id) {
 
 }
 

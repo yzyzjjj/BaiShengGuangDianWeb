@@ -79,6 +79,7 @@ function showAddModel() {
                 var data = ret.datas[i];
                 $("#addSelect").append(option.format(data.Id, data.CategoryName));
             }
+            hideTip($("#addModelNameTip"));
             $("#addModel").modal("show");
         });
 }
@@ -91,7 +92,6 @@ function addModel() {
     }
     var deviceCategoryId = $("#addSelect").val();
     var modelName = $("#addModelName").val();
-    hideTip($("#addModelNameTip"));
     if (isStrEmptyOrUndefined(modelName)) {
         showTip($("#addModelNameTip"), "型号不能为空");
         return;
@@ -166,6 +166,7 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
                 $("#updateSelect").append(option.format(data.Id, data.CategoryName));
             }
 
+            hideTip($("#updateModelNameTip"));
             $("#updateId").html(id);
             $("#updateSelect").val(deviceCategoryId);
             $("#updateModelName").val(modelName);
@@ -174,7 +175,7 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
         });
 }
 
-function UpdateModel() {
+function updateModel() {
     var opType = 122;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -183,7 +184,6 @@ function UpdateModel() {
     var id = parseInt($("#updateId").html());
     var deviceCategoryId = $("#updateSelect").val();
     var modelName = $("#updateModelName").val();
-    hideTip($("#updateModelNameTip"));
     if (isStrEmptyOrUndefined(modelName)) {
         showTip($("#updateModelNameTip"), "型号不能为空");
         return;
@@ -211,5 +211,5 @@ function UpdateModel() {
                 }
             });
     }
-    showConfirm("添加", doSth);
+    showConfirm("修改", doSth);
 } 
