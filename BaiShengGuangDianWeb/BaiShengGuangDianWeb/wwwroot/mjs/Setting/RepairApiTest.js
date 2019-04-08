@@ -469,3 +469,4 @@ function DeleteFaultDevice() {
             console.log(ret);
         });
 }
+ 

@@ -241,7 +241,7 @@ function DeleteDeviceModel() {
             console.log(ret);
         });
 }
-
+ 
 //场地库
 function GetSite() {
     var data = {}

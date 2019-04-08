@@ -9,6 +9,7 @@ function getRolemanager() {
                 return;
             }
 
+
             //var act = '<div class="dropdown">' +
             //    '<button type="button" class="btn dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown">' +
             //'操作<span class="caret"></span>' +
