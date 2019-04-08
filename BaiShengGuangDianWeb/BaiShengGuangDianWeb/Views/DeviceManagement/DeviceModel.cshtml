@@ -35,19 +35,20 @@
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label" for="addSelect">设备类型：</label>
                                     <div class="col-sm-9">
                                         <select class="form-control" id="addSelect"></select>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label" for="addModelName">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addModelName">
+                                        <input class="form-control" id="addModelName"onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addModelNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label" for="addDesc">描述：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addDesc">
                                     </div>
@@ -79,19 +80,20 @@
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label" for="updateSelect">设备类型：</label>
                                     <div class="col-sm-9">
                                         <select class="form-control" id="updateSelect"></select>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label" for="updateModelName">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateModelName">
+                                        <input class="form-control" id="updateModelName"onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateModelNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label" for="updateDesc">描述：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateDesc">
                                     </div>

@@ -6,6 +6,9 @@ var op = function (data, type, row) {
     var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showUpdateModel(\'' +
         row.Id + '\',\'' + row.DeviceCategoryId + '\',\'' + row.ModelName + '\',\'' + row.Description + '\')">修改</button>';
     html += '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="DeleteDeviceModel(' + row.Id + ',\'' + row.ModelName + '\')">删除</button>';
+
+
+
     return html;
 }
 
@@ -70,22 +73,23 @@ function showAddModel() {
 }
 
 function addModel() {
-    var doSth = function () {
-        var deviceCategoryId = $("#addSelect").val();
-        var modelName = $("#addModelName").val();
-        if (modelName == "") {
-            layer.msg("型号不能为空");
-            return;
-        }
-        var description = $("#addDesc").val();
+    var opType = 123;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var deviceCategoryId = $("#addSelect").val();
+    var modelName = $("#addModelName").val();
+    hideTip($("#addModelNameTip"));
+    if (isStrEmptyOrUndefined(modelName)) {
+        showTip($("#addModelNameTip"), "型号不能为空");
+        return;
+    }
+    var description = $("#addDesc").val();
 
+    var doSth = function () {
         $("#addModel").modal("hide");
 
-        var opType = 123;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
@@ -108,12 +112,12 @@ function addModel() {
 }
 
 function DeleteDeviceModel(id, modelName) {
+    var opType = 124;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     var doSth = function () {
-        var opType = 124;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
@@ -160,22 +164,23 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
 }
 
 function UpdateModel() {
-    var doSth = function () {
-        var id = parseInt($("#updateId").html());
-        var deviceCategoryId = $("#updateSelect").val();
-        var modelName = $("#updateModelName").val();
-        if (modelName == "") {
-            layer.msg("型号不能为空");
-            return;
-        }
-        var description = $("#updateDesc").val();
+    var opType = 122;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var id = parseInt($("#updateId").html());
+    var deviceCategoryId = $("#updateSelect").val();
+    var modelName = $("#updateModelName").val();
+    hideTip($("#updateModelNameTip"));
+    if (isStrEmptyOrUndefined(modelName)) {
+        showTip($("#updateModelNameTip"), "型号不能为空");
+        return;
+    }
+    var description = $("#updateDesc").val();
 
+    var doSth = function () {
         $("#updateModel").modal("hide");
-        var opType = 122;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
