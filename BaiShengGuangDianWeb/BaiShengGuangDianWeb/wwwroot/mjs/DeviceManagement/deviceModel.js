@@ -133,8 +133,8 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
         });
 }
 
-function UpdateModel() {
-
+function UpdateModel()
+{
     var doSth = function () {
         var id = parseInt($("#updateId").html());
         var deviceCategoryId = $("#updateSelect").val();

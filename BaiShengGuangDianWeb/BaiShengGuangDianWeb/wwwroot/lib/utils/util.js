@@ -53,9 +53,10 @@ function getJwtInfo(token) {
 
     var result2 = Base64.decode(info)
     var obj = JSON.parse(result2);
-    
+
     obj.permissionsList = obj.permissions.split(",").map(Number)
     // console.log( obj )
+
     return obj
 }
 
@@ -79,22 +80,6 @@ function isTokenValid() {
     }
 
     return true
-}
-
-//查看是否有角色是否有权限
-function checkHaveRole(role) {
-    var tkinfo = getCookieTokenInfo()
-    if (tkinfo == null) {
-        return false;
-    }
-    var accroles = tkinfo.roles
-    if (accroles.indexOf("Admin") >= 0) {
-        return true;
-    }
-    if (accroles.indexOf(role) >= 0) {
-        return true;
-    }
-    return false;
 }
 
 function reLogin() {
@@ -309,10 +294,10 @@ function uploaderImg(initBrowseElement, callback, options) {
         browse_button: "hidden-uploader-btn",
         filters: {
             mime_types: [ //只允许上传图片
-				{
-				    title: "Image files",
-				    extensions: "jpeg,jpg,png"
-				},
+                {
+                    title: "Image files",
+                    extensions: "jpeg,jpg,png"
+                },
             ],
             max_file_size: '10mb'
         },
@@ -439,8 +424,7 @@ function uploaderImg(initBrowseElement, callback, options) {
                             layer.msg('请重新上传', { icon: 2 });
                             break;
                     }
-                } else
-                {
+                } else {
                     layer.msg('上传失败,请重新上传..', { icon: 2 });
                 }
                 if (options && options.error) {
@@ -520,7 +504,7 @@ function uploaderImg(initBrowseElement, callback, options) {
 
     uploader.removeAllImgs = function (elementName, type) {
         browseElement = {},
-        uploader.fileList = {}
+            uploader.fileList = {}
     }
     return uploader
 }
@@ -623,30 +607,25 @@ function dataType() {
 }
 
 //图片放大
-function imgShowBig(id)
-{
+function imgShowBig(id) {
 
     var viewer = new Viewer(document.getElementById(id), {
-        ready: function ()
-        {
+        ready: function () {
             viewer.update();
         },
-        show: function ()
-        {
+        show: function () {
             viewer.update();
 
         },
-        shown: function ()
-        {
+        shown: function () {
             viewer.update();
 
         },
-        hide: function ()
-        {
+        hide: function () {
             viewer.update();
         }
     });
-    
+
 }
 
 //创建img图片
@@ -690,6 +669,9 @@ function showConfirm(text, func) {
     });
 }
 
+//查看是否有角色是否有权限
 function checkPermission(opType) {
     //permissionsList
+    var info = getCookieTokenInfo();
+    return info.permissionsList.indexOf(opType) >= 0;
 }

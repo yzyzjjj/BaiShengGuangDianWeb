@@ -117,7 +117,22 @@ function getOrganizationUnitsChild(list, parentId) {
 }
 
 function addOrganizationUnits() {
-
+    var data = {}
+    data.opType = 140;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            };
+            $("#addSelect").empty();
+            var option = '<option value="{value}">{option}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                $("#addSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
+            }
+            $("#addModel").modal("show");
+        });
 }
 
 function delOrganizationUnits() {
