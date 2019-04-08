@@ -103,7 +103,7 @@ function getParent(list) {
     var result = new Array();
     for (var i = 0; i < list.length; i++) {
         var data = list[i]
-        if ($.inArray(data.parent, result) < 0) {
+        if (result.indexOf(data.parent) < 0) {
             result.push(data.parent)
         }
     }
@@ -116,7 +116,7 @@ function getChild(list, parentId) {
     var result = new Array();
     for (var i = 0; i < list.length; i++) {
         var data = list[i]
-        if (data.parent == parentId && $.inArray(data.id, info.permissionsList) >= 0) {
+        if (data.parent == parentId && info.permissionsList.indexOf(data.id) >= 0) {
             result.push(data)
         }
     }

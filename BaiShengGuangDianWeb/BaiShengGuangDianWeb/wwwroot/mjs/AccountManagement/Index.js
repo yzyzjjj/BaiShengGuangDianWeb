@@ -10,7 +10,7 @@ function getOrganizationUnits() {
                 return;
             }
             $("#organizationUnits").empty();
-           
+
             var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
                 '  <div class="box-header with-border" onclick="onClick(\'onId\',\'onCnt\')">' +
                 '      <div class="box-tools" style="left: 0">' +
@@ -97,7 +97,7 @@ function getOrganizationUnitsParent(list) {
     var parents = new Array();
     for (var i = 0; i < list.length; i++) {
         var data = list[i]
-        if ($.inArray(data.parentId, parents) < 0) {
+        if (parents.indexOf(data.parentId) < 0) {
             parents.push(data.parentId)
         }
     }
