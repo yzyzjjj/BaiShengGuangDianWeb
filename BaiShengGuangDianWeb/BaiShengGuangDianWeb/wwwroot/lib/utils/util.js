@@ -689,3 +689,7 @@ function showConfirm(text, func) {
         layer.close(index);
     });
 }
+
+function checkPermission(opType) {
+    //permissionsList
+}
