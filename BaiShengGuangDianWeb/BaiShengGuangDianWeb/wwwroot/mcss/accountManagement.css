@@ -1,0 +1,12 @@
+﻿
+/* Ui Elements */
+#dropdownMenu1 {
+    background: aqua;
+}
+.box.box-primary {
+    margin-top: 18px;
+}
+.t_headers{ height: 50px;border-bottom: 1px solid lightblue;}
+.orangeinstruct {
+    line-height: 50px;margin-left: 15px;font-size: 20px; 
+}
