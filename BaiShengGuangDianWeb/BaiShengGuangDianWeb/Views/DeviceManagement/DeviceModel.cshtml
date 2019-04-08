@@ -12,7 +12,10 @@
     <div class="box box-primary">
         <div class="box-header with-border">
             <h3 class="box-title">设备型号</h3>
-            <button type="button" class="btn btn-primary pull-right" onclick="showAddModel()">添加设备型号</button>
+            <div class="btn-group pull-right">
+                <button type="button" class="btn btn-primary" onclick="getDeviceModelList()">重新加载</button>
+                <button type="button" class="btn btn-primary" onclick="showAddModel()">添加设备型号</button>
+            </div>
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">
@@ -43,7 +46,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addModelName">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addModelName"onfocusin="focusIn($(this))">
+                                        <input class="form-control" id="addModelName" onfocusin="focusIn($(this))">
                                         <label class="label-danger hidden" id="addModelNameTip"></label>
                                     </div>
                                 </div>
@@ -88,7 +91,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateModelName">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateModelName"onfocusin="focusIn($(this))">
+                                        <input class="form-control" id="updateModelName" onfocusin="focusIn($(this))">
                                         <label class="label-danger hidden" id="updateModelNameTip"></label>
                                     </div>
                                 </div>
