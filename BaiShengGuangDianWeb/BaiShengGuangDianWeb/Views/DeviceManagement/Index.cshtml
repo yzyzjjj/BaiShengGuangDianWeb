@@ -28,28 +28,93 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">新设备型号信息</h4>
+                    <h4 class="modal-title">新设备信息</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box">
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label" for="addCode">机台号：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addSelect"></select>
+                                        <input class="form-control" id="addCode" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addCodeTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label" for="addDeviceName">设备名：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addModelName">
+                                        <input class="form-control" id="addDeviceName" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addDeviceNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label" for="addMacAddress">MAC地址：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addDesc">
+                                        <input class="form-control" id="addMacAddress" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addMacAddressTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addIp">IP地址：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addIp" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addIpTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addPort">端口：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addPort" placeholder="默认60000" value="60000" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="addPortTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addIdentifier">识别码：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addIdentifier" onfocusin="focusIn($(this))">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addDeviceModel">设备型号：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="addDeviceModel"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addFirmware">固件版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="addFirmware"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addProcess">流程版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="addProcess"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addHardware">硬件版本：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="addHardware"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addSite">所在场地：</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="addSite"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addAdministratorUser">管理员用户：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addAdministratorUser">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addRemark">备注：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addRemark">
                                     </div>
                                 </div>
                             </form>
@@ -58,7 +123,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="addModel()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addDevice()">添加</button>
                 </div>
             </div>
         </div>

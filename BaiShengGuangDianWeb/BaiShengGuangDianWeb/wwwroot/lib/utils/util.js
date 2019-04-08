@@ -24,12 +24,26 @@ function isStrEmptyOrUndefined(val) {
     if (val == undefined) {
         return true
     }
-    if (val == null) {
-        return true
-    }
     return false
 }
 
+function isIp(ip) {
+    var exp = /^((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+    var reg = ip.match(exp);
+    if (reg == null) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function isPort(port) {
+    if (port < 0 || port > 65536) {
+        return false;
+    } else {
+        return true;
+    }
+}
 //非负浮点数
 function isNumber(num) {
     var regPos = /^\d+(\.\d+)?$/; //非负浮点数
@@ -67,6 +81,7 @@ function getCookieTokenInfo() {
 
     return info
 }
+
 //检查token是否过期之类
 function isTokenValid() {
     var tkinfo = getCookieTokenInfo()
@@ -80,6 +95,13 @@ function isTokenValid() {
     }
 
     return true
+}
+
+//查看是否有角色是否有权限
+function checkPermission(opType) {
+    //permissionsList
+    var info = getCookieTokenInfo();
+    return info.permissionsList.indexOf(opType) >= 0;
 }
 
 function reLogin() {
@@ -658,6 +680,7 @@ function removeCover() {
     $('#body-cover').remove();
 }
 
+//显示确认框
 function showConfirm(text, func) {
     layer.confirm("是否确定" + text, {
         btn: ["确定", "取消"]
@@ -669,9 +692,16 @@ function showConfirm(text, func) {
     });
 }
 
-//查看是否有角色是否有权限
-function checkPermission(opType) {
-    //permissionsList
-    var info = getCookieTokenInfo();
-    return info.permissionsList.indexOf(opType) >= 0;
+function focusIn(uiElement) {
+    var ele = uiElement.parent().find(".label-danger");
+    ele.html();
+    ele.addClass("hidden");
+}
+function hideTip(uiElement) {
+    uiElement.addClass("hidden");
+    uiElement.html();
+}
+function showTip(uiElement, text) {
+    uiElement.removeClass("hidden");
+    uiElement.html(text);
 }

@@ -10,9 +10,14 @@ var op = function (data, type, row) {
 }
 
 function getDeviceModelList() {
+    var opType = 120;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     ajaxPost("/Relay/Post",
         {
-            opType: 120
+            opType: opType
         },
         function (ret) {
             if (ret.errno != 0) {
@@ -41,8 +46,13 @@ function getDeviceModelList() {
 }
 
 function showAddModel() {
+    var opType = 140;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     var data = {}
-    data.opType = 140;
+    data.opType = opType;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -50,10 +60,10 @@ function showAddModel() {
                 return;
             };
             $("#addSelect").empty();
-            var option = '<option value="{value}">{option}</option>';
+            var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#addSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
+                $("#addSelect").append(option.format(data.Id, data.CategoryName));
             }
             $("#addModel").modal("show");
         });
@@ -70,8 +80,14 @@ function addModel() {
         var description = $("#addDesc").val();
 
         $("#addModel").modal("hide");
+
+        var opType = 123;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
         var data = {}
-        data.opType = 123;
+        data.opType = opType;
         data.opData = JSON.stringify({
             //设备类型
             DeviceCategoryId: deviceCategoryId,
@@ -93,8 +109,13 @@ function addModel() {
 
 function DeleteDeviceModel(id, modelName) {
     var doSth = function () {
+        var opType = 124;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
         var data = {}
-        data.opType = 124;
+        data.opType = opType;
         data.opData = JSON.stringify({
             id: id
         });
@@ -110,8 +131,13 @@ function DeleteDeviceModel(id, modelName) {
 }
 
 function showUpdateModel(id, deviceCategoryId, modelName, description) {
+    var opType = 140;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     var data = {}
-    data.opType = 140;
+    data.opType = opType;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -119,10 +145,10 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
                 return;
             };
             $("#updateSelect").empty();
-            var option = '<option value="{value}">{option}</option>';
+            var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#updateSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
+                $("#updateSelect").append(option.format(data.Id, data.CategoryName));
             }
 
             $("#updateId").html(id);
@@ -133,8 +159,7 @@ function showUpdateModel(id, deviceCategoryId, modelName, description) {
         });
 }
 
-function UpdateModel()
-{
+function UpdateModel() {
     var doSth = function () {
         var id = parseInt($("#updateId").html());
         var deviceCategoryId = $("#updateSelect").val();
@@ -146,8 +171,13 @@ function UpdateModel()
         var description = $("#updateDesc").val();
 
         $("#updateModel").modal("hide");
+        var opType = 122;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
         var data = {}
-        data.opType = 122
+        data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
             //设备类型
@@ -166,5 +196,4 @@ function UpdateModel()
             });
     }
     showConfirm("添加", doSth);
-
 } 
