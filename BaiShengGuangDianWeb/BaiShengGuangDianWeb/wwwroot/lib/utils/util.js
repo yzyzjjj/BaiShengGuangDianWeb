@@ -705,3 +705,10 @@ function showTip(uiElement, text) {
     uiElement.removeClass("hidden");
     uiElement.html(text);
 }
+
+//采用正则表达式获取地址栏参数
+function getQueryString(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return unescape(r[2]); return null;
+}

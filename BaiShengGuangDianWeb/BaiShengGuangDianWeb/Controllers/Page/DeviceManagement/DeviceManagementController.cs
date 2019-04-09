@@ -8,11 +8,32 @@ namespace BaiShengGuangDianWeb.Controllers.Page.DeviceManagement
 {
     public class DeviceManagementController : Controller
     {
+        /// <summary>
+        /// 设备管理
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             return View();
         }
 
+        /// <summary>
+        /// 设备详情
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Detail()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// 设备控制
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Control()
+        {
+            return View();
+        }
         /// <summary>
         /// 设备型号库管理
         /// </summary>

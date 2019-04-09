@@ -1,0 +1,187 @@
+﻿@model object
+
+@{
+    ViewBag.Title = "设备详情";
+    Layout = "_Layout";
+}
+<script src="~/mjs/DeviceManagement/deviceDetail.js"></script>
+<h2>设备详情</h2>
+<section class="content">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">状态信息</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <label class="control-label" for="detailCode1">机台号：</label>
+                        <select class="ms2 form-control" style="width:100%" id="detailCode1"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailState">运行状态：</label>
+                        <input class="form-control" disabled="disabled" id="detailState">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailContinuousRunTime">连续运行时间：</label>
+                        <input class="form-control" disabled="disabled" id="detailContinuousRunTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailProcessTime">加工时间：</label>
+                        <input class="form-control" disabled="disabled" id="detailProcessTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailRemainingProcessTime">剩余加工时间：</label>
+                        <input class="form-control" disabled="disabled" id="detailRemainingProcessTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalRunTime">累积运行总时间：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalRunTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailFlowCard">当前加工流程卡号：</label>
+                        <input class="form-control" disabled="disabled" id="detailFlowCard">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">设备信息</h3>
+                </div>
+                <div class="box-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailCode2">机台号：</label>
+                            <div class="col-sm-9">
+                                <select class="ms2 form-control" style="width:100%" id="detailCode2"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailDeviceName">设备名：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailDeviceName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailMacAddress">MAC地址：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailMacAddress">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailIp">IP地址：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailIp">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailPort">端口：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailPort">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailIdentifier">识别码：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailIdentifier">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailDeviceModel">设备型号：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailDeviceModel">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailFirmware">固件版本：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailFirmware">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailProcess">流程版本：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailProcess">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailHardware">硬件版本：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailHardware">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailSite">所在场地：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailSite">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailAdministratorUser">管理员用户：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailAdministratorUser">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailRemark">备注：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailRemark">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">加工数据</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <label class="control-label" for="detailCode3">机台号：</label>
+                        <select class="ms2 form-control" style="width:100%" id="detailCode3"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProductionDay">今日生产总数—白班：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProductionDay">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailPassRateDay">今日合格率—白班：</label>
+                        <input class="form-control" disabled="disabled" id="detailPassRateDay">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProcessTimeDay">今日加工总时间—白班：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProcessTimeDay">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProductionNight">今日生产总数—夜班：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProductionNight">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailPassRateNight">今日合格率—夜班：</label>
+                        <input class="form-control" disabled="disabled" id="detailPassRateNight">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProcessTimeNight">今日加工总时间—夜班：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProcessTimeNight">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProduction">今日生产总数：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProduction">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailPassRate">今日合格率：</label>
+                        <input class="form-control" disabled="disabled" id="detailPassRate">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="detailTotalProcessTime">今日加工总时间：</label>
+                        <input class="form-control" disabled="disabled" id="detailTotalProcessTime">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

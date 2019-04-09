@@ -8,10 +8,9 @@ function getDeviceList() {
         layer.msg("没有权限");
         return;
     }
-    ajaxPost("/Relay/Post",
-        {
-            opType: 100
-        },
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -25,21 +24,23 @@ function getDeviceList() {
                     '        <span class="caret"></span>' +
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">{0}{1}{2}{3}' +
+                    '    <ul class="dropdown-menu" role="menu">{0}{1}{2}{3}{4}' +
                     '    </ul>' +
                     '</div>';
 
-                var detailLi = '<li><a onclick="showDetailModel({0})">详情</a></li>'.format(data.Id);
+                var controlLi = '<li><a onclick="showControl({0})">控制</a></li>'.format(data.Id);
+                var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
                 var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\', \'{9}\', \'{10}\', \'{11}\', \'{12}\', \'{13}\', \'{14}\')">修改</a></li>'
                     .format(data.Id, data.DeviceName, data.Code, data.MacAddress, data.Ip, data.Port, data.Identifier, data.DeviceModelId,
                         data.FirmwareId, data.ProcessId, data.HardwareId, data.SiteId, data.AdministratorUser, data.Remark);
-                var upgradeLi = '<li><a onclick="showUpgradeModel({0})">升级</a></li>'.format(data.Id);
+                var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="DeleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.Code);
 
                 html = html.format(
+                    controlLi,
                     checkPermission(101) ? detailLi : "",
                     checkPermission(102) ? updateLi : "",
-                    checkPermission(107) ? upgradeLi : "",
+                    checkPermission(108) ? upgradeLi : "",
                     checkPermission(104) ? deleteLi : "");
 
                 return html;
@@ -395,20 +396,16 @@ function updateDevice() {
     showConfirm("修改", doSth);
 }
 
-function showDetailModel(id) {
-
+function showDetail(id) {
+    window.location = '/DeviceManagement/Detail?id=' + id;
 }
 
-function showControlModel(id) {
-
+function showControl(id) {
+    window.location = '/DeviceManagement/Control?id=' + id;
 }
 
-function showUpgradeModel(id) {
-
-}
-
-function showUpgradeModel(id) {
-
+function showUpgrade(id) {
+    window.location = '/DeviceManagement/Detail?id=' + id;
 }
 
 function DeleteDevice(id, code) {
