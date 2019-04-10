@@ -698,12 +698,30 @@ function focusIn(uiElement) {
     ele.addClass("hidden");
 }
 function hideTip(uiElement) {
-    uiElement.addClass("hidden");
-    uiElement.html();
+    if (typeof (uiElement) == "string") {
+        $("#" + uiElement).addClass("hidden");
+        $("#" + uiElement).html();
+    } else {
+        uiElement.addClass("hidden");
+        uiElement.html();
+    }
 }
 function showTip(uiElement, text) {
-    uiElement.removeClass("hidden");
-    uiElement.html(text);
+    if (typeof (uiElement) == "string") {
+        $("#" + uiElement).removeClass("hidden");
+        $("#" + uiElement).html(text);
+    } else {
+        uiElement.removeClass("hidden");
+        uiElement.html(text);
+    }
+}
+function hideClassTip(hClass) {
+    $("." + hClass).addClass("hidden");
+    $("." + hClass).html();
+}
+function showClassTip(hClass, text) {
+    $("." + hClass).removeClass("hidden");
+    $("." + hClass).html(text);
 }
 
 //采用正则表达式获取地址栏参数

@@ -66,11 +66,12 @@ function selectChange(datas) {
         $("#detailIp").val(firstData.Ip);
         $("#detailPort").val(firstData.Port);
         $("#detailIdentifier").val(firstData.Identifier);
-        $("#detailDeviceModel").val(firstData.DeviceModelId);
-        $("#detailFirmware").val(firstData.FirmwareId);
-        $("#detailProcess").val(firstData.ProcessId);
-        $("#detailHardware").val(firstData.HardwareId);
-        $("#detailSite").val(firstData.SiteId);
+        $("#detailDeviceModel").val(firstData.ModelName);
+        $("#detailScript").val(firstData.ScriptName);
+        $("#detailFirmware").val(firstData.FirmwareName);
+        $("#detailHardware").val(firstData.HardwareName);
+        $("#detailApplication").val(firstData.ApplicationName);
+        $("#detailSite").val(firstData.SiteName);
         $("#detailAdministratorUser").val(firstData.AdministratorUser);
         $("#detailRemark").val(firstData.Remark);
     }

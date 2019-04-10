@@ -23,8 +23,8 @@
             </div>
         </div>
     </div>
-    <!-- 模态框（Modal） -->
-    <div class="modal fade" id="addModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- 添加设备模态框（Modal） -->
+    <div class="modal fade" id="addModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -41,71 +41,90 @@
                                     <label class="col-sm-3 control-label" for="addCode">机台号：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addCode" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="addCodeTip"></label>
+                                        <label class="adt label-danger hidden" id="addCodeTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addDeviceName">设备名：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addDeviceName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="addDeviceNameTip"></label>
+                                        <label class="adt label-danger hidden" id="addDeviceNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addMacAddress">MAC地址：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addMacAddress" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="addMacAddressTip"></label>
+                                        <label class="adt label-danger hidden" id="addMacAddressTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addIp">IP地址：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addIp" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="addIpTip"></label>
+                                        <label class="adt label-danger hidden" id="addIpTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addPort">端口：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addPort" placeholder="默认60000" value="60000" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="addPortTip"></label>
+                                        <label class="adt label-danger hidden" id="addPortTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addIdentifier">识别码：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addIdentifier" onfocusin="focusIn($(this))">
+                                        <input class="form-control" id="addIdentifier">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addDeviceCategory">设备类型：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ads form-control" id="addDeviceCategory" onclick="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="addDeviceCategoryTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="addDeviceModel">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addDeviceModel"></select>
+                                        <select class="ads form-control" id="addDeviceModel" onchange="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="addDeviceModelTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="addFirmware">固件版本：</label>
+                                    <label class="col-sm-3 control-label" for="addScript">流程脚本版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addFirmware"></select>
+                                        <select class="ads form-control" id="addScript" onfocusin="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="addScriptTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="addProcess">流程版本：</label>
+                                    <label class="col-sm-3 control-label" for="addFirmware" onfocusin="focusIn($(this))">固件版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addProcess"></select>
+                                        <select class="ads form-control" id="addFirmware"></select>
+                                        <label class="adt label-danger hidden" id="addFirmwareTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="addHardware">硬件版本：</label>
+                                    <label class="col-sm-3 control-label" for="addHardware" onfocusin="focusIn($(this))">硬件版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addHardware"></select>
+                                        <select class="ads form-control" id="addHardware"></select>
+                                        <label class="adt label-danger hidden" id="addHardwareTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="addSite">所在场地：</label>
+                                    <label class="col-sm-3 control-label" for="addApplication" onfocusin="focusIn($(this))">应用层版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addSite"></select>
+                                        <select class="ads form-control" id="addApplication"></select>
+                                        <label class="adt label-danger hidden" id="addApplicationTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addSite" onfocusin="focusIn($(this))">所在场地：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ads form-control" id="addSite"></select>
+                                        <label class="adt label-danger hidden" id="addSiteTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -132,7 +151,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="updateModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- 更新设备模态框（Modal） -->
+    <div class="modal fade" id="updateModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -147,74 +167,93 @@
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="addCode">机台号：</label>
+                                    <label class="col-sm-3 control-label" for="updateCode">机台号：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateCode" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateCodeTip"></label>
+                                        <label class="adt label-danger hidden" id="updateCodeTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateDeviceName">设备名：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateDeviceName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateDeviceNameTip"></label>
+                                        <label class="adt label-danger hidden" id="updateDeviceNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateMacAddress">MAC地址：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateMacAddress" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateMacAddressTip"></label>
+                                        <label class="adt label-danger hidden" id="updateMacAddressTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateIp">IP地址：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateIp" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateIpTip"></label>
+                                        <label class="adt label-danger hidden" id="updateIpTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updatePort">端口：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updatePort" placeholder="默认60000" value="60000" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updatePortTip"></label>
+                                        <input class="form-control" id="updatePort" onfocusin="focusIn($(this))">
+                                        <label class="adt label-danger hidden" id="updatePortTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateIdentifier">识别码：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateIdentifier" onfocusin="focusIn($(this))">
+                                        <input class="form-control" id="updateIdentifier">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateDeviceCategory">设备类型：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ads form-control" id="updateDeviceCategory" onclick="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="updateDeviceCategoryTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label" for="updateDeviceModel">设备型号：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateDeviceModel"></select>
+                                        <select class="ads form-control" id="updateDeviceModel" onchange="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="updateDeviceModelTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="updateFirmware">固件版本：</label>
+                                    <label class="col-sm-3 control-label" for="updateScript">流程脚本版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateFirmware"></select>
+                                        <select class="ads form-control" id="updateScript" onfocusin="focusIn($(this))"></select>
+                                        <label class="adt label-danger hidden" id="updateScriptTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="updateProcess">流程版本：</label>
+                                    <label class="col-sm-3 control-label" for="updateFirmware" onfocusin="focusIn($(this))">固件版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateProcess"></select>
+                                        <select class="ads form-control" id="updateFirmware"></select>
+                                        <label class="adt label-danger hidden" id="updateFirmwareTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="updateHardware">硬件版本：</label>
+                                    <label class="col-sm-3 control-label" for="updateHardware" onfocusin="focusIn($(this))">硬件版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateHardware"></select>
+                                        <select class="ads form-control" id="updateHardware"></select>
+                                        <label class="adt label-danger hidden" id="updateHardwareTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="updateSite">所在场地：</label>
+                                    <label class="col-sm-3 control-label" for="updateApplication" onfocusin="focusIn($(this))">应用层版本：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateSite"></select>
+                                        <select class="ads form-control" id="updateApplication"></select>
+                                        <label class="adt label-danger hidden" id="updateApplicationTip"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateSite" onfocusin="focusIn($(this))">所在场地：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ads form-control" id="updateSite"></select>
+                                        <label class="adt label-danger hidden" id="updateSiteTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">

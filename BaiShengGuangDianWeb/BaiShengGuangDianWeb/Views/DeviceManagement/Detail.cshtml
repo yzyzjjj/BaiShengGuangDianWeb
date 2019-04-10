@@ -12,6 +12,9 @@
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">状态信息</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
                 </div>
                 <div class="box-body">
                     <div class="form-group">
@@ -49,84 +52,93 @@
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">设备信息</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
                 </div>
                 <div class="box-body">
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailCode2">机台号：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailCode2">机台号：</label>
+                            <div class="col-sm-8">
                                 <select class="ms2 form-control" style="width:100%" id="detailCode2"></select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailDeviceName">设备名：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailDeviceName">设备名：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailDeviceName">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailMacAddress">MAC地址：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailMacAddress">MAC地址：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailMacAddress">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailIp">IP地址：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailIp">IP地址：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailIp">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailPort">端口：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailPort">端口：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailPort">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailIdentifier">识别码：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailIdentifier">识别码：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailIdentifier">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailDeviceModel">设备型号：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailDeviceModel">设备型号：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailDeviceModel">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailFirmware">固件版本：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailScript">流程脚本版本：</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" disabled="disabled" id="detailScript">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="detailFirmware">固件版本：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailFirmware">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailProcess">流程版本：</label>
-                            <div class="col-sm-9">
-                                <input class="form-control" disabled="disabled" id="detailProcess">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailHardware">硬件版本：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailHardware">硬件版本：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailHardware">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailSite">所在场地：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailApplication">应用层版本：</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" disabled="disabled" id="detailApplication">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label" for="detailSite">所在场地：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailSite">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailAdministratorUser">管理员用户：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailAdministratorUser">管理员用户：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailAdministratorUser">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailRemark">备注：</label>
-                            <div class="col-sm-9">
+                            <label class="col-sm-4 control-label" for="detailRemark">备注：</label>
+                            <div class="col-sm-8">
                                 <input class="form-control" disabled="disabled" id="detailRemark">
                             </div>
                         </div>
@@ -138,6 +150,9 @@
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">加工数据</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
                 </div>
                 <div class="box-body">
                     <div class="form-group">
