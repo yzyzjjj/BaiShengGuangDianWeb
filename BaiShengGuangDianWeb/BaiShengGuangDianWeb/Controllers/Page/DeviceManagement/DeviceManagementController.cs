@@ -80,10 +80,18 @@ namespace BaiShengGuangDianWeb.Controllers.Page.DeviceManagement
         }
 
         /// <summary>
-        /// 流程库管理
+        /// 应用层库管理
         /// </summary>
         /// <returns></returns>
-        public IActionResult ProcessLibrary()
+        public IActionResult ApplicationLibrary()
+        {
+            return View();
+        }
+        /// <summary>
+        /// 流程脚本库管理
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Script()
         {
             return View();
         }

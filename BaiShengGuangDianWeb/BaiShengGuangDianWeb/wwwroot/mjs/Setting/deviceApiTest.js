@@ -48,19 +48,21 @@ function UpdateDeviceLibrary() {
         Identifier: "测试",
         //设备型号编号
         DeviceModelId: 2,
+        //流程脚本版本版本编号
+        ScriptId: 2,
         //设备固件版本编号
         FirmwareId: 2,
-        //设备流程版本编号
-        ProcessId: 2,
         //设备硬件版本编号
         HardwareId: 2,
+        //设备应用层版本编号
+        ApplicationId: 2,
         //设备所在场地编号
         SiteId: 1,
         //设备管理员用户
         AdministratorUser: "测试1",
         //备注
         Remark: "测试1"
-    })
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -88,10 +90,12 @@ function AddDeviceLibrary() {
         Identifier: "测试1",
         //设备型号编号
         DeviceModelId: 1,
+        //流程脚本版本版本编号
+        ScriptId: 1,
         //设备固件版本编号
         FirmwareId: 1,
-        //设备流程版本编号
-        ProcessId: 1,
+        //设备应用层版本编号
+        ApplicationId: 2,
         //设备硬件版本编号
         HardwareId: 1,
         //设备所在场地编号
@@ -606,8 +610,8 @@ function DeleteDeviceCategory() {
         });
 }
 
-//流程类型
-function GetProcessLibrary() {
+//应用层类型
+function GetApplicationLibrary() {
     var data = {}
     data.opType = 145
     ajaxPost("/Relay/Post", data,
@@ -619,7 +623,7 @@ function GetProcessLibrary() {
             console.log(ret);
         });
 }
-function GetSingleProcessLibrary() {
+function GetSingleApplicationLibrary() {
     var data = {}
     data.opType = 146
     data.opData = JSON.stringify({
@@ -634,13 +638,13 @@ function GetSingleProcessLibrary() {
             console.log(ret);
         });
 }
-function UpdateProcessLibrary() {
+function UpdateApplicationLibrary() {
     var data = {}
     data.opType = 147
     data.opData = JSON.stringify({
         id: 3,
         //名称
-        ProcessName: "测试",
+        ApplicationName: "测试",
         //程序文件的位置及名称
         FilePath: "测试",
         //描述
@@ -655,12 +659,12 @@ function UpdateProcessLibrary() {
             console.log(ret);
         });
 }
-function AddProcessLibrary() {
+function AddApplicationLibrary() {
     var data = {}
     data.opType = 148
     data.opData = JSON.stringify({
         //名称
-        ProcessName: "测试1",
+        ApplicationName: "测试1",
         //程序文件的位置及名称
         FilePath: "测试1",
         //描述
@@ -675,7 +679,7 @@ function AddProcessLibrary() {
             console.log(ret);
         });
 }
-function DeleteProcessLibrary() {
+function DeleteApplicationLibrary() {
     var data = {}
     data.opType = 149
     data.opData = JSON.stringify({
