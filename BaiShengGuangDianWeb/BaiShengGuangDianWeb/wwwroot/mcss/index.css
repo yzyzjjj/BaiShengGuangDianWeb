@@ -3,10 +3,9 @@
 
 
 .mHome {
-    background-image:url(mimages/bg2.jpg)
-    background-color: #ffffff2e;
+    background-image: url('../mimages/bg2.jpg');
     width: 100%;
-    position: absolute;
+    /*position: absolute;*/
     /*top: 0;*/
     line-height: 80px;
     left: 400px;

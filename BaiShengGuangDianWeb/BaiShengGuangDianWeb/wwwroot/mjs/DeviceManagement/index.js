@@ -21,19 +21,19 @@ function getDeviceList() {
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
-                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '        <span class="caret"></span>' +
-                    '        <span class="sr-only">Toggle Dropdown</span>' +
-                    '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">{0}{1}{2}{3}{4}' +
-                    '    </ul>' +
+                    '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '   <span class="caret"></span>' +
+                    '   <span class="sr-only">Toggle Dropdown</span>' +
+                    '</button>' +
+                    '<ul class="dropdown-menu" role="menu">{0}{1}{2}{3}{4}' +
+                    '</ul>' +
                     '</div>';
 
                 var controlLi = '<li><a onclick="showControl({0})">控制</a></li>'.format(data.Id);
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
                 var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15})">修改</a></li>'
                     .format(data.Id, data.DeviceName, data.Code, data.MacAddress, data.Ip, data.Port, data.Identifier, data.DeviceModelId, data.ScriptId,
-                    data.FirmwareId, data.ApplicationId, data.HardwareId, data.SiteId, data.AdministratorUser, data.Remark, data.DeviceCategoryId);
+                        data.FirmwareId, data.ApplicationId, data.HardwareId, data.SiteId, data.AdministratorUser, data.Remark, data.DeviceCategoryId);
                 var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="DeleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.Code);
 
@@ -51,9 +51,23 @@ function getDeviceList() {
             }
 
             var state = function (data, type, row) {
-                if (data.StateStr == '连接正常')
-                    return '<span class="text-green">' + data.StateStr + '</span>';
-                return '<span class="text-red">' + data.StateStr + '</span>';
+                var state = data.StateStr;
+                if (state == '连接正常')
+                    return '<span class="text-success">' + state + '</span>';
+                return '<span class="text-danger">' + state + '</span>';
+            }
+
+            var deviceState = function (data, type, row) {
+                var state = data.DeviceStateStr;
+                if (state == '待加工')
+                    return '<span class="text-success">' + state + '</span>';
+                if (state == '加工中')
+                    return '<span class="text-success">' + state + '</span>';
+                if (state == '已确认')
+                    return '<span class="text-warning">' + state + '</span>';
+                if (state == '维修中')
+                    return '<span class="text-info">' + state + '</span>';
+                return '<span class="text-red">' + state + '</span>';
             }
             $("#deviceList")
                 .DataTable({
@@ -72,6 +86,7 @@ function getDeviceList() {
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorUser", "title": "管理员" },
                         { "data": null, "title": "运行状态", "render": state },
+                        { "data": null, "title": "设备状态", "render": deviceState },
                         { "data": null, "title": "操作", "render": op }
                     ]
                 });

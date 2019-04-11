@@ -370,22 +370,24 @@ function GetFaultDeviceByCode() {
 }
 function PutFaultDevice() {
     var data = {}
-    data.opType = 420
-    data.opData = JSON.stringify({
-        //(自增Id)
-        id: 3,
-        //机台号
-        DeviceCode: "1号机",
-        //故障时间
-        FaultTime: "2019-4-7 09:34:42",
-        //报修人
-        Proposer: "测试",
-        //故障描述
-        FaultDescription: "测试",
-        //优先级
-        Priority: 1
-
-    })
+    data.opType = 420;
+    data.opData = JSON.stringify([
+            {
+                //(自增Id)
+                id: 3,
+                //机台号
+                DeviceCode: "1号机",
+                //故障时间
+                FaultTime: "2019-4-7 09:34:42",
+                //报修人
+                Proposer: "测试",
+                //故障描述
+                FaultDescription: "测试",
+                //优先级
+                Priority: 1
+            }
+        ]
+    );
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -469,4 +471,3 @@ function DeleteFaultDevice() {
             console.log(ret);
         });
 }
- 

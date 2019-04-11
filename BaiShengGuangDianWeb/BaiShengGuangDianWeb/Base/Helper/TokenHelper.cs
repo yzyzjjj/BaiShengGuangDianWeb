@@ -49,7 +49,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 issuer: Issuer,
                 audience: Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.Now.AddHours(3),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

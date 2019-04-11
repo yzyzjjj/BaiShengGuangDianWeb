@@ -5,7 +5,7 @@
         id = parseInt(idStr);
     }
     getControlList();
-
+    getStateList();
 }
 
 var id = 1;
@@ -32,10 +32,12 @@ function getControlList() {
                 var data = ret.datas[i];
                 $(".ms2").append(option.format(data.Id, data.Code));
                 if (data.Id == id) {
+                    firstData = data;
                     exit = true;
                 }
             }
             if (!exit && ret.datas.length > 0) {
+                firstData = ret.datas[0];
                 id = 1;
             }
             selectChange(ret.datas);
@@ -46,9 +48,8 @@ function getControlList() {
             });
         });
 }
-
+var firstData = null;
 function selectChange(datas) {
-    var firstData = null;
     for (var i = 0; i < datas.length; i++) {
         var data = datas[i];
         if (data.Id == id) {
@@ -60,7 +61,7 @@ function selectChange(datas) {
         id = 1;
     }
     if (firstData != null) {
-        $(".ms2").val(id).trigger("change");
+        $(".ms2").val(id);
         $("#detailDeviceName").val(firstData.DeviceName);
         $("#detailMacAddress").val(firstData.MacAddress);
         $("#detailIp").val(firstData.Ip);
@@ -75,4 +76,54 @@ function selectChange(datas) {
         $("#detailAdministratorUser").val(firstData.AdministratorUser);
         $("#detailRemark").val(firstData.Remark);
     }
+    getStateList();
+    getDataList();
+}
+
+function getStateList() {
+    var opType = 109;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                var info = "";
+                var key = data.Item1;
+                var val = data.Item2;
+                switch (key) {
+
+                    case 1: info = firstData.DeviceStateStr; break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                    case 12:
+                        info = val;
+                }
+                $("#StateBox").find("[name=" + key + "]").val(info);
+            };
+        });
+}
+
+function getDataList() {
+
 }

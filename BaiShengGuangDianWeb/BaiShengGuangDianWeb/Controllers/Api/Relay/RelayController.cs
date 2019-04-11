@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.HttpServer;
 using ModelBase.Base.Logger;
-using ModelBase.Base.ServerConfig.Enum;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using Newtonsoft.Json.Linq;
 using System;
+using ModelBase.Base.EnumConfig;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 {

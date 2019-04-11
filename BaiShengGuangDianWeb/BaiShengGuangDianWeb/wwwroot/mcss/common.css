@@ -1,0 +1,7 @@
+﻿.btn-group {
+    white-space: nowrap
+}
+
+.btn-group > .dropdown-toggle {
+    float: inherit;
+}
