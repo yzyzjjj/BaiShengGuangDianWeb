@@ -61,7 +61,7 @@ function selectChange(datas) {
         id = 1;
     }
     if (firstData != null) {
-        $(".ms2").val(id);
+        $(".ms2").val(id).trigger("change");
         $("#detailDeviceName").val(firstData.DeviceName);
         $("#detailMacAddress").val(firstData.MacAddress);
         $("#detailIp").val(firstData.Ip);
@@ -125,5 +125,18 @@ function getStateList() {
 }
 
 function getDataList() {
+
+}
+
+function openDevice() {
+
+}
+function closeDevice() {
+
+}
+function lockDevice() {
+
+}
+function unlockDevice() {
 
 }

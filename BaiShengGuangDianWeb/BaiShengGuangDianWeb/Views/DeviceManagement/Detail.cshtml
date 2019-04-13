@@ -22,28 +22,52 @@
                         <select class="ms2 form-control" style="width:100%" id="detailCode1"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailState">运行状态：</label>
-                        <input class="form-control" disabled="disabled" name="1" id="detailState">
+                        <label class="control-label" for="name1">运行状态：</label>
+                        <input class="form-control" disabled="disabled" name="1" id="name1">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailContinuousRunTime">连续运行时间：</label>
-                        <input class="form-control" disabled="disabled" name="2" id="detailContinuousRunTime">
+                        <label class="control-label" for="name2">连续运行时间：</label>
+                        <input class="form-control" disabled="disabled" name="2" id="name2">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailProcessTime">加工时间：</label>
-                        <input class="form-control" disabled="disabled" name="3" id="detailProcessTime">
+                        <label class="control-label" for="name3">加工时间：</label>
+                        <input class="form-control" disabled="disabled" name="3" id="name3">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailRemainingProcessTime">剩余加工时间：</label>
-                        <input class="form-control" disabled="disabled" name="4" id="detailRemainingProcessTime">
+                        <label class="control-label" for="name4">剩余加工时间：</label>
+                        <input class="form-control" disabled="disabled" name="4" id="name4">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailTotalRunTime">累积运行总时间：</label>
-                        <input class="form-control" disabled="disabled" name="5" id="detailTotalRunTime">
+                        <label class="control-label" for="name5">累积运行总时间：</label>
+                        <input class="form-control" disabled="disabled" name="5" id="name5">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="detailFlowCard">当前加工流程卡号：</label>
-                        <input class="form-control" disabled="disabled" name="6" id="detailFlowCard">
+                        <label class="control-label" for="name6">当前加工流程卡号：</label>
+                        <input class="form-control" disabled="disabled" name="6" id="name6">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name7">实时压力：</label>
+                        <input class="form-control" disabled="disabled" name="7" id="name7">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name8">比例阀数值：</label>
+                        <input class="form-control" disabled="disabled" name="8" id="name8">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name9">上盘重量：</label>
+                        <input class="form-control" disabled="disabled" name="9" id="name9">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name10">下盘转速：</label>
+                        <input class="form-control" disabled="disabled" name="10" id="name10">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name11">上盘转速：</label>
+                        <input class="form-control" disabled="disabled" name="11" id="name11">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="name12">网络控制模式：</label>
+                        <input class="form-control" disabled="disabled" name="12" id="name12">
                     </div>
                 </div>
             </div>
@@ -58,10 +82,18 @@
                 </div>
                 <div class="box-body">
                     <form class="form-horizontal">
+                        <div class="form-group col-sm-12">
+                            <div class="text-center">
+                                <button type="button" class="btn btn-primary" onclick="openDevice()">开启设备</button>
+                                <button type="button" class="btn btn-primary" onclick="closeDevice()">关闭设备</button>
+                                <button type="button" class="btn btn-primary" onclick="lockDevice()">锁定设备</button>
+                                <button type="button" class="btn btn-primary" onclick="unlockDevice()">解锁设备</button>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="col-sm-4 control-label" for="detailCode2">机台号：</label>
                             <div class="col-sm-8">
-                                <select class="ms2 form-control" style="width:100%" id="detailCode2"></select>
+                                <select class="ms2 form-control" style="width: 100%" id="detailCode2"></select>
                             </div>
                         </div>
                         <div class="form-group">
