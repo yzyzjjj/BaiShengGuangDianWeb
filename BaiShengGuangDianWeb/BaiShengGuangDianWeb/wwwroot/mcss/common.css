@@ -1,4 +1,11 @@
-﻿.btn-group {
+﻿.mTitle {
+    float: left;
+    padding: 15px 15px;
+    color: red;
+    font-weight: 600;
+}
+
+.btn-group {
     white-space: nowrap
 }
 
