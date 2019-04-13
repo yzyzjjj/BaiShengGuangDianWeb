@@ -17,6 +17,8 @@ function getRoleList() {
                     '\')">删除</button>';
                 return html;
             }
+            
+
             $("#rolesList")
                 .DataTable({
                     "destroy": true,

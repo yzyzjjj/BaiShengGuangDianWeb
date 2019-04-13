@@ -4,16 +4,32 @@
 }
 
 var op = function (data, type, row) {
-    var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showUpdateModel(\'' +
-        row.Id + '\',\'' + row.DeviceCategoryId + '\',\'' + row.ModelName + '\',\'' + row.Description + '\')">修改</button>';
-    html += '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="DeleteDeviceModel(' + row.Id + ',\'' + row.ModelName + '\')">删除</button>';
+    var html = '<div class="btn-group">' +
+        '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+        '        <span class="caret"></span>' +
+        '        <span class="sr-only">Toggle Dropdown</span>' +
+        '    </button>' +
+        '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+        '    </ul>' +
+        '</div>';
+    var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.SiteName, data.RegionDescription, data.Manager);
+    var deleteLi = '<li><a onclick="DeleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.SiteName);
+    html = html.format(
+        checkPermission(127) ? updateLi : "",
+        checkPermission(129) ? deleteLi : "");
     return html;
 }
 
 function getSiteList() {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     ajaxPost("/Relay/Post",
         {
-            opType: 125
+            opType: opType
         },
         function (ret) {
             if (ret.errno != 0) {
@@ -21,7 +37,7 @@ function getSiteList() {
                 return;
             }
 
-            $("#deviceModelList")
+            $("#siteList")
                 .DataTable({
                     "destroy": true,
                     "paging": true,
@@ -31,71 +47,93 @@ function getSiteList() {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": "Id", "title": "Id" },
-                        { "data": "ModelName", "title": "设备型号" },
-                        { "data": "CategoryName", "title": "设备类型" },
-                        { "data": "Description", "title": "备注" },
+                        { "data": "Id", "title": "序号" },
+                        { "data": "SiteName", "title": "场地名" },
+                        { "data": "RegionDescription", "title": "场地位置" },
+                        { "data": "Manager", "title": "管理人" },
                         { "data": null, "title": "操作", "render": op },
                     ],
                 });
         });
 }
 
-function showAddModel() {
+﻿
+function showAddSite() {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+  
     var data = {}
-    data.opType = 140;
+    data.opType = opType
+    
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             };
-            $("#addSelect").empty();
-            var option = '<option value="{value}">{option}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
-            }
+            $("#addSiteName").empty();
+            
             $("#addModel").modal("show");
         });
 }
 
-function addModel() {
+function addSite() {
+    var opType = 128;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var adSiteNames = $("#addSiteName").val();
+    var locationsReg = $("#addLocations").val();
+    var manergerMan = $("#addManager").val();
+    if (isStrEmptyOrUndefined(adSiteNames)) {
+        showTip($("#updateSiteNameTip"), "场地名不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(locationsReg)) {
+        showTip($("#updateSiteLocationTip"), "场地位置不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(manergerMan)) {
+        showTip($("#updateSiteManergerTip"), "管理人不能为空");
+        return;
+    }
     var doSth = function () {
-        var deviceCategoryId = $("#addSelect").val();
-        var modelName = $("#addModelName").val();
-        if (modelName == "") {
-            layer.msg("型号不能为空");
-            return;
-        }
-        var description = $("#addDesc").val();
-
-        $("#addModel").modal("hide");
+         $("#addModel").modal("hide");
         var data = {}
-        data.opType = 123;
+        data.opType = opType;
         data.opData = JSON.stringify({
-            //设备类型
-            DeviceCategoryId: deviceCategoryId,
-            //设备型号
-            ModelName: modelName,
-            //描述
-            Description: description
+            //场地名称
+            SiteName: adSiteNames,
+            //场地位置
+            RegionDescription: locationsReg,
+            //管理人
+            Manager: manergerMan
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getDeviceModelList();
+                    getSiteList();
                 }
             });
     }
     showConfirm("添加", doSth);
 }
 
-function DeleteDeviceModel(id, modelName) {
+function DeleteSite(id, siteName) {
+    var opType = 129;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
     var doSth = function () {
         var data = {}
-        data.opType = 124;
+        data.opType = opType;
         data.opData = JSON.stringify({
             id: id
         });
@@ -103,70 +141,78 @@ function DeleteDeviceModel(id, modelName) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getDeviceModelList();
+                    getSiteList();
                 }
             });
     }
-    showConfirm("删除设备型号：" + modelName, doSth);
+    showConfirm("删除场地：" + siteName, doSth);
 }
 
-function showUpdateModel(id, deviceCategoryId, modelName, description) {
+function showUpdateSite(id, adSiteNames, locationsReg, manergerMan) {
+    var opType = 126;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     var data = {}
-    data.opType = 140;
+    data.opType = opType;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             };
-            $("#updateSelect").empty();
-            var option = '<option value="{value}">{option}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#updateSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
-            }
-
-            $("#updateId").html(id);
-            $("#updateSelect").val(deviceCategoryId);
-            $("#updateModelName").val(modelName);
-            $("#updateDesc").val(description);
-            $("#updateModel").modal("show");
+    $("#addSiteName").empty();
+    
+    var option = '<option value="{0}">{1}</option>';
+    for (var i = 0; i < ret.datas.length; i++) {
+        var data = ret.datas[i];
+        $("#addSiteName").append(option.format(data.Id, data.SiteName, data.RegionDescription, data.Manager));
+    }
+    $("#updateId").html(id);
+        $("#updateSiteName").val(adSiteNames);
+        $("#updateRegions").val(locationsReg);
+        $("#updateManager").val(manergerMan);
+        $("#updateSite").modal("show");
         });
 }
 
-function UpdateModel() {
+function updateSite() {
+    var opType = 127;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var id = parseInt($("#updateId").html());
 
+    var siteLocation = $("#updateRegions").val();
+    var siteManger = $("#updateManager").val();
+    var siteName = $("#updateSiteName").val();
+   
+   
     var doSth = function () {
-        var id = parseInt($("#updateId").html());
-        var deviceCategoryId = $("#updateSelect").val();
-        var modelName = $("#updateModelName").val();
-        if (modelName == "") {
-            layer.msg("型号不能为空");
-            return;
-        }
-        var description = $("#updateDesc").val();
+        $("#updateSite").modal("hide");
 
-        $("#updateModel").modal("hide");
         var data = {}
-        data.opType = 122
+        data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
-            //设备类型
-            DeviceCategoryId: deviceCategoryId,
-            //设备型号
-            ModelName: modelName,
-            //描述
-            Description: description
+            //场地名称
+            SiteName: siteName,
+            //场地地址
+            RegionDescription: siteLocation,
+            //管理人
+            Manager: siteManger,
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getDeviceModelList();
+                    getSiteList();
                 }
             });
     }
-    showConfirm("添加", doSth);
+    showConfirm("修改", doSth);
 
 }
 

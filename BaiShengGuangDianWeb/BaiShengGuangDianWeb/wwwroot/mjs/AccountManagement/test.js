@@ -25,6 +25,97 @@ function getOrganizationUnits() {
                 '      </ul>' +
                 '  </div>' +
                 '</div>'
+            var mMenuStr = '< div class="table-box" >' +
+                '               <table id="example-advanced" class="tableztree01">' +
+                '                   <tr class="thead_tr">' +
+                '                       <td style="padding-left: 10px;font-weight: bold">部门</td>' +
+                '                       <td style="font-weight: bold">描述</td>' +
+                '                       <td style="font-weight: bold">操作</td>' + 
+                '                   </tr>' +
+                '                   <tbody>' +
+                '                   <tr data-tt-id="0">' +
+                '                       <td >' +
+                '                           <span class="folder"></span>重庆市规划局' +
+                '                       </td>' +
+                '                       <td>描述</td>' +
+                '                       <td >' +
+                '                           <a href="#" onClick="openlayer()">添加</a> ' +
+                '                           <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a>' +
+                '                       </td>' +
+                '                   </tr>' +
+                '                   <tr data-tt-id="1" data-tt-parent-id="0">' +
+                '                       <td >' +
+                '                           <span class="folder"></span>高新区规划局' +
+                '                       </td>' +
+                '                       <td>描述</td>' +
+                '                       <td >' +
+                '                           <a href="#" onClick="openlayer()">添加</a> ' +
+                '                           <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a>' +
+                '                       </td>' +
+                '                   </tr>' +
+                '                   <tr data-tt-id="1-1" data-tt-parent-id="1">' +
+                '                       <td >' +
+                '                           <span class="file"></span>城南分局' +
+                '                       </td>' +  
+                '                       <td>描述</td>'  
+
+                //< div class="table-box" >
+                //<table id="example-advanced" class="tableztree01">
+
+                //<tr class="thead_tr"><td style="padding-left: 10px;font-weight: bold">部门</td><td style="font-weight: bold">描述</td><td style="font-weight: bold">操作</td></tr>
+                //<tbody>
+                //<tr data-tt-id="0">
+
+                //<td ><span class="folder"></span>重庆市规划局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+
+                //</tr>
+
+
+                //<tr data-tt-id="1" data-tt-parent-id="0">
+
+                //<td ><span class="folder"></span>高新区规划局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+
+
+                //</tr>
+
+                //<tr data-tt-id="1-1" data-tt-parent-id="1">
+
+                //<td ><span class="file"></span>城南分局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+
+                //</tr>
+
+                //<tr data-tt-id="2">
+
+                //<td><span class="folder"></span>重庆市公安局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+
+                //</tr>
+
+                //<tr data-tt-id="2-1" data-tt-parent-id="2">
+
+                //<td><span class="file"></span>高新分局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+
+                //</tr>
+
+                //<tr data-tt-id="2-1" data-tt-parent-id="2">
+
+                //<td><span class="file"></span>江北分局</td>
+                //<td>描述</td>
+                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+                //</tr>
+
+                //</tbody>
+                //</table>
+                //</div >
 
             var datas = ret.datas
             var parents = getOrganizationUnitsParent(datas)

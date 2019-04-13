@@ -5,16 +5,17 @@
     Layout = "_Layout";
 }
 <script src="~/mjs/DeviceManagement/Site.js"></script>
-<h2>场地库管理</h2>
+<h2 style="font-size: 26px; position: relative; top: 15px; left: 700px;">场地库管理</h2>
 <section class="content">
     <div class="box box-primary">
         <div class="box-header with-border">
             <h3 class="box-title">场地库</h3>
-            <button type="button" class="btn btn-primary pull-right" onclick="showAddModel()">添加场地库</button>
+            <button type="button" class="btn btn-primary pull-right" onclick="getSiteList()" style="margin-right: 20px">重新加载</button>
+            <button type="button" class="btn btn-primary pull-right" onclick="showAddSite()" style="margin-right: 8px">添加场地库</button>
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">
-                <table class="table table-hover table-striped" id="deviceModelList"></table>
+                <table class="table table-hover table-striped" id="siteList"></table>
             </div>
         </div>
     </div>
@@ -26,28 +27,31 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">新设备型号信息</h4>
+                    <h4 class="modal-title">新场地信息</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box">
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label">场地名：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="addSelect"></select>
+                                        <input class="form-control" id="addSiteName" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateSiteNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label">具体位置：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addModelName">
+                                        <input class="form-control" id="addLocations" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateSiteLocationTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label">管理人：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addDesc">
+                                        <input class="form-control" id="addManager" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateSiteManergerTip"></label>
                                     </div>
                                 </div>
                             </form>
@@ -56,20 +60,20 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="addModel()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addSite()">添加</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="updateModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updateSite" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">设备型号信息</h4>
+                    <h4 class="modal-title" >场地信息</h4>
                     <label class="hidden" id="updateId"></label>
                 </div>
                 <div class="modal-body">
@@ -77,21 +81,21 @@
                         <div class="box-body">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备类型：</label>
+                                    <label class="col-sm-3 control-label">场地名：</label>
                                     <div class="col-sm-9">
-                                        <select class="form-control" id="updateSelect"></select>
+                                        <input class="form-control" id="updateSiteName">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">设备型号：</label>
+                                    <label class="col-sm-3 control-label">场地位置：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateModelName">
+                                        <input class="form-control" id="updateRegions">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
+                                    <label class="col-sm-3 control-label">管理人：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateDesc">
+                                        <input class="form-control" id="updateManager">
                                     </div>
                                 </div>
                             </form>
@@ -100,7 +104,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="UpdateModel()">修改</button>
+                    <button type="button" class="btn btn-primary" onclick="updateSite()">修改</button>
                 </div>
             </div>
         </div>

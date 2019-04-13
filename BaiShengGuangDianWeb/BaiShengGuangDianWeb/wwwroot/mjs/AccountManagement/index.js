@@ -74,9 +74,9 @@ function getMemberList(id) {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": null, "title": "操作", "render": op },
                         { "data": "Name", "title": "姓名" },
                         { "data": "RoleName", "title": "角色" },
+                        { "data": null, "title": "操作", "render": op },
                     ],
                 });
         });

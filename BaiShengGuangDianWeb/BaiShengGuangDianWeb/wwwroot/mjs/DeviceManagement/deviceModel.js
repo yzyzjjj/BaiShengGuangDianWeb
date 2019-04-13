@@ -49,7 +49,7 @@ function getDeviceModelList() {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": "Id", "title": "Id" },
+                        { "data": "Id", "title": "序号" },
                         { "data": "ModelName", "title": "设备型号" },
                         { "data": "CategoryName", "title": "设备类型" },
                         { "data": "Description", "title": "备注" },
