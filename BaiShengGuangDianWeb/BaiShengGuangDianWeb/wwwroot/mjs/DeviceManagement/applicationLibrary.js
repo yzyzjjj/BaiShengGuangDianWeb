@@ -14,7 +14,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
     var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.ApplicationName, data.FilePath, data.Description);
-    var deleteLi = '<li><a onclick="DeleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ApplicationName);
+    var deleteLi = '<li><a onclick="DeleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ApplicationName);
     html = html.format(
         checkPermission(147) ? updateLi : "",
         checkPermission(149) ? deleteLi : "");
@@ -121,7 +121,7 @@ function addApplication() {
     showConfirm("添加", doSth);
 }
 
-function DeleteSite(id, applicationName) {
+function DeleteApplication(id, applicationName) {
     var opType = 149;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

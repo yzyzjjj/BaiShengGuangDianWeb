@@ -4,8 +4,12 @@
 }
 
 <script src="~/mjs/Home/index.js"></script>
-<h2>工作台</h2>
 <section class="content ">
+    <h2>
+        工作台
+        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
+        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="">报表输入</button>
+    </h2>
     <div class="row">
         <div class="col-md-5">
             <div class="box box-primary">
@@ -18,7 +22,7 @@
                 <div class="box-body">
                     <div class="form-group">
                         <label class="control-label" for="processCode">选择设备：</label>
-                        <select class="ms2 form-control" style="width:100%" id="processCode" onchange="focusIn($(this))"></select>
+                        <select class="ms2 form-control" style="width: 100%" id="processCode" onchange="focusIn($(this))"></select>
                         <label class="label-danger hidden" id="processCodeTip"></label>
                     </div>
                     <div class="form-group">
@@ -64,7 +68,7 @@
         </div>
     </div>
 
-    <!-- 添加设备模态框（Modal） -->
+    <!-- 模态框（Modal） -->
     <div class="modal fade" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -77,6 +81,92 @@
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
                         <table class="table table-hover table-striped" id="processDataList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="faultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障报修</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="faultCode">机台号：</label>
+                        <select class="ms2 form-control" style="width: 88%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
+                        <label class="adt label-danger hidden" id="faultCodeTip"></label>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="proposer">报修人：</label>
+                        <input class="form-control" disabled="disabled" id="proposer" onfocusin="focusIn($(this))">
+                        <label class="adt label-danger hidden" id="proposerTip"></label>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="faultTime">故障时间：</label>
+                        <input type="text" id="faultDate" class="form_date form-control">
+                        <input type="time" id="faultTime" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="faultDesc">故障描述：</label>
+                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
+                        <label class="adt label-danger hidden" id="faultDescTip"></label>
+                    </div>
+
+                    <a style="text-decoration: underline" href='javascript:void(0);' onclick="getUsuallyFaultList()">常见故障及解决方法</a>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="reportFault()">上报</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="usuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常见故障及解决方法</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="usuallyFaultList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="usuallyFaultDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">解决方法</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

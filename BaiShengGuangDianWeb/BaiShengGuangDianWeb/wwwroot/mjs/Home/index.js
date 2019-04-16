@@ -1,4 +1,5 @@
 ﻿function pageReady() {
+
     $(".ms2").select2();
     $("#run").addClass("disabled");
     getDeviceList();
@@ -8,6 +9,10 @@
     $(".ms2").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
+    $("#faultCode").select2({
+        allowClear: true
+    });
+
 }
 
 function getDeviceList() {
@@ -67,13 +72,22 @@ function getDeviceList() {
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $(".ms2").append(option.format(data.Id, data.Code));
+                var state = data.DeviceStateStr;
+                if (state == '待加工' || state == '加工中') {
+                    $("#processCode").append(option.format(data.Id, data.Code));
+                    $("#faultCode").append(option.format(data.Code, data.Code));
+                }
             }
 
         });
 }
 
 function queryFlowCard() {
+    var opType = 260;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     $("#run").addClass("disabled");
     var query = true;
     //机台号
@@ -91,8 +105,9 @@ function queryFlowCard() {
     }
     if (!query)
         return;
+
     var data = {}
-    data.opType = 260
+    data.opType = opType;
     data.opData = JSON.stringify({
         Id: deviceId,
         FlowCardName: flowCard
@@ -125,13 +140,17 @@ function queryFlowCard() {
 }
 
 function queryProcessData(processNumber) {
+    var opType = 300;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
     //工艺编号
     if (isStrEmptyOrUndefined(processNumber)) {
         layer.msg("工艺编号不存在");
     }
-
     var data = {}
-    data.opType = 300
+    data.opType = opType;
     data.opData = JSON.stringify({
         id: processNumber
     });
@@ -169,10 +188,7 @@ function queryProcessData(processNumber) {
 
             $("#dataModel").modal("show");
         });
-
-
 }
-
 
 var id = null;
 var proNum = null;
@@ -186,8 +202,158 @@ function setProcessData() {
     if (isStrEmptyOrUndefined(proNum)) {
         return;
     }
-
+    //todo
 
     layer.msg("发送成功");
 }
 
+function showFaultModel() {
+
+    $("#faultDate").val(getNow());
+    $("#faultDate").datepicker('update');
+    $("#faultTime").val(getNowTime());
+    var info = getCookieTokenInfo();
+    $("#proposer").val(info.name);
+    hideClassTip('adt');
+    $("#faultModel").modal("show");
+}
+
+function reportFault() {
+    var opType = 422;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var report = true;
+    var codes = $("#faultCode").val();
+    //机台号
+    if (codes == null || codes.length <= 0) {
+        showTip($("#faultCodeTip"), "请选择设备");
+        report = false;
+    }
+
+    var proposer = $("#proposer").val();
+    //报修人
+    if (isStrEmptyOrUndefined(proposer)) {
+        showTip($("#proposerTip"), "报修人不能为空");
+        report = false;
+    }
+    var faultDate = $("#faultDate").val();
+    var faultTime = $("#faultTime").val();
+
+    var faultDesc = $("#faultDesc").val();
+    //故障描述
+    if (isStrEmptyOrUndefined(faultDesc)) {
+        showTip($("#faultDescTip"), "故障描述不能为空");
+        report = false;
+    }
+    if (!report)
+        return;
+    $("#faultModel").modal("hide");
+    var time = "{0} {1}:00".format(faultDate, faultTime);
+    var faults = new Array();
+    for (var i = 0; i < codes.length; i++) {
+        faults.push({
+            //机台号
+            DeviceCode: codes[i],
+            //故障时间
+            FaultTime: time,
+            //报修人
+            Proposer: proposer,
+            //故障描述
+            FaultDescription: faultDesc,
+            //优先级
+            Priority: 0
+        });
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify(faults);
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getDeviceList();
+            }
+        });
+
+}
+
+function getUsuallyFaultList() {
+    var opType = 400;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var remarkShowLength = 120;//默认现实的字符串长度
+            $("#usuallyFaultList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": [
+                        { "data": "Id", "title": "序号" },
+                        { "data": "UsuallyFaultDesc", "title": "常见故障" },
+                        { "data": "SolverPlan", "title": "解决方法" }
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": [2],
+                            "render": function (data, type, full, meta) {
+
+                                if (full.SolverPlan) {
+                                    if (full.SolverPlan.length > remarkShowLength) {
+                                        return full.SolverPlan.substr(0, remarkShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                    } else {
+                                        return full.SolverPlan;
+                                    }
+                                } else {
+                                    return "";
+                                }
+                            }
+                        }
+                    ]
+                });
+            $("#usuallyFaultModel").modal("show");
+
+        });
+}
+
+function showUsuallyFaultDetailModel(id) {
+    var opType = 401;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0)
+                $("#usuallyFaultDetail").html(ret.datas[0].SolverPlan);
+
+            $("#usuallyFaultDetailModel").modal("show");
+
+        });
+}

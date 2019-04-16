@@ -69,6 +69,10 @@ function getDeviceList() {
                     return '<span class="text-info">' + state + '</span>';
                 return '<span class="text-red">' + state + '</span>';
             }
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
             $("#deviceList")
                 .DataTable({
                     "destroy": true,
@@ -79,7 +83,8 @@ function getDeviceList() {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": "Id", "title": "Id" },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": "ModelName", "title": "设备型号" },
                         { "data": "SiteName", "title": "摆放位置" },

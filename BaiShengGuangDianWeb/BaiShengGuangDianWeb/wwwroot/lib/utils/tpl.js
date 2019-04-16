@@ -130,4 +130,9 @@ $(function () {
         pageReady()
         $(".form_date,.form_month").attr("readonly", true)
     }
+    $('.modal').on('hidden.bs.modal', function () {
+        if ($('.modal.in').size() >= 1) {
+            $('body').addClass('modal-open')
+        }
+    })
 })

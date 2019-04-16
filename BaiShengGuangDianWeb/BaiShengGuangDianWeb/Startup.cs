@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using ModelBase.Base.Filter;
 using ModelBase.Base.Logger;
+using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace BaiShengGuangDianWeb
@@ -35,7 +36,17 @@ namespace BaiShengGuangDianWeb
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options =>
+                    {
+                        //忽略循环引用
+                        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                        ////不使用驼峰样式的key
+                        //options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                        //设置时间格式
+                        options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                    }
+                );
 
             //注册过滤器
             services.AddMvc(options =>
