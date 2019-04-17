@@ -1,6 +1,7 @@
 const_loginurl = "/Account/Login";
 const_indexurl = "/Home";
 
+var tdShowLength = 80;
 var oLanguage = {
     "sLengthMenu": "每页显示 _MENU_ 条记录",
     "sZeroRecords": "对不起，查询不到任何相关数据",

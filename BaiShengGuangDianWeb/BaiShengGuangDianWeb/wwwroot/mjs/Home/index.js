@@ -294,7 +294,6 @@ function getUsuallyFaultList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var remarkShowLength = 120;//默认现实的字符串长度
             $("#usuallyFaultList")
                 .DataTable({
                     "destroy": true,
@@ -316,8 +315,8 @@ function getUsuallyFaultList() {
                             "render": function (data, type, full, meta) {
 
                                 if (full.SolverPlan) {
-                                    if (full.SolverPlan.length > remarkShowLength) {
-                                        return full.SolverPlan.substr(0, remarkShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                    if (full.SolverPlan.length > tdShowLength) {
+                                        return full.SolverPlan.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
                                     } else {
                                         return full.SolverPlan;
                                     }

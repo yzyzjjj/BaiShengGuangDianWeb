@@ -4,8 +4,27 @@
     $("#singleFaultType").select2();
     getFaultDeviceList();
     getRepairRecordList();
+    var data = {};
+    data.opType = 406;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#singleFaultType").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                if (i == 0)
+                    fType = data.Id;
+                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
+            }
+        });
 }
 
+var fType = 0;
 function getFaultDeviceList() {
     var opType = 417;
     if (!checkPermission(opType)) {
@@ -90,8 +109,14 @@ function getFaultDeviceList() {
 }
 
 function sChange(id, type) {
+    hideClassTip('adt');
     $(".dd").attr("disabled", "disabled");
     $(".db").addClass("hidden");
+    $("#solveDiv").addClass("hidden");
+    $("#singleFaultType").val(fType).trigger("change");
+
+    $("#rFaultCodeDiv").addClass("hidden");
+    $("#singleFaultCode").removeClass("hidden");
     var opType = 418;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -137,28 +162,12 @@ function sChange(id, type) {
                 }
             }
             if (type == 3) {
-                data = {};
-                data.opType = 406;
-                ajaxPost("/Relay/Post", data,
-                    function (ret) {
-                        if (ret.errno != 0) {
-                            layer.msg(ret.errmsg);
-                            return;
-                        }
-                        $("#singleSolveDate").val(getNow());
-                        $("#singleSolveDate").datepicker('update');
-                        $("#singleSolveTime").val(getNowTime());
-                        var info = getCookieTokenInfo();
-                        $("#singleFaultSolver").val(info.name);
-                        $(".ms2").empty();
-                        var option = '<option value="{0}">{1}</option>';
-                        for (var i = 0; i < ret.datas.length; i++) {
-                            var data = ret.datas[i];
-                            $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
-                        }
-                    });
+                $("#singleSolveDate").val(getNow());
+                $("#singleSolveDate").datepicker('update');
+                $("#singleSolveTime").val(getNowTime());
+                var info = getCookieTokenInfo();
+                $("#singleFaultSolver").val(info.name);
             }
-
             $("#singleFaultModel").modal("show");
         });
 }
@@ -315,7 +324,7 @@ function getRepairRecordList() {
             }
             var op = function (data, type, row) {
                 var html = "{0}";
-                var changeBtn = '<button type="button" class="btn btn-primary" onclick="sChange({0}, 0)">修改</button>'.format(data.Id);
+                var changeBtn = '<button type="button" class="btn btn-primary" onclick="rChange({0}, 0)">修改</button>'.format(data.Id);
 
                 html = html.format(checkPermission(414) ? changeBtn : "");
                 return html;
@@ -346,7 +355,187 @@ function getRepairRecordList() {
         });
 }
 
+function rChange(id, type) {
+    hideClassTip('adt');
+    $(".db").addClass("hidden");
+    $(".dd").attr("disabled", "disabled");
+    $("#rFaultCodeDiv").addClass("hidden");
+    $("#singleFaultType").val(fType).trigger("change");
 
+    var opType;
+    var data;
+    if (type == 0) {
+        opType = 413;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        data = {};
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id
+        });
+        ajaxPost("/Relay/Post",
+            data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                var data;
+                if (ret.datas.length > 0) {
+                    data = ret.datas[0];
+
+                    $("#rFaultCodeDiv").addClass("hidden");
+                    $("#singleFaultCode").removeClass("hidden");
+                    $("#singleUpdateId").html(id);
+                    $("#singleUpdateState").html(data.State);
+                    $("#singleFaultCode").val(data.DeviceCode);
+                    $("#singleProposer").val(data.Proposer);
+                    var d = data.FaultTime.split(' ');
+                    $("#singleFaultDate").val(d[0]);
+                    var t = d[1].split(':');
+                    $("#singleFaultTime").val("{0}:{1}".format(t[0], t[1]));
+                    $("#singleFaultDesc").html(data.FaultDescription);
+                    $("#singleFaultPriority").val(data.Priority);
+
+                    $("#singleFaultSolver").val(data.FaultSolver);
+                    var d = data.SolveTime.split(' ');
+                    $("#singleSolveDate").val(d[0]);
+                    var t = d[1].split(':');
+                    $("#singleSolveTime").val("{0}:{1}".format(t[0], t[1]));
+
+                    $("#singleFaultType").val(data.FaultTypeId).trigger("change");
+                    $("#solveDiv").removeClass("hidden");
+                    $("#recordChange").removeClass("hidden");
+                }
+
+                $("#singleFaultModel").modal("show");
+            });
+    } else {
+
+        opType = 100;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        data = {}
+        data.opType = opType;
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                $("#singleSolveDate").val(getNow());
+                $("#singleSolveDate").datepicker('update');
+                $("#singleSolveTime").val(getNowTime());
+                var info = getCookieTokenInfo();
+                $("#singleFaultSolver").val(info.name);
+
+                $("#singleFaultCode").addClass("hidden");
+                $("#rFaultCodeDiv").removeClass("hidden");
+                $("#singleProposer").val("");
+                $("#singleFaultDesc").html("");
+
+                $("#singleFaultDate").val(getNow());
+                $("#singleFaultDate").datepicker('update');
+                $("#singleFaultTime").val(getNowTime());
+                $(".dd").removeAttr("disabled");
+                $("#solveDiv").removeClass("hidden");
+
+                $("#rFaultCode").empty();
+                $("#rFaultCode").select2();
+                var option = '<option value="{0}">{1}</option>';
+                for (var i = 0; i < ret.datas.length; i++) {
+                    var data = ret.datas[i];
+                    $("#rFaultCode").append(option.format(data.Code, data.Code));
+                }
+                $("#recordAdd").removeClass("hidden");
+                $("#singleFaultModel").modal("show");
+
+            });
+
+
+    }
+}
+
+function recordChange(type) {
+    var id = parseInt($("#singleUpdateId").html());
+
+    var code;
+    code = type == 0 ? $("#singleFaultCode").val() : $("#rFaultCode").val();
+    //机台号
+    if (isStrEmptyOrUndefined(code)) {
+        if (type != 0)
+            showTip($("#rFaultCodeTip"), "请选择设备");
+        return;
+    }
+
+    var proposer = $("#singleProposer").val();
+    //报修人
+    if (isStrEmptyOrUndefined(proposer)) {
+        if (type != 0)
+            showTip($("#singleProposerTip"), "报修人不能为空");
+        return;
+    }
+    var faultDate = $("#singleFaultDate").val();
+    var faultTime = $("#singleFaultTime").val();
+    var time = "{0} {1}:00".format(faultDate, faultTime);
+
+    var faultDesc = $("#singleFaultDesc").val();
+    var priority = $("#singleFaultPriority").val();
+
+    var singleFaultSolver = $("#singleFaultSolver").val();
+    var singleSolvePlan = $("#singleSolvePlan").val();
+
+    var singleSolveDate = $("#singleSolveDate").val();
+    var singleSolveTime = $("#singleSolveTime").val();
+    var solveTime = "{0} {1}:00".format(singleSolveDate, singleSolveTime);
+
+    var singleFaultType = $("#singleFaultType").val();
+
+    $("#singleFaultModel").modal("hide");
+    var opType = type == 0 ? 414 : 415;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {};
+    data.opType = opType;
+    var record = {
+        //机台号
+        DeviceCode: code,
+        //故障时间
+        FaultTime: time,
+        //报修人
+        Proposer: proposer,
+        //故障描述
+        FaultDescription: faultDesc,
+        //优先级
+        Priority: priority,
+        //故障解决者
+        FaultSolver: singleFaultSolver,
+        //故障解决时间
+        SolveTime: solveTime,
+        //故障解决方案
+        SolvePlan: singleSolvePlan,
+        //故障类型表Id
+        FaultTypeId: singleFaultType
+    }
+    if (type == 0)
+        record.id = id;
+    data.opData = JSON.stringify(record);
+    ajaxPost("/Relay/Post",
+        data,
+        function (ret) {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getRepairRecordList();
+            }
+        });
+
+}
 
 function getUsuallyFaultList() {
     var opType = 400;
@@ -362,7 +551,6 @@ function getUsuallyFaultList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var remarkShowLength = 120;//默认现实的字符串长度
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
@@ -405,8 +593,8 @@ function getUsuallyFaultList() {
                             "targets": [2],
                             "render": function (data, type, full, meta) {
                                 if (full.SolverPlan) {
-                                    if (full.SolverPlan.length > remarkShowLength) {
-                                        return full.SolverPlan.substr(0, remarkShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                    if (full.SolverPlan.length > tdShowLength) {
+                                        return full.SolverPlan.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
                                     } else {
                                         return full.SolverPlan;
                                     }
@@ -582,6 +770,250 @@ function updateUsuallyFault() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getUsuallyFaultList();
+                }
+            });
+    }
+    showConfirm("修改", doSth);
+}
+
+
+function getFaultTypeList() {
+    var opType = 406;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '   <span class="caret"></span>' +
+                    '   <span class="sr-only">Toggle Dropdown</span>' +
+                    '</button>' +
+                    '<ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '</ul>' +
+                    '</div>';
+
+                var updateLi = '<li><a onclick="showUpdateFaultTypeModel({0})">修改</a></li>'.format(data.Id);
+                var deleteLi = '<li><a onclick="DeleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.FaultTypeName);
+
+                html = html.format(
+                    checkPermission(408) ? updateLi : "",
+                    checkPermission(411) ? deleteLi : "");
+
+                return html;
+            }
+            $("#faultTypeList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "iDisplayLength": 10, //默认显示的记录数
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "FaultTypeName", "title": "故障类型" },
+                        { "data": "FaultDescription", "title": "故障类型描述" },
+                        { "data": null, "title": "操作", "render": op }
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": [1],
+                            "render": function (data, type, full, meta) {
+                                if (full.FaultDescription) {
+                                    if (full.FaultDescription.length > tdShowLength) {
+                                        return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                    } else {
+                                        return full.FaultDescription;
+                                    }
+                                } else {
+                                    return "";
+                                }
+                            }
+                        }
+                    ]
+                });
+
+            $("#singleFaultType").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
+            }
+            $("#faultTypeModel").modal("show");
+
+        });
+}
+
+function showFaultTypeDetailModel(id) {
+    var opType = 401;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0)
+                $("#faultTypeDetail").html(ret.datas[0].SolverPlan);
+
+            $("#faultTypeDetailModel").modal("show");
+
+        });
+}
+
+function DeleteFaultType(id, faultTypeDesc) {
+    var opType = 411;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getFaultTypeList();
+                }
+            });
+    }
+    showConfirm("删除故障类型：" + faultTypeDesc, doSth);
+}
+
+function showAddFaultTypeModel() {
+    hideClassTip('adt');
+    $("#addFaultTypeModel").modal("show");
+}
+
+function addFaultType() {
+    var opType = 410;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var add = true;
+    var addFaultTypeName = $("#addFaultTypeName").val();
+    if (isStrEmptyOrUndefined(addFaultTypeName)) {
+        showTip($("addFaultTypeNameTip"), "故障类型不能为空");
+        add = false;
+    }
+    var addFaultTypeDesc = $("#addFaultTypeDesc").val();
+
+    if (!add)
+        return;
+
+    var doSth = function () {
+        $("#addFaultTypeModel").modal("hide");
+        var data = {};
+        data.opType = opType;
+        data.opData = JSON.stringify([{
+            //故障类型
+            FaultTypeName: addFaultTypeName,
+            //故障类型描述
+            FaultDescription: addFaultTypeDesc
+        }]);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getFaultTypeList();
+                }
+            });
+    }
+    showConfirm("添加", doSth);
+}
+
+function showUpdateFaultTypeModel(id) {
+    var opType = 407;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    $("#updateTypeId").html(id);
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#updateFaultTypeName").val(ret.datas[0].FaultTypeName);
+                $("#updateFaultTypeDesc").val(ret.datas[0].FaultDescription);
+            }
+            hideClassTip('adt');
+            $("#updateFaultTypeModel").modal("show");
+        });
+}
+
+function updateFaultType() {
+    var opType = 408;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var update = true;
+    var updateFaultTypeName = $("#updateFaultTypeName").val();
+    if (isStrEmptyOrUndefined(updateFaultTypeName)) {
+        showTip($("updateFaultTypeNameTip"), "故障类型不能为空");
+        update = false;
+    }
+    var updateFaultTypeDesc = $("#updateFaultTypeDesc").val();
+    if (!update)
+        return;
+    var id = parseInt($("#updateTypeId").html());
+
+    var doSth = function () {
+        $("#updateFaultTypeModel").modal("hide");
+        var data = {};
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id,
+            //故障类型
+            FaultTypeName: updateFaultTypeName,
+            //故障类型描述
+            FaultDescription: updateFaultTypeDesc
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getFaultTypeList();
                 }
             });
     }

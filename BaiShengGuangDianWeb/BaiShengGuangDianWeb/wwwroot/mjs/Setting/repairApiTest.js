@@ -122,9 +122,6 @@ function GetSingleFaultType() {
     data.opData = JSON.stringify({
         id: 1
     })
-    data.opData = JSON.stringify({
-        id: 1
-    })
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -227,9 +224,6 @@ function GetRepairRecord() {
 function GetSingleRepairRecord() {
     var data = {}
     data.opType = 413
-    data.opData = JSON.stringify({
-        id: 1
-    })
     data.opData = JSON.stringify({
         id: 1
     })
