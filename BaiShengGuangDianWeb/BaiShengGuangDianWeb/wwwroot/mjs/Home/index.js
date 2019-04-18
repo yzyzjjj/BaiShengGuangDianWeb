@@ -69,13 +69,13 @@ function getDeviceList() {
 
 
             $(".ms2").empty();
-            var option = '<option value="{0}">{1}</option>';
+            var option = '<option value="{0}" id="{2}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 var state = data.DeviceStateStr;
                 if (state == '待加工' || state == '加工中') {
-                    $("#processCode").append(option.format(data.Id, data.Code));
-                    $("#faultCode").append(option.format(data.Code, data.Code));
+                    $("#processCode").append(option.format(data.Id, data.Code, ''));
+                    $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
                 }
             }
 
@@ -252,10 +252,12 @@ function reportFault() {
     $("#faultModel").modal("hide");
     var time = "{0} {1}:00".format(faultDate, faultTime);
     var faults = new Array();
+    var admins = new Array();
     for (var i = 0; i < codes.length; i++) {
+        var code = codes[i];
         faults.push({
             //机台号
-            DeviceCode: codes[i],
+            DeviceCode: code,
             //故障时间
             FaultTime: time,
             //报修人
@@ -265,6 +267,13 @@ function reportFault() {
             //优先级
             Priority: 0
         });
+        var admin = $("#faultCode").find("[value=" + code + "]").attr("id");
+        if (!isStrEmptyOrUndefined(admin)) {
+            admins.push({
+                Code: code,
+                Admin: admin
+            });
+        }
     }
 
     var data = {}
@@ -275,6 +284,19 @@ function reportFault() {
             layer.msg(ret.errmsg);
             if (ret.errno == 0) {
                 getDeviceList();
+                for (var i = 0; i < admins.length; i++) {
+                    var admin = admins[i];
+                    var info = {
+                        ChatEnum: chatEnum.FaultDevice,
+                        Message: {
+                            Admin: admin.Admin,
+                            Code: admin.Code
+                        }
+                    }
+                    //调用服务器方法
+                    hubConnection.invoke('SendMsg', info);
+
+                }
             }
         });
 

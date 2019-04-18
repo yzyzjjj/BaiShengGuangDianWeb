@@ -27,10 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Base\SignalR\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\mimages\bg2.jpg" />
     <None Include="wwwroot\mjs\Account\login.js" />
   </ItemGroup>
