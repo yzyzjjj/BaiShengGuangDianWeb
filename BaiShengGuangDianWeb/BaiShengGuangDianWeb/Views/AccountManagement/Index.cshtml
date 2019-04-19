@@ -4,17 +4,17 @@
     ViewBag.Title = "组织结构管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/AccountManagement/test.js"></script>
-<link href="~/mcss/accountManagement.css" rel="stylesheet" />	
-<div class="title"><h2>组织结构</h2></div>	
+<script src="~/mjs/AccountManagement/Index.js"></script>
+<div  style="background: url('mimages/righttitlebig.png') repeat-x; border: 1px solid #c1d3de; margin: 0; padding: 0;overflow: visible;"><h2 style="margin: 0;margin: 0;padding: 0; line-height: 33px;margin-left: 2px;font-weight: bold; font-size: 16px;font-family: '微软雅黑'; color: #000000; ">组织结构</h2></div>	
 <section class="content">
     <div class="row">
         <div class="col-md-6">
-            <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-                添加组织结构
+            <button class="btn btn-primary " onclick="showAddOrganizationUnits()">
+                添加结构
             </button>
-            <!-- 模态框（Modal） -->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			     <table id="organizatList" style="display: none;"></table>
+              <!-- 模态框（Modal） -->
+            <div class="modal fade" id="addStruct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -25,53 +25,59 @@
                                 添加组织结构
                             </h4>
                         </div>
-                         <div class="modal-body">
-                                <div class="box">
-                                    <div class="box-body">
-                                        <form class="form-horizontal">
-                                            <div class="form-group">
-                                                <label class="col-sm-3 control-label">组织结构：</label>
-                                                <div class="col-sm-9">
-                                                    <select class="form-control" id="addSelect"></select>
-                                                </div>
+                        <div class="modal-body">
+                            <div class="box">
+                                <div class="box-body">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">添加一级部门：</label>
+                                            <div class="col-sm-9">
+                                                <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="isDepart1" value="1" type="radio">是</label>
+                                                <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="isDepart1" checked="checked" value="2" type="radio">否</label>
                                             </div>
-                                            <div class="form-group">
-                                                <label class="col-sm-3 control-label">添加部门：</label>
-                                                <div class="col-sm-9">
-                                                    <input class="form-control" id="addModelName">
-                                                </div>
+                                        </div>
+                                        <div class="form-group firstDepart2">
+                                            <label class="col-sm-3 control-label">上级部门：</label>
+                                            <div class="col-sm-9">
+                                                <select class="form-control" id="firstPart2"></select> 
                                             </div>
-                                            <div class="form-group">
-                                                <label class="col-sm-3 control-label">描述：</label>
-                                                <div class="col-sm-9">
-                                                    <input class="form-control" id="addDesc">
-                                                </div>
+                                        </div>
+                                        <div class="form-group firstDepart1">
+                                            <label class="col-sm-3 control-label">添加部门：</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" id="firstPart1"  >
                                             </div>
-                                        </form>
-                                    </div>
+                                        </div>
+                                        
+                                         <div class="form-group">
+                                            <label class="col-sm-3 control-label">描述：</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" id="addDesc">
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">关闭
                             </button>
-                            <button type="button" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" onclick="addOrganizationUnits()">
                                 提交添加
                             </button>
                         </div>
                     </div><!-- /.modal-content -->
                 </div><!-- /.modal -->
             </div>
-            <div id="organizationUnits" style="margin-top: 20px">
+			
+			
+			
+            <div id="organizationUnits" style="margin-top: 20px"></div>
 
-            </div>
-        </div>
-        <!-- /.col -->
-        <div class="col-md-6" id="memberListDiv">
-            <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-                添加成员
-            </button>
-            <!-- 模态框（Modal） -->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            
+			
+			 <!-- 模态框（Modal） -->
+            <div class="modal fade" id="showUpdateOrganizationUnits" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -79,17 +85,79 @@
                                 &times;
                             </button>
                             <h4 class="modal-title" id="myModalLabel">
-                                模态框（Modal）标题
+                                修改组织结构
+                            </h4>
+                            <label class="hidden" id="updateId"></label>
+                        </div>
+                        <div class="modal-body">
+                            <div class="box">
+                                <div class="box-body">
+                                    <form class="form-horizontal">
+                                         <div class="form-group thirdDepart">
+                                            <label class="col-sm-3 control-label">部门名称：</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" id="showOrganizationName">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">描述：</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" id="addDesc">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="UpdateOrganizationUnits()">
+                                修改
+                            </button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal -->
+            </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-6" id="memberListDiv">
+            <button class="btn btn-primary "  style="margin-bottom: 20px;" onclick="showAddMan()">
+                添加成员
+            </button>
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="addMan" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                添加成员
                             </h4>
                         </div>
                         <div class="modal-body">
-                            在这里添加一些文本
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">姓名：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addModelName">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">角色：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addRoles">
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">关闭
                             </button>
                             <button type="button" class="btn btn-primary">
-                                提交更改
+                                提交
                             </button>
                         </div>
                     </div><!-- /.modal-content -->

@@ -1,254 +1,162 @@
-﻿function pageReady() {
-    getOrganizationUnits()
-}
+﻿//function pageReady() {
+//    getOrganizationUnits()
+//}
 
-function getOrganizationUnits() {
-    ajaxGet("/OrganizationUnitManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            $("#organizationUnits").empty();
+//function getOrganizationUnits() {
+//    ajaxGet("/OrganizationUnitManagement/List", null,
+//        function (ret) {
+//            if (ret.errno != 0) {
+//                layer.msg(ret.errmsg);
+//                return;
+//            }
+//            $("#organizationUnits").empty();
 
-            var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                '  <div class="box-header with-border" onclick="onClick(\'onId\',\'onCnt\')">' +
-                '      <div class="box-tools" style="left: 0">' +
-                '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                '              <i class="fa fa-minus"></i>' +
-                '          </button>' +
-                '      </div>' +
-                '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
-                '  </div>' +
-                '  <div class="box-body no-padding">' +
-                '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                '      </ul>' +
-                '  </div>' +
-                '</div>'
-            var mMenuStr = '< div class="table-box" >' +
-                '               <table id="example-advanced" class="tableztree01">' +
-                '                   <tr class="thead_tr">' +
-                '                       <td style="padding-left: 10px;font-weight: bold">部门</td>' +
-                '                       <td style="font-weight: bold">描述</td>' +
-                '                       <td style="font-weight: bold">操作</td>' + 
-                '                   </tr>' +
-                '                   <tbody>' +
-                '                   <tr data-tt-id="0">' +
-                '                       <td >' +
-                '                           <span class="folder"></span>重庆市规划局' +
-                '                       </td>' +
-                '                       <td>描述</td>' +
-                '                       <td >' +
-                '                           <a href="#" onClick="openlayer()">添加</a> ' +
-                '                           <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a>' +
-                '                       </td>' +
-                '                   </tr>' +
-                '                   <tr data-tt-id="1" data-tt-parent-id="0">' +
-                '                       <td >' +
-                '                           <span class="folder"></span>高新区规划局' +
-                '                       </td>' +
-                '                       <td>描述</td>' +
-                '                       <td >' +
-                '                           <a href="#" onClick="openlayer()">添加</a> ' +
-                '                           <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a>' +
-                '                       </td>' +
-                '                   </tr>' +
-                '                   <tr data-tt-id="1-1" data-tt-parent-id="1">' +
-                '                       <td >' +
-                '                           <span class="file"></span>城南分局' +
-                '                       </td>' +  
-                '                       <td>描述</td>'  
+//            var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
+//                '  <div class="box-header with-border" onclick="onClick(\'onId\',\'onCnt\')">' +
+//                '      <div class="box-tools" style="left: 0">' +
+//                '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
+//                '              <i class="fa fa-minus"></i>' +
+//                '          </button>' +
+//                '      </div>' +
+//                '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
+//                '  </div>' +
+//                '  <div class="box-body no-padding">' +
+//                '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
+//                '      </ul>' +
+//                '  </div>' +
+//                '</div>'
+//             var datas = ret.datas
+//            var parents = getOrganizationUnitsParent(datas)
+//            for (var i = 0; i < parents.length; i++) {
+//                var childs = getOrganizationUnitsChild(datas, parents[i])
+//                for (var j = 0; j < childs.length; j++) {
+//                    var child = childs[j]
+//                    var mMenu = mMenuStr.replace('onId', child.id).replace('onCnt', child.memberCount)
+//                    var option = $(mMenu).clone()
+//                    option.find('h3').text(child.name + "(" + child.memberCount + ")")
+//                    option.find('.on_ul').attr('id', "on" + child.id)
+//                    if (child.parentId == 0) {
+//                        $("#organizationUnits").append(option)
+//                    } else {
+//                        $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option)
+//                    }
+//                }
+//            }
 
-                //< div class="table-box" >
-                //<table id="example-advanced" class="tableztree01">
+//        });
+//}
 
-                //<tr class="thead_tr"><td style="padding-left: 10px;font-weight: bold">部门</td><td style="font-weight: bold">描述</td><td style="font-weight: bold">操作</td></tr>
-                //<tbody>
-                //<tr data-tt-id="0">
+//var op = function (data, type, row) {
+//    var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showDevice(\'' +
+//        row.Id + '\',\'' + row.Name + '\',\'' + row.RoleName +
+//        '\')">删除</button>';
+//    return html;
+//}
 
-                //<td ><span class="folder"></span>重庆市规划局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+//function getMemberList(id) {
+//    ajaxGet("/OrganizationUnitManagement/MemberList",
+//        {
+//            organizationUnitId: id
+//        },
+//        function (ret) {
+//            if (ret.errno != 0) {
+//                layer.msg(ret.errmsg);
+//                return;
+//            }
+//            $("#memberListTable")
+//                .DataTable({
+//                    "destroy": true,
+//                    "paging": true,
+//                    "searching": true,
+//                    "language": { "url": "/content/datatables_language.json" },
+//                    "data": ret.datas,
+//                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+//                    "iDisplayLength": 20, //默认显示的记录数  
+//                    "columns": [
+//                        { "data": "Name", "title": "姓名" },
+//                        { "data": "RoleName", "title": "角色" },
+//                        { "data": null, "title": "操作", "render": op },
+//                    ],
+//                });
+//        });
+//}
 
-                //</tr>
+//function onClick(id, cnt) {
+//    $("#memberListTable").empty();
+//    if (cnt == 0)
+//        return;
+//    getMemberList(id)
+//}
 
+//function rule(a, b) {
+//    return a.id > b.id
+//}
 
-                //<tr data-tt-id="1" data-tt-parent-id="0">
+//function getOrganizationUnitsParent(list) {
+//    var parents = new Array();
+//    for (var i = 0; i < list.length; i++) {
+//        var data = list[i]
+//        if (parents.indexOf(data.parentId) < 0) {
+//            parents.push(data.parentId)
+//        }
+//    }
+//    return parents
+//}
 
-                //<td ><span class="folder"></span>高新区规划局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+//function getOrganizationUnitsChild(list, parentId) {
+//    var result = new Array();
+//    for (var i = 0; i < list.length; i++) {
+//        var data = list[i]
+//        if (data.parentId == parentId) {
+//            result.push(data)
+//        }
+//    }
 
+//    return result.sort(rule)
+//}
 
-                //</tr>
+//function addOrganizationUnits() {
+//    var data = {}
+//    data.opType = 140;
+//    ajaxPost("/Relay/Post", data,
+//        function (ret) {
+//            if (ret.errno != 0) {
+//                layer.msg(ret.errmsg);
+//                return;
+//            };
+//            $("#addSelect").empty();
+//            var option = '<option value="{value}">{option}</option>';
+//            for (var i = 0; i < ret.datas.length; i++) {
+//                var data = ret.datas[i];
+//                $("#addSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
+//            }
+//            $("#addModel").modal("show");
+//        });
+//}
 
-                //<tr data-tt-id="1-1" data-tt-parent-id="1">
+//function delOrganizationUnits() {
 
-                //<td ><span class="file"></span>城南分局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+//}
 
-                //</tr>
+//function updateOrganizationUnits() {
 
-                //<tr data-tt-id="2">
+//}
 
-                //<td><span class="folder"></span>重庆市公安局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+//function moveOrganizationUnits() {
 
-                //</tr>
+//}
 
-                //<tr data-tt-id="2-1" data-tt-parent-id="2">
+//function delMember() {
 
-                //<td><span class="file"></span>高新分局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
+//}
 
-                //</tr>
+//function addMember() {
 
-                //<tr data-tt-id="2-1" data-tt-parent-id="2">
+//}
 
-                //<td><span class="file"></span>江北分局</td>
-                //<td>描述</td>
-                //<td ><a href="#" onClick="openlayer()">添加</a> <a href="#">删除</a> <a href="#" onClick="openlayer()">修改</a></td>
-                //</tr>
+//function updateMember() {
 
-                //</tbody>
-                //</table>
-                //</div >
-
-            var datas = ret.datas
-            var parents = getOrganizationUnitsParent(datas)
-            for (var i = 0; i < parents.length; i++) {
-                var childs = getOrganizationUnitsChild(datas, parents[i])
-                for (var j = 0; j < childs.length; j++) {
-                    var child = childs[j]
-                    var mMenu = mMenuStr.replace('onId', child.id).replace('onCnt', child.memberCount)
-                    var option = $(mMenu).clone()
-                    option.find('h3').text(child.name + "(" + child.memberCount + ")")
-                    option.find('.on_ul').attr('id', "on" + child.id)
-                    if (child.parentId == 0) {
-                        $("#organizationUnits").append(option)
-                    } else {
-                        $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option)
-                    }
-                }
-            }
-
-        });
-}
-
-var op = function (data, type, row) {
-    var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="showDevice(\'' +
-        row.Id + '\',\'' + row.Name + '\',\'' + row.RoleName +
-        '\')">删除</button>';
-    return html;
-}
-
-function getMemberList(id) {
-    ajaxGet("/OrganizationUnitManagement/MemberList",
-        {
-            organizationUnitId: id
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            $("#memberListTable")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": "Name", "title": "姓名" },
-                        { "data": "RoleName", "title": "角色" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
-        });
-}
-
-function onClick(id, cnt) {
-    $("#memberListTable").empty();
-    if (cnt == 0)
-        return;
-    getMemberList(id)
-}
-
-function rule(a, b) {
-    return a.id > b.id
-}
-
-function getOrganizationUnitsParent(list) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (parents.indexOf(data.parentId) < 0) {
-            parents.push(data.parentId)
-        }
-    }
-    return parents
-}
-
-function getOrganizationUnitsChild(list, parentId) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.parentId == parentId) {
-            result.push(data)
-        }
-    }
-
-    return result.sort(rule)
-}
-
-function addOrganizationUnits() {
-    var data = {}
-    data.opType = 140;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addSelect").empty();
-            var option = '<option value="{value}">{option}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addSelect").append(option.format({ "value": data.Id, "option": data.CategoryName }));
-            }
-            $("#addModel").modal("show");
-        });
-}
-
-function delOrganizationUnits() {
-
-}
-
-function updateOrganizationUnits() {
-
-}
-
-function moveOrganizationUnits() {
-
-}
-
-function delMember() {
-
-}
-
-function addMember() {
-
-}
-
-function updateMember() {
-
-}
+//}
 
 
 

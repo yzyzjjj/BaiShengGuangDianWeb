@@ -34,9 +34,7 @@ function getUsers() {
                         { "data": "roleName", "title": "角色" },
                         { "data": "emailAddress", "title": "邮箱" },
                         { "data": null, "title": "操作", "render": op },
-                      
-                        
-                    ],
+                     ],
                 });
 
         });
