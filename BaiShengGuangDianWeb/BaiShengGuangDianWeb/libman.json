@@ -14,6 +14,20 @@
         "skin/default/loading-1.gif",
         "skin/default/loading-2.gif"
       ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "signalr.js@2.4.0",
+      "destination": "wwwroot/lib/signalr.js/"
+    },
+    {
+      "provider": "unpkg",
+      "library": "@aspnet/signalr@1.1.4",
+      "destination": "wwwroot/lib/signalr/",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.min.js"
+      ]
     }
   ]
 }

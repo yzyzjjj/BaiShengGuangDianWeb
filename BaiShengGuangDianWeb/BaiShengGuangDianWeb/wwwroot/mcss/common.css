@@ -9,6 +9,10 @@
     white-space: nowrap
 }
 
-.btn-group > .dropdown-toggle {
-    float: inherit;
-}
+    .btn-group > .dropdown-toggle {
+        float: inherit;
+    }
+
+    .btn-group-vertical > .btn, .btn-group > .btn {
+        float: inherit;
+    }

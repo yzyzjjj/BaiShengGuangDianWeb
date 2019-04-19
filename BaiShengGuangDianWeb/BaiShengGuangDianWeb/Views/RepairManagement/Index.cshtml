@@ -5,8 +5,350 @@
     Layout = "_Layout";
 }
 
-<h2>维修管理</h2>
 <script src="~/mjs/RepairManagement/index.js"></script>
+
 <section class="content ">
-   
+    <h2>
+        维修管理
+        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="getUsuallyFaultList()">常见故障解决</button>
+        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="getFaultTypeList()">故障类型</button>
+    </h2>
+    <div class="row">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">故障设备</h3>
+                <div class="box-tools pull-right">
+                    @*<button type="button" class="btn btn-primary btn-sm" onclick="showChange()">修改优先级</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showSure()">确认故障</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showRepairing()">设备维修中</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showRepaired()">设备已维修</button>*@
+                    <button type="button" class="btn btn-primary btn-sm" onclick="getFaultDeviceList()">重新加载</button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="faultDeviceList"></table>
+                </div>
+            </div>
+        </div>
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">维修记录</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">重新加载</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="rChange(0,1)">添加纪录</button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="repairRecordList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="singleFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障设备操作</h4>
+                    <label class="hidden" id="singleUpdateId"></label>
+                    <label class="hidden" id="singleUpdateState"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="singleFaultCode">机台号：</label>
+                        <input class="dd form-control" disabled="disabled" id="singleFaultCode">
+                        <div class="hidden" id="rFaultCodeDiv">
+                            <select class="form-control" style="width: 100%" id="rFaultCode" onchange="focusIn($(this))"></select>
+                            <label class="adt label-danger hidden" id="rFaultCodeTip"></label>
+                        </div>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="singleProposer">报修人：</label>
+                        <input class="dd form-control" disabled="disabled" id="singleProposer">
+                        <label class="adt label-danger hidden" id="singleProposerTip"></label>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="singleFaultDate">故障时间：</label>
+                        <input type="text" id="singleFaultDate" disabled="disabled" class="dd form_date form-control">
+                        <input type="time" id="singleFaultTime" disabled="disabled" class="dd form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="singleFaultDesc">故障描述：</label>
+                        <textarea class="dd form-control" id="singleFaultDesc" disabled="disabled" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="singleFaultPriority">优先级：</label>
+                        <select class="dd form-control" id="singleFaultPriority" disabled="disabled">
+                            <option value="0">低</option>
+                            <option value="1">中</option>
+                            <option value="2">高</option>
+                        </select>
+                    </div>
+
+                    <div class="box hidden" id="solveDiv">
+                        <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="singleFaultSolver">解决人：</label>
+                                <input class="form-control" id="singleFaultSolver">
+                                <label class="adt label-danger hidden" id="singleFaultSolverTip"></label>
+                            </div>
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="singleFaultDate">解决时间：</label>
+                                <input type="text" id="singleSolveDate" class="form_date form-control">
+                                <input type="time" id="singleSolveTime" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="singleSolvePlan">解决方案：</label>
+                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                            </div>
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="singleFaultType">故障类型：</label>
+                                <select class="form-control" id="singleFaultType" style="width: 88%"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(0)" id="singleChange">修改</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(1)" id="singleSure">确认故障</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(2)" id="singleRepairing">开始维修</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(3)" id="singleRepaired">维修完成</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="recordChange(0)" id="recordChange">修改</button>
+                    <button type="button" class="db btn btn-primary hidden" onclick="recordChange(1)" id="recordAdd">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="usuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常见故障及解决方法</h4>
+                    <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showAddUsuallyFaultModel()">添加常见故障</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="usuallyFaultList" style="padding-right: 10px;"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="usuallyFaultDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">解决方法</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addUsuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常见故障及解决方法</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="control-label" for="addUsuallyFaultDesc">常见故障：</label>
+                        <input class="form-control" id="addUsuallyFaultDesc" onfocusin="focusIn($(this))">
+                        <label class="adt label-danger hidden" id="addUsuallyFaultDescTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="addSolverPlan">解决方法：</label>
+                        <textarea class="form-control" id="addSolverPlan" style="resize: vertical" onfocusin="focusIn($(this))"></textarea>
+                        <label class="adt label-danger hidden" id="addSolverPlanTip"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addUsuallyFault()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="updateUsuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常见故障及解决方法</h4>
+                    <label class="hidden" id="updateId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="updateUsuallyFaultDesc">常见故障：</label>
+                                <input class="form-control" id="updateUsuallyFaultDesc" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateUsuallyFaultDescTip"></label>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="updateSolverPlan">解决方法：</label>
+                                <textarea class="form-control" id="updateSolverPlan" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
+                                <label class="adt label-danger hidden" id="updateSolverPlanTip"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateUsuallyFault()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="faultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障类型</h4>
+                    <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showAddFaultTypeModel()">添加故障类型</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="faultTypeList" style="padding-right: 10px;"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="faultTypeDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障类型描述</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addFaultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障类型</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label class="control-label" for="addFaultTypeName">故障类型：</label>
+                        <input class="form-control" id="addFaultTypeName" onfocusin="focusIn($(this))">
+                        <label class="adt label-danger hidden" id="addFaultTypeNameTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="addFaultTypeDesc">故障类型描述：</label>
+                        <textarea class="form-control" id="addFaultTypeDesc" style="resize: vertical" onfocusin="focusIn($(this))"></textarea>
+                        <label class="adt label-danger hidden" id="addFaultTypeDescTip"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addFaultType()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="updateFaultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障类型</h4>
+                    <label class="hidden" id="updateTypeId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="updateFaultTypeName">故障类型：</label>
+                                <input class="form-control" id="updateFaultTypeName" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateFaultTypeNameTip"></label>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="updateFaultTypeDesc">故障类型描述：</label>
+                                <textarea class="form-control" id="updateFaultTypeDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
+                                <label class="adt label-danger hidden" id="updateFaultTypeDescTip"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateFaultType()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>

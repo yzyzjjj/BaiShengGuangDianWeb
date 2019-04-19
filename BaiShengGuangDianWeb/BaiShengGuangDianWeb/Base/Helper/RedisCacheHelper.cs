@@ -197,6 +197,21 @@ namespace BaiShengGuangDianWeb.Base.Helper
             }
         }
 
+        public IEnumerable<string> GetAllKeys()
+        {
+            using (var r = _pool.GetClient())
+            {
+                try
+                {
+                    return r.GetAllKeys();
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorFormat("Redis连接出错：{0}", ex);
+                    return null;
+                }
+            }
+        }
         public T Get<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -284,15 +299,16 @@ namespace BaiShengGuangDianWeb.Base.Helper
 
         #region Redis数据类型List
 
-        public void List_Add<T>(string key, T t)
+        public void List_Add<T>(string key, T t, TimeSpan slidingExpiration = default(TimeSpan))
         {
+            var expTime = slidingExpiration == default(TimeSpan) ? TimeSpan.FromSeconds(_redisConfig.ExpireTime) : slidingExpiration;
             using (var redis = _pool.GetClient())
             {
                 try
                 {
                     var redisTypedClient = redis.As<T>();
                     redisTypedClient.AddItemToList(redisTypedClient.Lists[key], t);
-                    SetExpireIn(key, TimeSpan.FromSeconds(_redisConfig.ExpireTime));
+                    SetExpireIn(key, expTime);
                 }
                 catch (Exception ex)
                 {
@@ -301,15 +317,16 @@ namespace BaiShengGuangDianWeb.Base.Helper
             }
         }
 
-        public void List_AddRange<T>(string key, IEnumerable<T> values)
+        public void List_AddRange<T>(string key, IEnumerable<T> values, TimeSpan slidingExpiration = default(TimeSpan))
         {
+            var expTime = slidingExpiration == default(TimeSpan) ? TimeSpan.FromSeconds(_redisConfig.ExpireTime) : slidingExpiration;
             using (var redis = _pool.GetClient())
             {
                 try
                 {
                     var redisTypedClient = redis.As<T>();
                     redisTypedClient.Lists[key].AddRange(values);
-                    SetExpireIn(key, TimeSpan.FromSeconds(_redisConfig.ExpireTime));
+                    SetExpireIn(key, expTime);
 
                 }
                 catch (Exception ex)

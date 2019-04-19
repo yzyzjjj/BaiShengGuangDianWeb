@@ -73,6 +73,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
+        /// 根据code获取账号信息
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static AccountInfo GetAccountInfoByName(string name)
+        {
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Name = @name AND a.IsDeleted = 0 AND b.IsDeleted = 0";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { name }).FirstOrDefault();
+            return info;
+        }
+        /// <summary>
         /// 获取所有账号信息
         /// </summary>
         /// <returns></returns>

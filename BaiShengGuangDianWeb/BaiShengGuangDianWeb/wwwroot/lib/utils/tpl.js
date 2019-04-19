@@ -1,40 +1,40 @@
 //初始化表
 var commonfunc = function () {
     if (!isTokenValid()) {
-        window.location.href = const_loginurl
-        return
+        window.location.href = const_loginurl;
+        return;
     }
 
-    var tkinfo = getCookieTokenInfo()
-    $("#nuser_name").text(tkinfo.name)
-    $("#nuser_role").text(tkinfo.role)
-    $("#user_name").prepend(tkinfo.name)
-    $("#user_email").text(tkinfo.email)
+    var tkinfo = getCookieTokenInfo();
+    $("#nuser_name").text(tkinfo.name);
+    $("#nuser_role").text(tkinfo.role);
+    $("#user_name").prepend(tkinfo.name);
+    $("#user_email").text(tkinfo.email);
 
     $("#logoutBtn").click(function () {
         ajaxPost("/Account/Logout",
             null,
             function (ret) {
-                DelCookie("token")
-                window.location.href = const_loginurl
-            })
-    })
+                DelCookie("token");
+                window.location.href = const_loginurl;
+            });
+    });
 
     //控制左侧菜单栏的权限控制
-    $(".sidebar-menu li.mli").remove()
+    $(".sidebar-menu li.mli").remove();
     ajaxGet("/Account/Pages",
         null,
         function (ret) {
             if (ret.errno != 0) {
-                layer.msg(ret.msg)
-                return
+                layer.msg(ret.msg);
+                return;
             }
 
             var mMenu1 = '<li class="mli">' +
                 '   <a class="menuitem">' +
                 '       <i class="mi fa"></i> <span class="mt"></span>' +
                 '   </a>' +
-                '</li>'
+                '</li>';
 
             var mMenu2 = '<li class="mli treeview">' +
                 '    <a href="#">' +
@@ -45,89 +45,179 @@ var commonfunc = function () {
                 '    </a>' +
                 '    <ul class="treeview-menu">' +
                 '    </ul>' +
-                '</li>'
+                '</li>';
 
             var mMenu3 = '<li>' +
                 '   <a class="menuitem" > <i class="fa fa-circle-o"></i><span></span></a>' +
-                '</li >'
+                '</li >';
 
-            var datas = ret.datas
-            var parents = getParent(datas)
+            var datas = ret.datas;
+            var parents = getParent(datas);
             for (var i = 0; i < parents.length; i++) {
-                var childs = getChild(datas, parents[i])
+                var childs = getChild(datas, parents[i]);
                 for (var j = 0; j < childs.length; j++) {
-                    var child = childs[j]
-                    var option = null
+                    var child = childs[j];
+                    var option = null;
                     if (child.parent == 0) {
                         if (child.url == "") {
                             option = $(mMenu2).clone()
-                            option.find('.treeview-menu').attr('id', child.id)
-                            option.find('i.mi').addClass(child.icon)
-                            option.find('span.mt').text(child.name)
-                            $(".sidebar-menu").append(option)
+                            option.find('.treeview-menu').attr('id', child.id);
+                            option.find('i.mi').addClass(child.icon);
+                            option.find('span.mt').text(child.name);
+                            $(".sidebar-menu").append(option);
                         } else {
                             option = $(mMenu1).clone()
-                            option.find('.menuitem').attr('id', child.id)
-                            option.find('.menuitem').attr('href', child.url)
-                            option.find('i.mi').addClass(child.icon)
-                            option.find('span.mt').text(child.name)
-                            $(".sidebar-menu").append(option)
+                            option.find('.menuitem').attr('id', child.id);
+                            option.find('.menuitem').attr('href', child.url);
+                            option.find('i.mi').addClass(child.icon);
+                            option.find('span.mt').text(child.name);
+                            $(".sidebar-menu").append(option);
                         }
                     } else {
-                        option = $(mMenu3).clone()
-                        option.find('.treeview-menu').attr('id', child.id)
-                        option.find('a').attr('href', child.url)
-                        option.find('span').text(child.name)
-                        $(".sidebar-menu").find('[id=' + child.parent + ']').append(option)
+                        option = $(mMenu3).clone();
+                        option.find('.treeview-menu').attr('id', child.id);
+                        option.find('a').attr('href', child.url);
+                        option.find('span').text(child.name);
+                        $(".sidebar-menu").find('[id=' + child.parent + ']').append(option);
                     }
                 }
             }
 
-            var url = window.location
-
+            var url = window.location;
             $("a.menuitem[href]").filter(function () {
-                var u = this.pathname
+                var u = this.pathname;
                 return this.pathname === url.pathname
-            }).parent().addClass("active").parent().parent().addClass("active")
-        })
+            }).parent().addClass("active").parent().parent().addClass("active");
+        });
+
+    //服务地址
+    initHub();
+
 }
+
 
 function rule(a, b) {
     if (a.order == b.order) {
-        return a.id > b.id
+        return a.id > b.id;
     }
-    return a.order > b.order
+    return a.order > b.order;
 }
 
 function getParent(list) {
     var result = new Array();
     for (var i = 0; i < list.length; i++) {
-        var data = list[i]
+        var data = list[i];
         if (result.indexOf(data.parent) < 0) {
-            result.push(data.parent)
+            result.push(data.parent);
         }
     }
 
-    return result.sort(rule)
+    return result.sort(rule);
 }
 
 function getChild(list, parentId) {
-    var info = getCookieTokenInfo()
+    var info = getCookieTokenInfo();
     var result = new Array();
     for (var i = 0; i < list.length; i++) {
         var data = list[i]
         if (data.parent == parentId && info.permissionsList.indexOf(data.id) >= 0) {
-            result.push(data)
+            result.push(data);
         }
     }
 
-    return result.sort(rule)
+    return result.sort(rule);
+}
+var join = null;
+var check1 = null;
+var check2 = null;
+function initHub() {
+    if (hubConnection == null) {
+        hubConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+        initHubCallBack();
+    }
+    if (hubConnection.connection.connectionState != 1) {
+        //服务地址
+        hubConnection.start();
+
+        joinFunc();
+    }
+}
+
+function joinFunc() {
+    if (join == null) {
+        join = setInterval(function () {
+            if (hubConnection.connection.connectionState == 1) {
+                var tkinfo = getCookieTokenInfo();
+                var info = {
+                    ChatEnum: chatEnum.Connect,
+                    Message: {
+                        Id: tkinfo.id
+                    }
+                }
+                //调用服务器方法
+                hubConnection.invoke('SendMsg', info);
+                clearInterval(join);
+                join = null;
+                check1Func();
+            }
+        }, 1000);
+    }
+}
+
+function check1Func() {
+    if (check1 == null) {
+        check1 = setInterval(function () {
+            if (hubConnection.connection.connectionState == 2) {
+                clearInterval(check1);
+                check1 = null;
+                check2Func();
+            }
+        }, 1000);
+    }
+}
+function check2Func() {
+    if (check2 == null) {
+        check2 = setInterval(function () {
+            if (hubConnection.connection.connectionState == 1) {
+                clearInterval(check2);
+                check2 = null;
+            }
+            initHub();
+        }, 10000);
+    }
+}
+
+function initHubCallBack() {
+
+    //服务器回调方法
+    hubConnection.on('Default', () => {
+        console.log("connect success");
+    });
+
+    hubConnection.on('FaultDevice', data => {
+        var cnt = parseInt($(".rCnt").html());
+        $(".rCnt").html(++cnt);
+        var faultDevice = '<li>' +
+            '<a href="/RepairManagement">' +
+            '<h3><strong class="text-red">{0}</strong>于<strong class="text-info">{1}</strong>发生故障</h3>' +
+            '</a>' +
+            '</li> ';
+        $("#errLi .menu").append(faultDevice.format(data.Code, getFullTime()));
+    });
 }
 
 $(function () {
-    commonfunc()
+    commonfunc();
     if (typeof (pageReady) != "undefined") {
-        pageReady()
-        $(".form_date,.form_month").attr("readonly", true)
+        pageReady();
+        $(".form_date,.form_month").attr("readonly", true);
     }
+    $('.modal').on('hidden.bs.modal',
+        function () {
+            if ($('.modal.in').size() >= 1) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+
 })

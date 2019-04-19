@@ -1,6 +1,8 @@
 const_loginurl = "/Account/Login";
 const_indexurl = "/Home";
+var hubConnection = null;
 
+var tdShowLength = 80;
 var oLanguage = {
     "sLengthMenu": "每页显示 _MENU_ 条记录",
     "sZeroRecords": "对不起，查询不到任何相关数据",
@@ -14,5 +16,14 @@ var oLanguage = {
         "sPrevious": " 上一页 ",
         "sNext": " 下一页 ",
         "sLast": " 最后一页 "
-    },
+    }
 }
+
+var chatEnum = {
+    Default: 0,
+    //连接
+    Connect: 1,
+    // 故障设备
+    FaultDevice: 2
+}
+

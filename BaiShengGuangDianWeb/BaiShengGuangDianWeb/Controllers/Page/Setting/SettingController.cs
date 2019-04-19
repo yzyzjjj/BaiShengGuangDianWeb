@@ -16,6 +16,9 @@ namespace BaiShengGuangDianWeb.Controllers.Page.Setting
         {
             return View();
         }
-
+        public IActionResult Chat()
+        {
+            return View();
+        }
     }
 }
