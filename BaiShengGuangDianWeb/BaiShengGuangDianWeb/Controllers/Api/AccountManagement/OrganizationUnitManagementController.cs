@@ -63,10 +63,14 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.ParamError);
             }
 
-            var parent = OrganizationUnitHelper.GetOrganizationUnit(parentId);
-            if (parent == null)
+            OrganizationUnit parent = null;
+            if (parentId != 0)
             {
-                return Result.GenError<Result>(Error.ParentNotExist);
+                parent = OrganizationUnitHelper.GetOrganizationUnit(parentId);
+                if (parent == null)
+                {
+                    return Result.GenError<Result>(Error.ParentNotExist);
+                }
             }
 
             var name = param.GetValue("name");
@@ -78,7 +82,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var organizationUnit = new OrganizationUnit
             {
                 ParentId = parentId,
-                CodeLink = parent.CodeLink,
+                CodeLink = parent != null ? parent.CodeLink : "",
                 Name = name
             };
             OrganizationUnitHelper.AddOrganizationUnit(organizationUnit);
