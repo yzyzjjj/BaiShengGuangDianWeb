@@ -134,7 +134,8 @@ function queryFlowCard() {
             $("#info").append(html);
 
             id = deviceId;
-            proNum = flowCard.ProcessNumber;
+            processId = flowCard.ProcessId;
+            flowCardId = flowCard.flowCardId;
             $("#run").removeClass("disabled");
         });
 }
@@ -191,7 +192,8 @@ function queryProcessData(processNumber) {
 }
 
 var id = null;
-var proNum = null;
+var processId = null;
+var flowCardId = null;
 function setProcessData() {
     //机台号
     if (isStrEmptyOrUndefined(id)) {
@@ -199,12 +201,41 @@ function setProcessData() {
     }
 
     //流程卡
-    if (isStrEmptyOrUndefined(proNum)) {
+    if (isStrEmptyOrUndefined(flowCardId)) {
         return;
     }
-    //todo
 
-    layer.msg("发送成功");
+    //工艺
+    if (isStrEmptyOrUndefined(processId)) {
+        return;
+    }
+
+    var opType = 110;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            //设备id
+            DeviceId: id,
+            //程序文件的位置及名称
+            ProcessId: processId,
+            //描述
+            FlowCardId: flowCardId
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getDeviceList();
+                }
+            });
+    }
+    showConfirm("运行", doSth);
 }
 
 function showFaultModel() {

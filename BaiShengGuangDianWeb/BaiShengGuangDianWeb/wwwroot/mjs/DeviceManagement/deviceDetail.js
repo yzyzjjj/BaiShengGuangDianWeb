@@ -104,19 +104,8 @@ function getStateList() {
                 var key = data.Item1;
                 var val = data.Item2;
                 switch (key) {
-
                     case 1: info = firstData.DeviceStateStr; break;
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                    case 11:
-                    case 12:
+                    default :
                         info = val;
                 }
                 $("#StateBox").find("[name=" + key + "]").val(info);
