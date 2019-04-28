@@ -757,14 +757,14 @@ function changeFlowCard() {
     var oData = $("#gxList tbody").children();
     var postData = new Array();
     for (var i = 1; i <= oData.length; i++) {
-        var id = "";
-        var processorId = "";
-        var processorTime = "";
-        var surveyorId = "";
-        var surveyTime = "";
-        var qualifiedNumber = "";
-        var unqualifiedNumber = "";
-        var deviceId = "";
+        var id;
+        var processorId;
+        var processTime;
+        var surveyorId;
+        var surveyTime;
+        var qualifiedNumber;
+        var unqualifiedNumber;
+        var deviceId;
         for (var j = 1; j <= 8; j++) {
             var key = $("#c{1}f{0}".format(i, j));
             var v = key.val();
@@ -783,7 +783,8 @@ function changeFlowCard() {
                     //加工时间
                     key1 = $("#c{1}1f{0}".format(i, j));
                     key2 = $("#c{1}2f{0}".format(i, j));
-                    processorTime = key1.hasClass("hidden") ? v : '{0} {1}'.format($(key1).val(), $(key2).val());
+                    v = key1.hasClass("hidden") ? v : '{0} {1}'.format($(key1).val(), $(key2).val());
+                    processTime = isStrEmptyOrUndefined(v) ? null : v;
                     break;
                 case 4:
                     //检验人
@@ -793,7 +794,8 @@ function changeFlowCard() {
                     //检验时间
                     key1 = $("#c{1}1f{0}".format(i, j));
                     key2 = $("#c{1}2f{0}".format(i, j));
-                    surveyTime = key1.hasClass("hidden") ? v : '{0} {1}'.format($(key1).val(), $(key2).val());
+                    v = key1.hasClass("hidden") ? v : '{0} {1}'.format($(key1).val(), $(key2).val());
+                    surveyTime = isStrEmptyOrUndefined(v) ? null : v;
                     break;
                 case 6:
                     //合格数
@@ -811,29 +813,33 @@ function changeFlowCard() {
                     break;
             }
         }
-        postData.push({
+        var d = {
             Id: id,
             //流程卡(自增Id)
             FlowCardId: flowCardId,
-            ////加工人ID（自增id）  为0不指定加工人
+            //加工人ID（自增id）  为0不指定加工人
             ProcessorId: processorId,
-            //加工日期 
-            ProcessorTime: processorTime,
             //检验员Id（自增id）  为0不指定检验员
             SurveyorId: surveyorId,
-            //检验日期
-            SurveyTime: surveyTime,
             //合格数
             QualifiedNumber: qualifiedNumber,
             //不合格数
             UnqualifiedNumber: unqualifiedNumber,
             //机台号（自增Id）
             DeviceId: deviceId
-        });
+        };
+        //加工日期 
+        if (processTime != null)
+            d.ProcessTime = processTime;
+        //检验日期
+        if (surveyTime != null)
+            d.SurveyTime = surveyTime;
+        postData.push(d);
     }
     if (postData.length <= 0)
         return;
-    return;
+    if ($("#gxList").find(" .cancel-btn").length <= 0)
+        return;
     var doSth = function () {
         var data = {}
         data.opType = opType;

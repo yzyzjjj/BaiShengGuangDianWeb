@@ -262,7 +262,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).ToJSON();
+                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(","); ;
                     if (!permissions.IsNullOrEmpty())
                     {
                         accountInfo.Permissions = permissions;
