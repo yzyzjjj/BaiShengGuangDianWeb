@@ -28,6 +28,10 @@
         "dist/browser/signalr.js",
         "dist/browser/signalr.min.js"
       ]
+    },
+    {
+      "library": "bootstrap-datetimepicker@4.17.47",
+      "destination": "wwwroot/lib/AdminLTE-2.3.11/plugins/datetimepicker/"
     }
   ]
 }

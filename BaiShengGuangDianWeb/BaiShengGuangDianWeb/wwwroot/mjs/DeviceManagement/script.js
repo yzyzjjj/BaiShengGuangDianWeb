@@ -26,6 +26,10 @@
     $("#aScriptVersion").on("select2:select", function (e) {
         asScrId = parseInt($("#aScriptVersion").val());
     });
+    $("#jScriptVersion").on("select2:select", function (e) {
+        var name = $("#jScriptVersion").val();
+        $("#jsonName").val(name);
+    });
     $("#jsonFile").change(function (e) {
         initDiv1();
         var file = e.target.files[0];
@@ -36,16 +40,46 @@
                 try {
                     var datas = JSON.parse(datasStr);
                     var v = $("#fScriptVersion").val();
+                    var dType = parseInt($("#aDataType").val());
                     jsonData = new Array();
+                    var keyData = new Array();
                     for (var i = 0; i < datas.length; i++) {
                         var data = datas[i];
-                        if (isStrEmptyOrUndefined(data[2]))
-                            break;
+                        var variableName = null;
+                        var pointerAddress = null;
+                        switch (dType) {
+                            case 1:
+                                variableName = data[2];
+                                pointerAddress = data[0];
+                                break;
+                            case 2:
+                            case 3:
+                                variableName = data[1];
+                                pointerAddress = data[4];
+                                break;
+                            default:
+                        }
+                        if (isStrEmptyOrUndefined(variableName) || isStrEmptyOrUndefined(pointerAddress)) {
+                            continue;
+                        }
+                        if (dType == 2) {
+                            if (pointerAddress.indexOf("输入") < 0)
+                                continue;
+                            pointerAddress = pointerAddress.replace("输入", "");
+                        }
+                        if (dType == 3) {
+                            if (pointerAddress.indexOf("输出") < 0)
+                                continue;
+                            pointerAddress = pointerAddress.replace("输出", "");
+                        }
+                        if (keyData.indexOf(pointerAddress) >= 0)
+                            continue;
+                        keyData.push(pointerAddress);
                         jsonData.push({
                             Id: i + 1,
                             ScriptId: v,
-                            VariableName: data[2],
-                            PointerAddress: data[0]
+                            VariableName: variableName,
+                            PointerAddress: pointerAddress
                         });
                     }
                     $("#jsonList")
@@ -379,7 +413,8 @@ function getScriptVersionDetailList() {
                     { "data": null, "title": "序号", "render": order1 },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" }
+                    { "data": "PointerAddress", "title": "地址" },
+                    { "data": "Remark", "title": "备注" },
                 ]
             });
         var data2 = getData(ret.datas, 2);
@@ -401,7 +436,8 @@ function getScriptVersionDetailList() {
                     { "data": null, "title": "序号", "render": order2 },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" }
+                    { "data": "PointerAddress", "title": "地址" },
+                    { "data": "Remark", "title": "备注" },
                 ]
             });
         var data3 = getData(ret.datas, 3);
@@ -423,7 +459,8 @@ function getScriptVersionDetailList() {
                     { "data": null, "title": "序号", "render": order3 },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" }
+                    { "data": "PointerAddress", "title": "地址" },
+                    { "data": "Remark", "title": "备注" },
                 ]
             });
     });
@@ -481,12 +518,14 @@ function getScriptVersionList1(type) {
         }
 
         $("#aScriptVersion").empty();
+        $("#jScriptVersion").empty();
         var option = '<option value="{0}">{1}</option>';
         for (var i = 0; i < ret.datas.length; i++) {
             var data = ret.datas[i];
             if (asScrId == 0)
                 asScrId = data.Id;
             $("#aScriptVersion").append(option.format(data.Id, data.ScriptName));
+            $("#jScriptVersion").append(option.format(data.ScriptName, data.ScriptName));
         }
 
         if (type == 1)
@@ -505,10 +544,10 @@ function reset() {
         case "0":
             $("#avBody").empty();
             var tr = ('<tr id="av{0}">' +
-                '<td class="text-center"><label class="control-label" id="avx{0}">{0}</label></td>' +
+                '<td><label class="control-label" id="avx{0}">{0}</label></td>' +
                 '<td><input class="form-control" id="avb{0}"></td>' +
                 '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}"></td>' +
-                '<td class="text-center"><button type="button" class="btn btn-default btn-sm pull-right" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>').format(1);
             $("#avBody").append(tr);
             max = maxV = 2;
@@ -523,6 +562,7 @@ function reset() {
 
 function initDiv1() {
 
+    jsonData = null;
     $("#jsonList_wrapper").remove();
     $("#jsonList").remove();
 
@@ -543,10 +583,10 @@ var maxV = 2;
 function addOther() {
     //avBody
     var tr = ('<tr id="av{0}">' +
-        '<td class="text-center"><label class="control-label" id="avx{0}">{1}</label></td>' +
+        '<td><label class="control-label" id="avx{0}">{1}</label></td>' +
         '<td><input class="form-control" id="avb{0}"></td>' +
         '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}"></td>' +
-        '<td class="text-center"><button type="button" class="btn btn-default btn-sm pull-right" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#avBody").append(tr);
     max++;
@@ -606,6 +646,23 @@ function addValues() {
             };
             break;
         case "1":
+            var jsonName = $("#jsonName").val();
+            if (isStrEmptyOrUndefined(jsonName)) {
+                layer.msg("脚本名称不能为空");
+                return;
+            }
+            if (jsonData == null || jsonData.length == 0) {
+                layer.msg("请选择正确的json文件");
+                return;
+            }
+
+            postData = {
+                Type: v,
+                DeviceModelId: sDeviceModel,
+                VariableType: aDataType,
+                ScriptName: jsonName,
+                DataNameDictionaries: jsonData
+            };
             break;
         case "2":
             break;
@@ -614,6 +671,7 @@ function addValues() {
         default:
             return;
     }
+
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
@@ -624,8 +682,13 @@ function addValues() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getDeviceModelList();
-                } 
+                }
             });
     }
     showConfirm("添加", doSth);
+}
+
+function tableToExcel() {
+    //todo
+    layer.msg("待完善");
 }

@@ -207,10 +207,35 @@ function initHubCallBack() {
 }
 
 $(function () {
+    $('.form_date').datepicker({
+        language: 'zh-CN',
+        format: 'yyyy-mm-dd',
+        //endDate:getDayAfter(1),
+        maxViewMode: 2,
+        todayBtn: "linked",
+        autoclose: true
+    });
+    $('.form_month').datepicker({
+        language: 'zh-CN',
+        format: 'yyyy-mm',
+        startView: 2,
+        minViewMode: 1,
+        maxViewMode: 2,
+        todayBtn: "linked",
+        autoclose: true
+    });
+    $('.form_time').timepicker({
+        language: 'zh-CN',
+        showMeridian: false,
+        minuteStep: 1,
+        showSeconds: true,
+        secondStep: 1
+    });
+
     commonfunc();
     if (typeof (pageReady) != "undefined") {
         pageReady();
-        $(".form_date,.form_month").attr("readonly", true);
+        $(".form_date,.form_month,.form_time").attr("readonly", true);
     }
     $('.modal').on('hidden.bs.modal',
         function () {
@@ -219,5 +244,7 @@ $(function () {
             }
         });
 
+    $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+    $.fn.select2.defaults.set('width', '100%');
 
 })

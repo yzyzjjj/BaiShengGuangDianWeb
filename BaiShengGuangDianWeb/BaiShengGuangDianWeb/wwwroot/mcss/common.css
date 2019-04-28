@@ -16,3 +16,16 @@
     .btn-group-vertical > .btn, .btn-group > .btn {
         float: inherit;
     }
+
+th, td {
+    text-align: center;
+    white-space: nowrap;
+}
+.modal-dialog {
+    margin: 30px auto;
+    padding: 30px;
+    width: auto;
+}
+.modal-body .box {
+    overflow-x: auto;
+}

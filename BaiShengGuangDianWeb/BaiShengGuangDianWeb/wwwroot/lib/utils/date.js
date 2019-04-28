@@ -1,26 +1,4 @@
-﻿//定义一点时间的帮助方法
-$('.form_date').datepicker({
-    language: 'zh-CN',
-    format: 'yyyy-mm-dd',
-    //endDate:getDayAfter(1),
-    maxViewMode: 2,
-    todayBtn: "linked",
-    autoclose: true
-
-});
-$('.form_month').datepicker({
-    language: 'zh-CN',
-    format: 'yyyy-mm',
-    startView: 2,
-    minViewMode: 1,
-    maxViewMode: 2,
-    todayBtn: "linked",
-    autoclose: true
-
-});
-$('.form_time').timepicker({
-    language: 'zh-CN'
-});
+﻿
 function padLeft0(obj) {
     return obj.toString().replace(/^[0-9]{1}$/, "0" + obj);
 }
@@ -46,7 +24,7 @@ Date.prototype.format = function (format) {
     return format;
 }
 //获得今日日期
-function getNow() {
+function getDate() {
     var nowTime = new Date();
     var year = nowTime.getFullYear();
     var month = padLeft0(nowTime.getMonth() + 1);
@@ -54,9 +32,9 @@ function getNow() {
     return year + "-" + month + "-" + day;
 }
 
-function getNowTime() {
+function getTime() {
     var nowTime = new Date();
-    return nowTime.format('hh:mm');
+    return nowTime.format('hh:mm:ss');
 }
 
 function getFullTime() {
@@ -105,6 +83,5 @@ function getNowMonth() {
 function getNowYear() {
     var nowTime = new Date();
     var year = nowTime.getFullYear();
-
     return year;
 }

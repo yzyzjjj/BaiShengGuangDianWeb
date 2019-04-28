@@ -143,7 +143,7 @@ function sChange(id, type) {
                 var d = data.FaultTime.split(' ');
                 $("#singleFaultDate").val(d[0]);
                 var t = d[1].split(':');
-                $("#singleFaultTime").val("{0}:{1}".format(t[0], t[1]));
+                $("#singleFaultTime").val(d[1]);
                 $("#singleFaultDesc").html(data.FaultDescription);
                 $("#singleFaultPriority").val(data.Priority);
                 if (type == 0) {
@@ -162,9 +162,9 @@ function sChange(id, type) {
                 }
             }
             if (type == 3) {
-                $("#singleSolveDate").val(getNow());
+                $("#singleSolveDate").val(getDate());
                 $("#singleSolveDate").datepicker('update');
-                $("#singleSolveTime").val(getNowTime());
+                $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
                 $("#singleFaultSolver").val(info.name);
             }
@@ -189,7 +189,7 @@ function singleChange(type) {
     }
     var faultDate = $("#singleFaultDate").val();
     var faultTime = $("#singleFaultTime").val();
-    var time = "{0} {1}:00".format(faultDate, faultTime);
+    var time = "{0} {1}".format(faultDate, faultTime);
 
     var faultDesc = $("#singleFaultDesc").val();
     var priority = $("#singleFaultPriority").val();
@@ -238,7 +238,7 @@ function singleChange(type) {
 
         var singleSolveDate = $("#singleSolveDate").val();
         var singleSolveTime = $("#singleSolveTime").val();
-        var solveTime = "{0} {1}:00".format(singleSolveDate, singleSolveTime);
+        var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
 
         var singleFaultType = $("#singleFaultType").val();
 
@@ -394,16 +394,14 @@ function rChange(id, type) {
                     $("#singleProposer").val(data.Proposer);
                     var d = data.FaultTime.split(' ');
                     $("#singleFaultDate").val(d[0]);
-                    var t = d[1].split(':');
-                    $("#singleFaultTime").val("{0}:{1}".format(t[0], t[1]));
+                    $("#singleFaultTime").val(d[1]);
                     $("#singleFaultDesc").html(data.FaultDescription);
                     $("#singleFaultPriority").val(data.Priority);
 
                     $("#singleFaultSolver").val(data.FaultSolver);
                     var d = data.SolveTime.split(' ');
                     $("#singleSolveDate").val(d[0]);
-                    var t = d[1].split(':');
-                    $("#singleSolveTime").val("{0}:{1}".format(t[0], t[1]));
+                    $("#singleSolveTime").val(d[1]);
 
                     $("#singleFaultType").val(data.FaultTypeId).trigger("change");
                     $("#solveDiv").removeClass("hidden");
@@ -427,9 +425,9 @@ function rChange(id, type) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                $("#singleSolveDate").val(getNow());
+                $("#singleSolveDate").val(getDate());
                 $("#singleSolveDate").datepicker('update');
-                $("#singleSolveTime").val(getNowTime());
+                $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
                 $("#singleFaultSolver").val(info.name);
 
@@ -438,9 +436,9 @@ function rChange(id, type) {
                 $("#singleProposer").val("");
                 $("#singleFaultDesc").html("");
 
-                $("#singleFaultDate").val(getNow());
+                $("#singleFaultDate").val(getDate());
                 $("#singleFaultDate").datepicker('update');
-                $("#singleFaultTime").val(getNowTime());
+                $("#singleFaultTime").val(getTime());
                 $(".dd").removeAttr("disabled");
                 $("#solveDiv").removeClass("hidden");
 
@@ -481,7 +479,7 @@ function recordChange(type) {
     }
     var faultDate = $("#singleFaultDate").val();
     var faultTime = $("#singleFaultTime").val();
-    var time = "{0} {1}:00".format(faultDate, faultTime);
+    var time = "{0} {1}".format(faultDate, faultTime);
 
     var faultDesc = $("#singleFaultDesc").val();
     var priority = $("#singleFaultPriority").val();
@@ -491,7 +489,7 @@ function recordChange(type) {
 
     var singleSolveDate = $("#singleSolveDate").val();
     var singleSolveTime = $("#singleSolveTime").val();
-    var solveTime = "{0} {1}:00".format(singleSolveDate, singleSolveTime);
+    var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
 
     var singleFaultType = $("#singleFaultType").val();
 

@@ -73,7 +73,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 roleInfo = new RoleInfo
                 {
                     Name = name,
-                    Permissions = permissionList.Distinct().ToJSON()
+                    Permissions = permissionList.Distinct().Join(",")
                 };
             }
             catch (Exception)
@@ -174,7 +174,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    roleInfo.Permissions = permissionList.Distinct().ToJSON();
+                    roleInfo.Permissions = permissionList.Distinct().Join(",");
                     logParam += $",新权限列表: {roleInfo.Permissions}";
                 }
                 catch (Exception)

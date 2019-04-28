@@ -14,6 +14,7 @@
                 <button type="button" class="btn btn-primary btn-sm" onclick="getDeviceModelList()">重新加载</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showManageModel()">管理脚本版本</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showAddModel()">添加脚本数据</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="tableToExcel()">导出脚本数据</button>
             </div>
         </div>
         <div class="box-body">
@@ -160,7 +161,7 @@
     </div>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" id="addModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -173,7 +174,7 @@
                     <div class="form-group">
                         <label class="control-label">请选择数据源：</label>
                         <select class="form-control" id="fScriptVersion">
-                            <option value="0">输入添加</option>
+                            <option value="0">手动录入</option>
                             <option value="1">从Json文件</option>
                             <option value="2">从Excel文件</option>
                             <option value="3">从Sql文件</option>
@@ -189,7 +190,7 @@
                     </div>
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-primary btn-sm" onclick="addValues()">添加</button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="reset()">重置</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="reset()"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
                     <div class="sd form-group" id="div0">
                         <div class="form-group">
@@ -207,18 +208,24 @@
                             </thead>
                             <tbody id="avBody">
                                 <tr id="av1">
-                                    <td class="text-center"><label class="control-label" id="avx1">1</label></td>
+                                    <td><label class="control-label" id="avx1">1</label></td>
                                     <td><input class="form-control" id="avb1"></td>
                                     <td><input class="form-control" oninput="value=value.replace(/[^\d]/g,'')" id="avd1"></td>
-                                    <td class="text-center"><button type="button" class="btn btn-default btn-sm pull-right" onclick="delSelf(1)"><i class="fa fa-minus"></i> 删除</button></td>
+                                    <td><button type="button" class="btn btn-default btn-sm" onclick="delSelf(1)"><i class="fa fa-minus"></i> 删除</button></td>
                                 </tr>
                             </tbody>
                         </table>
-                        <button type="button" class="btn btn-default btn-sm pull-right" onclick="addOther()"><i class="fa fa-plus"></i> 添加新项</button>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-default btn-sm" onclick="addOther()"><i class="fa fa-plus"></i> 添加新项</button>
+                        </div>
                     </div>
                     <div class="sd form-group hidden" id="div1">
+                        <div class="form-group">
+                            <label class="control-label" for="sScriptVersion">请选择脚本版本：</label>
+                            <select class="ads form-control" id="jScriptVersion"></select>
+                        </div>
                         <label class="control-label">脚本名：</label>
-                        <input class="form-control" id="jsonName">
+                        <input class="form-control" placeholder="请选择或者输入脚本名" id="jsonName">
                         <label class="control-label">文件路径：</label>
                         <input class="form-control" type="file" id="jsonFile">
                         <h3 class="text-center">脚本数据</h3>

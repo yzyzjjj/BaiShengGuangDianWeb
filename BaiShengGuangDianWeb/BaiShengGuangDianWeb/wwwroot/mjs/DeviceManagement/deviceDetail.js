@@ -81,6 +81,7 @@ function selectChange(datas) {
 }
 
 function getStateList() {
+    $("#StateBox input").val("无数据");
     var opType = 109;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

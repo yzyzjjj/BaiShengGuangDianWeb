@@ -8,7 +8,7 @@
 <script src="~/mjs/RepairManagement/index.js"></script>
 
 <section class="content ">
-    <h2>
+    <h2 class="text-center">
         维修管理
         <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="getUsuallyFaultList()">常见故障解决</button>
         <button type="button" class="btn btn-primary pull-right btn-sm" onclick="getFaultTypeList()">故障类型</button>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" id="singleFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" tabindex="-1" id="singleFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,7 +78,7 @@
                     <div class="form-group form-inline">
                         <label class="control-label" for="singleFaultDate">故障时间：</label>
                         <input type="text" id="singleFaultDate" disabled="disabled" class="dd form_date form-control">
-                        <input type="time" id="singleFaultTime" disabled="disabled" class="dd form-control">
+                        <input type="time" id="singleFaultTime" disabled="disabled" class="dd form_time form-control">
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="singleFaultDesc">故障描述：</label>
@@ -103,7 +103,7 @@
                             <div class="form-group form-inline">
                                 <label class="control-label" for="singleFaultDate">解决时间：</label>
                                 <input type="text" id="singleSolveDate" class="form_date form-control">
-                                <input type="time" id="singleSolveTime" class="form-control">
+                                <input type="time" id="singleSolveTime" class="form_time form-control">
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="singleSolvePlan">解决方案：</label>

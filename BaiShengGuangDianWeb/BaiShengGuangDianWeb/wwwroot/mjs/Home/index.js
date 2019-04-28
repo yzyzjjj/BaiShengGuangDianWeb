@@ -240,9 +240,8 @@ function setProcessData() {
 
 function showFaultModel() {
 
-    $("#faultDate").val(getNow());
-    $("#faultDate").datepicker('update');
-    $("#faultTime").val(getNowTime());
+    $("#faultDate").val(getDate()).datepicker('update');
+    $("#faultTime").val(getTime());
     var info = getCookieTokenInfo();
     $("#proposer").val(info.name);
     hideClassTip('adt');
@@ -281,7 +280,7 @@ function reportFault() {
     if (!report)
         return;
     $("#faultModel").modal("hide");
-    var time = "{0} {1}:00".format(faultDate, faultTime);
+    var time = "{0} {1}".format(faultDate, faultTime);
     var faults = new Array();
     var admins = new Array();
     for (var i = 0; i < codes.length; i++) {
