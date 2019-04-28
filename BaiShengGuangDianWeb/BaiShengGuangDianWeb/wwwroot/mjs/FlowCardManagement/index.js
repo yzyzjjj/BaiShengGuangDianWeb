@@ -4,8 +4,6 @@
     getFlowCardList();
     getProductionProcessList();
     getRawMateriaList();
-    showChangeFlowCard(1);
-
 }
 
 //流程卡
@@ -515,8 +513,9 @@ function showChangeFlowCard(type) {
 
             $("#changeFCId").html(id);
             var option = '<option value="{0}">{1}</option>';
-            var o = 1;
+            var o = 0;
             var order = function (data, type, row) {
+                o = data.ProcessStepOrder;
                 return '<span oValue="{1}" id="c1f{0}">{0}</span>'.format(o, data.Id);
             }
             //加工人
@@ -527,13 +526,13 @@ function showChangeFlowCard(type) {
                 seProcessor += option.format(processor.Id, processor.ProcessorName);
             }
             var processorId = function (data, type, row) {
-                return '<select class="can ms2 form-control" id="c2f{0}" oValue="{2}">{1}</select>'.format(o, seProcessor, data.ProcessorId);
+                return '<select class="can1 ms2 form-control" id="c2f{0}" oValue="{2}">{1}</select>'.format(o, seProcessor, data.ProcessorId);
             }
             //加工时间
             var processTime = function (data, type, row) {
                 var html =
-                    '<input type="text" id="c31f{0}" class="can form_date form-control {4}" value="{2}">' +
-                    '<input type="text" id="c32f{0}" class="can form_time form-control {4}" value="{3}">' +
+                    '<input type="text" id="c31f{0}" class="can1 form_date form-control {4}" value="{2}">' +
+                    '<input type="text" id="c32f{0}" class="can1 form_time form-control {4}" value="{3}">' +
                     '<input type="text" id="c3f{0}" value="{1}" oValue="{1}" class="hidden">';
                 if (data.ProcessTime == '0001-01-01 00:00:00' || data.ProcessTime == null) {
                     data.ProcessTime = '';
@@ -549,13 +548,13 @@ function showChangeFlowCard(type) {
                 seSurveyor += option.format(surveyor.Id, surveyor.SurveyorName);
             }
             var surveyorId = function (data, type, row) {
-                return '<select class="can ms2 form-control" id="c4f{0}" oValue="{2}">{1}</select>'.format(o, seSurveyor, data.SurveyorId);
+                return '<select class="can2 ms2 form-control" id="c4f{0}" oValue="{2}">{1}</select>'.format(o, seSurveyor, data.SurveyorId);
             }
             //检验时间
             var surveyTime = function (data, type, row) {
                 var html =
-                    '<input type="text" id="c51f{0}" class="can form_date form-control {4}" value="{2}">' +
-                    '<input type="text" id="c52f{0}" class="can form_time form-control {4}" value="{3}">' +
+                    '<input type="text" id="c51f{0}" class="can2 form_date form-control {4}" value="{2}">' +
+                    '<input type="text" id="c52f{0}" class="can2 form_time form-control {4}" value="{3}">' +
                     '<input type="text" id="c5f{0}" value="{1}" oValue="{1}" class="hidden">';
                 if (data.SurveyTime == '0001-01-01 00:00:00' || data.SurveyTime == null) {
                     data.SurveyTime = '';
@@ -567,11 +566,11 @@ function showChangeFlowCard(type) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
+                return '<input class="can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");
@@ -580,21 +579,22 @@ function showChangeFlowCard(type) {
                 seDeviceId += option.format(device.Id, device.Code);
             }
             var deviceId = function (data, type, row) {
-                return '<select class="can ms2 form-control" id="c8f{0}" oValue="{2}">{1}</select>'.format(o, seDeviceId, data.DeviceId);
+                return '<select class="can1 ms2 form-control" id="c8f{0}" oValue="{2}">{1}</select>'.format(o, seDeviceId, data.DeviceId);
             }
             //操作
             var op = function (data, type, row) {
-                o++;
-                //if (data.ProcessTime == '0001-01-01 00:00:00' || data.ProcessTime == null)
-                return '<button class="btn btn-default edit-btn" type="button">编辑</button>';
-                //return '';
+                return '<button class="btn btn-default edit1-btn" type="button">加工</button>' +
+                    '<button class="btn btn-default edit2-btn" type="button">检验</button>';
+            }
+            function processStepOrder(a, b) {
+                return a.ProcessStepOrder > b.ProcessStepOrder;
             }
             $("#gxList")
                 .DataTable({
                     "destroy": true,
                     "bSort": false,
                     "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.processSteps,
+                    "data": ret.processSteps.sort(processStepOrder),
                     "aaSorting": [[0, "asc"]],
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
@@ -603,16 +603,17 @@ function showChangeFlowCard(type) {
                         { "data": "ProcessStepRequirements", "title": "加工要求" },
                         { "data": null, "title": "加工人", "render": processorId },
                         { "data": null, "title": "加工时间", "render": processTime },
+                        { "data": null, "title": "机台号", "render": deviceId },
                         { "data": null, "title": "检验人", "render": surveyorId },
                         { "data": null, "title": "检验时间", "render": surveyTime },
                         { "data": null, "title": "合格数", "render": qualifiedNumber },
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
-                        { "data": null, "title": "机台号", "render": deviceId },
-                        { "data": null, "title": "操作", "render": op }
+                        { "data": null, "title": "操作", "render": op },
                     ],
                     "initComplete": function (settings, json) {
                         $(".ms2").select2();
-                        $(".can").attr("disabled", "disabled");
+                        $(".can1").attr("disabled", "disabled");
+                        $(".can2").attr("disabled", "disabled");
                         $("#gxList th").css("padding-right", "8px");
                         for (var j = 0; j < ret.processSteps.length; j++) {
                             var index = j + 1;
@@ -629,8 +630,8 @@ function showChangeFlowCard(type) {
                             uiEle.val(ov).trigger("change");
                         }
 
-                        $("#gxList tbody").on("click", ".edit-btn", function () {
-                            var tds = $(this).parents("tr").children().find(".can");
+                        $("#gxList tbody").on("click", ".edit1-btn", function () {
+                            var tds = $(this).parents("tr").children().find(".can1");
                             var index = $($(this).parents("tr").children()[0]).text();
                             var keyDate = $("#c31f" + index);
                             var keyTime = $("#c32f" + index);
@@ -647,35 +648,48 @@ function showChangeFlowCard(type) {
                                 keyDate.val(t[0]);
                                 keyTime.val(t[1]);
                             }
-                            keyDate = $("#c51f" + index);
-                            keyTime = $("#c52f" + index);
-                            keyOri = $("#c5f" + index);
+
+                            tds.removeAttr("disabled");
+                            tds.css("background-color", "white");
+                            $(this).html("取消");
+                            $(this).removeClass("edit1-btn");
+                            $(this).addClass("cancel1-btn");
+                            $(this).removeClass("btn-default");
+                            $(this).addClass("btn-danger");
+                        });
+
+                        $("#gxList tbody").on("click", ".edit2-btn", function () {
+                            var tds = $(this).parents("tr").children().find(".can2");
+                            var index = $($(this).parents("tr").children()[0]).text();
+                            var keyDate = $("#c51f" + index);
+                            var keyTime = $("#c52f" + index);
+                            var keyOri = $("#c5f" + index);
                             keyDate.removeClass("hidden");
                             keyTime.removeClass("hidden");
-                            ov = keyOri.attr("ovalue")
+                            var ov = keyOri.attr("ovalue")
                             if (isStrEmptyOrUndefined(ov)) {
                                 keyDate.val(getDate()).datepicker('update');
                                 keyTime.val(getTime());
                             } else {
-                                t = ov.split(' ');
+                                var t = ov.split(' ');
                                 keyDate.val(t[0]);
                                 keyTime.val(t[1]);
                             }
 
                             tds.removeAttr("disabled");
+                            tds.css("background-color", "white");
                             $(this).html("取消");
-                            $(this).removeClass("edit-btn");
-                            $(this).addClass("cancel-btn");
+                            $(this).removeClass("edit2-btn");
+                            $(this).addClass("cancel2-btn");
                             $(this).removeClass("btn-default");
                             $(this).addClass("btn-danger");
                         });
 
-                        $("#gxList tbody").on("click", ".cancel-btn", function () {
-                            var tds = $(this).parents("tr").children().find(".can");
+                        $("#gxList tbody").on("click", ".cancel1-btn", function () {
+                            var tds = $(this).parents("tr").children().find(".can1");
                             tds.attr("disabled", "disabled");
                             var inputs = tds.filter("input");
                             $.each(inputs, function (i, val) {
-
                                 var ovalue = $(val).attr("ovalue");
                                 $(val).val(ovalue);
                             });
@@ -698,25 +712,50 @@ function showChangeFlowCard(type) {
                                 keyDate.val(t[0]);
                                 keyTime.val(t[1]);
                             }
-                            keyDate = $("#c51f" + index);
-                            keyTime = $("#c52f" + index);
-                            keyOri = $("#c5f" + index);
-                            ov = keyOri.attr("ovalue")
+
+                            tds.css("background-color", "#eee");
+                            $(this).html("加工");
+                            $(this).removeClass("cancel1-btn");
+                            $(this).addClass("edit1-btn");
+                            $(this).removeClass("btn-danger");
+                            $(this).addClass("btn-default");
+                        });
+
+                        $("#gxList tbody").on("click", ".cancel2-btn", function () {
+                            var tds = $(this).parents("tr").children().find(".can2");
+                            tds.attr("disabled", "disabled");
+                            var inputs = tds.filter("input");
+                            $.each(inputs, function (i, val) {
+                                var ovalue = $(val).attr("ovalue");
+                                $(val).val(ovalue);
+                            });
+                            var selects = tds.filter("select");
+                            $.each(selects, function (i, val) {
+                                var ovalue = $(val).attr("ovalue");
+                                $(val).val(ovalue).trigger("change");
+                            });
+                            var index = $($(this).parents("tr").children()[0]).text();
+                            var keyDate = $("#c51f" + index);
+                            var keyTime = $("#c52f" + index);
+                            var keyOri = $("#c5f" + index);
+                            var ov = keyOri.attr("ovalue")
                             if (isStrEmptyOrUndefined(ov)) {
                                 keyDate.addClass("hidden");
                                 keyTime.addClass("hidden");
                             } else {
-                                t = ov.split(' ');
+                                var t = ov.split(' ');
                                 keyDate.val(t[0]);
                                 keyTime.val(t[1]);
                             }
 
-                            $(this).html("编辑");
-                            $(this).removeClass("cancel-btn");
-                            $(this).addClass("edit-btn");
+                            tds.css("background-color", "#eee");
+                            $(this).html("检验");
+                            $(this).removeClass("cancel2-btn");
+                            $(this).addClass("edit2-btn");
                             $(this).removeClass("btn-danger");
                             $(this).addClass("btn-default");
                         });
+
                         initTime();
                     }
                 });
@@ -747,6 +786,7 @@ function initTime() {
     });
 
 }
+
 function changeFlowCard() {
     var opType = 208;
     if (!checkPermission(opType)) {
@@ -838,7 +878,7 @@ function changeFlowCard() {
     }
     if (postData.length <= 0)
         return;
-    if ($("#gxList").find(" .cancel-btn").length <= 0)
+    if ($("#gxList").find(".cancel1-btn").length <= 0 && $("#gxList").find(".cancel2-btn").length <= 0)
         return;
     var doSth = function () {
         var data = {}
