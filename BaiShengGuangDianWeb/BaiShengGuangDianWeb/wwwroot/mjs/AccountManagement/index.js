@@ -9,15 +9,15 @@ var doAction = '<div class="btn-group" style="position:absolute;right:30px;top:-
     '        <span class="sr-only">Toggle Dropdown</span>' +
     '    </button>' +
     '    <ul class="dropdown-menu" role="menu">' +
-    '       <li><a id="showOrganizat" onclick="showUpdateOrganizationUnits({0}, \'{1}\')">修改</a></li>'+
-    '       <li><a onclick="DeleteSite()">删除</a></li>'+
+    '       <li><a id="showOrganizat" onclick="showUpdateOrganizationUnits({0}, \'{1}\')">修改</a></li>' +
+    '       <li><a onclick="DeleteSite()">删除</a></li>' +
     '    </ul>' +
     '</div>';
 
 //var template1 = "我是{0}，今年{1}了";
 //var result1 = template1.format("loogn", 22)
 function getOrganizationUnits() {
-   
+
     ajaxGet("/OrganizationUnitManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
@@ -26,7 +26,7 @@ function getOrganizationUnits() {
             }
             $("#organizationUnits").empty();
 
-           
+
 
             var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
                 '  <div class="box-header with-border" onclick="onClick(\'onId\',\'onCnt\')">' +
@@ -47,8 +47,10 @@ function getOrganizationUnits() {
             var parents = getOrganizationUnitsParent(datas)
             for (var i = 0; i < parents.length; i++) {
                 var childs = getOrganizationUnitsChild(datas, parents[i])
+               
                 for (var j = 0; j < childs.length; j++) {
                     var child = childs[j]
+                    console.log(child)
                     var mMenu = mMenuStr.replace('onId', child.id).replace('onCnt', child.memberCount)
                     var option = $(mMenu).clone()
                     option.find('h3').text(child.name + "(" + child.memberCount + ")")
@@ -121,7 +123,7 @@ function getOrganizationUnitsParent(list) {
             parents.push(data.parentId)
         }
     }
-    return parents.sort()
+    return parents.sort(rule)
 }
 
 function getOrganizationUnitsChild(list, parentId) {
@@ -138,16 +140,16 @@ function getOrganizationUnitsChild(list, parentId) {
 
 function showAddOrganizationUnits() {
     var data_firstDepart = $("input[name=isDepart1]:checked").val();
-       if (data_firstDepart == "1") {
-           $(".firstDepart1").show();
-           $(".firstDepart2").hide();
-           
-    } 
+    if (data_firstDepart == "1") {
+        $(".firstDepart1").show();
+        $(".firstDepart2").hide();
+
+    }
     if (data_firstDepart == "2") {
         $(".firstDepart1").show();
         $(".firstDepart2").show();
 
-    } 
+    }
     var data = {}
     //分类判断
     $("input[name=isDepart1]").change(
@@ -164,7 +166,7 @@ function showAddOrganizationUnits() {
 
             }
         });
-     ajaxGet("/OrganizationUnitManagement/List", data,
+    ajaxGet("/OrganizationUnitManagement/List", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -176,7 +178,7 @@ function showAddOrganizationUnits() {
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 $("#firstPart2").append(option.format(data.id, data.name));
-             }
+            }
 
             $("#addStruct").modal("show");
 
@@ -189,10 +191,9 @@ function addOrganizationUnits() {
     var data_firstDepart1 = $("input[name=isDepart1]:checked").val();
     //获取
     var data_firstAdd1 = $("#firstPart1").val();
-    var date_descrip = $("#departDes").val();
     var data_pcid = $("#firstPart2").val();
-    
-   //一级部门
+
+    //一级部门
     if (data_firstDepart1 == "1") {
         data.parentId = 0
         data.name = data_firstAdd1;
@@ -201,7 +202,7 @@ function addOrganizationUnits() {
         data.parentId = data_pcid;
         data.name = data_firstAdd1;
     }
-   
+
     var doSth = function () {
 
         $("#addStruct").modal("hide");
@@ -221,7 +222,7 @@ function delOrganizationUnits() {
 
 }
 
-function showUpdateOrganizationUnits(id,name){
+function showUpdateOrganizationUnits(id, name) {
     var data = {}
     ajaxGet("/OrganizationUnitManagement/List", data,
         function (ret) {
@@ -229,15 +230,15 @@ function showUpdateOrganizationUnits(id,name){
                 layer.msg(ret.errmsg);
                 return;
             };
-            $("#firstPart2").empty();
+            $("#firstPart1").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#firstPart2").append(option.format(data.Id , data.Name));
+                $("#firstPart1").append(option.format(data.Id, data.Name));
             }
             $("#updateId").html(id);
             $("#showOrganizationName").val(name);
-            
+
             $("#showUpdateOrganizationUnits").modal("show");
         });
 
@@ -245,6 +246,23 @@ function showUpdateOrganizationUnits(id,name){
 
 function updateOrganizationUnits() {
 
+    var id = parseInt($("#updateId").html());
+    var updataOrganizatName = $("#showOrganizationName").val();
+    var doSth = function () {
+        $("#showUpdateOrganizationUnits").modal("hide");
+        var data = {
+            id: id,
+            name: updataOrganizatName
+        }
+        ajaxPost("/OrganizationUnitManagement/Update", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getOrganizationUnits();
+                }
+            });
+    }
+    showConfirm("修改", doSth);
 }
 
 function moveOrganizationUnits() {

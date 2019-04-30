@@ -1,17 +1,38 @@
 ﻿
 /* Ui Elements */
 
-.content {
-    background-image: url('../mimages/bg2.jpg');
-    width: 100%;
-    height: 1000px;
-    position: relative;
-}
 .mHome h4 {
-     position: absolute ;
+    position: absolute;
     left: 650px;
     font-size: 26px;
     font-weight: 600;
     text-align: center;
     color: red;
 }
+
+.direct_gundong {
+    font-size: 18px;
+    color: lightgray;
+}
+
+    .direct_gundong li:nth-child(1) {
+        height: 30px;
+        width: 76px;
+    }
+
+    .direct_gundong li:nth-child(2) {
+        margin-left: 6px;
+        height: 30px;
+        width: 70px;
+    }
+
+.skins_roles {
+    border-bottom: 2px solid lightcoral;
+    color: black;
+}
+
+.appear_d {
+    display: none
+}
+.usersAdd{ height: 30px;width: 76px;}
+.usersList{margin-left: 8px;height: 30px;width: 90px;}
