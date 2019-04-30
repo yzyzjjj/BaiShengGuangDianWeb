@@ -111,7 +111,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void DeleteAccountInfo(int id)
         {
-            var sql = "UPDATE `IsDeleted` = 1 WHERE `Id` = @Id;";
+            var sql = "UPDATE accounts Set `IsDeleted` = 1 WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, new { id });
         }
 

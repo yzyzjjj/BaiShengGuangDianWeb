@@ -29,7 +29,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             var param = Request.GetRequestParams();
             var opTypeStr = param.GetValue("opType");
             var opData = param.GetValue("opData", "");
-            if (!int.TryParse(opTypeStr, out int opType))
+            if (!int.TryParse(opTypeStr, out var opType))
             {
                 return Result.GenError<Result>(Error.ParamError);
             }

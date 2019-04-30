@@ -7,6 +7,7 @@ using ModelBase.Models.Result;
 using ServiceStack;
 using System;
 using System.Linq;
+using ModelBase.Base.HttpServer;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 {
@@ -70,6 +71,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var email = param.GetValue("email");
             var roleStr = param.GetValue("role");
             var permissions = param.GetValue("permissions");
+            var isProcessor = param.GetValue("isProcessor");
             if (account.IsNullOrEmpty() || account.IsNullOrEmpty() || name.IsNullOrEmpty() || roleStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
@@ -116,7 +118,84 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 SelfPermissions = permissions ?? ""
             };
             AccountHelper.AddAccountInfo(info);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}");
+            var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}";
+            if (!isProcessor.IsNullOrEmpty())
+            {
+                try
+                {
+                    var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
+                    logParam += $",生产角色:{isProcessor}";
+                    foreach (var variable in isProcessorList)
+                    {
+                        int opType;
+                        Permission permission;
+                        ManagementServer managementServer;
+                        string opData;
+                        string url;
+                        switch (variable)
+                        {
+                            case 0:
+                                opType = 251;
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                opData = new
+                                {
+                                    ProcessorName = name
+                                }.ToJSON();
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+                                break;
+                            case 1:
+                                opType = 257;
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                opData = new
+                                {
+                                    SurveyorName = name
+                                }.ToJSON();
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -155,7 +234,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             else
             {
-
                 accountInfo = AccountHelper.GetAccountInfo(accountStr);
             }
             if (accountInfo == null)
