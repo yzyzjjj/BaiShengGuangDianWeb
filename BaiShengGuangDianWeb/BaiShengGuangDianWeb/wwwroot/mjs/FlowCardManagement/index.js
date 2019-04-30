@@ -2,12 +2,14 @@
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
     getFlowCardList();
-    getProductionProcessList();
-    getRawMateriaList();
+    //getProductionProcessList();
+    //getRawMateriaList();
 }
 
+var fProductionProcessList = false;
+var fRawMateriaList = false;
 //流程卡
-function showAddFlowCardModel(id) {
+function showAddFlowCardModel() {
     hideClassTip("adt");
     var opType = 215;
     if (!checkPermission(opType)) {
@@ -583,8 +585,8 @@ function showChangeFlowCard(type) {
             }
             //操作
             var op = function (data, type, row) {
-                return '<button class="btn btn-default edit1-btn" type="button">加工</button>' +
-                    '<button class="btn btn-default edit2-btn" type="button">检验</button>';
+                return '<button class="btn btn-success edit1-btn" type="button">加工</button>' +
+                    '<button class="btn btn-info edit2-btn" type="button">检验</button>';
             }
             function processStepOrder(a, b) {
                 return a.ProcessStepOrder > b.ProcessStepOrder;
@@ -654,7 +656,7 @@ function showChangeFlowCard(type) {
                             $(this).html("取消");
                             $(this).removeClass("edit1-btn");
                             $(this).addClass("cancel1-btn");
-                            $(this).removeClass("btn-default");
+                            $(this).removeClass("btn-success");
                             $(this).addClass("btn-danger");
                         });
 
@@ -681,7 +683,7 @@ function showChangeFlowCard(type) {
                             $(this).html("取消");
                             $(this).removeClass("edit2-btn");
                             $(this).addClass("cancel2-btn");
-                            $(this).removeClass("btn-default");
+                            $(this).removeClass("btn-info");
                             $(this).addClass("btn-danger");
                         });
 
@@ -718,7 +720,7 @@ function showChangeFlowCard(type) {
                             $(this).removeClass("cancel1-btn");
                             $(this).addClass("edit1-btn");
                             $(this).removeClass("btn-danger");
-                            $(this).addClass("btn-default");
+                            $(this).addClass("btn-success");
                         });
 
                         $("#gxList tbody").on("click", ".cancel2-btn", function () {
@@ -753,7 +755,7 @@ function showChangeFlowCard(type) {
                             $(this).removeClass("cancel2-btn");
                             $(this).addClass("edit2-btn");
                             $(this).removeClass("btn-danger");
-                            $(this).addClass("btn-default");
+                            $(this).addClass("btn-info");
                         });
 
                         initTime();
@@ -896,7 +898,11 @@ function changeFlowCard() {
 }
 
 //计划号
-function getProductionProcessList() {
+function getProductionProcessList(first = false) {
+    if (first && fProductionProcessList)
+        return;
+    if (first)
+        fProductionProcessList = true;
     var opType = 215;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -1349,7 +1355,11 @@ function updateProductionProcess() {
 
 
 //原料
-function getRawMateriaList() {
+function getRawMateriaList(first = false) {
+    if (first && fRawMateriaList)
+        return;
+    if (first)
+        fRawMateriaList = true;
     var opType = 232;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

@@ -27,3 +27,4 @@ var chatEnum = {
     FaultDevice: 2
 }
 
+var maxProcessData = 8;

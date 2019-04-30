@@ -14,8 +14,8 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li class="active"><a href="#flowCardMgs" data-toggle="tab" aria-expanded="true">流程卡管理</a></li>
-                <li><a href="#productionProcessMgs" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
-                <li><a href="#rawMateriaMgs" data-toggle="tab" aria-expanded="false">原料管理</a></li>
+                <li onclick="getProductionProcessList(true)"><a href="#productionProcessMgs" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li onclick="getRawMateriaList(true)"><a href="#rawMateriaMgs" data-toggle="tab" aria-expanded="false">原料管理</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane active in" id="flowCardMgs">
@@ -292,7 +292,7 @@
                                 <div class="form-group text-right">
                                     <button type="button" class="pp btn btn-default btn-sm" onclick="showProductionProcessModel(-1)" id="ppReBtn"><i class="fa fa-repeat"></i> 恢复默认</button>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" style="overflow-x:auto">
                                     <label class="control-label">规格：</label>
                                     <table class="table table-hover table-striped">
                                         <thead>
@@ -312,7 +312,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-8">
-                                <div class="form-group">
+                                <div class="form-group" style="overflow-x:auto">
                                     <label class="control-label">工序：</label>
                                     <table class="table table-hover table-striped">
                                         <thead>
@@ -363,7 +363,7 @@
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-default btn-sm" onclick="reset()"><i class="fa fa-refresh"></i> 重置规格</button>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="overflow-x:auto">
                         <label class="control-label">规格：</label>
                         <table class="table table-hover table-striped">
                             <thead>
@@ -416,7 +416,7 @@
                         <button type="button" class="btn btn-default btn-sm" onclick="recovery()"><i class="fa fa-repeat"></i> 恢复默认</button>
                         <button type="button" class="btn btn-default btn-sm" onclick="reset1()"><i class="fa fa-refresh"></i> 重置规格</button>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="overflow-x:auto">
                         <label class="control-label">规格：</label>
                         <table class="table table-hover table-striped">
                             <thead>

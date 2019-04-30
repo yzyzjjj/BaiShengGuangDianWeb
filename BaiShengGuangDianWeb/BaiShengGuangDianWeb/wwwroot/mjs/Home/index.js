@@ -10,7 +10,8 @@
         $("#run").addClass("disabled");
     });
     $("#faultCode").select2({
-        allowClear: true
+        allowClear: true,
+        placeholder: "请选择"
     });
 
 }
@@ -162,11 +163,13 @@ function queryProcessData(processNumber) {
                 return;
             }
 
-            var time1 = function (data, type, row) {
-                return data.PressurizeMinute + ":" + data.PressurizeSecond;
+            //加压时间(M:S)
+            var pressurizeTime = function (data, type, row) {
+                return data.PressurizeMinute + " : " + data.PressurizeSecond;
             }
-            var time2 = function (data, type, row) {
-                return data.ProcessMinute + ":" + data.ProcessSecond;
+            //工序时间(M:S)
+            var processTime = function (data, type, row) {
+                return data.ProcessMinute + " : " + data.ProcessSecond;
             }
             $("#processDataList")
                 .DataTable({
@@ -180,8 +183,8 @@ function queryProcessData(processNumber) {
                     "iDisplayLength": 10, //默认显示的记录数  
                     "columns": [
                         { "data": "ProcessOrder", "title": "工序" },
-                        { "data": null, "title": "加压时间(分:秒)", "render": time1 },
-                        { "data": null, "title": "工序时间(分:秒)", "render": time2 },
+                        { "data": null, "title": "加压时间(分:秒)", "render": pressurizeTime },
+                        { "data": null, "title": "工序时间(分:秒)", "render": processTime },
                         { "data": "Pressure", "title": "设定压力(Kg)" },
                         { "data": "Speed", "title": "下盘速度(rpm)" }
                     ]
