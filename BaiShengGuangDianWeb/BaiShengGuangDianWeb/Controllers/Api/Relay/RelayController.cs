@@ -1,12 +1,15 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Mvc;
+using ModelBase.Base.EnumConfig;
 using ModelBase.Base.HttpServer;
 using ModelBase.Base.Logger;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using ModelBase.Base.EnumConfig;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 {
@@ -57,10 +60,33 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             {
                 var logParam = new
                 {
-                    opName = permission.Name, opData,
+                    opName = permission.Name,
+                    opData,
                 };
                 OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam.ToJSON());
-                return JObject.Parse(result);
+                if (opType != 100)
+                {
+                    return JObject.Parse(result);
+                }
+
+                if (StringHelper.IsAnyNullOrWhiteSpace(AccountHelper.CurrentUser.DeviceIds))
+                {
+                    return JObject.Parse(result);
+                }
+
+                var ret = JsonConvert.DeserializeObject<DataResult>(result);
+                var datas = new List<dynamic>();
+                foreach (var data in ret.datas)
+                {
+                    var id = (JObject.Parse(data.ToString()))["Id"].ToObject<int>();
+                    if (AccountHelper.CurrentUser.DeviceIdsList.Contains(id))
+                    {
+                        datas.Add(data);
+                    }
+                }
+
+                ret.datas = datas;
+                return ret;
             }
             catch (Exception e)
             {

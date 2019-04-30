@@ -17,7 +17,6 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public int Role { get; set; }
         public string RoleName { get; set; }
-
         public string EmailAddress { get; set; }
         [JsonIgnore]
         public bool IsDeleted { get; set; }
@@ -25,5 +24,7 @@ namespace BaiShengGuangDianWeb.Models.Account
         public string SelfPermissions { get; set; }
         public string Permissions { get; set; }
         public IEnumerable<int> PermissionsList => Permissions.Split(',').Select(int.Parse).Distinct();
+        public string DeviceIds { get; set; }
+        public IEnumerable<int> DeviceIdsList => DeviceIds.Split(',').Select(int.Parse).Distinct();
     }
 }
