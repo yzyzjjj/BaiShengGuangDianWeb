@@ -533,15 +533,15 @@ function showChangeFlowCard(type) {
             //加工时间
             var processTime = function (data, type, row) {
                 var html =
-                    '<input type="text" id="c31f{0}" class="can1 form_date form-control {4}" value="{2}">' +
-                    '<input type="text" id="c32f{0}" class="can1 form_time form-control {4}" value="{3}">' +
+                    '<input type="text" id="c31f{0}" class="can1 form_date form-control {4}" value="{2}" style="width:90px">' +
+                    '<input type="text" id="c32f{0}" class="can1 form_time form-control {4}" value="{3}" style="width:75px">' +
                     '<input type="text" id="c3f{0}" value="{1}" oValue="{1}" class="hidden">';
                 if (data.ProcessTime == '0001-01-01 00:00:00' || data.ProcessTime == null) {
                     data.ProcessTime = '';
                     return html.format(o, data.ProcessTime, "", "", "hidden");
                 }
                 var t = data.ProcessTime.split(' ');
-                return html.format(o, data.ProcessTime, t[0], t[1]);
+                return html.format(o, data.ProcessTime, t[0], t[1], "");
             }
             //检验人
             var seSurveyor = option.format(0, "无");
@@ -555,15 +555,15 @@ function showChangeFlowCard(type) {
             //检验时间
             var surveyTime = function (data, type, row) {
                 var html =
-                    '<input type="text" id="c51f{0}" class="can2 form_date form-control {4}" value="{2}">' +
-                    '<input type="text" id="c52f{0}" class="can2 form_time form-control {4}" value="{3}">' +
+                    '<input type="text" id="c51f{0}" class="can2 form_date form-control {4}" value="{2}" style="width:90px">' +
+                    '<input type="text" id="c52f{0}" class="can2 form_time form-control {4}" value="{3}" style="width:75px">' +
                     '<input type="text" id="c5f{0}" value="{1}" oValue="{1}" class="hidden">';
                 if (data.SurveyTime == '0001-01-01 00:00:00' || data.SurveyTime == null) {
                     data.SurveyTime = '';
                     return html.format(o, data.SurveyTime, "", "", "hidden");
                 }
                 var t = data.SurveyTime.split(' ');
-                return html.format(o, data.SurveyTime, t[0], t[1]);
+                return html.format(o, data.SurveyTime, t[0], t[1], "");
 
             }
             //合格数

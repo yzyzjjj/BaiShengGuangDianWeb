@@ -104,6 +104,17 @@ function checkPermission(opType) {
     return info.permissionsList.indexOf(opType) >= 0;
 }
 
+var isCover = false;
+//添加菊花效果
+function addCover() {
+    var html = '<div id="body-cover"><div class="spinner"> <div class="spinner-container container1"><div class="circle1"></div><div class="circle2"></div> <div class="circle3"></div><div class="circle4"></div>  </div> <div class="spinner-container container2"><div class="circle1"></div> <div class="circle2"></div><div class="circle3"></div> <div class="circle4"></div> </div><div class="spinner-container container3"><div class="circle1"></div> <div class="circle2"></div>  <div class="circle3"></div> <div class="circle4"></div></div></div></div>'
+    $('body').append(html);
+}
+//删除菊花效果
+function removeCover() {
+    $('#body-cover').remove();
+}
+
 function reLogin() {
     //window.location.href = const_loginurl
     console.log("err")
@@ -111,8 +122,8 @@ function reLogin() {
 
 //ajax 包装 data 必须是张表，或者null,带token
 function ajaxPost(url, data, func) {
-
-    if (data == null || data == undefined) {
+    addCover();
+    if (data == null) {
         data = {}
     }
 
@@ -120,15 +131,16 @@ function ajaxPost(url, data, func) {
     //if (!isStrEmptyOrUndefined(token)) {
     //    data.token = token
     //}
-
-    $.post(url, data, func).error(reLogin);
-
+    var funcC = function(e) {
+        removeCover();
+        func(e);
+    }
+    $.post(url, data, funcC).error(reLogin);
 }
 
 //ajax 包装 data 必须是张表，或者null,带token
 function ajaxGet(url, data, func) {
-
-    if (data == null || data == undefined) {
+    if (data == null) {
         data = {}
     }
 
@@ -148,10 +160,12 @@ function ajaxGet(url, data, func) {
         paramstr = paramstr + key + "=" + data[key];
     }
 
-
+    var funcC = function (e) {
+        removeCover();
+        func(e);
+    }
     url = url + paramstr;
-    $.get(url, func).error(reLogin);
-
+    $.get(url, funcC).error(reLogin);
 }
 
 //在请求的表中添加token 信息
@@ -669,16 +683,6 @@ function creat() {
 }
 ImgCreated.prototype.dataType = dataType;
 ImgCreated.prototype.creat = creat;
-
-//添加菊花效果
-function addCover() {
-    var html = '<div id="body-cover"><div class="spinner"> <div class="spinner-container container1"><div class="circle1"></div><div class="circle2"></div> <div class="circle3"></div><div class="circle4"></div>  </div> <div class="spinner-container container2"><div class="circle1"></div> <div class="circle2"></div><div class="circle3"></div> <div class="circle4"></div> </div><div class="spinner-container container3"><div class="circle1"></div> <div class="circle2"></div>  <div class="circle3"></div> <div class="circle4"></div></div></div></div>'
-    $('body').append(html);
-}
-//删除菊花效果
-function removeCover() {
-    $('#body-cover').remove();
-}
 
 //显示确认框
 function showConfirm(text, func) {

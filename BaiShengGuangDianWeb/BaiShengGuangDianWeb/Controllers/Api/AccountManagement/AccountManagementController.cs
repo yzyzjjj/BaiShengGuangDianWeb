@@ -202,7 +202,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             else
             {
-
                 accountInfo = AccountHelper.GetAccountInfo(accountStr);
             }
             if (accountInfo == null)
