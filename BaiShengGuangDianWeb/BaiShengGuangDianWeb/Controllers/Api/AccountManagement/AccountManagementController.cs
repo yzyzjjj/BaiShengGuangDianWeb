@@ -98,7 +98,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).ToJSON();
+                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");
                 }
                 catch (Exception)
                 {
@@ -113,7 +113,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 Name = name,
                 Role = role,
                 EmailAddress = email,
-                SelfPermissions = permissions
+                SelfPermissions = permissions ?? ""
             };
             AccountHelper.AddAccountInfo(info);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}");
@@ -262,7 +262,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(","); ;
+                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");
                     if (!permissions.IsNullOrEmpty())
                     {
                         accountInfo.Permissions = permissions;
