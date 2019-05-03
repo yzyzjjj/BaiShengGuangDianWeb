@@ -23,8 +23,10 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public string SelfPermissions { get; set; }
         public string Permissions { get; set; }
+        [JsonIgnore]
         public IEnumerable<int> PermissionsList => Permissions.Split(',').Select(int.Parse).Distinct();
         public string DeviceIds { get; set; }
+        [JsonIgnore]
         public IEnumerable<int> DeviceIdsList => DeviceIds.Split(',').Select(int.Parse).Distinct();
     }
 }

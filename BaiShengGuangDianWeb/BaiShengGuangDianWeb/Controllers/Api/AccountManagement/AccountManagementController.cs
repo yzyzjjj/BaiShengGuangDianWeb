@@ -2,12 +2,12 @@
 using BaiShengGuangDianWeb.Models.Account;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.EnumConfig;
+using ModelBase.Base.HttpServer;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
 using System;
 using System.Linq;
-using ModelBase.Base.HttpServer;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 {
@@ -72,6 +72,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var roleStr = param.GetValue("role");
             var permissions = param.GetValue("permissions");
             var isProcessor = param.GetValue("isProcessor");
+            var deviceIds = param.GetValue("deviceIds");
             if (account.IsNullOrEmpty() || account.IsNullOrEmpty() || name.IsNullOrEmpty() || roleStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
@@ -108,6 +109,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
+            if (!deviceIds.IsNullOrEmpty())
+            {
+                try
+                {
+                    deviceIds = deviceIds.Split(',').Select(int.Parse).Distinct().Join(",");
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
             var info = new AccountInfo
             {
                 Account = account,
@@ -115,7 +127,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 Name = name,
                 Role = role,
                 EmailAddress = email,
-                SelfPermissions = permissions ?? ""
+                SelfPermissions = permissions ?? "",
+                DeviceIds = deviceIds ?? ""
             };
             AccountHelper.AddAccountInfo(info);
             var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}";

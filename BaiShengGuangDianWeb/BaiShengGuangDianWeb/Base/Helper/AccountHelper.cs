@@ -100,7 +100,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void AddAccountInfo(AccountInfo info)
         {
-            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `EmailAddress`, `IsDeleted`, `SelfPermissions`) VALUES (@Account, @Password, @Name, @Role, @EmailAddress, @IsDeleted, @SelfPermissions);";
+            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`) " +
+                      "VALUES (@Account, @Password, @Name, @Role, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds);";
             ServerConfig.WebDb.Execute(sql, info);
         }
 
@@ -122,7 +123,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void UpdateAccountInfo(AccountInfo info)
         {
-            var sql = "UPDATE accounts SET `Password` = @Password, `Name` = @Name, `Role` = @Role, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, `SelfPermissions` = @SelfPermissions WHERE `Id` = @Id;";
+            var sql = "UPDATE accounts SET `Password` = @Password, `Name` = @Name, `Role` = @Role, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, `SelfPermissions` = @SelfPermissions, `SelfPermissions` = @DeviceIds WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, info);
         }
     }
