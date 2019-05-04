@@ -95,5 +95,13 @@ namespace BaiShengGuangDianWeb.Controllers.Page.DeviceManagement
         {
             return View();
         }
+        /// <summary>
+        /// 设备工序管理
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult DeviceProcessStep()
+        {
+            return View();
+        }
     }
 }

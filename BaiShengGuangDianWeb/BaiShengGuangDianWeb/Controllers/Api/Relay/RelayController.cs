@@ -63,7 +63,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
                     opName = permission.Name,
                     opData,
                 };
-                OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam.ToJSON());
+                OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, opType, logParam.ToJSON());
                 if (opType != 100)
                 {
                     return JObject.Parse(result);

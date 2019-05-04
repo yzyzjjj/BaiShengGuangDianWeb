@@ -13,10 +13,6 @@
         float: inherit;
     }
 
-    .btn-group-vertical > .btn, .btn-group > .btn {
-        float: inherit;
-    }
-
 th, td {
     text-align: center;
     white-space: nowrap;

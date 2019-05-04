@@ -1,0 +1,123 @@
+﻿@model object
+
+@{
+    ViewBag.Title = "工序名管理";
+    Layout = "_Layout";
+}
+
+<script src="~/mjs/DeviceManagement/deviceProcessStep.js"></script>
+<section class="content">
+    <h2 style="font-size: 24px;text-align: center; height: 30px; line-height: 30px;">工序名管理</h2>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">工序名</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary" onclick="getDeviceProcessStepList()">重新加载</button>
+                <button type="button" class="btn btn-primary" onclick="showAddModel()">添加工序名</button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped" id="deviceProcessStepList"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="addModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">新工序名信息</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="box-body">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addSelect">设备类型：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ms2 form-control" id="addSelect"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addStepName">工序名：</label>
+                                    <div class="col-sm-7">
+                                        <input class="form-control" id="addStepName" onfocusin="focusIn($(this))" oninput="addStepNameCheck()">
+                                        <label class="label-danger hidden" id="addStepNameTip"></label>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="checkbox" id="addIsSurvey" class="icheckbox_minimal">
+                                        <label for="addIsSurvey">是否为检验</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="addDesc">描述：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="addDesc">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addModel()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updateModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">工序名信息</h4>
+                    <label class="hidden" id="updateId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="box-body">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateSelect">设备类型：</label>
+                                    <div class="col-sm-9">
+                                        <select class="ms2 form-control" id="updateSelect"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateStepName">工序名：</label>
+                                    <div class="col-sm-7">
+                                        <input class="form-control" id="updateStepName" onfocusin="focusIn($(this))" oninput="updateStepNameCheck()">
+                                        <label class="label-danger hidden" id="updateStepNameTip"></label>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="checkbox" id="updateIsSurvey" class="icheckbox_minimal">
+                                        <label for="addIsSurvey">是否为检验</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="updateDesc">描述：</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control" id="updateDesc">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateModel()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -95,12 +95,16 @@ var commonfunc = function () {
 
 }
 
-
 function rule(a, b) {
-    if (a.order == b.order) {
-        return a.id > b.id;
+    if (typeof a == "object") {
+        if (a.order == b.order) {
+            return a.id > b.id ? 1 : -1;
+        } else {
+            return a.order > b.order ? 1 : -1;
+        }
+    } else {
+        return a > b ? 1 : -1;
     }
-    return a.order > b.order;
 }
 
 function getParent(list) {
@@ -230,6 +234,12 @@ $(function () {
         minuteStep: 1,
         showSeconds: true,
         secondStep: 1
+    });
+
+    $('.icheckbox_minimal').iCheck({
+        checkboxClass: 'icheckbox_minimal',
+        radioClass: 'iradio_minimal',
+        increaseArea: '20%' // optional
     });
 
     commonfunc();

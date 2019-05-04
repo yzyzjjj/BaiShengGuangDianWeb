@@ -37,6 +37,10 @@ var opType = 130;
                 return;
             }
 
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
             $("#firmlibraryList")
                 .DataTable({
                     "destroy": true,
@@ -47,7 +51,8 @@ var opType = 130;
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": "Id", "title": "序号" },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "FirmwareName", "title": "固件版本名称" },
                         { "data": "VarNumber", "title": "变量数量" },
                         { "data": "CommunicationProtocol", "title": "通信协议" },

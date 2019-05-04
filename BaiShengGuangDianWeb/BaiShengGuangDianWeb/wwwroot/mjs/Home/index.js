@@ -131,7 +131,7 @@ function queryFlowCard() {
                 var data = flowCard.RawMateriaSpecifications[i];
                 html += p.format(data.SpecificationName, data.SpecificationValue);
             }
-            html += '<p><b>工艺编号：</b>{0}<button type="button" class="btn btn-primary btn-sm pull-right" onclick="queryProcessData(\'{0}\')">工艺数据</button></p>'.format(flowCard.ProcessNumber);
+            html += '<p><b>工艺编号：</b>{0}<button type="button" class="btn btn-primary btn-sm pull-right" onclick="queryProcessData(\'{0}\')">工艺数据</button></p>'.format(flowCard.ProcessId);
             $("#info").append(html);
 
             id = deviceId;
@@ -234,7 +234,7 @@ function setProcessData() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getDeviceList();
+                    //getDeviceList();
                 }
             });
     }
