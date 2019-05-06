@@ -128,7 +128,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 Role = role,
                 EmailAddress = email,
                 SelfPermissions = permissions ?? "",
-                DeviceIds = deviceIds ?? ""
+                DeviceIds = deviceIds ?? "",
+                ProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor
             };
             AccountHelper.AddAccountInfo(info);
             var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}";
@@ -255,6 +256,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
+
+            if (accountInfo.Default)
+            {
+                return Result.GenError<Result>(Error.AccountNotOperate);
+            }
+
+            if (accountInfo.Id == AccountHelper.CurrentUser.Id)
+            {
+                return Result.GenError<Result>(Error.OperateNotSafe);
+            }
+
             AccountHelper.DeleteAccountInfo(accountInfo.Id);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}", accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
@@ -351,7 +363,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 try
                 {
                     var roleInfo = RoleHelper.GetRoleInfo(accountInfo.Role);
-
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
                     permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");

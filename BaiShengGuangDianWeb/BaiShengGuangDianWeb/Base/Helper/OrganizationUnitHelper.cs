@@ -108,7 +108,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static IEnumerable<dynamic> MemberList(OrganizationUnit organizationUnit)
         {
-            var sql = "SELECT b.Id, b.`Name`, b.RoleName FROM `account_organization_units` a JOIN ( SELECT a.*, b.`Name` RoleName FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0 ) b ON a.AccountId = b.Id WHERE a.IsDeleted = 0 AND a.OrganizationUnitId = @Id;";
+            var sql = "SELECT b.Id, a.AccountId, b.`Name`, b.RoleName FROM `account_organization_units` a JOIN ( SELECT a.*, b.`Name` RoleName FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0 ) b ON a.AccountId = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0 AND a.OrganizationUnitId = @Id;";
             return ServerConfig.WebDb.Query<dynamic>(sql, new { organizationUnit.Id });
         }
 

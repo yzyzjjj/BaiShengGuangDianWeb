@@ -5,6 +5,7 @@ using ModelBase.Base.EnumConfig;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
+using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 {
@@ -294,6 +295,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
+
+            var memberList = OrganizationUnitHelper.MemberList(organizationUnit);
+            if (memberList.Any(x => x.AccountId == member.Id))
+            {
+                return Result.GenError<Result>(Error.MemberIsExist);
+            }
+
             OrganizationUnitHelper.AddMember(organizationUnit, member);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
                 $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}", member.Id);

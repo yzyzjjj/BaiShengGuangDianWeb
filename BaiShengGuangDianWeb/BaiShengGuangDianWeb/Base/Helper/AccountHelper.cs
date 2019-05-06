@@ -100,8 +100,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void AddAccountInfo(AccountInfo info)
         {
-            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`) " +
-                      "VALUES (@Account, @Password, @Name, @Role, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds);";
+            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`, `Default`, `ProductionRole`) " +
+                      "VALUES (@Account, @Password, @Name, @Role, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds, @Default, @ProductionRole);";
             ServerConfig.WebDb.Execute(sql, info);
         }
 
@@ -123,7 +123,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void UpdateAccountInfo(AccountInfo info)
         {
-            var sql = "UPDATE accounts SET `Password` = @Password, `Name` = @Name, `Role` = @Role, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, `SelfPermissions` = @SelfPermissions, `SelfPermissions` = @DeviceIds WHERE `Id` = @Id;";
+            var sql = "UPDATE accounts SET `Account` = @Account, `Password` = @Password, `Name` = @Name, `Role` = @Role, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, `SelfPermissions` = @SelfPermissions, `DeviceIds` = @DeviceIds, `Default` = @Default, `ProductionRole` = @ProductionRole WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, info);
         }
     }

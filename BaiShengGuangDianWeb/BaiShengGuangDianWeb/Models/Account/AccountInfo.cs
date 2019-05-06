@@ -28,5 +28,8 @@ namespace BaiShengGuangDianWeb.Models.Account
         public string DeviceIds { get; set; }
         [JsonIgnore]
         public IEnumerable<int> DeviceIdsList => DeviceIds.Split(',').Select(int.Parse).Distinct();
+        [JsonIgnore]
+        public bool Default { get; set; }
+        public string ProductionRole { get; set; }
     }
 }
