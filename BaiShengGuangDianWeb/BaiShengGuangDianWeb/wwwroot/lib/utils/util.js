@@ -101,7 +101,12 @@ function isTokenValid() {
 function checkPermission(opType) {
     //permissionsList
     var info = getCookieTokenInfo();
-    return info.permissionsList.indexOf(opType) >= 0;
+    if (info == null) {
+        window.location.href = const_loginurl;
+        return -1;
+    } else {
+        return info.permissionsList.indexOf(opType) >= 0;
+    }
 }
 
 var isCover = false;
@@ -131,7 +136,7 @@ function ajaxPost(url, data, func) {
     //if (!isStrEmptyOrUndefined(token)) {
     //    data.token = token
     //}
-    var funcC = function(e) {
+    var funcC = function (e) {
         removeCover();
         func(e);
     }

@@ -163,7 +163,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
                                 opData = new
                                 {
-                                    ProcessorName = name
+                                    ProcessorName = name,
+                                    Account = account,
                                 }.ToJSON();
                                 url = managementServer.Host + permission.Url;
                                 HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
@@ -188,7 +189,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
                                 opData = new
                                 {
-                                    SurveyorName = name
+                                    SurveyorName = name,
+                                    Account = account
                                 }.ToJSON();
                                 url = managementServer.Host + permission.Url;
                                 HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,

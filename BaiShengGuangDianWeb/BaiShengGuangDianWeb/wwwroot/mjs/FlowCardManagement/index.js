@@ -167,9 +167,9 @@ function getFlowCardList() {
                 return data.ProcessTime;
             }
             var processStepName = function (data, type, row) {
-                if (isStrEmptyOrUndefined(data.ProcessStepName))
-                    data.ProcessStepName = '未开始加工';
-                return data.ProcessStepName;
+                if (isStrEmptyOrUndefined(data.StepName))
+                    return '未开始加工';
+                return data.CategoryName + "-" + data.StepName;
             }
             var priority = function (data, type, row) {
                 var state = data.Priority;
@@ -239,74 +239,95 @@ var ufGGmaxV = 1;
 var ufGXmax = 1;
 var ufGXmaxV = 1;
 function showUpdateFlowCard(type) {
-    hideClassTip("adt");
-    $("#ufGGBody").empty();
-    $("#ufGXBody").empty();
-    ufGGmax = ufGGmaxV = ufGXmax = ufGXmaxV = 1;
-    var opType = 201;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    if (type == -1 && ufRecover == 1)
-        return;
-    if (type == -1)
-        ufRecover = 1;
-    var id = type == -1 ? $("#updateFCId").html() : type;
-    var data = {}
-    data.opType = opType;
-    data.opData = JSON.stringify({
-        id: id
-    });
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-
-            var r = ret.datas[0];
-            $("#updateFCId").html(id);
-            $("#ufProductionProcess").val(r.ProductionProcessName);
-            $("#ufRawMateria").val(r.RawMateriaName);
-            $("#ufPriority").val(r.Priority);
-            $("#ufRawMaterialQuantity").val(r.RawMaterialQuantity);
-            $("#ufFlowCardName").val(r.FlowCardName);
-            $("#ufSender").val(r.Sender);
-            $("#ufInboundNum").val(r.InboundNum);
-            $("#ufRemarks").val(r.Remarks);
-
-            var tr;
-            for (var j = 0; j < r.Specifications.length; j++) {
-                var productionProcessSpecification = r.Specifications[j];
-                tr = ('<tr id="ufGG{0}" value="{2}">' +
-                    '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
-                    '<td><input class="form-control" value="{3}" id="ufGGm{0}"></td>' +
-                    '<td><input class="form-control" value="{4}" id="ufGGz{0}"></td>' +
-                    '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                    '</tr>').format(ufGGmax, ufGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
-                $("#ufGGBody").append(tr);
-                ufGGmax++;
-                ufGGmaxV++;
-            }
-            for (var j = 0; j < r.ProcessSteps.length; j++) {
-                var processStep = r.ProcessSteps[j];
-                tr = ('<tr id="ufGX{0}" value="{2}">' +
-                    '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
-                    '<td><input class="form-control" value="{3}" id="ufGXm{0}"></td>' +
-                    '<td><input class="form-control" value="{4}" id="ufGXz{0}"></td>' +
-                    '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                    '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepName, processStep.ProcessStepRequirements);
-                $("#ufGXBody").append(tr);
-                ufGXmax++;
-                ufGXmaxV++;
-            }
-
-            if (type != -1)
-                $("#updateFlowCardModel").modal("show");
-            else
-                ufRecover = 0;
+    var doSth = function () {
+        hideClassTip("adt");
+        $("#ufGGBody").empty();
+        $("#ufGXBody").empty();
+        ufGGmax = ufGGmaxV = ufGXmax = ufGXmaxV = 1;
+        var opType = 201;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        if (type == -1 && ufRecover == 1)
+            return;
+        if (type == -1)
+            ufRecover = 1;
+        var id = type == -1 ? $("#updateFCId").html() : type;
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id
         });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                };
+
+                var r = ret.datas[0];
+                $("#updateFCId").html(id);
+                $("#ufProductionProcess").val(r.ProductionProcessName);
+                $("#ufRawMateria").val(r.RawMateriaName);
+                $("#ufPriority").val(r.Priority);
+                $("#ufRawMaterialQuantity").val(r.RawMaterialQuantity);
+                $("#ufFlowCardName").val(r.FlowCardName);
+                $("#ufSender").val(r.Sender);
+                $("#ufInboundNum").val(r.InboundNum);
+                $("#ufRemarks").val(r.Remarks);
+
+                var tr;
+                for (var j = 0; j < r.Specifications.length; j++) {
+                    var productionProcessSpecification = r.Specifications[j];
+                    tr = ('<tr id="ufGG{0}" value="{2}">' +
+                        '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
+                        '<td><input class="form-control" value="{3}" id="ufGGm{0}"></td>' +
+                        '<td><input class="form-control" value="{4}" id="ufGGz{0}"></td>' +
+                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                        '</tr>').format(ufGGmax, ufGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
+                    $("#ufGGBody").append(tr);
+                    ufGGmax++;
+                    ufGGmaxV++;
+                }
+                var processStep;
+                for (var j = 0; j < r.ProcessSteps.length; j++) {
+                    processStep = r.ProcessSteps[j];
+                    tr = ('<tr id="ufGX{0}" value="{2}">' +
+                        '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
+                        '<td><select class="ms2 yc form-control" id="ufGXm{0}"></td>' +
+                        '<td><input class="form-control" value="{3}" id="ufGXz{0}"></td>' +
+                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                        '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
+                    $("#ufGXBody").append(tr);
+                    ufGXmax++;
+                    ufGXmaxV++;
+                }
+
+                if (DeviceProcessData != null) {
+                    $(".yc").empty();
+                    var option = '<option value="{0}">{1}-{2}</option>';
+                    for (var i = 0; i < DeviceProcessData.length; i++) {
+                        var opt = DeviceProcessData[i];
+                        $(".yc").append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+                    }
+                    $(".yc").css("width", "100%");
+                    $(".yc").select2();
+
+                    for (var j = 0; j < r.ProcessSteps.length; j++) {
+                        processStep = r.ProcessSteps[j];
+                        var selector = "#ufGXm" + (j + 1);
+                        $(selector).val(processStep.ProcessStepId).trigger("change");
+                    }
+                }
+
+                if (type != -1)
+                    $("#updateFlowCardModel").modal("show");
+                else
+                    ufRecover = 0;
+            });
+    }
+    checkDeviceProcessData(doSth);
 }
 
 function updateFlowCard() {
@@ -360,8 +381,8 @@ function updateFlowCard() {
     var l = 1;
     for (i = 1; i < ufGXmax; i++) {
         if ($("#ufGX" + i).length > 0) {
-            var processStepName = $("#ufGXm" + i).val();
-            if (isStrEmptyOrUndefined(processStepName)) {
+            var processStepId = $("#ufGXm" + i).val();
+            if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
@@ -372,7 +393,7 @@ function updateFlowCard() {
             ufGXdata.push({
                 Id: id,
                 ProcessStepOrder: l++,
-                ProcessStepName: processStepName,
+                ProcessStepId: processStepId,
                 ProcessStepRequirements: processStepRequirements
             });
         }
@@ -446,14 +467,27 @@ function ufGGDelSelf(id) {
 }
 
 function ufResetGX() {
+    ufGXmax = ufGXmaxV = 1;
     $("#ufGXBody").empty();
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{0}</label></td>' +
-        '<td><input class="form-control" id="ufGXm{0}"></td>' +
+        '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
         '<td><input class="form-control" id="ufGXz{0}"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-        '</tr>').format(1);
+        '</tr>').format(ufGXmax);
     $("#ufGXBody").append(tr);
+    if (DeviceProcessData != null) {
+        var selector = "#ufGXm" + ufGXmax;
+        $(selector).empty();
+        var option = '<option value="{0}">{1}-{2}</option>';
+        for (var i = 0; i < DeviceProcessData.length; i++) {
+            var opt = DeviceProcessData[i];
+            $(selector).append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+        }
+        $(selector).css("width", "100%");
+        $(selector).select2();
+    }
+
     if (lastType == 0) {
         $(".dd").removeClass("hidden");
     } else {
@@ -466,13 +500,27 @@ function ufAddOtherGX() {
     //ufGXBody
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="ufGXm{0}"></td>' +
+        '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
         '<td><input class="form-control" id="ufGXz{0}"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGXmax, ufGXmaxV);
     $("#ufGXBody").append(tr);
+    if (DeviceProcessData != null) {
+        var selector = "#ufGXm" + ufGXmax;
+        $(selector).empty();
+        var option = '<option value="{0}">{1}-{2}</option>';
+        for (var i = 0; i < DeviceProcessData.length; i++) {
+            var opt = DeviceProcessData[i];
+            $(selector).append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+        }
+        $(selector).css("width", "100%");
+        $(selector).select2();
+    }
+
     ufGXmax++;
     ufGXmaxV++;
+
+
 }
 
 function ufGXDelSelf(id) {
@@ -516,6 +564,10 @@ function showChangeFlowCard(type) {
             $("#changeFCId").html(id);
             var option = '<option value="{0}">{1}</option>';
             var o = 0;
+
+            var processStepName = function (data, type, row) {
+                return data.CategoryName + "-" + data.StepName;
+            }
             var order = function (data, type, row) {
                 o = data.ProcessStepOrder;
                 return '<span oValue="{1}" id="c1f{0}">{0}</span>'.format(o, data.Id);
@@ -568,11 +620,11 @@ function showChangeFlowCard(type) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");
@@ -585,8 +637,9 @@ function showChangeFlowCard(type) {
             }
             //操作
             var op = function (data, type, row) {
-                return '<button class="btn btn-success edit1-btn" type="button">加工</button>' +
-                    '<button class="btn btn-info edit2-btn" type="button">检验</button>';
+                if (!data.IsSurvey)
+                    return '<button class="btn btn-success edit1-btn" type="button">加工</button>';
+                return '<button class="btn btn-info edit2-btn" type="button">检验</button>';
             }
             function processStepOrder(a, b) {
                 return a.ProcessStepOrder > b.ProcessStepOrder;
@@ -601,7 +654,7 @@ function showChangeFlowCard(type) {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "MarkedDateTime", "title": "修改时间" },
-                        { "data": "ProcessStepName", "title": "工序名称" },
+                        { "data": null, "title": "工序名称", "render": processStepName },
                         { "data": "ProcessStepRequirements", "title": "加工要求" },
                         { "data": null, "title": "加工人", "render": processorId },
                         { "data": null, "title": "加工时间", "render": processTime },
@@ -1014,84 +1067,130 @@ function showProductionProcess(id) {
         });
 }
 
+var DeviceProcessData = null;
 var recover = 0;
 function showProductionProcessModel(type) {
-    hideClassTip("adt");
-    $(".pp").addClass("hidden");
-    if (type != 0) {
+    var doSth = function () {
+        hideClassTip("adt");
+        $(".pp").addClass("hidden");
+        if (type != 0) {
 
-        $("#uppBtn").removeClass("hidden");
-        $("#ppReBtn").removeClass("hidden");
-        $("#apGGBody").empty();
-        $("#apGXBody").empty();
-        apGGmax = apGGmaxV = apGXmax = apGXmaxV = 1;
+            $("#uppBtn").removeClass("hidden");
+            $("#ppReBtn").removeClass("hidden");
+            $("#apGGBody").empty();
+            $("#apGXBody").empty();
+            apGGmax = apGGmaxV = apGXmax = apGXmaxV = 1;
 
-        var opType = 216;
+            var opType = 216;
+            if (!checkPermission(opType)) {
+                layer.msg("没有权限");
+                return;
+            }
+            if (type == -1 && recover == 1)
+                return;
+            if (type == -1)
+                recover = 1;
+            var data = {}
+            data.opType = opType;
+            var id = type == -1 ? $("#updateppId").html() : type;
+            data.opData = JSON.stringify({
+                id: id
+            });
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    if (ret.errno != 0) {
+                        layer.msg(ret.errmsg);
+                        return;
+                    }
+                    var r = ret.datas[0];
+                    $("#updateppId").html(id);
+                    $("#productionProcessName").val(r.ProductionProcessName);
+                    for (var j = 0; j < r.Specifications.length; j++) {
+                        var productionProcessSpecification = r.Specifications[j];
+                        var tr = ('<tr id="apGG{0}" value="{2}">' +
+                            '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
+                            '<td><input class="form-control" value="{3}" id="apGGm{0}"></td>' +
+                            '<td><input class="form-control" value="{4}" id="apGGz{0}"></td>' +
+                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                            '</tr>').format(apGGmax, apGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
+                        $("#apGGBody").append(tr);
+                        apGGmax++;
+                        apGGmaxV++;
+                    }
+                    var processStep;
+                    for (var j = 0; j < r.ProcessSteps.length; j++) {
+                        processStep = r.ProcessSteps[j];
+                        var tr = ('<tr id="apGX{0}" value="{2}">' +
+                            '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
+                            '<td><select class="ms2 yc form-control" id="apGXm{0}"></td>' +
+                            '<td><input class="form-control" value="{3}" id="apGXz{0}"></td>' +
+                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                            '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
+                        $("#apGXBody").append(tr);
+                        apGXmax++;
+                        apGXmaxV++;
+                    }
+
+                    if (DeviceProcessData != null) {
+                        $(".yc").empty();
+                        var option = '<option value="{0}">{1}-{2}</option>';
+                        for (var i = 0; i < DeviceProcessData.length; i++) {
+                            var opt = DeviceProcessData[i];
+                            $(".yc").append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+                        }
+                        $(".yc").css("width", "100%");
+                        $(".yc").select2();
+
+                        for (var j = 0; j < r.ProcessSteps.length; j++) {
+                            processStep = r.ProcessSteps[j];
+                            var selector = "#apGXm" + (j + 1);
+                            $(selector).val(processStep.ProcessStepId).trigger("change");
+                        }
+                    }
+
+                    $(".dd").addClass("hidden");
+
+                    if (type != -1)
+                        $("#productionProcessModel").modal("show");
+                    else
+                        recover = 0;
+                });
+        } else {
+            if (lastType != type) {
+                $("#productionProcessName").val("");
+                $("#appBtn").removeClass("hidden");
+                addResetGG();
+                addResetGX();
+                $(".dd").removeClass("hidden");
+            }
+            $("#productionProcessModel").modal("show");
+        }
+        lastType = type;
+    }
+    checkDeviceProcessData(doSth);
+}
+
+function checkDeviceProcessData(func) {
+    if (DeviceProcessData == null) {
+        var opType = 150;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
             return;
         }
-        if (type == -1 && recover == 1)
-            return;
-        if (type == -1)
-            recover = 1;
-        var data = {}
-        data.opType = opType;
-        var id = type == -1 ? $("#updateppId").html() : type;
-        data.opData = JSON.stringify({
-            id: id
-        });
-        ajaxPost("/Relay/Post", data,
+        ajaxPost("/Relay/Post",
+            {
+                opType: opType
+            },
             function (ret) {
                 if (ret.errno != 0) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                var r = ret.datas[0];
-                $("#updateppId").html(id);
-                $("#productionProcessName").val(r.ProductionProcessName);
-                for (var j = 0; j < r.Specifications.length; j++) {
-                    var productionProcessSpecification = r.Specifications[j];
-                    var tr = ('<tr id="apGG{0}" value="{2}">' +
-                        '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
-                        '<td><input class="form-control" value="{3}" id="apGGm{0}"></td>' +
-                        '<td><input class="form-control" value="{4}" id="apGGz{0}"></td>' +
-                        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                        '</tr>').format(apGGmax, apGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
-                    $("#apGGBody").append(tr);
-                    apGGmax++;
-                    apGGmaxV++;
-                }
-                for (var j = 0; j < r.ProcessSteps.length; j++) {
-                    var processStep = r.ProcessSteps[j];
-                    var tr = ('<tr id="apGX{0}" value="{2}">' +
-                        '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
-                        '<td><input class="form-control" value="{3}" id="apGXm{0}"></td>' +
-                        '<td><input class="form-control" value="{4}" id="apGXz{0}"></td>' +
-                        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                        '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepName, processStep.ProcessStepRequirements);
-                    $("#apGXBody").append(tr);
-                    apGXmax++;
-                    apGXmaxV++;
-                }
-                $(".dd").addClass("hidden");
-
-                if (type != -1)
-                    $("#productionProcessModel").modal("show");
-                else
-                    recover = 0;
+                DeviceProcessData = ret.datas;
+                func();
             });
-    } else {
-        if (lastType != type) {
-            $("#productionProcessName").val("");
-            $("#appBtn").removeClass("hidden");
-            addResetGG();
-            addResetGX();
-            $(".dd").removeClass("hidden");
-        }
-        $("#productionProcessModel").modal("show");
-    }
-    lastType = type;
+    } else
+        func();
 }
 
 var lastType = -2;
@@ -1139,20 +1238,33 @@ function apGGDelSelf(id) {
 }
 
 function addResetGX() {
+    apGXmax = apGXmaxV = 1;
     $("#apGXBody").empty();
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{0}</label></td>' +
-        '<td><input class="form-control" id="apGXm{0}"></td>' +
+        '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
         '<td><input class="form-control" id="apGXz{0}"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-        '</tr>').format(1);
+        '</tr>').format(apGXmax);
     $("#apGXBody").append(tr);
+    if (DeviceProcessData != null) {
+        var selector = "#apGXm" + apGXmax;
+        $(selector).empty();
+        var option = '<option value="{0}">{1}-{2}</option>';
+        for (var i = 0; i < DeviceProcessData.length; i++) {
+            var opt = DeviceProcessData[i];
+            $(selector).append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+        }
+        $(selector).css("width", "100%");
+        $(selector).select2();
+    }
     if (lastType == 0) {
         $(".dd").removeClass("hidden");
     } else {
         $(".dd").addClass("hidden");
     }
-    apGXmax = apGXmaxV = 2;
+    apGXmax++;
+    apGXmaxV++;
 }
 
 var apGXmax = 2;
@@ -1161,11 +1273,22 @@ function addOtherGX() {
     //apGXBody
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="apGXm{0}"></td>' +
+        '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
         '<td><input class="form-control" id="apGXz{0}"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGXmax, apGXmaxV);
     $("#apGXBody").append(tr);
+    if (DeviceProcessData != null) {
+        var selector = "#apGXm" + apGXmax;
+        $(selector).empty();
+        var option = '<option value="{0}">{1}-{2}</option>';
+        for (var i = 0; i < DeviceProcessData.length; i++) {
+            var opt = DeviceProcessData[i];
+            $(selector).append(option.format(opt.Id, opt.CategoryName, opt.StepName));
+        }
+        $(selector).css("width", "100%");
+        $(selector).select2();
+    }
     apGXmax++;
     apGXmaxV++;
 }
@@ -1222,8 +1345,8 @@ function addProductionProcess() {
     var l = 1;
     for (i = 1; i < apGXmax; i++) {
         if ($("#apGX" + i).length > 0) {
-            var processStepName = $("#apGXm" + i).val();
-            if (isStrEmptyOrUndefined(processStepName)) {
+            var processStepId = $("#apGXm" + i).val();
+            if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
@@ -1232,7 +1355,7 @@ function addProductionProcess() {
 
             apGXdata.push({
                 ProcessStepOrder: l++,
-                ProcessStepName: processStepName,
+                ProcessStepId: processStepId,
                 ProcessStepRequirements: processStepRequirements
             });
         }
@@ -1308,8 +1431,8 @@ function updateProductionProcess() {
     var l = 1;
     for (i = 1; i < apGXmax; i++) {
         if ($("#apGX" + i).length > 0) {
-            var processStepName = $("#apGXm" + i).val();
-            if (isStrEmptyOrUndefined(processStepName)) {
+            var processStepId = $("#apGXm" + i).val();
+            if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
@@ -1320,7 +1443,7 @@ function updateProductionProcess() {
             apGXdata.push({
                 Id: id,
                 ProcessStepOrder: l++,
-                ProcessStepName: processStepName,
+                ProcessStepId: processStepId,
                 ProcessStepRequirements: processStepRequirements
             });
         }
@@ -1352,7 +1475,6 @@ function updateProductionProcess() {
     }
     showConfirm("修改", doSth);
 }
-
 
 //原料
 function getRawMateriaList(first = false) {
