@@ -42,7 +42,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 new Claim("role", accountInfo.RoleName),
                 new Claim("account", accountInfo.Account),
                 new Claim("email", accountInfo.EmailAddress),
-                new Claim("permissions", accountInfo.Permissions)
+                new Claim("permissions", accountInfo.Permissions),
+                new Claim("prole", accountInfo.ProductionRole)
             };
             var creds = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(

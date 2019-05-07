@@ -59,19 +59,20 @@ function isNumber(num) {
 //获取jwt中的信息
 function getJwtInfo(token) {
     if (isStrEmptyOrUndefined(token)) {
-        return null
+        return null;
     }
 
-    var strarr = token.split(".")
-    var info = strarr[1]
+    var strArr = token.split(".");
+    var info = strArr[1];
 
-    var result2 = Base64.decode(info)
+    var result2 = Base64.decode(info);
     var obj = JSON.parse(result2);
 
-    obj.permissionsList = obj.permissions.split(",").map(Number)
+    obj.permissionsList = obj.permissions.split(",").map(Number);
+    obj.proleList = obj.prole.split(",").map(Number);
     // console.log( obj )
 
-    return obj
+    return obj;
 }
 
 //从token中获取jwt信息

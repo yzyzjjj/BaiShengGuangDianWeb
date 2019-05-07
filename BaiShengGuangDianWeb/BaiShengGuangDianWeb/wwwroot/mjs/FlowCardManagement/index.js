@@ -552,7 +552,7 @@ function showChangeFlowCard(type) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: id
+        Id: id
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {

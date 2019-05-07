@@ -8,7 +8,7 @@
     <h2>
         工作台
         <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
-        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="">报表输入</button>
+        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showInputReport()">报表输入</button>
     </h2>
     <div class="row">
         <div class="col-md-5">
@@ -69,7 +69,7 @@
     </div>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" tabindex="-1" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -171,6 +171,36 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="inputReportModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">报表输入</h4>
+                    <label class="hidden" id="rpFCId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-inline">
+                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))">
+                        <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
+                        <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
+                        <label class="label-danger hidden" id="rpFlowCardTip"></label>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="gxList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="reportFlowCard()" id="reportFlowCard">保存</button>
                 </div>
             </div>
         </div>

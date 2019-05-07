@@ -13,7 +13,7 @@
         allowClear: true,
         placeholder: "请选择"
     });
-
+    showInputReport()
 }
 
 function getDeviceList() {
@@ -411,4 +411,319 @@ function showUsuallyFaultDetailModel(id) {
             $("#usuallyFaultDetailModel").modal("show");
 
         });
+}
+
+function showInputReport() {
+    var info = getCookieTokenInfo();
+    var p = info.proleList.indexOf(0) == -1;
+    var s = info.proleList.indexOf(1) == -1;
+
+    $("#reportFlowCard").addClass("hidden");
+    if (!p || !s)
+        $("#reportFlowCard").removeClass("hidden");
+    $("#inputReportModel").modal("show");
+}
+
+function queryRpFlowCard() {
+    $("#gxList").empty();
+    var opType = 202;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    //流程卡
+    var flowCard = $("#rpFlowCard").val();
+    if (isStrEmptyOrUndefined(flowCard)) {
+        showTip("rpFlowCardTip", "流程卡号不能为空");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        FlowCard: flowCard
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            };
+
+            function processStepOrder(a, b) {
+                return a.ProcessStepOrder > b.ProcessStepOrder;
+            }
+
+            var info = getCookieTokenInfo();
+            info.proleList = [0, 1]
+            var p = info.proleList.indexOf(0) > -1;
+            var s = info.proleList.indexOf(1) > -1;
+            var pIndex = -1;
+            var sIndex = -1;
+            var datas = ret.processSteps.sort(processStepOrder);
+            if (datas.length > 0)
+                $("#rpFCId").html(datas[0].FlowCardId);
+            for (var j = 0; j < datas.length; j++) {
+                var d = datas[j];
+                if (d.IsReport)
+                    continue;
+                if (!d.IsSurvey && p && !(d.ProcessTime == '0001-01-01 00:00:00' || d.ProcessTime == null)) {
+                    pIndex = d.ProcessStepOrder;
+                } else if (d.IsSurvey && s && (d.SurveyTime == '0001-01-01 00:00:00' || d.SurveyTime == null)) {
+                    if (sIndex == -1) {
+                        sIndex = d.ProcessStepOrder;
+                    }
+                }
+            }
+            if (pIndex != -1 && sIndex != -1) {
+                if ((pIndex < sIndex))
+                    sIndex = -1;
+                else
+                    pIndex = -1;
+            }
+
+            var o = 0;
+            var processStepName = function (data, type, row) {
+                return data.CategoryName + "-" + data.StepName;
+            }
+            var order = function (data, type, row) {
+                o = data.ProcessStepOrder;
+                return '<span id="c1f{0}" oValue="{1}">{0}</span>'.format(o, data.Id);
+            }
+            //加工人
+            var processorId = function (data, type, row) {
+                return '<span id="c2f{0}" oValue="{2}">{1}</span>'.format(o, data.ProcessorName, data.ProcessorId);
+            }
+            //加工时间
+            var processTime = function (data, type, row) {
+                if (data.ProcessTime == '0001-01-01 00:00:00' || data.ProcessTime == null) {
+                    return '<span id="c3f{0}" oValue="{1}"></span>'.format(o, data.ProcessTime);
+                }
+                return '<span id="c3f{0}" oValue="{1}">{1}</span>'.format(o, data.ProcessTime);
+            }
+            //检验人
+            var surveyorId = function (data, type, row) {
+                if (sIndex == data.ProcessStepOrder) {
+                    var id = 0;
+                    for (var i = 0; i < ret.surveyors.length; i++) {
+                        var d = ret.surveyors[i];
+                        if (d.SurveyorName == info.name) {
+                            id = d.Id;
+                            break;
+                        }
+                    }
+                    return '<span id="c4f{0}" oValue="{2}">{1}</span>'.format(o, info.name, id);
+                }
+                return '<span id="c4f{0}" oValue="{2}">{1}</span>'.format(o, data.SurveyorName, data.SurveyorId);
+            }
+            //检验时间
+            var surveyTime = function (data, type, row) {
+                var html =
+                    '<input type="text" id="c51f{0}" class="form_date form-control" value="{2}" style="width:90px;background-color:white;">' +
+                    '<input type="text" id="c52f{0}" class="form_time form-control" value="{3}" style="width:75px;background-color:white;">' +
+                    '<span id="c5f{0}" oValue="{1}" class="hidden">{1}</span>';
+                if (sIndex != data.ProcessStepOrder) {
+                    if (data.SurveyTime == '0001-01-01 00:00:00' || data.SurveyTime == null) {
+                        return '<span id="c5f{0}" oValue="{1}"></span>'.format(o, data.SurveyTime);
+                    }
+                    return '<span id="c5f{0}" oValue="{1}">{1}</span>'.format(o, data.SurveyTime);
+                }
+                return html.format(o, data.SurveyTime, getDate(), getTime());
+            }
+            //合格数
+            var qualifiedNumber = function (data, type, row) {
+                if (data.IsSurvey) {
+                    if (sIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
+                            .format(o, data.QualifiedNumber);
+                    }
+
+                } else {
+                    if (pIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
+                            .format(o, data.QualifiedNumber);
+                    }
+                }
+                return '<input class="form-control" id="c6f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
+            }
+            //不合格数
+            var unqualifiedNumber = function (data, type, row) {
+                if (data.IsSurvey) {
+                    if (sIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
+                            .format(o, data.UnqualifiedNumber);
+                    }
+
+                } else {
+                    if (pIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
+                            .format(o, data.UnqualifiedNumber);
+                    }
+                }
+                return '<input class="form-control" id="c7f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
+            }
+            //机台号
+            var deviceId = function (data, type, row) {
+                return '<span id="c8f{0}" oValue="{2}">{1}</span>'.format(o, data.Code, data.DeviceId);
+            }
+
+            $("#gxList")
+                .DataTable({
+                    "destroy": true,
+                    "bSort": false,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": datas,
+                    "aaSorting": [[0, "asc"]],
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "MarkedDateTime", "title": "修改时间" },
+                        { "data": null, "title": "工序名称", "render": processStepName },
+                        { "data": "ProcessStepRequirements", "title": "加工要求" },
+                        { "data": null, "title": "加工人", "render": processorId },
+                        { "data": null, "title": "加工时间", "render": processTime },
+                        { "data": null, "title": "机台号", "render": deviceId },
+                        { "data": null, "title": "检验人", "render": surveyorId },
+                        { "data": null, "title": "检验时间", "render": surveyTime },
+                        { "data": null, "title": "合格数", "render": qualifiedNumber },
+                        { "data": null, "title": "不合格数", "render": unqualifiedNumber },
+                    ],
+                    "initComplete": function (settings, json) {
+                        $("#gxList th").css("padding-right", "8px");
+                        initTime();
+                    }
+                });
+        });
+}
+
+function initTime() {
+    $("#gxList .form_date,.form_time").attr("readonly", true);
+    $('#gxList .form_date').datepicker({
+        language: 'zh-CN',
+        format: 'yyyy-mm-dd',
+        //endDate:getDayAfter(1),
+        maxViewMode: 2,
+        todayBtn: "linked",
+        autoclose: true
+    });
+
+    $('#gxList .form_time').timepicker({
+        language: 'zh-CN',
+        showMeridian: false,
+        minuteStep: 1,
+        showSeconds: true,
+        secondStep: 1
+    });
+
+}
+
+function reportFlowCard() {
+    var opType = 208;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var flowCardId = parseInt($("#rpFCId").html());
+    var oData = $("#gxList tbody").children();
+    var postData = new Array();
+    for (var i = 1; i <= oData.length; i++) {
+        var id;
+        var processorId;
+        var processTime;
+        var surveyorId;
+        var surveyTime;
+        var qualifiedNumber;
+        var unqualifiedNumber;
+        var deviceId;
+        for (var j = 1; j <= 8; j++) {
+            var key = $("#c{1}f{0}".format(i, j));
+            var v = key.attr("ovalue");
+            var key1;
+            var key2;
+            switch (j) {
+                case 1:
+                    v = $(key).attr("ovalue");
+                    id = v;
+                    break;
+                case 2:
+                    //加工人
+                    processorId = v;
+                    break;
+                case 3:
+                    //加工时间
+                    processTime = isStrEmptyOrUndefined(v) ? null : v;
+                    break;
+                case 4:
+                    //检验人
+                    surveyorId = v;
+                    break;
+                case 5:
+                    //检验时间
+                    if (key.parent().find("input").length > 0) {
+                        key1 = $("#c{1}1f{0}".format(i, j));
+                        key2 = $("#c{1}2f{0}".format(i, j));
+                        v = key1.hasClass("hidden") ? v : '{0} {1}'.format($(key1).val(), $(key2).val());
+                    }
+                    surveyTime = isStrEmptyOrUndefined(v) ? null : v;
+                    break;
+                case 6:
+                    v = key.val();
+                    //合格数
+                    qualifiedNumber = v;
+                    break;
+                case 7:
+                    v = key.val();
+                    //不合格数
+                    unqualifiedNumber = v;
+                    break;
+                case 8:
+                    //机台号
+                    deviceId = v;
+                    break;
+                default:
+                    break;
+            }
+        }
+        var d = {
+            Id: id,
+            //流程卡(自增Id)
+            FlowCardId: flowCardId,
+            //加工人ID（自增id）  为0不指定加工人
+            ProcessorId: processorId,
+            //检验员Id（自增id）  为0不指定检验员
+            SurveyorId: surveyorId,
+            //合格数
+            QualifiedNumber: qualifiedNumber,
+            //不合格数
+            UnqualifiedNumber: unqualifiedNumber,
+            //机台号（自增Id）
+            DeviceId: deviceId
+        };
+        //加工日期 
+        if (processTime != null)
+            d.ProcessTime = processTime;
+        //检验日期
+        if (surveyTime != null)
+            d.SurveyTime = surveyTime;
+        postData.push(d);
+    }
+    if (postData.length <= 0)
+        return;
+
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(postData);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    queryRpFlowCard();
+                }
+            });
+    }
+    showConfirm("保存", doSth);
+}
+
+function clearRpFlowCard() {
+    $("#rpFlowCard").val("");
+    $("#gxList").empty();
 }
