@@ -5,6 +5,7 @@ using ModelBase.Base.EnumConfig;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
@@ -285,26 +286,22 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.OrganizationUnitNotExist);
             }
             var memberIdStr = param.GetValue("memberId");
-            if (!int.TryParse(memberIdStr, out var memberId))
-            {
-                return Result.GenError<Result>(Error.ParamError);
-            }
-
-            var member = AccountHelper.GetAccountInfo(memberId);
-            if (member == null)
+            var memberIdList = memberIdStr.Split(',').Select(int.Parse);
+            var addMemberList = AccountHelper.GetAccountInfos(memberIdList);
+            if (!addMemberList.Any() || addMemberList.Count() != memberIdList.Count())
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
 
             var memberList = OrganizationUnitHelper.MemberList(organizationUnit);
-            if (memberList.Any(x => x.AccountId == member.Id))
+            if (memberList.Any(x => addMemberList.Any(y => y.Id == x.AccountId)))
             {
                 return Result.GenError<Result>(Error.MemberIsExist);
             }
 
-            OrganizationUnitHelper.AddMember(organizationUnit, member);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value,
-                $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}", member.Id);
+            OrganizationUnitHelper.AddMembers(organizationUnit, addMemberList);
+            var logParam = addMemberList.Select(member => $"组织ID:{organizationUnit.Id},组织名:{organizationUnit.Name},成员ID:{member.Id},成员名:{member.Name}").Join(",");
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
 

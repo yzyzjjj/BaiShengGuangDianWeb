@@ -125,6 +125,18 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
+        /// 批量添加组织成员
+        /// </summary>
+        /// <param name="organizationUnit"></param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
+        public static void AddMembers(OrganizationUnit organizationUnit, IEnumerable<AccountInfo> accountInfos)
+        {
+            var sql = "INSERT INTO account_organization_units (`AccountId`, `OrganizationUnitId`) VALUES (@AccountId, @OrganizationUnitId);";
+            ServerConfig.WebDb.Execute(sql, accountInfos.Select(x => new { AccountId = x.Id, OrganizationUnitId = organizationUnit.Id }));
+        }
+
+        /// <summary>
         /// 删除组织成员
         /// </summary>
         /// <param name="id">自增Id</param>

@@ -48,6 +48,18 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
             return info;
         }
+
+        /// <summary>
+        /// 根据accountId 批量获取账号信息
+        /// </summary>
+        /// <param name="accountIds"></param>
+        /// <returns></returns>
+        public static IEnumerable<AccountInfo> GetAccountInfos(IEnumerable<int> accountIds)
+        {
+            var sql = "SELECT * FROM `accounts` WHERE Id IN @accountId AND IsDeleted = 0";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId = accountIds });
+            return info;
+        }
         /// <summary>
         /// 根据账号获取账号信息
         /// </summary>
