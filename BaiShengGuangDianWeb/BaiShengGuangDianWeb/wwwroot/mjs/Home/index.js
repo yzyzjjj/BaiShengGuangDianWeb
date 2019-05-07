@@ -13,7 +13,6 @@
         allowClear: true,
         placeholder: "请选择"
     });
-    showInputReport()
 }
 
 function getDeviceList() {
