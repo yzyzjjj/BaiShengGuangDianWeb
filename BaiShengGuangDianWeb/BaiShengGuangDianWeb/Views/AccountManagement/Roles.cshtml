@@ -62,7 +62,7 @@
         </div>
     </div>
 	
-  <div class="modal fade" id="updataRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updataRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -76,7 +76,7 @@
                     <div class="box">
                         <ul class="breadcrumb direct_gundong" >
                             <li class="jolesAdd skins_roles">角色属性</li>
-                            <li class="powerList">权限</li>
+                            <li class="uppowerList">权限</li>
                         </ul>
                         <div class="box-body upRoles">
                             <form class="form-horizontal">
@@ -84,7 +84,7 @@
                                     <label class="col-sm-3 control-label">角色名称：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updataRoleName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateSiteNameTip"></label>
+                                        <label class="label-danger hidden" id="updateRoleNameTip"></label>
                                     </div>
                                 </div>
                             </form>
@@ -102,5 +102,29 @@
             </div>
         </div>
     </div>
+
+	<div class="modal fade" id="tip_Power" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">提醒</h4>
+                    <label class="hidden" id="updateId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="box">
+                        <h3>你还未选择权限</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 

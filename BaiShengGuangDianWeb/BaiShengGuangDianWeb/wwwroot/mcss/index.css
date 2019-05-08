@@ -25,14 +25,23 @@
         height: 30px;
         width: 70px;
     }
-
+.direct_gundong li:nth-child(3) {
+    margin-left: 6px;
+    height: 30px;
+    width: 70px;
+}
 .skins_roles {
     border-bottom: 2px solid lightcoral;
     color: black;
 }
 
 .appear_d {
-    display: none
+    display: none !important;
 }
 .usersAdd{ height: 30px;width: 76px;}
 .usersList{margin-left: 8px;height: 30px;width: 90px;}
+.workman { margin-left: 8px; height: 30px; width: 90px;}
+.account-box { text-align: center;}
+.addMember{ display: none;}
+.choice{ display: none;}
+

@@ -9,7 +9,7 @@ var op = function (data, type, row) {
         '        <span class="sr-only">Toggle Dropdown</span>' +
         '    </button>' +
         '    <ul class="dropdown-menu" role="menu">' +
-        '<li><a onclick="showUpdateUsers({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\')">修改</a></li>'.format(data.id, data.account, data.emailAddress, data.name,data.roleName, data.permissions) +
+        '<li><a onclick="showUpdateUsers({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\')">修改</a></li>'.format(data.id, data.account, data.emailAddress, data.name, data.roleName, data.permissions, data.deviceIds) +
         '<li><a onclick="DeleteUsers({0}, \'{1}\')">删除</a></li>'.format(data.id, data.account) +
         '</ul>' +
         '</div>';
@@ -23,15 +23,15 @@ function getUsersList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-              $("#userTable")
+            $("#userTable")
                 .DataTable({
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                     "language": { "url": "/content/datatables_language.json" },
+                    "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [1, 2, 3], //更改显示记录数选项  
-                    "iDisplayLength": 1, //默认显示的记录数  
+                    "aLengthMenu": [8, 16, 24], //更改显示记录数选项  
+                    "iDisplayLength": 8, //默认显示的记录数  
                     "columns": [
                         { "data": "id", "title": "序号" },
                         { "data": "account", "title": "用户名" },
@@ -39,7 +39,7 @@ function getUsersList() {
                         { "data": "roleName", "title": "角色" },
                         { "data": "emailAddress", "title": "邮箱" },
                         { "data": null, "title": "操作", "render": op },
-                     ],
+                    ],
                 });
 
         });
@@ -48,6 +48,10 @@ function showAddUsers() {
     $("#addUsers").modal("show");
     $("#addUsersName").empty();
     $(".usersChoice").addClass('appear_d');
+    $(".joinworker").addClass('appear_d');
+    $(".usersAdd").addClass('skins_roles');
+    $(".workman").removeClass('skins_roles');
+    $(".workman").hide();
     var data = {}
     ajaxGet("/RoleManagement/List", null,
         function (ret) {
@@ -55,12 +59,11 @@ function showAddUsers() {
                 layer.msg(ret.errmsg);
                 return;
             }
-           
             $(".jolesChoice").empty();
             var userJoles = '<div class="box box-solid userRoles" style="margin-bottom: 0;">' +
                 '       <input type="radio" style="font-size:20px;" class="selectUsers" name="usersName"  /> ' +
                 '       <h3 class="box-title" style="margin-left: 30px;font-size:18px;display:inline-block;"></h3>' +
-                    '</div>'
+                '</div>'
             var datas = ret.datas;
             var usersName = getUsersName(datas);
             console.log(usersName)
@@ -72,37 +75,43 @@ function showAddUsers() {
                     option.find('h3').text(joles.name)
                     option.find('.selectUsers').attr('value', joles.id)
                     $(".jolesChoice").append(option)
+                    $("input[name=usersName]:first").prop("checked",true)
                 }
-                
             }
-
         })
-   $("#addUsersName").empty();
+    $("#addUsersName").empty();
     $(".usersAdd").addClass('skins_roles');
     $(".addUsers").removeClass('appear_d');
     $(".usersList").removeClass('skins_roles');
+   
     $(".usersAdd").click(function () {
         $(this).addClass('skins_roles');
         $(".usersList").removeClass('skins_roles');
         $(".usersChoice").addClass('appear_d');
         $(".addUsers").removeClass('appear_d');
-     
+        $(".workman").removeClass('skins_roles');
+        $(".joinworker").addClass('appear_d');
     });
-    
+   
+       
     $(".usersList").click(function () {
-
         $(this).addClass('skins_roles');
         $(".usersAdd").removeClass('skins_roles');
         $(".addUsers").addClass('appear_d');
         $(".usersChoice").removeClass('appear_d');
+        $(".workman").removeClass('skins_roles');
+        $(".joinworker").addClass('appear_d');
+        var roels = $(".selectUsers:checked").val();
+        data = {
+            role: roels,
+        }
         //persions开始
-        ajaxGet("/Account/Permissions", data,
+        ajaxGet("/Account/OtherPermissions", data,
             function (ret) {
                 if (ret.errno != 0) {
                     layer.msg(ret.errmsg);
                     return;
                 };
-
 
                 $(".usersChoice").empty();
 
@@ -120,23 +129,39 @@ function showAddUsers() {
                     '      </ul>' +
                     ' </div>' +
                     '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds"  /> '
-
-                var datas = ret.datas
+                var mMenus = '<div class="box box-solid collapsed-box" style="margin-bottom: 0;">' +
+                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
+                    '      <div class="box-tools" style="left: 28px">' +
+                    '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
+                    '              <i class="fa fa-minus" style="margin-left:1px;"></i>' +
+                    '          </button>' +
+                    '      </div>' +
+                    '      <h3 class="box-title" style="margin-left: 30px"></h3>' +
+                    '  </div>' +
+                    '  <div class="box-body no-padding">' +
+                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
+                    '      </ul>' +
+                    ' </div>' +
+                    '</div>'
+                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds" value="" /> '
+                var datas = ret.datas;
+                var pages = [{ name: "网页", parentID: 0 }, { name: "接口", parentID: 1 }]
+                for (var t = 0; t < pages.length; t++) {
+                    var mMenu = mMenuStr.replace('onId', pages[t].parentID)
+                    var option = $(mMenu).clone()
+                    option.find('h3').text(pages[t].name)
+                    option.find('.box-tools').before(rolesChoice)
+                    option.find('.selectCheck').attr('id', "checkd" + pages[t].parentID)
+                    option.find('.on_ul').attr('id', "cont" + pages[t].parentID)
+                    $(".usersChoice").append(option)
+                    checkeds(pages[t].parentID);
+                }
+                var falseParent = getRolesParent(datas, false)
+                var type_d = [{ name: " 页面管理", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
                 //获取isPage第一层为true
                 var parents = getRolesParent(datas, true)
                 //获取type值
                 var rolesType = getRolesTypes(parents)
-                var pages = { name: "网页", parentID: 0 }
-                var mMenu = mMenuStr.replace('onId', pages.parentID)
-                var option = $(mMenu).clone()
-                option.find('h3').text(pages.name)
-                option.find('.box-tools').before(rolesChoice)
-                option.find('.selectCheck').attr('id', "checks" + pages.parentID)
-                option.find('.on_ul').attr('id', "cont" + pages.parentID)
-                $(".usersChoice").append(option)
-                var type_d = [{ name: " 页面相关", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
-
                 for (var i = 0; i < rolesType.length; i++) {
                     //获取当type=1时的data
                     var childs = getChildRolesTypes(parents, rolesType[i])
@@ -144,42 +169,32 @@ function showAddUsers() {
                         var types = type_d[n]
                         if (types.Pid == rolesType[i]) {
                             var mMenu = mMenuStr.replace('onId', rolesType[i])
-
                             var option = $(mMenu).clone()
                             option.find('h3').text(types.name)
                             option.find('.box-tools').before(rolesChoice)
                             option.find('.selectCheck').attr('id', "checks" + types.Pid)
                             option.find('.on_ul').attr('id', "on" + types.Pid)
-                            if ($(".usersChoice").find('[id=' + "cont" + pages.parentID + ']')) {
-                                $(".usersChoice").find('[id=' + "cont" + pages.parentID + ']').append(option)
+                            if ($(".usersChoice").find('[id=' + "cont" + 0 + ']')) {
+                                $(".usersChoice").find('[id=' + "cont" + 0 + ']').append(option)
                                 //复选框
-                                $(".usersChoice").find('[id=' + "checks" + types.Pid + ']').click(function () {
-                                    $(".usersChoice").find('[id=' + "checks" + pages.parentID + ']').prop("checked", true)
-                                })
-
+                                type(types.Pid);
+                                //选择结束
                             }
-
                             //获取label值的数组
                             var label = getRolesLabel(childs)
                             for (var j = 0; j < label.length; j++) {
                                 var labels = label[j]
                                 var lable_D = { label: label[j], labelID: j }
-                                var mMenu = mMenuStr.replace('onId', lable_D.labelID)
+                                var mMenu = mMenus.replace('onId', lable_D.labelID)
                                 var option = $(mMenu).clone()
                                 option.find('h3').text(lable_D.label)
                                 option.find('.box-tools').before(rolesChoice)
                                 option.find('.selectCheck').attr('id', "la_d" + lable_D.labelID)
+                                option.find('.fa').attr('class', "fa fa-plus")
                                 option.find('.on_ul').attr('id', "la" + lable_D.labelID)
                                 if ($(".usersChoice").find('[id=' + "on" + types.Pid + ']')) {
                                     $(".usersChoice").find('[id=' + "on" + types.Pid + ']').append(option)
-                                    //复选框
-                                    $(".usersChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                        $(".usersChoice").find('[id=' + "checks" + 1 + ']').prop("checked", true)
-                                    })
-                                    $(".usersChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                        $(this).find('input[name="privilegeIds"]:checkbox').prop("checked", true)
-                                    })
-
+                                    chioce(j);
                                 }
                                 //获取lable相同时的data
                                 var childLabel = getChildRolesLabel(childs, label[j])
@@ -191,46 +206,147 @@ function showAddUsers() {
                                     option.find('.box-tools').before(rolesChoice)
                                     option.find('.selectCheck').attr('id', "name_d" + labelchild.id)
                                     option.find('.selectCheck').attr('value', labelchild.id)
-                                    option.find('.on_ul').attr('id', "name" + labelchild.id)
-                                    if (labelchild.label == lable_D.label && labelchild.label != labelchild.name) {
-                                        $(".usersChoice").find('[id=' + "la" + lable_D.labelID + ']').append(option)
-                                        //复选框
-                                        $(".usersChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                            $(".usersChoice").find('[id=' + "checks" + 1 + ']').prop("checked", true)
-                                        })
+                                    if (labelchild.label != labelchild.name) {
+                                        $(".usersChoice").find('[id=' + "la" + lable_D.labelID + ']').append(option);
+                                    } else {
+                                        $(".usersChoice").find('[id=' + "la_d" + lable_D.labelID + ']').attr('value', labelchild.id);
+
                                     }
 
                                 }
-
-
                             }
-
                         }
-
                     }
-
-
                 }
 
-                //选择                   
-                $(".selectCheck:first").click(function () {
-                    if (this.checked) {
-                        $("input[name='privilegeIds']:checkbox").each(function () {
-                            $(this).prop("checked", true);
-                        });
-                    } else {
-                        $("input[name='privilegeIds']:checkbox").each(function () {
-                            $(this).prop("checked", false);
-                        });
-                    }
 
-                });
+
+                //接口
+                var falseParent = getRolesParent(datas, false)
+                //获取type值
+                var rolesTypefalse = getRolesTypes(falseParent)
+                for (var i = 0; i < rolesTypefalse.length; i++) {
+                    //获取type的data
+                    var childsfalse = getChildRolesTypes(falseParent, rolesTypefalse[i])
+                    for (var n = 0; n < type_d.length; n++) {
+                        var types = type_d[n]
+                        if (types.Pid == rolesTypefalse[i]) {
+                            var mMenu = mMenuStr.replace('onId', rolesTypefalse[i])
+                            var option = $(mMenu).clone()
+                            option.find('h3').text(types.name)
+                            option.find('.box-tools').before(rolesChoice)
+                            option.find('.selectCheck').attr('id', "false" + types.Pid)
+                            option.find('.on_ul').attr('id', "onfalse" + types.Pid)
+                            if ($(".usersChoice").find('[id=' + "cont" + 1 + ']')) {
+                                $(".usersChoice").find('[id=' + "cont" + 1 + ']').append(option)
+                                //复选框
+                                falseType(types.Pid)
+                                //选择结束
+                            }
+                            //获取label值的数组
+                            var labelfalse = getRolesLabel(childsfalse)
+                            for (var j = 0; j < labelfalse.length; j++) {
+                                var labels = labelfalse[j]
+                                var lable_D = { label: labelfalse[j], labelID: j }
+                                var mMenu = mMenus.replace('onId', lable_D.labelID)
+                                var option = $(mMenu).clone()
+                                option.find('h3').text(lable_D.label)
+                                option.find('.box-tools').before(rolesChoice)
+                                option.find('.selectCheck').attr('id', "la_dfalse" + lable_D.labelID)
+                                option.find('.on_ul').attr('id', "lafalse" + lable_D.labelID)
+                                option.find('.fa').attr('class', "fa fa-plus")
+                                if ($(".usersChoice").find('[id=' + "onfalse" + types.Pid + ']')) {
+                                    $(".usersChoice").find('[id=' + "onfalse" + types.Pid + ']').append(option);
+                                    falsechioce(lable_D.labelID)
+                                }
+                                //获取lable相同时的data
+                                var childLabels = getChildRolesLabel(childsfalse, labelfalse[j])
+                                for (var m = 0; m < childLabels.length; m++) {
+                                    var labelchild = childLabels[m]
+                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
+                                    var option = $(mMenu).clone()
+                                    option.find('h3').text(labelchild.name)
+                                    option.find('.box-tools').before(rolesChoice)
+                                    option.find('.selectCheck').attr('id', "name_dfalse" + labelchild.id)
+                                    option.find('.selectCheck').attr('value', labelchild.id)
+                                    if (labelchild.label != labelchild.name) {
+                                        $(".usersChoice").find('[id=' + "lafalse" + lable_D.labelID + ']').append(option)
+
+                                    } else {
+                                        $(".usersChoice").find('[id=' + "la_dfalse" + lable_D.labelID + ']').attr('value', labelchild.id);
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
 
             });
         //persions结束
-
     });
+    $("input[name=joinwork]").change(
+        function () {
+            var data_depart1 = $(this).val();
+            if (data_depart1 == "0") {
+                $(".workman").show();
+               
+            }
+            if (data_depart1 == "1") {
+                $(".workman").hide();
+            }
+        });
+    $(".workman").click(function() {
+        $(this).addClass('skins_roles');
+        $(".usersAdd").removeClass('skins_roles');
+        $(".usersList").removeClass('skins_roles');
+        $(".addUsers").addClass('appear_d');
+        $(".usersChoice").addClass('appear_d');
+        $(".joinworker").removeClass('appear_d');
+        var opType = 100;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var data = {}
+        data.opType = opType;
+        ajaxPost("/Relay/Post", data,
+            function(ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                
+                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
+                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
+                    '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
+                    '  </div>' +
+                    '  <div class="box-body no-padding">' +
+                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
+                    '      </ul>' +
+                    ' </div>' +
+                    '</div>'
+                var rolesChoice = '<input type="checkbox" class="selectCodes" name="codes" /> '
+               var datas = ret.datas;
+                var parents = getmadeCode(datas)
+                console.log(parents);
+                for (var i = 0; i < parents.length; i++) {
+                    var childs = getCodeData(datas, parents[i])
+                    for (var j = 0; j < childs.length; j++) {
+                        var child = childs[j]
+                        var mMenu = mMenuStr.replace('onId', child.Id)
+                        var option = $(mMenu).clone()
+                        option.find('h3').text(child.Code)
+                        option.find('.box-title').before(rolesChoice)
+                        option.find('.selectCodes').attr('value', child.Id)
+                        option.find('.on_ul').attr('id', "on" + child.Id)
+                        $(".joinworker").append(option)
+                     }
+                }
+               
+            })
+    })
 }
 function addUsers() {
 
@@ -238,7 +354,24 @@ function addUsers() {
     var personNames = $("#addPersonName").val();
     var email = $("#addEmail").val();
     var Password = $("#addPassword").val();
-    var roles= $("input[name=usersName]:checked").val();
+    var joinswork = $("input[name=joinwork]:checked").val();
+    var joincheck = $("input[name=checker]:checked").val();
+    var accountArray = new Array();
+    if (joinswork == 0 && joincheck == 1) {
+        accountArray.push(joinswork);
+        accountArray.push(joincheck);
+    }
+    if (joinswork == 0 && joincheck == 2) {
+        accountArray.push(joinswork);
+    }
+    if (joinswork == 1 && joincheck == 1) {
+        accountArray.push(joincheck);
+    }
+    if (joinswork == 1 && joincheck == 2) {
+                  return
+    }
+    joinsWorkId = accountArray.join(",");
+    var roles = $("input[name=usersName]:checked").val();
     if (roles == "") {
         alert("你还未选择角色！")
     }
@@ -257,6 +390,21 @@ function addUsers() {
     }
 
     roleId = roleArray.join(",");
+    var Code_value = [];
+    $('input[name="codes"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
+        if ($(this).val() != "") {
+            Code_value.push({ id: $(this).val() })
+            return Code_value
+        }
+    });
+    //console.log(chk_value)
+    var codeArray = new Array();
+
+    for (i = 0; i < Code_value.length; i++) {
+        codeArray.push(Code_value[i].id);
+    }
+
+    codeId = codeArray.join(",");
 
     if (isStrEmptyOrUndefined(addUsersName)) {
         showTip($("#usersNameTip"), "用户名不能为空");
@@ -270,17 +418,19 @@ function addUsers() {
         showTip($("#emailNameTip"), "邮箱不能为空");
         return;
     }
-   
- 
+
+
     var doSth = function () {
         $("#addUsers").modal("hide");
         var data = {
-            account:usersNames,
-            password:Password,
+            account: usersNames,
+            password: Password,
             name: personNames,
             email: email,
             role: roles,
-            permissions: roleId
+            permissions: roleId,
+            isProcessor: joinsWorkId,
+            deviceIds: codeId
         }
 
 
@@ -296,11 +446,20 @@ function addUsers() {
     showConfirm("添加", doSth);
 
 }
-function showUpdateUsers(id, account, email, name,rolename, permissions) {
+function showUpdateUsers(id, account, email, name, rolename, permissions, deviceIds) {
     $("#updataUsers").modal("show");
     $(".updataChoice").addClass('appear_d');
+    $(".updataworker").addClass('appear_d');
+   $(".usersAdd").addClass('skins_roles');
+    $(".workman").removeClass('skins_roles');
+    $(".usersList").removeClass('skins_roles');
+    $(".upUsers").removeClass('appear_d');
+    $(".workman").hide();
     var dataPermissions = []
     var dataPermissions = permissions.split(",");
+    var dataDevices = []
+    var dataDevices = deviceIds.split(",");
+    console.log(dataDevices)
     var data = {}
     ajaxGet("/RoleManagement/List", null,
         function (ret) {
@@ -309,65 +468,66 @@ function showUpdateUsers(id, account, email, name,rolename, permissions) {
                 return;
             }
 
-            $(".jolesChoice").empty();
+            $(".upjolesChoice").empty();
             var userJoles = '<div class="box box-solid userRoles" style="margin-bottom: 0;">' +
-                '       <input type="radio" style="font-size:20px;" class="selectUsers" name="usersName"  /> ' +
+                '       <input type="radio" style="font-size:20px;" class="selectUsersd" name="Namechoice"  /> ' +
                 '       <h3 class="box-title" style="margin-left: 30px;font-size:18px;display:inline-block;"></h3>' +
                 '</div>'
             var datas = ret.datas;
             var usersName = getUsersName(datas);
+            var subscript = usersName.indexOf(rolename)
             
-            console.log(usersName)
-            for (var i = 0; i < usersName.length; i++) {
+             for (var i = 0; i < usersName.length; i++) {
 
                 var userdata = getUsersData(datas, usersName[i])
                 for (var j = 0; j < userdata.length; j++) {
                     var joles = userdata[j]
                     var option = $(userJoles).clone()
                     option.find('h3').text(joles.name)
-                    option.find('.selectUsers').attr('value', joles.id)
-                    $(".jolesChoice").append(option)
-                    if (joles.name == rolename) {
-
-                        $(".jolesChoice").find('.selectUsers').prop("checked", true)
-                    } 
+                    option.find('.selectUsersd').attr('value', joles.id)
+                    $(".upjolesChoice").append(option)
+                    $("input[name=Namechoice]").eq(subscript).prop("checked", true);
                 }
 
             }
-
+           
         })
-    console.log(dataPermissions)
+    //if (joles.name == rolename) {
+    //    $(".jolesChoice").find('.selectUsers').prop("checked", true)
+    //}
     $("#updateId").html(id);
     $("#updataUsersName").val(account);
     $("#updataPersonName").val(name);
     $("#updataEmail").val(email);
-
-    $(".usersAdd").addClass('skins_roles');
-    $(".upUsers").removeClass('appear_d');
-    $(".updataChoice").addClass('appear_d');
-    $(".usersList").removeClass('skins_roles');
     $(".usersAdd").click(function () {
-
         $(this).addClass('skins_roles');
         $(".usersList").removeClass('skins_roles');
         $(".updataChoice").addClass('appear_d');
         $(".upUsers").removeClass('appear_d');
+        $(".updataworker").addClass('appear_d');
+        $(".workman").removeClass('skins_roles');
     });
-    
+
     $(".usersList").click(function () {
-        data = {}
         $(this).addClass('skins_roles');
         $(".usersAdd").removeClass('skins_roles');
         $(".upUsers").addClass('appear_d');
         $(".updataChoice").removeClass('appear_d');
-        ajaxGet("/Account/Permissions", data,
+        $(".workman").removeClass('skins_roles');
+        $(".updataworker").addClass('appear_d');
+        var roels = $(".selectUsersd:checked").val();
+        data = {
+            role: roels,
+        }
+        //persions开始
+        ajaxGet("/Account/OtherPermissions", data,
             function (ret) {
                 if (ret.errno != 0) {
                     layer.msg(ret.errmsg);
                     return;
                 };
-                $(".updataChoice").empty();
 
+                $(".updataChoice").empty();
                 var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
                     '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
                     '      <div class="box-tools" style="left: 28px">' +
@@ -382,23 +542,25 @@ function showUpdateUsers(id, account, email, name,rolename, permissions) {
                     '      </ul>' +
                     ' </div>' +
                     '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds" /> '
-
-                var datas = ret.datas
+                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds" value="" /> '
+                var datas = ret.datas;
+                var pages = [{ name: "网页", parentID: 0 }, { name: "接口", parentID: 1 }]
+                for (var t = 0; t < pages.length; t++) {
+                    var mMenu = mMenuStr.replace('onId', pages[t].parentID)
+                    var option = $(mMenu).clone()
+                    option.find('h3').text(pages[t].name)
+                    option.find('.box-tools').before(rolesChoice)
+                    option.find('.selectCheck').attr('id', "checkd" + pages[t].parentID)
+                    option.find('.on_ul').attr('id', "cont" + pages[t].parentID)
+                    $(".updataChoice").append(option)
+                    checkeds(pages[t].parentID);
+                }
+                var falseParent = getRolesParent(datas, false)
+                var type_d = [{ name: " 页面管理", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
                 //获取isPage第一层为true
                 var parents = getRolesParent(datas, true)
                 //获取type值
                 var rolesType = getRolesTypes(parents)
-                var pages = { name: "网页", parentID: 0 }
-                var mMenu = mMenuStr.replace('onId', pages.parentID)
-                var option = $(mMenu).clone()
-                option.find('h3').text(pages.name)
-                option.find('.box-tools').before(rolesChoice)
-                option.find('.selectCheck').attr('id', "checks" + pages.parentID)
-                option.find('.on_ul').attr('id', "cont" + pages.parentID)
-                $(".updataChoice").append(option)
-                var type_d = [{ name: " 页面相关", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
-
                 for (var i = 0; i < rolesType.length; i++) {
                     //获取当type=1时的data
                     var childs = getChildRolesTypes(parents, rolesType[i])
@@ -406,21 +568,17 @@ function showUpdateUsers(id, account, email, name,rolename, permissions) {
                         var types = type_d[n]
                         if (types.Pid == rolesType[i]) {
                             var mMenu = mMenuStr.replace('onId', rolesType[i])
-
                             var option = $(mMenu).clone()
                             option.find('h3').text(types.name)
                             option.find('.box-tools').before(rolesChoice)
                             option.find('.selectCheck').attr('id', "checks" + types.Pid)
                             option.find('.on_ul').attr('id', "on" + types.Pid)
-                            if ($(".updataChoice").find('[id=' + "cont" + pages.parentID + ']')) {
-                                $(".updataChoice").find('[id=' + "cont" + pages.parentID + ']').append(option)
+                            if ($(".updataChoice").find('[id=' + "cont" + 0 + ']')) {
+                                $(".updataChoice").find('[id=' + "cont" + 0 + ']').append(option)
                                 //复选框
-                                $(".updataChoice").find('[id=' + "checks" + types.Pid + ']').click(function () {
-                                    $(".updataChoice").find('[id=' + "checks" + pages.parentID + ']').prop("checked", true)
-                                })
-
+                                type(types.Pid);
+                                //选择结束
                             }
-
                             //获取label值的数组
                             var label = getRolesLabel(childs)
                             for (var j = 0; j < label.length; j++) {
@@ -434,14 +592,7 @@ function showUpdateUsers(id, account, email, name,rolename, permissions) {
                                 option.find('.on_ul').attr('id', "la" + lable_D.labelID)
                                 if ($(".updataChoice").find('[id=' + "on" + types.Pid + ']')) {
                                     $(".updataChoice").find('[id=' + "on" + types.Pid + ']').append(option)
-                                    //复选框
-                                    $(".updataChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                        $(".updataChoice").find('[id=' + "checks" + 1 + ']').prop("checked", true)
-                                    })
-                                    $(".updataChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                        $(this).find('input[name="privilegeIds"]:checkbox').prop("checked", true)
-                                    })
-
+                                    chioce(j);
                                 }
                                 //获取lable相同时的data
                                 var childLabel = getChildRolesLabel(childs, label[j])
@@ -453,40 +604,177 @@ function showUpdateUsers(id, account, email, name,rolename, permissions) {
                                     option.find('.box-tools').before(rolesChoice)
                                     option.find('.selectCheck').attr('id', "name_d" + labelchild.id)
                                     option.find('.selectCheck').attr('value', labelchild.id)
-                                    option.find('.on_ul').attr('id', "name" + labelchild.id)
-                                    if (labelchild.label == lable_D.label && labelchild.label != labelchild.name) {
+                                    if (labelchild.label != labelchild.name) {
                                         $(".updataChoice").find('[id=' + "la" + lable_D.labelID + ']').append(option)
-                                        //复选框
 
-                                        $(".updataChoice").find('[id=' + "la_d" + lable_D.labelID + ']').click(function () {
-                                            $(".updataChoice").find('[id=' + "checks" + 1 + ']').prop("checked", true)
-                                        })
+                                    } else {
+                                        $(".updataChoice").find('[id=' + "la_d" + lable_D.labelID + ']').attr('value', labelchild.id);
+
                                     }
-
                                 }
-
-
                             }
-
                         }
+                    }
+                }
+                //接口
+                var falseParent = getRolesParent(datas, false)
+                //获取type值
+                var rolesTypefalse = getRolesTypes(falseParent)
+                for (var i = 0; i < rolesTypefalse.length; i++) {
+                    //获取type的data
+                    var childsfalse = getChildRolesTypes(falseParent, rolesTypefalse[i])
+                    for (var n = 0; n < type_d.length; n++) {
+                        var types = type_d[n]
+                        if (types.Pid == rolesTypefalse[i]) {
+                            var mMenu = mMenuStr.replace('onId', rolesTypefalse[i])
+                            var option = $(mMenu).clone()
+                            option.find('h3').text(types.name)
+                            option.find('.box-tools').before(rolesChoice)
+                            option.find('.selectCheck').attr('id', "false" + types.Pid)
+                            option.find('.on_ul').attr('id', "onfalse" + types.Pid)
+                            if ($(".updataChoice").find('[id=' + "cont" + 1 + ']')) {
+                                $(".updataChoice").find('[id=' + "cont" + 1 + ']').append(option)
+                                //复选框
+                                falseType(types.Pid)
+                                //选择结束
+                            }
+                            //获取label值的数组
+                            var labelfalse = getRolesLabel(childsfalse)
+                            for (var j = 0; j < labelfalse.length; j++) {
+                                var labels = labelfalse[j]
+                                var lable_D = { label: labelfalse[j], labelID: j }
+                                var mMenu = mMenuStr.replace('onId', lable_D.labelID)
+                                var option = $(mMenu).clone()
+                                option.find('h3').text(lable_D.label)
+                                option.find('.box-tools').before(rolesChoice)
+                                option.find('.selectCheck').attr('id', "la_dfalse" + lable_D.labelID)
+                                option.find('.on_ul').attr('id', "lafalse" + lable_D.labelID)
+                                if ($(".updataChoice").find('[id=' + "onfalse" + types.Pid + ']')) {
+                                    $(".updataChoice").find('[id=' + "onfalse" + types.Pid + ']').append(option);
+                                    falsechioce(lable_D.labelID)
+                                }
+                                //获取lable相同时的data
+                                var childLabels = getChildRolesLabel(childsfalse, labelfalse[j])
+                                for (var m = 0; m < childLabels.length; m++) {
+                                    var labelchild = childLabels[m]
+                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
+                                    var option = $(mMenu).clone()
+                                    option.find('h3').text(labelchild.name)
+                                    option.find('.box-tools').before(rolesChoice)
+                                    option.find('.selectCheck').attr('id', "name_dfalse" + labelchild.id)
+                                    option.find('.selectCheck').attr('value', labelchild.id)
+                                    if (labelchild.label != labelchild.name) {
+                                        $(".updataChoice").find('[id=' + "lafalse" + lable_D.labelID + ']').append(option)
 
+                                    } else {
+                                        $(".updataChoice").find('[id=' + "la_dfalse" + lable_D.labelID + ']').attr('value', labelchild.id);
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                //复选框设置
+
+                $('input[name="privilegeIds"]:checkbox').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
+                    for (var i = 0; i < dataPermissions.length; i++) {
+                        if ($(this).val() == dataPermissions[i]) {
+                            $(this).prop("checked", true);
+                        }
                     }
 
-
-                }
-                
+                });
+                //复选框设置结束
             });
-
-
+        //persions结束
     });
+    $("input[name=upjoinwork]").change(
+        function () {
+            var data_depart1 = $(this).val();
+            if (data_depart1 == "0") {
+                $(".workman").show();
+
+            }
+            if (data_depart1 == "1") {
+                $(".workman").hide();
+            }
+            
+        });
+    if (deviceIds != "") {
+        $("input[name=upjoinwork]").eq(0).prop("checked", true);
+        $(".workman").show();
+
+    }
+    $(".workman").click(function () {
+        $(this).addClass('skins_roles');
+        $(".usersAdd").removeClass('skins_roles');
+        $(".usersList").removeClass('skins_roles');
+        $(".upUsers").addClass('appear_d');
+        $(".updataChoice").addClass('appear_d');
+        $(".updataworker").removeClass('appear_d');
+        var opType = 100;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var data = {}
+        data.opType = opType;
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+
+                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
+                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
+                    '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
+                    '  </div>' +
+                    '  <div class="box-body no-padding">' +
+                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
+                    '      </ul>' +
+                    ' </div>' +
+                    '</div>'
+                var rolesChoice = '<input type="checkbox" class="selectCodes" name="codes" /> '
+                var datas = ret.datas;
+                var parents = getmadeCode(datas)
+                console.log(parents);
+                for (var i = 0; i < parents.length; i++) {
+                    var childs = getCodeData(datas, parents[i])
+                    for (var j = 0; j < childs.length; j++) {
+                        var child = childs[j]
+                        var mMenu = mMenuStr.replace('onId', child.Id)
+                        var option = $(mMenu).clone()
+                        option.find('h3').text(child.Code)
+                        option.find('.box-title').before(rolesChoice)
+                        option.find('.selectCodes').attr('value', child.Id)
+                        option.find('.on_ul').attr('id', "on" + child.Id)
+                        $(".updataworker").append(option)
+                    }
+                }
+                //选择框设置
+                $('input[name="codes"]:checkbox').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
+                    for (var i = 0; i < dataDevices.length; i++) {
+                        if ($(this).val() == dataDevices[i]) {
+                            $(this).prop("checked", true);
+                        }
+                    }
+
+                });
+                //复选框设置结束
+            })
+       
+    })
 
 }
 function updataUsers() {
     var id = parseInt($("#updateId").html());
-    var upUserName = $("#updataPersonName").val();
+    var upUserName = $("#updataUsersName").val();
+    var upPersonName = $("#updataPersonName").val();
     var password = $("#updataPassword").val();
     var email = $("#updataEmail").val();
-    var roles = $("input[name=usersName]:checked").val();
+    var roles = $("input[name=Namechoice]:checked").val();
     var chk_value = [];
     $('input[name="privilegeIds"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
         if ($(this).val() != "") {
@@ -508,8 +796,9 @@ function updataUsers() {
 
         var data = {
             id: id,
+            account: upUserName,
             password: password,
-            name: upUserName,
+            name: upPersonName,
             email: email,
             role: roles,
             permissions: roleId
@@ -527,7 +816,7 @@ function updataUsers() {
 
 }
 function DeleteUsers(id, account) {
-   
+
     var doSth = function () {
         var data = {
             id: id,
@@ -626,4 +915,79 @@ function getChildRolesTypes(list, type) {
         }
     }
     return result.sort(rule)
+}
+function getmadeCode(list) {
+    var parents = new Array();
+    for (var i = 0; i < list.length; i++) {
+        var data = list[i]
+        if (parents.indexOf(data.Code) < 0) {
+            parents.push(data.Code)
+        }
+    }
+    return parents.sort(rule)
+}
+function getCodeData(list, code) {
+    var result = new Array();
+    for (var i = 0; i < list.length; i++) {
+        var data = list[i]
+        if (data.Code == code) {
+            result.push(data)
+        }
+    }
+
+    return result.sort(rule)
+}
+function checkeds(t) {
+    $("#checkd" + t).click(function () {
+        if (this.checked) {
+            $("#checkd" + t).parent().parent().find(".selectCheck").prop("checked", true);
+        } else {
+            $("#checkd" + t).parent().parent().find(".selectCheck").prop("checked", false);
+        }
+    })
+}
+function type(i) {
+    $("#checks" + i).click(function () {
+        if (this.checked) {
+            $("#checks" + i).parent().parent().find(".selectCheck").prop("checked", true);
+            $("#checks" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
+        } else {
+            $("#checks" + i).parent().parent().find(".selectCheck").prop("checked", false);
+            $("#checks" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
+        }
+
+    })
+}
+function chioce(i) {
+    $("#la_d" + i).click(function () {
+        if (this.checked) {
+            $("#la_d" + i).parent().parent().find(".selectCheck").prop("checked", true);
+            $("#la_d" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
+        } else {
+            $("#la_d" + i).parent().parent().find(".selectCheck").prop("checked", false);
+            $("#la_d" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
+        }
+    })
+}
+function falseType(m) {
+    $("#false" + m).click(function () {
+        if (this.checked) {
+            $("#false" + m).parent().parent().find(".selectCheck").prop("checked", true);
+            $("#false" + m).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
+        } else {
+            $("#false" + m).parent().parent().find(".selectCheck").prop("checked", false);
+            $("#false" + m).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
+        }
+    })
+}
+function falsechioce(i) {
+    $("#la_dfalse" + i).click(function () {
+        if (this.checked) {
+            $("#la_dfalse" + i).parent().parent().find(".selectCheck").prop("checked", true);
+            $("#la_dfalse" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
+        } else {
+            $("#la_dfalse" + i).parent().parent().find(".selectCheck").prop("checked", false);
+            $("#la_dfalse" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
+        }
+    })
 }
