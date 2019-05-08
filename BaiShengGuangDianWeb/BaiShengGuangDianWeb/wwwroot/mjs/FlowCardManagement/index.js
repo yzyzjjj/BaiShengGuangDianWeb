@@ -187,7 +187,7 @@ function getFlowCardList() {
                     "autoWidth": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aaSorting": [[0, "asc"]],
+                    "aaSorting": [[1, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": [
@@ -993,7 +993,7 @@ function getProductionProcessList(first = false) {
                     "autoWidth": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aaSorting": [[0, "asc"]],
+                    "aaSorting": [[1, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": [
@@ -1519,7 +1519,7 @@ function getRawMateriaList(first = false) {
                     "autoWidth": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aaSorting": [[0, "asc"]],
+                    "aaSorting": [[1, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": [
