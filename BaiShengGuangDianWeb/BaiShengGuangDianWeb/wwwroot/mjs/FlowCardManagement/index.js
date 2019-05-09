@@ -1,11 +1,39 @@
 ﻿function pageReady() {
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
-    getFlowCardList();
+    getWorkshopList();
+    getFlowCardList(-1);
+    $("#workshopCode").on("select2:select", function (e) {
+        getFlowCardList();
+    });
     //getProductionProcessList();
     //getRawMateriaList();
 }
 
+function getWorkshopList() {
+    var opType = 261;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#workshopCode").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+            }
+            $("#workshopCode").append(option.format(0, "所有"));
+        });
+}
 var fProductionProcessList = false;
 var fRawMateriaList = false;
 //流程卡
@@ -130,7 +158,8 @@ function addFlowCard() {
     showConfirm("添加", doSth);
 }
 
-function getFlowCardList() {
+function getFlowCardList(t = 0) {
+    $("#flowCardList").empty();
     var opType = 200;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -138,6 +167,9 @@ function getFlowCardList() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        id: t == -1 ? 1 : $("#workshopCode").val()
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -196,7 +228,12 @@ function getFlowCardList() {
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "MarkedDateTime", "title": "修改时间" },
                         { "data": "ProductionProcessName", "title": "计划号" },
-                        { "data": "FlowCardName", "title": "流程卡号" },
+                        { "data": "WorkshopName", "title": "卡类型" },
+                        {
+                            "data": null, "title": "流程卡号", "render": function (data, type, row) {
+                                return data.FlowCardName.substring(2);
+                            }
+                        },
                         { "data": "RawMateriaName", "title": "原料批次" },
                         { "data": null, "title": "优先级", "render": priority },
                         { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },

@@ -740,3 +740,7 @@ function getQueryString(name) {
     var r = window.location.search.substr(1).match(reg);
     if (r != null) return unescape(r[2]); return null;
 }
+
+function parseInt(num, n) {
+    return (Array(n).join(0) + num).slice(-n);
+}

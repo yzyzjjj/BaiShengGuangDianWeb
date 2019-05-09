@@ -3,6 +3,7 @@
     $(".ms2").select2();
     $("#run").addClass("disabled");
     getDeviceList();
+    getWorkshopList();
     $("#flowCard").change(function () {
         $("#run").addClass("disabled");
     });
@@ -68,7 +69,8 @@ function getDeviceList() {
                 });
 
 
-            $(".ms2").empty();
+            $("#processCode").empty();
+            $("#faultCode").empty();
             var option = '<option value="{0}" id="{2}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -78,7 +80,30 @@ function getDeviceList() {
                     $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
                 }
             }
+        });
+}
 
+function getWorkshopList() {
+    var opType = 261;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#workshopCode").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+            }
         });
 }
 
@@ -88,6 +113,7 @@ function queryFlowCard() {
         layer.msg("没有权限");
         return;
     }
+
     $("#run").addClass("disabled");
     var query = true;
     //机台号
@@ -105,12 +131,13 @@ function queryFlowCard() {
     }
     if (!query)
         return;
+    var ws = parseInt($("#workshopCode").val(), 2);
 
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
         Id: deviceId,
-        FlowCardName: flowCard
+        FlowCardName: ws + flowCard
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {

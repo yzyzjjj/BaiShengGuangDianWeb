@@ -29,6 +29,11 @@
                             </div>
                         </div>
                         <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="workshopCode">选择卡类型：</label>
+                                <select class="ms2 form-control" style="width: 100%" id="workshopCode" onchange="focusIn($(this))"></select>
+                                <label class="label-danger hidden" id="workshopCodeTip"></label>
+                            </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="flowCardList"></table>
                             </div>
