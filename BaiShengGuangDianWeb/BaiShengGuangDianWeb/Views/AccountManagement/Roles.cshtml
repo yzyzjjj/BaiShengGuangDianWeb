@@ -7,7 +7,7 @@
 <link href="~/mcss/index.css" rel="stylesheet" type="text/css">
 <script src="~/mjs/AccountManagement/roles.js"></script>
 
-<div  style="background:#f4f6f7 repeat-x; border: 1px solid #c1d3de; margin: 0; padding: 0;overflow: visible;"><h2 style="margin: 0;padding: 0; line-height: 33px;margin-left: 2px;font-weight: bold; font-size: 16px;font-family: '微软雅黑'; color: #000000; ">角色管理</h2></div>		
+<div style="background:#f4f6f7 repeat-x; border: 1px solid #c1d3de; margin: 0; padding: 0;overflow: visible;"><h2 style="margin: 0;padding: 0; line-height: 33px;margin-left: 2px;font-weight: bold; font-size: 16px;font-family: 微软雅黑; color: #000000; ">角色管理</h2></div>
 <section class="content">
     <div class="box box-primary">
         <div class="box-header with-border">
@@ -21,8 +21,9 @@
             </div>
         </div>
     </div>
-	<!-- 模态框（Modal） -->
-    <div class="modal fade" id="addRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="addRoleModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -32,25 +33,22 @@
                     <h4 class="modal-title">新角色信息</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="box">
-                        <ul class="breadcrumb direct_gundong" >
-                            <li class="jolesAdd skins_roles">角色属性</li>
-                            <li class="powerList">权限</li>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li><a href="#div_proto" data-toggle="tab">角色属性</a></li>
+                            <li class="active"><a href="#div_per" data-toggle="tab">权限列表</a></li>
                         </ul>
-                        <div class="box-body addRoles">
-                            <form class="form-horizontal">
+                        <div class="tab-content no-padding">
+                            <div id="div_proto" class="tab-pane fade">
                                 <div class="form-group">
-                                    <label class="col-sm-3 control-label">角色名称：</label>
-                                    <div class="col-sm-9">
+                                    <label class="control-label">角色名称：</label>
+                                    <div class="">
                                         <input class="form-control" id="addRoleName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateSiteNameTip"></label>
+                                        <label class="label-danger hidden" id="addRoleNameTip"></label>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="box-body  powerChoice">
-                           
-
+                            </div>
+                            <div id="div_per" class="tab-pane active in"></div>
                         </div>
                     </div>
                 </div>
@@ -61,7 +59,7 @@
             </div>
         </div>
     </div>
-	
+
     <div class="modal fade" id="updataRoles" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -74,7 +72,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="box">
-                        <ul class="breadcrumb direct_gundong" >
+                        <ul class="breadcrumb direct_gundong">
                             <li class="jolesAdd skins_roles">角色属性</li>
                             <li class="uppowerList">权限</li>
                         </ul>
@@ -90,7 +88,7 @@
                             </form>
                         </div>
                         <div class="box-body  updataChoice">
-                           
+
 
                         </div>
                     </div>
@@ -103,7 +101,7 @@
         </div>
     </div>
 
-	<div class="modal fade" id="tip_Power" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="tip_Power" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -120,7 +118,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                   
+
                 </div>
             </div>
         </div>
