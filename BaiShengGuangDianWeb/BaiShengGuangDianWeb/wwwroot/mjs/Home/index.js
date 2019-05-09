@@ -6,7 +6,7 @@
     $("#flowCard").change(function () {
         $("#run").addClass("disabled");
     });
-    $(".ms2").on("select2:select", function (e) {
+    $("#processCode").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
     $("#faultCode").select2({
@@ -242,13 +242,35 @@ function setProcessData() {
 }
 
 function showFaultModel() {
+    var opType = 406;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
 
-    $("#faultDate").val(getDate()).datepicker('update');
-    $("#faultTime").val(getTime());
-    var info = getCookieTokenInfo();
-    $("#proposer").val(info.name);
-    hideClassTip('adt');
-    $("#faultModel").modal("show");
+            $("#faultType").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#faultType").append(option.format(d.Id, d.FaultTypeName));
+            }
+
+
+            $("#faultDate").val(getDate()).datepicker('update');
+            $("#faultTime").val(getTime());
+            var info = getCookieTokenInfo();
+            $("#proposer").val(info.name);
+            hideClassTip('adt');
+            $("#faultModel").modal("show");
+        });
 }
 
 function reportFault() {
@@ -273,10 +295,11 @@ function reportFault() {
     }
     var faultDate = $("#faultDate").val();
     var faultTime = $("#faultTime").val();
+    var faultType = $("#faultType").val();
 
     var faultDesc = $("#faultDesc").val();
     //故障描述
-    if (isStrEmptyOrUndefined(faultDesc)) {
+    if (isStrEmptyOrUndefined(faultDesc) && faultType == 1) {
         showTip($("#faultDescTip"), "故障描述不能为空");
         report = false;
     }
@@ -298,7 +321,9 @@ function reportFault() {
             //故障描述
             FaultDescription: faultDesc,
             //优先级
-            Priority: 0
+            Priority: 0,
+            //故障类型
+            FaultTypeId: faultType
         });
         var admin = $("#faultCode").find("[value=" + code + "]").attr("id");
         if (!isStrEmptyOrUndefined(admin)) {

@@ -14,12 +14,14 @@
             }
 
             $("#singleFaultType").empty();
+            $("#singleFaultType1").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 if (i == 0)
                     fType = data.Id;
                 $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
+                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
             }
         });
 }
@@ -93,17 +95,18 @@ function getFaultDeviceList() {
                         { "data": null, "title": "状态", "render": rState },
                         { "data": null, "title": "优先级", "render": priority },
                         { "data": "Proposer", "title": "报修人" },
+                        { "data": "FaultTypeName", "title": "故障类型" },
                         { "data": "FaultDescription", "title": "故障描述" },
                         { "data": null, "title": "操作", "render": op },
                     ]
                 });
 
 
-            $(".ms2").empty();
+            $("#singleFaultCode").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $(".ms2").append(option.format(data.Id, data.DeviceCode));
+                $("#singleFaultCode").append(option.format(data.Id, data.DeviceCode));
             }
         });
 }
@@ -140,6 +143,7 @@ function sChange(id, type) {
                 $("#singleUpdateState").html(data.State);
                 $("#singleFaultCode").val(data.DeviceCode);
                 $("#singleProposer").val(data.Proposer);
+                $("#singleFaultType1").val(data.FaultTypeId).trigger("change");
                 var d = data.FaultTime.split(' ');
                 $("#singleFaultDate").val(d[0]);
                 var t = d[1].split(':');
@@ -241,6 +245,7 @@ function singleChange(type) {
         var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
 
         var singleFaultType = $("#singleFaultType").val();
+        var singleFaultType1 = $("#singleFaultType1").val();
 
         //删除
         opType = 423;
@@ -290,7 +295,9 @@ function singleChange(type) {
                 //故障解决方案
                 SolvePlan: singleSolvePlan,
                 //故障类型表Id
-                FaultTypeId: singleFaultType
+                FaultTypeId: singleFaultType,
+                //故障类型表Id
+                FaultTypeId1: singleFaultType1
             });
         ajaxPost("/Relay/Post",
             data,
