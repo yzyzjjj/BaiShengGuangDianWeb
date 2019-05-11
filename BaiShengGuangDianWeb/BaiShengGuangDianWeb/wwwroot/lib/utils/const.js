@@ -28,3 +28,4 @@ var chatEnum = {
 }
 
 var maxProcessData = 8;
+var lastLocation = "lastLocation";

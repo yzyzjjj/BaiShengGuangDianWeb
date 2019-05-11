@@ -95,7 +95,7 @@ var commonfunc = function () {
 
 }
 
-function rule(a, b) {
+function sortRule(a, b) {
     if (typeof a == "object") {
         if (a.order == b.order) {
             return a.id > b.id ? 1 : -1;
@@ -116,7 +116,7 @@ function getParent(list) {
         }
     }
 
-    return result.sort(rule);
+    return result.sort(sortRule);
 }
 
 function getChild(list, parentId) {
@@ -129,7 +129,7 @@ function getChild(list, parentId) {
         }
     }
 
-    return result.sort(rule);
+    return result.sort(sortRule);
 }
 var join = null;
 var check1 = null;
@@ -236,7 +236,7 @@ $(function () {
         secondStep: 1
     });
 
-    $('.icheckbox_minimal').iCheck({
+    $('.icb_minimal').iCheck({
         checkboxClass: 'icheckbox_minimal',
         radioClass: 'iradio_minimal',
         increaseArea: '20%' // optional

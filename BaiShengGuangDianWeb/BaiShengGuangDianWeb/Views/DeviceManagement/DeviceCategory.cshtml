@@ -4,16 +4,16 @@
     ViewBag.Title = "设备类型库管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/DeviceManagement/deviceCategory.js"></script>
 
+<script src="~/mjs/DeviceManagement/deviceCategory.js"></script>
 <section class="content">
-    <h2 style="font-size: 24px;text-align: center; height: 30px; line-height: 30px;">设备类型库管理</h2>
+    <h2 class="text-center">设备类型库管理</h2>
     <div class="box box-primary">
-        <div class="box-header with-border">
+        <div class="box-header">
             <h3 class="box-title">设备类型库</h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-primary" onclick="getCategoryList()">重新加载</button>
                 <button type="button" class="btn btn-primary" onclick="showAddCategory()">添加类型库</button>
+                <button type="button" class="btn btn-primary" onclick="getCategoryList()">重新加载</button>
             </div>
         </div>
         <div class="box-body">

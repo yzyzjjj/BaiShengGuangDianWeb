@@ -14,7 +14,6 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public string Password { get; set; }
         public string Name { get; set; }
-        [JsonIgnore]
         public int Role { get; set; }
         public string RoleName { get; set; }
         public string EmailAddress { get; set; }

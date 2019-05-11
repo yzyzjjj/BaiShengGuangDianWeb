@@ -82,13 +82,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
+            var accountInfo = AccountHelper.GetAccountInfoByName(account);
+            if (accountInfo != null)
+            {
+                return Result.GenError<Result>(Error.NameIsExist);
+            }
 
-            var accountInfo = AccountHelper.GetAccountInfo(account);
+            accountInfo = AccountHelper.GetAccountInfo(account);
             if (accountInfo != null)
             {
                 return Result.GenError<Result>(Error.AccountIsExist);
             }
-
             var roleInfo = RoleHelper.GetRoleInfo(role);
             if (roleInfo == null)
             {
@@ -234,7 +238,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var param = Request.GetRequestParams();
             var idStr = param.GetValue("id");
             var accountStr = param.GetValue("account");
-            if (idStr.IsNullOrEmpty() || accountStr.IsNullOrEmpty())
+            if (idStr.IsNullOrEmpty() && accountStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
@@ -291,7 +295,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var param = Request.GetRequestParams();
             var idStr = param.GetValue("id");
             var accountStr = param.GetValue("account");
-            if (idStr.IsNullOrEmpty() || accountStr.IsNullOrEmpty())
+            if (idStr.IsNullOrEmpty() && accountStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
             }

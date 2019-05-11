@@ -78,7 +78,6 @@ function getDeviceList() {
                     $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
                 }
             }
-
         });
 }
 

@@ -103,6 +103,7 @@ function checkPermission(opType) {
     //permissionsList
     var info = getCookieTokenInfo();
     if (info == null) {
+        SetCookie(lastLocation, window.location.href);
         window.location.href = const_loginurl;
         return -1;
     } else {
@@ -155,22 +156,22 @@ function ajaxGet(url, data, func) {
     //    data.token = token;
     //}
 
-    var paramstr = "";
+    var paramStr = "";
     for (var key in data) {
-        if (paramstr == "") {
-            paramstr = "?";
+        if (paramStr == "") {
+            paramStr = "?";
         }
-        if (paramstr != "?") {
-            paramstr = paramstr + "&";
+        if (paramStr != "?") {
+            paramStr = paramStr + "&";
         }
-        paramstr = paramstr + key + "=" + data[key];
+        paramStr = paramStr + key + "=" + data[key];
     }
 
     var funcC = function (e) {
         removeCover();
         func(e);
     }
-    url = url + paramstr;
+    url = url + paramStr;
     $.get(url, funcC).error(reLogin);
 }
 
@@ -206,10 +207,11 @@ function errorHandle(ret) {
 
     layer.alert(ret.errmsg);
 
-    //token 有问题，重新登录
-    if (ret.errno == ErrorEnum.MissToken || ret.errno == ErrorEnum.TokenError || ret.errno == ErrorEnum.TokenInvalid) {
-        window.location.href = const_loginurl;
-    }
+    ////token 有问题，重新登录
+    //if (ret.errno == ErrorEnum.MissToken || ret.errno == ErrorEnum.TokenError || ret.errno == ErrorEnum.TokenInvalid) {
+    //    SetCookie(lastLocation, window.location.href);
+    //    window.location.href = const_loginurl;
+    //}
     return true;
 }
 
@@ -693,7 +695,23 @@ ImgCreated.prototype.creat = creat;
 //显示确认框
 function showConfirm(text, func) {
     layer.confirm("是否确定" + text, {
-        btn: ["确定", "取消"]
+        btn: ["确定", "取消"],
+        success: function () {
+            this.enterEsc = function (event) {
+                if (event.keyCode === 13) {
+                    $(".layui-layer-btn0").click();
+                    return false; //阻止系统默认回车事件
+                } else if (event.keyCode == 27) {
+                    $(".layui-layer-btn1").click();
+                    return false;
+                }
+            };
+            $(document).on('keydown', this.enterEsc); //监听键盘事件，关闭层
+        },
+        end: function () {
+            $(document).off('keydown', this.enterEsc); //解除键盘关闭事件
+
+        }
     }, function (index) {
         layer.close(index);
         func();
