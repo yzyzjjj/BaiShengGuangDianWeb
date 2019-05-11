@@ -627,14 +627,11 @@ function showPermissions(uiName, datas) {
         increaseArea: '20%' // optional
     });
 
-    $(".on_cb").on('ifClicked', function (event) {
-        updateCheckBoxState(uiName);
+    $(".on_cb").on('ifChanged', function (event) {
+        var f = $(this).is(":checked");
+        $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
+        updateCheckBoxState(uiName, this, f);
     });
-
-
-
-
-
 }
 
 function getPageData(datas, isPage) {
@@ -696,13 +693,23 @@ function getLabelData(datas, label) {
     return res.sort(rule);
 }
 
-function updateCheckBoxState(uiName) {
-    console.log(uiName);
-
-
-
-
-
-
-
+function updateCheckBoxState(uiName, ui, f) {
+    var pid = $(ui).attr("pid");
+    if (!f) {
+        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
+    } else {
+        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("uncheck");
+        var p2 = $("#" + uiName).find(".on_cb").filter("[pid=" + pid + "]");
+        for (var i = 0; i < p2.length; i++) {
+            if ($(p2[i]).is(":checked")) {
+                $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
+                break;
+            }
+        }
+    }
+    pid = $(ui).attr("pid");
+    if (pid == null)
+        return;
+    ui = $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]");
+    updateCheckBoxState(uiName, ui, f);
 }

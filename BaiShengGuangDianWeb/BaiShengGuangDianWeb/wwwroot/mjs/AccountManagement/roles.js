@@ -1,5 +1,6 @@
 ﻿function pageReady() {
     getRoleList();
+    showAddRoles();
 }
 
 function getRoleList() {
@@ -207,10 +208,12 @@ function showPermissions(uiName, datas) {
         '</div>';
 
     var mNameStr = '<li>' +
+        '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
         '    <div class="box-header no-padding">' +
         '        <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>' +
-        '        <input type="checkbox" class="on_cb name" style="width: 15px;" />' +
+        '        <input type="checkbox" class="on_cb" style="width: 15px;" />' +
         '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
+        '    </div>' +
         '    </div>' +
         '</li>';
 
@@ -231,6 +234,8 @@ function showPermissions(uiName, datas) {
         var option = $(mOptionStr1).clone();
         option.find("h3").text(page.name);
         option.find(".on_cb").attr("value", page.id);
+        option.find(".on_cb").attr("lvl", 1);
+        option.find(".on_cb").addClass("1");
         option.find(".on_ul").attr("id", "ul" + page.id);
         $("#" + uiName).append(option);
         var dTypes = getTypes(pageData);
@@ -242,6 +247,8 @@ function showPermissions(uiName, datas) {
             option = $("<li>" + mOptionStr1 + "<li>").clone();
             option.find("h3").text(type.name);
             option.find(".on_cb").attr("value", type.id);
+            option.find(".on_cb").attr("pid", page.id);
+            option.find(".on_cb").addClass("2");
             option.find(".on_ul").attr("id", "ul" + type.id);
             $("#" + uiName).find("[id=ul" + page.id + "]").append(option);
 
@@ -255,6 +262,8 @@ function showPermissions(uiName, datas) {
                         .clone();
                     option.find("h3").text(dLabel);
                     option.find(".on_cb").attr("value", firstData.id);
+                    option.find(".on_cb").attr("pid", type.id);
+                    option.find(".on_cb").addClass("3");
                     option.find(".on_ul").attr("id", "ul" + firstData.id);
                     option.find("div:first").addClass("collapsed-box");
                     option.find(".on_i").removeClass("fa-minus");
@@ -267,6 +276,8 @@ function showPermissions(uiName, datas) {
                         option = $(mNameStr).clone();
                         option.find("h3").text(lData.name);
                         option.find(".on_cb").attr("value", lData.id);
+                        option.find(".on_cb").attr("pid", firstData.id);
+                        option.find(".on_cb").addClass("4");
                         $("#" + uiName).find("[id=ul" + firstData.id + "]").append(option);
                     }
 
@@ -274,6 +285,8 @@ function showPermissions(uiName, datas) {
                     option = $("<li>" + mOptionStr1 + "<li>").clone();
                     option.find("h3").text(dLabel);
                     option.find(".on_cb").attr("value", lbI);
+                    option.find(".on_cb").attr("pid", type.id);
+                    option.find(".on_cb").addClass("3");
                     option.find(".on_ul").attr("id", "ul" + lbI);
                     option.find("div:first").addClass("collapsed-box");
                     option.find(".on_i").removeClass("fa-minus");
@@ -284,6 +297,8 @@ function showPermissions(uiName, datas) {
                         option = $(mNameStr).clone();
                         option.find("h3").text(lData.name);
                         option.find(".on_cb").attr("value", lData.id);
+                        option.find(".on_cb").attr("pid", lbI);
+                        option.find(".on_cb").addClass("4");
                         $("#" + uiName).find("[id=ul" + lbI + "]").append(option);
                     }
                     lbI--;
@@ -299,13 +314,10 @@ function showPermissions(uiName, datas) {
     });
 
     $(".on_cb").on('ifClicked', function (event) {
-        updateCheckBoxState(uiName);
+        var f = $(this).is(":checked");
+        $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
+        updateCheckBoxState(uiName, this, f);
     });
-
-
-
-
-
 }
 
 function getPageData(datas, isPage) {
@@ -367,13 +379,23 @@ function getLabelData(datas, label) {
     return res.sort(rule);
 }
 
-function updateCheckBoxState(uiName) {
-    console.log(uiName);
-
-
-
-
-
-
-
+function updateCheckBoxState(uiName, ui, f) {
+    var pid = $(ui).attr("pid");
+    if (!f) {
+        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
+    } else {
+        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("uncheck");
+        var p2 = $("#" + uiName).find(".on_cb").filter("[pid=" + pid + "]");
+        for (var i = 0; i < p2.length; i++) {
+            if ($(p2[i]).is(":checked")) {
+                $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
+                break;
+            }
+        }
+    }
+    pid = $(ui).attr("pid");
+    if (pid == null)
+        return;
+    ui = $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]");
+    updateCheckBoxState(uiName, ui, f);
 }
