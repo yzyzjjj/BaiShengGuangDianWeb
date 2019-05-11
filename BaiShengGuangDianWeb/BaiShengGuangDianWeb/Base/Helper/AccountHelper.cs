@@ -20,7 +20,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static string GenAccountPwd(string account, string pwd)
         {
-            string pwdstr = pwd + account + ServerConfig.PasswordKey;
+            var pwdstr = pwd + account + ServerConfig.PasswordKey;
             return MD5Util.GetMd5Hash(pwdstr);
         }
 
@@ -32,8 +32,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static string GenAccountPwdByOrignalPwd(string account, string orignalPwd)
         {
-            string pwd = MD5Util.GetMd5Hash(MD5Util.GetMd5Hash(orignalPwd));
-            string pwdstr = pwd + account + ServerConfig.PasswordKey;
+            var pwd = MD5Util.GetMd5Hash(MD5Util.GetMd5Hash(orignalPwd));
+            var pwdstr = pwd + account + ServerConfig.PasswordKey;
             return MD5Util.GetMd5Hash(pwdstr);
         }
 
@@ -85,7 +85,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
-        /// 根据code获取账号信息
+        /// 根据姓名获取账号信息
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>

@@ -1,115 +1,70 @@
 ﻿function pageReady() {
-    getOrganizationUnits();  
-    $("#addMember").addClass('addMember');
+    $(".ms2").select2();
+    getOrganizationUnits();
+    $("#rdo1").on("ifChanged", function (event) {
+        if (!$(this).is(":checked")) {
+            $("#cbDiv").removeClass("hidden");
+        } else {
+            $("#cbDiv").addClass("hidden");
+        }
+    });
 }
 
-var doAction = '<div class="btn-group" style="position:absolute;right:30px;top:-0.5px;">' +
-    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
-    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-    '        <span class="caret"></span>' +
-    '        <span class="sr-only">Toggle Dropdown</span>' +
-    '    </button>' +
-    '    <ul class="dropdown-menu" role="menu">' +
-    '       <li><a id="showOrganizat" onclick="showUpdateOrganizationUnits({0}, \'{1}\')">修改</a></li>' +
-    '       <li><a onclick="DeleteOrganizat({0}, \'{1}\')">删除</a></li>' +
-    '    </ul>' +
-    '</div>';
-
-//var template1 = "我是{0}，今年{1}了";
-//var result1 = template1.format("loogn", 22)
 function getOrganizationUnits() {
-    
+    $("#organizationUnits").empty();
     ajaxGet("/OrganizationUnitManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            $("#organizationUnits").empty();
 
+            var doAction = '<div class="btn-group" style="float:right;">' +
+                '<button type = "button" class="btn btn-default btn-sm" > <i class="fa fa-asterisk"></i>操作</button >' +
+                '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '        <span class="caret"></span>' +
+                '        <span class="sr-only">Toggle Dropdown</span>' +
+                '    </button>' +
+                '    <ul class="dropdown-menu" role="menu">' +
+                '       <li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>' +
+                '       <li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>' +
+                '    </ul>' +
+                '</div>';
 
-
-            var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                '  <div class="box-header with-border" onclick="onClick(\'onId\',\'onCnt\',\'onName\')">' +
-                '      <div class="box-tools" style="left: 0">' +
-                '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                '              <i class="fa fa-minus"></i>' +
-                '          </button>' +
-                '      </div>' +
-                '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
-                '  </div>' +
-                '  <div class="box-body no-padding">' +
-                '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                '      </ul>' +
-                ' </div>' +
-                '</div>'
+            var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
+                '    <div class="box-header" style="padding: 2px;">' +
+                '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
+                '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;" onclick="onClick(\'{0}\',\'{1}\')"></h3>' +
+                '    </div>' +
+                '    <div class="box-body no-padding">' +
+                '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
+                '    </div>' +
+                '</div>';
 
             var datas = ret.datas;
-            var parents = getOrganizationUnitsParent(datas)
+            var parents = getOrganizationUnitsParent(datas);
             for (var i = 0; i < parents.length; i++) {
-                var childs = getOrganizationUnitsChild(datas, parents[i])
-               for (var j = 0; j < childs.length; j++) {
-                    var child = childs[j]
-                   var mMenu = mMenuStr.replace('onId', child.id).replace('onCnt', child.memberCount).replace('onName', child.name)
-                    var option = $(mMenu).clone()
-                    option.find('h3').text(child.name + "(" + child.memberCount + ")")
-                    option.find('h3').after(doAction.format(child.id, child.name))
-                    option.find('.on_ul').attr('id', "on" + child.id)
+                var children = getOrganizationUnitsChild(datas, parents[i]);
+                for (var j = 0; j < children.length; j++) {
+                    var child = children[j];
                     if (child.parentId == 0) {
-                        $("#organizationUnits").append(option)
+                        var mMenu = mMenuStr.format(child.id, child.name);
+                        var option = $(mMenu).clone();
+                        option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
+                        option.find('h3').after(doAction.format(child.id, child.name));
+                        option.find('.on_ul').attr('id', "on" + child.id);
+                        $("#organizationUnits").append(option);
                     } else {
-                        $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option)
-
+                        var mMenu = "<li>" + mMenuStr.format(child.id, child.name) + "</li>";
+                        var option = $(mMenu).clone();
+                        option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
+                        option.find('h3').after(doAction.format(child.id, child.name))
+                        option.find('.on_ul').attr('id', "on" + child.id);
+                        $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option);
                     }
                 }
             }
-
         });
-}
-
-var op = function (data, type, row) {
-    var html = '<button type="button" class="btn btn-primary" data-toggle="modal" onclick="DeletMerber(\'' +
-        data.Id + '\',\'' + data.Name + '\')">删除</button>';
-    return html;
-}
-
-function getMemberList(id,name) {
-    $(".merberName").text(name);
-     $(".merberName").attr('id', id)
-    ajaxGet("/OrganizationUnitManagement/MemberList",
-        {
-            organizationUnitId: id
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            $("#memberListTable")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": "Id", "title": "序号" },
-                        { "data": "Name", "title": "姓名" },
-                        { "data": "RoleName", "title": "角色" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
-
-        });
-}
-
-function onClick(id, cnt,name) {
-    $("#memberListTable").empty();
-    $("#addMember").removeClass('addMember');
-    getMemberList(id, name);
-   
 }
 
 function rule(a, b) {
@@ -139,75 +94,44 @@ function getOrganizationUnitsChild(list, parentId) {
     return result.sort(rule)
 }
 
-function showAddOrganizationUnits() {
-    var data_firstDepart = $("input[name=isDepart1]:checked").val();
-    if (data_firstDepart == "1") {
-        $(".firstDepart1").show();
-        $(".firstDepart2").hide();
-
-    }
-    if (data_firstDepart == "2") {
-        $(".firstDepart1").show();
-        $(".firstDepart2").show();
-
-    }
-    var data = {}
-    //分类判断
-    $("input[name=isDepart1]").change(
-        function () {
-            var data_depart1 = $(this).val();
-            if (data_depart1 == "1") {
-                $(".firstDepart1").show();
-                $(".firstDepart2").hide();
-
-            }
-            if (data_depart1 == "2") {
-                $(".firstDepart1").show();
-                $(".firstDepart2").show();
-
-            }
-        });
-    ajaxGet("/OrganizationUnitManagement/List", data,
+function showAddOrganizationUnitModal() {
+    $("#rdo2").iCheck("check");
+    $("#cbDiv").removeClass("hidden");
+    $("#addOrganizationUnit").empty();
+    ajaxGet("/OrganizationUnitManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             };
-            $("#firstPart1").val("");
-            $("#firstPart2").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#firstPart2").append(option.format(data.id, data.name));
+                $("#addOrganizationUnit").append(option.format(data.id, data.name));
             }
 
-            $("#addStruct").modal("show");
-
+            $("#addOrganizationUnitModal").modal("show");
         });
 }
 
-function addOrganizationUnits() {
+function addOrganizationUnit() {
     var data = {}
-    //选择
-    var data_firstDepart1 = $("input[name=isDepart1]:checked").val();
-    //获取
-    var data_firstAdd1 = $("#firstPart1").val();
-    var data_pcid = $("#firstPart2").val();
-
-    //一级部门
-    if (data_firstDepart1 == "1") {
-        data.parentId = 0
-        data.name = data_firstAdd1;
+    var addName = $("#addName").val();
+    if (isStrEmptyOrUndefined(addName)) {
+        layer.msg("部门名称不能为空");
+        return;
     }
-    if (data_firstDepart1 == "2") {
-        data.parentId = data_pcid;
-        data.name = data_firstAdd1;
+    if ($("#rdo1").is(":checked")) {
+        //一级部门
+        data.parentId = 0;
+        data.name = addName;
+    } else {
+        var pid = $("#addOrganizationUnit").val();
+        data.parentId = pid;
+        data.name = addName;
     }
-
     var doSth = function () {
-
-        $("#addStruct").modal("hide");
-
+        $("#addOrganizationUnitModal").modal("hide");
         ajaxPost("/OrganizationUnitManagement/Add", data,
             function (ret) {
                 layer.msg(ret.errmsg);
@@ -219,41 +143,26 @@ function addOrganizationUnits() {
     showConfirm("添加", doSth);
 }
 
-function delOrganizationUnits() {
-
+function showUpdateOrganizationUnit(id, name) {
+    $("#updateId").html(id);
+    $("#organizationName").val(name);
+    $("#updateOrganizationUnitModal").modal("show");
 }
 
-function showUpdateOrganizationUnits(id, name) {
-    var data = {}
-    ajaxGet("/OrganizationUnitManagement/List", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#firstPart1").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#firstPart1").append(option.format(data.Id, data.Name));
-            }
-            $("#updateId").html(id);
-            $("#showOrganizationName").val(name);
-
-            $("#showUpdateOrganizationUnits").modal("show");
-        });
-
-}
-
-function updateOrganizationUnits() {
+function updateOrganizationUnit() {
 
     var id = parseInt($("#updateId").html());
-    var updataOrganizatName = $("#showOrganizationName").val();
+    var organizationName = $("#organizationName").val();
+    if (isStrEmptyOrUndefined(organizationName)) {
+        layer.msg("部门名称不能为空");
+        return;
+    }
+
     var doSth = function () {
-        $("#showUpdateOrganizationUnits").modal("hide");
+        $("#updateOrganizationUnitModal").modal("hide");
         var data = {
             id: id,
-            name: updataOrganizatName
+            name: organizationName
         }
         ajaxPost("/OrganizationUnitManagement/Update", data,
             function (ret) {
@@ -266,124 +175,179 @@ function updateOrganizationUnits() {
     showConfirm("修改", doSth);
 }
 
-function DeleteOrganizat(id, OrganizName) {
+function deleteOrganizationUnit(id, organizName) {
 
     var doSth = function () {
         var data = {
-            id: id,
+            id: id
         }
 
         ajaxPost("/OrganizationUnitManagement/Delete", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getOrganizationUnits();
+                    //getOrganizationUnits();
+                    $("#on" + id).parents(".box-solid:first").remove();
                 }
             });
     }
-    showConfirm("删除组织：" + OrganizName, doSth);
+    showConfirm("删除部门：" + organizName, doSth);
 }
+
 function moveOrganizationUnits() {
 
 }
 
-function delMember() {
-
+function onClick(id, name) {
+    $("#memberListTable").empty();
+    getMemberList(id, name);
 }
 
-function addMember() {
-
-}
-
-function updateMember() {
-
-}
-
-function getAccountName(list) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (parents.indexOf(data.account) < 0) {
-            parents.push(data.account);
-        }
-    }
-    return parents.sort(rule);
-}
-function getAccountData(list, account) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (data.account == account) {
-            result.push(data);
-        }
-    }
-
-    return result.sort(rule)
-}
-function showAddMan() {
-    $("#addMan").modal("show");
-    $(".checkMerber").empty();
-    ajaxGet("/AccountManagement/List", null,
-        function(ret) {
+var memberList = null;
+function getMemberList(id, name) {
+    memberList = new Array();
+    $("#unName").text(name);
+    $("#unName").attr("value", id);
+    $("#showAddMemberModal").removeClass("hidden");
+    ajaxGet("/OrganizationUnitManagement/MemberList",
+        {
+            organizationUnitId: id
+        },
+        function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                '  <div class="box-header with-border">' +
-                '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
-                '  </div>' +
-                '</div>'
-            var rolesChoice = '<input type="checkbox" class="selectCodes" name="codes" /> '
-            var datas = ret.datas;
-            var parents = getAccountName(datas)
-            console.log(parents);
-            for (var i = 0; i < parents.length; i++) {
-                var childs = getAccountData(datas, parents[i])
-                for (var j = 0; j < childs.length; j++) {
-                    var child = childs[j]
-                    var mMenu = mMenuStr
-                    var option = $(mMenu).clone()
-                    option.find('h3').text(child.account)
-                    option.find('.box-title').before(rolesChoice)
-                    option.find('.selectCodes').attr('value', child.id)
-                   $(".checkMerber").append(option)
-                }
+            for (var i = 0; i < ret.datas.length; i++) {
+                memberList.push(ret.datas[i].Id);
             }
-        })
+            var op = function (data, type, row) {
+                var html = '<button type="button" class="btn btn-primary btn-sm btn-danger" data-toggle="modal" onclick="deleteMember({0},\'{1}\')">删除</button>'.format(data.Id, data.Name);
+                return html;
+            }
+
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+
+            $("#memberListTable")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "Name", "title": "姓名" },
+                        { "data": "RoleName", "title": "角色" },
+                        { "data": null, "title": "操作", "render": op },
+                    ],
+                    "initComplete": function (settings, json) {
+                        $("#memberListTable td").css("padding", "3px");
+                        $("#memberListTable td").css("vertical-align", "middle");
+                    }
+                });
+        });
 }
-function addMerbers() {
-    var id = $(".merberName").attr("id");
-    var name = $(".merberName").text();
-    var Code_value = [];
-    $('input[name="codes"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-        if ($(this).val() != "") {
-            Code_value.push({ id: $(this).val() })
-            return Code_value
-        }
-    });
-    //console.log(chk_value)
-    var codeArray = new Array();
 
-    for (i = 0; i < Code_value.length; i++) {
-        codeArray.push(Code_value[i].id);
-    }
+var addList = null;
+function showAddMemberModal() {
+    $("#memberList").empty();
+    addList = new Array();
+    ajaxGet("/AccountManagement/List",
+        null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
 
-    codeId = codeArray.join(",");
+            var data = new Array();
+            for (var i = 0; i < ret.datas.length; i++) {
+                if (memberList.indexOf(ret.datas[i].id) == -1)
+                    data.push(ret.datas[i]);
+            }
 
- 
+            var op = function (data, type, row) {
+                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.id);
+            }
+
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            $("#memberList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": data,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "aaSorting": [[1, "asc"]],
+                    "columns": [
+                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "id", "title": "id", "bVisible": false },
+                        { "data": "name", "title": "姓名" },
+                        { "data": "account", "title": "账号" },
+                        { "data": "roleName", "title": "角色" }
+                    ],
+                    "initComplete": function (settings, json) {
+                        $("#memberList td").css("padding", "3px");
+                        $("#memberList td").css("vertical-align", "middle");
+                        $("#memberList .icb_minimal").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#memberList .icb_minimal").on('ifChanged', function (event) {
+                            var ui = $(this);
+                            var v = ui.attr("value");
+                            if (ui.is(":checked")) {
+                                ui.parents("tr:first").css("background-color", "gray");
+                                addList.push(v);
+                            } else {
+                                if (ui.parents("tr:first").hasClass("odd"))
+                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                else
+                                    ui.parents("tr:first").css("background-color", "");
+
+                                addList.splice(addList.indexOf(v), 1);
+                            }
+                        });
+                    }
+                });
+            $("#addMemberModal").modal("show");
+        });
+}
+
+function addMember() {
+    var unId = $("#unName").attr("value");
+    var unName = $("#unName").text();
+    var codeId = addList.join(",");
+    var cnt = addList.length;
+    addList = new Array();
     var doSth = function () {
-        $("#addMan").modal("hide");
+        $("#addMemberModal").modal("hide");
         var data = {
-            organizationUnitId: id,
+            organizationUnitId: unId,
             memberId: codeId
         }
-  ajaxPost("/OrganizationUnitManagement/AddMember", data,
+        ajaxPost("/OrganizationUnitManagement/AddMember", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getMemberList(id, name);
-                    getOrganizationUnits();  
+                    getMemberList(unId, unName);
+
+                    var ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
+                    ui.html(parseInt(ui.text()) + cnt);
                 }
             });
     }
@@ -391,16 +355,13 @@ function addMerbers() {
     showConfirm("添加", doSth);
 
 }
-function closeStruct() {
 
-
-}
-function DeletMerber(id,Name) {
-    var organizatId = $(".merberName").attr("id");
-    var name = $(".merberName").text();
+function deleteMember(id, name) {
+    var unId = $("#unName").attr("value");
+    var unName = $("#unName").text();
     var doSth = function () {
         var data = {
-            organizationUnitId: organizatId,
+            organizationUnitId: unId,
             memberId: id
         }
 
@@ -408,14 +369,12 @@ function DeletMerber(id,Name) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getMemberList(organizatId, name);
-                    getOrganizationUnits();  
+                    getMemberList(unId, unName);
+                    var ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
+                    ui.html(parseInt(ui.text() - 1));
                 }
             });
     }
-    showConfirm("删除成员：" + Name, doSth);
+    showConfirm("删除成员：" + name, doSth);
 
 }
-
-
-

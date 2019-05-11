@@ -20,7 +20,7 @@ th, td {
 
 .modal-dialog {
     margin: 30px auto;
-    padding: 30px;
+    padding: 50px;
     width: auto;
 }
 
@@ -28,6 +28,12 @@ th, td {
     overflow-x: auto;
 }
 
+.noShadow {
+    box-shadow: 0 0 0 rgba(0,0,0,0.1);
+}
+.mli > li {
+    border-bottom: 0 !important;
+}
 
 
 
@@ -52,10 +58,11 @@ th, td {
     z-index: 99999;
     background: rgba(0,0,0,0.3);
     color: #fff;
-    display:flex;
-    justify-content:center;
-    align-items :center
+    display: flex;
+    justify-content: center;
+    align-items: center
 }
+
 .spinner {
     margin: 100px auto;
     width: 80px;

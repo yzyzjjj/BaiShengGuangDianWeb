@@ -34,6 +34,12 @@
                     return;
                 }
 
+                var lastUrl = GetCookie(lastLocation);
+                if (!isStrEmptyOrUndefined(lastUrl)) {
+                    DelCookie(lastLocation);
+                    window.location.href = lastUrl;
+                    return;
+                }
                 window.location.href = const_indexurl;
             });
     });

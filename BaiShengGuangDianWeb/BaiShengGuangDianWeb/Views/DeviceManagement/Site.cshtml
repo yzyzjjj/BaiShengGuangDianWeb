@@ -8,10 +8,12 @@
 <h2 style="font-size: 26px; position: relative; top: 15px; left: 700px;">场地库管理</h2>
 <section class="content">
     <div class="box box-primary">
-        <div class="box-header with-border">
+        <div class="box-header">
             <h3 class="box-title">场地库</h3>
-            <button type="button" class="btn btn-primary pull-right" onclick="getSiteList()" style="margin-right: 20px">重新加载</button>
-            <button type="button" class="btn btn-primary pull-right" onclick="showAddSite()" style="margin-right: 8px">添加场地库</button>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary" onclick="showAddSite()">添加场地库</button>
+                <button type="button" class="btn btn-primary" onclick="getSiteList()">重新加载</button>
+            </div>
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">

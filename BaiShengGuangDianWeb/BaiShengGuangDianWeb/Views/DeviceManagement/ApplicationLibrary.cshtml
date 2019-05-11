@@ -6,14 +6,15 @@
 }
 
 <script src="~/mjs/DeviceManagement/applicationLibrary.js"></script>
-
 <section class="content">
-    <h2 style="font-size: 24px;text-align: center; height: 30px; line-height: 30px;">应用层管理</h2>
+    <h2 class="text-center">应用层管理</h2>
     <div class="box box-primary">
-        <div class="box-header with-border">
+        <div class="box-header">
             <h3 class="box-title">应用库</h3>
-            <button type="button" class="btn btn-primary pull-right" onclick="getApplicationList()" style="margin-right: 20px">重新加载</button>
-            <button type="button" class="btn btn-primary pull-right" onclick="showAddApplication()" style="margin-right: 8px">添加应用层</button>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary" onclick="showAddApplication()">添加应用层</button>
+                <button type="button" class="btn btn-primary" onclick="getApplicationList()">重新加载</button>
+            </div>
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">

@@ -4,16 +4,17 @@
     ViewBag.Title = "用户管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/AccountManagement/users.js"></script>
-<link href="~/mcss/index.css" rel="stylesheet" type="text/css">
-<div  style="background:#f4f6f7 repeat-x; border: 1px solid #c1d3de; margin: 0; padding: 0;overflow: visible;"><h2 style="margin: 0;padding: 0; line-height: 33px;margin-left: 2px;font-weight: bold; font-size: 16px;font-family: '微软雅黑'; color: #000000; ">用户管理</h2></div>		
 
+<script src="~/mjs/AccountManagement/users.js"></script>
 <section class="content">
+    <h2 class="text-center">用户管理</h2>
     <div class="box box-primary">
-        <div class="box-header with-border">
-            <h3 class="box-title">用户</h3>
-            <button type="button" class="btn btn-primary pull-right" onclick="getUsersList()" style="margin-right: 20px">重新加载</button>
-            <button type="button" class="btn btn-primary pull-right" onclick="showAddUsers()" style="margin-right: 8px">添加用户</button>
+        <div class="box-header">
+            <h3 class="box-title">用户列表</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary" onclick="showAddUserModal()">添加用户</button>
+                <button type="button" class="btn btn-primary" onclick="getUsersList()">重新加载</button>
+            </div>
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">
@@ -21,8 +22,9 @@
             </div>
         </div>
     </div>
- <!-- 添加用户（Modal） -->
-    <div class="modal fade" id="addUsers" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- 添加用户（Modal） -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -32,84 +34,74 @@
                     <h4 class="modal-title">添加用户</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="box">
-                        <ul class="breadcrumb" >
-                            <li class="usersAdd skins_roles">用户信息</li>
-                            <li class="usersList">额外权限</li>
-                            <li class="workman">生产员</li>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a id="add_protoDiv" href="#add_proto" data-toggle="tab">用户信息</a></li>
+                            <li><a id="add_perDiv" href="#add_per" data-toggle="tab">额外权限</a></li>
+                            <li><a id="add_deviceDiv" href="#add_device" data-toggle="tab" class="text-red hidden">设置机台号</a></li>
                         </ul>
-                        <div class="box-body addUsers">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">用户名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addUsersName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="usersNameTip"></label>
+                        <div class="tab-content no-padding">
+                            <div id="add_proto" class="tab-pane active in">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="control-label">用户名：</label>
+                                            <input class="dd form-control" id="addAccount">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">姓名：</label>
+                                            <input class="dd form-control" id="addName">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">邮箱：</label>
+                                            <input class="dd form-control" id="addEmail">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">密码：</label>
+                                            <input class="dd form-control" id="addPassword">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">选择角色：</label>
+                                            <select class="ms2 form-control" id="addRole" style="width: 100%"></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label text-red">是否为生产员：</label>
+                                            <input type="checkbox" id="addProcessor" name="dRadio" class="icb_minimal">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label text-red">是否为检验员：</label>
+                                            <input type="checkbox" id="addSurveyor" name="dRadio" class="icb_minimal">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">姓名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addPersonName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="personNameTip"></label>
+                            </div>
+                            <div id="add_per" class="tab-pane">
+                                <div class="box">
+                                    <div class="box-body" id="add_per_body">
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">邮箱：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addEmail" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="emailNameTip"></label>
+                            </div>
+                            <div id="add_device" class="tab-pane">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <table class="table table-hover table-striped" id="addDeviceList"></table>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">随机密码：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addPassword" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="passwordNameTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">角色：</label>
-                                    <div class="col-sm-9 jolesChoice">
-                                       
-                                       
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">是否为生产员：</label>
-                                    <div class="col-sm-9" style="margin-top: 6px">
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="joinwork" value="0" type="radio">是</label>
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="joinwork" checked="checked" value="1" type="radio">否</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">是否为检验：</label>
-                                    <div class="col-sm-9" style="margin-top: 6px">
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="checker" value="1" type="radio">是</label>
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="checker" checked="checked" value="2" type="radio">否</label>
-                                    </div>
-                                </div>
-                              </form>
-                        </div>
-                        <div class="box-body  usersChoice" >
-                           
-
-                        </div>
-                        <div class="box-body  joinworker" style="margin-left: 200px">
-                           
-
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="addUsers()">添加</button>
+                    <button type="button" class="btn btn-primary btn-danger" onclick="addReset()">重置</button>
+                    <button type="button" class="btn btn-primary" onclick="addUser()">添加</button>
                 </div>
             </div>
         </div>
     </div>
-	<!-- 修改用户（Modal） -->
-    <div class="modal fade" id="updataUsers" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- 修改用户（Modal） -->
+    <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -120,79 +112,67 @@
                     <label class="hidden" id="updateId"></label>
                 </div>
                 <div class="modal-body">
-                    <div class="box">
-                        <ul class="breadcrumb" >
-                            <li class="usersAdd skins_roles">用户信息</li>
-                            <li class="usersList">额外权限</li>
-                            <li class="workman">生产员</li>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a id="update_protoDiv" href="#update_proto" data-toggle="tab">用户信息</a></li>
+                            <li><a id="update_perDiv" href="#update_per" data-toggle="tab">额外权限</a></li>
+                            <li><a id="update_deviceDiv" href="#update_device" data-toggle="tab" class="text-red hidden">设置机台号</a></li>
                         </ul>
-                        <div class="box-body upUsers">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">用户名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updataUsersName" onfocusin="focusIn($(this))" disabled>
-                                        <label class="label-danger hidden" id="usersNameTip"></label>
+                        <div class="tab-content no-padding">
+                            <div id="update_proto" class="tab-pane active in">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="control-label">用户名：</label>
+                                            <input class="ud form-control" id="updateAccount" disabled="disabled">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">姓名：</label>
+                                            <input class="ud form-control" id="updateName">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">邮箱：</label>
+                                            <input class="ud form-control" id="updateEmail">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">是否修改密码：</label>
+                                            <input type="checkbox" id="updatePassword" name="dRadio" class="icb_minimal">
+                                            <input class="ud form-control" id="updateNewPassword" disabled="disabled">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">选择角色：</label>
+                                            <select class="ms2 form-control" id="updateRole" style="width: 100%"></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label text-red">是否为生产员：</label>
+                                            <input type="checkbox" id="updateProcessor" name="dRadio" class="icb_minimal">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label text-red">是否为检验员：</label>
+                                            <input type="checkbox" id="updateSurveyor" name="dRadio" class="icb_minimal">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">姓名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updataPersonName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="personNameTip"></label>
+                            </div>
+                            <div id="update_per" class="tab-pane">
+                                <div class="box">
+                                    <div class="box-body" id="update_per_body">
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">邮箱：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updataEmail" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="emailNameTip"></label>
+                            </div>
+                            <div id="update_device" class="tab-pane">
+                                <div class="box">
+                                    <div class="box-body">
+                                        <table class="table table-hover table-striped" id="updateDeviceList"></table>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">随机密码：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updataPassword" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="passwordNameTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">角色：</label>
-                                    <div class="col-sm-9 upjolesChoice" >
-                                       
-                                       
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">是否为生产员：</label>
-                                    <div class="col-sm-9" style="margin-top: 6px">
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="upjoinwork" value="0" type="radio">是</label>
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="upjoinwork" checked="checked" value="1" type="radio">否</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">是否为检验：</label>
-                                    <div class="col-sm-9" style="margin-top: 6px">
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="checker" value="1" type="radio">是</label>
-                                        <label class="input-radio" style="vertical-align: middle; display: inline-block; cursor: pointer; line-height: 30px; margin-right: 15px;"><input style="margin-right: 5px; vertical-align: unset; font-size: 100%;" name="checker" checked="checked" value="2" type="radio">否</label>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-                        <div class="box-body  updataChoice">
-                           
-
-                        </div>
-                        <div class="box-body  updataworker" style="margin-left: 200px">
-                           
-
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary" onclick="updataUsers()">修改</button>
+                    <button type="button" class="btn btn-primary" onclick="updateUser()">修改</button>
                 </div>
             </div>
         </div>

@@ -7,13 +7,13 @@
 
 <script src="~/mjs/DeviceManagement/deviceProcessStep.js"></script>
 <section class="content">
-    <h2 style="font-size: 24px;text-align: center; height: 30px; line-height: 30px;">工序名管理</h2>
+    <h2 class="text-center">工序名管理</h2>
     <div class="box box-primary">
-        <div class="box-header with-border">
+        <div class="box-header">
             <h3 class="box-title">工序名</h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-primary" onclick="getDeviceProcessStepList()">重新加载</button>
                 <button type="button" class="btn btn-primary" onclick="showAddModel()">添加工序名</button>
+                <button type="button" class="btn btn-primary" onclick="getDeviceProcessStepList()">重新加载</button>
             </div>
         </div>
         <div class="box-body">
@@ -50,7 +50,7 @@
                                         <label class="label-danger hidden" id="addStepNameTip"></label>
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="checkbox" id="addIsSurvey" class="icheckbox_minimal">
+                                        <input type="checkbox" id="addIsSurvey" class="icb_minimal">
                                         <label for="addIsSurvey">是否为检验</label>
                                     </div>
                                 </div>

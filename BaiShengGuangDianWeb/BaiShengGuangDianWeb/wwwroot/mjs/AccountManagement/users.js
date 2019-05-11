@@ -1,27 +1,66 @@
 ﻿function pageReady() {
-    getUsersList()
-}
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu">' +
-        '<li><a onclick="showUpdateUsers({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\')">修改</a></li>'.format(data.id, data.account, data.emailAddress, data.name, data.roleName, data.permissions, data.deviceIds) +
-        '<li><a onclick="DeleteUsers({0}, \'{1}\')">删除</a></li>'.format(data.id, data.account) +
-        '</ul>' +
-        '</div>';
+    getUsersList();
 
-    return html;
+    $("#addProcessor").on("ifChanged", function (event) {
+        if ($(this).is(":checked")) {
+            $("#add_deviceDiv").removeClass("hidden");
+        } else {
+            $("#add_deviceDiv").addClass("hidden");
+        }
+    });
+
+    $("#add_perDiv").click(function (e) {
+        getOtherPermission("add_per_body", $("#addRole").val(), null);
+    });
+
+
+    $("#updateProcessor").on("ifChanged", function (event) {
+        if ($(this).is(":checked")) {
+            $("#update_deviceDiv").removeClass("hidden");
+        } else {
+            $("#update_deviceDiv").addClass("hidden");
+        }
+    });
+
+    $("#update_perDiv").click(function (e) {
+        getOtherPermission("update_per_body", $("#updateRole").val(), permission);
+    });
+
+    $("#updatePassword").on("ifChanged", function (event) {
+        if (!$(this).is(":checked")) {
+            $("#updateNewPassword").attr("disabled", "disabled");
+        } else {
+            $("#updateNewPassword").removeAttr("disabled");
+        }
+    });
 }
+
 function getUsersList() {
     ajaxGet("/AccountManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
+            }
+
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '        <span class="caret"></span>' +
+                    '        <span class="sr-only">Toggle Dropdown</span>' +
+                    '    </button>' +
+                    '    <ul class="dropdown-menu" role="menu">' +
+                    '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, data.account, data.name, data.emailAddress, data.permissions, data.deviceIds, data.productionRole) +
+                    '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, data.account) +
+                    '</ul>' +
+                    '</div>';
+
+                return html;
+            }
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
             }
             $("#userTable")
                 .DataTable({
@@ -30,10 +69,11 @@ function getUsersList() {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [8, 16, 24], //更改显示记录数选项  
-                    "iDisplayLength": 8, //默认显示的记录数  
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "iDisplayLength": 10, //默认显示的记录数  
                     "columns": [
-                        { "data": "id", "title": "序号" },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "id", "title": "id", "bVisible": false },
                         { "data": "account", "title": "用户名" },
                         { "data": "name", "title": "姓名" },
                         { "data": "roleName", "title": "角色" },
@@ -44,778 +84,8 @@ function getUsersList() {
 
         });
 }
-function showAddUsers() {
-    $("#addUsers").modal("show");
-    $("#addUsersName").empty();
-    $(".usersChoice").addClass('appear_d');
-    $(".joinworker").addClass('appear_d');
-    $(".usersAdd").addClass('skins_roles');
-    $(".workman").removeClass('skins_roles');
-    $(".workman").hide();
-    var data = {}
-    ajaxGet("/RoleManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            $(".jolesChoice").empty();
-            var userJoles = '<div class="box box-solid userRoles" style="margin-bottom: 0;">' +
-                '       <input type="radio" style="font-size:20px;" class="selectUsers" name="usersName"  /> ' +
-                '       <h3 class="box-title" style="margin-left: 30px;font-size:18px;display:inline-block;"></h3>' +
-                '</div>'
-            var datas = ret.datas;
-            var usersName = getUsersName(datas);
-            console.log(usersName)
-            for (var i = 0; i < usersName.length; i++) {
-                var userdata = getUsersData(datas, usersName[i])
-                for (var j = 0; j < userdata.length; j++) {
-                    var joles = userdata[j]
-                    var option = $(userJoles).clone()
-                    option.find('h3').text(joles.name)
-                    option.find('.selectUsers').attr('value', joles.id)
-                    $(".jolesChoice").append(option)
-                    $("input[name=usersName]:first").prop("checked",true)
-                }
-            }
-        })
-    $("#addUsersName").empty();
-    $(".usersAdd").addClass('skins_roles');
-    $(".addUsers").removeClass('appear_d');
-    $(".usersList").removeClass('skins_roles');
-   
-    $(".usersAdd").click(function () {
-        $(this).addClass('skins_roles');
-        $(".usersList").removeClass('skins_roles');
-        $(".usersChoice").addClass('appear_d');
-        $(".addUsers").removeClass('appear_d');
-        $(".workman").removeClass('skins_roles');
-        $(".joinworker").addClass('appear_d');
-    });
-   
-       
-    $(".usersList").click(function () {
-        $(this).addClass('skins_roles');
-        $(".usersAdd").removeClass('skins_roles');
-        $(".addUsers").addClass('appear_d');
-        $(".usersChoice").removeClass('appear_d');
-        $(".workman").removeClass('skins_roles');
-        $(".joinworker").addClass('appear_d');
-        var roels = $(".selectUsers:checked").val();
-        data = {
-            role: roels,
-        }
-        //persions开始
-        ajaxGet("/Account/OtherPermissions", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                };
 
-                $(".usersChoice").empty();
-
-                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
-                    '      <div class="box-tools" style="left: 28px">' +
-                    '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                    '              <i class="fa fa-minus" style="margin-left:1px;"></i>' +
-                    '          </button>' +
-                    '      </div>' +
-                    '      <h3 class="box-title" style="margin-left: 30px"></h3>' +
-                    '  </div>' +
-                    '  <div class="box-body no-padding">' +
-                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                    '      </ul>' +
-                    ' </div>' +
-                    '</div>'
-                var mMenus = '<div class="box box-solid collapsed-box" style="margin-bottom: 0;">' +
-                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
-                    '      <div class="box-tools" style="left: 28px">' +
-                    '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                    '              <i class="fa fa-minus" style="margin-left:1px;"></i>' +
-                    '          </button>' +
-                    '      </div>' +
-                    '      <h3 class="box-title" style="margin-left: 30px"></h3>' +
-                    '  </div>' +
-                    '  <div class="box-body no-padding">' +
-                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                    '      </ul>' +
-                    ' </div>' +
-                    '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds" value="" /> '
-                var datas = ret.datas;
-                var pages = [{ name: "网页", parentID: 0 }, { name: "接口", parentID: 1 }]
-                for (var t = 0; t < pages.length; t++) {
-                    var mMenu = mMenuStr.replace('onId', pages[t].parentID)
-                    var option = $(mMenu).clone()
-                    option.find('h3').text(pages[t].name)
-                    option.find('.box-tools').before(rolesChoice)
-                    option.find('.selectCheck').attr('id', "checkd" + pages[t].parentID)
-                    option.find('.on_ul').attr('id', "cont" + pages[t].parentID)
-                    $(".usersChoice").append(option)
-                    checkeds(pages[t].parentID);
-                }
-                var falseParent = getRolesParent(datas, false)
-                var type_d = [{ name: " 页面管理", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
-                //获取isPage第一层为true
-                var parents = getRolesParent(datas, true)
-                //获取type值
-                var rolesType = getRolesTypes(parents)
-                for (var i = 0; i < rolesType.length; i++) {
-                    //获取当type=1时的data
-                    var childs = getChildRolesTypes(parents, rolesType[i])
-                    for (var n = 0; n < type_d.length; n++) {
-                        var types = type_d[n]
-                        if (types.Pid == rolesType[i]) {
-                            var mMenu = mMenuStr.replace('onId', rolesType[i])
-                            var option = $(mMenu).clone()
-                            option.find('h3').text(types.name)
-                            option.find('.box-tools').before(rolesChoice)
-                            option.find('.selectCheck').attr('id', "checks" + types.Pid)
-                            option.find('.on_ul').attr('id', "on" + types.Pid)
-                            if ($(".usersChoice").find('[id=' + "cont" + 0 + ']')) {
-                                $(".usersChoice").find('[id=' + "cont" + 0 + ']').append(option)
-                                //复选框
-                                type(types.Pid);
-                                //选择结束
-                            }
-                            //获取label值的数组
-                            var label = getRolesLabel(childs)
-                            for (var j = 0; j < label.length; j++) {
-                                var labels = label[j]
-                                var lable_D = { label: label[j], labelID: j }
-                                var mMenu = mMenus.replace('onId', lable_D.labelID)
-                                var option = $(mMenu).clone()
-                                option.find('h3').text(lable_D.label)
-                                option.find('.box-tools').before(rolesChoice)
-                                option.find('.selectCheck').attr('id', "la_d" + lable_D.labelID)
-                                option.find('.fa').attr('class', "fa fa-plus")
-                                option.find('.on_ul').attr('id', "la" + lable_D.labelID)
-                                if ($(".usersChoice").find('[id=' + "on" + types.Pid + ']')) {
-                                    $(".usersChoice").find('[id=' + "on" + types.Pid + ']').append(option)
-                                    chioce(j);
-                                }
-                                //获取lable相同时的data
-                                var childLabel = getChildRolesLabel(childs, label[j])
-                                for (var m = 0; m < childLabel.length; m++) {
-                                    var labelchild = childLabel[m]
-                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
-                                    var option = $(mMenu).clone()
-                                    option.find('h3').text(labelchild.name)
-                                    option.find('.box-tools').before(rolesChoice)
-                                    option.find('.selectCheck').attr('id', "name_d" + labelchild.id)
-                                    option.find('.selectCheck').attr('value', labelchild.id)
-                                    if (labelchild.label != labelchild.name) {
-                                        $(".usersChoice").find('[id=' + "la" + lable_D.labelID + ']').append(option);
-                                    } else {
-                                        $(".usersChoice").find('[id=' + "la_d" + lable_D.labelID + ']').attr('value', labelchild.id);
-
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-
-                //接口
-                var falseParent = getRolesParent(datas, false)
-                //获取type值
-                var rolesTypefalse = getRolesTypes(falseParent)
-                for (var i = 0; i < rolesTypefalse.length; i++) {
-                    //获取type的data
-                    var childsfalse = getChildRolesTypes(falseParent, rolesTypefalse[i])
-                    for (var n = 0; n < type_d.length; n++) {
-                        var types = type_d[n]
-                        if (types.Pid == rolesTypefalse[i]) {
-                            var mMenu = mMenuStr.replace('onId', rolesTypefalse[i])
-                            var option = $(mMenu).clone()
-                            option.find('h3').text(types.name)
-                            option.find('.box-tools').before(rolesChoice)
-                            option.find('.selectCheck').attr('id', "false" + types.Pid)
-                            option.find('.on_ul').attr('id', "onfalse" + types.Pid)
-                            if ($(".usersChoice").find('[id=' + "cont" + 1 + ']')) {
-                                $(".usersChoice").find('[id=' + "cont" + 1 + ']').append(option)
-                                //复选框
-                                falseType(types.Pid)
-                                //选择结束
-                            }
-                            //获取label值的数组
-                            var labelfalse = getRolesLabel(childsfalse)
-                            for (var j = 0; j < labelfalse.length; j++) {
-                                var labels = labelfalse[j]
-                                var lable_D = { label: labelfalse[j], labelID: j }
-                                var mMenu = mMenus.replace('onId', lable_D.labelID)
-                                var option = $(mMenu).clone()
-                                option.find('h3').text(lable_D.label)
-                                option.find('.box-tools').before(rolesChoice)
-                                option.find('.selectCheck').attr('id', "la_dfalse" + lable_D.labelID)
-                                option.find('.on_ul').attr('id', "lafalse" + lable_D.labelID)
-                                option.find('.fa').attr('class', "fa fa-plus")
-                                if ($(".usersChoice").find('[id=' + "onfalse" + types.Pid + ']')) {
-                                    $(".usersChoice").find('[id=' + "onfalse" + types.Pid + ']').append(option);
-                                    falsechioce(lable_D.labelID)
-                                }
-                                //获取lable相同时的data
-                                var childLabels = getChildRolesLabel(childsfalse, labelfalse[j])
-                                for (var m = 0; m < childLabels.length; m++) {
-                                    var labelchild = childLabels[m]
-                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
-                                    var option = $(mMenu).clone()
-                                    option.find('h3').text(labelchild.name)
-                                    option.find('.box-tools').before(rolesChoice)
-                                    option.find('.selectCheck').attr('id', "name_dfalse" + labelchild.id)
-                                    option.find('.selectCheck').attr('value', labelchild.id)
-                                    if (labelchild.label != labelchild.name) {
-                                        $(".usersChoice").find('[id=' + "lafalse" + lable_D.labelID + ']').append(option)
-
-                                    } else {
-                                        $(".usersChoice").find('[id=' + "la_dfalse" + lable_D.labelID + ']').attr('value', labelchild.id);
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-            });
-        //persions结束
-    });
-    $("input[name=joinwork]").change(
-        function () {
-            var data_depart1 = $(this).val();
-            if (data_depart1 == "0") {
-                $(".workman").show();
-               
-            }
-            if (data_depart1 == "1") {
-                $(".workman").hide();
-            }
-        });
-    $(".workman").click(function() {
-        $(this).addClass('skins_roles');
-        $(".usersAdd").removeClass('skins_roles');
-        $(".usersList").removeClass('skins_roles');
-        $(".addUsers").addClass('appear_d');
-        $(".usersChoice").addClass('appear_d');
-        $(".joinworker").removeClass('appear_d');
-        var opType = 100;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
-        var data = {}
-        data.opType = opType;
-        ajaxPost("/Relay/Post", data,
-            function(ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                
-                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
-                    '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
-                    '  </div>' +
-                    '  <div class="box-body no-padding">' +
-                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                    '      </ul>' +
-                    ' </div>' +
-                    '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCodes" name="codes" /> '
-               var datas = ret.datas;
-                var parents = getmadeCode(datas)
-                console.log(parents);
-                for (var i = 0; i < parents.length; i++) {
-                    var childs = getCodeData(datas, parents[i])
-                    for (var j = 0; j < childs.length; j++) {
-                        var child = childs[j]
-                        var mMenu = mMenuStr.replace('onId', child.Id)
-                        var option = $(mMenu).clone()
-                        option.find('h3').text(child.Code)
-                        option.find('.box-title').before(rolesChoice)
-                        option.find('.selectCodes').attr('value', child.Id)
-                        option.find('.on_ul').attr('id', "on" + child.Id)
-                        $(".joinworker").append(option)
-                     }
-                }
-               
-            })
-    })
-}
-function addUsers() {
-
-    var usersNames = $("#addUsersName").val();
-    var personNames = $("#addPersonName").val();
-    var email = $("#addEmail").val();
-    var Password = $("#addPassword").val();
-    var joinswork = $("input[name=joinwork]:checked").val();
-    var joincheck = $("input[name=checker]:checked").val();
-    var accountArray = new Array();
-    if (joinswork == 0 && joincheck == 1) {
-        accountArray.push(joinswork);
-        accountArray.push(joincheck);
-    }
-    if (joinswork == 0 && joincheck == 2) {
-        accountArray.push(joinswork);
-    }
-    if (joinswork == 1 && joincheck == 1) {
-        accountArray.push(joincheck);
-    }
-    if (joinswork == 1 && joincheck == 2) {
-                  return
-    }
-    joinsWorkId = accountArray.join(",");
-    var roles = $("input[name=usersName]:checked").val();
-    if (roles == "") {
-        alert("你还未选择角色！")
-    }
-    var chk_value = [];
-    $('input[name="privilegeIds"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-        if ($(this).val() != "") {
-            chk_value.push({ id: $(this).val() })
-            return chk_value
-        }
-    });
-    //console.log(chk_value)
-    var roleArray = new Array();
-
-    for (i = 0; i < chk_value.length; i++) {
-        roleArray.push(chk_value[i].id);
-    }
-
-    roleId = roleArray.join(",");
-    var Code_value = [];
-    $('input[name="codes"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-        if ($(this).val() != "") {
-            Code_value.push({ id: $(this).val() })
-            return Code_value
-        }
-    });
-    //console.log(chk_value)
-    var codeArray = new Array();
-
-    for (i = 0; i < Code_value.length; i++) {
-        codeArray.push(Code_value[i].id);
-    }
-
-    codeId = codeArray.join(",");
-
-    if (isStrEmptyOrUndefined(addUsersName)) {
-        showTip($("#usersNameTip"), "用户名不能为空");
-        return;
-    }
-    if (isStrEmptyOrUndefined(addPersonName)) {
-        showTip($("#personNameTip"), "姓名不能为空");
-        return;
-    }
-    if (isStrEmptyOrUndefined(addEmail)) {
-        showTip($("#emailNameTip"), "邮箱不能为空");
-        return;
-    }
-
-
-    var doSth = function () {
-        $("#addUsers").modal("hide");
-        var data = {
-            account: usersNames,
-            password: Password,
-            name: personNames,
-            email: email,
-            role: roles,
-            permissions: roleId,
-            isProcessor: joinsWorkId,
-            deviceIds: codeId
-        }
-
-
-        ajaxPost("/AccountManagement/Add", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getUsersList();
-                }
-            });
-    }
-
-    showConfirm("添加", doSth);
-
-}
-function showUpdateUsers(id, account, email, name, rolename, permissions, deviceIds) {
-    $("#updataUsers").modal("show");
-    $(".updataChoice").addClass('appear_d');
-    $(".updataworker").addClass('appear_d');
-   $(".usersAdd").addClass('skins_roles');
-    $(".workman").removeClass('skins_roles');
-    $(".usersList").removeClass('skins_roles');
-    $(".upUsers").removeClass('appear_d');
-    $(".workman").hide();
-    var dataPermissions = []
-    var dataPermissions = permissions.split(",");
-    var dataDevices = []
-    var dataDevices = deviceIds.split(",");
-    console.log(dataDevices)
-    var data = {}
-    ajaxGet("/RoleManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            $(".upjolesChoice").empty();
-            var userJoles = '<div class="box box-solid userRoles" style="margin-bottom: 0;">' +
-                '       <input type="radio" style="font-size:20px;" class="selectUsersd" name="Namechoice"  /> ' +
-                '       <h3 class="box-title" style="margin-left: 30px;font-size:18px;display:inline-block;"></h3>' +
-                '</div>'
-            var datas = ret.datas;
-            var usersName = getUsersName(datas);
-            var subscript = usersName.indexOf(rolename)
-            
-             for (var i = 0; i < usersName.length; i++) {
-
-                var userdata = getUsersData(datas, usersName[i])
-                for (var j = 0; j < userdata.length; j++) {
-                    var joles = userdata[j]
-                    var option = $(userJoles).clone()
-                    option.find('h3').text(joles.name)
-                    option.find('.selectUsersd').attr('value', joles.id)
-                    $(".upjolesChoice").append(option)
-                    $("input[name=Namechoice]").eq(subscript).prop("checked", true);
-                }
-
-            }
-           
-        })
-    //if (joles.name == rolename) {
-    //    $(".jolesChoice").find('.selectUsers').prop("checked", true)
-    //}
-    $("#updateId").html(id);
-    $("#updataUsersName").val(account);
-    $("#updataPersonName").val(name);
-    $("#updataEmail").val(email);
-    $(".usersAdd").click(function () {
-        $(this).addClass('skins_roles');
-        $(".usersList").removeClass('skins_roles');
-        $(".updataChoice").addClass('appear_d');
-        $(".upUsers").removeClass('appear_d');
-        $(".updataworker").addClass('appear_d');
-        $(".workman").removeClass('skins_roles');
-    });
-
-    $(".usersList").click(function () {
-        $(this).addClass('skins_roles');
-        $(".usersAdd").removeClass('skins_roles');
-        $(".upUsers").addClass('appear_d');
-        $(".updataChoice").removeClass('appear_d');
-        $(".workman").removeClass('skins_roles');
-        $(".updataworker").addClass('appear_d');
-        var roels = $(".selectUsersd:checked").val();
-        data = {
-            role: roels,
-        }
-        //persions开始
-        ajaxGet("/Account/OtherPermissions", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                };
-
-                $(".updataChoice").empty();
-                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
-                    '      <div class="box-tools" style="left: 28px">' +
-                    '          <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                    '              <i class="fa fa-minus" style="margin-left:1px;"></i>' +
-                    '          </button>' +
-                    '      </div>' +
-                    '      <h3 class="box-title" style="margin-left: 30px"></h3>' +
-                    '  </div>' +
-                    '  <div class="box-body no-padding">' +
-                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                    '      </ul>' +
-                    ' </div>' +
-                    '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCheck" name="privilegeIds" value="" /> '
-                var datas = ret.datas;
-                var pages = [{ name: "网页", parentID: 0 }, { name: "接口", parentID: 1 }]
-                for (var t = 0; t < pages.length; t++) {
-                    var mMenu = mMenuStr.replace('onId', pages[t].parentID)
-                    var option = $(mMenu).clone()
-                    option.find('h3').text(pages[t].name)
-                    option.find('.box-tools').before(rolesChoice)
-                    option.find('.selectCheck').attr('id', "checkd" + pages[t].parentID)
-                    option.find('.on_ul').attr('id', "cont" + pages[t].parentID)
-                    $(".updataChoice").append(option)
-                    checkeds(pages[t].parentID);
-                }
-                var falseParent = getRolesParent(datas, false)
-                var type_d = [{ name: " 页面管理", Pid: 1 }, { name: " 组织管理", Pid: 2 }, { name: "设备管理", Pid: 3 }, { name: "流程卡管理", Pid: 4 }, { name: "工艺管理", Pid: 5 }, { name: "维修管理", Pid: 6 }]
-                //获取isPage第一层为true
-                var parents = getRolesParent(datas, true)
-                //获取type值
-                var rolesType = getRolesTypes(parents)
-                for (var i = 0; i < rolesType.length; i++) {
-                    //获取当type=1时的data
-                    var childs = getChildRolesTypes(parents, rolesType[i])
-                    for (var n = 0; n < type_d.length; n++) {
-                        var types = type_d[n]
-                        if (types.Pid == rolesType[i]) {
-                            var mMenu = mMenuStr.replace('onId', rolesType[i])
-                            var option = $(mMenu).clone()
-                            option.find('h3').text(types.name)
-                            option.find('.box-tools').before(rolesChoice)
-                            option.find('.selectCheck').attr('id', "checks" + types.Pid)
-                            option.find('.on_ul').attr('id', "on" + types.Pid)
-                            if ($(".updataChoice").find('[id=' + "cont" + 0 + ']')) {
-                                $(".updataChoice").find('[id=' + "cont" + 0 + ']').append(option)
-                                //复选框
-                                type(types.Pid);
-                                //选择结束
-                            }
-                            //获取label值的数组
-                            var label = getRolesLabel(childs)
-                            for (var j = 0; j < label.length; j++) {
-                                var labels = label[j]
-                                var lable_D = { label: label[j], labelID: j }
-                                var mMenu = mMenuStr.replace('onId', lable_D.labelID)
-                                var option = $(mMenu).clone()
-                                option.find('h3').text(lable_D.label)
-                                option.find('.box-tools').before(rolesChoice)
-                                option.find('.selectCheck').attr('id', "la_d" + lable_D.labelID)
-                                option.find('.on_ul').attr('id', "la" + lable_D.labelID)
-                                if ($(".updataChoice").find('[id=' + "on" + types.Pid + ']')) {
-                                    $(".updataChoice").find('[id=' + "on" + types.Pid + ']').append(option)
-                                    chioce(j);
-                                }
-                                //获取lable相同时的data
-                                var childLabel = getChildRolesLabel(childs, label[j])
-                                for (var m = 0; m < childLabel.length; m++) {
-                                    var labelchild = childLabel[m]
-                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
-                                    var option = $(mMenu).clone()
-                                    option.find('h3').text(labelchild.name)
-                                    option.find('.box-tools').before(rolesChoice)
-                                    option.find('.selectCheck').attr('id', "name_d" + labelchild.id)
-                                    option.find('.selectCheck').attr('value', labelchild.id)
-                                    if (labelchild.label != labelchild.name) {
-                                        $(".updataChoice").find('[id=' + "la" + lable_D.labelID + ']').append(option)
-
-                                    } else {
-                                        $(".updataChoice").find('[id=' + "la_d" + lable_D.labelID + ']').attr('value', labelchild.id);
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                //接口
-                var falseParent = getRolesParent(datas, false)
-                //获取type值
-                var rolesTypefalse = getRolesTypes(falseParent)
-                for (var i = 0; i < rolesTypefalse.length; i++) {
-                    //获取type的data
-                    var childsfalse = getChildRolesTypes(falseParent, rolesTypefalse[i])
-                    for (var n = 0; n < type_d.length; n++) {
-                        var types = type_d[n]
-                        if (types.Pid == rolesTypefalse[i]) {
-                            var mMenu = mMenuStr.replace('onId', rolesTypefalse[i])
-                            var option = $(mMenu).clone()
-                            option.find('h3').text(types.name)
-                            option.find('.box-tools').before(rolesChoice)
-                            option.find('.selectCheck').attr('id', "false" + types.Pid)
-                            option.find('.on_ul').attr('id', "onfalse" + types.Pid)
-                            if ($(".updataChoice").find('[id=' + "cont" + 1 + ']')) {
-                                $(".updataChoice").find('[id=' + "cont" + 1 + ']').append(option)
-                                //复选框
-                                falseType(types.Pid)
-                                //选择结束
-                            }
-                            //获取label值的数组
-                            var labelfalse = getRolesLabel(childsfalse)
-                            for (var j = 0; j < labelfalse.length; j++) {
-                                var labels = labelfalse[j]
-                                var lable_D = { label: labelfalse[j], labelID: j }
-                                var mMenu = mMenuStr.replace('onId', lable_D.labelID)
-                                var option = $(mMenu).clone()
-                                option.find('h3').text(lable_D.label)
-                                option.find('.box-tools').before(rolesChoice)
-                                option.find('.selectCheck').attr('id', "la_dfalse" + lable_D.labelID)
-                                option.find('.on_ul').attr('id', "lafalse" + lable_D.labelID)
-                                if ($(".updataChoice").find('[id=' + "onfalse" + types.Pid + ']')) {
-                                    $(".updataChoice").find('[id=' + "onfalse" + types.Pid + ']').append(option);
-                                    falsechioce(lable_D.labelID)
-                                }
-                                //获取lable相同时的data
-                                var childLabels = getChildRolesLabel(childsfalse, labelfalse[j])
-                                for (var m = 0; m < childLabels.length; m++) {
-                                    var labelchild = childLabels[m]
-                                    var mMenu = mMenuStr.replace('onId', labelchild.id)
-                                    var option = $(mMenu).clone()
-                                    option.find('h3').text(labelchild.name)
-                                    option.find('.box-tools').before(rolesChoice)
-                                    option.find('.selectCheck').attr('id', "name_dfalse" + labelchild.id)
-                                    option.find('.selectCheck').attr('value', labelchild.id)
-                                    if (labelchild.label != labelchild.name) {
-                                        $(".updataChoice").find('[id=' + "lafalse" + lable_D.labelID + ']').append(option)
-
-                                    } else {
-                                        $(".updataChoice").find('[id=' + "la_dfalse" + lable_D.labelID + ']').attr('value', labelchild.id);
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                //复选框设置
-
-                $('input[name="privilegeIds"]:checkbox').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-                    for (var i = 0; i < dataPermissions.length; i++) {
-                        if ($(this).val() == dataPermissions[i]) {
-                            $(this).prop("checked", true);
-                        }
-                    }
-
-                });
-                //复选框设置结束
-            });
-        //persions结束
-    });
-    $("input[name=upjoinwork]").change(
-        function () {
-            var data_depart1 = $(this).val();
-            if (data_depart1 == "0") {
-                $(".workman").show();
-
-            }
-            if (data_depart1 == "1") {
-                $(".workman").hide();
-            }
-            
-        });
-    if (deviceIds != "") {
-        $("input[name=upjoinwork]").eq(0).prop("checked", true);
-        $(".workman").show();
-
-    }
-    $(".workman").click(function () {
-        $(this).addClass('skins_roles');
-        $(".usersAdd").removeClass('skins_roles');
-        $(".usersList").removeClass('skins_roles');
-        $(".upUsers").addClass('appear_d');
-        $(".updataChoice").addClass('appear_d');
-        $(".updataworker").removeClass('appear_d');
-        var opType = 100;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
-        var data = {}
-        data.opType = opType;
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-
-                var mMenuStr = '<div class="box box-solid" style="margin-bottom: 0;">' +
-                    '  <div class="box-header with-border" onclick="onClick(\'onId\')">' +
-                    '      <h3 class="box-title" style="margin-left: 10px"></h3>' +
-                    '  </div>' +
-                    '  <div class="box-body no-padding">' +
-                    '      <ul class="on_ul nav nav-pills nav-stacked" style="margin-left: 20px">' +
-                    '      </ul>' +
-                    ' </div>' +
-                    '</div>'
-                var rolesChoice = '<input type="checkbox" class="selectCodes" name="codes" /> '
-                var datas = ret.datas;
-                var parents = getmadeCode(datas)
-                console.log(parents);
-                for (var i = 0; i < parents.length; i++) {
-                    var childs = getCodeData(datas, parents[i])
-                    for (var j = 0; j < childs.length; j++) {
-                        var child = childs[j]
-                        var mMenu = mMenuStr.replace('onId', child.Id)
-                        var option = $(mMenu).clone()
-                        option.find('h3').text(child.Code)
-                        option.find('.box-title').before(rolesChoice)
-                        option.find('.selectCodes').attr('value', child.Id)
-                        option.find('.on_ul').attr('id', "on" + child.Id)
-                        $(".updataworker").append(option)
-                    }
-                }
-                //选择框设置
-                $('input[name="codes"]:checkbox').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-                    for (var i = 0; i < dataDevices.length; i++) {
-                        if ($(this).val() == dataDevices[i]) {
-                            $(this).prop("checked", true);
-                        }
-                    }
-
-                });
-                //复选框设置结束
-            })
-       
-    })
-
-}
-function updataUsers() {
-    var id = parseInt($("#updateId").html());
-    var upUserName = $("#updataUsersName").val();
-    var upPersonName = $("#updataPersonName").val();
-    var password = $("#updataPassword").val();
-    var email = $("#updataEmail").val();
-    var roles = $("input[name=Namechoice]:checked").val();
-    var chk_value = [];
-    $('input[name="privilegeIds"]:checked').each(function () { //遍历每一个名字为privilegeIds的复选框，其中选中的执行函数
-        if ($(this).val() != "") {
-            chk_value.push({ id: $(this).val() })
-            return chk_value
-        }
-    });
-    //console.log(chk_value)
-    var roleArray = new Array();
-
-    for (i = 0; i < chk_value.length; i++) {
-        roleArray.push(chk_value[i].id);
-    }
-
-    roleId = roleArray.join(",");
-
-    var doSth = function () {
-        $("#updataUsers").modal("hide");
-
-        var data = {
-            id: id,
-            account: upUserName,
-            password: password,
-            name: upPersonName,
-            email: email,
-            role: roles,
-            permissions: roleId
-        }
-
-        ajaxPost("/AccountManagement/Update", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getUsersList();
-                }
-            });
-    }
-    showConfirm("修改", doSth);
-
-}
-function DeleteUsers(id, account) {
+function deleteUser(id, account) {
 
     var doSth = function () {
         var data = {
@@ -833,161 +103,606 @@ function DeleteUsers(id, account) {
     }
     showConfirm("删除用户：" + account, doSth);
 }
-function rule(a, b) {
-    return a.id > b.id
+
+function roleRule(a, b) {
+    return a.id < b.id ? 1 : -1;
 }
-function onClick(id) {
+
+function addReset() {
+    addList = new Array();
+    $(".dd").val("");
+    $("#addProcessor").iCheck('uncheck');
+    $("#addSurveyor").iCheck('uncheck');
+    lastAddRole = 0;
+    addList = new Array();
+    showAddUserModal(-1);
+}
+
+var addList = new Array();
+function showAddUserModal(type = 0) {
+    $("#add_protoDiv").click();
+    var role = $("#addRole").val();
+    if (lastAddRole == role) {
+        $("#addUserModal").modal("show");
+        return;
+    }
+    $("#addRole").empty();
+    ajaxGet("/RoleManagement/List",
+        null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            var datas = ret.datas.sort(roleRule);
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < datas.length; i++) {
+                var d = datas[i];
+                $("#addRole").append(option.format(d.id, d.name));
+            }
+            if (type != -1)
+                $("#addUserModal").modal("show");
+            getOtherPermission("add_per_body", $("#addRole").val(), null);
+        });
+
+    var opType = 100;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post",
+        data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            var op = function (data, type, row) {
+                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
+            }
+
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            $("#addDeviceList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "aaSorting": [[1, "asc"]],
+                    "columns": [
+                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "Code", "title": "机台号" },
+                        { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    "initComplete": function (settings, json) {
+                        $("#addDeviceList td").css("padding", "3px");
+                        $("#addDeviceList td").css("vertical-align", "middle");
+                        $("#addDeviceList .icb_minimal").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
+                            var ui = $(this);
+                            var v = ui.attr("value");
+                            if (ui.is(":checked")) {
+                                ui.parents("tr:first").css("background-color", "gray");
+                                addList.push(v);
+                            } else {
+                                if (ui.parents("tr:first").hasClass("odd"))
+                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                else
+                                    ui.parents("tr:first").css("background-color", "");
+
+                                addList.splice(addList.indexOf(v), 1);
+                            }
+                        });
+                    }
+                });
+
+        });
+}
+
+function addUser() {
+    var addAccount = $("#addAccount").val();
+    var addName = $("#addName").val();
+    var addEmail = $("#addEmail").val();
+    var addPassword = $("#addPassword").val();
+    var addRole = $("#addRole").val();
+    var pRole = new Array();
+    if ($("#addProcessor").is(":checked"))
+        pRole.push(0);
+    if ($("#addSurveyor").is(":checked"))
+        pRole.push(1);
+    var pRoles = pRole.join(",");
+
+    var pId = new Array();
+    var cbs = $("#add_per_body .on_cb");
+    for (var i = 0; i < cbs.length; i++) {
+        var e = cbs[i];
+        var v = parseInt($(e).attr("value"));
+        if ($(e).is(":checked") && v > 0)
+            pId.push(v);
+    }
+    var roleIds = pId.join(",");
+
+    var deviceIds = "";
+    if (pRole.indexOf(0) > -1)
+        deviceIds = addList.join(",");
+    else
+        addList = new Array();
+
+    if (isStrEmptyOrUndefined(addAccount)) {
+        layer.msg("用户名不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(addName)) {
+        layer.msg("姓名不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(addPassword)) {
+        layer.msg("密码不能为空");
+        return;
+    }
+
+    var doSth = function () {
+        $("#addUserModal").modal("hide");
+        var data = {
+            account: addAccount,
+            password: addPassword,
+            name: addName,
+            email: addEmail,
+            role: addRole,
+            permissions: roleIds,
+            isProcessor: pRoles,
+            deviceIds: deviceIds
+        }
+        ajaxPost("/AccountManagement/Add", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getUsersList();
+                }
+            });
+    }
+
+    showConfirm("添加", doSth);
+}
+
+var updateList = new Array();
+var permission = null;
+function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole) {
+    $("#update_protoDiv").click();
+    updateList = new Array();
+    permission = permissions;
+    $("#updateId").html(id);
+    $("#updateAccount").val(account);
+    $("#updateName").val(name);
+    $("#updateEmail").val(emailAddress);
+    $("#updatePassword").iCheck('uncheck');
+    $("#updateNewPassword").val("");
+
+    var productionRoleList = productionRole.split(",");
+
+    $("#updateProcessor").iCheck(productionRoleList.indexOf("0") > -1 ? 'check' : 'uncheck');
+    $("#updateSurveyor").iCheck(productionRoleList.indexOf("1") > -1 ? 'check' : 'uncheck');
+
+    $("#updateRole").empty();
+    ajaxGet("/RoleManagement/List",
+        null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            var datas = ret.datas.sort(roleRule);
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < datas.length; i++) {
+                var d = datas[i];
+                $("#updateRole").append(option.format(d.id, d.name));
+            }
+            $("#updateRole").val(role).trigger("update");
+
+            $("#updateUserModal").modal("show");
+            getOtherPermission("update_per_body", $("#updateRole").val(), permissions);
+        });
+
+    var opType = 100;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post",
+        data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            var op = function (data, type, row) {
+                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
+            }
+
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            $("#updateDeviceList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "aaSorting": [[1, "asc"]],
+                    "columns": [
+                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "Code", "title": "机台号" },
+                        { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    "initComplete": function (settings, json) {
+                        $("#updateDeviceList td").css("pupdateing", "3px");
+                        $("#updateDeviceList td").css("vertical-align", "middle");
+                        $("#updateDeviceList .icb_minimal").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#updateDeviceList .icb_minimal").on('ifChanged', function (event) {
+                            var ui = $(this);
+                            var v = ui.attr("value");
+                            if (ui.is(":checked")) {
+                                ui.parents("tr:first").css("background-color", "gray");
+                                updateList.push(v);
+                            } else {
+                                if (ui.parents("tr:first").hasClass("odd"))
+                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                else
+                                    ui.parents("tr:first").css("background-color", "");
+
+                                updateList.splice(updateList.indexOf(v), 1);
+                            }
+                        });
+
+                        if (isStrEmptyOrUndefined(deviceIds)) {
+                            $("#updateDeviceList .icb_minimal").iCheck('check');
+                            return;
+                        }
+
+                        var deviceIdList = deviceIds.split(",");
+                        for (var i = 0; i < deviceIdList.length; i++) {
+                            var index = deviceIdList[i];
+                            $("#updateDeviceList .icb_minimal").filter("[value=" + index + "]").iCheck('check');
+                        }
+                    }
+                });
+        });
+}
+
+function updateUser() {
+    var id = parseInt($("#updateId").html());
+    var updateName = $("#updateName").val();
+    var updateEmail = $("#updateEmail").val();
+    var updateRole = $("#updateRole").val();
+    var pRole = new Array();
+    if ($("#updateProcessor").is(":checked"))
+        pRole.push(0);
+    if ($("#updateSurveyor").is(":checked"))
+        pRole.push(1);
+    var pRoles = pRole.join(",");
+
+    var pId = new Array();
+    var cbs = $("#update_per_body .on_cb");
+    for (var i = 0; i < cbs.length; i++) {
+        var e = cbs[i];
+        var v = parseInt($(e).attr("value"));
+        if ($(e).is(":checked") && v > 0)
+            pId.push(v);
+    }
+    var roleIds = pId.join(",");
+
+    var deviceIds = "";
+    if (pRole.indexOf(0) > -1)
+        deviceIds = updateList.join(",");
+    else
+        updateList = new Array();
+
+    if (isStrEmptyOrUndefined(updateName)) {
+        layer.msg("姓名不能为空");
+        return;
+    }
+
+    var data = {
+        id: id,
+        name: updateName,
+        email: updateEmail,
+        role: updateRole,
+        permissions: roleIds,
+        isProcessor: pRoles,
+        deviceIds: deviceIds
+    }
+
+    if ($("#updatePassword").is(":checked")) {
+
+        var updateNewPassword = $("#updateNewPassword").val();
+        if (isStrEmptyOrUndefined(updateNewPassword)) {
+            layer.msg("密码不能为空");
+            return;
+        }
+        data.password = updateNewPassword;
+    }
+
+    var doSth = function () {
+        $("#updateUserModal").modal("hide");
+        ajaxPost("/AccountManagement/Update", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getUsersList();
+                }
+            });
+    }
+    showConfirm("修改", doSth);
+}
 
 
+
+
+var lastAddRole = 0;
+var lastUpdateRole = 0;
+function getOtherPermission(ui, role, permissions, type = 0) {
+    if (type == 0) {
+        if (lastAddRole == role)
+            return;
+        lastAddRole = role;
+    } else {
+        if (lastUpdateRole == role)
+            return;
+        lastUpdateRole = role;
+    }
+    var permissionList = null;
+    if (!isStrEmptyOrUndefined(permissions))
+        permissionList = permissions.split(",").map(Number);
+
+    $("#" + ui).empty();
+    ajaxGet("/Account/OtherPermissions",
+        {
+            role: role
+        },
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            };
+            var i;
+            var d;
+            var datas = new Array();
+            if (permissionList != null) {
+                for (i = 0; i < ret.datas.length; i++) {
+                    d = ret.datas[i];
+                    if (permissionList.indexOf(d.id) > -1)
+                        datas.push(d.id);
+                }
+            }
+            showPermissions(ui, ret.datas);
+
+            for (i = 0; i < datas.length; i++) {
+                $("#update_per_body .on_cb").filter("[value=" + datas[i] + "]").iCheck("check");
+            }
+        });
+
 }
-function getUsersName(list) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (parents.indexOf(data.name) < 0) {
-            parents.push(data.name)
+
+function showPermissions(uiName, datas) {
+    var mOptionStr1 = '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
+        '    <div class="box-header no-padding">' +
+        '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
+        '        <input type="checkbox" class="on_cb" style="width: 15px;"/>' +
+        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
+        '    </div>' +
+        '    <div class="box-body no-padding">' +
+        '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
+        '    </div>' +
+        '</div>';
+    var mOptionStr2 = '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
+        '    <div class="box-header no-padding">' +
+        '        <a type="button" class="btn btn-box-tool disabled" data-widget="collapse" style="opacity:0;"><i class="on_i fa fa-minus"></i></a>' +
+        '        <input type="checkbox" class="on_cb" style="width: 15px;"/>' +
+        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
+        '    </div>' +
+        '    <div class="box-body no-padding">' +
+        '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
+        '    </div>' +
+        '</div>';
+
+    var mNameStr = '<li>' +
+        '    <div class="box-header no-padding">' +
+        '        <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>' +
+        '        <input type="checkbox" class="on_cb name" style="width: 15px;" />' +
+        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
+        '    </div>' +
+        '</li>';
+
+
+    var pages = [{ id: -1, name: "网页", isPage: true }, { id: -2, name: "接口", isPage: false }];
+    var types = {}
+    types[1] = { id: -3, name: "页面管理" };
+    types[2] = { id: -4, name: "组织管理" };
+    types[3] = { id: -5, name: "设备管理" };
+    types[4] = { id: -6, name: "流程卡管理" };
+    types[5] = { id: -7, name: "工艺管理" };
+    types[6] = { id: -8, name: "维修管理" };
+    var lbI = -9;
+    for (var i = 0; i < pages.length; i++) {
+        var page = pages[i];
+        var pageData = getPageData(datas, page.isPage);
+
+        var option = $(mOptionStr1).clone();
+        option.find("h3").text(page.name);
+        option.find(".on_cb").attr("value", page.id);
+        option.find(".on_ul").attr("id", "ul" + page.id);
+        $("#" + uiName).append(option);
+        var dTypes = getTypes(pageData);
+        for (var j = 0; j < dTypes.length; j++) {
+            var dType = dTypes[j];
+            var type = types[dType];
+            var typeData = getTypeData(pageData, dType);
+
+            option = $("<li>" + mOptionStr1 + "<li>").clone();
+            option.find("h3").text(type.name);
+            option.find(".on_cb").attr("value", type.id);
+            option.find(".on_ul").attr("id", "ul" + type.id);
+            $("#" + uiName).find("[id=ul" + page.id + "]").append(option);
+
+            var dLabels = getLabels(typeData);
+            for (var k = 0; k < dLabels.length; k++) {
+                var dLabel = dLabels[k];
+                var labelData = getLabelData(pageData, dLabel);
+                if (page.isPage) {
+                    var firstData = labelData.shift();
+                    option = $(labelData.length > 1 ? ("<li>" + mOptionStr1 + "<li>") : ("<li>" + mOptionStr2 + "<li>"))
+                        .clone();
+                    option.find("h3").text(dLabel);
+                    option.find(".on_cb").attr("value", firstData.id);
+                    option.find(".on_ul").attr("id", "ul" + firstData.id);
+                    option.find("div:first").addClass("collapsed-box");
+                    option.find(".on_i").removeClass("fa-minus");
+                    option.find(".on_i").addClass("fa-plus");
+
+                    $("#" + uiName).find("[id=ul" + type.id + "]").append(option);
+                    for (var l = 0; l < labelData.length; l++) {
+                        var lData = labelData[l];
+
+                        option = $(mNameStr).clone();
+                        option.find("h3").text(lData.name);
+                        option.find(".on_cb").attr("value", lData.id);
+                        $("#" + uiName).find("[id=ul" + firstData.id + "]").append(option);
+                    }
+
+                } else {
+                    option = $("<li>" + mOptionStr1 + "<li>").clone();
+                    option.find("h3").text(dLabel);
+                    option.find(".on_cb").attr("value", lbI);
+                    option.find(".on_ul").attr("id", "ul" + lbI);
+                    option.find("div:first").addClass("collapsed-box");
+                    option.find(".on_i").removeClass("fa-minus");
+                    option.find(".on_i").addClass("fa-plus");
+                    $("#" + uiName).find("[id=ul" + type.id + "]").append(option);
+                    for (var l = 0; l < labelData.length; l++) {
+                        var lData = labelData[l];
+                        option = $(mNameStr).clone();
+                        option.find("h3").text(lData.name);
+                        option.find(".on_cb").attr("value", lData.id);
+                        $("#" + uiName).find("[id=ul" + lbI + "]").append(option);
+                    }
+                    lbI--;
+                }
+            }
         }
     }
-    return parents.sort(rule)
+
+    $(".on_cb").iCheck({
+        checkboxClass: 'icheckbox_minimal',
+        radioClass: 'iradio_minimal',
+        increaseArea: '20%' // optional
+    });
+
+    $(".on_cb").on('ifClicked', function (event) {
+        updateCheckBoxState(uiName);
+    });
+
+
+
+
+
 }
-function getUsersData(list, name) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.name == name) {
-            result.push(data)
+
+function getPageData(datas, isPage) {
+    var res = new Array();
+    for (var i = 0; i < datas.length; i++) {
+        var data = datas[i];
+        if (data.isPage == isPage) {
+            res.push(data);
         }
     }
-
-    return result.sort(rule)
+    return res;
 }
-function getRolesParent(list, choice) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.isPage == choice) {
-            parents.push(data)
+
+function getTypes(datas) {
+    var res = new Array();
+    for (var i = 0; i < datas.length; i++) {
+        var data = datas[i];
+        if (res.indexOf(data.type) < 0) {
+            res.push(data.type);
         }
     }
-    return parents.sort(rule)
+    return res.sort();
 }
-function getRolesTypes(list) {
-    var types = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (types.indexOf(data.type) < 0) {
-            types.push(data.type)
-        }
-    }
-    return types.sort()
-}
-function getRolesLabel(list) {
-    var label = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
 
-
-        if (label.indexOf(data.label) < 0) {
-
-            label.push(data.label)
-        }
-
-    }
-
-    return label.sort(rule)
-}
-function getChildRolesLabel(list, label) {
-    var childLabel = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.label == label) {
-            childLabel.push(data)
-        }
-    }
-    return childLabel.sort(rule)
-}
-function getChildRolesTypes(list, type) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
+function getTypeData(datas, type) {
+    var res = new Array();
+    for (var i = 0; i < datas.length; i++) {
+        var data = datas[i];
         if (data.type == type) {
-            result.push(data)
+            res.push(data);
         }
     }
-    return result.sort(rule)
+    return res;
 }
-function getmadeCode(list) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (parents.indexOf(data.Code) < 0) {
-            parents.push(data.Code)
-        }
-    }
-    return parents.sort(rule)
-}
-function getCodeData(list, code) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.Code == code) {
-            result.push(data)
-        }
-    }
 
-    return result.sort(rule)
-}
-function checkeds(t) {
-    $("#checkd" + t).click(function () {
-        if (this.checked) {
-            $("#checkd" + t).parent().parent().find(".selectCheck").prop("checked", true);
-        } else {
-            $("#checkd" + t).parent().parent().find(".selectCheck").prop("checked", false);
+function getLabels(datas) {
+    var res = new Array();
+    for (var i = 0; i < datas.length; i++) {
+        var data = datas[i];
+        if (res.indexOf(data.label) < 0) {
+            res.push(data.label);
         }
-    })
+    }
+    return res;
 }
-function type(i) {
-    $("#checks" + i).click(function () {
-        if (this.checked) {
-            $("#checks" + i).parent().parent().find(".selectCheck").prop("checked", true);
-            $("#checks" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
-        } else {
-            $("#checks" + i).parent().parent().find(".selectCheck").prop("checked", false);
-            $("#checks" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
-        }
 
-    })
+function rule(a, b) {
+    return a.id > b.id ? 1 : -1;
 }
-function chioce(i) {
-    $("#la_d" + i).click(function () {
-        if (this.checked) {
-            $("#la_d" + i).parent().parent().find(".selectCheck").prop("checked", true);
-            $("#la_d" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
-        } else {
-            $("#la_d" + i).parent().parent().find(".selectCheck").prop("checked", false);
-            $("#la_d" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
+
+function getLabelData(datas, label) {
+    var res = new Array();
+    for (var i = 0; i < datas.length; i++) {
+        var data = datas[i];
+        if (data.label == label) {
+            res.push(data);
         }
-    })
+    }
+    return res.sort(rule);
 }
-function falseType(m) {
-    $("#false" + m).click(function () {
-        if (this.checked) {
-            $("#false" + m).parent().parent().find(".selectCheck").prop("checked", true);
-            $("#false" + m).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
-        } else {
-            $("#false" + m).parent().parent().find(".selectCheck").prop("checked", false);
-            $("#false" + m).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
-        }
-    })
-}
-function falsechioce(i) {
-    $("#la_dfalse" + i).click(function () {
-        if (this.checked) {
-            $("#la_dfalse" + i).parent().parent().find(".selectCheck").prop("checked", true);
-            $("#la_dfalse" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", true);
-        } else {
-            $("#la_dfalse" + i).parent().parent().find(".selectCheck").prop("checked", false);
-            $("#la_dfalse" + i).parent().parent().parent().parent().prev().children(".selectCheck").prop("checked", false);
-        }
-    })
+
+function updateCheckBoxState(uiName) {
+    console.log(uiName);
+
+
+
+
+
+
+
 }
