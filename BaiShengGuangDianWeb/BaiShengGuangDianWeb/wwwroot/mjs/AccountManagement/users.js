@@ -509,6 +509,21 @@ function getOtherPermission(ui, role, permissions, type = 0) {
             for (i = 0; i < datas.length; i++) {
                 $("#update_per_body .on_cb").filter("[value=" + datas[i] + "]").iCheck("check");
             }
+
+            if (permissionList != null) {
+                var names = $("#update_per_body .4");
+                for (var i = 0; i < names.length; i++) {
+                    if ($(names[i]).is(":checked")) {
+                        updateCheckBoxState("update_per_body", names[i], false);
+                    }
+                }
+                var p3 = $("#update_per_body .3");
+                for (var i = 0; i < p3.length; i++) {
+                    if ($(p3[i]).is(":checked")) {
+                        updateCheckBoxState("update_per_body", p3[i], false);
+                    }
+                }
+            }
         });
 
 }

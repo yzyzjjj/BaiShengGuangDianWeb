@@ -49,6 +49,7 @@ function getRoleList() {
 }
 
 function showAddRoles() {
+    $("#add_protoDiv").click();
     $("#addRoleName").val("");
     $("#add_per_body").empty();
     ajaxGet("/Account/Permissions", null,
@@ -123,6 +124,7 @@ function deleteRole(id, name) {
 
 function showUpdateRole(id, name, permissions) {
     var dataPermissions = permissions.split(",");
+    $("#update_protoDiv").click();
     $("#updateRoleName").val(name);
     $("#update_per_body").empty();
     $("#updateId").html(id);
@@ -139,7 +141,22 @@ function showUpdateRole(id, name, permissions) {
                     var pid = dataPermissions[n];
                     $("#update_per_body .on_cb").filter("[value=" + pid + "]").iCheck("check");
                 }
+                if (dataPermissions.length > 0) {
+                    var names = $("#update_per_body .4");
+                    for (var i = 0; i < names.length; i++) {
+                        if ($(names[i]).is(":checked")) {
+                            updateCheckBoxState("update_per_body", names[i], false);
+                        }
+                    }
+                    var p3 = $("#update_per_body .3");
+                    for (var i = 0; i < p3.length; i++) {
+                        if ($(p3[i]).is(":checked")) {
+                            updateCheckBoxState("update_per_body", p3[i], false);
+                        }
+                    }
+                }
             }
+
             $("#updateRoleModal").modal("show");
         });
 }
