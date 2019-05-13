@@ -321,7 +321,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var logParam = $"账号:{accountInfo.Account}";
             //Name
             var name = param.GetValue("name");
-            if (!name.IsNullOrEmpty())
+            if (!name.IsNullOrEmpty() && accountInfo.Name != name)
             {
                 logParam = $",名字:{accountInfo.Name},新名字:{name}";
                 accountInfo.Name = name;
@@ -331,13 +331,16 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             if (!password.IsNullOrEmpty())
             {
                 var pwd = AccountHelper.GenAccountPwdByOrignalPwd(accountInfo.Account, password);
-                logParam = $",密码:{accountInfo.Password},新密码明文/密文:{password}/{pwd}";
-                accountInfo.Password = pwd;
+                if (accountInfo.Password != pwd)
+                {
+                    logParam = $",密码:{accountInfo.Password},新密码明文/密文:{password}/{pwd}";
+                    accountInfo.Password = pwd;
+                }
             }
 
             //EmailAddress
             var email = param.GetValue("email");
-            if (!email.IsNullOrEmpty())
+            if (!email.IsNullOrEmpty() && accountInfo.EmailAddress != email)
             {
                 logParam = $",邮箱:{accountInfo.EmailAddress},新邮箱:{email}";
                 accountInfo.EmailAddress = email;
@@ -352,13 +355,16 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
 
-                var roleInfo = RoleHelper.GetRoleInfo(role, true);
-                if (roleInfo == null)
+                if (accountInfo.Role != role)
                 {
-                    return Result.GenError<Result>(Error.RoleNotExist);
+                    var roleInfo = RoleHelper.GetRoleInfo(role, true);
+                    if (roleInfo == null)
+                    {
+                        return Result.GenError<Result>(Error.RoleNotExist);
+                    }
+                    logParam = $",角色ID:{accountInfo.Role},角色名:{accountInfo.RoleName},新角色ID:{role},新角色名:{roleInfo.Name}";
+                    accountInfo.Role = role;
                 }
-                logParam = $",角色ID:{accountInfo.Role},角色名:{accountInfo.RoleName},新角色ID:{role},新角色名:{roleInfo.Name}";
-                accountInfo.Role = role;
             }
             //Permissions
             var permissions = param.GetValue("permissions");
@@ -370,9 +376,9 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
                     permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");
-                    if (!permissions.IsNullOrEmpty())
+                    if (!permissions.IsNullOrEmpty() && accountInfo.Permissions != permissions)
                     {
-                        accountInfo.Permissions = permissions;
+                        accountInfo.SelfPermissions = permissions;
                         logParam += $",新特殊权限列表: {accountInfo.Permissions}";
                     }
                 }
