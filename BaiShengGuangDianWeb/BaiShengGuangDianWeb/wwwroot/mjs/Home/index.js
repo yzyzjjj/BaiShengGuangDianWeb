@@ -131,7 +131,7 @@ function queryFlowCard() {
     }
     if (!query)
         return;
-    var ws = parseInt($("#workshopCode").val(), 2);
+    var ws = parseIntStr($("#workshopCode").val(), 2);
 
     var data = {}
     data.opType = opType;

@@ -186,7 +186,7 @@ function getFlowCardList(t = 0) {
                 var html = "{0}{1}{2}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateFlowCard({0})">修改</button>'.format(data.Id);
                 var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0})">更新</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, data.FlowCardName);
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, data.FlowCardName.substring(2));
 
                 html = html.format(
                     checkPermission(207) ? changeBtn : "",
@@ -251,7 +251,7 @@ function getFlowCardList(t = 0) {
         });
 }
 
-function DeleteFlowCard(id, name) {
+function deleteFlowCard(id, name) {
     var opType = 211;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

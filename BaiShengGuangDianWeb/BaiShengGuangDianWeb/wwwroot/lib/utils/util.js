@@ -759,6 +759,6 @@ function getQueryString(name) {
     if (r != null) return unescape(r[2]); return null;
 }
 
-function parseInt(num, n) {
+function parseIntStr(num, n) {
     return (Array(n).join(0) + num).slice(-n);
 }
