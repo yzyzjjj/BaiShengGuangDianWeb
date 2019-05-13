@@ -26,10 +26,12 @@ function getWorkshopList() {
             }
 
             $("#workshopCode").empty();
+            $("#afWorkshopCode").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
                 $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+                $("#afWorkshopCode").append(option.format(d.Id, d.WorkshopName));
             }
             $("#workshopCode").append(option.format(0, "所有"));
         });
@@ -89,6 +91,7 @@ function addFlowCard() {
         layer.msg("没有权限");
         return;
     }
+    var afWorkshopCode = $("#afWorkshopCode").val();
     var afProductionProcess = $("#afProductionProcess").val();
     var afRawMateria = $("#afRawMateria").val();
     var afRawMaterialQuantity = $("#afRawMaterialQuantity").val();
@@ -138,7 +141,9 @@ function addFlowCard() {
             //优先级
             Priority: afPriority,
             //备注
-            Remarks: afRemarks
+            Remarks: afRemarks,
+            //卡类型
+            WorkshopId: afWorkshopCode
         });
     }
 
