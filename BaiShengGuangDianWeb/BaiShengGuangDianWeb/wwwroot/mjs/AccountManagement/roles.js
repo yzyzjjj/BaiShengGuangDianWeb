@@ -1,6 +1,5 @@
 ﻿function pageReady() {
     getRoleList();
-    showAddRoles();
 }
 
 function getRoleList() {
