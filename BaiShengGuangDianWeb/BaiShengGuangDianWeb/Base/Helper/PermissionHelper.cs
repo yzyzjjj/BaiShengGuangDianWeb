@@ -46,5 +46,12 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             return PermissionsList.Values.Where(x => x.Type == 0).Select(x => x.Id);
         }
+
+
+        public static void Delete(IEnumerable<int> list)
+        {
+            ServerConfig.WebDb.Execute("UPDATE permissions SET  `IsDelete` = 1 WHERE `Id` IN @Id;", new {Id = list});
+        }
+
     }
 }

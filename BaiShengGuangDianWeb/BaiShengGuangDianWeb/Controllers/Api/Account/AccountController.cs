@@ -115,6 +115,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
+
         [HttpGet("Pages")]
         public DataResult Pages()
         {
@@ -136,5 +137,30 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             return result;
         }
 
+        [HttpPost("DeletePermission")]
+        public Result DeletePermission()
+        {
+            var accountInfo = AccountHelper.CurrentUser;
+            if (accountInfo == null)
+            {
+                return Result.GenError<CommonResult>(Error.AccountNotExist);
+            }
+            var param = Request.GetRequestParams();
+            var permission = param.GetValue("permission");
+
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<CommonResult>(Error.NoAuth);
+            }
+
+            if (!permission.IsNullOrEmpty())
+            {
+                var permissionList = permission.Split(",").Select(int.Parse).Distinct();
+                PermissionHelper.Delete(permissionList);
+            }
+
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+            return Result.GenError<Result>(Error.Success);
+        }
     }
 }
