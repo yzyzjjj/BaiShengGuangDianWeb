@@ -422,10 +422,11 @@ function updateUser() {
     var roleIds = pId.join(",");
 
     var deviceIds = "";
-    if (pRole.indexOf(0) > -1)
-        deviceIds = updateList.join(",");
-    else
+    if (pRole.indexOf(0) == -1)
         updateList = new Array();
+    else {
+        deviceIds = updateList.length == $("#updateDeviceList .icb_minimal").length ? "" : updateList.join(",");
+    }
 
     if (isStrEmptyOrUndefined(updateName)) {
         layer.msg("姓名不能为空");

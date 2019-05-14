@@ -7,6 +7,7 @@ using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
@@ -124,18 +125,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
-            var info = new AccountInfo
-            {
-                Account = account,
-                Password = AccountHelper.GenAccountPwdByOrignalPwd(account, password),
-                Name = name,
-                Role = role,
-                EmailAddress = email,
-                SelfPermissions = permissions ?? "",
-                DeviceIds = deviceIds ?? "",
-                ProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor
-            };
-            AccountHelper.AddAccountInfo(info);
             var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}";
             if (!isProcessor.IsNullOrEmpty())
             {
@@ -143,6 +132,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
                     logParam += $",生产角色:{isProcessor}";
+                    isProcessor = isProcessorList.Join(",");
                     foreach (var variable in isProcessorList)
                     {
                         int opType;
@@ -215,6 +205,19 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
+            var info = new AccountInfo
+            {
+                Account = account,
+                Password = AccountHelper.GenAccountPwdByOrignalPwd(account, password),
+                Name = name,
+                Role = role,
+                EmailAddress = email,
+                SelfPermissions = permissions ?? "",
+                DeviceIds = deviceIds ?? "",
+                ProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor,
+                MaxProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor
+            };
+            AccountHelper.AddAccountInfo(info);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam);
             return Result.GenError<Result>(Error.Success);
         }
@@ -271,8 +274,86 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.OperateNotSafe);
             }
 
+            var logParam = $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}";
             AccountHelper.DeleteAccountInfo(accountInfo.Id);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}", accountInfo.Id);
+            if (!accountInfo.ProductionRole.IsNullOrEmpty())
+            {
+                var isProcessor = accountInfo.ProductionRole;
+                try
+                {
+                    var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
+                    logParam += $",生产角色:{isProcessor}";
+                    foreach (var variable in isProcessorList)
+                    {
+                        int opType;
+                        Permission permission;
+                        ManagementServer managementServer;
+                        string opData;
+                        string url;
+                        switch (variable)
+                        {
+                            case 0:
+                                opType = 253;
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                opData = new
+                                {
+                                    accountInfo.Account
+                                }.ToJSON();
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+                                break;
+                            case 1:
+                                opType = 259;
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                opData = new
+                                {
+                                    accountInfo.Account
+                                }.ToJSON();
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam, accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }
 
@@ -320,11 +401,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var logParam = $"账号:{accountInfo.Account}";
             //Name
+            var fName = false;
             var name = param.GetValue("name");
             if (!name.IsNullOrEmpty() && accountInfo.Name != name)
             {
                 logParam = $",名字:{accountInfo.Name},新名字:{name}";
                 accountInfo.Name = name;
+                fName = true;
             }
             //Password
             var password = param.GetValue("password");
@@ -366,9 +449,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     accountInfo.Role = role;
                 }
             }
+
             //Permissions
             var permissions = param.GetValue("permissions");
-            if (!permissions.IsNullOrEmpty())
+            if (!permissions.IsNullOrEmpty() && accountInfo.SelfPermissions != permissions)
             {
                 try
                 {
@@ -379,7 +463,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     if (!permissions.IsNullOrEmpty() && accountInfo.Permissions != permissions)
                     {
                         accountInfo.SelfPermissions = permissions;
-                        logParam += $",新特殊权限列表: {accountInfo.Permissions}";
+                        logParam += $",新特殊权限列表: {accountInfo.SelfPermissions}";
                     }
                 }
                 catch (Exception)
@@ -387,7 +471,323 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
+            else
+            {
+                accountInfo.SelfPermissions = "";
+                logParam += $",新特殊权限列表: {accountInfo.SelfPermissions}";
+            }
+
+            //ProductionRole
+            var isProcessor = param.GetValue("isProcessor");
+            if (!isProcessor.IsNullOrEmpty() && accountInfo.ProductionRole != isProcessor)
+            {
+                try
+                {
+                    var oldProductionRoleList = new List<int>();
+                    if (!accountInfo.ProductionRole.IsNullOrEmpty())
+                    {
+                        oldProductionRoleList = accountInfo.ProductionRole.Split(',').Select(int.Parse).ToList();
+                    }
+
+                    var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
+                    isProcessor = isProcessorList.Join(",");
+                    logParam += $",生产角色: {accountInfo.ProductionRole},新生产角色: {isProcessor}";
+                    accountInfo.ProductionRole = isProcessor;
+                    var maxProductionRoleList = new List<int>();
+                    if (!accountInfo.MaxProductionRole.IsNullOrEmpty())
+                    {
+                        maxProductionRoleList = accountInfo.MaxProductionRole.Split(',').Select(int.Parse).ToList();
+                    }
+                    var all = new List<int>();
+                    all.AddRange(oldProductionRoleList);
+                    all.AddRange(isProcessorList);
+
+                    foreach (var variable in all.Distinct())
+                    {
+                        int opType;
+                        Permission permission;
+                        ManagementServer managementServer;
+                        string url;
+                        string opData;
+                        switch (variable)
+                        {
+                            case 0:
+                                //上一次包含,本次不包含 = 删除
+                                if (oldProductionRoleList.Contains(variable) && !isProcessorList.Contains(variable))
+                                {
+                                    //已存在 = 删除
+                                    if (maxProductionRoleList.Contains(variable))
+                                    {
+                                        opType = 253;
+                                        opData = new
+                                        {
+                                            id = accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                //上一次不包含,本次包含 = 添加
+                                else if (!oldProductionRoleList.Contains(variable) && isProcessorList.Contains(variable))
+                                {
+                                    //已存在 = 更新
+                                    if (maxProductionRoleList.Contains(variable))
+                                    {
+                                        opType = 250;
+                                        opData = new
+                                        {
+                                            id = accountInfo.Account,
+                                            MarkedDelete = false,
+                                            ProcessorName = accountInfo.Name,
+                                            accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                    //不存在 = 添加
+                                    else
+                                    {
+                                        opType = 251;
+                                        opData = new
+                                        {
+                                            ProcessorName = accountInfo.Name,
+                                            accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+
+                                break;
+                            case 1:
+                                //上一次包含,本次不包含 = 删除
+                                if (oldProductionRoleList.Contains(variable) && !isProcessorList.Contains(variable))
+                                {
+                                    //已存在 = 删除
+                                    if (maxProductionRoleList.Contains(variable))
+                                    {
+                                        opType = 259;
+                                        opData = new
+                                        {
+                                            id = accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                //上一次不包含,本次包含 = 添加
+                                else if (!oldProductionRoleList.Contains(variable) && isProcessorList.Contains(variable))
+                                {
+                                    //已存在 = 更新
+                                    if (maxProductionRoleList.Contains(variable))
+                                    {
+                                        opType = 256;
+                                        opData = new
+                                        {
+                                            id = accountInfo.Account,
+                                            MarkedDelete = false,
+                                            SurveyorName = accountInfo.Name,
+                                            accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                    //不存在 = 添加
+                                    else
+                                    {
+                                        opType = 257;
+                                        opData = new
+                                        {
+                                            SurveyorName = accountInfo.Name,
+                                            accountInfo.Account
+                                        }.ToJSON();
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                                permission = PermissionHelper.Get(opType);
+                                if (permission == null || permission.HostId == 0)
+                                {
+                                    break;
+                                }
+
+                                managementServer = ManagementServerHelper.Get(permission.HostId);
+                                if (managementServer == null)
+                                {
+                                    break;
+                                }
+
+                                url = managementServer.Host + permission.Url;
+                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                    (s, exception) =>
+                                    {
+
+                                    });
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    maxProductionRoleList.AddRange(isProcessorList);
+                    accountInfo.MaxProductionRole = maxProductionRoleList.Distinct().Join(",");
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+            else if (accountInfo.ProductionRole != isProcessor)
+            {
+                logParam += $",生产角色: {accountInfo.ProductionRole},新生产角色: {isProcessor}";
+                accountInfo.ProductionRole = "";
+            }
+
+            if (fName)
+            {
+                var maxProductionRoleList = new List<int>();
+                if (!accountInfo.MaxProductionRole.IsNullOrEmpty())
+                {
+                    maxProductionRoleList = accountInfo.MaxProductionRole.Split(',').Select(int.Parse).ToList();
+                }
+                var productionRoleList = new List<int>();
+                if (!accountInfo.ProductionRole.IsNullOrEmpty())
+                {
+                    productionRoleList = accountInfo.ProductionRole.Split(',').Select(int.Parse).ToList();
+                }
+
+                foreach (var variable in maxProductionRoleList)
+                {
+                    int opType;
+                    Permission permission;
+                    ManagementServer managementServer;
+                    string url;
+                    string opData;
+                    switch (variable)
+                    {
+                        case 0:
+                            //已存在 = 更新
+                            if (maxProductionRoleList.Contains(variable))
+                            {
+                                opType = 250;
+                                opData = new
+                                {
+                                    id = accountInfo.Account,
+                                    MarkedDelete = !productionRoleList.Contains(variable),
+                                    ProcessorName = accountInfo.Name,
+                                    accountInfo.Account
+                                }.ToJSON();
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            permission = PermissionHelper.Get(opType);
+                            if (permission == null || permission.HostId == 0)
+                            {
+                                break;
+                            }
+
+                            managementServer = ManagementServerHelper.Get(permission.HostId);
+                            if (managementServer == null)
+                            {
+                                break;
+                            }
+
+                            url = managementServer.Host + permission.Url;
+                            HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                (s, exception) =>
+                                {
+
+                                });
+
+                            break;
+                        case 1:
+                            //已存在 = 更新
+                            if (maxProductionRoleList.Contains(variable))
+                            {
+                                opType = 256;
+                                opData = new
+                                {
+                                    id = accountInfo.Account,
+                                    MarkedDelete = !productionRoleList.Contains(variable),
+                                    SurveyorName = accountInfo.Name,
+                                    accountInfo.Account
+                                }.ToJSON();
+                            }
+                            else
+                            {
+                                break;
+                            }
+
+                            permission = PermissionHelper.Get(opType);
+                            if (permission == null || permission.HostId == 0)
+                            {
+                                break;
+                            }
+
+                            managementServer = ManagementServerHelper.Get(permission.HostId);
+                            if (managementServer == null)
+                            {
+                                break;
+                            }
+
+                            url = managementServer.Host + permission.Url;
+                            HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                (s, exception) =>
+                                {
+
+                                });
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            var deviceIds = param.GetValue("deviceIds");
+            if (!deviceIds.IsNullOrEmpty() && accountInfo.DeviceIds != deviceIds)
+            {
+                try
+                {
+                    deviceIds = deviceIds.Split(',').Select(int.Parse).Distinct().Join(",");
+                    accountInfo.DeviceIds = deviceIds;
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+            else
+            {
+                accountInfo.DeviceIds = "";
+            }
             AccountHelper.UpdateAccountInfo(accountInfo);
+
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam, accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }

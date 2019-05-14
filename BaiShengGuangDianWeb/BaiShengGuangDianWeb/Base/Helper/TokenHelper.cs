@@ -86,6 +86,20 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 try
                 {
                     AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
+                    //new Claim("name", accountInfo.Name),
+                    //new Claim("email", accountInfo.EmailAddress),
+                    //new Claim("permissions", accountInfo.Permissions),
+                    //new Claim("prole", accountInfo.ProductionRole)
+
+                    if (AccountHelper.CurrentUser.Name != payLoad["name"].ToString() ||
+                        AccountHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
+                        AccountHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
+                        AccountHelper.CurrentUser.Permissions != payLoad["permissions"].ToString() ||
+                        AccountHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
+                    {
+                        needUpdate = true;
+                    }
+
                     return true;
                 }
                 catch (Exception)

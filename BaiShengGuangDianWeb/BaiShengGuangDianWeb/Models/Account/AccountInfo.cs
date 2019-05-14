@@ -30,5 +30,7 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public bool Default { get; set; }
         public string ProductionRole { get; set; }
+        [JsonIgnore]
+        public string MaxProductionRole { get; set; }
     }
 }
