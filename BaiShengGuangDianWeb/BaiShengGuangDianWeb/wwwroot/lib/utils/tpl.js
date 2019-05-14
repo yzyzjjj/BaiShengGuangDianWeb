@@ -61,13 +61,13 @@ var commonfunc = function () {
                     if (child.parent == 0) {
                         if (child.url == "") {
                             option = $(mMenu2).clone()
-                            option.find('.treeview-menu').attr('id', child.id);
+                            option.find('.treeview-menu').attr('id', "main"+child.id);
                             option.find('i.mi').addClass(child.icon);
                             option.find('span.mt').text(child.name);
                             $(".sidebar-menu").append(option);
                         } else {
                             option = $(mMenu1).clone()
-                            option.find('.menuitem').attr('id', child.id);
+                            option.find('.menuitem').attr('id', "main" +child.id);
                             option.find('.menuitem').attr('href', child.url);
                             option.find('i.mi').addClass(child.icon);
                             option.find('span.mt').text(child.name);
@@ -75,10 +75,10 @@ var commonfunc = function () {
                         }
                     } else {
                         option = $(mMenu3).clone();
-                        option.find('.treeview-menu').attr('id', child.id);
+                        option.find('.treeview-menu').attr('id', "main" +child.id);
                         option.find('a').attr('href', child.url);
                         option.find('span').text(child.name);
-                        $(".sidebar-menu").find('[id=' + child.parent + ']').append(option);
+                        $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
                     }
                 }
             }
