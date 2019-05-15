@@ -825,3 +825,5 @@ function initFileInput(uiEle, type, func = null) {
     }).on('fileerror', function (event, data, msg) {  //一个文件上传失败
         console.log('文件上传失败！' + msg);
     });
+
+}
