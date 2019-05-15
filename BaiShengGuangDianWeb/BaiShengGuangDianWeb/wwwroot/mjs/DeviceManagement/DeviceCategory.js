@@ -14,7 +14,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
     var updateLi = '<li><a onclick="showUpdateCategory({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.Id, data.CategoryName, data.Description);
-    var deleteLi = '<li><a onclick="DeleteCategory({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.CategoryName);
+    var deleteLi = '<li><a onclick="deleteCategory({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.CategoryName);
     html = html.format(
         checkPermission(142) ? updateLi : "",
         checkPermission(144) ? deleteLi : "");
@@ -61,27 +61,11 @@ function getCategoryList() {
         });
 }
 
-
 function showAddCategory() {
-    var opType = 140;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
-    var data = {}
-    data.opType = opType
-     ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addCategoryName").empty();
-
-            $("#addModel").modal("show");
-        });
-    
+    hideClassTip('adt');
+    $("#addCategoryName").val("");
+    $("#addCategoryDesc").val("");
+    $("#addModel").modal("show");
 }
 
 function addCategory() {
@@ -93,7 +77,7 @@ function addCategory() {
     var categoryName = $("#addCategoryName").val();
     var categoryDesc = $("#addCategoryDesc").val();
     if (isStrEmptyOrUndefined(categoryName)) {
-        showTip($("#updateCategoryNameTip"), "类型名不能为空");
+        showTip($("#addCategoryNameTip"), "类型名不能为空");
         return;
     }
     var doSth = function () {
@@ -105,7 +89,7 @@ function addCategory() {
             CategoryName: categoryName,
             //描述
             Description: categoryDesc,
-          
+
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -116,10 +100,10 @@ function addCategory() {
             });
     }
     showConfirm("添加", doSth);
-    
+
 }
 
-function DeleteCategory(id, categoryName ) {
+function deleteCategory(id, categoryName) {
     var opType = 144;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -140,36 +124,15 @@ function DeleteCategory(id, categoryName ) {
                 }
             });
     }
-    showConfirm("删除场地：" + categoryName, doSth);
+    showConfirm("删除类型：" + categoryName, doSth);
 }
 
 function showUpdateCategory(id, categoryName, categoryDesc) {
-    var opType = 141;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addCategoryName").empty();
-
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addCategoryName").append(option.format(data.Id, data.CategoryName, data.Description));
-            }
-            $("#updateId").html(id);
-            $("#updateCategoryName").val(categoryName);
-            $("#updateCategoryDesc").val(categoryDesc);
-
-            $("#updateCategory").modal("show");
-        });
+    hideClassTip('adt');
+    $("#updateId").html(id);
+    $("#updateCategoryName").val(categoryName);
+    $("#updateCategoryDesc").val(categoryDesc);
+    $("#updateCategory").modal("show");
 }
 
 function updateCategory() {
@@ -182,7 +145,11 @@ function updateCategory() {
 
     var categoryName = $("#updateCategoryName").val();
     var categoryDesc = $("#updateCategoryDesc").val();
-    
+
+    if (isStrEmptyOrUndefined(categoryName)) {
+        showTip($("#updateCategoryNameTip"), "类型名不能为空");
+        return;
+    }
 
     var doSth = function () {
         $("#updateCategory").modal("hide");
@@ -195,7 +162,7 @@ function updateCategory() {
             CategoryName: categoryName,
             //更新后描述
             Description: categoryDesc,
-            
+
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -210,4 +177,3 @@ function updateCategory() {
 }
 
 
- 

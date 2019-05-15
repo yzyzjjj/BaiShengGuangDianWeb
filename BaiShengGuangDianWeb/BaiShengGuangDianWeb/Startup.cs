@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModelBase.Base.Filter;
 using ModelBase.Base.Logger;
+using System.IO;
 
 namespace BaiShengGuangDianWeb
 {
@@ -81,6 +82,24 @@ namespace BaiShengGuangDianWeb
                 routes.MapHub<ChatHub>("/chatHub");
             });
             app.UseMvcWithDefaultRoute();
+
+            var rootPath = Path.Combine(env.ContentRootPath, "File");
+            if (!File.Exists(rootPath))
+            {
+                Directory.CreateDirectory(rootPath);
+            }
+
+            var filePath = Path.Combine(rootPath, "FirmwareLibrary");
+            if (!File.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            filePath = Path.Combine(rootPath, "ApplicationLibrary");
+            if (!File.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
 
             Log.Info("Server Start");
         }

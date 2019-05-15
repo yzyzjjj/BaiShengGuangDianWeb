@@ -68,7 +68,7 @@ function getJwtInfo(token) {
     var result2 = Base64.decode(info);
     var obj = JSON.parse(result2);
 
-    obj.permissionsList = isStrEmptyOrUndefined(obj.permissions)?new Array(): obj.permissions.split(",").map(Number);
+    obj.permissionsList = isStrEmptyOrUndefined(obj.permissions) ? new Array() : obj.permissions.split(",").map(Number);
     obj.proleList = isStrEmptyOrUndefined(obj.prole) ? new Array() : obj.prole.split(",").map(Number);
     // console.log( obj )
 
@@ -762,3 +762,66 @@ function getQueryString(name) {
 function parseIntStr(num, n) {
     return (Array(n).join(0) + num).slice(-n);
 }
+
+function initFileInput(uiEle, type, func = null) {
+    //$("#" + uiEle).fileinput({
+    //    uploadUrl: '/Upload/Post', //上传的地址
+    //    language: 'zh', //设置语言
+    //    allowedFileExtensions: ["bin"],//接收的文件后缀
+    //    showUpload: false, //是否显示上传按钮
+    //    showCaption: false, //是否显示标题
+    //    //dropZoneEnabled: false, //是否显示预览
+    //    maxFileCount: 1,
+    //    autoReplace:true,
+    //    layoutTemplates: {
+    //        actionDelete: '', //去除上传预览的缩略图中的删除图标  
+    //        actionUpload: '',//去除上传预览缩略图中的上传图片；  
+    //        actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。  
+    //    },  
+    //});
+
+    ////导入文件上传完成之后的事件
+    //$("#" + uiEle).on("fileuploaded", function (event, data, previewId, index) {
+    //    $(this).empty();
+    //    console.log("success");
+    //    if (func != null)
+    //        func();
+    //});
+
+
+    $("#" + uiEle).fileinput({
+        language: 'zh', //设置语言 
+        uploadUrl: '/Upload/Post',
+        //enctype: 'multipart/form-data',
+        allowedFileExtensions: ['bin'],//接收的文件后缀
+        showUpload: false, //是否显示上传按钮
+        showPreview: true, //展前预览
+        showCaption: true,//是否显示标题
+        //maxFileSize: 10000,//上传文件最大的尺寸
+        maxFileCount: 1,
+        dropZoneEnabled: false,//是否显示拖拽区域
+        browseClass: "btn btn-primary", //按钮样式
+        uploadAsync: false,
+        autoReplace: true,
+        layoutTemplates: {
+            actionDelete: '', //去除上传预览的缩略图中的删除图标  
+            actionUpload: '',//去除上传预览缩略图中的上传图片；  
+            actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。                
+        },
+        uploadExtraData: function (previewId, index) {
+            //向后台传递type,nameStr作为额外参数
+            var obj = {};
+            obj.type = "card";
+            obj.nameStr = "HL0093"
+            return obj;
+        }
+    }).on("filebatchselected", function (event, files) {
+        console.log("filebatchselected");
+
+    }).on("filebatchuploadsuccess", function (event, data) {
+        console.log("文件上传成功！");
+        if (func != null)
+            func();
+    }).on('fileerror', function (event, data, msg) {  //一个文件上传失败
+        console.log('文件上传失败！' + msg);
+    });

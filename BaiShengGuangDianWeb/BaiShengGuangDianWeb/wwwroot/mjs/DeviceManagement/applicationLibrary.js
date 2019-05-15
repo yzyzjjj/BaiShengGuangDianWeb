@@ -14,7 +14,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
     var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.ApplicationName, data.FilePath, data.Description);
-    var deleteLi = '<li><a onclick="DeleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ApplicationName);
+    var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ApplicationName);
     html = html.format(
         checkPermission(147) ? updateLi : "",
         checkPermission(149) ? deleteLi : "");
@@ -63,25 +63,11 @@ function getApplicationList() {
 }
 
 function showAddApplication() {
-    var opType = 145;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
-    var data = {}
-    data.opType = opType
-
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addApplicationName").empty();
-
-            $("#addModel").modal("show");
-        });
+    hideClassTip('adt');
+    $("#addApplicationName").val("");
+    $("#addFilePath").val("");
+    $("#addDesc").val("");
+    $("#addModel").modal("show");
 }
 
 function addApplication() {
@@ -91,17 +77,17 @@ function addApplication() {
         return;
     }
     var applicationName = $("#addApplicationName").val();
-    var filePath= $("#addFilePath").val();
+    var filePath = $("#addFilePath").val();
     var desc = $("#addDesc").val();
     if (isStrEmptyOrUndefined(applicationName)) {
-        showTip($("#updateApplicationNameTip"), "场地名不能为空");
+        showTip($("#addApplicationNameTip"), "名称不能为空");
         return;
     }
     if (isStrEmptyOrUndefined(filePath)) {
-        showTip($("#updateFilePathTip"), "场地位置不能为空");
+        showTip($("#addFilePathTip"), "程序文件不能为空");
         return;
     }
-    
+
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
@@ -125,7 +111,7 @@ function addApplication() {
     showConfirm("添加", doSth);
 }
 
-function DeleteApplication(id, applicationName) {
+function deleteApplication(id, applicationName) {
     var opType = 149;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -150,32 +136,12 @@ function DeleteApplication(id, applicationName) {
 }
 
 function showUpdateApplication(id, applicationName, filePath, desc) {
-    var opType = 146;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addApplicationName").empty();
-
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addApplicationName").append(option.format(data.Id, data.ApplicationName, data.FilePath, data.Description));
-            }
-            $("#updateId").html(id);
-            $("#updateApplicationName").val(applicationName);
-            $("#updateFilePath").val(filePath);
-            $("#updateDesc").val(desc);
-            $("#updateApplication").modal("show");
-        });
+    hideClassTip('adt');
+    $("#updateId").html(id);
+    $("#updateApplicationName").val(applicationName);
+    $("#updateFilePath").val(filePath);
+    $("#updateDesc").val(desc);
+    $("#updateApplicationModal").modal("show");
 }
 
 function updateApplication() {
@@ -189,10 +155,16 @@ function updateApplication() {
     var appName = $("#updateApplicationName").val();
     var appFilePath = $("#updateFilePath").val();
     var appDesc = $("#updateDesc").val();
-
-
+    if (isStrEmptyOrUndefined(appName)) {
+        showTip($("#updateApplicationNameTip"), "名称不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(appFilePath)) {
+        showTip($("#updateFilePathTip"), "程序文件不能为空");
+        return;
+    }
     var doSth = function () {
-        $("#updateApplication").modal("hide");
+        $("#updateApplicationModal").modal("hide");
 
         var data = {}
         data.opType = opType;
@@ -218,4 +190,3 @@ function updateApplication() {
 }
 
 
- 

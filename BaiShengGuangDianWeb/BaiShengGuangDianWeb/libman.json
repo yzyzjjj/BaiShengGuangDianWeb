@@ -16,11 +16,6 @@
       ]
     },
     {
-      "provider": "cdnjs",
-      "library": "signalr.js@2.4.0",
-      "destination": "wwwroot/lib/signalr.js/"
-    },
-    {
       "provider": "unpkg",
       "library": "@aspnet/signalr@1.1.4",
       "destination": "wwwroot/lib/signalr/",
@@ -32,6 +27,10 @@
     {
       "library": "bootstrap-datetimepicker@4.17.47",
       "destination": "wwwroot/lib/AdminLTE-2.3.11/plugins/datetimepicker/"
+    },
+    {
+      "library": "bootstrap-fileinput@5.0.3",
+      "destination": "wwwroot/lib/bootstrap-fileinput/"
     }
   ]
 }
