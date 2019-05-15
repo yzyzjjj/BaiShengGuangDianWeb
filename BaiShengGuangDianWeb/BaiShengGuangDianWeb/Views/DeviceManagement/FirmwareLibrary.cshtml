@@ -18,7 +18,7 @@
         </div>
         <div class="box-body">
             <div class="table-responsive mailbox-messages">
-                <table class="table table-hover table-striped" id="firmlibraryList"></table>
+                <table class="table table-hover table-striped" id="firmLibraryList"></table>
             </div>
         </div>
     </div>
@@ -40,35 +40,35 @@
                                     <label class="col-sm-3 control-label">固件版本名称：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addFireName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateFireNameTip"></label>
+                                        <label class="label-danger hidden" id="addFireNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">变量数量：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addFireNumber" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateFireNumberTip"></label>
+                                        <label class="label-danger hidden" id="addFireNumberTip"></label>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group hidden">
                                     <label class="col-sm-3 control-label">通信协议：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="addCommunication" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateCommunicationTip"></label>
+                                        <label class="label-danger hidden" id="addCommunicationTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addLocationName">
-                                        <label class="label-danger hidden" id="updateLocationNameTip"></label>
+                                        <input  id="addLocationName" type="file" >
+                                        <label class="label-danger hidden" id="addLocationNameTip"></label>
                                     </div>
                                 </div>
+
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">描述：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="addDescr">
-                                        <label class="label-danger hidden" id="updateDescrTip"></label>
+                                        <input class="form-control" id="addDesc">
                                     </div>
                                 </div>
                             </form>
@@ -100,16 +100,18 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">固件版本名称：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateFirmName">
+                                        <input class="form-control" id="updateFirmName" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateFirmNameTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">变量数量：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateFirmNumber">
+                                        <input class="form-control" id="updateFirmNumber" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateFirmNumberTip"></label>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group hidden">
                                     <label class="col-sm-3 control-label">通信协议：</label>
                                     <div class="col-sm-9">
                                         <input class="form-control" id="updateFireCommunication">
@@ -118,13 +120,14 @@
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateFirePath">
+                                        <input class="form-control" id="updateFirePath" onfocusin="focusIn($(this))">
+                                        <label class="label-danger hidden" id="updateFirePathTip"></label>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">描述：</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control" id="updateFireDes">
+                                        <input class="form-control" id="updateDes">
                                     </div>
                                 </div>
                             </form>

@@ -27,5 +27,12 @@ var chatEnum = {
     FaultDevice: 2
 }
 
+var fileEnum = {
+    Default: 0,
+    // ¹Ì¼þ
+    FirmwareLibrary: 1,
+    // Ó¦ÓÃ²ã
+    ApplicationLibrary: 2
+}
 var maxProcessData = 8;
 var lastLocation = "lastLocation";

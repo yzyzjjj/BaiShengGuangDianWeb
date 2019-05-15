@@ -1,7 +1,10 @@
 ﻿
 function pageReady() {
     getFirmList();
+    initFileInput("addLocationName", fileEnum.FirmwareLibrary);
+    showAddFireLibrary();
 }
+
 
 var op = function (data, type, row) {
     var html = '<div class="btn-group">' +
@@ -22,7 +25,7 @@ var op = function (data, type, row) {
 }
 
 function getFirmList() {
-var opType = 130;
+    var opType = 130;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -41,7 +44,7 @@ var opType = 130;
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#firmlibraryList")
+            $("#firmLibraryList")
                 .DataTable({
                     "destroy": true,
                     "paging": true,
@@ -55,7 +58,7 @@ var opType = 130;
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "FirmwareName", "title": "固件版本名称" },
                         { "data": "VarNumber", "title": "变量数量" },
-                        { "data": "CommunicationProtocol", "title": "通信协议" },
+                        //{ "data": "CommunicationProtocol", "title": "通信协议" },
                         { "data": "FilePath", "title": "程序文件的位置及名称" },
                         { "data": "Description", "title": "描述" },
                         { "data": null, "title": "操作", "render": op },
@@ -66,70 +69,56 @@ var opType = 130;
 
 
 function showAddFireLibrary() {
-    var opType = 130 ;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
-    var data = {}
-    data.opType = opType
-
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addFireName").empty();
-
-            $("#addModel").modal("show");
-        });
+    $("#addFireName").empty();
+    $("#addModel").modal("show");
 }
 
 function addFirmLibrary() {
+    $('#addLocationName').fileinput("upload");
+    return;
     var opType = 133;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    var fireWareName = $("#addFireName").val();
-    var fireWareNumber = $("#addFireNumber").val();
-    var fireWareCommunication = $("#addCommunication").val();
-    var fireWareLocationName = $("#addLocationName").val();
-    var fireWareDescript = $("#addDescr").val();
-    if (isStrEmptyOrUndefined(fireWareName)) {
-        showTip($("#updateFireNameTip"), "版本名称不能为空");
+    var addFireName = $("#addFireName").val();
+    var addFireNumber = $("#addFireNumber").val();
+    var addCommunication = $("#addCommunication").val();
+    var addLocationName = $("#addLocationName").val();
+    var addDesc = $("#addDesc").val();
+    if (isStrEmptyOrUndefined(addFireName)) {
+        showTip($("#addFireNameTip"), "版本名称不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(fireWareNumber)) {
-        showTip($("#updateFireNumberTip"), "变量数量不能为空");
+    if (isStrEmptyOrUndefined(addFireNumber)) {
+        showTip($("#addFireNumberTip"), "变量数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(fireWareCommunication)) {
-        showTip($("#updateCommunicationTip"), "通信协议不能为空");
+    if (isStrEmptyOrUndefined(addCommunication)) {
+        addCommunication = "";
+        //showTip($("#updateCommunicationTip"), "通信协议不能为空");
+        //return;
+    }
+    if (isStrEmptyOrUndefined(addLocationName)) {
+        showTip($("#addLocationNameTip"), "程序文件的位置及名称不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(fireWareLocationName)) {
-        showTip($("#updateLocationNameTip"), "程序文件的位置及名称不能为空");
-        return;
-    }
-   
+
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {};
         data.opType = opType;
         data.opData = JSON.stringify({
             //固件版本名称
-            FirmwareName: fireWareName ,
+            FirmwareName: addFireName,
             //变量数量
-            VarNumber: fireWareNumber,
+            VarNumber: addFireNumber,
             //通信协议
-            CommunicationProtocol: fireWareCommunication,
+            CommunicationProtocol: addCommunication,
             //程序文件的位置及名称
-            FilePath: fireWareLocationName,
+            FilePath: addLocationName,
             //描述
-            Description: fireWareDescript,
+            Description: addDesc
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -167,34 +156,14 @@ function DeleteFireLibrary(id, fireWareName) {
 }
 
 function showUpdateFirm(id, fireWareName, fireWareNumber, fireWareCommunication, fireWareLocationName, fireWareDescript) {
-    var opType = 131;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-           
-            $("#addFireName").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addFireName").append(option.format(data.Id, data.FirmwareName, data.VarNumber, data.CommunicationProtocol, data.FilePath, data.Description));
-            }
-            $("#updateId").html(id);
-            $("#updateFirmName").val(fireWareName);
-            $("#updateFirmNumber").val(fireWareNumber);
-            $("#updateFireCommunication").val(fireWareCommunication);
-            $("#pdateFirePath").val(fireWareLocationName);
-            $("#updateFireDes").val(fireWareDescript);
-            $("#updateFirm").modal("show");
-        });
+
+    $("#updateId").html(id);
+    $("#updateFirmName").val(fireWareName);
+    $("#updateFirmNumber").val(fireWareNumber);
+    //$("#updateFireCommunication").val(fireWareCommunication);
+    $("#updateFirePath").val(fireWareLocationName);
+    $("#updateFireDes").val(fireWareDescript);
+    $("#updateFirm").modal("show");
 }
 
 function updateFirm() {
@@ -214,7 +183,7 @@ function updateFirm() {
 
     var doSth = function () {
         $("#updateFirm").modal("hide");
-        
+
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
