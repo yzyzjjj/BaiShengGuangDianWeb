@@ -1,5 +1,5 @@
 
-﻿function pageReady() {
+function pageReady() {
     getSiteList();
 }
 
@@ -14,7 +14,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
     var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.SiteName, data.RegionDescription, data.Manager);
-    var deleteLi = '<li><a onclick="DeleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.SiteName);
+    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.SiteName);
     html = html.format(
         checkPermission(127) ? updateLi : "",
         checkPermission(129) ? deleteLi : "");
@@ -62,27 +62,12 @@ function getSiteList() {
         });
 }
 
-﻿
 function showAddSite() {
-    var opType = 125;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-  
-    var data = {}
-    data.opType = opType
-    
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addSiteName").empty();
-            
-            $("#addModel").modal("show");
-        });
+    hideClassTip('adt');
+    $("#addSiteName").val("");
+    $("#addLocations").val("");
+    $("#addManager").val("");
+    $("#addModel").modal("show");
 }
 
 function addSite() {
@@ -91,32 +76,29 @@ function addSite() {
         layer.msg("没有权限");
         return;
     }
-    var adSiteNames = $("#addSiteName").val();
-    var locationsReg = $("#addLocations").val();
-    var manergerMan = $("#addManager").val();
-    if (isStrEmptyOrUndefined(adSiteNames)) {
-        showTip($("#updateSiteNameTip"), "场地名不能为空");
+    var addSiteName = $("#addSiteName").val();
+    var addLocations = $("#addLocations").val();
+    var manager = $("#addManager").val();
+    if (isStrEmptyOrUndefined(addSiteName)) {
+        showTip($("#addSiteNameTip"), "场地名不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(locationsReg)) {
-        showTip($("#updateSiteLocationTip"), "场地位置不能为空");
+    if (isStrEmptyOrUndefined(addLocations)) {
+        showTip($("#addLocationsTip"), "场地位置不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(manergerMan)) {
-        showTip($("#updateSiteManergerTip"), "管理人不能为空");
-        return;
-    }
+
     var doSth = function () {
-         $("#addModel").modal("hide");
+        $("#addModel").modal("hide");
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             //场地名称
-            SiteName: adSiteNames,
+            SiteName: addSiteName,
             //场地位置
-            RegionDescription: locationsReg,
+            RegionDescription: addLocations,
             //管理人
-            Manager: manergerMan
+            Manager: manager
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -129,7 +111,7 @@ function addSite() {
     showConfirm("添加", doSth);
 }
 
-function DeleteSite(id, siteName) {
+function deleteSite(id, siteName) {
     var opType = 129;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -153,33 +135,13 @@ function DeleteSite(id, siteName) {
     showConfirm("删除场地：" + siteName, doSth);
 }
 
-function showUpdateSite(id, adSiteNames, locationsReg, manergerMan) {
-    var opType = 126;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-    $("#addSiteName").empty();
-    
-    var option = '<option value="{0}">{1}</option>';
-    for (var i = 0; i < ret.datas.length; i++) {
-        var data = ret.datas[i];
-        $("#addSiteName").append(option.format(data.Id, data.SiteName, data.RegionDescription, data.Manager));
-    }
+function showUpdateSite(id, adSiteNames, locationsReg, man) {
+    hideClassTip('adt');
     $("#updateId").html(id);
-        $("#updateSiteName").val(adSiteNames);
-        $("#updateRegions").val(locationsReg);
-        $("#updateManager").val(manergerMan);
-        $("#updateSite").modal("show");
-        });
+    $("#updateSiteName").val(adSiteNames);
+    $("#updateRegions").val(locationsReg);
+    $("#updateManager").val(man);
+    $("#updateSiteModal").modal("show");
 }
 
 function updateSite() {
@@ -190,24 +152,32 @@ function updateSite() {
     }
     var id = parseInt($("#updateId").html());
 
-    var siteLocation = $("#updateRegions").val();
-    var siteManger = $("#updateManager").val();
-    var siteName = $("#updateSiteName").val();
-   
-   
+    var updateSiteName = $("#updateSiteName").val();
+    var updateRegions = $("#updateRegions").val();
+    var manager = $("#updateManager").val();
+
+    if (isStrEmptyOrUndefined(updateSiteName)) {
+        showTip($("#updateSiteNameTip"), "场地名不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateRegions)) {
+        showTip($("#updateRegionsTip"), "场地位置不能为空");
+        return;
+    }
+
     var doSth = function () {
-        $("#updateSite").modal("hide");
+        $("#updateSiteModal").modal("hide");
 
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
             //场地名称
-            SiteName: siteName,
+            SiteName: updateSiteName,
             //场地地址
-            RegionDescription: siteLocation,
+            RegionDescription: updateRegions,
             //管理人
-            Manager: siteManger,
+            Manager: manager,
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {

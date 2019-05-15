@@ -31,34 +31,29 @@
                     </button>
                     <h4 class="modal-title">新场地信息</h4>
                 </div>
-                <div class="modal-body">
-                    <div class="box">
-                        <div class="box-body">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">场地名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addSiteName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateSiteNameTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">具体位置：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addLocations" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateSiteLocationTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">管理人：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addManager" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateSiteManergerTip"></label>
-                                    </div>
-                                </div>
-                            </form>
+                <div class="modal-body box">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">场地名：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addSiteName" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="addSiteNameTip"></label>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">具体位置：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addLocations" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="addLocationsTip"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">管理人：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addManager">
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -68,41 +63,39 @@
         </div>
     </div>
 
-    <div class="modal fade" id="updateSite" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updateSiteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title" >场地信息</h4>
+                    <h4 class="modal-title">场地信息</h4>
                     <label class="hidden" id="updateId"></label>
                 </div>
-                <div class="modal-body">
-                    <div class="box">
-                        <div class="box-body">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">场地名：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateSiteName">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">场地位置：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateRegions">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">管理人：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateManager">
-                                    </div>
-                                </div>
-                            </form>
+                <div class="modal-body box">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">场地名：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateSiteName" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateSiteNameTip"></label>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">场地位置：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateRegions" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateRegionsTip"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">管理人：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateManager">
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

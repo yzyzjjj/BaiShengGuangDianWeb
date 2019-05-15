@@ -7,12 +7,12 @@
 
 <script src="~/mjs/DeviceManagement/applicationLibrary.js"></script>
 <section class="content">
-    <h2 class="text-center">应用层管理</h2>
+    <h2 class="text-center">应用层库管理</h2>
     <div class="box box-primary">
         <div class="box-header">
-            <h3 class="box-title">应用库</h3>
+            <h3 class="box-title">应用层库</h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-primary" onclick="showAddApplication()">添加应用层</button>
+                <button type="button" class="btn btn-primary" onclick="showAddApplication()">添加新应用层</button>
                 <button type="button" class="btn btn-primary" onclick="getApplicationList()">重新加载</button>
             </div>
         </div>
@@ -30,36 +30,31 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">应用层库信息</h4>
+                    <h4 class="modal-title">新应用层信息</h4>
                 </div>
-                <div class="modal-body">
-                    <div class="box">
-                        <div class="box-body">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">名称：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addApplicationName" onfocusin="focusIn($(this))">
-                                        <label class="label-danger hidden" id="updateApplicationNameTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addFilePath">
-                                        <label class="label-danger hidden" id="updateFilePathTip"></label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="addDesc">
-                                        <label class="label-danger hidden" id="updateDescTip"></label>
-                                    </div>
-                                </div>
-                            </form>
+                <div class="modal-body box">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">名称：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addApplicationName" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="addApplicationNameTip"></label>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addFilePath" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="addFilePathTip"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">描述：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="addDesc">
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -69,41 +64,39 @@
         </div>
     </div>
 
-    <div class="modal fade" id="updateApplication" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updateApplicationModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">场地信息</h4>
+                    <h4 class="modal-title">应用层信息</h4>
                     <label class="hidden" id="updateId"></label>
                 </div>
-                <div class="modal-body">
-                    <div class="box">
-                        <div class="box-body">
-                            <form class="form-horizontal">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="">名称：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateApplicationName">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateFilePath">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">描述：</label>
-                                    <div class="col-sm-9">
-                                        <input class="form-control" id="updateDesc">
-                                    </div>
-                                </div>
-                            </form>
+                <div class="modal-body box">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="">名称：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateApplicationName" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateApplicationNameTip"></label>
+                            </div>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateFilePath" onfocusin="focusIn($(this))">
+                                <label class="adt label-danger hidden" id="updateFilePathTip"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">描述：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="updateDesc">
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

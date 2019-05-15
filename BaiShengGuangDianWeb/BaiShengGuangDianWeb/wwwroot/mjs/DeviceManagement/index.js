@@ -100,8 +100,8 @@ function getDeviceList() {
 
 var option = '<option value="{0}">{1}</option>';
 function initAddSelect(categories, models, scripts) {
-    if (categories.length == 0 || models.length == 0 || scripts.length == 0)
-        return;
+    //if (categories.length == 0 || models.length == 0 || scripts.length == 0)
+    //    return;
     var i;
     var data;
     for (i = 0; i < categories.length; i++) {

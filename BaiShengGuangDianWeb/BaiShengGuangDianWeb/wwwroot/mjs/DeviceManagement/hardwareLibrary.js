@@ -1,6 +1,6 @@
 ﻿
 function pageReady() {
-    getHardWareList();
+    getHardwareList();
 }
 
 var op = function (data, type, row) {
@@ -13,15 +13,15 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateHard({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, data.HardwareName, data.InputNumber, data.OutputNumber,data.DacNumber,data.AdcNumber,data.AxisNumber,data.ComNumber,data.Description);
-    var deleteLi = '<li><a onclick="DeleteHard({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.HardwareName);
+    var updateLi = '<li><a onclick="showUpdateHardware({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, data.HardwareName, data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, data.Description);
+    var deleteLi = '<li><a onclick="deleteHardware({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.HardwareName);
     html = html.format(
         checkPermission(137) ? updateLi : "",
         checkPermission(139) ? deleteLi : "");
     return html;
 }
 
-function getHardWareList() {
+function getHardwareList() {
     var opType = 135;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -67,106 +67,89 @@ function getHardWareList() {
         });
 }
 
-
-function showHardWare() {
-    var opType = 135;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
-    var data = {}
-    data.opType = opType
-
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addHardName").empty();
-
-            $("#addModel").modal("show");
-        });
+function showAddHardwareModal() {
+    hideClassTip('adt');
+    $(".dd").val("");
+    $("#addModel").modal("show");
 }
 
-function addHardWare() {
+function addHardware() {
     var opType = 138;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    var hardName = $("#addHardName").val();
-    var inputNumber = $("#addInputNumber").val();
-    var outputNumber = $("#addOutputNumber").val();
-    var dacNumber = $("#addDacNumber").val();
-    var adcNumber = $("#addAdcNumber").val();
-    var axisNumber = $("#addAxisNumber").val();
-    var comNumber = $("#addComNumber").val();
-    var description = $("#addDescription").val();
-    if (isStrEmptyOrUndefined(hardName)) {
-        showTip($("#updateHardNameTip"), "版本名称不能为空");
+    var addHardwareName = $("#addHardwareName").val();
+    var addInputNumber = $("#addInputNumber").val();
+    var addOutputNumber = $("#addOutputNumber").val();
+    var addDacNumber = $("#addDacNumber").val();
+    var addAdcNumber = $("#addAdcNumber").val();
+    var addAxisNumber = $("#addAxisNumber").val();
+    var addComNumber = $("#addComNumber").val();
+    var addDescription = $("#addDescription").val();
+    if (isStrEmptyOrUndefined(addHardwareName)) {
+        showTip($("#addHardwareNameTip"), "名称不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(inputNumber)) {
-        showTip($("#updateInputNumberTip"), "输入口数量不能为空");
+    if (isStrEmptyOrUndefined(addInputNumber)) {
+        showTip($("#addInputNumberTip"), "输入口数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(outputNumber)) {
-        showTip($("#updateOutputNumberTip"), "输出口数量不能为空");
+    if (isStrEmptyOrUndefined(addOutputNumber)) {
+        showTip($("#addOutputNumberTip"), "输出口数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(dacNumber)) {
-        showTip($("#updateDacNumberTip"), "数模转换数量不能为空");
+    if (isStrEmptyOrUndefined(addDacNumber)) {
+        showTip($("#addDacNumberTip"), "数模转换数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(adcNumber)) {
-        showTip($("#updateAdcNumberTip"), "模数转换数量不能为空");
+    if (isStrEmptyOrUndefined(addAdcNumber)) {
+        showTip($("#addAdcNumberTip"), "模数转换数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(axisNumber)) {
-        showTip($("#updateAxisNumberTip"), "主轴数量不能为空");
+    if (isStrEmptyOrUndefined(addAxisNumber)) {
+        showTip($("#addAxisNumberTip"), "主轴数量不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(comNumber)) {
-        showTip($("#updateComNumberTip"), "通用串口数量不能为空");
+    if (isStrEmptyOrUndefined(addComNumber)) {
+        showTip($("#addComNumberTip"), "通用串口数量不能为空");
         return;
     }
-    
+
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             //硬件版本名称
-            HardwareName: hardName,
+            HardwareName: addHardwareName,
             //输入口数量
-            InputNumber: inputNumber,
+            InputNumber: addInputNumber,
             //输出口数量
-            OutputNumber: outputNumber,
+            OutputNumber: addOutputNumber,
             //数模转换数量
-            DacNumber: dacNumber,
+            DacNumber: addDacNumber,
             //模数转换数量
-            AdcNumber: adcNumber,
+            AdcNumber: addAdcNumber,
             //主轴数量
-            AxisNumber: axisNumber,
+            AxisNumber: addAxisNumber,
             //通用串口数量
-            ComNumber: comNumber,
+            ComNumber: addComNumber,
             //描述
-            Description: description,
+            Description: addDescription,
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getHardWareList();
+                    getHardwareList();
                 }
             });
     }
     showConfirm("添加", doSth);
 }
 
-function DeleteHard(id, hardName) {
+function deleteHardware(id, hardName) {
     var opType = 139;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -183,48 +166,30 @@ function DeleteHard(id, hardName) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getHardWareList();
+                    getHardwareList();
                 }
             });
     }
     showConfirm("删除硬件：" + hardName, doSth);
 }
 
-function showUpdateHard(id, hardName, inputNumber, outputNumber, dacNumber, adcNumber, axisNumber, comNumber, description) {
-    var opType = 136;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            $("#addHardName").empty();
+function showUpdateHardware(id, hardName, inputNumber, outputNumber, dacNumber, adcNumber, axisNumber, comNumber, description) {
 
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#addHardName").append(option.format(data.Id, data.HardwareName, data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, data.Description));
-            }
-            $("#updateId").html(id);
-            $("#updateHardName").val(hardName);
-            $("#updateInputNumber").val(inputNumber);
-            $("#updateOutputNumber").val(outputNumber);
-            $("#updateDacNumber").val(dacNumber);
-            $("#updateAdcNumber").val(adcNumber);
-            $("#updateAxisNumber").val(axisNumber);
-            $("#updateComNumber").val(comNumber);
-            $("#updateDescription").val(description);
-            $("#updateHard").modal("show");
-        });
+    hideClassTip('adt');
+    $(".dd").val("");
+    $("#updateId").html(id);
+    $("#updateHardwareName").val(hardName);
+    $("#updateInputNumber").val(inputNumber);
+    $("#updateOutputNumber").val(outputNumber);
+    $("#updateAdcNumber").val(dacNumber);
+    $("#updateAdcNumber").val(adcNumber);
+    $("#updateAxisNumber").val(axisNumber);
+    $("#updateComNumber").val(comNumber);
+    $("#updateDescription").val(description);
+    $("#updateHardwareModal").modal("show");
 }
 
-function updateHard() {
+function updateHardware() {
     var opType = 137;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -232,43 +197,72 @@ function updateHard() {
     }
     var id = parseInt($("#updateId").html());
 
-    var libraryName = $("#updateHardName").val();
-    var libraryInput= $("#updateInputNumber").val();
-    var libraryOutput = $("#updateOutputNumber").val();
-    var libraryDac = $("#updateDacNumber").val();
-    var libraryAdc = $("#updateAdcNumber").val();
-    var libraryAxis = $("#updateAxisNumber").val();
-    var libraryCom = $("#updateComNumber").val();
-    var libraryDescr = $("#updateDescription").val();
+    var updateHardwareName = $("#updateHardwareName").val();
+    var updateInputNumber = $("#updateInputNumber").val();
+    var updateOutputNumber = $("#updateOutputNumber").val();
+    var updateDacNumber = $("#updateDacNumber").val();
+    var updateAdcNumber = $("#updateAdcNumber").val();
+    var updateAxisNumber = $("#updateAxisNumber").val();
+    var updateComNumber = $("#updateComNumber").val();
+    var updateDescription = $("#updateDescription").val();
+    if (isStrEmptyOrUndefined(updateHardwareName)) {
+        showTip($("#updateHardwareNameTip"), "名称不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateInputNumber)) {
+        showTip($("#updateInputNumberTip"), "输入口数量不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateOutputNumber)) {
+        showTip($("#updateOutputNumberTip"), "输出口数量不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateDacNumber)) {
+        showTip($("#updateDacNumberTip"), "数模转换数量不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateAdcNumber)) {
+        showTip($("#updateAdcNumberTip"), "模数转换数量不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateAxisNumber)) {
+        showTip($("#updateAxisNumberTip"), "主轴数量不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(updateComNumber)) {
+        showTip($("#updateComNumberTip"), "通用串口数量不能为空");
+        return;
+    }
+
     var doSth = function () {
-        $("#updateHard").modal("hide");
+        $("#updateHardwareModal").modal("hide");
 
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
             //硬件版本名称
-            HardwareName: libraryName,
+            HardwareName: updateHardwareName,
             //输入口数量
-            InputNumber: libraryInput,
+            InputNumber: updateInputNumber,
             //输出口数量
-            OutputNumber: libraryOutput,
+            OutputNumber: updateOutputNumber,
             //数模转换数量
-            DacNumber: libraryDac,
+            DacNumber: updateDacNumber,
             //模数转换数量
-            AdcNumber: libraryAdc,
+            AdcNumber: updateAdcNumber,
             //主轴数量
-            AxisNumber: libraryAxis,
+            AxisNumber: updateAxisNumber,
             //通用串口数量
-            ComNumber: libraryCom,
+            ComNumber: updateComNumber,
             //描述
-            Description: libraryDescr,
+            Description: updateDescription,
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getHardWareList();
+                    getHardwareList();
                 }
             });
     }
