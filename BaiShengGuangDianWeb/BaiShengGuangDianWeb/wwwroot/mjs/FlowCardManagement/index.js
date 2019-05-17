@@ -61,16 +61,16 @@ function addFlowCard() {
         layer.msg("没有权限");
         return;
     }
-    var afProductionProcess = $("#afProductionProcess").val();
-    var afRawMateria = $("#afRawMateria").val();
-    var afRawMaterialQuantity = $("#afRawMaterialQuantity").val();
-    var afPriority = $("#afPriority").val();
-    var afInboundNum = $("#afInboundNum").val();
-    var afRemarks = $("#afRemarks").val();
-    var afSender = $("#afSender").val();
+    var afProductionProcess = $("#afProductionProcess").val().trim();
+    var afRawMateria = $("#afRawMateria").val().trim();
+    var afRawMaterialQuantity = $("#afRawMaterialQuantity").val().trim();
+    var afPriority = $("#afPriority").val().trim();
+    var afInboundNum = $("#afInboundNum").val().trim();
+    var afRemarks = $("#afRemarks").val().trim();
+    var afSender = $("#afSender").val().trim();
 
-    var afStartFlowCard = $("#afStartFlowCard").val();
-    var afFlowCardNumber = $("#afFlowCardNumber").val();
+    var afStartFlowCard = $("#afStartFlowCard").val().trim();
+    var afFlowCardNumber = $("#afFlowCardNumber").val().trim();
 
     if (isStrEmptyOrUndefined(afRawMaterialQuantity)) {
         showTip($("#afRawMaterialQuantityTip"), "原料数量不能为空");
@@ -149,7 +149,7 @@ function getFlowCardList() {
                 var html = "{0}{1}{2}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateFlowCard({0})">修改</button>'.format(data.Id);
                 var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0})">更新</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, data.FlowCardName);
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.FlowCardName));
 
                 html = html.format(
                     checkPermission(207) ? changeBtn : "",
@@ -209,7 +209,9 @@ function getFlowCardList() {
         });
 }
 
-function DeleteFlowCard(id, name) {
+function deleteFlowCard(id, name) {
+    name = unescape(name);
+
     var opType = 211;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -282,8 +284,8 @@ function showUpdateFlowCard(type) {
                     var productionProcessSpecification = r.Specifications[j];
                     tr = ('<tr id="ufGG{0}" value="{2}">' +
                         '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
-                        '<td><input class="form-control" value="{3}" id="ufGGm{0}"></td>' +
-                        '<td><input class="form-control" value="{4}" id="ufGGz{0}"></td>' +
+                        '<td><input class="form-control" value="{3}" id="ufGGm{0}" maxlength="20"></td>' +
+                        '<td><input class="form-control" value="{4}" id="ufGGz{0}" maxlength="20"></td>' +
                         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                         '</tr>').format(ufGGmax, ufGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
                     $("#ufGGBody").append(tr);
@@ -296,7 +298,7 @@ function showUpdateFlowCard(type) {
                     tr = ('<tr id="ufGX{0}" value="{2}">' +
                         '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
                         '<td><select class="ms2 yc form-control" id="ufGXm{0}"></td>' +
-                        '<td><input class="form-control" value="{3}" id="ufGXz{0}"></td>' +
+                        '<td><input class="form-control" value="{3}" id="ufGXz{0}" maxlength="100"></td>' +
                         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                         '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
                     $("#ufGXBody").append(tr);
@@ -336,11 +338,11 @@ function updateFlowCard() {
         layer.msg("没有权限");
         return;
     }
-    var priority = $("#ufPriority").val();
-    var rawMaterialQuantity = $("#ufRawMaterialQuantity").val();
-    var sender = $("#ufSender").val();
-    var inboundNum = $("#ufInboundNum").val();
-    var remarks = $("#ufRemarks").val();
+    var priority = $("#ufPriority").val().trim();
+    var rawMaterialQuantity = $("#ufRawMaterialQuantity").val().trim();
+    var sender = $("#ufSender").val().trim();
+    var inboundNum = $("#ufInboundNum").val().trim();
+    var remarks = $("#ufRemarks").val().trim();
 
     var afRq = parseInt(rawMaterialQuantity);
     if (afRq <= 0) {
@@ -353,13 +355,13 @@ function updateFlowCard() {
     var id;
     for (i = 1; i < ufGGmax; i++) {
         if ($("#ufGG" + i).length > 0) {
-            var specificationName = $("#ufGGm" + i).val();
+            var specificationName = $("#ufGGm" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationName)) {
                 layer.msg("规格名不能为空");
                 return;
             }
 
-            var specificationValue = $("#ufGGz" + i).val();
+            var specificationValue = $("#ufGGz" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationValue)) {
                 layer.msg("规格值不能为空");
                 return;
@@ -381,13 +383,13 @@ function updateFlowCard() {
     var l = 1;
     for (i = 1; i < ufGXmax; i++) {
         if ($("#ufGX" + i).length > 0) {
-            var processStepId = $("#ufGXm" + i).val();
+            var processStepId = $("#ufGXm" + i).val().trim();
             if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
 
-            var processStepRequirements = $("#ufGXz" + i).val();
+            var processStepRequirements = $("#ufGXz" + i).val().trim();
 
             id = $("#ufGX" + i).attr("value");
             ufGXdata.push({
@@ -434,8 +436,8 @@ function ufResetGG() {
     $("#ufGGBody").empty();
     var tr = ('<tr id="ufGG{0}">' +
         '<td><label class="control-label" id="ufGGx{0}">{0}</label></td>' +
-        '<td><input class="form-control" id="ufGGm{0}"></td>' +
-        '<td><input class="form-control" id="ufGGz{0}"></td>' +
+        '<td><input class="form-control" id="ufGGm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="ufGGz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#ufGGBody").append(tr);
@@ -446,8 +448,8 @@ function ufAddOtherGG() {
     //ufGGBody
     var tr = ('<tr id="ufGG{0}" value="0">' +
         '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="ufGGm{0}"></td>' +
-        '<td><input class="form-control" id="ufGGz{0}"></td>' +
+        '<td><input class="form-control" id="ufGGm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="ufGGz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGGmax, ufGGmaxV);
     $("#ufGGBody").append(tr);
@@ -472,7 +474,7 @@ function ufResetGX() {
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{0}</label></td>' +
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
-        '<td><input class="form-control" id="ufGXz{0}"></td>' +
+        '<td><input class="form-control" id="ufGXz{0}" maxlength="100"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGXmax);
     $("#ufGXBody").append(tr);
@@ -501,7 +503,7 @@ function ufAddOtherGX() {
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
-        '<td><input class="form-control" id="ufGXz{0}"></td>' +
+        '<td><input class="form-control" id="ufGXz{0}" maxlength="100"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGXmax, ufGXmaxV);
     $("#ufGXBody").append(tr);
@@ -620,11 +622,11 @@ function showChangeFlowCard(type) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");
@@ -665,7 +667,7 @@ function showChangeFlowCard(type) {
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
                         { "data": null, "title": "操作", "render": op },
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $(".ms2").select2();
                         $(".can1").attr("disabled", "disabled");
                         $(".can2").attr("disabled", "disabled");
@@ -973,7 +975,7 @@ function getProductionProcessList(first = false) {
             var op = function (data, type, row) {
                 var html = "{0}{1}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showProductionProcessModel({0})">详情</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteProductionProcess({0}, \'{1}\')">删除</button>'.format(data.Id, data.ProductionProcessName);
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteProductionProcess({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ProductionProcessName));
 
                 html = html.format(
                     checkPermission(207) ? changeBtn : "",
@@ -1013,7 +1015,8 @@ function getProductionProcessList(first = false) {
         });
 }
 
-function DeleteProductionProcess(id, name) {
+function deleteProductionProcess(id, name) {
+    name = unescape(name);
     var opType = 221;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -1109,8 +1112,8 @@ function showProductionProcessModel(type) {
                         var productionProcessSpecification = r.Specifications[j];
                         var tr = ('<tr id="apGG{0}" value="{2}">' +
                             '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
-                            '<td><input class="form-control" value="{3}" id="apGGm{0}"></td>' +
-                            '<td><input class="form-control" value="{4}" id="apGGz{0}"></td>' +
+                            '<td><input class="form-control" value="{3}" id="apGGm{0}" maxlength="20"></td>' +
+                            '<td><input class="form-control" value="{4}" id="apGGz{0}" maxlength="20"></td>' +
                             '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                             '</tr>').format(apGGmax, apGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
                         $("#apGGBody").append(tr);
@@ -1123,7 +1126,7 @@ function showProductionProcessModel(type) {
                         var tr = ('<tr id="apGX{0}" value="{2}">' +
                             '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
                             '<td><select class="ms2 yc form-control" id="apGXm{0}"></td>' +
-                            '<td><input class="form-control" value="{3}" id="apGXz{0}"></td>' +
+                            '<td><input class="form-control" value="{3}" id="apGXz{0}" maxlength="100"></td>' +
                             '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                             '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
                         $("#apGXBody").append(tr);
@@ -1156,6 +1159,7 @@ function showProductionProcessModel(type) {
                         recover = 0;
                 });
         } else {
+            $("#appBtn").removeClass("hidden");
             if (lastType != type) {
                 $("#productionProcessName").val("");
                 $("#appBtn").removeClass("hidden");
@@ -1198,8 +1202,8 @@ function addResetGG() {
     $("#apGGBody").empty();
     var tr = ('<tr id="apGG{0}">' +
         '<td><label class="control-label" id="apGGx{0}">{0}</label></td>' +
-        '<td><input class="form-control" id="apGGm{0}"></td>' +
-        '<td><input class="form-control" id="apGGz{0}"></td>' +
+        '<td><input class="form-control" id="apGGm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="apGGz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#apGGBody").append(tr);
@@ -1217,8 +1221,8 @@ function addOtherGG() {
     //apGGBody
     var tr = ('<tr id="apGG{0}" value="0">' +
         '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="apGGm{0}"></td>' +
-        '<td><input class="form-control" id="apGGz{0}"></td>' +
+        '<td><input class="form-control" id="apGGm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="apGGz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGGmax, apGGmaxV);
     $("#apGGBody").append(tr);
@@ -1243,7 +1247,7 @@ function addResetGX() {
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{0}</label></td>' +
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
-        '<td><input class="form-control" id="apGXz{0}"></td>' +
+        '<td><input class="form-control" id="apGXz{0}" maxlength="100"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGXmax);
     $("#apGXBody").append(tr);
@@ -1274,7 +1278,7 @@ function addOtherGX() {
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
-        '<td><input class="form-control" id="apGXz{0}"></td>' +
+        '<td><input class="form-control" id="apGXz{0}" maxlength="100"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGXmax, apGXmaxV);
     $("#apGXBody").append(tr);
@@ -1310,7 +1314,7 @@ function addProductionProcess() {
         layer.msg("没有权限");
         return;
     }
-    var productionProcessName = $("#productionProcessName").val();
+    var productionProcessName = $("#productionProcessName").val().trim();
     if (isStrEmptyOrUndefined(productionProcessName)) {
         showTip($("#productionProcessNameTip"), "计划号不能为空");
         return;
@@ -1319,13 +1323,13 @@ function addProductionProcess() {
     var i;
     for (i = 1; i < apGGmax; i++) {
         if ($("#apGG" + i).length > 0) {
-            var specificationName = $("#apGGm" + i).val();
+            var specificationName = $("#apGGm" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationName)) {
                 layer.msg("规格名不能为空");
                 return;
             }
 
-            var specificationValue = $("#apGGz" + i).val();
+            var specificationValue = $("#apGGz" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationValue)) {
                 layer.msg("规格值不能为空");
                 return;
@@ -1345,13 +1349,13 @@ function addProductionProcess() {
     var l = 1;
     for (i = 1; i < apGXmax; i++) {
         if ($("#apGX" + i).length > 0) {
-            var processStepId = $("#apGXm" + i).val();
+            var processStepId = $("#apGXm" + i).val().trim();
             if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
 
-            var processStepRequirements = $("#apGXz" + i).val();
+            var processStepRequirements = $("#apGXz" + i).val().trim();
 
             apGXdata.push({
                 ProcessStepOrder: l++,
@@ -1393,7 +1397,7 @@ function updateProductionProcess() {
         layer.msg("没有权限");
         return;
     }
-    var productionProcessName = $("#productionProcessName").val();
+    var productionProcessName = $("#productionProcessName").val().trim();
     if (isStrEmptyOrUndefined(productionProcessName)) {
         showTip($("#productionProcessNameTip"), "计划号不能为空");
         return;
@@ -1403,13 +1407,13 @@ function updateProductionProcess() {
     var id;
     for (i = 1; i < apGGmax; i++) {
         if ($("#apGG" + i).length > 0) {
-            var specificationName = $("#apGGm" + i).val();
+            var specificationName = $("#apGGm" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationName)) {
                 layer.msg("规格名不能为空");
                 return;
             }
 
-            var specificationValue = $("#apGGz" + i).val();
+            var specificationValue = $("#apGGz" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationValue)) {
                 layer.msg("规格值不能为空");
                 return;
@@ -1431,13 +1435,13 @@ function updateProductionProcess() {
     var l = 1;
     for (i = 1; i < apGXmax; i++) {
         if ($("#apGX" + i).length > 0) {
-            var processStepId = $("#apGXm" + i).val();
+            var processStepId = $("#apGXm" + i).val().trim();
             if (isStrEmptyOrUndefined(processStepId)) {
                 layer.msg("工序名称不能为空");
                 return;
             }
 
-            var processStepRequirements = $("#apGXz" + i).val();
+            var processStepRequirements = $("#apGXz" + i).val().trim();
 
             id = $("#apGX" + i).attr("value");
             apGXdata.push({
@@ -1499,7 +1503,7 @@ function getRawMateriaList(first = false) {
             var op = function (data, type, row) {
                 var html = "{0}{1}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateRawMateriaModel({0})">详情</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteRawMateria({0}, \'{1}\')">删除</button>'.format(data.Id, data.RawMateriaName);
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteRawMateria({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.RawMateriaName));
 
                 html = html.format(
                     checkPermission(207) ? changeBtn : "",
@@ -1533,7 +1537,8 @@ function getRawMateriaList(first = false) {
         });
 }
 
-function DeleteRawMateria(id, name) {
+function deleteRawMateria(id, name) {
+    name = unescape(name);
     var opType = 239;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -1592,8 +1597,8 @@ function showUpdateRawMateriaModel(id, type = 0) {
                 var rawMateriaSpecification = r.RawMateriaSpecifications[j];
                 var tr = ('<tr id="ur{0}" value="{2}">' +
                     '<td><label class="control-label" id="urx{0}">{1}</label></td>' +
-                    '<td><input class="form-control" value="{3}" id="urm{0}"></td>' +
-                    '<td><input class="form-control" value="{4}" id="urz{0}"></td>' +
+                    '<td><input class="form-control" value="{3}" id="urm{0}" maxlength="20"></td>' +
+                    '<td><input class="form-control" value="{4}" id="urz{0}" maxlength="20"></td>' +
                     '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                     '</tr>').format(uMax, uMaxV, rawMateriaSpecification.Id, rawMateriaSpecification.SpecificationName, rawMateriaSpecification.SpecificationValue);
                 $("#urBody").append(tr);
@@ -1614,7 +1619,7 @@ function updateRawMateria() {
         layer.msg("没有权限");
         return;
     }
-    var urRawMateriaName = $("#urRawMateriaName").val();
+    var urRawMateriaName = $("#urRawMateriaName").val().trim();
     if (isStrEmptyOrUndefined(urRawMateriaName)) {
         showTip($("#urRawMateriaNameTip"), "原料批次不能为空");
         return;
@@ -1623,13 +1628,13 @@ function updateRawMateria() {
     for (var i = 1; i < uMax; i++) {
         if ($("#ur" + i).length > 0) {
             var id = $("#ur" + i).attr("value");
-            var specificationName = $("#urm" + i).val();
+            var specificationName = $("#urm" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationName)) {
                 layer.msg("规格名不能为空");
                 return;
             }
 
-            var specificationValue = $("#urz" + i).val();
+            var specificationValue = $("#urz" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationValue)) {
                 layer.msg("规格值不能为空");
                 return;
@@ -1675,8 +1680,8 @@ function addOther1() {
     //arBody
     var tr = ('<tr id="ur{0}" value="0">' +
         '<td><label class="control-label" id="urx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="urm{0}"></td>' +
-        '<td><input class="form-control" id="urz{0}"></td>' +
+        '<td><input class="form-control" id="urm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="urz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(uMax, uMaxV);
     $("#urBody").append(tr);
@@ -1709,8 +1714,8 @@ function reset() {
     $("#arBody").empty();
     var tr = ('<tr id="ar{0}">' +
         '<td><label class="control-label" id="arx{0}">{0}</label></td>' +
-        '<td><input class="form-control" id="arm{0}"></td>' +
-        '<td><input class="form-control" id="arz{0}"></td>' +
+        '<td><input class="form-control" id="arm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="arz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#arBody").append(tr);
@@ -1723,8 +1728,8 @@ function addOther() {
     //arBody
     var tr = ('<tr id="ar{0}">' +
         '<td><label class="control-label" id="arx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="arm{0}"></td>' +
-        '<td><input class="form-control" id="arz{0}"></td>' +
+        '<td><input class="form-control" id="arm{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" id="arz{0}" maxlength="20"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#arBody").append(tr);
@@ -1749,7 +1754,7 @@ function addRawMateria() {
         layer.msg("没有权限");
         return;
     }
-    var arRawMateriaName = $("#arRawMateriaName").val();
+    var arRawMateriaName = $("#arRawMateriaName").val().trim();
     if (isStrEmptyOrUndefined(arRawMateriaName)) {
         showTip($("#arRawMateriaNameTip"), "原料批次不能为空");
         return;
@@ -1757,13 +1762,13 @@ function addRawMateria() {
     var inputData = new Array();
     for (var i = 1; i < max; i++) {
         if ($("#ar" + i).length > 0) {
-            var specificationName = $("#arm" + i).val();
+            var specificationName = $("#arm" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationName)) {
                 layer.msg("规格名不能为空");
                 return;
             }
 
-            var specificationValue = $("#arz" + i).val();
+            var specificationValue = $("#arz" + i).val().trim();
             if (isStrEmptyOrUndefined(specificationValue)) {
                 layer.msg("规格值不能为空");
                 return;

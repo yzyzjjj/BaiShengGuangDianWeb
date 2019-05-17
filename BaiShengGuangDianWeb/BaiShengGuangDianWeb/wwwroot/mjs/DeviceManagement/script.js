@@ -105,6 +105,14 @@
             fr.readAsText(file, 'gb2312');  //也是利用将图片作为url读出
         }
     });
+    $("#addScriptVersionDeviceModel").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
+    $("#updateScriptVersionDeviceModel").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
 }
 var jsonData = null;
 
@@ -128,8 +136,8 @@ function getScriptVersionAllList(type) {
         }
         var op = function (data, type, row) {
             var html = '<div class="btn-group">{0}{1}</div>';
-            var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateScriptVersionModel({0}, {1}, \'{2}\')">修改</button>'.format(data.Id, data.DeviceModelId, data.ScriptName);
-            var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteScriptVersion({0}, \'{1}\')">删除</button>'.format(data.Id, data.ScriptName);
+            var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'.format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
+            var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ScriptName));
 
             html = html.format(
                 checkPermission(115) ? changeBtn : "",
@@ -149,7 +157,6 @@ function getScriptVersionAllList(type) {
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "ScriptName", "title": "脚本名称" },
-                    { "data": "ModelName", "title": "设备型号" },
                     { "data": "ValueNumber", "title": "变量数" },
                     { "data": "InputNumber", "title": "输入口数" },
                     { "data": "OutputNumber", "title": "输出口数" },
@@ -166,6 +173,7 @@ function showManageModel() {
 }
 
 function showAddScriptVersionModel() {
+    hideClassTip("adt");
     $("#addScriptVersionModel").modal("show");
 }
 
@@ -176,18 +184,19 @@ function addScriptVersion() {
         return;
     }
     var addScriptVersionDeviceModel = $("#addScriptVersionDeviceModel").val();
-    var addScriptVersionName = $("#addScriptVersionName").val();
+    var addScriptVersionName = $("#addScriptVersionName").val().trim();
     if (isStrEmptyOrUndefined(addScriptVersionName)) {
         showTip($("#addScriptVersionNameTip"), "脚本名称不能为空");
         return;
     }
+    var addScriptVersionDeviceModelList = addScriptVersionDeviceModel == null ? "" : addScriptVersionDeviceModel.join(",");
     var doSth = function () {
         $("#addScriptVersionModel").modal("hide");
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             //类型名称
-            DeviceModelId: addScriptVersionDeviceModel,
+            DeviceModelId: addScriptVersionDeviceModelList,
             //描述
             ScriptName: addScriptVersionName,
         });
@@ -202,7 +211,7 @@ function addScriptVersion() {
     showConfirm("添加", doSth);
 }
 
-function DeleteScriptVersion(id, name) {
+function deleteScriptVersion(id, name) {
     var opType = 116;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -222,12 +231,19 @@ function DeleteScriptVersion(id, name) {
                 }
             });
     }
-    showConfirm("删除脚本：" + name, doSth);
+    showConfirm("删除脚本：" + unescape(name), doSth);
 }
 
-function showUpdateScriptVersionModel(id, deviceModle, name) {
+function showUpdateScriptVersionModel(id, deviceModel, name) {
+    deviceModel = unescape(deviceModel);
+    name = unescape(name);
     $("#updateId").html(id);
-    $("#updateScriptVersionDeviceModel").val(deviceModle);
+    hideClassTip("adt");
+    var deviceModelList = [];
+    if (!isStrEmptyOrUndefined(deviceModel))
+        deviceModelList = deviceModel.split(",").map(Number);
+
+    $("#updateScriptVersionDeviceModel").val(deviceModelList).trigger("change");
     $("#updateScriptVersionName").val(name);
     $("#updateScriptVersionModel").modal("show");
 }
@@ -239,11 +255,12 @@ function updateScriptVersion() {
         return;
     }
     var updateScriptVersionDeviceModel = $("#updateScriptVersionDeviceModel").val();
-    var updateScriptVersionName = $("#updateScriptVersionName").val();
+    var updateScriptVersionName = $("#updateScriptVersionName").val().trim();
     if (isStrEmptyOrUndefined(updateScriptVersionName)) {
         showTip($("#updateScriptVersionNameTip"), "脚本名称不能为空");
         return;
     }
+    var updateScriptVersionDeviceModelList = updateScriptVersionDeviceModel == null ? "" : updateScriptVersionDeviceModel.join(",");
     var id = parseInt($("#updateId").html());
     var doSth = function () {
         $("#updateScriptVersionModel").modal("hide");
@@ -252,7 +269,7 @@ function updateScriptVersion() {
         data.opData = JSON.stringify({
             id: id,
             //类型名称
-            DeviceModelId: updateScriptVersionDeviceModel,
+            DeviceModelId: updateScriptVersionDeviceModelList,
             //描述
             ScriptName: updateScriptVersionName,
         });
@@ -319,9 +336,9 @@ function getDeviceModelList() {
                 var data = ret.datas[i];
                 if (deModel == 0)
                     deModel = data.Id;
-                $("#sDeviceModel").append(option.format(data.Id, data.ModelName));
-                $("#addScriptVersionDeviceModel").append(option.format(data.Id, data.ModelName));
-                $("#updateScriptVersionDeviceModel").append(option.format(data.Id, data.ModelName));
+                $("#sDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+                $("#addScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+                $("#updateScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
             }
             getScriptVersionList();
 
@@ -492,7 +509,7 @@ function getDeviceModelList1(type) {
                 var data = ret.datas[i];
                 if (adeModel == 0)
                     adeModel = data.Id;
-                $("#aDeviceModel").append(option.format(data.Id, data.ModelName));
+                $("#aDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
             }
             getScriptVersionList1(type);
         });
@@ -545,8 +562,8 @@ function reset() {
             $("#avBody").empty();
             var tr = ('<tr id="av{0}">' +
                 '<td><label class="control-label" id="avx{0}">{0}</label></td>' +
-                '<td><input class="form-control" id="avb{0}"></td>' +
-                '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}"></td>' +
+                '<td><input class="form-control" id="avb{0}" maxlength="20"></td>' +
+                '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}" maxlength="5"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>').format(1);
             $("#avBody").append(tr);
@@ -584,8 +601,8 @@ function addOther() {
     //avBody
     var tr = ('<tr id="av{0}">' +
         '<td><label class="control-label" id="avx{0}">{1}</label></td>' +
-        '<td><input class="form-control" id="avb{0}"></td>' +
-        '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}"></td>' +
+        '<td><input class="form-control" id="avb{0}" maxlength="20"></td>' +
+        '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}" maxlength="5"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#avBody").append(tr);

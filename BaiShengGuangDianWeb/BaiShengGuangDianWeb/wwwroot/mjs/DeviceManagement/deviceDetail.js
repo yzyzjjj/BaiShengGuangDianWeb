@@ -121,12 +121,15 @@ function getDataList() {
 function openDevice() {
 
 }
+
 function closeDevice() {
 
 }
+
 function lockDevice() {
 
 }
+
 function unlockDevice() {
 
 }

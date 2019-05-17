@@ -13,8 +13,8 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateCategory({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.Id, data.CategoryName, data.Description);
-    var deleteLi = '<li><a onclick="deleteCategory({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.CategoryName);
+    var updateLi = '<li><a onclick="showUpdateCategory({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.Id, escape(data.CategoryName), escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteCategory({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.CategoryName));
     html = html.format(
         checkPermission(142) ? updateLi : "",
         checkPermission(144) ? deleteLi : "");
@@ -74,7 +74,7 @@ function addCategory() {
         layer.msg("没有权限");
         return;
     }
-    var categoryName = $("#addCategoryName").val();
+    var categoryName = $("#addCategoryName").val().trim();
     var categoryDesc = $("#addCategoryDesc").val();
     if (isStrEmptyOrUndefined(categoryName)) {
         showTip($("#addCategoryNameTip"), "类型名不能为空");
@@ -104,6 +104,7 @@ function addCategory() {
 }
 
 function deleteCategory(id, categoryName) {
+    categoryName = unescape(categoryName);
     var opType = 144;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -128,6 +129,8 @@ function deleteCategory(id, categoryName) {
 }
 
 function showUpdateCategory(id, categoryName, categoryDesc) {
+    categoryName = unescape(categoryName);
+    categoryDesc = unescape(categoryDesc);
     hideClassTip('adt');
     $("#updateId").html(id);
     $("#updateCategoryName").val(categoryName);
@@ -143,7 +146,7 @@ function updateCategory() {
     }
     var id = parseInt($("#updateId").html());
 
-    var categoryName = $("#updateCategoryName").val();
+    var categoryName = $("#updateCategoryName").val().trim();
     var categoryDesc = $("#updateCategoryDesc").val();
 
     if (isStrEmptyOrUndefined(categoryName)) {

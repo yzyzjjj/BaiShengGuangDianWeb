@@ -60,7 +60,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var param = Request.GetRequestParams();
             var parentIdStr = param.GetValue("parentId");
+            var name = param.GetValue("name");
             if (!int.TryParse(parentIdStr, out var parentId))
+            {
+                return Result.GenError<Result>(Error.ParamError);
+            }
+            if (name.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
@@ -73,12 +78,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParentNotExist);
                 }
-            }
 
-            var name = param.GetValue("name");
-            if (name.IsNullOrEmpty())
-            {
-                return Result.GenError<Result>(Error.ParamError);
+                var underOrganizationUnits = OrganizationUnitHelper.GetUnderOrganizationUnits(parentId);
+                if (underOrganizationUnits.Any(x => x.Name == name))
+                {
+                    return Result.GenError<Result>(Error.OrganizationUnitIsExist);
+                }
             }
 
             var organizationUnit = new OrganizationUnit
@@ -162,6 +167,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             if (nameStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
+            }
+
+            var underOrganizationUnits = OrganizationUnitHelper.GetUnderOrganizationUnits(organizationUnit.ParentId);
+            if (underOrganizationUnits.Any(x => x.Name == nameStr))
+            {
+                return Result.GenError<Result>(Error.OrganizationUnitIsExist);
             }
 
             organizationUnit.Name = nameStr;

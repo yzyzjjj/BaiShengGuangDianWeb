@@ -13,8 +13,8 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateHardware({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, data.HardwareName, data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, data.Description);
-    var deleteLi = '<li><a onclick="deleteHardware({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.HardwareName);
+    var updateLi = '<li><a onclick="showUpdateHardware({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, escape(data.HardwareName), data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteHardware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.HardwareName));
     html = html.format(
         checkPermission(137) ? updateLi : "",
         checkPermission(139) ? deleteLi : "");
@@ -79,13 +79,13 @@ function addHardware() {
         layer.msg("没有权限");
         return;
     }
-    var addHardwareName = $("#addHardwareName").val();
-    var addInputNumber = $("#addInputNumber").val();
-    var addOutputNumber = $("#addOutputNumber").val();
-    var addDacNumber = $("#addDacNumber").val();
-    var addAdcNumber = $("#addAdcNumber").val();
-    var addAxisNumber = $("#addAxisNumber").val();
-    var addComNumber = $("#addComNumber").val();
+    var addHardwareName = $("#addHardwareName").val().trim();
+    var addInputNumber = $("#addInputNumber").val().trim();
+    var addOutputNumber = $("#addOutputNumber").val().trim();
+    var addDacNumber = $("#addDacNumber").val().trim();
+    var addAdcNumber = $("#addAdcNumber").val().trim();
+    var addAxisNumber = $("#addAxisNumber").val().trim();
+    var addComNumber = $("#addComNumber").val().trim();
     var addDescription = $("#addDescription").val();
     if (isStrEmptyOrUndefined(addHardwareName)) {
         showTip($("#addHardwareNameTip"), "名称不能为空");
@@ -150,6 +150,7 @@ function addHardware() {
 }
 
 function deleteHardware(id, hardName) {
+    hardName = unescape(hardName);
     var opType = 139;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -174,14 +175,15 @@ function deleteHardware(id, hardName) {
 }
 
 function showUpdateHardware(id, hardName, inputNumber, outputNumber, dacNumber, adcNumber, axisNumber, comNumber, description) {
-
+    hardName = unescape(hardName);
+    description = unescape(description);
     hideClassTip('adt');
     $(".dd").val("");
     $("#updateId").html(id);
     $("#updateHardwareName").val(hardName);
     $("#updateInputNumber").val(inputNumber);
     $("#updateOutputNumber").val(outputNumber);
-    $("#updateAdcNumber").val(dacNumber);
+    $("#updateDacNumber").val(dacNumber);
     $("#updateAdcNumber").val(adcNumber);
     $("#updateAxisNumber").val(axisNumber);
     $("#updateComNumber").val(comNumber);
@@ -197,13 +199,13 @@ function updateHardware() {
     }
     var id = parseInt($("#updateId").html());
 
-    var updateHardwareName = $("#updateHardwareName").val();
-    var updateInputNumber = $("#updateInputNumber").val();
-    var updateOutputNumber = $("#updateOutputNumber").val();
-    var updateDacNumber = $("#updateDacNumber").val();
-    var updateAdcNumber = $("#updateAdcNumber").val();
-    var updateAxisNumber = $("#updateAxisNumber").val();
-    var updateComNumber = $("#updateComNumber").val();
+    var updateHardwareName = $("#updateHardwareName").val().trim();
+    var updateInputNumber = $("#updateInputNumber").val().trim();
+    var updateOutputNumber = $("#updateOutputNumber").val().trim();
+    var updateDacNumber = $("#updateDacNumber").val().trim();
+    var updateAdcNumber = $("#updateAdcNumber").val().trim();
+    var updateAxisNumber = $("#updateAxisNumber").val().trim();
+    var updateComNumber = $("#updateComNumber").val().trim();
     var updateDescription = $("#updateDescription").val();
     if (isStrEmptyOrUndefined(updateHardwareName)) {
         showTip($("#updateHardwareNameTip"), "名称不能为空");

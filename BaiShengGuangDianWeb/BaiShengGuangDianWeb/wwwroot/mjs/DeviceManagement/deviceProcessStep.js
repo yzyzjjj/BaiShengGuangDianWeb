@@ -15,8 +15,8 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
 
-    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, data.StepName, data.Description);
-    var deleteLi = '<li><a onclick="DeleteDeviceProcessStep({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.StepName);
+    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.StepName), escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteDeviceProcessStep({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.StepName));
 
     html = html.format(
         checkPermission(152) ? updateLi : "",
@@ -103,7 +103,7 @@ function addModel() {
         return;
     }
     var modelId = $("#addSelect").val();
-    var stepName = $("#addStepName").val();
+    var stepName = $("#addStepName").val().trim();
     if (isStrEmptyOrUndefined(stepName)) {
         showTip($("#addStepNameTip"), "工序名不能为空");
         return;
@@ -136,7 +136,8 @@ function addModel() {
     showConfirm("添加", doSth);
 }
 
-function DeleteDeviceProcessStep(id, stepName) {
+function deleteDeviceProcessStep(id, stepName) {
+    stepName = unescape(stepName);
     var opType = 154;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -160,6 +161,8 @@ function DeleteDeviceProcessStep(id, stepName) {
 }
 
 function showUpdateModel(id, deviceCategoryId, stepName, description) {
+    stepName = unescape(stepName);
+    description = unescape(description);
     var opType = 140;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -203,7 +206,7 @@ function updateModel() {
     }
     var id = parseInt($("#updateId").html());
     var categoryId = $("#updateSelect").val();
-    var stepName = $("#updateStepName").val();
+    var stepName = $("#updateStepName").val().trim();
     if (isStrEmptyOrUndefined(stepName)) {
         showTip($("#updateStepNameTip"), "工序名不能为空");
         return;

@@ -229,6 +229,7 @@ $(function () {
         autoclose: true
     });
     $('.form_time').timepicker({
+        format:"HH:mm:ss",
         language: 'zh-CN',
         showMeridian: false,
         minuteStep: 1,

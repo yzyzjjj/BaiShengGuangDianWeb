@@ -25,6 +25,7 @@ Date.prototype.format = function (format) {
 }
 //获得今日日期
 function getDate() {
+    return new Date().format("yyyy-MM-dd");
     var nowTime = new Date();
     var year = nowTime.getFullYear();
     var month = padLeft0(nowTime.getMonth() + 1);
@@ -33,11 +34,13 @@ function getDate() {
 }
 
 function getTime() {
+    return new Date().format("hh:mm:ss");
     var nowTime = new Date();
-    return nowTime.format('hh:mm:ss');
+    return nowTime.format("hh:mm:ss");
 }
 
 function getFullTime() {
+    return new Date().format("yyyy-MM-dd hh:mm:ss");
     var nowTime = new Date();
     var year = nowTime.getFullYear();
     var month = padLeft0(nowTime.getMonth() + 1);

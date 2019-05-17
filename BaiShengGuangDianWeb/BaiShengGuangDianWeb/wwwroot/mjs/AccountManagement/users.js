@@ -51,8 +51,8 @@ function getUsersList() {
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
                     '    <ul class="dropdown-menu" role="menu">' +
-                    '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, data.account, data.name, data.emailAddress, data.permissions, data.deviceIds, data.productionRole) +
-                    '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, data.account) +
+                    '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole)) +
+                    '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account)) +
                     '</ul>' +
                     '</div>';
 
@@ -86,6 +86,7 @@ function getUsersList() {
 }
 
 function deleteUser(id, account) {
+    account = unescape(account);
 
     var doSth = function () {
         var data = {
@@ -121,11 +122,16 @@ function addReset() {
 var addList = new Array();
 function showAddUserModal(type = 0) {
     $("#add_protoDiv").click();
+    $(".dd").val("");
+    $("#addProcessor").iCheck('uncheck');
+    $("#addSurveyor").iCheck('uncheck');
+
+
     var role = $("#addRole").val();
-    if (lastAddRole == role) {
-        $("#addUserModal").modal("show");
-        return;
-    }
+    //if (lastAddRole == role) {
+    //    $("#addUserModal").modal("show");
+    //    return;
+    //}
     $("#addRole").empty();
     ajaxGet("/RoleManagement/List",
         null,
@@ -186,7 +192,7 @@ function showAddUserModal(type = 0) {
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $("#addDeviceList td").css("padding", "3px");
                         $("#addDeviceList td").css("vertical-align", "middle");
                         $("#addDeviceList .icb_minimal").iCheck({
@@ -284,6 +290,13 @@ function addUser() {
 var updateList = new Array();
 var permission = null;
 function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole) {
+    account = unescape(account);
+    name = unescape(name);
+    emailAddress = unescape(emailAddress);
+    permissions = unescape(permissions);
+    deviceIds = unescape(deviceIds);
+    productionRole = unescape(productionRole);
+
     $("#update_protoDiv").click();
     updateList = new Array();
     permission = permissions;
@@ -360,7 +373,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $("#updateDeviceList td").css("pupdateing", "3px");
                         $("#updateDeviceList td").css("vertical-align", "middle");
                         $("#updateDeviceList .icb_minimal").iCheck({

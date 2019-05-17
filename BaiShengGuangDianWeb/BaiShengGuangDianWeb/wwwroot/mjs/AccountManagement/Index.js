@@ -48,17 +48,17 @@ function getOrganizationUnits() {
                 for (var j = 0; j < children.length; j++) {
                     var child = children[j];
                     if (child.parentId == 0) {
-                        var mMenu = mMenuStr.format(child.id, child.name);
+                        var mMenu = mMenuStr.format(child.id, escape(child.name));
                         var option = $(mMenu).clone();
                         option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(doAction.format(child.id, child.name));
+                        option.find('h3').after(doAction.format(child.id, escape(child.name)));
                         option.find('.on_ul').attr('id', "on" + child.id);
                         $("#organizationUnits").append(option);
                     } else {
-                        var mMenu = "<li>" + mMenuStr.format(child.id, child.name) + "</li>";
+                        var mMenu = "<li>" + mMenuStr.format(child.id, escape(child.name)) + "</li>";
                         var option = $(mMenu).clone();
                         option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(doAction.format(child.id, child.name))
+                        option.find('h3').after(doAction.format(child.id, escape(child.name)))
                         option.find('.on_ul').attr('id', "on" + child.id);
                         $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option);
                     }
@@ -116,7 +116,7 @@ function showAddOrganizationUnitModal() {
 
 function addOrganizationUnit() {
     var data = {}
-    var addName = $("#addName").val();
+    var addName = $("#addName").val().trim();
     if (isStrEmptyOrUndefined(addName)) {
         layer.msg("部门名称不能为空");
         return;
@@ -144,6 +144,7 @@ function addOrganizationUnit() {
 }
 
 function showUpdateOrganizationUnit(id, name) {
+    name = unescape(name);
     $("#updateId").html(id);
     $("#organizationName").val(name);
     $("#updateOrganizationUnitModal").modal("show");
@@ -152,7 +153,7 @@ function showUpdateOrganizationUnit(id, name) {
 function updateOrganizationUnit() {
 
     var id = parseInt($("#updateId").html());
-    var organizationName = $("#organizationName").val();
+    var organizationName = $("#organizationName").val().trim();
     if (isStrEmptyOrUndefined(organizationName)) {
         layer.msg("部门名称不能为空");
         return;
@@ -175,7 +176,8 @@ function updateOrganizationUnit() {
     showConfirm("修改", doSth);
 }
 
-function deleteOrganizationUnit(id, organizName) {
+function deleteOrganizationUnit(id, organizationUnitName) {
+    organizationUnitName = unescape(organizationUnitName);
 
     var doSth = function () {
         var data = {
@@ -191,7 +193,7 @@ function deleteOrganizationUnit(id, organizName) {
                 }
             });
     }
-    showConfirm("删除部门：" + organizName, doSth);
+    showConfirm("删除部门：" + organizationUnitName, doSth);
 }
 
 function moveOrganizationUnits() {
@@ -199,6 +201,8 @@ function moveOrganizationUnits() {
 }
 
 function onClick(id, name) {
+    name = unescape(name);
+
     $("#memberListTable").empty();
     getMemberList(id, name);
 }
@@ -222,7 +226,7 @@ function getMemberList(id, name) {
                 memberList.push(ret.datas[i].Id);
             }
             var op = function (data, type, row) {
-                var html = '<button type="button" class="btn btn-primary btn-sm btn-danger" data-toggle="modal" onclick="deleteMember({0},\'{1}\')">删除</button>'.format(data.Id, data.Name);
+                var html = '<button type="button" class="btn btn-primary btn-sm btn-danger" data-toggle="modal" onclick="deleteMember({0},\'{1}\')">删除</button>'.format(data.Id, escape(data.Name));
                 return html;
             }
 
@@ -247,7 +251,7 @@ function getMemberList(id, name) {
                         { "data": "RoleName", "title": "角色" },
                         { "data": null, "title": "操作", "render": op },
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
                         $("#memberListTable td").css("vertical-align", "middle");
                     }
@@ -299,7 +303,7 @@ function showAddMemberModal() {
                         { "data": "account", "title": "账号" },
                         { "data": "roleName", "title": "角色" }
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $("#memberList td").css("padding", "3px");
                         $("#memberList td").css("vertical-align", "middle");
                         $("#memberList .icb_minimal").iCheck({
@@ -357,6 +361,7 @@ function addMember() {
 }
 
 function deleteMember(id, name) {
+    name = unescape(name);
     var unId = $("#unName").attr("value");
     var unName = $("#unName").text();
     var doSth = function () {

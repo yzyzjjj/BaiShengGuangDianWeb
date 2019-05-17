@@ -69,7 +69,7 @@ function getProcessList(type = 307) {
                 var detailBtn = '<button type="button" class="btn btn-primary" onclick="showProcessDetailModel({0})">详情</button>'.format(data.Id);
                 var updateBtn = '<button type="button" class="btn btn-warning" onclick="showUpdateProcessModel({0})">修改</button>'.format(data.Id);
                 var copyBtn = '<button type="button" class="btn btn-info" onclick="showAddModel({0})">拷贝</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="DeleteProcess({0}, \'{1}\')">删除</button>'.format(data.Id, data.ProcessNumber);
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteProcess({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ProcessNumber));
 
                 html = html.format(
                     checkPermission(207) ? detailBtn : "",
@@ -110,7 +110,7 @@ function getProcessList(type = 307) {
                                 if (full.ProcessNumber) {
                                     if (full.ProcessNumber.length > tdShowLength) {
                                         return full.ProcessNumber.substr(0, tdShowLength) +
-                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(full.ProcessNumber);
+                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ProcessNumber));
                                     } else {
                                         return full.ProcessNumber;
                                     }
@@ -126,7 +126,7 @@ function getProcessList(type = 307) {
                                 if (full.ModelName) {
                                     if (full.ModelName.length > tdShowLength) {
                                         return full.ModelName.substr(0, tdShowLength) +
-                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(full.ModelName);
+                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ModelName));
                                     } else {
                                         return full.ModelName;
                                     }
@@ -142,7 +142,7 @@ function getProcessList(type = 307) {
                                 if (full.ProductionProcessName) {
                                     if (full.ProductionProcessName.length > tdShowLength) {
                                         return full.ProductionProcessName.substr(0, tdShowLength) +
-                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(full.ProductionProcessName);
+                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ProductionProcessName));
                                     } else {
                                         return full.ProductionProcessName;
                                     }
@@ -158,7 +158,7 @@ function getProcessList(type = 307) {
                                 if (full.Code) {
                                     if (full.Code.length > tdShowLength) {
                                         return full.Code.substr(0, tdShowLength) +
-                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(full.Code);
+                                            ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.Code));
                                     } else {
                                         return full.Code;
                                     }
@@ -173,11 +173,15 @@ function getProcessList(type = 307) {
 }
 
 function showDetailModel(content) {
+    content = unescape(content);
+
     $("#detail").html(content);
     $("#detailModel").modal("show");
 }
 
-function DeleteProcess(id, name) {
+function deleteProcess(id, name) {
+    name = unescape(name);
+
     var opType = 317;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -474,12 +478,12 @@ function showAddModel(id) {
 
                 var tr = '<tr id="ap{0}" value="{2}">' +
                     '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                    '<td><input class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                    '<td><input class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-                    '<td><input class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                    '<td><input class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-                    '<td><input class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                    '<td><input class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+                    '<td><input class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                    '<td><input class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+                    '<td><input class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                    '<td><input class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+                    '<td><input class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                    '<td><input class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
                     '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                     '</tr>';
                 for (var j = 0; j < ret.datas.length; j++) {
@@ -607,12 +611,12 @@ function apReset() {
     $("#apBody").empty();
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{0}</label></td>' +
-        '<td><input class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-        '<td><input class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-        '<td><input class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+        '<td><input class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#apBody").append(tr);
@@ -628,12 +632,12 @@ function addOther() {
     //arBody
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-        '<td><input class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-        '<td><input class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-        '<td><input class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-        '<td><input class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+        '<td><input class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+        '<td><input class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#apBody").append(tr);
@@ -664,7 +668,7 @@ function addProcess() {
         layer.msg("没有权限");
         return;
     }
-    var apProcess = $("#apProcess").val();
+    var apProcess = $("#apProcess").val().trim();
     if (isStrEmptyOrUndefined(apProcess)) {
         showTip($("#apProcessTip"), "工艺编号不能为空");
         return;
@@ -681,32 +685,32 @@ function addProcess() {
     var l = 1;
     for (var i = 1; i < max; i++) {
         if ($("#ap" + i).length > 0) {
-            var pressurizeMinute = $("#apJy1" + i).val();
+            var pressurizeMinute = $("#apJy1" + i).val().trim();
             if (isStrEmptyOrUndefined(pressurizeMinute)) {
                 layer.msg("加压时间(M)不能为空");
                 return;
             }
-            var pressurizeSecond = $("#apJy2" + i).val();
+            var pressurizeSecond = $("#apJy2" + i).val().trim();
             if (isStrEmptyOrUndefined(pressurizeSecond)) {
                 layer.msg("加压时间(S)不能为空");
                 return;
             }
-            var processMinute = $("#apGx1" + i).val();
+            var processMinute = $("#apGx1" + i).val().trim();
             if (isStrEmptyOrUndefined(processMinute)) {
                 layer.msg("工序时间(M)不能为空");
                 return;
             }
-            var processSecond = $("#apGx2" + i).val();
+            var processSecond = $("#apGx2" + i).val().trim();
             if (isStrEmptyOrUndefined(processSecond)) {
                 layer.msg("工序时间(S)不能为空");
                 return;
             }
-            var pressure = $("#apYl" + i).val();
+            var pressure = $("#apYl" + i).val().trim();
             if (isStrEmptyOrUndefined(pressure)) {
                 layer.msg("设定压力(Kg)不能为空");
                 return;
             }
-            var speed = $("#apSd" + i).val();
+            var speed = $("#apSd" + i).val().trim();
             if (isStrEmptyOrUndefined(speed)) {
                 layer.msg("下盘速度(rpm)不能为空");
                 return;
@@ -786,12 +790,12 @@ function showUpdateProcessModel(id) {
 
             var tr = '<tr id="ap{0}" value="{2}">' +
                 '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                '<td><input class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                '<td><input class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-                '<td><input class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                '<td><input class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
-                '<td><input class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
-                '<td><input class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+                '<td><input class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                '<td><input class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+                '<td><input class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                '<td><input class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="10"></td>' +
+                '<td><input class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
+                '<td><input class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>';
             for (var j = 0; j < ret.datas.length; j++) {
@@ -816,7 +820,7 @@ function updateProcess() {
         layer.msg("没有权限");
         return;
     }
-    var apProcess = $("#apProcess").val();
+    var apProcess = $("#apProcess").val().trim();
     if (isStrEmptyOrUndefined(apProcess)) {
         showTip($("#apProcessTip"), "工艺编号不能为空");
         return;
@@ -833,32 +837,32 @@ function updateProcess() {
     var l = 1;
     for (var i = 1; i < max; i++) {
         if ($("#ap" + i).length > 0) {
-            var pressurizeMinute = $("#apJy1" + i).val();
+            var pressurizeMinute = $("#apJy1" + i).val().trim();
             if (isStrEmptyOrUndefined(pressurizeMinute)) {
                 layer.msg("加压时间(M)不能为空");
                 return;
             }
-            var pressurizeSecond = $("#apJy2" + i).val();
+            var pressurizeSecond = $("#apJy2" + i).val().trim();
             if (isStrEmptyOrUndefined(pressurizeSecond)) {
                 layer.msg("加压时间(S)不能为空");
                 return;
             }
-            var processMinute = $("#apGx1" + i).val();
+            var processMinute = $("#apGx1" + i).val().trim();
             if (isStrEmptyOrUndefined(processMinute)) {
                 layer.msg("工序时间(M)不能为空");
                 return;
             }
-            var processSecond = $("#apGx2" + i).val();
+            var processSecond = $("#apGx2" + i).val().trim();
             if (isStrEmptyOrUndefined(processSecond)) {
                 layer.msg("工序时间(S)不能为空");
                 return;
             }
-            var pressure = $("#apYl" + i).val();
+            var pressure = $("#apYl" + i).val().trim();
             if (isStrEmptyOrUndefined(pressure)) {
                 layer.msg("设定压力(Kg)不能为空");
                 return;
             }
-            var speed = $("#apSd" + i).val();
+            var speed = $("#apSd" + i).val().trim();
             if (isStrEmptyOrUndefined(speed)) {
                 layer.msg("下盘速度(rpm)不能为空");
                 return;

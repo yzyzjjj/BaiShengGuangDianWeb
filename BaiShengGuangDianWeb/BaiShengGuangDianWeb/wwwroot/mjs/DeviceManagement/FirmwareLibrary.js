@@ -15,8 +15,8 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateFirmwareModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\')">修改</a></li>'.format(data.Id, data.FirmwareName, data.VarNumber, data.CommunicationProtocol, data.FilePath, data.Description);
-    var deleteLi = '<li><a onclick="deleteFirmware({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.FirmwareName);
+    var updateLi = '<li><a onclick="showUpdateFirmwareModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\')">修改</a></li>'.format(data.Id, escape(data.FirmwareName), escape(data.VarNumber), escape(data.CommunicationProtocol), escape(data.FilePath), escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteFirmware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FirmwareName));
     html = html.format(
         checkPermission(132) ? updateLi : "",
         checkPermission(134) ? deleteLi : "");
@@ -130,7 +130,9 @@ function addFirmware() {
     showConfirm("添加", doSth);
 }
 
-function deleteFirmware(id, fireWareName) {
+function deleteFirmware(id, firmwareName) {
+    firmwareName = unescape(firmwareName);
+
     var opType = 134;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -151,10 +153,16 @@ function deleteFirmware(id, fireWareName) {
                 }
             });
     }
-    showConfirm("删除固件：" + fireWareName, doSth);
+    showConfirm("删除固件：" + firmwareName, doSth);
 }
 
 function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommunication, firmwareLocationName, firmwareDescription) {
+    firmwareName = unescape(firmwareName);
+    firmwareNumber = unescape(firmwareNumber);
+    firmwareCommunication = unescape(firmwareCommunication);
+    firmwareLocationName = unescape(firmwareLocationName);
+    firmwareDescription = unescape(firmwareDescription);
+
     hideClassTip('adt');
     $(".dd").val("");
     $("#updateId").html(id);
@@ -174,10 +182,10 @@ function updateFirmware() {
     }
     var id = parseInt($("#updateId").html());
 
-    var updateName = $("#updateName").val();
-    var updateNumber = $("#updateNumber").val();
-    var updateCommunication = $("#updateCommunication").val();
-    var updateFilePath = $("#updateFilePath").val();
+    var updateName = $("#updateName").val().trim();
+    var updateNumber = $("#updateNumber").val().trim();
+    var updateCommunication = $("#updateCommunication").val().trim();
+    var updateFilePath = $("#updateFilePath").val().trim();
     var updateDesc = $("#updateDesc").val();
     if (isStrEmptyOrUndefined(updateName)) {
         showTip($("#updateNameTip"), "名称不能为空");

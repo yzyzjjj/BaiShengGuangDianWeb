@@ -35,23 +35,23 @@
                 <div class="modal-body box">
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">名称：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>名称：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="addApplicationName" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="addApplicationName" onfocusin="focusIn($(this))" maxlength="32">
                                 <label class="adt label-danger hidden" id="addApplicationNameTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="addFilePath" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="addFilePath" onfocusin="focusIn($(this))" maxlength="100">
                                 <label class="adt label-danger hidden" id="addFilePathTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">描述：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="addDesc">
+                                <input class="form-control" id="addDesc" maxlength="255">
                             </div>
                         </div>
                     </form>
@@ -77,23 +77,23 @@
                 <div class="modal-body box">
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="">名称：</label>
+                            <label class="col-sm-3 control-label" for=""><span class="text-red">* </span>名称：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="updateApplicationName" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="updateApplicationName" onfocusin="focusIn($(this))" maxlength="32">
                                 <label class="adt label-danger hidden" id="updateApplicationNameTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">程序文件的位置及名称：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="updateFilePath" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="updateFilePath" onfocusin="focusIn($(this))" maxlength="100">
                                 <label class="adt label-danger hidden" id="updateFilePathTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">描述：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="updateDesc">
+                                <input class="form-control" id="updateDesc" maxlength="255">
                             </div>
                         </div>
                     </form>

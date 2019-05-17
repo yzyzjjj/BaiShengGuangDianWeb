@@ -45,6 +45,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
+        /// 根据id获取下级组织结构
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static IEnumerable<OrganizationUnit> GetUnderOrganizationUnits(int id)
+        {
+            var sql = "SELECT * FROM `organization_units` WHERE IsDeleted = 0 AND ParentId = @id;";
+            var info = ServerConfig.WebDb.Query<OrganizationUnit>(sql, new { id });
+            return info;
+        }
+        /// <summary>
         /// 添加组织结构
         /// </summary>
         /// <param name="organizationUnit"></param>
