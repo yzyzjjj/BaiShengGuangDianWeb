@@ -111,33 +111,33 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afRawMaterialQuantity">原料数量：</label>
-                        <input class="form-control" id="afRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="afRawMaterialQuantity"><span class="text-red">* </span>原料数量：</label>
+                        <input class="form-control" id="afRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="10">
                         <label class="adt label-danger" id="afRawMaterialQuantityTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afStartFlowCard">起始流程卡号：</label>
-                        <input class="form-control" id="afStartFlowCard" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="afStartFlowCard"><span class="text-red">* </span>起始流程卡号：</label>
+                        <input class="form-control" id="afStartFlowCard" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="afStartFlowCardTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afFlowCardNumber">流程卡数：</label>
-                        <input class="form-control" id="afFlowCardNumber" value="1" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="afFlowCardNumber"><span class="text-red">* </span>流程卡数：</label>
+                        <input class="form-control" id="afFlowCardNumber" value="1" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="3">
                         <label class="adt label-danger" id="afFlowCardNumberTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afSender">发片人：</label>
-                        <input class="form-control" id="afSender" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="afSender"><span class="text-red">* </span>发片人：</label>
+                        <input class="form-control" id="afSender" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="afSenderTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afInboundNum">入库号：</label>
-                        <input class="form-control" id="afInboundNum" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="afInboundNum"><span class="text-red">* </span>入库号：</label>
+                        <input class="form-control" id="afInboundNum" onfocusin="focusIn($(this))" maxlength="32">
                         <label class="adt label-danger" id="afInboundNumTip"></label>
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="afRemarks">备注：</label>
-                        <input class="form-control" id="afRemarks">
+                        <input class="form-control" id="afRemarks" maxlength="255">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -161,11 +161,11 @@
                 <div class="modal-body col-sm-12">
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label class="control-label" for="ufProductionProcess">计划号：</label>
+                            <label class="control-label" for="ufProductionProcess"><span class="text-red">* </span>计划号：</label>
                             <input class="form-control" id="ufProductionProcess" disabled="disabled">
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufRawMateria">请选择原料批次：</label>
+                            <label class="control-label" for="ufRawMateria"><span class="text-red">* </span>原料批次：</label>
                             <input class="form-control" id="ufRawMateria" disabled="disabled">
                         </div>
                         <div class="form-group">
@@ -177,27 +177,27 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufRawMaterialQuantity">原料数量：</label>
-                            <input class="form-control" id="ufRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))">
+                            <label class="control-label" for="ufRawMaterialQuantity"><span class="text-red">* </span>原料数量：</label>
+                            <input class="form-control" id="ufRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="10">
                             <label class="adt label-danger" id="ufRawMaterialQuantityTip"></label>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufFlowCardName">流程卡号：</label>
-                            <input class="form-control" id="ufFlowCardName" disabled="disabled">
+                            <label class="control-label" for="ufFlowCardName"><span class="text-red">* </span>流程卡号：</label>
+                            <input class="form-control" id="ufFlowCardName" disabled="disabled" maxlength="20">
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufSender">发片人：</label>
-                            <input class="form-control" id="ufSender" onfocusin="focusIn($(this))">
+                            <label class="control-label" for="ufSender"><span class="text-red">* </span>发片人：</label>
+                            <input class="form-control" id="ufSender" onfocusin="focusIn($(this))" maxlength="20">
                             <label class="adt label-danger" id="ufSenderTip"></label>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufInboundNum">入库号：</label>
-                            <input class="form-control" id="ufInboundNum" onfocusin="focusIn($(this))">
+                            <label class="control-label" for="ufInboundNum"><span class="text-red">* </span>入库号：</label>
+                            <input class="form-control" id="ufInboundNum" onfocusin="focusIn($(this))" maxlength="32">
                             <label class="adt label-danger" id="ufInboundNumTip"></label>
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="ufRemarks">备注：</label>
-                            <input class="form-control" id="ufRemarks">
+                            <input class="form-control" id="ufRemarks" maxlength="255">
                         </div>
                     </div>
 
@@ -294,8 +294,8 @@
                         <div class="box-body col-sm-12">
                             <div class="col-sm-4">
                                 <div class="form-group">
-                                    <label class="control-label" for="productionProcessName">计划号：</label>
-                                    <input class="form-control" id="productionProcessName" onfocusin="focusIn($(this))">
+                                    <label class="control-label" for="productionProcessName"><span class="text-red">* </span>计划号：</label>
+                                    <input class="form-control" id="productionProcessName" onfocusin="focusIn($(this))" maxlength="20">
                                     <label class="adt label-danger hidden" id="productionProcessNameTip"></label>
                                 </div>
                                 <div class="form-group text-right">
@@ -365,8 +365,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="control-label" for="arRawMateriaName">原料批次：</label>
-                        <input class="form-control" id="arRawMateriaName" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="arRawMateriaName"><span class="text-red">* </span>原料批次：</label>
+                        <input class="form-control" id="arRawMateriaName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="arRawMateriaNameTip"></label>
                     </div>
                     <div class="form-group text-right">
@@ -386,8 +386,8 @@
                             <tbody id="arBody">
                                 <tr id="ar1">
                                     <td><label class="control-label" id="arx1">1</label></td>
-                                    <td><input class="form-control" id="arm1"></td>
-                                    <td><input class="form-control" id="arz1"></td>
+                                    <td><input class="form-control" id="arm1" maxlength="20"></td>
+                                    <td><input class="form-control" id="arz1" maxlength="20"></td>
                                     <td><button type="button" class="btn btn-default btn-sm" onclick="delSelf(1)"><i class="fa fa-minus"></i> 删除</button></td>
                                 </tr>
                             </tbody>
@@ -417,8 +417,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="control-label" for="urRawMateriaName">原料批次：</label>
-                        <input class="form-control" id="urRawMateriaName" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="urRawMateriaName"><span class="text-red">* </span>原料批次：</label>
+                        <input class="form-control" id="urRawMateriaName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="urRawMateriaNameTip"></label>
                     </div>
                     <div class="form-group text-right">

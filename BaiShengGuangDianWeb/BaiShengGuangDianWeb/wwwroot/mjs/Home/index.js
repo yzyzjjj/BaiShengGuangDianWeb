@@ -10,12 +10,31 @@
     $("#processCode").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
+    $("#faultType").on("select2:select", function (e) {
+        if ($("#faultType").val() != "1") {
+            var desc = "";
+            for (var i = 0; i < faultData.length; i++) {
+                if (faultData[i].Id == $("#faultType").val()) {
+                    desc = faultData[i].FaultDescription;
+                    break;
+                }
+            }
+            $("#faultDesc").val(desc);
+            $("#faultDesc").attr("disabled", "disabled");
+
+        } else {
+                $("#faultDesc").val("");
+
+            $("#faultDesc").removeAttr("disabled");
+        }
+    });
     $("#faultCode").select2({
         allowClear: true,
         placeholder: "请选择"
     });
 }
 
+var faultData = null;
 function getDeviceList() {
     var opType = 100;
     if (!checkPermission(opType)) {
@@ -124,7 +143,7 @@ function queryFlowCard() {
     }
 
     //流程卡
-    var flowCard = $("#flowCard").val();
+    var flowCard = $("#flowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("flowCardTip", "流程卡号不能为空");
         query = false;
@@ -169,6 +188,7 @@ function queryFlowCard() {
 }
 
 function queryProcessData(processNumber) {
+    processNumber = unescape(processNumber);
     var opType = 300;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -274,6 +294,13 @@ function showFaultModel() {
         layer.msg("没有权限");
         return;
     }
+    hideClassTip('adt');
+    $("#faultDate").val(getDate()).datepicker('update');
+    $("#faultTime").val(getTime());
+    var info = getCookieTokenInfo();
+    $("#proposer").val(info.name);
+    $("#faultDesc").val("");
+
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data,
@@ -289,13 +316,7 @@ function showFaultModel() {
                 var d = ret.datas[i];
                 $("#faultType").append(option.format(d.Id, d.FaultTypeName));
             }
-
-
-            $("#faultDate").val(getDate()).datepicker('update');
-            $("#faultTime").val(getTime());
-            var info = getCookieTokenInfo();
-            $("#proposer").val(info.name);
-            hideClassTip('adt');
+            faultData = ret.datas;
             $("#faultModel").modal("show");
         });
 }
@@ -314,7 +335,7 @@ function reportFault() {
         report = false;
     }
 
-    var proposer = $("#proposer").val();
+    var proposer = $("#proposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
         showTip($("#proposerTip"), "报修人不能为空");
@@ -324,7 +345,7 @@ function reportFault() {
     var faultTime = $("#faultTime").val();
     var faultType = $("#faultType").val();
 
-    var faultDesc = $("#faultDesc").val();
+    var faultDesc = $("#faultDesc").val().trim();
     //故障描述
     if (isStrEmptyOrUndefined(faultDesc) && faultType == 1) {
         showTip($("#faultDescTip"), "故障描述不能为空");
@@ -332,6 +353,7 @@ function reportFault() {
     }
     if (!report)
         return;
+
     $("#faultModel").modal("hide");
     var time = "{0} {1}".format(faultDate, faultTime);
     var faults = new Array();
@@ -483,7 +505,7 @@ function queryRpFlowCard() {
         return;
     }
     //流程卡
-    var flowCard = $("#rpFlowCard").val();
+    var flowCard = $("#rpFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("rpFlowCardTip", "流程卡号不能为空");
         return;
@@ -637,7 +659,7 @@ function queryRpFlowCard() {
                         { "data": null, "title": "合格数", "render": qualifiedNumber },
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
                     ],
-                    "initComplete": function (settings, json) {
+                    "drawCallback": function (settings, json) {
                         $("#gxList th").css("padding-right", "8px");
                         initTime();
                     }

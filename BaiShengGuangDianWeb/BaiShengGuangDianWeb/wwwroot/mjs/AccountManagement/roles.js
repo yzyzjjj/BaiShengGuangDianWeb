@@ -18,8 +18,8 @@ function getRoleList() {
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
                     '    <ul class="dropdown-menu" role="menu">' +
-                    '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, data.name, data.permissions) +
-                    '<li><a onclick="deleteRole({0}, \'{1}\')">删除</a></li>'.format(data.id, data.name) +
+                    '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions)) +
+                    '<li><a onclick="deleteRole({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.name)) +
                     '</ul>' +
                     '</div>';
 
@@ -106,6 +106,7 @@ function addRole() {
 }
 
 function deleteRole(id, name) {
+    name = unescape(name);
     var doSth = function () {
         var data = {
             id: id,
@@ -123,6 +124,9 @@ function deleteRole(id, name) {
 }
 
 function showUpdateRole(id, name, permissions) {
+    name = unescape(name);
+    permissions = unescape(permissions);
+
     var dataPermissions = permissions.split(",");
     $("#update_protoDiv").click();
     $("#updateRoleName").val(name);

@@ -35,16 +35,16 @@
                 <div class="modal-body box">
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">类型名：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>类型名：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="addCategoryName" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="addCategoryName" onfocusin="focusIn($(this))" maxlength="32">
                                 <label class="adt label-danger hidden" id="addCategoryNameTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">描述：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="addCategoryDesc">
+                                <input class="form-control" id="addCategoryDesc" maxlength="255">
                             </div>
                         </div>
                     </form>
@@ -70,16 +70,16 @@
                 <div class="modal-body box">
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">类型名：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>类型名：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="updateCategoryName" onfocusin="focusIn($(this))">
+                                <input class="form-control" id="updateCategoryName" onfocusin="focusIn($(this))" maxlength="32">
                                 <label class="adt label-danger hidden" id="updateCategoryNameTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label">描述：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" id="updateCategoryDesc">
+                                <input class="form-control" id="updateCategoryDesc" maxlength="255">
                             </div>
                         </div>
 

@@ -24,6 +24,26 @@
                 $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
             }
         });
+
+
+    $("#faultType").on("select2:select", function (e) {
+        if ($("#faultType").val() != "1") {
+            var desc = "";
+            for (var i = 0; i < faultData.length; i++) {
+                if (faultData[i].Id == $("#faultType").val()) {
+                    desc = faultData[i].FaultDescription;
+                    break;
+                }
+            }
+            $("#faultDesc").val(desc);
+            $("#faultDesc").attr("disabled", "disabled");
+
+        } else {
+            $("#faultDesc").val("");
+
+            $("#faultDesc").removeAttr("disabled");
+        }
+    });
 }
 
 var fType = 0;
@@ -154,23 +174,29 @@ function sChange(id, type) {
                     $("#singleFaultPriority").removeAttr("disabled");
                     $("#singleChange").removeClass("hidden");
                 }
+                //确认故障
                 if (type == 1) {
                     $("#singleSure").removeClass("hidden");
                 }
+                //来说维修
                 if (type == 2) {
                     $("#singleRepairing").removeClass("hidden");
                 }
+                //维修完成
                 if (type == 3) {
                     $("#solveDiv").removeClass("hidden");
                     $("#singleRepaired").removeClass("hidden");
+                    $("#singleFaultType").val(data.FaultTypeId).trigger("change");
                 }
             }
+            //维修完成
             if (type == 3) {
                 $("#singleSolveDate").val(getDate());
                 $("#singleSolveDate").datepicker('update');
                 $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
                 $("#singleFaultSolver").val(info.name);
+                $("#singleSolvePlan").val("");
             }
             $("#singleFaultModel").modal("show");
         });
@@ -186,7 +212,7 @@ function singleChange(type) {
         return;
     }
 
-    var proposer = $("#singleProposer").val();
+    var proposer = $("#singleProposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
         return;
@@ -477,7 +503,7 @@ function recordChange(type) {
         return;
     }
 
-    var proposer = $("#singleProposer").val();
+    var proposer = $("#singleProposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
         if (type != 0)
@@ -568,7 +594,7 @@ function getUsuallyFaultList() {
                     '</div>';
 
                 var updateLi = '<li><a onclick="showUpdateUsuallyFaultModel({0})">修改</a></li>'.format(data.Id);
-                var deleteLi = '<li><a onclick="DeleteUsuallyFault({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.UsuallyFaultDesc);
+                var deleteLi = '<li><a onclick="deleteUsuallyFault({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.UsuallyFaultDesc));
 
                 html = html.format(
                     checkPermission(402) ? updateLi : "",
@@ -640,7 +666,8 @@ function showUsuallyFaultDetailModel(id) {
         });
 }
 
-function DeleteUsuallyFault(id, usuallyFaultDesc) {
+function deleteUsuallyFault(id, usuallyFaultDesc) {
+    usuallyFaultDesc = unescape(usuallyFaultDesc);
     var opType = 405;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -676,12 +703,12 @@ function addUsuallyFault() {
     }
 
     var add = true;
-    var addUsuallyFaultDesc = $("#addUsuallyFaultDesc").val();
+    var addUsuallyFaultDesc = $("#addUsuallyFaultDesc").val().trim();
     if (isStrEmptyOrUndefined(addUsuallyFaultDesc)) {
-        showTip($("addUsuallyFaultDescTip"), "故障描述不能为空");
+        showTip("addUsuallyFaultDescTip", "故障描述不能为空");
         add = false;
     }
-    var addSolverPlan = $("#addSolverPlan").val();
+    var addSolverPlan = $("#addSolverPlan").val().trim();
     if (isStrEmptyOrUndefined(addSolverPlan)) {
         showTip($("#addSolverPlanTip"), "解决方案不能为空");
         add = false;
@@ -745,12 +772,12 @@ function updateUsuallyFault() {
     }
 
     var update = true;
-    var updateUsuallyFaultDesc = $("#updateUsuallyFaultDesc").val();
+    var updateUsuallyFaultDesc = $("#updateUsuallyFaultDesc").val().trim();
     if (isStrEmptyOrUndefined(updateUsuallyFaultDesc)) {
-        showTip($("updateUsuallyFaultDescTip"), "故障描述不能为空");
+        showTip($("#updateUsuallyFaultDescTip"), "故障描述不能为空");
         update = false;
     }
-    var updateSolverPlan = $("#updateSolverPlan").val();
+    var updateSolverPlan = $("#updateSolverPlan").val().trim();
     if (isStrEmptyOrUndefined(updateSolverPlan)) {
         showTip($("#updateSolverPlanTip"), "解决方案不能为空");
         update = false;
@@ -780,7 +807,6 @@ function updateUsuallyFault() {
     }
     showConfirm("修改", doSth);
 }
-
 
 function getFaultTypeList() {
     var opType = 406;
@@ -812,7 +838,7 @@ function getFaultTypeList() {
                     '</div>';
 
                 var updateLi = '<li><a onclick="showUpdateFaultTypeModel({0})">修改</a></li>'.format(data.Id);
-                var deleteLi = '<li><a onclick="DeleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.FaultTypeName);
+                var deleteLi = '<li><a onclick="deleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
 
                 html = html.format(
                     checkPermission(408) ? updateLi : "",
@@ -839,7 +865,7 @@ function getFaultTypeList() {
                     ],
                     "columnDefs": [
                         {
-                            "targets": [1],
+                            "targets": [3],
                             "render": function (data, type, full, meta) {
                                 if (full.FaultDescription) {
                                     if (full.FaultDescription.length > tdShowLength) {
@@ -867,7 +893,7 @@ function getFaultTypeList() {
 }
 
 function showFaultTypeDetailModel(id) {
-    var opType = 401;
+    var opType = 407;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -884,14 +910,15 @@ function showFaultTypeDetailModel(id) {
                 return;
             }
             if (ret.datas.length > 0)
-                $("#faultTypeDetail").html(ret.datas[0].SolverPlan);
+                $("#faultTypeDetail").html(ret.datas[0].FaultDescription);
 
             $("#faultTypeDetailModel").modal("show");
 
         });
 }
 
-function DeleteFaultType(id, faultTypeDesc) {
+function deleteFaultType(id, faultTypeDesc) {
+    faultTypeDesc = unescape(faultTypeDesc);
     var opType = 411;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -916,6 +943,8 @@ function DeleteFaultType(id, faultTypeDesc) {
 
 function showAddFaultTypeModel() {
     hideClassTip('adt');
+    $("#addFaultTypeName").val("");
+    $("#addFaultTypeDesc").val("");
     $("#addFaultTypeModel").modal("show");
 }
 
@@ -927,9 +956,9 @@ function addFaultType() {
     }
 
     var add = true;
-    var addFaultTypeName = $("#addFaultTypeName").val();
+    var addFaultTypeName = $("#addFaultTypeName").val().trim();
     if (isStrEmptyOrUndefined(addFaultTypeName)) {
-        showTip($("addFaultTypeNameTip"), "故障类型不能为空");
+        showTip("addFaultTypeNameTip", "故障类型不能为空");
         add = false;
     }
     var addFaultTypeDesc = $("#addFaultTypeDesc").val();
@@ -993,9 +1022,9 @@ function updateFaultType() {
     }
 
     var update = true;
-    var updateFaultTypeName = $("#updateFaultTypeName").val();
+    var updateFaultTypeName = $("#updateFaultTypeName").val().trim();
     if (isStrEmptyOrUndefined(updateFaultTypeName)) {
-        showTip($("updateFaultTypeNameTip"), "故障类型不能为空");
+        showTip("updateFaultTypeNameTip", "故障类型不能为空");
         update = false;
     }
     var updateFaultTypeDesc = $("#updateFaultTypeDesc").val();

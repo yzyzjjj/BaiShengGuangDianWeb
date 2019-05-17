@@ -114,12 +114,12 @@
                 <div class="modal-body">
                     <div class="form-group form-inline">
                         <label class="control-label" for="addScriptVersionDeviceModel">请选择设备型号：</label>
-                        <select class="ads form-control" id="addScriptVersionDeviceModel"></select>
+                        <select class="ads form-control" id="addScriptVersionDeviceModel" multiple="multiple"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="addScriptVersionName">脚本名称：</label>
-                        <input class="form-control" id="addScriptVersionName" onfocusin="focusIn($(this))">
-                        <label class="label-danger hidden" id="addScriptVersionNameTip"></label>
+                        <label class="control-label" for="addScriptVersionName"><span class="text-red">* </span>脚本名称：</label>
+                        <input class="form-control" id="addScriptVersionName" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger hidden" id="addScriptVersionNameTip"></label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -144,11 +144,11 @@
                 <div class="modal-body">
                     <div class="form-group form-inline">
                         <label class="control-label" for="updateScriptVersionDeviceModel">请选择设备型号：</label>
-                        <select class="ads form-control" id="updateScriptVersionDeviceModel"></select>
+                        <select class="ads form-control" id="updateScriptVersionDeviceModel" multiple="multiple"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="updateScriptVersionName">脚本名称：</label>
-                        <input class="form-control" id="updateScriptVersionName" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="updateScriptVersionName"><span class="text-red">* </span>脚本名称：</label>
+                        <input class="form-control" id="updateScriptVersionName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="label-danger hidden" id="updateScriptVersionNameTip"></label>
                     </div>
                 </div>
@@ -209,8 +209,8 @@
                             <tbody id="avBody">
                                 <tr id="av1">
                                     <td><label class="control-label" id="avx1">1</label></td>
-                                    <td><input class="form-control" id="avb1"></td>
-                                    <td><input class="form-control" oninput="value=value.replace(/[^\d]/g,'')" id="avd1"></td>
+                                    <td><input class="form-control" id="avb1" maxlength="20"></td>
+                                    <td><input class="form-control" oninput="value=value.replace(/[^\d]/g,'')" id="avd1" maxlength="5"></td>
                                     <td><button type="button" class="btn btn-default btn-sm" onclick="delSelf(1)"><i class="fa fa-minus"></i> 删除</button></td>
                                 </tr>
                             </tbody>
@@ -225,7 +225,7 @@
                             <select class="ads form-control" id="jScriptVersion"></select>
                         </div>
                         <label class="control-label">脚本名：</label>
-                        <input class="form-control" placeholder="请选择或者输入脚本名" id="jsonName">
+                        <input class="form-control" placeholder="请选择或者输入脚本名" id="jsonName" maxlength="50">
                         <label class="control-label">文件路径：</label>
                         <input class="form-control" type="file" id="jsonFile">
                         <h3 class="text-center">脚本数据</h3>

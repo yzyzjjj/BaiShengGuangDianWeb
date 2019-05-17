@@ -13,8 +13,8 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.SiteName, data.RegionDescription, data.Manager);
-    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.SiteName);
+    var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.SiteName), escape(data.RegionDescription), escape(data.Manager));
+    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.SiteName));
     html = html.format(
         checkPermission(127) ? updateLi : "",
         checkPermission(129) ? deleteLi : "");
@@ -76,8 +76,8 @@ function addSite() {
         layer.msg("没有权限");
         return;
     }
-    var addSiteName = $("#addSiteName").val();
-    var addLocations = $("#addLocations").val();
+    var addSiteName = $("#addSiteName").val().trim();
+    var addLocations = $("#addLocations").val().trim();
     var manager = $("#addManager").val();
     if (isStrEmptyOrUndefined(addSiteName)) {
         showTip($("#addSiteNameTip"), "场地名不能为空");
@@ -112,6 +112,7 @@ function addSite() {
 }
 
 function deleteSite(id, siteName) {
+    siteName = unescape(siteName);
     var opType = 129;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -136,6 +137,9 @@ function deleteSite(id, siteName) {
 }
 
 function showUpdateSite(id, adSiteNames, locationsReg, man) {
+    adSiteNames = unescape(adSiteNames);
+    locationsReg = unescape(locationsReg);
+
     hideClassTip('adt');
     $("#updateId").html(id);
     $("#updateSiteName").val(adSiteNames);
@@ -152,8 +156,8 @@ function updateSite() {
     }
     var id = parseInt($("#updateId").html());
 
-    var updateSiteName = $("#updateSiteName").val();
-    var updateRegions = $("#updateRegions").val();
+    var updateSiteName = $("#updateSiteName").val().trim();
+    var updateRegions = $("#updateRegions").val().trim();
     var manager = $("#updateManager").val();
 
     if (isStrEmptyOrUndefined(updateSiteName)) {

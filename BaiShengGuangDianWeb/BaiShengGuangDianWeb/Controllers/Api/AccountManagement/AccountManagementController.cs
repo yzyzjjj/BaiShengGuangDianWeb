@@ -405,10 +405,15 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var name = param.GetValue("name");
             if (!name.IsNullOrEmpty() && accountInfo.Name != name)
             {
+                if (AccountHelper.GetAccountInfoByName(name) != null)
+                {
+                    return Result.GenError<Result>(Error.NameIsExist);
+                }
                 logParam = $",名字:{accountInfo.Name},新名字:{name}";
                 accountInfo.Name = name;
                 fName = true;
             }
+
             //Password
             var password = param.GetValue("password");
             if (!password.IsNullOrEmpty())

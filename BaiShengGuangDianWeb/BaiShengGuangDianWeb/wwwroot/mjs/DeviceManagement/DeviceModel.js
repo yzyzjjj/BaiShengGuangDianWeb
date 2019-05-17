@@ -13,8 +13,8 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
 
-    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, data.ModelName, data.Description);
-    var deleteLi = '<li><a onclick="DeleteDeviceModel({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ModelName);
+    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.ModelName), escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteDeviceModel({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.ModelName));
 
     html = html.format(
         checkPermission(122) ? updateLi : "",
@@ -54,7 +54,7 @@ function getDeviceModelList() {
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false }, 
+                        { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "ModelName", "title": "设备型号" },
                         { "data": "CategoryName", "title": "设备类型" },
                         { "data": "Description", "title": "备注" },
@@ -96,7 +96,7 @@ function addModel() {
         return;
     }
     var deviceCategoryId = $("#addSelect").val();
-    var modelName = $("#addModelName").val();
+    var modelName = $("#addModelName").val().trim();
     if (isStrEmptyOrUndefined(modelName)) {
         showTip($("#addModelNameTip"), "型号不能为空");
         return;
@@ -127,7 +127,8 @@ function addModel() {
     showConfirm("添加", doSth);
 }
 
-function DeleteDeviceModel(id, modelName) {
+function deleteDeviceModel(id, modelName) {
+    modelName = unescape(modelName);
     var opType = 124;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -151,6 +152,8 @@ function DeleteDeviceModel(id, modelName) {
 }
 
 function showUpdateModel(id, deviceCategoryId, modelName, description) {
+    modelName = unescape(modelName);
+    description = unescape(description);
     var opType = 140;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -188,7 +191,7 @@ function updateModel() {
     }
     var id = parseInt($("#updateId").html());
     var deviceCategoryId = $("#updateSelect").val();
-    var modelName = $("#updateModelName").val();
+    var modelName = $("#updateModelName").val().trim();
     if (isStrEmptyOrUndefined(modelName)) {
         showTip($("#updateModelNameTip"), "型号不能为空");
         return;

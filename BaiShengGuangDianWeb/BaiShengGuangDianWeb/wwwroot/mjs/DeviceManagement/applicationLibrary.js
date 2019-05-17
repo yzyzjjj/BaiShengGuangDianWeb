@@ -13,8 +13,8 @@ var op = function (data, type, row) {
         '    <ul class="dropdown-menu" role="menu">{0}{1}' +
         '    </ul>' +
         '</div>';
-    var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.ApplicationName, data.FilePath, data.Description);
-    var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.ApplicationName);
+    var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.ApplicationName), escape(data.FilePath), escape(data.Description));
+    var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.ApplicationName));
     html = html.format(
         checkPermission(147) ? updateLi : "",
         checkPermission(149) ? deleteLi : "");
@@ -76,8 +76,8 @@ function addApplication() {
         layer.msg("没有权限");
         return;
     }
-    var applicationName = $("#addApplicationName").val();
-    var filePath = $("#addFilePath").val();
+    var applicationName = $("#addApplicationName").val().trim();
+    var filePath = $("#addFilePath").val().trim();
     var desc = $("#addDesc").val();
     if (isStrEmptyOrUndefined(applicationName)) {
         showTip($("#addApplicationNameTip"), "名称不能为空");
@@ -112,6 +112,7 @@ function addApplication() {
 }
 
 function deleteApplication(id, applicationName) {
+    applicationName = unescape(applicationName);
     var opType = 149;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -136,6 +137,9 @@ function deleteApplication(id, applicationName) {
 }
 
 function showUpdateApplication(id, applicationName, filePath, desc) {
+    applicationName = unescape(applicationName);
+    filePath = unescape(filePath);
+    desc = unescape(desc);
     hideClassTip('adt');
     $("#updateId").html(id);
     $("#updateApplicationName").val(applicationName);
@@ -152,8 +156,8 @@ function updateApplication() {
     }
     var id = parseInt($("#updateId").html());
 
-    var appName = $("#updateApplicationName").val();
-    var appFilePath = $("#updateFilePath").val();
+    var appName = $("#updateApplicationName").val().trim();
+    var appFilePath = $("#updateFilePath").val().trim();
     var appDesc = $("#updateDesc").val();
     if (isStrEmptyOrUndefined(appName)) {
         showTip($("#updateApplicationNameTip"), "名称不能为空");

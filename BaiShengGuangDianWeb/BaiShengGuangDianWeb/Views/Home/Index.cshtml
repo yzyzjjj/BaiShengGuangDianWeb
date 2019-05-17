@@ -33,7 +33,7 @@
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div class="form-inline">
-                            <input class="form-control" id="flowCard" placeholder="请输入流程卡号" onfocusin="focusIn($(this))">
+                            <input class="form-control" id="flowCard" placeholder="请输入流程卡号" onfocusin="focusIn($(this))" maxlength="20">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()">查询</button>
                             <label class="label-danger hidden" id="flowCardTip"></label>
                         </div>
@@ -112,17 +112,17 @@
                         <label class="adt label-danger hidden" id="faultCodeTip"></label>
                     </div>
                     <div class="form-group form-inline">
-                        <label class="control-label" for="proposer">报修人：</label>
-                        <input class="form-control" disabled="disabled" id="proposer" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="proposer"><span class="text-red">* </span>报修人：</label>
+                        <input class="form-control" disabled="disabled" id="proposer" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger hidden" id="proposerTip"></label>
                     </div>
                     <div class="form-group form-inline">
-                        <label class="control-label" for="faultTime">故障时间：</label>
+                        <label class="control-label" for="faultTime"><span class="text-red">* </span>故障时间：</label>
                         <input type="text" id="faultDate" class="form_date form-control">
                         <input type="text" id="faultTime" class=" form_time form-control">
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="faultType">故障类型：</label>
+                        <label class="control-label" for="faultType"><span class="text-red">* </span>故障类型：</label>
                         <select class="ms2 form-control" style="width: 88%" id="faultType"></select>
                     </div>
                     <div class="form-group">
@@ -198,7 +198,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-inline">
-                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))">
+                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" maxlength="20">
                         <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
                         <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
                         <label class="label-danger hidden" id="rpFlowCardTip"></label>

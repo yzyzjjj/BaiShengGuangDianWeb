@@ -31,6 +31,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
+        /// 根据name获取角色信息
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static RoleInfo GetRoleInfoByName(string name)
+        {
+            var sql = "SELECT * FROM `roles` WHERE IsDeleted = 0 AND Name = @name;";
+            return ServerConfig.WebDb.Query<RoleInfo>(sql, new { name }).FirstOrDefault();
+        }
+
+        /// <summary>
         /// 添加角色信息
         /// </summary>
         /// <param name="roleInfo"></param>

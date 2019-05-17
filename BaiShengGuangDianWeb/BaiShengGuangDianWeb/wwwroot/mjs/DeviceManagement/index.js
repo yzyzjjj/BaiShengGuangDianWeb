@@ -1,6 +1,9 @@
 ﻿function pageReady() {
     getDeviceList();
     $(".ads").css("width", "100%");
+    $(".col-sm-2").addClass("mcolsm2");
+    $("#addIp").inputmask("ip");
+    $("#updateIp").inputmask("ip");
 }
 
 function getDeviceList() {
@@ -32,10 +35,10 @@ function getDeviceList() {
                 var controlLi = '<li><a onclick="showControl({0})">控制</a></li>'.format(data.Id);
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
                 var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15})">修改</a></li>'
-                    .format(data.Id, data.DeviceName, data.Code, data.MacAddress, data.Ip, data.Port, data.Identifier, data.DeviceModelId, data.ScriptId,
-                        data.FirmwareId, data.ApplicationId, data.HardwareId, data.SiteId, data.AdministratorUser, data.Remark, data.DeviceCategoryId);
+                    .format(data.Id, escape(data.DeviceName), escape(data.Code), escape(data.MacAddress), escape(data.Ip), escape(data.Port), escape(data.Identifier), escape(data.DeviceModelId), escape(data.ScriptId),
+                        escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.AdministratorUser), escape(data.Remark), escape(data.DeviceCategoryId));
                 var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
-                var deleteLi = '<li><a onclick="DeleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, data.Code);
+                var deleteLi = '<li><a onclick="deleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.Code));
 
                 html = html.format(
                     controlLi,
@@ -205,31 +208,31 @@ function addDevice() {
     }
     var add = true;
     //机台号
-    var code = $("#addCode").val();
+    var code = $("#addCode").val().trim();
     if (isStrEmptyOrUndefined(code)) {
         showTip("addCodeTip", "机台号不能为空");
         add = false;
     }
     //设备名
-    var deviceName = $("#addDeviceName").val();
+    var deviceName = $("#addDeviceName").val().trim();
     if (isStrEmptyOrUndefined(deviceName)) {
         showTip("addDeviceNameTip", "设备名不能为空");
         add = false;
     }
     //设备MAC地址
-    var macAddress = $("#addMacAddress").val();
-    if (isStrEmptyOrUndefined(macAddress)) {
-        showTip("addMacAddressTip", "MAC地址不能为空");
-        add = false;
-    }
+    var macAddress = $("#addMacAddress").val().trim();
+    //if (isStrEmptyOrUndefined(macAddress)) {
+    //    showTip("addMacAddressTip", "MAC地址不能为空");
+    //    add = false;
+    //}
     //IP
-    var ip = $("#addIp").val();
+    var ip = $("#addIp").val().trim();
     if (!isIp(ip)) {
         showTip("addIpTip", "IP非法");
         add = false;
     }
     //端口
-    var port = $("#addPort").val();
+    var port = $("#addPort").val().trim();
     if (!isPort(port)) {
         showTip("addPortTip", "端口非法");
         add = false;
@@ -237,46 +240,46 @@ function addDevice() {
     //识别码
     var identifier = $("#addIdentifier").val();
     //设备类型
-    var deviceCategoryId = $("#addDeviceCategory").val();
+    var deviceCategoryId = $("#addDeviceCategory").val().trim();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
         showTip("addDeviceCategoryTip", "设备类型错误");
         add = false;
     }
 
     //设备型号编号
-    var deviceModelId = $("#addDeviceModel").val();
+    var deviceModelId = $("#addDeviceModel").val().trim();
     if (isStrEmptyOrUndefined(deviceModelId)) {
         showTip("addDeviceModelTip", "设备型号错误");
         add = false;
     }
 
     //流程脚本版本
-    var scriptId = $("#addScript").val();
+    var scriptId = $("#addScript").val().trim();
     if (isStrEmptyOrUndefined(scriptId)) {
         showTip("addScriptTip", "流程脚本版本错误");
         add = false;
     }
 
     //设备固件版本编号
-    var firmwareId = $("#addFirmware").val();
+    var firmwareId = $("#addFirmware").val().trim();
     if (isStrEmptyOrUndefined(firmwareId)) {
         showTip("addFirmwareTip", "固件版本错误");
         add = false;
     }
     //设备应用层版本编号
-    var applicationId = $("#addApplication").val();
+    var applicationId = $("#addApplication").val().trim();
     if (isStrEmptyOrUndefined(applicationId)) {
         showTip("addApplicationTip", "应用层版本错误");
         add = false;
     }
     //设备硬件版本编号
-    var hardwareId = $("#addHardware").val();
+    var hardwareId = $("#addHardware").val().trim();
     if (isStrEmptyOrUndefined(hardwareId)) {
         showTip("addHardwareTip", "硬件版本错误");
         add = false;
     }
     //设备所在场地编号
-    var siteId = $("#addSite").val();
+    var siteId = $("#addSite").val().trim();
     if (isStrEmptyOrUndefined(siteId)) {
         showTip("addSiteTip", "场地错误");
         add = false;
@@ -390,6 +393,21 @@ function initUpdateSelect(categoryId, modelId, scriptId, categories, models, scr
 }
 
 function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, scriptId, firmwareId, applicationId, hardwareId, siteId, administratorUser, remark, categoryId) {
+    deviceName = unescape(deviceName);
+    code = unescape(code);
+    macAddress = unescape(macAddress);
+    ip = unescape(ip);
+    port = unescape(port);
+    identifier = unescape(identifier);
+    deviceModelId = unescape(deviceModelId);
+    scriptId = unescape(scriptId);
+    firmwareId = unescape(firmwareId);
+    applicationId = unescape(applicationId);
+    siteId = unescape(siteId);
+    administratorUser = unescape(administratorUser);
+    remark = unescape(remark);
+    categoryId = unescape(categoryId);
+
     var opType = 107;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -437,7 +455,7 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             $("#updateIdentifier").val(identifier);
             $("#updateDeviceModel").val(deviceModelId);
             $("#updateScript").val(scriptId);
-            $("#updateFirmware").val(1);
+            $("#updateFirmware").val(firmwareId);
             $("#updateHardware").val(hardwareId);
             $("#updateApplication").val(applicationId);
             $("#updateSite").val(siteId);
@@ -457,31 +475,31 @@ function updateDevice() {
     var id = parseInt($("#updateId").html());
     var update = true;
     //机台号
-    var code = $("#updateCode").val();
+    var code = $("#updateCode").val().trim();
     if (isStrEmptyOrUndefined(code)) {
         showTip("updateCodeTip", "机台号不能为空");
         update = false;
     }
     //设备名
-    var deviceName = $("#updateDeviceName").val();
+    var deviceName = $("#updateDeviceName").val().trim();
     if (isStrEmptyOrUndefined(deviceName)) {
         showTip("updateDeviceNameTip", "设备名不能为空");
         update = false;
     }
     //设备MAC地址
-    var macAddress = $("#updateMacAddress").val();
+    var macAddress = $("#updateMacAddress").val().trim();
     if (isStrEmptyOrUndefined(macAddress)) {
         showTip("updateMacAddressTip", "MAC地址不能为空");
         update = false;
     }
     //IP
-    var ip = $("#updateIp").val();
+    var ip = $("#updateIp").val().trim();
     if (!isIp(ip)) {
         showTip("updateIpTip", "IP非法");
         update = false;
     }
     //端口
-    var port = $("#updatePort").val();
+    var port = $("#updatePort").val().trim();
     if (!isPort(port)) {
         showTip("updatePortTip", "端口非法");
         update = false;
@@ -489,21 +507,21 @@ function updateDevice() {
     //识别码
     var identifier = $("#updateIdentifier").val();
     //设备类型
-    var deviceCategoryId = $("#updateDeviceCategory").val();
+    var deviceCategoryId = $("#updateDeviceCategory").val().trim();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
         showTip("updateDeviceCategoryTip", "设备类型错误");
         update = false;
     }
 
     //设备型号编号
-    var deviceModelId = $("#updateDeviceModel").val();
+    var deviceModelId = $("#updateDeviceModel").val().trim();
     if (isStrEmptyOrUndefined(deviceModelId)) {
         showTip("updateDeviceModelTip", "设备型号错误");
         update = false;
     }
 
     //流程脚本版本
-    var scriptId = $("#updateScript").val();
+    var scriptId = $("#updateScript").val().trim();
     if (isStrEmptyOrUndefined(scriptId)) {
         showTip("updateScriptTip", "流程脚本版本错误");
         update = false;
@@ -512,23 +530,23 @@ function updateDevice() {
     //设备固件版本编号
     var firmwareId = $("#updateFirmware").val();
     if (isStrEmptyOrUndefined(firmwareId)) {
-        showTip("updateFirmwareTip", "固件版本错误");
+        showTip("updateFirmwareTip", "固件版本错误").trim();
         update = false;
     }
     //设备应用层版本编号
     var applicationId = $("#updateApplication").val();
     if (isStrEmptyOrUndefined(applicationId)) {
-        showTip("updateApplicationTip", "应用层版本错误");
+        showTip("updateApplicationTip", "应用层版本错误").trim();
         update = false;
     }
     //设备硬件版本编号
-    var hardwareId = $("#updateHardware").val();
+    var hardwareId = $("#updateHardware").val().trim();
     if (isStrEmptyOrUndefined(hardwareId)) {
         showTip("updateHardwareTip", "硬件版本错误");
         update = false;
     }
     //设备所在场地编号
-    var siteId = $("#updateSite").val();
+    var siteId = $("#updateSite").val().trim();
     if (isStrEmptyOrUndefined(siteId)) {
         showTip("updateSiteTip", "场地错误");
         update = false;
@@ -598,7 +616,9 @@ function showUpgrade(id) {
     window.location = '/DeviceManagement/Detail?id=' + id;
 }
 
-function DeleteDevice(id, code) {
+function deleteDevice(id, code) {
+    code = unescape(code);
+
     var opType = 104;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

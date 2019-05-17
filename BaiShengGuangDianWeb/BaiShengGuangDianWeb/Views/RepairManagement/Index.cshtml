@@ -36,8 +36,8 @@
             <div class="box-header with-border">
                 <h3 class="box-title">维修记录</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">重新加载</button>
                     <button type="button" class="btn btn-primary btn-sm" onclick="rChange(0,1)">添加纪录</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">重新加载</button>
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="form-group form-inline">
                         <label class="control-label" for="singleProposer">报修人：</label>
-                        <input class="dd form-control" disabled="disabled" id="singleProposer">
+                        <input class="dd form-control" disabled="disabled" id="singleProposer" maxlength="20">
                         <label class="adt label-danger hidden" id="singleProposerTip"></label>
                     </div>
                     <div class="form-group form-inline">
@@ -86,7 +86,7 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="singleFaultDesc">故障描述：</label>
-                        <textarea class="dd form-control" id="singleFaultDesc" disabled="disabled" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                        <textarea class="dd form-control" id="singleFaultDesc" disabled="disabled" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
                     </div>
                     <div class="form-group form-inline">
                         <label class="control-label" for="singleFaultPriority">优先级：</label>
@@ -101,7 +101,7 @@
                         <div class="box-body">
                             <div class="form-group form-inline">
                                 <label class="control-label" for="singleFaultSolver">解决人：</label>
-                                <input class="form-control" id="singleFaultSolver">
+                                <input class="form-control" id="singleFaultSolver" maxlength="20">
                                 <label class="adt label-danger hidden" id="singleFaultSolverTip"></label>
                             </div>
                             <div class="form-group form-inline">
@@ -111,7 +111,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="singleSolvePlan">解决方案：</label>
-                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
                             </div>
                             <div class="form-group form-inline">
                                 <label class="control-label" for="singleFaultType">故障类型：</label>
@@ -192,13 +192,13 @@
                 <div class="modal-body">
 
                     <div class="form-group">
-                        <label class="control-label" for="addUsuallyFaultDesc">常见故障：</label>
-                        <input class="form-control" id="addUsuallyFaultDesc" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="addUsuallyFaultDesc"><span class="text-red">* </span>常见故障：</label>
+                        <input class="form-control" id="addUsuallyFaultDesc" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger hidden" id="addUsuallyFaultDescTip"></label>
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="addSolverPlan">解决方法：</label>
-                        <textarea class="form-control" id="addSolverPlan" style="resize: vertical" onfocusin="focusIn($(this))"></textarea>
+                        <textarea class="form-control" id="addSolverPlan" style="resize: vertical" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
                         <label class="adt label-danger hidden" id="addSolverPlanTip"></label>
                     </div>
                 </div>
@@ -225,13 +225,13 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="updateUsuallyFaultDesc">常见故障：</label>
-                                <input class="form-control" id="updateUsuallyFaultDesc" onfocusin="focusIn($(this))">
+                                <label class="control-label" for="updateUsuallyFaultDesc"><span class="text-red">* </span>常见故障：</label>
+                                <input class="form-control" id="updateUsuallyFaultDesc" onfocusin="focusIn($(this))" maxlength="20">
                                 <label class="adt label-danger hidden" id="updateUsuallyFaultDescTip"></label>
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="updateSolverPlan">解决方法：</label>
-                                <textarea class="form-control" id="updateSolverPlan" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
+                                <textarea class="form-control" id="updateSolverPlan" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
                                 <label class="adt label-danger hidden" id="updateSolverPlanTip"></label>
                             </div>
                         </div>
@@ -303,13 +303,13 @@
                 <div class="modal-body">
 
                     <div class="form-group">
-                        <label class="control-label" for="addFaultTypeName">故障类型：</label>
-                        <input class="form-control" id="addFaultTypeName" onfocusin="focusIn($(this))">
+                        <label class="control-label" for="addFaultTypeName"><span class="text-red">* </span>故障类型：</label>
+                        <input class="form-control" id="addFaultTypeName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger hidden" id="addFaultTypeNameTip"></label>
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="addFaultTypeDesc">故障类型描述：</label>
-                        <textarea class="form-control" id="addFaultTypeDesc" style="resize: vertical" onfocusin="focusIn($(this))"></textarea>
+                        <textarea class="form-control" id="addFaultTypeDesc" style="resize: vertical" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
                         <label class="adt label-danger hidden" id="addFaultTypeDescTip"></label>
                     </div>
                 </div>
@@ -336,13 +336,13 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="updateFaultTypeName">故障类型：</label>
-                                <input class="form-control" id="updateFaultTypeName" onfocusin="focusIn($(this))">
+                                <label class="control-label" for="updateFaultTypeName"><span class="text-red">* </span>故障类型：</label>
+                                <input class="form-control" id="updateFaultTypeName" onfocusin="focusIn($(this))" maxlength="20">
                                 <label class="adt label-danger hidden" id="updateFaultTypeNameTip"></label>
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="updateFaultTypeDesc">故障类型描述：</label>
-                                <textarea class="form-control" id="updateFaultTypeDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
+                                <textarea class="form-control" id="updateFaultTypeDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
                                 <label class="adt label-danger hidden" id="updateFaultTypeDescTip"></label>
                             </div>
                         </div>
