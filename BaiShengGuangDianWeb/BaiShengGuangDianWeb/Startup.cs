@@ -1,4 +1,5 @@
 ﻿using BaiShengGuangDianWeb.Base.Chat;
+using BaiShengGuangDianWeb.Base.FileConfig;
 using BaiShengGuangDianWeb.Base.Filter;
 using BaiShengGuangDianWeb.Base.Helper;
 using BaiShengGuangDianWeb.Base.Server;
@@ -83,22 +84,14 @@ namespace BaiShengGuangDianWeb
             });
             app.UseMvcWithDefaultRoute();
 
-            var rootPath = Path.Combine(env.ContentRootPath, "File");
-            if (!File.Exists(rootPath))
+            FilePath.RootPath = env.ContentRootPath;
+            foreach (var pair in FilePath.GetFileDictionary())
             {
-                Directory.CreateDirectory(rootPath);
-            }
-
-            var filePath = Path.Combine(rootPath, "FirmwareLibrary");
-            if (!File.Exists(filePath))
-            {
-                Directory.CreateDirectory(filePath);
-            }
-
-            filePath = Path.Combine(rootPath, "ApplicationLibrary");
-            if (!File.Exists(filePath))
-            {
-                Directory.CreateDirectory(filePath);
+                var filePath = Path.Combine(FilePath.RootPath, pair.Value);
+                if (!File.Exists(filePath))
+                {
+                    Directory.CreateDirectory(filePath);
+                }
             }
 
             Log.Info("Server Start");

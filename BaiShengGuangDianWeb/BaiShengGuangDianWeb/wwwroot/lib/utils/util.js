@@ -77,32 +77,33 @@ function getJwtInfo(token) {
 
 //从token中获取jwt信息
 function getCookieTokenInfo() {
-    var token = GetCookie("token")
-    var info = getJwtInfo(token)
+    var token = GetCookie("token");
+    var info = getJwtInfo(token);
 
-    return info
+    return info;
 }
 
 //检查token是否过期之类
 function isTokenValid() {
-    var tkinfo = getCookieTokenInfo()
+    var tkinfo = getCookieTokenInfo();
     if (tkinfo == null) {
-        return false
+        return false;
     }
 
-    var timestamp = new Date().getTime() / 1000
+    var timestamp = new Date().getTime() / 1000;
     if (timestamp > tkinfo.exp) {
-        return false
+        return false;
     }
 
-    return true
+    return true;
 }
 
 //查看是否有角色是否有权限
 function checkPermission(opType) {
     //permissionsList
     var info = getCookieTokenInfo();
-    if (info == null) {
+
+    if (info == null || !isTokenValid()) {
         SetCookie(lastLocation, window.location.href);
         window.location.href = const_loginurl;
         return -1;
@@ -725,6 +726,11 @@ function focusIn(uiElement) {
     ele.html();
     ele.addClass("hidden");
 }
+function inputChange(uiElement, className) {
+    var ele = uiElement.parents("." + className + ":first").find(".label-danger");
+    ele.html();
+    ele.addClass("hidden");
+}
 function hideTip(uiElement) {
     if (typeof (uiElement) == "string") {
         $("#" + uiElement).addClass("hidden");
@@ -760,32 +766,7 @@ function getQueryString(name) {
 }
 
 function initFileInput(uiEle, type, func = null) {
-    //$("#" + uiEle).fileinput({
-    //    uploadUrl: '/Upload/Post', //上传的地址
-    //    language: 'zh', //设置语言
-    //    allowedFileExtensions: ["bin"],//接收的文件后缀
-    //    showUpload: false, //是否显示上传按钮
-    //    showCaption: false, //是否显示标题
-    //    //dropZoneEnabled: false, //是否显示预览
-    //    maxFileCount: 1,
-    //    autoReplace:true,
-    //    layoutTemplates: {
-    //        actionDelete: '', //去除上传预览的缩略图中的删除图标  
-    //        actionUpload: '',//去除上传预览缩略图中的上传图片；  
-    //        actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。  
-    //    },  
-    //});
-
-    ////导入文件上传完成之后的事件
-    //$("#" + uiEle).on("fileuploaded", function (event, data, previewId, index) {
-    //    $(this).empty();
-    //    console.log("success");
-    //    if (func != null)
-    //        func();
-    //});
-
-
-    $("#" + uiEle).fileinput({
+    var obj = $("#" + uiEle).fileinput({
         language: 'zh', //设置语言 
         uploadUrl: '/Upload/Post',
         //enctype: 'multipart/form-data',
@@ -794,34 +775,61 @@ function initFileInput(uiEle, type, func = null) {
         showPreview: true, //展前预览
         showCaption: true,//是否显示标题
         //maxFileSize: 10000,//上传文件最大的尺寸
+        minFileCount: 1,
         maxFileCount: 1,
         dropZoneEnabled: false,//是否显示拖拽区域
         browseClass: "btn btn-primary", //按钮样式
-        uploadAsync: false,
-        autoReplace:true,
+        uploadAsync: true,
+        autoReplace: true,
         layoutTemplates: {
             actionDelete: '', //去除上传预览的缩略图中的删除图标  
             actionUpload: '',//去除上传预览缩略图中的上传图片；  
             actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。                
         },
-        uploadExtraData: function (previewId, index) {
-            //向后台传递type,nameStr作为额外参数
+        uploadExtraData: function () {
+            //向后台传递type作为额外参数
             var obj = {};
-            obj.type = "card";
-            obj.nameStr = "HL0093"
+            obj.type = type;
             return obj;
         }
     }).on("filebatchselected", function (event, files) {
-        console.log("filebatchselected");
+        if (files.length > 1) {
+            $("#" + uiEle).fileinput('clear');
+        }
+        switch (type) {
+            case fileEnum.FirmwareLibrary:
+            case fileEnum.ApplicationLibrary:
+                if (files.length != undefined)
+                    $("#" + uiEle).fileinput('clear');
 
-    }).on("filebatchuploadsuccess", function (event, data) {
-        console.log("文件上传成功！");
-        if (func != null)
-            func();
+                var name = "";
+                for (var key in files) {
+                    if (files.hasOwnProperty(key)) {
+                        name = key;
+                        break;
+                    }
+                }
+                if (!checkFileExt(name, fileExt[type]))
+                    $("#" + uiEle).fileinput('clear');
+                break;
+            default:
+        }
     }).on('fileerror', function (event, data, msg) {  //一个文件上传失败
         console.log('文件上传失败！' + msg);
+        $(this).fileinput('clear');
+    }).on("fileuploaded", function (event, fileRet, previewId, index) {
+        console.log("文件上传成功！");
+        $(this).fileinput('clear');
+        fileCallBack[fileEnum.FirmwareLibrary](fileRet.response);
     });
 
+    return obj;
+}
 
-
+function checkFileExt(file, fileExt) {
+    for (var i = 0; i < fileExt.length; i++) {
+        if (file.indexOf(fileExt[i]) > -1)
+            return true;
+    }
+    return false;
 }

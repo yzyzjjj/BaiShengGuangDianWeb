@@ -2,6 +2,8 @@ const_loginurl = "/Account/Login";
 const_indexurl = "/Home";
 var hubConnection = null;
 
+var maxProcessData = 8;
+var lastLocation = "lastLocation";
 var tdShowLength = 20;
 var oLanguage = {
     "sLengthMenu": "每页显示 _MENU_ 条记录",
@@ -34,5 +36,19 @@ var fileEnum = {
     // 应用层
     ApplicationLibrary: 2
 }
-var maxProcessData = 8;
-var lastLocation = "lastLocation";
+
+//文件扩展名
+var fileExt = [];
+fileExt[fileEnum.Default] = [];
+// 固件
+fileExt[fileEnum.FirmwareLibrary] = ["bin"];
+// 应用层
+fileExt[fileEnum.ApplicationLibrary] = [];
+
+//文件上传回调
+var fileCallBack = [];
+fileCallBack[fileEnum.Default] = function () { };
+// 固件
+fileCallBack[fileEnum.FirmwareLibrary] = function () { };
+// 应用层
+fileCallBack[fileEnum.ApplicationLibrary] = function () { };

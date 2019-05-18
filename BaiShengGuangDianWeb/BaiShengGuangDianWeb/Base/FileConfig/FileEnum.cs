@@ -1,4 +1,4 @@
-﻿namespace BaiShengGuangDianWeb.Base.EnumConfig
+﻿namespace BaiShengGuangDianWeb.Base.FileConfig
 {
     public enum FileEnum
     {

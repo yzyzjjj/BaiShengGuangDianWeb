@@ -1,10 +1,7 @@
 ﻿
 function pageReady() {
     getFirmwareList();
-    //initFileInput("addLocationName", fileEnum.FirmwareLibrary);
-    //showAddFireLibrary();
 }
-
 var op = function (data, type, row) {
     var html = '<div class="btn-group">' +
         '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
@@ -66,15 +63,18 @@ function getFirmwareList() {
         });
 }
 
+var addFirmwareUpload = null;
 function showAddFirmwareModal() {
+    if (addFirmwareUpload == null)
+        addFirmwareUpload = initFileInput("addFilePath", fileEnum.FirmwareLibrary);
+    $("#addFilePath").fileinput('clear');
+
     hideClassTip('adt');
     $(".dd").val("");
     $("#addModel").modal("show");
 }
 
 function addFirmware() {
-    //$('#addLocationName').fileinput("upload");
-    //return;
     var opType = 133;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -99,33 +99,42 @@ function addFirmware() {
         //return;
     }
     if (isStrEmptyOrUndefined(addFilePath)) {
-        showTip($("#addFilePathTip"), "程序文件的位置及名称不能为空");
+        showTip($("#addFilePathTip"), "请选择程序文件");
         return;
     }
-
-    var doSth = function () {
-        $("#addModel").modal("hide");
-        var data = {};
-        data.opType = opType;
-        data.opData = JSON.stringify({
-            //固件版本名称
-            FirmwareName: addName,
-            //变量数量
-            VarNumber: addNumber,
-            //通信协议
-            CommunicationProtocol: addCommunication,
-            //程序文件的位置及名称
-            FilePath: addFilePath,
-            //描述
-            Description: addDesc
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getFirmwareList();
-                }
+    fileCallBack[fileEnum.FirmwareLibrary] = function (fileRet) {
+        if (fileRet.errno == 0) {
+            $("#addModel").modal("hide");
+            var data = {};
+            data.opType = opType;
+            data.opData = JSON.stringify({
+                //固件版本名称
+                FirmwareName: addName,
+                //变量数量
+                VarNumber: addNumber,
+                //通信协议
+                CommunicationProtocol: addCommunication,
+                //程序文件的位置及名称
+                FilePath: fileRet.data,
+                //描述
+                Description: addDesc
             });
+
+            ajaxPost("/Relay/Post",
+                data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        getFirmwareList();
+                    }
+                });
+
+        } else {
+            layer.msg(fileRet.errmsg);
+        }
+    };
+    var doSth = function () {
+        $('#addFilePath').fileinput("upload");
     }
     showConfirm("添加", doSth);
 }
@@ -156,6 +165,7 @@ function deleteFirmware(id, firmwareName) {
     showConfirm("删除固件：" + firmwareName, doSth);
 }
 
+var updateFirmwareUpload = null;
 function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommunication, firmwareLocationName, firmwareDescription) {
     firmwareName = unescape(firmwareName);
     firmwareNumber = unescape(firmwareNumber);
@@ -163,13 +173,17 @@ function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommu
     firmwareLocationName = unescape(firmwareLocationName);
     firmwareDescription = unescape(firmwareDescription);
 
+    if (updateFirmwareUpload == null)
+        updateFirmwareUpload = initFileInput("updateFilePath", fileEnum.FirmwareLibrary);
+    $("#updateFilePath").fileinput('clear');
+
     hideClassTip('adt');
     $(".dd").val("");
     $("#updateId").html(id);
     $("#updateName").val(firmwareName);
     $("#updateNumber").val(firmwareNumber);
     $("#updateCommunication").val(firmwareCommunication);
-    $("#updateFilePath").val(firmwareLocationName);
+    $("#oldUpdateFilePath").val(firmwareLocationName);
     $("#updateDesc").val(firmwareDescription);
     $("#updateFirm").modal("show");
 }
@@ -200,37 +214,69 @@ function updateFirmware() {
         //showTip($("#updateCommunicationTip"), "通信协议不能为空");
         //return;
     }
+    var doSth;
     if (isStrEmptyOrUndefined(updateFilePath)) {
-        showTip($("#updateFilePathTip"), "程序文件的位置及名称不能为空");
-        return;
-    }
-    var doSth = function () {
-        $("#updateFirm").modal("hide");
-
-        var data = {}
-        data.opType = opType;
-        data.opData = JSON.stringify({
-            id: id,
-            //固件版本名称
-            FirmwareName: updateName,
-            //变量数量
-            VarNumber: updateNumber,
-            //通信协议
-            CommunicationProtocol: updateCommunication,
-            //程序文件的位置及名称
-            FilePath: updateFilePath,
-            //描述
-            Description: updateDesc,
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getFirmwareList();
-                }
+        doSth = function () {
+            $("#updateFirm").modal("hide");
+            var data = {}
+            data.opType = opType;
+            data.opData = JSON.stringify({
+                id: id,
+                //固件版本名称
+                FirmwareName: updateName,
+                //变量数量
+                VarNumber: updateNumber,
+                //通信协议
+                CommunicationProtocol: updateCommunication,
+                //程序文件的位置及名称
+                FilePath: $("#oldUpdateFilePath").val(),
+                //描述
+                Description: updateDesc,
             });
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        getFirmwareList();
+                    }
+                });
+        };
+        showConfirm("修改", doSth);
+    } else {
+        fileCallBack[fileEnum.FirmwareLibrary] = function (fileRet) {
+            if (fileRet.errno == 0) {
+                $("#updateFirm").modal("hide");
+                var data = {}
+                data.opType = opType;
+                data.opData = JSON.stringify({
+                    id: id,
+                    //固件版本名称
+                    FirmwareName: updateName,
+                    //变量数量
+                    VarNumber: updateNumber,
+                    //通信协议
+                    CommunicationProtocol: updateCommunication,
+                    //程序文件的位置及名称
+                    FilePath: fileRet.data,
+                    //描述
+                    Description: updateDesc,
+                });
+                ajaxPost("/Relay/Post", data,
+                    function (ret) {
+                        layer.msg(ret.errmsg);
+                        if (ret.errno == 0) {
+                            getFirmwareList();
+                        }
+                    });
+            } else {
+                layer.msg(fileRet.errmsg);
+            }
+        };
+        doSth = function () {
+            $('#updateFilePath').fileinput("upload");
+        };
+        showConfirm("修改", doSth);
     }
-    showConfirm("修改", doSth);
 
 }
 
