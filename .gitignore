@@ -251,5 +251,5 @@ logs/*.log
 tmp/
 info.xml
 Logs/
-
+File/
 BaiShengGuangDianWeb/BaiShengGuangDianWeb/Properties/launchSettings.json
