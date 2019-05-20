@@ -1,26 +1,21 @@
-﻿using BaiShengGuangDianWeb.Base.Helper;
-using Microsoft.AspNetCore.Hosting;
+﻿using BaiShengGuangDianWeb.Base.FileConfig;
+using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.EnumConfig;
+using ModelBase.Base.Logger;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
+using ServiceStack;
 using System;
 using System.IO;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Upload
 {
-    [Route("Upload")]
+    [Microsoft.AspNetCore.Mvc.Route("Upload")]
     [ApiController]
     public class UploadController : ControllerBase
     {
-        private IHostingEnvironment _hostingEnvironment;
-
-        public UploadController(IHostingEnvironment hostingEnvironment)
-        {
-            _hostingEnvironment = hostingEnvironment;
-
-        }
         [HttpPost("Post")]
         public object UploadPost()
         {
@@ -34,45 +29,65 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
             }
 
             var param = Request.GetRequestParams();
+            var type = param.GetValue("type");
             try
             {
-                var files = Request.Form.Files;
-
-                long size = files.Sum(f => f.Length);
-
-                string webRootPath = _hostingEnvironment.WebRootPath;
-
-                string contentRootPath = _hostingEnvironment.ContentRootPath;
-
-                foreach (var formFile in files)
-
+                if (!EnumHelper.TryParseStr(type, out FileEnum fileEnum))
                 {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
 
-                    if (formFile.Length > 0)
+                var fileExts = FileExt.GetFileExt(fileEnum);
+                var files = Request.Form.Files;
+                if (files.Count == 0)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+
+                var fullPath = FilePath.GetFullPath(fileEnum);
+                if (files.Count > 1)
+                {
+                    return Result.GenError<Result>(Error.FileSingle);
+                }
+
+                var formFile = files[0];
+                if (formFile.Length > 0)
+                {
+                    var exts = formFile.FileName.Split(".");
+                    var ext = exts.Last();
+                    if (!ext.IsNullOrEmpty() && !fileExts.Contains(ext))
                     {
-
-                        //string fileExt = GetFileExt(formFile.FileName); //文件扩展名，不含“.”
-
-                        //long fileSize = formFile.Length; //获得文件大小，以字节为单位
-
-                        //string newFileName = System.Guid.NewGuid().ToString() + "." + fileExt; //随机生成新的文件名
-
-                        //var filePath = webRootPath + "/upload/" + newFileName;
-
-                        //using (var stream = new FileStream(filePath, FileMode.Create))
-                        //{
-                        //    await formFile.CopyToAsync(stream);
-                        //}
-
+                        return Result.GenError<Result>(Error.FileExtError);
                     }
 
+                    var fileName = "";
+                    switch (fileEnum)
+                    {
+                        case FileEnum.FirmwareLibrary: fileName = "NPC"; break;
+                        default: Result.GenError<Result>(Error.Fail); break;
+                    }
+                    fileName = $"{fileName}_{DateTime.Now.ToStrFile()}.{ext}";
+                    var newFileName = $"{fileName}_back{DateTime.Now.ToStrFile()}.{ext}";
+                    var newFullPath = Path.Combine(fullPath, newFileName);
+                    var filePath = Path.Combine(fullPath, fileName);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Move(filePath, newFullPath);
+                    }
+
+                    using (var stream = new FileStream(filePath, FileMode.OpenOrCreate))
+                    {
+                        var s = formFile.CopyToAsync(stream).GetResult();
+                    }
+                    var result = new CommonResult { data = fileName };
+                    return result;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Result.GenError<Result>(Error.Fail);
+                Log.ErrorFormat("上传文件失败,类型:{0}", type);
             }
-            return Result.GenError<Result>(Error.Success);
+            return Result.GenError<Result>(Error.Fail);
         }
     }
 }

@@ -58,9 +58,7 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称：</label>
                             <div class="col-sm-9">
-                                @*<input id="addLocationName" type="file">
-                                    <label class="label-danger hidden" id="addLocationNameTip"></label>*@
-                                <input class="dd form-control" id="addFilePath" onfocusin="focusIn($(this))" maxlength="100">
+                                <input class="dd" id="addFilePath" type="file" accept=".bin" onchange="inputChange($(this),'col-sm-9')">
                                 <label class="adt label-danger hidden" id="addFilePathTip"></label>
                             </div>
                         </div>
@@ -114,9 +112,10 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称：</label>
+                            <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称(未选择不更新)：</label>
                             <div class="col-sm-9">
-                                <input class="dd form-control" id="updateFilePath" onfocusin="focusIn($(this))" maxlength="100">
+                                <input class="dd" id="updateFilePath" type="file" accept=".bin" onchange="inputChange($(this),'col-sm-9')">
+                                <input id="oldUpdateFilePath" class="hidden">
                                 <label class="adt label-danger hidden" id="updateFilePathTip"></label>
                             </div>
                         </div>
