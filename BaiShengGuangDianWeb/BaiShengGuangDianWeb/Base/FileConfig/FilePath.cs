@@ -34,6 +34,10 @@ namespace BaiShengGuangDianWeb.Base.FileConfig
         {
             return Path.Combine(RootPath, filePath);
         }
+        public static string GetFullPath(FileEnum fileEnum, string fileName)
+        {
+            return Path.Combine(GetFullPath(fileEnum), fileName);
+        }
         public static string GetHalfPath(FileEnum fileEnum, string fileName)
         {
             return Path.Combine(GetFileDictionary(fileEnum), fileName);

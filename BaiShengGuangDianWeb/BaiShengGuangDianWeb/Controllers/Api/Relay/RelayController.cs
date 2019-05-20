@@ -1,4 +1,5 @@
-﻿using BaiShengGuangDianWeb.Base.Helper;
+﻿using BaiShengGuangDianWeb.Base.FileConfig;
+using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.EnumConfig;
 using ModelBase.Base.HttpServer;
@@ -7,13 +8,14 @@ using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ServiceStack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 {
-    [Route("Relay")]
+    [Microsoft.AspNetCore.Mvc.Route("Relay")]
     [ApiController]
     public class RelayController : ControllerBase
     {
@@ -50,6 +52,49 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
+            //设备升级
+            if (opType == 108)
+            {
+                try
+                {
+                    //Type: fileEnum.FirmwareLibrary,
+                    //DeviceId: $("#detailCode2").val(),
+                    //FirmwareId: $("#detailFirmware").val(),
+                    //Path: $("#detailFirmware").attr("path")
+                    var data = JObject.Parse(opData);
+                    if (!EnumHelper.TryParseStr(data["Type"].ToString(), out FileEnum fileEnum))
+                    {
+                        return Result.GenError<Result>(Error.ParamError);
+                    }
+
+                    var path = data["Path"].ToString();
+                    if (path.IsNullOrEmpty())
+                    {
+                        return Result.GenError<Result>(Error.ParamError);
+                    }
+                    switch (fileEnum)
+                    {
+                        case FileEnum.FirmwareLibrary:
+                            var filePath = FilePath.GetFullPath(fileEnum, path);
+                            var bin = FileHelper.Get16StringFromFile(filePath);
+                            var d = new
+                            {
+                                DeviceId = data["DeviceId"].ToString(),
+                                FirmwareId = data["FirmwareId"].ToString(),
+                                FirmwareFile = bin,
+                            };
+
+                            opData = d.ToJSON();
+                            break;
+                        default: Result.GenError<Result>(Error.Fail); break;
+                    }
+                }
+                catch (Exception)
+                {
+                    return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+
             var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")
             {
