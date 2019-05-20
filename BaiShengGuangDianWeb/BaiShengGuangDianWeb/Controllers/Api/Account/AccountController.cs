@@ -157,6 +157,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             {
                 var permissionList = permission.Split(",").Select(int.Parse).Distinct();
                 PermissionHelper.Delete(permissionList);
+                PermissionHelper.LoadConfig();
             }
 
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
