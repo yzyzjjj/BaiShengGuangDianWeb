@@ -219,7 +219,7 @@ function getFlowCardList() {
                         { "data": null, "title": "操作", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "MarkedDateTime", "title": "修改时间" },
+                        { "data": "CreateTime", "title": "创建时间" },
                         { "data": "ProductionProcessName", "title": "计划号" },
                         { "data": "FlowCardName", "title": "流程卡号" },
                         { "data": "RawMateriaName", "title": "原料批次" },
