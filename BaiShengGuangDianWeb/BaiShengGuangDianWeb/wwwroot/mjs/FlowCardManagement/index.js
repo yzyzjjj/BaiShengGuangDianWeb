@@ -158,8 +158,8 @@ function getFlowCardList() {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        StartTime: $("#flowCardStartDate").val(),
-        EndTime: $("#flowCardEndDate").val(),
+        StartTime: start,
+        EndTime: end
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {

@@ -26,6 +26,7 @@
         }
     });
 }
+
 function getFaultType() {
     var data = {};
     data.opType = 406;
@@ -48,6 +49,7 @@ function getFaultType() {
             }
         });
 }
+
 var fType = 0;
 function getFaultDeviceList() {
     var opType = 417;
@@ -228,7 +230,6 @@ function singleChange(type) {
     var faultDesc = $("#singleFaultDesc").val();
     var priority = $("#singleFaultPriority").val();
 
-    $("#singleFaultModel").modal("hide");
 
     var opType;
     var data;
@@ -258,6 +259,7 @@ function singleChange(type) {
                 State: type == 0 ? state : type
             }
         ]);
+        $("#singleFaultModel").modal("hide");
         ajaxPost("/Relay/Post",
             data,
             function (ret) {
@@ -277,6 +279,10 @@ function singleChange(type) {
         var singleFaultType = $("#singleFaultType").val();
         var singleFaultType1 = $("#singleFaultType1").val();
 
+        if (compareDate(time, solveTime)) {
+            layer.msg("解决时间不能小于故障时间");
+            return;
+        }
         //删除
         opType = 423;
         if (!checkPermission(opType)) {
@@ -290,6 +296,7 @@ function singleChange(type) {
                 //(自增Id)
                 id: id
             });
+        $("#singleFaultModel").modal("hide");
         ajaxPost("/Relay/Post",
             data,
             function (ret) {
