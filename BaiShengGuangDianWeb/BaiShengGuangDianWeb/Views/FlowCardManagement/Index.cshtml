@@ -24,15 +24,21 @@
                             <h3 class="box-title">流程卡</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-primary btn-sm" onclick="showAddFlowCardModel()">添加流程卡</button>
-                                <button type="button" class="btn btn-primary btn-sm" onclick="getFlowCardList()">重新加载</button>
+                                @*<button type="button" class="btn btn-primary btn-sm" onclick="getFlowCardList()">重新加载</button>*@
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
                         </div>
                         <div class="box-body">
-                            <div class="form-group">
+                            <div class="form-group form-inline">
                                 <label class="control-label" for="workshopCode">选择卡类型：</label>
-                                <select class="ms2 form-control" style="width: 100%" id="workshopCode" onchange="focusIn($(this))"></select>
-                                <label class="label-danger hidden" id="workshopCodeTip"></label>
+                                <select class="ms2 form-control" style="width: 100%" id="workshopCode"></select>
+                            </div>
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="flowCardStartDate"><span class="text-red">* </span>开始时间：</label>
+                                <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 20%;">
+                                <label class="control-label" for="flowCardEndDate"><span class="text-red">* </span>结束时间：</label>
+                                <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 20%;">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="getFlowCardList()">查询</button>
                             </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="flowCardList"></table>

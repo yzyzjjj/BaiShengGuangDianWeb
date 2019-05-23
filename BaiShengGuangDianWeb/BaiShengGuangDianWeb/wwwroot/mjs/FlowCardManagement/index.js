@@ -4,8 +4,12 @@
     getWorkshopList();
     //getFlowCardList(-1);
     $("#workshopCode").on("select2:select", function (e) {
-        getFlowCardList();
+        //getFlowCardList();
     });
+
+    $("#flowCardStartDate").val(getDate()).datepicker('update');
+    $("#flowCardEndDate").val(getDate()).datepicker('update');
+    //getFlowCardList();
     //getProductionProcessList();
     //getRawMateriaList();
 }
@@ -182,7 +186,9 @@ function getFlowCardList(t = 0) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: t == -1 ? 1 : $("#workshopCode").val()
+        Id: t == -1 ? 1 : $("#workshopCode").val(),
+        StartTime: $("#flowCardStartDate").val(),
+        EndTime: $("#flowCardEndDate").val(),
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
