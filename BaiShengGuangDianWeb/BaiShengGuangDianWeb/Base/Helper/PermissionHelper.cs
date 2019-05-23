@@ -50,7 +50,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
 
         public static void Delete(IEnumerable<int> list)
         {
-            ServerConfig.WebDb.Execute("UPDATE permissions SET  `IsDelete` = 1 WHERE `Id` IN @Id;", new {Id = list});
+            ServerConfig.WebDb.Execute("UPDATE permissions SET  `IsDelete` = 1 WHERE `Id` IN @Id AND Type != 0;", new { Id = list });
         }
 
     }

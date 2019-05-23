@@ -107,7 +107,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-inline">
-                        <label class="control-label" for="faultCode">机台号：</label>
+                        <label class="control-label" for="faultCode"><span class="text-red">* </span>机台号：</label>
                         <select class="ms2 form-control" style="width: 88%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
                         <label class="adt label-danger hidden" id="faultCodeTip"></label>
                     </div>
@@ -198,7 +198,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-inline">
-                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" maxlength="20">
+                        <select class="ms2 form-control" style="width: 20%" id="RpWorkshopCode"></select>
+                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                         <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
                         <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
                         <label class="label-danger hidden" id="rpFlowCardTip"></label>

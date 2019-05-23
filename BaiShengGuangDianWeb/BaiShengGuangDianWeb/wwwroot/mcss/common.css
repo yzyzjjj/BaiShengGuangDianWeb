@@ -13,6 +13,11 @@
         float: inherit;
     }
 
+.mbtn-group {
+    position: relative !important;
+    float: inherit !important;
+}
+
 th, td {
     text-align: center;
     white-space: nowrap;
@@ -31,6 +36,7 @@ th, td {
 .noShadow {
     box-shadow: 0 0 0 rgba(0,0,0,0.1);
 }
+
 .mli > li {
     border-bottom: 0 !important;
 }

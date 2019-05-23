@@ -15,7 +15,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
 
-    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.StepName), escape(data.Description));
+    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', {4})">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.StepName), escape(data.Description), data.IsSurvey);
     var deleteLi = '<li><a onclick="deleteDeviceProcessStep({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.StepName));
 
     html = html.format(
@@ -160,7 +160,7 @@ function deleteDeviceProcessStep(id, stepName) {
     showConfirm("删除设备工序：" + stepName, doSth);
 }
 
-function showUpdateModel(id, deviceCategoryId, stepName, description) {
+function showUpdateModel(id, deviceCategoryId, stepName, description, isSurvey) {
     stepName = unescape(stepName);
     description = unescape(description);
     var opType = 140;
@@ -188,14 +188,9 @@ function showUpdateModel(id, deviceCategoryId, stepName, description) {
             $("#updateSelect").val(deviceCategoryId);
             $("#updateStepName").val(stepName);
             $("#updateDesc").val(description);
-            updateStepNameCheck();
+            $("#updateIsSurvey").iCheck(isSurvey ? "check" : "uncheck");
             $("#updateModel").modal("show");
         });
-}
-
-function updateStepNameCheck() {
-    var v = $("#updateStepName").val();
-    $("#updateIsSurvey").iCheck(v.indexOf("检验") > -1 ? "check" : "uncheck");
 }
 
 function updateModel() {

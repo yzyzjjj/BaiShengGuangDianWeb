@@ -23,7 +23,7 @@
             $("#faultDesc").attr("disabled", "disabled");
 
         } else {
-                $("#faultDesc").val("");
+            $("#faultDesc").val("");
 
             $("#faultDesc").removeAttr("disabled");
         }
@@ -118,10 +118,12 @@ function getWorkshopList() {
             }
 
             $("#workshopCode").empty();
+            $("#RpWorkshopCode").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
                 $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+                $("#RpWorkshopCode").append(option.format(d.Id, d.WorkshopName));
             }
         });
 }
@@ -505,7 +507,9 @@ function queryRpFlowCard() {
         return;
     }
     //流程卡
-    var flowCard = $("#rpFlowCard").val().trim();
+
+    var ws = parseIntStr($("#RpWorkshopCode").val(), 2);
+    var flowCard = ws + $("#rpFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("rpFlowCardTip", "流程卡号不能为空");
         return;
@@ -694,7 +698,8 @@ function reportFlowCard() {
         layer.msg("没有权限");
         return;
     }
-    var flowCardId = parseInt($("#rpFCId").html());
+    var ws = parseIntStr($("#RpWorkshopCode").val(), 2);
+    var flowCardId = ws + $("#rpFCId").html();
     var oData = $("#gxList tbody").children();
     var postData = new Array();
     for (var i = 1; i <= oData.length; i++) {
@@ -756,8 +761,9 @@ function reportFlowCard() {
             }
         }
         var d = {
-            Id: id,
             //流程卡(自增Id)
+            Id: id,
+            //流程卡
             FlowCardId: flowCardId,
             //加工人ID（自增id）  为0不指定加工人
             ProcessorId: processorId,

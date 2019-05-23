@@ -50,6 +50,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                     return Result.GenError<Result>(Error.FileSingle);
                 }
 
+                var fileName = "";
+                switch (fileEnum)
+                {
+                    case FileEnum.FirmwareLibrary: fileName = "NPC"; break;
+                    default: Result.GenError<Result>(Error.Fail); break;
+                }
+
                 var formFile = files[0];
                 if (formFile.Length > 0)
                 {
@@ -60,12 +67,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                         return Result.GenError<Result>(Error.FileExtError);
                     }
 
-                    var fileName = "";
-                    switch (fileEnum)
-                    {
-                        case FileEnum.FirmwareLibrary: fileName = "NPC"; break;
-                        default: Result.GenError<Result>(Error.Fail); break;
-                    }
                     fileName = $"{fileName}_{DateTime.Now.ToStrFile()}.{ext}";
                     var newFileName = $"{fileName}_back{DateTime.Now.ToStrFile()}.{ext}";
                     var newFullPath = Path.Combine(fullPath, newFileName);
