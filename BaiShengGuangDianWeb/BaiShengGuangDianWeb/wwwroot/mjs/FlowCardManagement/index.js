@@ -147,6 +147,14 @@ function getFlowCardList() {
         layer.msg("没有权限");
         return;
     }
+
+    var start = $("#flowCardStartDate").val();
+    var end = $("#flowCardEndDate").val();
+    if (compareDate(start, end)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
