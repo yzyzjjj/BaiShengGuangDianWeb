@@ -254,7 +254,8 @@ $(function () {
                 $('body').addClass('modal-open');
             }
         });
-
+    //$("input").attr("onkeyup", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
+    //$("input").attr("onpaste", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
     $.fn.modal.Constructor.prototype.enforceFocus = function () { };
     $.fn.select2.defaults.set('width', '100%');
 

@@ -294,14 +294,14 @@ function showAddMemberModal() {
                     "data": data,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "aaSorting": [[1, "asc"]],
+                    "aaSorting": [[0, "asc"]],
                     "columns": [
-                        { "data": null, "title": "", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "id", "title": "id", "bVisible": false },
                         { "data": "name", "title": "姓名" },
                         { "data": "account", "title": "账号" },
-                        { "data": "roleName", "title": "角色" }
+                        { "data": "roleName", "title": "角色" },
+                        { "data": null, "title": "选择", "sClass":"text-red", "render": op }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#memberList td").css("padding", "3px");
@@ -335,6 +335,10 @@ function showAddMemberModal() {
 function addMember() {
     var unId = $("#unName").attr("value");
     var unName = $("#unName").text();
+    if (addList == null || addList.length == 0) {
+        layer.msg("请选择成员");
+        return;
+    }
     var codeId = addList.join(",");
     var cnt = addList.length;
     addList = new Array();

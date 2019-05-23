@@ -4,26 +4,7 @@
     $("#singleFaultType").select2();
     getFaultDeviceList();
     getRepairRecordList();
-    var data = {};
-    data.opType = 406;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            $("#singleFaultType").empty();
-            $("#singleFaultType1").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (i == 0)
-                    fType = data.Id;
-                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
-                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
-            }
-        });
+    getFaultType();
 
 
     $("#faultType").on("select2:select", function (e) {
@@ -45,7 +26,28 @@
         }
     });
 }
+function getFaultType() {
+    var data = {};
+    data.opType = 406;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
 
+            $("#singleFaultType").empty();
+            $("#singleFaultType1").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                if (i == 0)
+                    fType = data.Id;
+                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
+                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
+            }
+        });
+}
 var fType = 0;
 function getFaultDeviceList() {
     var opType = 417;
@@ -193,6 +195,8 @@ function sChange(id, type) {
             if (type == 3) {
                 $("#singleSolveDate").val(getDate());
                 $("#singleSolveDate").datepicker('update');
+
+
                 $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
                 $("#singleFaultSolver").val(info.name);
@@ -882,13 +886,17 @@ function getFaultTypeList() {
                 });
 
             $("#singleFaultType").empty();
+            $("#singleFaultType1").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
+                if (i == 0)
+                    fType = data.Id;
                 $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
+                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
             }
-            $("#faultTypeModel").modal("show");
 
+            $("#faultTypeModel").modal("show");
         });
 }
 

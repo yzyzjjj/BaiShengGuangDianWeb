@@ -65,6 +65,9 @@ function getDeviceModelList() {
 }
 
 function showAddModel() {
+    $("#addModelName").val("");
+    $("#addDesc").val("");
+    hideTip($("#addModelNameTip"));
     var opType = 140;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -84,7 +87,6 @@ function showAddModel() {
                 var data = ret.datas[i];
                 $("#addSelect").append(option.format(data.Id, data.CategoryName));
             }
-            hideTip($("#addModelNameTip"));
             $("#addModel").modal("show");
         });
 }
