@@ -88,3 +88,9 @@ function getNowYear() {
     var year = nowTime.getFullYear();
     return year;
 }
+
+function compareDate(date1, date2) {
+    var oDate1 = new Date(date1);
+    var oDate2 = new Date(date2);
+    return oDate1.getTime() > oDate2.getTime();
+}     
