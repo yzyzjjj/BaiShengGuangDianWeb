@@ -7,26 +7,26 @@
     getFaultType();
 
 
-    $("#faultType").on("select2:select", function (e) {
-        if ($("#faultType").val() != "1") {
+    $("#singleFaultType1").on("select2:select", function (e) {
+        if ($("#singleFaultType1").val() != "1") {
             var desc = "";
             for (var i = 0; i < faultData.length; i++) {
-                if (faultData[i].Id == $("#faultType").val()) {
+                if (faultData[i].Id == $("#singleFaultType1").val()) {
                     desc = faultData[i].FaultDescription;
                     break;
                 }
             }
-            $("#faultDesc").val(desc);
-            $("#faultDesc").attr("disabled", "disabled");
+            $("#singleFaultDesc").val(desc);
+            $("#singleFaultDesc").attr("disabled", "disabled");
 
         } else {
-            $("#faultDesc").val("");
+            $("#singleFaultDesc").val("");
 
-            $("#faultDesc").removeAttr("disabled");
+            $("#singleFaultDesc").removeAttr("disabled");
         }
     });
 }
-
+var faultData = null;
 function getFaultType() {
     var data = {};
     data.opType = 406;
@@ -36,7 +36,7 @@ function getFaultType() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            faultData = ret.datas;
             $("#singleFaultType").empty();
             $("#singleFaultType1").empty();
             var option = '<option value="{0}">{1}</option>';
@@ -833,6 +833,8 @@ function getFaultTypeList() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            faultData = ret.datas;
+
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
