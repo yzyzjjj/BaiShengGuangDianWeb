@@ -514,6 +514,9 @@ function getScriptVersionDetailList() {
             .DataTable({
                 "destroy": true,
                 "paging": true,
+                "deferRender": false,
+                "bLengthChange": false,
+                "info": false,
                 "searching": true,
                 "autoWidth": true,
                 "language": { "url": "/content/datatables_language.json" },
@@ -537,6 +540,9 @@ function getScriptVersionDetailList() {
             .DataTable({
                 "destroy": true,
                 "paging": true,
+                "deferRender": false,
+                "bLengthChange": false,
+                "info": false,
                 "searching": true,
                 "autoWidth": true,
                 "language": { "url": "/content/datatables_language.json" },
