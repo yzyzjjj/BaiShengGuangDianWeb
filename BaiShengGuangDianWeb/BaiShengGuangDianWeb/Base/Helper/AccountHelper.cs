@@ -44,7 +44,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static AccountInfo GetAccountInfo(int accountId)
         {
-            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Id = @accountId AND a.IsDeleted = 0 AND b.IsDeleted = 0";
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Id = @accountId AND a.IsDeleted = 0 AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
             return info;
         }
@@ -101,7 +101,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static IEnumerable<AccountInfo> GetAccountInfo()
         {
-            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0";
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0 ORDER BY a.Id";
             return ServerConfig.WebDb.Query<AccountInfo>(sql);
         }
 

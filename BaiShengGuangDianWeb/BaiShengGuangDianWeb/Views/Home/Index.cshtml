@@ -121,9 +121,12 @@
                         <select class="ms2 form-control" style="width: 88%" id="faultType"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="faultDesc">故障描述：</label>
-                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
-                        <label class="adt label-danger hidden" id="faultDescTip"></label>
+                        <label class="control-label" for="faultDefaultDesc">故障描述：</label>
+                        <textarea class="form-control" id="faultDefaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="faultDesc">补充：</label>
+                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
                     </div>
 
                     <a style="text-decoration: underline" href='javascript:void(0);' onclick="getUsuallyFaultList()">常见故障及解决方法</a>

@@ -166,9 +166,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             var logParam = $"角色ID:{roleInfo.Id}";
             var name = param.GetValue("name");
-            if (!name.IsNullOrEmpty())
+            if (!name.IsNullOrEmpty() && roleInfo.Name != name)
             {
-                if (RoleHelper.GetRoleInfoByName(name) != null)
+                var acc = RoleHelper.GetRoleInfoByName(name);
+                if (acc != null && acc.Id != roleInfo.Id)
                 {
                     return Result.GenError<Result>(Error.RoleIsExist);
                 }
