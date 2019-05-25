@@ -8,22 +8,14 @@
 
 
     $("#singleFaultType1").on("select2:select", function (e) {
-        if ($("#singleFaultType1").val() != "1") {
-            var desc = "";
-            for (var i = 0; i < faultData.length; i++) {
-                if (faultData[i].Id == $("#singleFaultType1").val()) {
-                    desc = faultData[i].FaultDescription;
-                    break;
-                }
+        var desc = "";
+        for (var i = 0; i < faultData.length; i++) {
+            if (faultData[i].Id == $("#singleFaultType1").val()) {
+                desc = faultData[i].FaultDescription;
+                break;
             }
-            $("#singleFaultDesc").val(desc);
-            $("#singleFaultDesc").attr("disabled", "disabled");
-
-        } else {
-            $("#singleFaultDesc").val("");
-
-            $("#singleFaultDesc").removeAttr("disabled");
         }
+        $("#singleFaultDefaultDesc").val(desc);
     });
 }
 var faultData = null;
@@ -122,6 +114,18 @@ function getFaultDeviceList() {
                         { "data": "FaultTypeName", "title": "故障类型" },
                         { "data": "FaultDescription", "title": "故障描述" },
                         { "data": null, "title": "操作", "render": op },
+                    ],
+                    "columnDefs": [
+                        {
+                            "targets": [8],
+                            "render": function (data, type, full, meta) {
+                                if (full.FaultDescription) {
+                                    return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
+                                } else {
+                                    return "";
+                                }
+                            }
+                        }
                     ]
                 });
 
@@ -172,6 +176,16 @@ function sChange(id, type) {
                 $("#singleFaultDate").val(d[0]);
                 var t = d[1].split(':');
                 $("#singleFaultTime").val(d[1]);
+
+                var desc = "";
+                for (var i = 0; i < faultData.length; i++) {
+                    if (faultData[i].Id == $("#singleFaultType1").val()) {
+                        desc = faultData[i].FaultDescription;
+                        break;
+                    }
+                }
+                $("#singleFaultDefaultDesc").val(desc);
+
                 $("#singleFaultDesc").html(data.FaultDescription);
                 $("#singleFaultPriority").val(data.Priority);
                 if (type == 0) {
@@ -182,7 +196,7 @@ function sChange(id, type) {
                 if (type == 1) {
                     $("#singleSure").removeClass("hidden");
                 }
-                //来说维修
+                //维修中
                 if (type == 2) {
                     $("#singleRepairing").removeClass("hidden");
                 }
@@ -197,7 +211,6 @@ function sChange(id, type) {
             if (type == 3) {
                 $("#singleSolveDate").val(getDate());
                 $("#singleSolveDate").datepicker('update');
-
 
                 $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
@@ -405,6 +418,7 @@ function rChange(id, type) {
     $(".dd").attr("disabled", "disabled");
     $("#rFaultCodeDiv").addClass("hidden");
     $("#singleFaultType").val(fType).trigger("change");
+    $("#singleFaultType1").val(fType).trigger("select2:select");
 
     var opType;
     var data;
@@ -473,11 +487,12 @@ function rChange(id, type) {
                 $("#singleSolveDate").datepicker('update');
                 $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
+                if (id == 0)
                 $("#singleFaultSolver").val(info.name);
 
                 $("#singleFaultCode").addClass("hidden");
                 $("#rFaultCodeDiv").removeClass("hidden");
-                $("#singleProposer").val("");
+                $("#singleProposer").val(info.name);
                 $("#singleFaultDesc").html("");
 
                 $("#singleFaultDate").val(getDate());
@@ -909,12 +924,19 @@ function getFaultTypeList() {
         });
 }
 
-function showFaultTypeDetailModel(id) {
+function showFaultTypeDetailModel(id, desc = "") {
     var opType = 407;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
+    desc = unescape(desc);
+    $("#faultTypeDetail1Div").addClass("hidden");
+    if (!isStrEmptyOrUndefined(desc)) {
+        $("#faultTypeDetail1Div").removeClass("hidden");
+        $("#faultTypeDetail1").html(desc);
+    }
+
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -930,7 +952,6 @@ function showFaultTypeDetailModel(id) {
                 $("#faultTypeDetail").html(ret.datas[0].FaultDescription);
 
             $("#faultTypeDetailModel").modal("show");
-
         });
 }
 

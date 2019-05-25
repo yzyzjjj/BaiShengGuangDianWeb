@@ -85,8 +85,12 @@
                         <select class="dd ms2 form-control" style="width: 88%" id="singleFaultType1"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="singleFaultDesc">故障描述：</label>
-                        <textarea class="dd form-control" id="singleFaultDesc" disabled="disabled" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
+                        <label class="control-label" for="singleFaultDefaultDesc">故障类型描述：</label>
+                        <textarea class="form-control" id="singleFaultDefaultDesc" disabled="disabled" style="resize: vertical; height: 100px; overflow-y: scroll;" maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="singleFaultDesc">补充：</label>
+                        <textarea class="dd form-control" disabled="disabled" id="singleFaultDesc" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
                     <div class="form-group form-inline">
                         <label class="control-label" for="singleFaultPriority">优先级：</label>
@@ -276,11 +280,16 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">故障类型描述</h4>
+                    <h4 class="modal-title">故障描述</h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                        <label class="control-label" for="faultTypeDetail">故障类型描述：</label>
+                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                    <div class="form-group hidden" id="faultTypeDetail1Div">
+                        <label class="control-label" for="faultTypeDetail1">补充：</label>
+                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail1" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

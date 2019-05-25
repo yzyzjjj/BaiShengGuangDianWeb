@@ -11,22 +11,15 @@
         $("#run").addClass("disabled");
     });
     $("#faultType").on("select2:select", function (e) {
-        if ($("#faultType").val() != "1") {
-            var desc = "";
-            for (var i = 0; i < faultData.length; i++) {
-                if (faultData[i].Id == $("#faultType").val()) {
-                    desc = faultData[i].FaultDescription;
-                    break;
-                }
+        var desc = "";
+        for (var i = 0; i < faultData.length; i++) {
+            if (faultData[i].Id == $("#faultType").val()) {
+                desc = faultData[i].FaultDescription;
+                break;
             }
-            $("#faultDesc").val(desc);
-            $("#faultDesc").attr("disabled", "disabled");
-
-        } else {
-            $("#faultDesc").val("");
-
-            $("#faultDesc").removeAttr("disabled");
         }
+        $("#faultDefaultDesc").val(desc);
+        $("#faultDefaultDesc").attr("disabled", "disabled");
     });
     $("#faultCode").select2({
         allowClear: true,
@@ -96,8 +89,8 @@ function getDeviceList() {
                 var state = data.DeviceStateStr;
                 if (state == '待加工' || state == '加工中') {
                     $("#processCode").append(option.format(data.Id, data.Code, ''));
-                    $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
                 }
+                $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
             }
         });
 }
@@ -311,14 +304,18 @@ function showFaultModel() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            faultData = ret.datas;
 
             $("#faultType").empty();
             var option = '<option value="{0}">{1}</option>';
+            var t = 0;
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
+                if (t == 0)
+                    t = d.Id;
                 $("#faultType").append(option.format(d.Id, d.FaultTypeName));
             }
-            faultData = ret.datas;
+            $("#faultType").val(t).trigger("select2:select");
             $("#faultModel").modal("show");
         });
 }
@@ -349,10 +346,10 @@ function reportFault() {
 
     var faultDesc = $("#faultDesc").val().trim();
     //故障描述
-    if (isStrEmptyOrUndefined(faultDesc) && faultType == 1) {
-        showTip($("#faultDescTip"), "故障描述不能为空");
-        report = false;
-    }
+    //if (isStrEmptyOrUndefined(faultDesc) && faultType == 1) {
+    //    showTip($("#faultDescTip"), "故障描述不能为空");
+    //    report = false;
+    //}
     if (!report)
         return;
 
