@@ -99,6 +99,6 @@ function delPermission() {
     if (isStrEmptyOrUndefined(delId)) {
         layer.msg('请选择要删除的数据');
     } else {
-        showConfirm("删除以下权限:" + "<pre style='color:red'>"+delName+"</pre>",doSth);
+        showConfirm("删除以下权限:" + "<pre style='color:red'>" + delName + "</pre>", doSth);
     }
 }
