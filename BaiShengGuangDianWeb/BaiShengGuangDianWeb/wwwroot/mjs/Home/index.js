@@ -7,6 +7,9 @@
     $("#flowCard").change(function () {
         $("#run").addClass("disabled");
     });
+    $("#workshopCode").change(function () {
+        $("#run").addClass("disabled");
+    });
     $("#processCode").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
