@@ -2,10 +2,14 @@
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
     getWorkshopList();
-    getFlowCardList(-1);
+    //getFlowCardList(-1);
     $("#workshopCode").on("select2:select", function (e) {
-        getFlowCardList();
+        //getFlowCardList();
     });
+
+    $("#flowCardStartDate").val(getDate()).datepicker('update');
+    $("#flowCardEndDate").val(getDate()).datepicker('update');
+    //getFlowCardList();
     //getProductionProcessList();
     //getRawMateriaList();
 }
@@ -122,6 +126,14 @@ function addFlowCard() {
         showTip($("#afFlowCardNumberTip"), "流程卡数不能为空");
         return;
     }
+    if (isStrEmptyOrUndefined(afSender)) {
+        showTip($("#afSenderTip"), "发片人不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(afInboundNum)) {
+        showTip($("#afInboundNumTip"), "入库号不能为空");
+        return;
+    }
     var flowCard = parseInt(afStartFlowCard);
     var count = parseInt(afFlowCardNumber);
     var pData = new Array();
@@ -171,10 +183,20 @@ function getFlowCardList(t = 0) {
         layer.msg("没有权限");
         return;
     }
+
+    var start = $("#flowCardStartDate").val();
+    var end = $("#flowCardEndDate").val();
+    if (compareDate(start, end)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: t == -1 ? 1 : $("#workshopCode").val()
+        Id: t == -1 ? 1 : $("#workshopCode").val(),
+        StartTime: start,
+        EndTime: end
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -222,7 +244,9 @@ function getFlowCardList(t = 0) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
+                    //"deferRender": true,
                     "autoWidth": true,
+                    //"paginationType": "full_numbers", 
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
                     "aaSorting": [[1, "desc"]],
@@ -232,7 +256,7 @@ function getFlowCardList(t = 0) {
                         { "data": null, "title": "操作", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "MarkedDateTime", "title": "修改时间" },
+                        { "data": "CreateTime", "title": "创建时间" },
                         { "data": "ProductionProcessName", "title": "计划号" },
                         { "data": "WorkshopName", "title": "卡类型" },
                         {
@@ -387,9 +411,22 @@ function updateFlowCard() {
     var inboundNum = $("#ufInboundNum").val().trim();
     var remarks = $("#ufRemarks").val().trim();
 
+    if (isStrEmptyOrUndefined(rawMaterialQuantity)) {
+        showTip($("#ufRawMaterialQuantityTip"), "原料数量不能为空");
+        return;
+    }
     var afRq = parseInt(rawMaterialQuantity);
     if (afRq <= 0) {
         showTip($("#ufRawMaterialQuantityTip"), "原料数量必须大于0");
+        return;
+    }
+
+    if (isStrEmptyOrUndefined(sender)) {
+        showTip($("#ufSenderTip"), "发片人不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(inboundNum)) {
+        showTip($("#ufInboundNumTip"), "入库号不能为空");
         return;
     }
 
@@ -533,11 +570,11 @@ function ufResetGX() {
         $(selector).select2();
     }
 
-    if (lastType == 0) {
-        $(".dd").removeClass("hidden");
-    } else {
-        $(".dd").addClass("hidden");
-    }
+    //if (lastType == 0) {
+    //    $(".dd").removeClass("hidden");
+    //} else {
+    //    $(".dd").addClass("hidden");
+    //}
     ufGXmax = ufGXmaxV = 2;
 }
 
@@ -665,11 +702,11 @@ function showChangeFlowCard(type) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10">'.format(o, data.QualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");
@@ -687,12 +724,17 @@ function showChangeFlowCard(type) {
                 return '<button class="btn btn-info edit2-btn" type="button">检验</button>';
             }
             function processStepOrder(a, b) {
-                return a.ProcessStepOrder > b.ProcessStepOrder;
+                return a.ProcessStepOrder > b.ProcessStepOrder ? 1 : -1;
             }
             $("#gxList")
                 .DataTable({
                     "destroy": true,
                     "bSort": false,
+                    "paging": false,// 是否显示分页
+                    "deferRender": false,
+                    "bLengthChange": false,
+                    "info": false,
+                    "searching": false,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.processSteps.sort(processStepOrder),
                     "aaSorting": [[0, "asc"]],

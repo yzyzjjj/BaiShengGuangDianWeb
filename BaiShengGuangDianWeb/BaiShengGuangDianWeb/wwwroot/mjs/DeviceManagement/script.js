@@ -12,6 +12,8 @@
 
     $("#sScriptVersion").on("select2:select", function (e) {
         sScrId = parseInt($("#sScriptVersion").val());
+        if (sScrId == 0)
+            return;
         getScriptVersionDetailList();
     });
 
@@ -30,9 +32,23 @@
         var name = $("#jScriptVersion").val();
         $("#jsonName").val(name);
     });
+    $("#aDataType").change(function (e) {
+        var aDataType = $("#aDataType").val();
+        var fScriptVersion = $("#fScriptVersion").val();
+        switch (fScriptVersion) {
+            case "1":
+                $("#jsonFile").val("");
+                initDiv1();
+            default:
+        }
+
+    });
     $("#jsonFile").change(function (e) {
         initDiv1();
         var file = e.target.files[0];
+        if (isStrEmptyOrUndefined(file)) {
+            return;
+        }
         if (window.FileReader) {
             var fr = new FileReader();
             fr.onloadend = function (f) {
@@ -76,7 +92,7 @@
                             continue;
                         keyData.push(pointerAddress);
                         jsonData.push({
-                            Id: i + 1,
+                            Id: jsonData.length + 1,
                             ScriptId: v,
                             VariableName: variableName,
                             PointerAddress: pointerAddress
@@ -113,9 +129,41 @@
         allowClear: true,
         placeholder: "请选择"
     });
+    var opType = 113;
+    if (!checkPermission(opType)) {
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        scriptData = ret.datas;
+    });
+    opType = 112;
+    if (!checkPermission(opType)) {
+        return;
+    }
+    ajaxPost("/Relay/Post",
+        {
+            opType: opType
+        },
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            valueType = ret.datas;
+        });
+    $("#udtScriptVersion").on("select2:select", function (e) {
+        max = 0;
+        showUsuallyDictionaryTypeModel(true);
+    });
 }
 var jsonData = null;
-
+var scriptData = null;
 function getScriptVersionAllList(type) {
     var opType = 113;
     if (!checkPermission(opType)) {
@@ -129,21 +177,22 @@ function getScriptVersionAllList(type) {
             layer.msg(ret.errmsg);
             return;
         }
-
+        scriptData = ret.datas;
         var o = 0;
         var order = function (data, type, row) {
             return ++o;
         }
         var op = function (data, type, row) {
             var html = '<div class="btn-group">{0}{1}</div>';
-            var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'.format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
-            var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ScriptName));
+            var changeBtn = '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'.format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
+            var delBtn = '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ScriptName));
 
             html = html.format(
                 checkPermission(115) ? changeBtn : "",
                 checkPermission(116) ? delBtn : "");
             return html;
         };
+
         $("#scriptVersionList")
             .DataTable({
                 "destroy": true,
@@ -190,6 +239,10 @@ function addScriptVersion() {
         return;
     }
     var addScriptVersionDeviceModelList = addScriptVersionDeviceModel == null ? "" : addScriptVersionDeviceModel.join(",");
+    if (addScriptVersionDeviceModelList.length == 0) {
+        layer.msg("请选择设备型号");
+        return;
+    }
     var doSth = function () {
         $("#addScriptVersionModel").modal("hide");
         var data = {}
@@ -261,6 +314,10 @@ function updateScriptVersion() {
         return;
     }
     var updateScriptVersionDeviceModelList = updateScriptVersionDeviceModel == null ? "" : updateScriptVersionDeviceModel.join(",");
+    if (updateScriptVersionDeviceModelList.length == 0) {
+        layer.msg("请选择设备型号");
+        return;
+    }
     var id = parseInt($("#updateId").html());
     var doSth = function () {
         $("#updateScriptVersionModel").modal("hide");
@@ -284,6 +341,7 @@ function updateScriptVersion() {
     showConfirm("修改", doSth);
 }
 
+var valueType = null;
 var deModel = 0;
 var sScrId = 0;
 function getDataTypeList() {
@@ -301,7 +359,7 @@ function getDataTypeList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            valueType = ret.datas;
             $("#aDataType").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
@@ -312,6 +370,13 @@ function getDataTypeList() {
 }
 
 function getDeviceModelList() {
+
+    $("#valList_wrapper").parent().empty()
+        .append('<table class="table table-hover table-striped" id="valList"></table>');
+    $("#inList_wrapper").parent().empty()
+        .append('<table class="table table-hover table-striped" id="inList"></table>');
+    $("#outList_wrapper").parent().empty()
+        .append('<table class="table table-hover table-striped" id="outList"></table>');
     deModel = 0;
     var opType = 120;
     if (!checkPermission(opType)) {
@@ -368,12 +433,12 @@ function getScriptVersionList() {
         var option = '<option value="{0}">{1}</option>';
         for (var i = 0; i < ret.datas.length; i++) {
             var data = ret.datas[i];
-            if (sScrId == 0)
-                sScrId = data.Id;
+            //if (sScrId == 0)
+            //    sScrId = data.Id;
             $("#sScriptVersion").append(option.format(data.Id, data.ScriptName));
         }
-
-        getScriptVersionDetailList();
+        $("#sScriptVersion").val(0).trigger("update");
+        //getScriptVersionDetailList();
 
 
     });
@@ -386,7 +451,7 @@ function getScriptVersionDetailList() {
         return;
     }
     if (sScrId == 0) {
-
+        return;
     }
     var data = {}
     data.opType = opType;
@@ -415,17 +480,23 @@ function getScriptVersionDetailList() {
         var order1 = function (data, type, row) {
             return ++o1;
         }
+
         $("#valList").empty();
+        $("#inList").empty();
+        $("#outList").empty();
         $("#valList")
             .DataTable({
                 "destroy": true,
                 "paging": true,
+                "deferRender": false,
+                "bLengthChange": false,
+                "info": false,
                 "searching": true,
                 "autoWidth": true,
                 "language": { "url": "/content/datatables_language.json" },
-                "data": data1,
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数  
+                "data": data1,
                 "columns": [
                     { "data": null, "title": "序号", "render": order1 },
                     { "data": "Id", "title": "Id", "bVisible": false },
@@ -443,6 +514,9 @@ function getScriptVersionDetailList() {
             .DataTable({
                 "destroy": true,
                 "paging": true,
+                "deferRender": false,
+                "bLengthChange": false,
+                "info": false,
                 "searching": true,
                 "autoWidth": true,
                 "language": { "url": "/content/datatables_language.json" },
@@ -466,6 +540,9 @@ function getScriptVersionDetailList() {
             .DataTable({
                 "destroy": true,
                 "paging": true,
+                "deferRender": false,
+                "bLengthChange": false,
+                "info": false,
                 "searching": true,
                 "autoWidth": true,
                 "language": { "url": "/content/datatables_language.json" },
@@ -552,6 +629,7 @@ function getScriptVersionList1(type) {
 }
 
 function showAddModel() {
+    //$("#fScriptVersion").val(0).trigger("change");
     getDeviceModelList1(1);
 }
 
@@ -578,7 +656,6 @@ function reset() {
 }
 
 function initDiv1() {
-
     jsonData = null;
     $("#jsonList_wrapper").remove();
     $("#jsonList").remove();
@@ -630,7 +707,7 @@ function addValues() {
     var v = $("#fScriptVersion").val();
     var sDeviceModel = $("#sDeviceModel").val();
     var aDataType = $("#aDataType").val();
-    var postData;
+    var postData = null;
     switch (v) {
         case "0":
             var aScriptVersion = $("#aScriptVersion").val();
@@ -682,13 +759,18 @@ function addValues() {
             };
             break;
         case "2":
+            return;
             break;
         case "3":
+            return;
             break;
         default:
             return;
     }
-
+    if (postData.DataNameDictionaries.length == 0) {
+        layer.msg("请输入数据");
+        return;
+    }
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
@@ -708,4 +790,232 @@ function addValues() {
 function tableToExcel() {
     //todo
     layer.msg("待完善");
+}
+
+//常用变量设置
+function showUsuallyDictionaryTypeModel(refresh = false) {
+    if (scriptData != null && scriptData.length > 0) {
+        if (!refresh) {
+            $("#udtScriptVersion").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < scriptData.length; i++) {
+                var d = scriptData[i];
+                $("#udtScriptVersion").append(option.format(d.Id, d.ScriptName));
+                //if (d.Id == scriptId)
+                //    $("#udtScriptVersion").val(scriptId).trigger("update");
+            }
+        }
+
+        var opType = 118;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: $("#udtScriptVersion").val()
+        });
+        ajaxPost("/Relay/Post",
+            data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+
+                if (ret.datas.length > 0) {
+                    usData = ret.datas;
+                    showUsuallyDictionary();
+                } else {
+                    if (!refresh) {
+                        $("#usuallyDictionaryTypeModel").modal("show");
+                    }
+                }
+            });
+    } else {
+        if (!refresh) {
+            $("#usuallyDictionaryTypeModel").modal("show");
+        }
+    }
+}
+var usData = null;
+var max = 0;
+function showUsuallyDictionary() {
+    var opType = 106;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: $("#udtScriptVersion").val()
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+
+        function getData(results, type) {
+            var res = new Array();
+            for (var i = 0; i < results.length; i++) {
+                var result = results[i];
+                if (result.VariableTypeId == type)
+                    res.push(result);
+            }
+            return res;
+        }
+
+        var vData = [];
+        vData["1"] = getData(ret.datas, 1);
+        vData["2"] = getData(ret.datas, 2);
+        vData["3"] = getData(ret.datas, 3);
+        max = usData.length;
+        var o = 0;
+        var order = function (data, type, row) {
+            return ++o;
+        }
+        var op = function (data, type, row) {
+            var html = '<div class="form-group">{0}{1}</div>';
+            var sel1 = '<select class="mSel mSel1 form-control" v="{0}" id="val{0}" ov="{1}" did="{2}" vid="vid1_{3}"></select>'.format(o, data.VariableTypeId, data.Id, data.VariableNameId);
+            var sel2 = '<select class="mSel mSel2 form-control" v="{0}" id="dic{0}" ov="{1}" vid="vid2_{2}"></select>'.format(o, data.DictionaryId, data.VariableNameId);
+
+            html = html.format(sel1, sel2);
+            return html;
+        };
+        $("#udtList")
+            .DataTable({
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": { "url": "/content/datatables_language.json" },
+                "data": usData,
+                "aLengthMenu": [35, 70, 105], //更改显示记录数选项  
+                "iDisplayLength": 35, //默认显示的记录数
+                "columns": [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "VariableName", "title": "变量用途" },
+                    { "data": null, "title": "变量地址", "render": op, "sClass": "text-left" },
+                ],
+                "drawCallback": function (settings, json) {
+                    var msl = $(".mSel");
+                    var init = true;
+                    for (var i = 0; i < msl.length; i++) {
+                        if (!$(msl[i]).hasClass("done")) {
+                            init = false;
+                            break;
+                        }
+                    }
+                    if (init)
+                        return;
+
+                    $(".mSel2").select2();
+                    $(".mSel1").empty();
+                    var option = '<option value="{0}">{1}</option>';
+                    var list = $(".mSel1");
+                    if (list.length > 0) {
+                        for (var i = 0; i < valueType.length; i++) {
+                            var d = valueType[i];
+                            $(".mSel1").append(option.format(d.Id, d.TypeName));
+                        }
+                        var sel1s = [];
+                        for (var j = 0; j < list.length; j++) {
+                            var mSel1 = $(list[j]);
+                            var v = mSel1.attr("v");
+                            var ov = mSel1.attr("ov");
+                            mSel1.val(ov).trigger("change");
+                            $("#dic" + v).addClass("vt" + ov);
+                            if (sel1s.indexOf(ov) == -1)
+                                sel1s.push(ov);
+                        }
+                        for (var va in sel1s) {
+                            var val = sel1s[va];
+                            $(".vt" + val).empty();
+                            //$(".vt" + val).append(option.format(0, "未设置"));
+                            for (var i = 0; i < vData[val].length; i++) {
+                                var d = vData[val][i];
+                                $(".vt" + val).append(option.format(d.PointerAddress, d.PointerAddress + "-" + d.VariableName));
+                            }
+                        }
+                        for (var j = 0; j < list.length; j++) {
+                            var mSel1 = $(list[j]);
+                            var v = mSel1.attr("v");
+                            var ov = $("#dic" + v).attr("ov");
+                            $("#dic" + v).val(ov).trigger("update");
+                        }
+                        $(".mSel1").addClass("done");
+                        $(".mSel2").addClass("done");
+                        $(".mSel1").removeClass("mSel1");
+                        $(".mSel2").removeClass("mSel2");
+
+                    }
+                }
+            });
+        $("#usuallyDictionaryTypeModel").modal("show");
+    });
+}
+
+function updateUdt() {
+    var scrId = $("#udtScriptVersion").val();
+    if (scrId == null)
+        return;
+
+    if (max > 0) {
+        var opType = 119;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var change = false;
+        var postData = [];
+        for (var d in usData) {
+            var dt = usData[d];
+            var val = $("#udtList").find(".mSel").filter("[vid=vid1_" + dt.VariableNameId +"]");
+            var dic = $("#udtList").find(".mSel").filter("[vid=vid2_" + dt.VariableNameId + "]");
+            if (val.length > 0) {
+                var dictionaryId = $(dic).val();
+                var variableTypeId = $(val).val();
+                if (dictionaryId == null)
+                    dictionaryId = "0";
+
+                if (parseInt(variableTypeId) != dt.VariableTypeId || parseInt(dictionaryId) != dt.DictionaryId) {
+                    change = true;
+                }
+                postData.push({
+                    Id: dt.Id,
+                    ScriptId: scrId,
+                    VariableNameId: dt.VariableNameId,
+                    DictionaryId: dictionaryId,
+                    VariableTypeId: variableTypeId
+                });
+            } else {
+                postData.push({
+                    Id: dt.Id,
+                    ScriptId: scrId,
+                    VariableNameId: dt.VariableNameId,
+                    DictionaryId: dt.DictionaryId,
+                    VariableTypeId: dt.VariableTypeId
+                });
+            }
+        }
+
+        if (!change)
+            return;
+
+        var doSth = function () {
+            var data = {}
+            data.opType = opType;
+            data.opData = JSON.stringify(postData);
+            ajaxPost("/Relay/Post", data, function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0)
+                    showUsuallyDictionaryTypeModel(true);
+            });
+        }
+        showConfirm("修改", doSth);
+    }
 }

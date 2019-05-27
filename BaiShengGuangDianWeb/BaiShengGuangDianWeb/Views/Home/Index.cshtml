@@ -41,7 +41,7 @@
 
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">信息</h3>
+                            <h3 class="box-title">信息(先查询后运行)</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
@@ -107,7 +107,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-inline">
-                        <label class="control-label" for="faultCode">机台号：</label>
+                        <label class="control-label" for="faultCode"><span class="text-red">* </span>机台号：</label>
                         <select class="ms2 form-control" style="width: 88%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
                         <label class="adt label-danger hidden" id="faultCodeTip"></label>
                     </div>
@@ -126,9 +126,12 @@
                         <select class="ms2 form-control" style="width: 88%" id="faultType"></select>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="faultDesc">故障描述：</label>
-                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))"></textarea>
-                        <label class="adt label-danger hidden" id="faultDescTip"></label>
+                        <label class="control-label" for="faultDefaultDesc">故障描述：</label>
+                        <textarea class="form-control" id="faultDefaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="faultDesc">补充：</label>
+                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
                     </div>
 
                     <a style="text-decoration: underline" href='javascript:void(0);' onclick="getUsuallyFaultList()">常见故障及解决方法</a>
@@ -198,7 +201,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-inline">
-                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" maxlength="20">
+                        <select class="ms2 form-control" style="width: 20%" id="RpWorkshopCode"></select>
+                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                         <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
                         <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
                         <label class="label-danger hidden" id="rpFlowCardTip"></label>
