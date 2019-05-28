@@ -721,8 +721,8 @@ function showConfirm(text, func) {
     });
 }
 
-function focusIn(uiElement) {
-    var ele = uiElement.parent().find(".label-danger");
+function focusIn(uiElement, className = "label-danger") {
+    var ele = uiElement.parent().find("." + className + ":first");
     ele.html();
     ele.addClass("hidden");
 }
