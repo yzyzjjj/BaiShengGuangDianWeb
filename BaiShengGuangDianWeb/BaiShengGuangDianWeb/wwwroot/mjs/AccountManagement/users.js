@@ -33,6 +33,9 @@
             $("#updateNewPassword").removeAttr("disabled");
         }
     });
+    if (!checkPermission(74)) {
+        $("#showAddUserModal").addClass("hidden");
+    }
 }
 
 function getUsersList() {
@@ -50,37 +53,62 @@ function getUsersList() {
                     '        <span class="caret"></span>' +
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">' +
-                    '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole)) +
-                    '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account)) +
-                    '</ul>' +
+                    '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '    </ul>' +
                     '</div>';
-
+                var upUsers =  '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
+                var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
+                html = html.format(
+                    checkPermission(76) ? upUsers : "",
+                    checkPermission(75) ? delUsers : "");
                 return html;
             }
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#userTable")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                    "iDisplayLength": 10, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "id", "title": "id", "bVisible": false },
-                        { "data": "account", "title": "用户名" },
-                        { "data": "name", "title": "姓名" },
-                        { "data": "roleName", "title": "角色" },
-                        { "data": "emailAddress", "title": "邮箱" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
+            var opType1 = 76;
+            var opType2 = 75;
+            if (checkPermission(opType1) || checkPermission(opType2)) {
+                $("#userTable")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                        "iDisplayLength": 10, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "id", "title": "id", "bVisible": false },
+                            { "data": "account", "title": "用户名" },
+                            { "data": "name", "title": "姓名" },
+                            { "data": "roleName", "title": "角色" },
+                            { "data": "emailAddress", "title": "邮箱" },
+                            { "data": null, "title": "操作", "render": op },
+                        ]
+                    });
+            } else {
+                $("#userTable")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                        "iDisplayLength": 10, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "id", "title": "id", "bVisible": false },
+                            { "data": "account", "title": "用户名" },
+                            { "data": "name", "title": "姓名" },
+                            { "data": "roleName", "title": "角色" },
+                            { "data": "emailAddress", "title": "邮箱" },
+                        ]
+                    });
+            }
 
         });
 }

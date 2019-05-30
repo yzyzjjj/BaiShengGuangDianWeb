@@ -4,6 +4,10 @@
     $(".col-sm-2").addClass("mcolsm2");
     $("#addIp").inputmask("ip");
     $("#updateIp").inputmask("ip");
+    var opType = 103;
+    if (!checkPermission(opType)) {
+        $("#showAddModel").addClass("hidden");
+    }
 }
 
 function getDeviceList() {

@@ -36,7 +36,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">维修记录</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="rChange(0,1)">添加纪录</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="rChange" onclick="rChange(0,1)">添加纪录</button>
                     <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">重新加载</button>
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>
@@ -147,7 +147,7 @@
                         &times;
                     </button>
                     <h4 class="modal-title">常见故障及解决方法</h4>
-                    <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showAddUsuallyFaultModel()">添加常见故障</button>
+                    <button type="button" class="btn btn-primary pull-right btn-sm" id="showAddUsuallyFaultModel" onclick="showAddUsuallyFaultModel()">添加常见故障</button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
@@ -258,7 +258,7 @@
                         &times;
                     </button>
                     <h4 class="modal-title">故障类型</h4>
-                    <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showAddFaultTypeModel()">添加故障类型</button>
+                    <button type="button" id="showAddFaultTypeModel" class="btn btn-primary pull-right btn-sm" onclick="showAddFaultTypeModel()">添加故障类型</button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
