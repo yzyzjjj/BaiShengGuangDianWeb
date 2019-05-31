@@ -12,6 +12,18 @@
     //getFlowCardList();
     //getProductionProcessList();
     //getRawMateriaList();
+    var opType = 210;
+    if (!checkPermission(opType)) {
+        $("#showAddFlowCardModel").addClass("hidden");
+    }
+    opType = 220;
+    if (!checkPermission(opType)) {
+        $("#showProductionProcessModel").addClass("hidden");
+    }
+    opType = 237;
+    if (!checkPermission(opType)) {
+        $("#showAddRawMateriaModel").addClass("hidden");
+    }
 }
 
 function getWorkshopList() {

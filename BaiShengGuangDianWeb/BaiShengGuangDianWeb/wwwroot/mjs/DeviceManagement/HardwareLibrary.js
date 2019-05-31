@@ -1,6 +1,10 @@
 ﻿
 function pageReady() {
     getHardwareList();
+    var opType = 138;
+    if (!checkPermission(opType)) {
+        $("#showAddHardwareModal").addClass("hidden");
+    }
 }
 
 var op = function (data, type, row) {
@@ -41,29 +45,56 @@ function getHardwareList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#hardwareList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "HardwareName", "title": "版本名称" },
-                        { "data": "InputNumber", "title": "输入口数量" },
-                        { "data": "OutputNumber", "title": "输出口数量" },
-                        { "data": "DacNumber", "title": "数模转换数量" },
-                        { "data": "AdcNumber", "title": "模数转换数量" },
-                        { "data": "AxisNumber", "title": "主轴数量" },
-                        { "data": "ComNumber", "title": "通用串口数量" },
-                        { "data": "Description", "title": "描述" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
+            var opType1 = 137;
+            var opType2 = 139;
+            if (checkPermission(opType1) || checkPermission(opType2)) {
+                $("#hardwareList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "HardwareName", "title": "版本名称" },
+                            { "data": "InputNumber", "title": "输入口数量" },
+                            { "data": "OutputNumber", "title": "输出口数量" },
+                            { "data": "DacNumber", "title": "数模转换数量" },
+                            { "data": "AdcNumber", "title": "模数转换数量" },
+                            { "data": "AxisNumber", "title": "主轴数量" },
+                            { "data": "ComNumber", "title": "通用串口数量" },
+                            { "data": "Description", "title": "描述" },
+                            { "data": null, "title": "操作", "render": op },
+                        ],
+                    });
+            } else {
+                $("#hardwareList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "HardwareName", "title": "版本名称" },
+                            { "data": "InputNumber", "title": "输入口数量" },
+                            { "data": "OutputNumber", "title": "输出口数量" },
+                            { "data": "DacNumber", "title": "数模转换数量" },
+                            { "data": "AdcNumber", "title": "模数转换数量" },
+                            { "data": "AxisNumber", "title": "主轴数量" },
+                            { "data": "ComNumber", "title": "通用串口数量" },
+                            { "data": "Description", "title": "描述" },
+                        ],
+                    });
+            }
         });
 }
 

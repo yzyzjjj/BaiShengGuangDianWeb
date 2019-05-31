@@ -33,12 +33,10 @@
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div class="form-inline">
-                            <input class="form-control" id="flowCard" placeholder="请输入流程卡号" onfocusin="focusIn($(this))" maxlength="20">
+                            <input class="form-control" id="flowCard" value="" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()">查询</button>
-                            <label class="label-danger hidden" id="flowCardTip"></label>
                         </div>
                     </div>
-
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">信息(先查询后运行)</h3>
@@ -46,7 +44,25 @@
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
                         </div>
-                        <div class="box-body" id="info">
+                        <div class="box-body hidden" id="fcBody">
+                            <div id="info">
+                            </div>
+                            <hr>
+                            <div class=" table-bordered mbox">
+                                <h4 class="text-blue text-center">工艺数据</h4>
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <td>工序</td>
+                                            <td>加压时间(分:秒)</td>
+                                            <td>工序时间(分:秒)</td>
+                                            <td>设定压力(Kg)</td>
+                                            <td>下盘速度(rpm)</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pData"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="box-footer">
                             <button type="button" class="btn btn-primary btn-lg pull-right disabled" onclick="setProcessData()" id="run">确认运行</button>
@@ -74,26 +90,26 @@
     </div>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" tabindex="-1" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">工艺数据</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="processDataList"></table>
+    @*<div class="modal fade" tabindex="-1" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">工艺数据</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="processDataList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
             </div>
-        </div>
-    </div>
+        </div>*@
 
     <!-- 模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="faultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

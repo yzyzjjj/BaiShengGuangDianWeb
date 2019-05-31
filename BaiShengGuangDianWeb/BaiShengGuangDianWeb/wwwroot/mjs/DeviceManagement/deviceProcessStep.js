@@ -2,6 +2,10 @@
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
     getDeviceProcessStepList();
+    var opType = 153;
+    if (!checkPermission(opType)) {
+        $("#showAddModel").addClass("hidden");
+    }
 }
 
 var op = function (data, type, row) {
@@ -45,24 +49,46 @@ function getDeviceProcessStepList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#deviceProcessStepList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "CategoryName", "title": "设备类型" },
-                        { "data": "StepName", "title": "工序名" },
-                        { "data": "Description", "title": "备注" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
+            var opType1 = 152;
+            var opType2 = 154;
+            if (checkPermission(opType1) || checkPermission(opType2)) {
+                $("#deviceProcessStepList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "CategoryName", "title": "设备类型" },
+                            { "data": "StepName", "title": "工序名" },
+                            { "data": "Description", "title": "备注" },
+                            { "data": null, "title": "操作", "render": op },
+                        ],
+                    });
+            } else {
+                $("#deviceProcessStepList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "CategoryName", "title": "设备类型" },
+                            { "data": "StepName", "title": "工序名" },
+                            { "data": "Description", "title": "备注" },
+                        ],
+                    });
+            }
         });
 }
 

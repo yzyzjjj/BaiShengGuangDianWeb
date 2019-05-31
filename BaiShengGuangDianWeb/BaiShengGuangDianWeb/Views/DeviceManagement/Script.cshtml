@@ -13,7 +13,7 @@
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-primary btn-sm" onclick="showManageModel()">管理脚本版本</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyDictionaryTypeModel()">设置常用变量</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="showAddModel()">添加脚本数据</button>
+                <button type="button" class="btn btn-primary btn-sm" id="showAddModel" onclick="showAddModel()">添加脚本数据</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="tableToExcel()">导出脚本数据</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="getDeviceModelList()">重新加载</button>
             </div>
@@ -88,7 +88,7 @@
                         &times;
                     </button>
                     <h4 class="modal-title">脚本版本</h4>
-                    <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showAddScriptVersionModel()">添加脚本版本</button>
+                    <button type="button" class="btn btn-primary pull-right btn-sm" id="showAddScriptVersionModel" onclick="showAddScriptVersionModel()">添加脚本版本</button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">

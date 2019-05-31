@@ -1,6 +1,10 @@
 ﻿
 function pageReady() {
     getFirmwareList();
+    var opType = 133;
+    if (!checkPermission(opType)) {
+        $("#showAddFirmwareModal").addClass("hidden");
+    }
 }
 var op = function (data, type, row) {
     var html = '<div class="btn-group">' +
@@ -40,26 +44,50 @@ function getFirmwareList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#firmLibraryList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "FirmwareName", "title": "固件版本名称" },
-                        { "data": "VarNumber", "title": "变量数量" },
-                        //{ "data": "CommunicationProtocol", "title": "通信协议" },
-                        { "data": "FilePath", "title": "程序文件的位置及名称" },
-                        { "data": "Description", "title": "描述" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
+            var opType1 = 132;
+            var opType2 = 134;
+            if (checkPermission(opType1) || checkPermission(opType2)) {
+                $("#firmLibraryList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "FirmwareName", "title": "固件版本名称" },
+                            { "data": "VarNumber", "title": "变量数量" },
+                            //{ "data": "CommunicationProtocol", "title": "通信协议" },
+                            { "data": "FilePath", "title": "程序文件的位置及名称" },
+                            { "data": "Description", "title": "描述" },
+                            { "data": null, "title": "操作", "render": op },
+                        ],
+                    });
+            } else {
+                $("#firmLibraryList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "FirmwareName", "title": "固件版本名称" },
+                            { "data": "VarNumber", "title": "变量数量" },
+                            //{ "data": "CommunicationProtocol", "title": "通信协议" },
+                            { "data": "FilePath", "title": "程序文件的位置及名称" },
+                            { "data": "Description", "title": "描述" },
+                        ],
+                    });
+            }
         });
 }
 

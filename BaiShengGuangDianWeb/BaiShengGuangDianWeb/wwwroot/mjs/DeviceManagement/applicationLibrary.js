@@ -1,6 +1,9 @@
 ﻿
 function pageReady() {
     getApplicationList();
+    if (!checkPermission(148)) {
+        $("#showAddApplication").addClass("hidden");
+    }
 }
 
 var op = function (data, type, row) {
@@ -41,24 +44,46 @@ function getApplicationList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            $("#applicationList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "ApplicationName", "title": "名称" },
-                        { "data": "FilePath", "title": "程序文件的位置及名称" },
-                        { "data": "Description", "title": "描述" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
-                });
+            var opType1 = 147;
+            var opType2 = 149;
+            if (checkPermission(opType1) || checkPermission(opType2)) {
+                $("#applicationList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "ApplicationName", "title": "名称" },
+                            { "data": "FilePath", "title": "程序文件的位置及名称" },
+                            { "data": "Description", "title": "描述" },
+                            { "data": null, "title": "操作", "render": op },
+                        ],
+                    });
+            } else {
+                $("#applicationList")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "Id", "title": "Id", "bVisible": false },
+                            { "data": "ApplicationName", "title": "名称" },
+                            { "data": "FilePath", "title": "程序文件的位置及名称" },
+                            { "data": "Description", "title": "描述" },
+                        ],
+                    });
+            }
         });
 }
 
