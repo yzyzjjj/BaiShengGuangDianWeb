@@ -6,25 +6,22 @@
     });
 
     $("#loginBtn").click(function () {
-        var acc = $("#account").val();
-        var pwd = $("#password").val();
+        var account = $("#account").val();
+        var password = $("#password").val();
 
-        if (acc == "") {
-            $("#tipinfo").show();
-            $("#tipinfo").text("账号不能为空");
+        if (isStrEmptyOrUndefined(account)) {
+            showTip($("#accountTip"),"账号不能为空");
             return;
         }
-        if (pwd == "") {
-            $("#tipinfo").show();
-            $("#tipinfo").text("密码不能为空");
+        if (isStrEmptyOrUndefined(password)) {
+            showTip($("#passwordTip"),"密码不能为空");
             return;
         }
 
-
-        var pwdMd5 = window.md5(window.md5(pwd));
-
+        var pwdMd5 = window.md5(window.md5(password));
+        
         var data = {}
-        data.account = acc;
+        data.account = account;
         data.password = pwdMd5;
 
         ajaxPost("/Account/Login", data,

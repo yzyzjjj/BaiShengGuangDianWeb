@@ -1,5 +1,4 @@
-﻿@using BaiShengGuangDianWeb.Base.Server
-@model object
+﻿@model object
 
 @{
     ViewBag.Title = "权限管理";
@@ -14,7 +13,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">权限列表</h3>
                 <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-danger btn-sm " onclick="delPermission()">删除</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="delPermission" onclick="delPermission()">删除</button>
                     <button type="button" class="btn btn-primary btn-sm" onclick="getPermissionsList()">重新加载</button>
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>

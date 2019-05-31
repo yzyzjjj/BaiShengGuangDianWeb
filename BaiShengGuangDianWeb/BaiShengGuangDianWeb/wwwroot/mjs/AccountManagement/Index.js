@@ -8,6 +8,10 @@
             $("#cbDiv").addClass("hidden");
         }
     });
+    var opType = 66;
+    if (!checkPermission(opType)) {
+        $("#showAddOrganizationUnitModal").addClass("hidden");
+    }
 }
 
 function getOrganizationUnits() {
@@ -25,11 +29,18 @@ function getOrganizationUnits() {
                 '        <span class="caret"></span>' +
                 '        <span class="sr-only">Toggle Dropdown</span>' +
                 '    </button>' +
-                '    <ul class="dropdown-menu" role="menu">' +
-                '       <li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>' +
-                '       <li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>' +
+                '    <ul class="dropdown-menu" role="menu">{0}{1}' +
                 '    </ul>' +
                 '</div>';
+            var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>';
+            var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>';
+            if (checkPermission(67) || checkPermission(68)) {
+                doAction = doAction.format(
+                    checkPermission(68) ? upUnit : "",
+                    checkPermission(67) ? delUnit : "");
+            } else {
+                doAction = "";
+            }
 
             var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
                 '    <div class="box-header" style="padding: 2px;">' +
@@ -213,6 +224,10 @@ function getMemberList(id, name) {
     $("#unName").text(name);
     $("#unName").attr("value", id);
     $("#showAddMemberModal").removeClass("hidden");
+    var opType = 71;
+    if (!checkPermission(opType)) {
+        $("#showAddMemberModal").addClass("hidden");
+    }
     ajaxGet("/OrganizationUnitManagement/MemberList",
         {
             organizationUnitId: id
@@ -234,6 +249,20 @@ function getMemberList(id, name) {
             var order = function (data, type, row) {
                 return ++o;
             }
+            var columns = checkPermission(72)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "Name", "title": "姓名" },
+                    { "data": "RoleName", "title": "角色" },
+                    { "data": null, "title": "操作", "render": op },
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "Name", "title": "姓名" },
+                    { "data": "RoleName", "title": "角色" },
+                ];
 
             $("#memberListTable")
                 .DataTable({
@@ -244,13 +273,7 @@ function getMemberList(id, name) {
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "Name", "title": "姓名" },
-                        { "data": "RoleName", "title": "角色" },
-                        { "data": null, "title": "操作", "render": op },
-                    ],
+                    "columns": columns,
                     "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
                         $("#memberListTable td").css("vertical-align", "middle");

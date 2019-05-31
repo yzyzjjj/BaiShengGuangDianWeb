@@ -36,6 +36,10 @@
     $("#apProductionProcessName").on("select2:unselect", function (e) {
         getDeviceList(-1);
     });
+    var opType = 316;
+    if (!checkPermission(opType)) {
+        $("#showAddModel").addClass("hidden");
+    }
 }
 
 var lastData = null;

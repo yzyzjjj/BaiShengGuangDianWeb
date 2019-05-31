@@ -161,6 +161,14 @@
         max = 0;
         showUsuallyDictionaryTypeModel(true);
     });
+    var opType = 111;
+    if (!checkPermission(opType)) {
+        $("#showAddModel").addClass("hidden");
+    }
+    var opType = 114;
+    if (!checkPermission(opType)) {
+        $("#showAddScriptVersionModel").addClass("hidden");
+    }
 }
 var jsonData = null;
 var scriptData = null;
@@ -192,26 +200,48 @@ function getScriptVersionAllList(type) {
                 checkPermission(116) ? delBtn : "");
             return html;
         };
-
-        $("#scriptVersionList")
-            .DataTable({
-                "destroy": true,
-                "paging": true,
-                "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": ret.datas,
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "ScriptName", "title": "脚本名称" },
-                    { "data": "ValueNumber", "title": "变量数" },
-                    { "data": "InputNumber", "title": "输入口数" },
-                    { "data": "OutputNumber", "title": "输出口数" },
-                    { "data": null, "title": "操作", "render": op },
-                ]
-            });
+        var opType1 = 115;
+        var opType2 = 116;
+        if (checkPermission(opType1) || checkPermission(opType2)) {
+            $("#scriptVersionList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "ScriptName", "title": "脚本名称" },
+                        { "data": "ValueNumber", "title": "变量数" },
+                        { "data": "InputNumber", "title": "输入口数" },
+                        { "data": "OutputNumber", "title": "输出口数" },
+                        { "data": null, "title": "操作", "render": op },
+                    ]
+                });
+        } else {
+            $("#scriptVersionList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "ScriptName", "title": "脚本名称" },
+                        { "data": "ValueNumber", "title": "变量数" },
+                        { "data": "InputNumber", "title": "输入口数" },
+                        { "data": "OutputNumber", "title": "输出口数" },
+                    ]
+                });
+        }
         if (type == 1)
             $("#scriptVersionModel").modal("show");
     });
