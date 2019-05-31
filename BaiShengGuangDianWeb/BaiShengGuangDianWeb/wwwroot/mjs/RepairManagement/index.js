@@ -133,11 +133,8 @@ function getFaultDeviceList() {
                             {
                                 "targets": [8],
                                 "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
-                                    } else {
-                                        return "";
-                                    }
+                                    full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
+                                    return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
                                 }
                             }
                         ]
@@ -563,7 +560,7 @@ function rChange(id, type) {
                 $("#singleSolveTime").val(getTime());
                 var info = getCookieTokenInfo();
                 if (id == 0)
-                $("#singleFaultSolver").val(info.name);
+                    $("#singleFaultSolver").val(info.name);
 
                 $("#singleFaultCode").addClass("hidden");
                 $("#rFaultCodeDiv").removeClass("hidden");
@@ -1010,12 +1007,12 @@ function getFaultTypeList() {
                         "columnDefs": [
                             {
                                 "targets": [3],
-                                "render": function(data, type, full, meta) {
+                                "render": function (data, type, full, meta) {
                                     if (full.FaultDescription) {
                                         if (full.FaultDescription.length > tdShowLength) {
                                             return full.FaultDescription.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >全部显示</a> '
-                                                .format(full.Id);
+                                                    .format(full.Id);
                                         } else {
                                             return full.FaultDescription;
                                         }
