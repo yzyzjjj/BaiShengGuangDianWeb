@@ -56,12 +56,15 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsers =  '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
+                var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
                 var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
                 html = html.format(
                     checkPermission(76) ? upUsers : "",
                     checkPermission(75) ? delUsers : "");
                 return html;
+            }
+            var del = function (data, type, row) {
+                return data.isDeleted ? "<span class='text-red'>是</span>" : "否";
             }
             var o = 0;
             var order = function (data, type, row) {
@@ -86,6 +89,7 @@ function getUsersList() {
                             { "data": "name", "title": "姓名" },
                             { "data": "roleName", "title": "角色" },
                             { "data": "emailAddress", "title": "邮箱" },
+                            { "data": null, "title": "删除", "render": del },
                             { "data": null, "title": "操作", "render": op },
                         ]
                     });
@@ -106,10 +110,10 @@ function getUsersList() {
                             { "data": "name", "title": "姓名" },
                             { "data": "roleName", "title": "角色" },
                             { "data": "emailAddress", "title": "邮箱" },
+                            { "data": null, "title": "删除", "render": del },
                         ]
                     });
             }
-
         });
 }
 
@@ -817,7 +821,11 @@ function getLabels(datas) {
 }
 
 function rule(a, b) {
-    return a.id > b.id ? 1 : -1;
+    if (a.order == b.order) {
+        return a.id > b.id ? 1 : -1;
+    } else {
+        return a.order > b.order ? 1 : -1;
+    }
 }
 
 function getLabelData(datas, label) {

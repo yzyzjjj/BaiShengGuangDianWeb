@@ -39,11 +39,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var result = new DataResult();
             if (id == 0)
             {
-                result.datas.AddRange(AccountHelper.GetAccountInfo());
+                result.datas.AddRange(AccountHelper.GetAccountInfoAll());
             }
             else
             {
-                result.datas.Add(AccountHelper.GetAccountInfo(id));
+                result.datas.Add(AccountHelper.GetAccountInfoAll(id));
             }
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
@@ -83,13 +83,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
-            var accountInfo = AccountHelper.GetAccountInfoByName(account);
+            var accountInfo = AccountHelper.GetAccountInfoByNameAll(name);
             if (accountInfo != null)
             {
                 return Result.GenError<Result>(Error.NameIsExist);
             }
 
-            accountInfo = AccountHelper.GetAccountInfo(account);
+            accountInfo = AccountHelper.GetAccountInfoAll(account);
             if (accountInfo != null)
             {
                 return Result.GenError<Result>(Error.AccountIsExist);
@@ -253,11 +253,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }
-                accountInfo = AccountHelper.GetAccountInfo(id);
+                accountInfo = AccountHelper.GetAccountInfoAll(id);
             }
             else
             {
-                accountInfo = AccountHelper.GetAccountInfo(accountStr);
+                accountInfo = AccountHelper.GetAccountInfoAll(accountStr);
             }
             if (accountInfo == null)
             {
@@ -388,11 +388,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }
-                accountInfo = AccountHelper.GetAccountInfo(id);
+                accountInfo = AccountHelper.GetAccountInfoAll(id);
             }
             else
             {
-                accountInfo = AccountHelper.GetAccountInfo(accountStr);
+                accountInfo = AccountHelper.GetAccountInfoAll(accountStr);
             }
             if (accountInfo == null)
             {

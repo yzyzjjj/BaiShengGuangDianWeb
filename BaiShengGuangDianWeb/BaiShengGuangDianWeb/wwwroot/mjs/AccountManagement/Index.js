@@ -288,8 +288,7 @@ var addList = null;
 function showAddMemberModal() {
     $("#memberList").empty();
     addList = new Array();
-    ajaxGet("/AccountManagement/List",
-        null,
+    ajaxGet("/AccountManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);

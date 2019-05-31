@@ -411,7 +411,11 @@ function getLabels(datas) {
 }
 
 function rule(a, b) {
-    return a.id > b.id ? 1 : -1;
+    if (a.order == b.order) {
+        return a.id > b.id ? 1 : -1;
+    } else {
+        return a.order > b.order ? 1 : -1;
+    }
 }
 
 function getLabelData(datas, label) {

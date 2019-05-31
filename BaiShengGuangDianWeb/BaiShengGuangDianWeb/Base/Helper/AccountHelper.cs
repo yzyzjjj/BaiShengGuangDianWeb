@@ -48,16 +48,15 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
             return info;
         }
-
         /// <summary>
-        /// 根据accountId 批量获取账号信息
+        /// 根据accountId获取账号信息
         /// </summary>
-        /// <param name="accountIds"></param>
+        /// <param name="accountId"></param>
         /// <returns></returns>
-        public static IEnumerable<AccountInfo> GetAccountInfos(IEnumerable<int> accountIds)
+        public static AccountInfo GetAccountInfoAll(int accountId)
         {
-            var sql = "SELECT * FROM `accounts` WHERE Id IN @accountId AND IsDeleted = 0";
-            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId = accountIds });
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Id = @accountId AND b.IsDeleted = 0;";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
             return info;
         }
         /// <summary>
@@ -69,6 +68,29 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Account = @account AND a.IsDeleted = 0 AND b.IsDeleted = 0";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
+            return info;
+        }
+        /// <summary>
+        /// 根据账号获取账号信息  包括已删除
+        /// </summary>
+        /// <param name="account">账号</param>
+        /// <returns></returns>
+        public static AccountInfo GetAccountInfoAll(string account)
+        {
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Account = @account AND b.IsDeleted = 0";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
+            return info;
+        }
+
+        /// <summary>
+        /// 根据accountId 批量获取账号信息
+        /// </summary>
+        /// <param name="accountIds"></param>
+        /// <returns></returns>
+        public static IEnumerable<AccountInfo> GetAccountInfos(IEnumerable<int> accountIds)
+        {
+            var sql = "SELECT * FROM `accounts` WHERE Id IN @accountId AND IsDeleted = 0";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId = accountIds });
             return info;
         }
 
@@ -96,12 +118,32 @@ namespace BaiShengGuangDianWeb.Base.Helper
             return info;
         }
         /// <summary>
+        /// 根据姓名获取账号信息
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static AccountInfo GetAccountInfoByNameAll(string name)
+        {
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.Name = @name AND b.IsDeleted = 0";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { name }).FirstOrDefault();
+            return info;
+        }
+        /// <summary>
         /// 获取所有账号信息
         /// </summary>
         /// <returns></returns>
         public static IEnumerable<AccountInfo> GetAccountInfo()
         {
             var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE a.IsDeleted = 0 AND b.IsDeleted = 0 ORDER BY a.Id";
+            return ServerConfig.WebDb.Query<AccountInfo>(sql);
+        }
+        /// <summary>
+        /// 获取所有账号信息    包括已删除
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<AccountInfo> GetAccountInfoAll()
+        {
+            var sql = "SELECT a.*, b.`Name` RoleName, IF ( a.SelfPermissions = '', b.Permissions, CONCAT(b.Permissions, ',', a.SelfPermissions) ) Permissions FROM `accounts` a JOIN `roles` b ON a.Role = b.Id WHERE b.IsDeleted = 0 ORDER BY a.IsDeleted, a.Id";
             return ServerConfig.WebDb.Query<AccountInfo>(sql);
         }
 
