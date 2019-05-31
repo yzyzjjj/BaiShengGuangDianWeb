@@ -24,6 +24,15 @@
         allowClear: true,
         placeholder: "请选择"
     });
+
+    $("#isDifference").on('ifChanged', function (event) {
+        var ui = $(this);
+        if (ui.is(":checked")) {
+            $("#differenceDiv").removeClass("hidden");
+        } else {
+            $("#differenceDiv").addClass("hidden");
+        }
+    });
 }
 
 var faultData = null;
@@ -93,12 +102,17 @@ function getDeviceList() {
         });
 }
 
+var processData = null;
 function queryFlowCard() {
+    hideTip("processCodeTip");
     var opType = 260;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
+    $("#fcBody").addClass("hidden");
+    $("#info").empty();
+    $("#pData").empty();
     $("#run").addClass("disabled");
     var query = true;
     //机台号
@@ -111,7 +125,7 @@ function queryFlowCard() {
     //流程卡
     var flowCard = $("#flowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
-        showTip("flowCardTip", "流程卡号不能为空");
+        layer.msg("流程卡号不能为空");
         query = false;
     }
     if (!query)
@@ -125,11 +139,39 @@ function queryFlowCard() {
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
-            $("#info").empty();
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
+            $("#fcBody").removeClass("hidden");
+
+            if (checkPermission(323)) {
+                var head =
+                    '<div class="form-group border-left">' +
+                    '<label for="isDifference" class="text-info">是否微调：</label>' +
+                    '<input type="checkbox" id="isDifference" class="icb_minimal">' +
+                    '</div>' +
+                    '<div class="form-group form-inline hidden" id="differenceDiv">' +
+                    '<label class="control-label" for="difference">偏差值：</label>' +
+                    '<input class="form-control" id="difference" oninput="value=value.replace(/[^\\d]/g,\'\')" placeholder="请输入偏差值" maxlength="20">' +
+                    '</div>';
+
+                $("#info").append(head);
+            }
+            $("#isDifference").iCheck({
+                checkboxClass: 'icheckbox_minimal',
+                radioClass: 'iradio_minimal',
+                increaseArea: '20%' // optional
+            });
+
+            $("#isDifference").on('ifChanged', function (event) {
+                var ui = $(this);
+                if (ui.is(":checked")) {
+                    $("#differenceDiv").removeClass("hidden");
+                } else {
+                    $("#differenceDiv").addClass("hidden");
+                }
+            });
             var flowCard = ret.flowCard;
             var html = '<p><b>计划号：</b>{0}</p>' +
                 '<p><b>紧急程度：</b>{1}</p>';
@@ -141,14 +183,41 @@ function queryFlowCard() {
                 var data = flowCard.RawMateriaSpecifications[i];
                 html += p.format(data.SpecificationName, data.SpecificationValue);
             }
-            html += '<p><b>工艺编号：</b>{0}<button type="button" class="btn btn-primary btn-sm pull-right" onclick="queryProcessData(\'{1}\')">工艺数据</button></p>'
-                .format(flowCard.ProcessNumber, flowCard.ProcessId);
+            html += '<p><b>工艺编号：</b>{0}</p>'.format(flowCard.ProcessNumber);
             $("#info").append(html);
 
             id = deviceId;
             processId = flowCard.ProcessId;
             flowCardId = flowCard.flowCardId;
-            $("#run").removeClass("disabled");
+            var tr1 = '<tr><td>{0}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{1}</td><td>{2}</td></tr>';
+            var tr2 =
+                '<tr>' +
+                '    <td style="vertical-align: middle;"><span>{0}</span></td>' +
+                '    <td class="form-inline">' +
+                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" />' +
+                '        <span style="width: 10%;">:</span>' +
+                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" />' +
+                '    </td>' +
+                '    <td class="form-inline">' +
+                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" />' +
+                '        <span style="width: 10%;">:</span>' +
+                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" />' +
+                '    </td>' +
+                '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" /></td>' +
+                '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" /></td>' +
+                '</tr>';
+            processData = flowCard.processData.sort(function (a, b) {
+                return a.ProcessOrder > b.ProcessOrder ? 1 : -1;
+            });
+
+            if (processData.length > 0) {
+                var tr = !checkPermission(156) ? tr1 : tr2;
+                $("#run").removeClass("disabled");
+                for (var j = 0; j < processData.length; j++) {
+                    var pd = processData[j];
+                    $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
+                }
+            }
         });
 }
 

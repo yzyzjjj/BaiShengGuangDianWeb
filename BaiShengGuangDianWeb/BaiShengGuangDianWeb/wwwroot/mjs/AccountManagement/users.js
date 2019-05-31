@@ -58,6 +58,9 @@ function getUsersList() {
 
                 return html;
             }
+            var del = function (data, type, row) {
+                return data.isDeleted ? "<span class='text-red'>是</span>" : "否";
+            }
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
@@ -69,8 +72,8 @@ function getUsersList() {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                    "iDisplayLength": 10, //默认显示的记录数  
+                    "aLengthMenu": [30, 60, 90], //更改显示记录数选项  
+                    "iDisplayLength": 30, //默认显示的记录数  
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "id", "title": "id", "bVisible": false },
@@ -78,7 +81,8 @@ function getUsersList() {
                         { "data": "name", "title": "姓名" },
                         { "data": "roleName", "title": "角色" },
                         { "data": "emailAddress", "title": "邮箱" },
-                        { "data": null, "title": "操作", "render": op },
+                        { "data": null, "title": "删除", "render": del },
+                        { "data": null, "title": "操作", "render": op }
                     ],
                 });
 
@@ -721,7 +725,11 @@ function getLabels(datas) {
 }
 
 function rule(a, b) {
-    return a.id > b.id ? 1 : -1;
+    if (a.order == b.order) {
+        return a.id > b.id ? 1 : -1;
+    } else {
+        return a.order > b.order ? 1 : -1;
+    }
 }
 
 function getLabelData(datas, label) {

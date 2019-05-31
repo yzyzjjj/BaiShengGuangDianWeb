@@ -263,8 +263,7 @@ var addList = null;
 function showAddMemberModal() {
     $("#memberList").empty();
     addList = new Array();
-    ajaxGet("/AccountManagement/List",
-        null,
+    ajaxGet("/AccountManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -301,7 +300,7 @@ function showAddMemberModal() {
                         { "data": "name", "title": "姓名" },
                         { "data": "account", "title": "账号" },
                         { "data": "roleName", "title": "角色" },
-                        { "data": null, "title": "选择", "sClass":"text-red", "render": op }
+                        { "data": null, "title": "选择", "sClass": "text-red", "render": op }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#memberList td").css("padding", "3px");
