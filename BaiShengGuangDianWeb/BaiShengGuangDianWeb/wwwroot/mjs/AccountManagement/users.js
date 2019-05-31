@@ -196,7 +196,7 @@ function showAddUserModal(type = 0) {
             }
 
             var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
+                return '<input type="checkbox" value="{0}" class="icb_minimal add" onclick="">'.format(data.Id);
             }
 
             var o = 0;
@@ -210,15 +210,19 @@ function showAddUserModal(type = 0) {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='all'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    //关闭第一列排序功能
+                    "columnDefs": [
+                        { "orderable": false, "targets": 0 }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#addDeviceList td").css("padding", "3px");
@@ -228,7 +232,38 @@ function showAddUserModal(type = 0) {
                             radioClass: 'iradio_minimal',
                             increaseArea: '20%' // optional
                         });
-                        $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
+                        $("#addDeviceList .add").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#addDeviceList .all").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+
+                        var checkAll = $('input.all');  //全选的input
+                        var checkAdd = $('input.add'); //所有单选的input
+
+                        checkAll.on('ifChecked ifUnchecked', function (event) {
+                            if (event.type == 'ifChecked') {
+                                checkAdd.iCheck('check');
+                            } else {
+                                checkAdd.iCheck('uncheck');
+                            }
+                        });
+
+                        checkAdd.on('ifChanged', function (event) {
+                            if (checkAdd.filter(':checked').length == checkAdd.length) {
+                                checkAll.prop('checked', true);
+                            } else {
+                                checkAll.prop('checked', false);
+                            }
+                            checkAll.iCheck('update');
+                        });
+
+                        $("#addDeviceList .add").on('ifChanged', function (event) {
                             var ui = $(this);
                             var v = ui.attr("value");
                             if (ui.is(":checked")) {
@@ -377,7 +412,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
             }
 
             var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
+                return '<input type="checkbox" value="{0}" class="icb_minimal up" onclick="">'.format(data.Id);
             }
 
             var o = 0;
@@ -391,15 +426,19 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='all'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    //关闭第一列排序功能
+                    "columnDefs": [
+                        { "orderable": false, "targets": 0 }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#updateDeviceList td").css("pupdateing", "3px");
@@ -409,7 +448,36 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                             radioClass: 'iradio_minimal',
                             increaseArea: '20%' // optional
                         });
-                        $("#updateDeviceList .icb_minimal").on('ifChanged', function (event) {
+                        $("#updateDeviceList .up").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#updateDeviceList .all").iCheck({
+                            checkboxClass: 'icheckbox_minimal',
+                            radioClass: 'iradio_minimal',
+                            increaseArea: '20%' // optional
+                        });
+                        var checkAll = $('input.all');  //全选的input
+                        var checkUp = $('input.up'); //所有单选的input
+
+                        checkAll.on('ifChecked ifUnchecked', function (event) {
+                            if (event.type == 'ifChecked') {
+                                checkUp.iCheck('check');
+                            } else {
+                                checkUp.iCheck('uncheck');
+                            }
+                        });
+
+                        checkUp.on('ifChanged', function (event) {
+                            if (checkUp.filter(':checked').length == checkUp.length) {
+                                checkAll.prop('checked', true);
+                            } else {
+                                checkAll.prop('checked', false);
+                            }
+                            checkAll.iCheck('update');
+                        });
+                        $("#updateDeviceList .up").on('ifChanged', function (event) {
                             var ui = $(this);
                             var v = ui.attr("value");
                             if (ui.is(":checked")) {
@@ -426,14 +494,14 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                         });
 
                         if (isStrEmptyOrUndefined(deviceIds)) {
-                            $("#updateDeviceList .icb_minimal").iCheck('check');
+                            checkUp.iCheck('uncheck');
                             return;
-                        }
+                        } 
 
                         var deviceIdList = deviceIds.split(",");
                         for (var i = 0; i < deviceIdList.length; i++) {
                             var index = deviceIdList[i];
-                            $("#updateDeviceList .icb_minimal").filter("[value=" + index + "]").iCheck('check');
+                            checkUp.filter("[value=" + index + "]").iCheck('check');
                         }
                     }
                 });
@@ -466,7 +534,7 @@ function updateUser() {
     if (pRole.indexOf(0) == -1)
         updateList = new Array();
     else {
-        deviceIds = updateList.length == $("#updateDeviceList .icb_minimal").length ? "" : updateList.join(",");
+        deviceIds = updateList.length == $("#updateDeviceList .up").length + 1 ? "" : updateList.join(",");
     }
 
     if (isStrEmptyOrUndefined(updateName)) {

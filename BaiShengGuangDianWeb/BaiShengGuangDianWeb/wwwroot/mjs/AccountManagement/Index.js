@@ -32,15 +32,6 @@ function getOrganizationUnits() {
                 '    <ul class="dropdown-menu" role="menu">{0}{1}' +
                 '    </ul>' +
                 '</div>';
-            var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>';
-            var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>';
-            if (checkPermission(67) || checkPermission(68)) {
-                doAction = doAction.format(
-                    checkPermission(68) ? upUnit : "",
-                    checkPermission(67) ? delUnit : "");
-            } else {
-                doAction = "";
-            }
 
             var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
                 '    <div class="box-header" style="padding: 2px;">' +
@@ -58,18 +49,29 @@ function getOrganizationUnits() {
                 var children = getOrganizationUnitsChild(datas, parents[i]);
                 for (var j = 0; j < children.length; j++) {
                     var child = children[j];
+                    var mMenu;
+                    var option;
+
+                    var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>'.format(child.id, escape(child.name));
+                    var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>'.format(child.id, escape(child.name));
+                    var da = "";
+                    if (checkPermission(67) || checkPermission(68)) {
+                        da = doAction.format(
+                            checkPermission(67) ? upUnit : "",
+                            checkPermission(68) ? delUnit : "");
+                    }
                     if (child.parentId == 0) {
-                        var mMenu = mMenuStr.format(child.id, escape(child.name));
-                        var option = $(mMenu).clone();
+                        mMenu = mMenuStr.format(child.id, escape(child.name));
+                        option = $(mMenu).clone();
                         option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(doAction.format(child.id, escape(child.name)));
+                        option.find('h3').after(da);
                         option.find('.on_ul').attr('id', "on" + child.id);
                         $("#organizationUnits").append(option);
                     } else {
-                        var mMenu = "<li>" + mMenuStr.format(child.id, escape(child.name)) + "</li>";
-                        var option = $(mMenu).clone();
+                        mMenu = "<li>" + mMenuStr.format(child.id, escape(child.name)) + "</li>";
+                        option = $(mMenu).clone();
                         option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(doAction.format(child.id, escape(child.name)))
+                        option.find('h3').after(da);
                         option.find('.on_ul').attr('id', "on" + child.id);
                         $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option);
                     }
