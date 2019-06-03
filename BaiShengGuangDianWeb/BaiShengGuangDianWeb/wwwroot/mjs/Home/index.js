@@ -3,7 +3,11 @@
     $(".ms2").select2();
     $("#run").addClass("disabled");
     getDeviceList();
+    getWorkshopList();
     $("#flowCard").change(function () {
+        $("#run").addClass("disabled");
+    });
+    $("#workshopCode").change(function () {
         $("#run").addClass("disabled");
     });
     $("#processCode").on("select2:select", function (e) {
@@ -89,7 +93,8 @@ function getDeviceList() {
                 });
 
 
-            $(".ms2").empty();
+            $("#processCode").empty();
+            $("#faultCode").empty();
             var option = '<option value="{0}" id="{2}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -102,6 +107,32 @@ function getDeviceList() {
         });
 }
 
+function getWorkshopList() {
+    var opType = 261;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#workshopCode").empty();
+            $("#RpWorkshopCode").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+                $("#RpWorkshopCode").append(option.format(d.Id, d.WorkshopName));
+            }
+        });
+}
+
 var processData = null;
 function queryFlowCard() {
     hideTip("processCodeTip");
@@ -110,6 +141,7 @@ function queryFlowCard() {
         layer.msg("没有权限");
         return;
     }
+
     $("#fcBody").addClass("hidden");
     $("#processSteps").empty();
     $("#info").empty();
@@ -131,12 +163,13 @@ function queryFlowCard() {
     }
     if (!query)
         return;
+    var ws = parseIntStr($("#workshopCode").val(), 2);
 
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
         Id: deviceId,
-        FlowCardName: flowCard
+        FlowCardName: ws + flowCard
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -556,7 +589,9 @@ function queryRpFlowCard() {
         return;
     }
     //流程卡
-    var flowCard = $("#rpFlowCard").val().trim();
+
+    var ws = parseIntStr($("#RpWorkshopCode").val(), 2);
+    var flowCard = ws + $("#rpFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("rpFlowCardTip", "流程卡号不能为空");
         return;
@@ -776,7 +811,8 @@ function reportFlowCard() {
         layer.msg("没有权限");
         return;
     }
-    var flowCardId = parseInt($("#rpFCId").html());
+    var ws = parseIntStr($("#RpWorkshopCode").val(), 2);
+    var flowCardId = ws + $("#rpFCId").html();
     var oData = $("#gxList tbody").children();
     var postData = new Array();
     var canSave = false;
@@ -856,8 +892,9 @@ function reportFlowCard() {
             }
         }
         var d = {
-            Id: id,
             //流程卡(自增Id)
+            Id: id,
+            //流程卡
             FlowCardId: flowCardId,
             //加工人ID（自增id）  为0不指定加工人
             ProcessorId: processorId,

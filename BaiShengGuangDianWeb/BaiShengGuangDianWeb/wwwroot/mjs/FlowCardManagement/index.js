@@ -1,6 +1,11 @@
 ﻿function pageReady() {
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
+    getWorkshopList();
+    //getFlowCardList(-1);
+    $("#workshopCode").on("select2:select", function (e) {
+        //getFlowCardList();
+    });
 
     $("#flowCardStartDate").val(getDate()).datepicker('update');
     $("#flowCardEndDate").val(getDate()).datepicker('update');
@@ -21,6 +26,32 @@
     }
 }
 
+function getWorkshopList() {
+    var opType = 261;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#workshopCode").empty();
+            $("#afWorkshopCode").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#workshopCode").append(option.format(d.Id, d.WorkshopName));
+                $("#afWorkshopCode").append(option.format(d.Id, d.WorkshopName));
+            }
+            $("#workshopCode").append(option.format(0, "所有"));
+        });
+}
 var fProductionProcessList = false;
 var fRawMateriaList = false;
 //流程卡
@@ -76,6 +107,8 @@ function addFlowCard() {
         layer.msg("没有权限");
         return;
     }
+
+    var afWorkshopCode = $("#afWorkshopCode").val().trim();
     var afProductionProcess = $("#afProductionProcess").val().trim();
     var afRawMateria = $("#afRawMateria").val().trim();
     var afRawMaterialQuantity = $("#afRawMaterialQuantity").val().trim();
@@ -133,7 +166,9 @@ function addFlowCard() {
             //优先级
             Priority: afPriority,
             //备注
-            Remarks: afRemarks
+            Remarks: afRemarks,
+            //卡类型
+            WorkshopId: afWorkshopCode
         });
     }
 
@@ -153,7 +188,8 @@ function addFlowCard() {
     showConfirm("添加", doSth);
 }
 
-function getFlowCardList() {
+function getFlowCardList(t = 0) {
+    $("#flowCardList").empty();
     var opType = 200;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -170,6 +206,7 @@ function getFlowCardList() {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
+        Id: t == -1 ? 1 : $("#workshopCode").val(),
         StartTime: start,
         EndTime: end
     });
@@ -184,7 +221,7 @@ function getFlowCardList() {
                 var html = "{0}{1}{2}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateFlowCard({0})">修改</button>'.format(data.Id);
                 var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0})">更新</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.FlowCardName));
+                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.FlowCardName.substring(2)));
 
                 html = html.format(
                     checkPermission(207) ? changeBtn : "",
@@ -233,7 +270,12 @@ function getFlowCardList() {
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "CreateTime", "title": "创建时间" },
                         { "data": "ProductionProcessName", "title": "计划号" },
-                        { "data": "FlowCardName", "title": "流程卡号" },
+                        { "data": "WorkshopName", "title": "卡类型" },
+                        {
+                            "data": null, "title": "流程卡号", "render": function (data, type, row) {
+                                return data.FlowCardName.substring(2);
+                            }
+                        },
                         { "data": "RawMateriaName", "title": "原料批次" },
                         { "data": null, "title": "优先级", "render": priority },
                         { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },

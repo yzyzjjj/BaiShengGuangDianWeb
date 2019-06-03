@@ -765,6 +765,10 @@ function getQueryString(name) {
     if (r != null) return unescape(r[2]); return null;
 }
 
+function parseIntStr(num, n) {
+    return (Array(n).join(0) + num).slice(-n);
+}
+
 function initFileInput(uiEle, type, func = null) {
     var obj = $("#" + uiEle).fileinput({
         language: 'zh', //设置语言 

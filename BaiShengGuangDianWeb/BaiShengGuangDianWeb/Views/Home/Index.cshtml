@@ -26,6 +26,11 @@
                         <label class="label-danger hidden" id="processCodeTip"></label>
                     </div>
                     <div class="form-group">
+                        <label class="control-label" for="workshopCode">选择卡类型：</label>
+                        <select class="ms2 form-control" style="width: 100%" id="workshopCode" onchange="focusIn($(this))"></select>
+                        <label class="label-danger hidden" id="workshopCodeTip"></label>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div class="form-inline">
                             <input class="form-control" id="flowCard" value="" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
@@ -227,7 +232,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-inline">
-                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" maxlength="20">
+                        <select class="ms2 form-control" style="width: 20%" id="RpWorkshopCode"></select>
+                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                         <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
                         <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
                         <label class="label-danger hidden" id="rpFlowCardTip"></label>
