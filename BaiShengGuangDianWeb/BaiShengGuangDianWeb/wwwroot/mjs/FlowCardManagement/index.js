@@ -335,9 +335,10 @@ function showUpdateFlowCard(type) {
                     tr = ('<tr id="ufGX{0}" value="{2}">' +
                         '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
                         '<td><select class="ms2 yc form-control" id="ufGXm{0}"></td>' +
-                        '<td><input class="form-control" value="{3}" id="ufGXz{0}" maxlength="100"></td>' +
+                        '<td><input class="form-control" value="{3}" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
+                        '<td><input class="form-control text-center" value="{4}" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
                         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                        '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
+                        '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepRequirements, processStep.ProcessStepRequirementMid);
                     $("#ufGXBody").append(tr);
                     ufGXmax++;
                     ufGXmaxV++;
@@ -440,13 +441,20 @@ function updateFlowCard() {
             }
 
             var processStepRequirements = $("#ufGXz" + i).val().trim();
+            var processStepRequirementMid = $("#ufGXh" + i).val().trim();
+
+            if (isStrEmptyOrUndefined(processStepRequirementMid) || parseFloat(processStepRequirementMid) <= 0) {
+                layer.msg("合格值必须大于0");
+                return;
+            }
 
             id = $("#ufGX" + i).attr("value");
             ufGXdata.push({
                 Id: id,
                 ProcessStepOrder: l++,
                 ProcessStepId: processStepId,
-                ProcessStepRequirements: processStepRequirements
+                ProcessStepRequirements: processStepRequirements,
+                ProcessStepRequirementMid: processStepRequirementMid
             });
         }
     }
@@ -524,7 +532,8 @@ function ufResetGX() {
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{0}</label></td>' +
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
-        '<td><input class="form-control" id="ufGXz{0}" maxlength="100"></td>' +
+        '<td><input class="form-control" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
+        '<td><input class="form-control text-center" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGXmax);
     $("#ufGXBody").append(tr);
@@ -553,7 +562,8 @@ function ufAddOtherGX() {
     var tr = ('<tr id="ufGX{0}" value="0">' +
         '<td><label class="control-label" id="ufGXx{0}">{1}</label></td>' +
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
-        '<td><input class="form-control" id="ufGXz{0}" maxlength="100"></td>' +
+        '<td><input class="form-control" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
+        '<td><input class="form-control text-center" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(ufGXmax, ufGXmaxV);
     $("#ufGXBody").append(tr);
@@ -687,11 +697,19 @@ function showChangeFlowCard(type) {
             var deviceId = function (data, type, row) {
                 return '<select class="can1 ms2 form-control" id="c8f{0}" oValue="{2}">{1}</select>'.format(o, seDeviceId, data.DeviceId);
             }
+            //成厚范围
+            var qualifiedRange = function (data, type, row) {
+                return '<input class="can1 can2 form-control" id="c9f{0}" style="width:100%" value="{1}" oValue="{1}" onblur="autoCal(this, \'c10f{0}\')" maxlength="20">'.format(o, data.QualifiedRange);
+            }
+            //成厚均值
+            var qualifiedMode = function (data, type, row) {
+                return '<input class="can1 can2 form-control" id="c10f{0}" style="width:100%" value="{1}" oValue="{1}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10">'.format(o, data.QualifiedMode);
+            }
             //操作
             var op = function (data, type, row) {
                 if (!data.IsSurvey)
-                    return '<button class="btn btn-success edit1-btn" type="button">加工</button>';
-                return '<button class="btn btn-info edit2-btn" type="button">检验</button>';
+                    return '<button class="btn btn-success edit1-btn" type="button" id="c11f{0}">加工</button>'.format(o);
+                return '<button class="btn btn-info edit2-btn" type="button" id="c11f{0}">检验</button>'.format(o);
             }
             function processStepOrder(a, b) {
                 return a.ProcessStepOrder > b.ProcessStepOrder ? 1 : -1;
@@ -720,6 +738,8 @@ function showChangeFlowCard(type) {
                         { "data": null, "title": "检验时间", "render": surveyTime },
                         { "data": null, "title": "合格数", "render": qualifiedNumber },
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
+                        { "data": null, "title": "成厚范围(<span class=\"text-info\">例:0.2～0.3mm</span>)", "render": qualifiedRange },
+                        { "data": null, "title": "成厚均值(<span class=\"text-info\">例:0.25</span>)", "render": qualifiedMode },
                         { "data": null, "title": "操作", "render": op },
                     ],
                     "drawCallback": function (settings, json) {
@@ -917,7 +937,9 @@ function changeFlowCard() {
         var qualifiedNumber;
         var unqualifiedNumber;
         var deviceId;
-        for (var j = 1; j <= 8; j++) {
+        var qualifiedRange;
+        var qualifiedMode;
+        for (var j = 1; j <= 10; j++) {
             var key = $("#c{1}f{0}".format(i, j));
             var v = key.val();
             var key1;
@@ -961,6 +983,20 @@ function changeFlowCard() {
                     //机台号
                     deviceId = v;
                     break;
+                case 9:
+                    //成厚范围
+                    qualifiedRange = v;
+                    break;
+                case 10:
+                    //成厚均值
+                    qualifiedMode = v;
+                    if (($("#c11f{0}".format(i)).hasClass("cancel1-btn") || $("#c11f{0}".format(i)).hasClass("cancel2-btn"))
+                        && (isStrEmptyOrUndefined(qualifiedMode) || parseFloat(qualifiedMode) <= 0)) {
+                        layer.msg("成厚均值必须大于0");
+                        return;
+                    }
+
+                    break;
                 default:
                     break;
             }
@@ -978,7 +1014,11 @@ function changeFlowCard() {
             //不合格数
             UnqualifiedNumber: unqualifiedNumber,
             //机台号（自增Id）
-            DeviceId: deviceId
+            DeviceId: deviceId,
+            //成厚范围
+            QualifiedRange: qualifiedRange,
+            //成厚均值
+            QualifiedMode: qualifiedMode
         };
         //加工日期 
         if (processTime != null)
@@ -992,6 +1032,7 @@ function changeFlowCard() {
         return;
     if ($("#gxList").find(".cancel1-btn").length <= 0 && $("#gxList").find(".cancel2-btn").length <= 0)
         return;
+    return;
     var doSth = function () {
         var data = {}
         data.opType = opType;
@@ -1181,9 +1222,10 @@ function showProductionProcessModel(type) {
                         var tr = ('<tr id="apGX{0}" value="{2}">' +
                             '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
                             '<td><select class="ms2 yc form-control" id="apGXm{0}"></td>' +
-                            '<td><input class="form-control" value="{3}" id="apGXz{0}" maxlength="100"></td>' +
+                            '<td><input class="form-control" value="{3}" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
+                            '<td><input class="form-control text-center" value="{4}" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
                             '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                            '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepRequirements);
+                            '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepRequirements, processStep.ProcessStepRequirementMid);
                         $("#apGXBody").append(tr);
                         apGXmax++;
                         apGXmaxV++;
@@ -1302,7 +1344,8 @@ function addResetGX() {
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{0}</label></td>' +
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
-        '<td><input class="form-control" id="apGXz{0}" maxlength="100"></td>' +
+        '<td><input class="form-control" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
+        '<td><input class="form-control text-center" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGXmax);
     $("#apGXBody").append(tr);
@@ -1333,7 +1376,8 @@ function addOtherGX() {
     var tr = ('<tr id="apGX{0}" value="0">' +
         '<td><label class="control-label" id="apGXx{0}">{1}</label></td>' +
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
-        '<td><input class="form-control" id="apGXz{0}" maxlength="100"></td>' +
+        '<td><input class="form-control" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
+        '<td><input class="form-control text-center" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(apGXmax, apGXmaxV);
     $("#apGXBody").append(tr);
@@ -1411,11 +1455,18 @@ function addProductionProcess() {
             }
 
             var processStepRequirements = $("#apGXz" + i).val().trim();
+            var processStepRequirementMid = $("#apGXh" + i).val().trim();
+
+            if (isStrEmptyOrUndefined(processStepRequirementMid) || parseFloat(processStepRequirementMid) <= 0) {
+                layer.msg("合格值必须大于0");
+                return;
+            }
 
             apGXdata.push({
                 ProcessStepOrder: l++,
                 ProcessStepId: processStepId,
-                ProcessStepRequirements: processStepRequirements
+                ProcessStepRequirements: processStepRequirements,
+                ProcessStepRequirementMid: processStepRequirementMid
             });
         }
     }
@@ -1497,13 +1548,20 @@ function updateProductionProcess() {
             }
 
             var processStepRequirements = $("#apGXz" + i).val().trim();
+            var processStepRequirementMid = $("#apGXh" + i).val().trim();
+
+            if (isStrEmptyOrUndefined(processStepRequirementMid) || parseFloat(processStepRequirementMid) <= 0) {
+                layer.msg("合格值必须大于0");
+                return;
+            }
 
             id = $("#apGX" + i).attr("value");
             apGXdata.push({
                 Id: id,
                 ProcessStepOrder: l++,
                 ProcessStepId: processStepId,
-                ProcessStepRequirements: processStepRequirements
+                ProcessStepRequirements: processStepRequirements,
+                ProcessStepRequirementMid: processStepRequirementMid
             });
         }
     }

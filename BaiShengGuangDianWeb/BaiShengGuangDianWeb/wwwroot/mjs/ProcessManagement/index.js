@@ -78,7 +78,7 @@ function getProcessList(type = 307) {
                 html = html.format(
                     checkPermission(207) ? detailBtn : "",
                     checkPermission(313) && lastType == 307 ? updateBtn : "",
-                    checkPermission(303) && lastType == 307 ? copyBtn : "",
+                    checkPermission(316) && lastType == 307 ? copyBtn : "",
                     checkPermission(211) && lastType == 307 ? delBtn : "");
                 return html;
             }
@@ -527,7 +527,7 @@ function getDeviceModelList() {
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#apDeviceModel").append(option.format(data.Id, data.ModelName));
+                $("#apDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
             }
             if (cData != null)
                 $("#apDeviceModel").val(cData.DeviceModels.split(",")).trigger("change");
@@ -558,7 +558,9 @@ function getProductionProcessList() {
                 $("#apProductionProcessName").append(option.format(data.Id, data.ProductionProcessName));
             }
             if (cData != null)
-                $("#apProductionProcessName").val(cData.ProductModels.split(",")).trigger("change");
+                $("#apProductionProcessName").val(cData.ProductModels).trigger("change");
+            else
+                $("#apProductionProcessName").val(0).trigger("change");
             getDeviceList();
         });
 }
@@ -575,8 +577,7 @@ function getDeviceList(type = 0) {
     var productionProcessIds = $("#apProductionProcessName").val();
     if (deviceModelIds == null ||
         deviceModelIds.length <= 0 ||
-        productionProcessIds == null ||
-        productionProcessIds.length <= 0) {
+        productionProcessIds == null) {
         $("#addProcessModel").modal("show");
         return;
     }
@@ -585,7 +586,7 @@ function getDeviceList(type = 0) {
     data.opType = opType;
     var d = {
         DeviceModelIds: deviceModelIds.join(","),
-        ProductionProcessIds: productionProcessIds.join(",")
+        ProductionProcessIds: productionProcessIds
     }
     if (cData != null)
         d.Pid = cData.Id;
@@ -737,7 +738,7 @@ function addProcess() {
     var postData = {
         ProcessNumber: apProcess,
         DeviceModels: deviceModels.join(","),
-        ProductModels: productModels.join(","),
+        ProductModels: productModels,
         DeviceIds: deviceIds.join(","),
         ProcessDatas: inputData
     };
@@ -892,7 +893,7 @@ function updateProcess() {
         Id: cData.Id,
         ProcessNumber: apProcess,
         DeviceModels: deviceModels.join(","),
-        ProductModels: productModels.join(","),
+        ProductModels: productModels,
         DeviceIds: deviceIds.join(","),
         ProcessDatas: inputData
     };

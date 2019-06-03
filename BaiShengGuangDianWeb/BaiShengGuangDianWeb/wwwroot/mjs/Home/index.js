@@ -82,9 +82,9 @@ function getDeviceList() {
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": null, "title": "设备状态", "render": deviceState },
-                        { "data": "ModelName", "title": "流程卡号" },
-                        { "data": "SiteName", "title": "加工时间" },
-                        { "data": "SiteName", "title": "剩余时间" },
+                        { "data": "FlowCard", "title": "流程卡号" },
+                        { "data": "ProcessTime", "title": "加工时间" },
+                        { "data": "LeftTime", "title": "剩余时间" },
                     ]
                 });
 
@@ -111,6 +111,7 @@ function queryFlowCard() {
         return;
     }
     $("#fcBody").addClass("hidden");
+    $("#processSteps").empty();
     $("#info").empty();
     $("#pData").empty();
     $("#run").addClass("disabled");
@@ -218,6 +219,18 @@ function queryFlowCard() {
                     $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
                 }
             }
+
+            var processSteps = flowCard.processSteps.sort(function (a, b) {
+                return a.ProcessStepOrder > b.ProcessStepOrder ? 1 : -1;
+            });
+            if (processSteps.length > 0) {
+                var tr = '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>';
+                for (var j = 0; j < processSteps.length; j++) {
+                    var ps = processSteps[j];
+                    $("#processSteps").append(tr.format(ps.ProcessStepOrderName, ps.StepName, ps.ProcessStepRequirements, ps.QualifiedRange, ps.QualifiedMode == 0 ? "" : ps.QualifiedMode));
+                }
+            }
+
         });
 }
 
@@ -319,7 +332,7 @@ function setProcessData() {
                 }
             });
     }
-    showConfirm("运行", doSth);
+    showConfirm("设置", doSth);
 }
 
 function showFaultModel() {
@@ -644,14 +657,12 @@ function queryRpFlowCard() {
             var qualifiedNumber = function (data, type, row) {
                 if (data.IsSurvey) {
                     if (sIndex == data.ProcessStepOrder && !data.IsReport) {
-                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
-                            .format(o, data.QualifiedNumber);
+                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
                     }
 
                 } else {
                     if (pIndex == data.ProcessStepOrder && !data.IsReport) {
-                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
-                            .format(o, data.QualifiedNumber);
+                        return '<input class="form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
                     }
                 }
                 return '<input class="form-control" id="c6f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.QualifiedNumber);
@@ -660,14 +671,12 @@ function queryRpFlowCard() {
             var unqualifiedNumber = function (data, type, row) {
                 if (data.IsSurvey) {
                     if (sIndex == data.ProcessStepOrder && !data.IsReport) {
-                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
-                            .format(o, data.UnqualifiedNumber);
+                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
                     }
 
                 } else {
                     if (pIndex == data.ProcessStepOrder && !data.IsReport) {
-                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" {2}>'
-                            .format(o, data.UnqualifiedNumber);
+                        return '<input class="form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
                     }
                 }
                 return '<input class="form-control" id="c7f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')">'.format(o, data.UnqualifiedNumber);
@@ -677,16 +686,49 @@ function queryRpFlowCard() {
                 return '<span id="c8f{0}" oValue="{2}">{1}</span>'.format(o, data.Code, data.DeviceId);
             }
 
+            //成厚范围
+            var qualifiedRange = function (data, type, row) {
+                if (data.IsSurvey) {
+                    if (sIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c9f{0}" style="width:100%" value="{1}" oValue="{1}" onblur="autoCal(this, \'c10f{0}\')" maxlength="20">'.format(o, data.QualifiedRange);
+                    }
+
+                } else {
+                    if (pIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c9f{0}" style="width:100%" value="{1}" oValue="{1}" onblur="autoCal(this, \'c10f{0}\')" maxlength="20">'.format(o, data.QualifiedRange);
+                    }
+                }
+                return '<input class="form-control" id="c9f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" onblur="autoCal(this, \'c10f{0}\')" maxlength="20">'.format(o, data.QualifiedRange);
+            }
+            //成厚均值
+            var qualifiedMode = function (data, type, row) {
+                if (data.IsSurvey) {
+                    if (sIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c10f{0}" style="width:100%" value="{1}" oValue="{1}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10">'.format(o, data.QualifiedMode);
+                    }
+
+                } else {
+                    if (pIndex == data.ProcessStepOrder && !data.IsReport) {
+                        return '<input class="form-control" id="c10f{0}" style="width:100%" value="{1}" oValue="{1}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10">'.format(o, data.QualifiedMode);
+                    }
+                }
+                return '<input class="form-control" id="c10f{0}" disabled="disabled" style="width:100%" value="{1}" oValue="{1}" onblur="autoCal(this, \'c10f{0}\')" maxlength="20">'.format(o, data.QualifiedMode);
+            }
             $("#gxList")
                 .DataTable({
                     "destroy": true,
                     "bSort": false,
+                    "paging": false,// 是否显示分页
+                    "deferRender": false,
+                    "bLengthChange": false,
+                    "info": false,
+                    "searching": false,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": datas,
                     "aaSorting": [[0, "asc"]],
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
-                        { "data": "MarkedDateTime", "title": "修改时间" },
+                        //{ "data": "MarkedDateTime", "title": "修改时间" },
                         { "data": null, "title": "工序名称", "render": processStepName },
                         { "data": "ProcessStepRequirements", "title": "加工要求" },
                         { "data": null, "title": "加工人", "render": processorId },
@@ -696,6 +738,8 @@ function queryRpFlowCard() {
                         { "data": null, "title": "检验时间", "render": surveyTime },
                         { "data": null, "title": "合格数", "render": qualifiedNumber },
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
+                        { "data": null, "title": "成厚范围(<span class=\"text-info\">例:0.2～0.3mm</span>)", "render": qualifiedRange },
+                        { "data": null, "title": "成厚均值(<span class=\"text-info\">例:0.25</span>)", "render": qualifiedMode },
                     ],
                     "drawCallback": function (settings, json) {
                         $("#gxList th").css("padding-right", "8px");
@@ -735,6 +779,7 @@ function reportFlowCard() {
     var flowCardId = parseInt($("#rpFCId").html());
     var oData = $("#gxList tbody").children();
     var postData = new Array();
+    var canSave = false;
     for (var i = 1; i <= oData.length; i++) {
         var id;
         var processorId;
@@ -744,14 +789,15 @@ function reportFlowCard() {
         var qualifiedNumber;
         var unqualifiedNumber;
         var deviceId;
-        for (var j = 1; j <= 8; j++) {
+        var qualifiedRange;
+        var qualifiedMode;
+        for (var j = 1; j <= 10; j++) {
             var key = $("#c{1}f{0}".format(i, j));
             var v = key.attr("ovalue");
             var key1;
             var key2;
             switch (j) {
                 case 1:
-                    v = $(key).attr("ovalue");
                     id = v;
                     break;
                 case 2:
@@ -789,6 +835,22 @@ function reportFlowCard() {
                     //机台号
                     deviceId = v;
                     break;
+                case 9:
+                    //成厚范围
+                    v = key.val();
+                    qualifiedRange = v;
+                    break;
+                case 10:
+                    //成厚均值
+                    v = key.val();
+                    qualifiedMode = v;
+                    if (isStrEmptyOrUndefined($("#c10f{0}".format(i)).attr("disabled"))) {
+                        canSave = true;
+                        if ((isStrEmptyOrUndefined(qualifiedMode) || parseFloat(qualifiedMode) <= 0)) {
+                            layer.msg("成厚均值必须大于0");
+                            return;
+                        }
+                    }
                 default:
                     break;
             }
@@ -806,7 +868,11 @@ function reportFlowCard() {
             //不合格数
             UnqualifiedNumber: unqualifiedNumber,
             //机台号（自增Id）
-            DeviceId: deviceId
+            DeviceId: deviceId,
+            //成厚范围
+            QualifiedRange: qualifiedRange,
+            //成厚均值
+            QualifiedMode: qualifiedMode
         };
         //加工日期 
         if (processTime != null)
@@ -818,7 +884,8 @@ function reportFlowCard() {
     }
     if (postData.length <= 0)
         return;
-
+    if (!canSave)
+        return;
     var doSth = function () {
         var data = {}
         data.opType = opType;

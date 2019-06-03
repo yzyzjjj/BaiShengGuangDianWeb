@@ -8,6 +8,80 @@
     if (!checkPermission(opType)) {
         $("#showAddModel").addClass("hidden");
     }
+
+    $("#addDeviceCategory").on("select2:select", function (e) {
+        hideTip("addDeviceModelTip");
+        hideTip("addScriptTip");
+        var categoryId = parseInt($("#addDeviceCategory option:checked").val());
+        $("#addDeviceModel").empty();
+
+        var modelId = 0;
+        var data;
+        var i;
+        for (i = 0; i < models.length; i++) {
+            data = models[i];
+            if (data.DeviceCategoryId == categoryId) {
+                modelId = modelId == 0 ? data.Id : modelId;
+                $("#addDeviceModel").append(option.format(data.Id, data.ModelName));
+            }
+        }
+        $("#addScript").empty();
+        for (i = 0; i < scripts.length; i++) {
+            data = scripts[i];
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+                $("#addScript").append(option.format(data.Id, data.ScriptName));
+            }
+        }
+    });
+
+    $("#addDeviceModel").on("select2:select", function (e) {
+        hideTip("addScriptTip");
+        var modelId = parseInt($("#addDeviceModel option:checked").val());
+        $("#addScript").empty();
+        for (var i = 0; i < scripts.length; i++) {
+            var data = scripts[i];
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+                $("#addScript").append(option.format(data.Id, data.ScriptName));
+            }
+        }
+    });
+
+    $("#updateDeviceCategory").on("select2:select", function (e) {
+        hideTip("updateDeviceModelTip");
+        hideTip("updateScriptTip");
+        var categoryId = parseInt($("#updateDeviceCategory option:checked").val());
+        $("#updateDeviceModel").empty();
+
+        var modelId = 0;
+        var data;
+        var i;
+        for (i = 0; i < models.length; i++) {
+            data = models[i];
+            if (data.DeviceCategoryId == categoryId) {
+                modelId = modelId == 0 ? data.Id : modelId;
+                $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
+            }
+        }
+        $("#updateScript").empty();
+        for (i = 0; i < scripts.length; i++) {
+            data = scripts[i];
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+                $("#updateScript").append(option.format(data.Id, data.ScriptName));
+            }
+        }
+    });
+
+    $("#updateDeviceModel").on("select2:select", function (e) {
+        var modelId = parseInt($("#updateDeviceModel option:checked").val());
+        $("#updateScript").empty();
+        for (var i = 0; i < scripts.length; i++) {
+            var data = scripts[i];
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+                hideTip("updateScriptTip");
+                $("#updateScript").append(option.format(data.Id, data.ScriptName));
+            }
+        }
+    });
 }
 
 function getDeviceList() {
@@ -76,6 +150,9 @@ function getDeviceList() {
                     return '<span class="text-info">' + state + '</span>';
                 return '<span class="text-red">' + state + '</span>';
             }
+            var modelName = function (data, type, row) {
+                return data.CategoryName + "-" + data.ModelName;
+            }
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
@@ -93,7 +170,7 @@ function getDeviceList() {
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
-                        { "data": "ModelName", "title": "设备型号" },
+                        { "data": null, "title": "设备型号", "render": modelName },
                         { "data": "SiteName", "title": "摆放位置" },
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorUser", "title": "管理员" },
@@ -127,41 +204,6 @@ function initAddSelect(categories, models, scripts) {
         if (data.DeviceModelId == modelId)
             $("#addScript").append(option.format(data.Id, data.ScriptName));
     }
-
-    $("#addDeviceCategory").on("select2:select", function (e) {
-        var categoryId = parseInt($("#addDeviceCategory option:checked").val());
-        $("#addDeviceModel").empty();
-
-        var modelId = 0;
-        for (i = 0; i < models.length; i++) {
-            data = models[i];
-            if (data.DeviceCategoryId == categoryId) {
-                hideTip("addDeviceModelTip");
-                modelId = modelId == 0 ? data.Id : modelId;
-                $("#addDeviceModel").append(option.format(data.Id, data.ModelName));
-            }
-        }
-        $("#addScript").empty();
-        for (i = 0; i < scripts.length; i++) {
-            data = scripts[i];
-            if (data.DeviceModelId == modelId) {
-                hideTip("addScriptTip");
-                $("#addScript").append(option.format(data.Id, data.ScriptName));
-            }
-        }
-    });
-
-    $("#addDeviceModel").on("select2:select", function (e) {
-        var modelId = parseInt($("#addDeviceModel option:checked").val());
-        $("#addScript").empty();
-        for (i = 0; i < scripts.length; i++) {
-            data = scripts[i];
-            if (data.DeviceModelId == modelId) {
-                hideTip("addScriptTip");
-                $("#addScript").append(option.format(data.Id, data.ScriptName));
-            }
-        }
-    });
 }
 
 function showAddModel() {
@@ -230,7 +272,7 @@ function addDevice() {
     //    add = false;
     //}
     //IP
-    var ip = $("#addIp").val().trim();
+    var ip = $("#addIp").val().trim().replace("_", "");
     if (!isIp(ip)) {
         showTip("addIpTip", "IP非法");
         add = false;
@@ -340,7 +382,8 @@ function addDevice() {
     showConfirm("添加机台号：" + code, doSth);
 }
 
-function initUpdateSelect(categoryId, modelId, scriptId, categories, models, scripts) {
+var categories, models, scripts;
+function initUpdateSelect(categoryId, modelId, scriptId) {
     var i;
     var data;
     for (i = 0; i < categories.length; i++) {
@@ -358,42 +401,6 @@ function initUpdateSelect(categoryId, modelId, scriptId, categories, models, scr
         $("#updateScript").append(option.format(data.Id, data.ScriptName));
     }
     $("#updateScript").val(scriptId);
-
-    $("#updateDeviceCategory").on("select2:select", function (e) {
-        var categoryId = parseInt($("#updateDeviceCategory option:checked").val());
-        $("#updateDeviceModel").empty();
-
-        var modelId = 0;
-        for (i = 0; i < models.length; i++) {
-            data = models[i];
-            if (data.DeviceCategoryId == categoryId) {
-                hideTip("updateDeviceModelTip");
-                modelId = modelId == 0 ? data.Id : modelId;
-                $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
-            }
-        }
-        $("#updateScript").empty();
-        for (i = 0; i < scripts.length; i++) {
-            data = scripts[i];
-            if (data.DeviceModelId == modelId) {
-                hideTip("updateScriptTip");
-                $("#updateScript").append(option.format(data.Id, data.ScriptName));
-            }
-        }
-    });
-
-    $("#updateDeviceModel").on("select2:select", function (e) {
-        var modelId = parseInt($("#updateDeviceModel option:checked").val());
-        $("#updateScript").empty();
-        for (i = 0; i < scripts.length; i++) {
-            data = scripts[i];
-            if (data.DeviceModelId == modelId) {
-                hideTip("updateScriptTip");
-                $("#updateScript").append(option.format(data.Id, data.ScriptName));
-            }
-        }
-    });
-
 }
 
 function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, scriptId, firmwareId, applicationId, hardwareId, siteId, administratorUser, remark, categoryId) {
@@ -447,7 +454,10 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
                 $("#updateSite").append(option.format(data.Id, data.SiteName));
             }
 
-            initUpdateSelect(categoryId, deviceModelId, scriptId, ret.deviceCategories, ret.deviceModels, ret.scriptVersions);
+            categories = ret.deviceCategories;
+            models = ret.deviceModels;
+            scripts = ret.scriptVersions;
+            initUpdateSelect(categoryId, deviceModelId, scriptId);
             hideClassTip("adt");
 
             $("#updateId").html(id);
@@ -497,7 +507,7 @@ function updateDevice() {
         update = false;
     }
     //IP
-    var ip = $("#updateIp").val().trim();
+    var ip = $("#updateIp").val().trim().replace("_", "");
     if (!isIp(ip)) {
         showTip("updateIpTip", "IP非法");
         update = false;
