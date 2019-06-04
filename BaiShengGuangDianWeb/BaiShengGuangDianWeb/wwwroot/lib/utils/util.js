@@ -833,3 +833,112 @@ function checkFileExt(file, fileExt) {
     }
     return false;
 }
+
+//整数5位  小数4位
+function onInput(obj, zs = 5, xs = 4) {
+    obj.value = input(obj.value, zs, xs);
+}
+
+function input(s, zs = 5, xs = 4) {
+
+    //修复第一个字符是小数点 的情况.
+    if (s != '' && s.substr(0, 1) == '.') {
+        s = "";
+    }
+    s = s.replace(/^0*(0\.|[1-9])/, '$1');//解决 粘贴不生效
+    s = s.replace(/[^\d.]/g, "");  //清除“数字”和“.”以外的字符
+    s = s.replace(/\.{2,}/g, "."); //只保留第一个. 清除多余的     
+    s = s.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+    ///^(\-)*(\d+)\.(\d{4}).*$/
+    var reg = eval("/^(\\-)*(\\d+)\\.(\\d{" + xs + "}).*$/")
+    s = s.replace(reg, '$1$2.$3');//只能输入xs个小数     
+    if (s.indexOf(".") < 0 && s != "") {
+        //以上已经过滤，此处控制的是如果没有小数点，首位不能为0
+        //if (s.substr(0, 1) == '0' && s.length == 2) {
+        //    s = s.substr(1, s.length);
+        //}
+        while (s.substr(0, 2) == '00') {
+            s = s.substr(1, s.length);
+        }
+    }
+
+    if (s != '') {
+        s = s.split(".");
+        if (s.length > 0 && s[0].length > zs) {
+            s[0] = s[0].substr(0, zs);
+        }
+        s = s.join(".");
+    }
+    return s;
+}
+
+function onInputEnd(obj) {
+    obj.value = inputEnd(obj.value);
+}
+
+function inputEnd(s) {
+    if (s.indexOf(".") > -1 && s != "") {
+        s = s.split("").reverse().join("");
+        while (s.substr(0, 1) == '0') {
+            s = s.substr(1, s.length);
+        }
+        while (s.substr(0, 1) == '.') {
+            s = s.substr(1, s.length);
+        }
+    }
+    return s.split("").reverse().join("");
+}
+
+function autoCal(obj, ui) {
+    if (obj.value == '')
+        return;
+
+    var t = 0;
+    if (obj.value.indexOf("±") > -1)
+        t = 1;
+    else if (obj.value.indexOf("～") > -1)
+        t = 2;
+    else if (obj.value.indexOf("±") > -1)
+        t = 3;
+
+    ui = $("#" + ui);
+    var num = [];
+    var s = obj.value.replace(" ", "").split("");
+    s.push(";");
+    var n = "";
+    for (var i = 0; i < s.length; i++) {
+        if (isNumber(s[i]) || s[i] == '.') {
+            n += s[i];
+        } else {
+            if (isNumber(n))
+                num[num.length] = parseFloat(n);
+            n = "";
+        }
+    }
+
+    var p;
+    switch (t) {
+        case 1:
+            if (num.length >= 1) {
+                p = num[0]; break;
+            }
+        case 2:
+            if (num.length == 1) {
+                p = num[0]; break;
+            } else if (num.length >= 2) {
+                p = (num[0] + num[1]) / 2.0; break;
+            }
+        default:
+            if (num.length >= 1) {
+                p = num[0];
+                break;
+            }
+            p = 0; break;
+    }
+
+    p = input(p.toString());
+    p = inputEnd(p.toString());
+    ui.val(p);
+}
+
+
