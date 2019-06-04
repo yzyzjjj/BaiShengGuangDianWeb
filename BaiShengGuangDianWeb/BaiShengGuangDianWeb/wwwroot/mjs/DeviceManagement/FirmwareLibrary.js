@@ -66,6 +66,9 @@ function getFirmwareList() {
                             { "data": "Description", "title": "描述" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 6 }
+                        ],
                     });
             } else {
                 $("#firmLibraryList")
@@ -85,7 +88,7 @@ function getFirmwareList() {
                             //{ "data": "CommunicationProtocol", "title": "通信协议" },
                             { "data": "FilePath", "title": "程序文件的位置及名称" },
                             { "data": "Description", "title": "描述" },
-                        ],
+                        ]
                     });
             }
         });

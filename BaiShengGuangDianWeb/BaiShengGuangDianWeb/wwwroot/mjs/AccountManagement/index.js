@@ -265,6 +265,11 @@ function getMemberList(id, name) {
                     { "data": "Name", "title": "姓名" },
                     { "data": "RoleName", "title": "角色" },
                 ];
+            var defs = checkPermission(72)
+                ? [
+                    { "orderable": false, "targets": 4 }
+                ]
+                : "";
 
             $("#memberListTable")
                 .DataTable({
@@ -276,6 +281,7 @@ function getMemberList(id, name) {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": columns,
+                    "columnDefs":defs,
                     "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
                         $("#memberListTable td").css("vertical-align", "middle");
@@ -326,6 +332,9 @@ function showAddMemberModal() {
                         { "data": "account", "title": "账号" },
                         { "data": "roleName", "title": "角色" },
                         { "data": null, "title": "选择", "sClass": "text-red", "render": op }
+                    ],
+                    "columnDefs": [
+                        { "orderable": false, "targets": 5 }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#memberList td").css("padding", "3px");

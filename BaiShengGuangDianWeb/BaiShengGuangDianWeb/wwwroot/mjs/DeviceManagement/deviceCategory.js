@@ -64,6 +64,9 @@ function getCategoryList() {
                             { "data": "Description", "title": "描述" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 4 }
+                        ],
                     });
             } else {
                 $("#categoryList")
@@ -80,7 +83,7 @@ function getCategoryList() {
                             { "data": "Id", "title": "Id", "bVisible": false },
                             { "data": "CategoryName", "title": "类型名" },
                             { "data": "Description", "title": "描述" },
-                        ],
+                        ]
                     });
             }
         });

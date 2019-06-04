@@ -69,6 +69,9 @@ function getDeviceProcessStepList() {
                             { "data": "Description", "title": "备注" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 5 }
+                        ]
                     });
             } else {
                 $("#deviceProcessStepList")

@@ -100,6 +100,9 @@ function getDeviceList() {
                         { "data": null, "title": "运行状态", "render": state },
                         { "data": null, "title": "设备状态", "render": deviceState },
                         { "data": null, "title": "操作", "render": op }
+                    ],
+                    "columnDefs": [
+                        { "orderable": false, "targets": 9 }
                     ]
                 });
         });

@@ -64,6 +64,9 @@ function getApplicationList() {
                             { "data": "Description", "title": "描述" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 5 }
+                        ]
                     });
             } else {
                 $("#applicationList")
@@ -81,7 +84,7 @@ function getApplicationList() {
                             { "data": "ApplicationName", "title": "名称" },
                             { "data": "FilePath", "title": "程序文件的位置及名称" },
                             { "data": "Description", "title": "描述" },
-                        ],
+                        ]
                     });
             }
         });

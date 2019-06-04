@@ -58,13 +58,15 @@ function getUsersList() {
                     '</div>';
                 var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
                 var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
-                html = html.format(
-                    checkPermission(76) ? upUsers : "",
-                    checkPermission(75) ? delUsers : "");
+                !checkPermission(76) && checkPermission(75) && data.isDeleted
+                    ? html = ""
+                    : html = html.format(
+                        checkPermission(76) ? upUsers : "",
+                        checkPermission(75) && !data.isDeleted ? delUsers : "");
                 return html;
             }
             var del = function (data, type, row) {
-                return data.isDeleted ? "<span class='text-red'>是</span>" : "否";
+                return data.isDeleted ? "<span class='text-red'>是</span>": "否";
             }
             var o = 0;
             var order = function (data, type, row) {
@@ -91,7 +93,10 @@ function getUsersList() {
                             { "data": "emailAddress", "title": "邮箱" },
                             { "data": null, "title": "删除", "render": del },
                             { "data": null, "title": "操作", "render": op },
-                        ]
+                        ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 7 }
+                        ],
                     });
             } else {
                 $("#userTable")
@@ -151,8 +156,10 @@ function addReset() {
     showAddUserModal(-1);
 }
 
-var addList = new Array();
+var addList = null;
+var addData = null;
 function showAddUserModal(type = 0) {
+    addList = new Array();
     $("#add_protoDiv").click();
     $(".dd").val("");
     $("#addProcessor").iCheck('uncheck');
@@ -198,15 +205,15 @@ function showAddUserModal(type = 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal add" onclick="">'.format(data.Id);
+                return '<input type="checkbox" value="{0}" id="checkAdd" class="icb_minimal" onclick="">'.format(data.Id);
             }
 
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
             }
+
             $("#addDeviceList")
                 .DataTable({
                     "destroy": true,
@@ -214,11 +221,11 @@ function showAddUserModal(type = 0) {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
+                    "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+                    "iDisplayLength": 5, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "全选<input type='checkbox' class='all'>", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
@@ -229,62 +236,69 @@ function showAddUserModal(type = 0) {
                         { "orderable": false, "targets": 0 }
                     ],
                     "drawCallback": function (settings, json) {
-                        $("#addDeviceList td").css("padding", "3px");
-                        $("#addDeviceList td").css("vertical-align", "middle");
-                        $("#addDeviceList .icb_minimal").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
-                        $("#addDeviceList .add").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
-                        $("#addDeviceList .all").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
+                        //if ($("#addDeviceList .all").is(":checked")) {
+                            //$("#addDeviceList .icb_minimal").iCheck('check');
+                        
 
-                        var checkAll = $('input.all');  //全选的input
-                        var checkAdd = $('input.add'); //所有单选的input
 
-                        checkAll.on('ifChecked ifUnchecked', function (event) {
-                            if (event.type == 'ifChecked') {
-                                checkAdd.iCheck('check');
+
+                        //}
+                        //else
+                        //{
+                            $("#addDeviceList td").css("padding", "3px");
+                            $("#addDeviceList td").css("vertical-align", "middle");
+                            $("#addDeviceList .icb_minimal").iCheck({
+                                checkboxClass: 'icheckbox_minimal',
+                                radioClass: 'iradio_minimal',
+                                increaseArea: '20%' // optional
+                            });
+
+                            $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
+                                var ui = $(this);
+                                var v = ui.attr("value");
+                                if (ui.is(":checked")) {
+                                    ui.parents("tr:first").css("background-color", "gray");
+                                    addList.push(v);
+                                } else {
+                                    if (ui.parents("tr:first").hasClass("odd"))
+                                        ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                    else
+                                        ui.parents("tr:first").css("background-color", "");
+
+                                    addList.splice(addList.indexOf(v), 1);
+                                }
+                            });
+                        //}
+                        $("#checkAll").on("ifChanged", function (event) {
+                            if ($(this).is(":checked")) {
+                                $("#addDeviceList .icb_minimal").iCheck('check');
                             } else {
-                                checkAdd.iCheck('uncheck');
+                                $("#addDeviceList .icb_minimal").iCheck('uncheck');
                             }
                         });
+                        if ($("#checkAll").is(":checked")) {    
+                            $("#addDeviceList .icb_minimal").iCheck('check');
+                        } else if ($("#addDeviceList .icb_minimal").is(":checked")) {
+                            $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
+                                var ui = $(this);
+                                var v = ui.attr("value");
+                                if (ui.is(":checked")) {
+                                    ui.parents("tr:first").css("background-color", "gray");
+                                    addList.push(v);
+                                } else {
+                                    if (ui.parents("tr:first").hasClass("odd"))
+                                        ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                    else
+                                        ui.parents("tr:first").css("background-color", "");
 
-                        checkAdd.on('ifChanged', function (event) {
-                            if (checkAdd.filter(':checked').length == checkAdd.length) {
-                                checkAll.prop('checked', true);
-                            } else {
-                                checkAll.prop('checked', false);
-                            }
-                            checkAll.iCheck('update');
-                        });
-
-                        $("#addDeviceList .add").on('ifChanged', function (event) {
-                            var ui = $(this);
-                            var v = ui.attr("value");
-                            if (ui.is(":checked")) {
-                                ui.parents("tr:first").css("background-color", "gray");
-                                addList.push(v);
-                            } else {
-                                if (ui.parents("tr:first").hasClass("odd"))
-                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
-                                else
-                                    ui.parents("tr:first").css("background-color", "");
-
-                                addList.splice(addList.indexOf(v), 1);
-                            }
-                        });
+                                    addList.splice(addList.indexOf(v), 1);
+                                }
+                            });
+                        } else {
+                            $("#addDeviceList .icb_minimal").iCheck('uncheck');
+                        }
                     }
                 });
-
         });
 }
 
@@ -538,7 +552,7 @@ function updateUser() {
     if (pRole.indexOf(0) == -1)
         updateList = new Array();
     else {
-        deviceIds = updateList.length == $("#updateDeviceList .up").length + 1 ? "" : updateList.join(",");
+        deviceIds = updateList.join(",");
     }
 
     if (isStrEmptyOrUndefined(updateName)) {
