@@ -1,0 +1,22 @@
+[
+  //{
+  //  "outputFileName": "wwwroot/mcss/allCss.min.css",
+  //  "inputFiles": [
+  //    "wwwroot/mcss/*.css"
+  //  ]
+  //},
+  {
+    "outputFileName": "wwwroot/lib/utils/all.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/const.js",
+      "wwwroot/lib/utils/date.js",
+      "wwwroot/lib/utils/tpl.js",
+      "wwwroot/lib/utils/util.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]

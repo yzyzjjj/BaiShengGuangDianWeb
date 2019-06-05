@@ -170,10 +170,15 @@
     <script src="~/lib/layer/layer.js"></script>
     <script src="~/lib/utils/md5.min.js"></script>
     <script src="~/lib/utils/base64.min.js"></script>
-    <script src="~/lib/utils/const.js"></script>
-    <script src="~/lib/utils/util.js"></script>
-    <script src="~/lib/utils/date.js"></script>
-    <script src="~/lib/utils/tpl.js"></script>
+    <environment include="Development">
+        <script src="~/lib/utils/const.js"></script>
+        <script src="~/lib/utils/util.js"></script>
+        <script src="~/lib/utils/date.js"></script>
+        <script src="~/lib/utils/tpl.js"></script>
+    </environment>
+    <environment include="Staging,Production">
+        <script src="~/lib/utils/all.min.js" asp-append-version="true"></script>
+    </environment>
 </head>
 
 <!-- copied directly from AdminLTE index.html (FR) -->
