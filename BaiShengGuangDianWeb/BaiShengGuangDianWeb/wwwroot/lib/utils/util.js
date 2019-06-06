@@ -105,7 +105,7 @@ function checkPermission(opType) {
 
     if (info == null || !isTokenValid()) {
         SetCookie(lastLocation, window.location.href);
-        window.location.href = const_loginurl;
+        window.location.href = loginUrl;
         return -1;
     } else {
         return info.permissionsList.indexOf(opType) >= 0;
@@ -124,7 +124,7 @@ function removeCover() {
 }
 
 function reLogin() {
-    //window.location.href = const_loginurl
+    //window.location.href = loginUrl
     console.log("err")
 }
 
@@ -211,7 +211,7 @@ function errorHandle(ret) {
     ////token 有问题，重新登录
     //if (ret.errno == ErrorEnum.MissToken || ret.errno == ErrorEnum.TokenError || ret.errno == ErrorEnum.TokenInvalid) {
     //    SetCookie(lastLocation, window.location.href);
-    //    window.location.href = const_loginurl;
+    //    window.location.href = loginUrl;
     //}
     return true;
 }
