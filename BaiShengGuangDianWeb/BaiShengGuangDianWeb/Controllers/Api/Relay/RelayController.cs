@@ -109,7 +109,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
                     opData,
                 };
                 OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, opType, logParam.ToJSON());
-                if (opType != 100)
+                if (opType != 100 || AccountHelper.CurrentUser.Role == 1)
                 {
                     return JObject.Parse(result);
                 }

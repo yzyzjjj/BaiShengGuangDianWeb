@@ -82,8 +82,8 @@ function getUsersList() {
                         "searching": true,
                         "language": { "url": "/content/datatables_language.json" },
                         "data": ret.datas,
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数  
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
                             { "data": "id", "title": "id", "bVisible": false },
@@ -225,8 +225,8 @@ function showAddUserModal(type = 0) {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-                    "iDisplayLength": 5, //默认显示的记录数  
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数 
                     "aaSorting": [[1, "asc"]],
                     "columns": [
                         { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op },
@@ -353,7 +353,6 @@ function addUser() {
         layer.msg("密码不能为空");
         return;
     }
-    return;
     var doSth = function () {
         $("#addUserModal").modal("hide");
         var data = {
@@ -387,9 +386,10 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
     permissions = unescape(permissions);
     deviceIds = unescape(deviceIds);
     productionRole = unescape(productionRole);
-
+    if (!isStrEmptyOrUndefined(deviceIds))
+        updateList = deviceIds.split(",");
     $("#update_protoDiv").click();
-    updateList = new Array();
+
     permission = permissions;
     $("#updateId").html(id);
     $("#updateAccount").val(account);
@@ -429,6 +429,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
         layer.msg("没有权限");
         return;
     }
+    deviceId = new Array();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post",
@@ -439,8 +440,11 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                 return;
             }
 
+            for (var d in ret.datas) {
+                deviceId.push(ret.datas[d].Id.toString());
+            }
             var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal up" onclick="">'.format(data.Id);
+                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
             }
 
             var o = 0;
@@ -454,11 +458,11 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "全选<input type='checkbox' class='all'>", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='upCheckAll'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
@@ -476,60 +480,64 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                             radioClass: 'iradio_minimal',
                             increaseArea: '20%' // optional
                         });
-                        $("#updateDeviceList .up").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
-                        $("#updateDeviceList .all").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
-                        var checkAll = $('input.all');  //全选的input
-                        var checkUp = $('input.up'); //所有单选的input
 
-                        checkAll.on('ifChecked ifUnchecked', function (event) {
-                            if (event.type == 'ifChecked') {
-                                checkUp.iCheck('check');
-                            } else {
-                                checkUp.iCheck('uncheck');
-                            }
-                        });
-
-                        checkUp.on('ifChanged', function (event) {
-                            if (checkUp.filter(':checked').length == checkUp.length) {
-                                checkAll.prop('checked', true);
-                            } else {
-                                checkAll.prop('checked', false);
-                            }
-                            checkAll.iCheck('update');
-                        });
-                        $("#updateDeviceList .up").on('ifChanged', function (event) {
+                        if (updateList.length == deviceId.length) {
+                            $("#upCheckAll").iCheck('check');
+                        }
+                        $("#updateDeviceList .icb_minimal").on('ifChanged', function (event) {
                             var ui = $(this);
                             var v = ui.attr("value");
-                            if (ui.is(":checked")) {
-                                ui.parents("tr:first").css("background-color", "gray");
-                                updateList.push(v);
-                            } else {
-                                if (ui.parents("tr:first").hasClass("odd"))
-                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
-                                else
-                                    ui.parents("tr:first").css("background-color", "");
-
-                                updateList.splice(updateList.indexOf(v), 1);
+                            if (!isStrEmptyOrUndefined(v)) {
+                                if (ui.is(":checked")) {
+                                    ui.parents("tr:first").css("background-color", "gray");
+                                    if (updateList.indexOf(v) == -1) {
+                                        updateList.push(v);
+                                    }
+                                    if ($("#upCheckAll").is(":checked")) {
+                                        updateList = new Array();
+                                    }
+                                    if (updateList.length == deviceId.length) {
+                                        $("#upCheckAll").iCheck('check');
+                                    }
+                                } else {
+                                    if (ui.parents("tr:first").hasClass("odd"))
+                                        ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                    else
+                                        ui.parents("tr:first").css("background-color", "");
+                                    if (updateList.indexOf(v) != -1)
+                                        updateList.splice(updateList.indexOf(v), 1);
+                                    if ($("#upCheckAll").is(":checked")) {
+                                        for (var j = 0; j < deviceId.length; j++) {
+                                            if (deviceId[j] != v)
+                                                updateList.push(deviceId[j]);
+                                        }
+                                        $("#upCheckAll").iCheck('uncheck');
+                                    }
+                                }
                             }
                         });
-
-                        if (isStrEmptyOrUndefined(deviceIds)) {
-                            checkUp.iCheck('uncheck');
-                            return;
-                        }
-
-                        var deviceIdList = deviceIds.split(",");
-                        for (var i = 0; i < deviceIdList.length; i++) {
-                            var index = deviceIdList[i];
-                            checkUp.filter("[value=" + index + "]").iCheck('check');
+                        $("#upCheckAll").on("ifChanged", function (event) {
+                            if ($(this).is(":checked")) {
+                                $("#updateDeviceList .icb_minimal").iCheck('check');
+                                updateList = new Array();
+                            } else {
+                                if (updateList.length == 0)
+                                    $("#updateDeviceList .icb_minimal").iCheck('uncheck');
+                            }
+                        });
+                        if ($("#upCheckAll").is(":checked")) {
+                            updateList = new Array();
+                            $("#updateDeviceList .icb_minimal").iCheck('check');
+                        } else {
+                            var iCks = $("#updateDeviceList .icb_minimal");
+                            for (var i = 0; i < iCks.length; i++) {
+                                if (isNumber(iCks[i].value)) {
+                                    if (updateList.indexOf(iCks[i].value) == -1)
+                                        $(iCks[i]).iCheck('uncheck');
+                                    else
+                                        $(iCks[i]).iCheck('check');
+                                }
+                            }
                         }
                     }
                 });
@@ -557,12 +565,14 @@ function updateUser() {
             pId.push(v);
     }
     var roleIds = pId.join(",");
-
     var deviceIds = "";
-    if (pRole.indexOf(0) == -1)
-        updateList = new Array();
+    if ($("#upCheckAll").is(":checked"))
+        deviceIds = deviceId.join(",");
     else {
-        deviceIds = updateList.join(",");
+        if (pRole.indexOf(0) > -1)
+            deviceIds = updateList.join(",");
+        else
+            updateList = new Array();
     }
 
     if (isStrEmptyOrUndefined(updateName)) {
