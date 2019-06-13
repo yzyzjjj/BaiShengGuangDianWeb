@@ -58,9 +58,11 @@ function getUsersList() {
                     '</div>';
                 var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
                 var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
-                html = html.format(
-                    checkPermission(76) ? upUsers : "",
-                    checkPermission(75) ? delUsers : "");
+                !checkPermission(76) && checkPermission(75) && data.isDeleted
+                    ? html = ""
+                    : html = html.format(
+                        checkPermission(76) ? upUsers : "",
+                        checkPermission(75) && !data.isDeleted ? delUsers : "");
                 return html;
             }
             var del = function (data, type, row) {
@@ -80,8 +82,8 @@ function getUsersList() {
                         "searching": true,
                         "language": { "url": "/content/datatables_language.json" },
                         "data": ret.datas,
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数  
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
                             { "data": "id", "title": "id", "bVisible": false },
@@ -91,7 +93,10 @@ function getUsersList() {
                             { "data": "emailAddress", "title": "邮箱" },
                             { "data": null, "title": "删除", "render": del },
                             { "data": null, "title": "操作", "render": op },
-                        ]
+                        ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 7 }
+                        ],
                     });
             } else {
                 $("#userTable")
@@ -151,8 +156,10 @@ function addReset() {
     showAddUserModal(-1);
 }
 
-var addList = new Array();
+var addList = null;
+var deviceId = null;
 function showAddUserModal(type = 0) {
+    addList = new Array();
     $("#add_protoDiv").click();
     $(".dd").val("");
     $("#addProcessor").iCheck('uncheck');
@@ -189,6 +196,7 @@ function showAddUserModal(type = 0) {
         layer.msg("没有权限");
         return;
     }
+    deviceId = new Array();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post",
@@ -198,7 +206,9 @@ function showAddUserModal(type = 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            for (var d in ret.datas) {
+                deviceId.push(ret.datas[d].Id.toString());
+            }
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
             }
@@ -207,6 +217,7 @@ function showAddUserModal(type = 0) {
             var order = function (data, type, row) {
                 return ++o;
             }
+
             $("#addDeviceList")
                 .DataTable({
                     "destroy": true,
@@ -215,14 +226,18 @@ function showAddUserModal(type = 0) {
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
+                    "iDisplayLength": 20, //默认显示的记录数 
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    //关闭第一列排序功能
+                    "columnDefs": [
+                        { "orderable": false, "targets": 0 }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#addDeviceList td").css("padding", "3px");
@@ -232,24 +247,64 @@ function showAddUserModal(type = 0) {
                             radioClass: 'iradio_minimal',
                             increaseArea: '20%' // optional
                         });
+
                         $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
                             var ui = $(this);
                             var v = ui.attr("value");
-                            if (ui.is(":checked")) {
-                                ui.parents("tr:first").css("background-color", "gray");
-                                addList.push(v);
-                            } else {
-                                if (ui.parents("tr:first").hasClass("odd"))
-                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
-                                else
-                                    ui.parents("tr:first").css("background-color", "");
-
-                                addList.splice(addList.indexOf(v), 1);
+                            if (!isStrEmptyOrUndefined(v)) {
+                                if (ui.is(":checked")) {
+                                    ui.parents("tr:first").css("background-color", "gray");
+                                    if (addList.indexOf(v) == -1) {
+                                        addList.push(v);
+                                    }
+                                    if ($("#checkAll").is(":checked")) {
+                                        addList = new Array();
+                                    }
+                                    if (addList.length == deviceId.length) {
+                                        $("#checkAll").iCheck('check');
+                                    }
+                                } else {
+                                    if (ui.parents("tr:first").hasClass("odd"))
+                                        ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                    else
+                                        ui.parents("tr:first").css("background-color", "");
+                                    if (addList.indexOf(v) != -1)
+                                        addList.splice(addList.indexOf(v), 1);
+                                    if ($("#checkAll").is(":checked")) {
+                                        for (var j = 0; j < deviceId.length; j++) {
+                                            if (deviceId[j] != v)
+                                                addList.push(deviceId[j]);
+                                        }
+                                        $("#checkAll").iCheck('uncheck');
+                                    }
+                                }
                             }
                         });
+                        $("#checkAll").on("ifChanged", function (event) {
+                            if ($(this).is(":checked")) {
+                                $("#addDeviceList .icb_minimal").iCheck('check');
+                                addList = new Array();
+                            } else {
+                                if (addList.length == 0)
+                                    $("#addDeviceList .icb_minimal").iCheck('uncheck');
+                            }
+                        });
+                        if ($("#checkAll").is(":checked")) {
+                            addList = new Array();
+                            $("#addDeviceList .icb_minimal").iCheck('check');
+                        } else {
+                            var iCks = $("#addDeviceList .icb_minimal");
+                            for (var i = 0; i < iCks.length; i++) {
+                                if (isNumber(iCks[i].value)) {
+                                    if (addList.indexOf(iCks[i].value) == -1)
+                                        $(iCks[i]).iCheck('uncheck');
+                                    else
+                                        $(iCks[i]).iCheck('check');
+                                }
+                            }
+                        }
                     }
                 });
-
         });
 }
 
@@ -277,10 +332,14 @@ function addUser() {
     var roleIds = pId.join(",");
 
     var deviceIds = "";
-    if (pRole.indexOf(0) > -1)
-        deviceIds = addList.join(",");
-    else
-        addList = new Array();
+    if ($("#checkAll").is(":checked"))
+        deviceIds = deviceId.join(",");
+    else {
+        if (pRole.indexOf(0) > -1)
+            deviceIds = addList.join(",");
+        else
+            addList = new Array();
+    }
 
     if (isStrEmptyOrUndefined(addAccount)) {
         layer.msg("用户名不能为空");
@@ -294,7 +353,6 @@ function addUser() {
         layer.msg("密码不能为空");
         return;
     }
-
     var doSth = function () {
         $("#addUserModal").modal("hide");
         var data = {
@@ -328,9 +386,10 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
     permissions = unescape(permissions);
     deviceIds = unescape(deviceIds);
     productionRole = unescape(productionRole);
-
+    if (!isStrEmptyOrUndefined(deviceIds))
+        updateList = deviceIds.split(",");
     $("#update_protoDiv").click();
-    updateList = new Array();
+
     permission = permissions;
     $("#updateId").html(id);
     $("#updateAccount").val(account);
@@ -370,6 +429,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
         layer.msg("没有权限");
         return;
     }
+    deviceId = new Array();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post",
@@ -380,6 +440,9 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                 return;
             }
 
+            for (var d in ret.datas) {
+                deviceId.push(ret.datas[d].Id.toString());
+            }
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
             }
@@ -399,11 +462,15 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                     "iDisplayLength": 20, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='upCheckAll'>", "render": op },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
+                    ],
+                    //关闭第一列排序功能
+                    "columnDefs": [
+                        { "orderable": false, "targets": 0 }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#updateDeviceList td").css("pupdateing", "3px");
@@ -413,31 +480,64 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                             radioClass: 'iradio_minimal',
                             increaseArea: '20%' // optional
                         });
+
+                        if (updateList.length == deviceId.length) {
+                            $("#upCheckAll").iCheck('check');
+                        }
                         $("#updateDeviceList .icb_minimal").on('ifChanged', function (event) {
                             var ui = $(this);
                             var v = ui.attr("value");
-                            if (ui.is(":checked")) {
-                                ui.parents("tr:first").css("background-color", "gray");
-                                updateList.push(v);
-                            } else {
-                                if (ui.parents("tr:first").hasClass("odd"))
-                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
-                                else
-                                    ui.parents("tr:first").css("background-color", "");
-
-                                updateList.splice(updateList.indexOf(v), 1);
+                            if (!isStrEmptyOrUndefined(v)) {
+                                if (ui.is(":checked")) {
+                                    ui.parents("tr:first").css("background-color", "gray");
+                                    if (updateList.indexOf(v) == -1) {
+                                        updateList.push(v);
+                                    }
+                                    if ($("#upCheckAll").is(":checked")) {
+                                        updateList = new Array();
+                                    }
+                                    if (updateList.length == deviceId.length) {
+                                        $("#upCheckAll").iCheck('check');
+                                    }
+                                } else {
+                                    if (ui.parents("tr:first").hasClass("odd"))
+                                        ui.parents("tr:first").css("background-color", "#f9f9f9");
+                                    else
+                                        ui.parents("tr:first").css("background-color", "");
+                                    if (updateList.indexOf(v) != -1)
+                                        updateList.splice(updateList.indexOf(v), 1);
+                                    if ($("#upCheckAll").is(":checked")) {
+                                        for (var j = 0; j < deviceId.length; j++) {
+                                            if (deviceId[j] != v)
+                                                updateList.push(deviceId[j]);
+                                        }
+                                        $("#upCheckAll").iCheck('uncheck');
+                                    }
+                                }
                             }
                         });
-
-                        if (isStrEmptyOrUndefined(deviceIds)) {
+                        $("#upCheckAll").on("ifChanged", function (event) {
+                            if ($(this).is(":checked")) {
+                                $("#updateDeviceList .icb_minimal").iCheck('check');
+                                updateList = new Array();
+                            } else {
+                                if (updateList.length == 0)
+                                    $("#updateDeviceList .icb_minimal").iCheck('uncheck');
+                            }
+                        });
+                        if ($("#upCheckAll").is(":checked")) {
+                            updateList = new Array();
                             $("#updateDeviceList .icb_minimal").iCheck('check');
-                            return;
-                        }
-
-                        var deviceIdList = deviceIds.split(",");
-                        for (var i = 0; i < deviceIdList.length; i++) {
-                            var index = deviceIdList[i];
-                            $("#updateDeviceList .icb_minimal").filter("[value=" + index + "]").iCheck('check');
+                        } else {
+                            var iCks = $("#updateDeviceList .icb_minimal");
+                            for (var i = 0; i < iCks.length; i++) {
+                                if (isNumber(iCks[i].value)) {
+                                    if (updateList.indexOf(iCks[i].value) == -1)
+                                        $(iCks[i]).iCheck('uncheck');
+                                    else
+                                        $(iCks[i]).iCheck('check');
+                                }
+                            }
                         }
                     }
                 });
@@ -465,12 +565,14 @@ function updateUser() {
             pId.push(v);
     }
     var roleIds = pId.join(",");
-
     var deviceIds = "";
-    if (pRole.indexOf(0) == -1)
-        updateList = new Array();
+    if ($("#upCheckAll").is(":checked"))
+        deviceIds = deviceId.join(",");
     else {
-        deviceIds = updateList.length == $("#updateDeviceList .icb_minimal").length ? "" : updateList.join(",");
+        if (pRole.indexOf(0) > -1)
+            deviceIds = updateList.join(",");
+        else
+            updateList = new Array();
     }
 
     if (isStrEmptyOrUndefined(updateName)) {

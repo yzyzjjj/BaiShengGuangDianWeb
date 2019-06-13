@@ -29,6 +29,41 @@
     if (!checkPermission(opType)) {
         $("#showAddUsuallyFaultModel").addClass("hidden");
     }
+    //定时器
+    window.onload = function () {
+        (function ($) {
+            funObj = {
+                timeUserFun: 'timeUserFun',
+            }
+            $[funObj.timeUserFun] = function (time) {
+                var userTime = time * 60;
+                var objTime = {
+                    init: 0,
+                    time: function () {
+                        objTime.init += 1;
+                        if (objTime.init == userTime) {
+                            getFaultDeviceList(); // 用户未操作任何事件,刷新故障设备列表
+                            objTime.init = 0;
+                        }
+                    },
+                    eventFun: function () {
+                        clearInterval(testUser);
+                        objTime.init = 0;
+                        testUser = setInterval(objTime.time, 1000);
+                    }
+                }
+                var testUser = setInterval(objTime.time, 1000);
+                //添加事件语柄
+                var body = document.querySelector('html');
+                body.addEventListener("click", objTime.eventFun);
+                body.addEventListener("keydown", objTime.eventFun);
+                body.addEventListener("mousemove", objTime.eventFun);
+                body.addEventListener("mousewheel", objTime.eventFun);
+            }
+        })(window)
+        //   直接调用 参数代表分钟数,可以有一位小数;
+        timeUserFun(1);
+    }
 }
 var faultData = null;
 function getFaultType() {
@@ -130,6 +165,7 @@ function getFaultDeviceList() {
                             { "data": null, "title": "操作", "render": op },
                         ],
                         "columnDefs": [
+                            { "orderable": false, "targets": 9 },
                             {
                                 "targets": [8],
                                 "render": function (data, type, full, meta) {
@@ -441,7 +477,7 @@ function getRepairRecordList() {
                         "searching": true,
                         "language": { "url": "/content/datatables_language.json" },
                         "data": ret.datas,
-                        "aaSorting": [[0, "desc"]],
+                        "aaSorting": [[0, "asc"]],
                         "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                         "iDisplayLength": 20, //默认显示的记录数
                         "columns": [
@@ -455,7 +491,26 @@ function getRepairRecordList() {
                             { "data": "SolveTime", "title": "解决时间" },
                             { "data": "FaultTypeName", "title": "故障类型" },
                             { "data": null, "title": "操作", "render": op },
-                        ]
+                        ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 9 },
+                            {
+                                "targets": [6],
+                                "render": function (data, type, full, meta) {
+                                    if (full.FaultDescription) {
+                                        if (full.FaultDescription.length > tdShowLength) {
+                                            return full.FaultDescription.substr(0, tdShowLength) +
+                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
+                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
+                                        } else {
+                                            return full.FaultDescription;
+                                        }
+                                    } else {
+                                        return "";
+                                    }
+                                }
+                            }
+                        ],
                     });
             } else {
                 $("#repairRecordList")
@@ -465,7 +520,7 @@ function getRepairRecordList() {
                         "searching": true,
                         "language": { "url": "/content/datatables_language.json" },
                         "data": ret.datas,
-                        "aaSorting": [[0, "desc"]],
+                        "aaSorting": [[0, "asc"]],
                         "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                         "iDisplayLength": 20, //默认显示的记录数
                         "columns": [
@@ -478,6 +533,24 @@ function getRepairRecordList() {
                             { "data": "FaultDescription", "title": "故障描述" },
                             { "data": "SolveTime", "title": "解决时间" },
                             { "data": "FaultTypeName", "title": "故障类型" },
+                        ],
+                        "columnDefs": [
+                            {
+                                "targets": [6],
+                                "render": function (data, type, full, meta) {
+                                    if (full.FaultDescription) {
+                                        if (full.FaultDescription.length > tdShowLength) {
+                                            return full.FaultDescription.substr(0, tdShowLength) +
+                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
+                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
+                                        } else {
+                                            return full.FaultDescription;
+                                        }
+                                    } else {
+                                        return "";
+                                    }
+                                }
+                            }
                         ]
                     });
             }
@@ -721,6 +794,7 @@ function getUsuallyFaultList() {
                         ],
                         "bAutoWidth": true,
                         "columnDefs": [
+                            { "orderable": false, "targets": 3 },
                             {
                                 "targets": [2],
                                 "render": function (data, type, full, meta) {
@@ -1005,6 +1079,7 @@ function getFaultTypeList() {
                             { "data": null, "title": "操作", "render": op }
                         ],
                         "columnDefs": [
+                            { "orderable": false, "targets": 4 },
                             {
                                 "targets": [3],
                                 "render": function (data, type, full, meta) {

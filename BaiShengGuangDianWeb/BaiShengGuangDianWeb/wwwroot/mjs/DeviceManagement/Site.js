@@ -65,6 +65,9 @@ function getSiteList() {
                             { "data": "Manager", "title": "管理人" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 5 }
+                        ],
                     });
             } else {
                 $("#siteList")
@@ -82,7 +85,7 @@ function getSiteList() {
                             { "data": "SiteName", "title": "场地名" },
                             { "data": "RegionDescription", "title": "场地位置" },
                             { "data": "Manager", "title": "管理人" },
-                        ],
+                        ]
                     });
             }
         });

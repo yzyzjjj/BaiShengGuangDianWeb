@@ -83,17 +83,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
-            var accountInfo = AccountHelper.GetAccountInfoByNameAll(name);
-            if (accountInfo != null)
-            {
-                return Result.GenError<Result>(Error.NameIsExist);
-            }
-
-            accountInfo = AccountHelper.GetAccountInfoAll(account);
+            var accountInfo = AccountHelper.GetAccountInfoAll(account);
             if (accountInfo != null)
             {
                 return Result.GenError<Result>(Error.AccountIsExist);
             }
+
+            if (AccountHelper.GetAccountInfoByNameAll(name) != null)
+            {
+                return Result.GenError<Result>(Error.NameIsExist);
+            }
+
             var roleInfo = RoleHelper.GetRoleInfo(role);
             if (roleInfo == null)
             {

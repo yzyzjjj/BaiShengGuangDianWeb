@@ -70,6 +70,9 @@ function getHardwareList() {
                             { "data": "Description", "title": "描述" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 10 }
+                        ],
                     });
             } else {
                 $("#hardwareList")
@@ -92,7 +95,7 @@ function getHardwareList() {
                             { "data": "AxisNumber", "title": "主轴数量" },
                             { "data": "ComNumber", "title": "通用串口数量" },
                             { "data": "Description", "title": "描述" },
-                        ],
+                        ]
                     });
             }
         });

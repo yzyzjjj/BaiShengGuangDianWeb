@@ -37,7 +37,7 @@
                     window.location.href = lastUrl;
                     return;
                 }
-                window.location.href = const_indexurl;
+                window.location.href = indexUrl;
             });
     });
 });

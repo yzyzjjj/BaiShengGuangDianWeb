@@ -52,6 +52,9 @@ function getRoleList() {
                             { "data": "id", "title": "Id", "bVisible": false },
                             { "data": "name", "title": "角色名称" },
                             { "data": null, "title": "操作", "render": op },
+                        ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 3 }
                         ]
                     });
             } else {

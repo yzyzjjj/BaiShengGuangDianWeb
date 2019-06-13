@@ -1,5 +1,5 @@
-const_loginurl = "/Account/Login";
-const_indexurl = "/Home";
+var loginUrl = "/Account/Login";
+var indexUrl = "/Home";
 var hubConnection = null;
 
 var maxProcessData = 8;

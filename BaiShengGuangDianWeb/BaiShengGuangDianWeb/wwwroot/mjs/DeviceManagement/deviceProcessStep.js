@@ -69,6 +69,9 @@ function getDeviceProcessStepList() {
                             { "data": "Description", "title": "备注" },
                             { "data": null, "title": "操作", "render": op },
                         ],
+                        "columnDefs": [
+                            { "orderable": false, "targets": 5 }
+                        ]
                     });
             } else {
                 $("#deviceProcessStepList")
@@ -219,6 +222,11 @@ function showUpdateModel(id, deviceCategoryId, stepName, description, isSurvey) 
         });
 }
 
+function updateStepNameCheck() {
+    var v = $("#updateStepName").val();
+    $("#updateIsSurvey").iCheck(v.indexOf("检验") > -1 ? "check" : "uncheck");
+}
+
 function updateModel() {
     var opType = 152;
     if (!checkPermission(opType)) {
@@ -258,4 +266,4 @@ function updateModel() {
             });
     }
     showConfirm("修改", doSth);
-} 
+}

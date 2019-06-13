@@ -67,6 +67,9 @@ function getDeviceModelList() {
                                 { "data": "Description", "title": "备注" },
                                 { "data": null, "title": "操作", "render": op },
                             ],
+                            "columnDefs": [
+                                { "orderable": false, "targets": 5 }
+                            ]
                         });
                 } else {
                     $("#deviceModelList")
@@ -85,7 +88,7 @@ function getDeviceModelList() {
                                 { "data": "CategoryName", "title": "设备类型" },
                                 { "data": "Description", "title": "备注" },
                                 
-                            ],
+                            ]
                         });
                 }
         });

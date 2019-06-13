@@ -1,7 +1,7 @@
 //初始化表
 var commonfunc = function () {
     if (!isTokenValid()) {
-        window.location.href = const_loginurl;
+        window.location.href = loginUrl;
         return;
     }
 
@@ -16,7 +16,7 @@ var commonfunc = function () {
             null,
             function (ret) {
                 DelCookie("token");
-                window.location.href = const_loginurl;
+                window.location.href = loginUrl;
             });
     });
 
