@@ -24,15 +24,6 @@
         allowClear: true,
         placeholder: "请选择"
     });
-
-    $("#isDifference").on('ifChanged', function (event) {
-        var ui = $(this);
-        if (ui.is(":checked")) {
-            $("#differenceDiv").removeClass("hidden");
-        } else {
-            $("#differenceDiv").addClass("hidden");
-        }
-    });
 }
 
 var faultData = null;
@@ -102,6 +93,7 @@ function getDeviceList() {
         });
 }
 
+var oProcessData = null;
 var processData = null;
 function queryFlowCard() {
     hideTip("processCodeTip");
@@ -147,15 +139,16 @@ function queryFlowCard() {
             $("#fcBody").removeClass("hidden");
 
             if (checkPermission(323)) {
-                var head =
-                    '<div class="form-group border-left">' +
-                    '<label for="isDifference" class="text-info">是否微调：</label>' +
-                    '<input type="checkbox" id="isDifference" class="icb_minimal">' +
-                    '</div>' +
-                    '<div class="form-group form-inline hidden" id="differenceDiv">' +
-                    '<label class="control-label" for="difference">偏差值：</label>' +
-                    '<input class="form-control" id="difference" oninput="value=value.replace(/[^\\d]/g,\'\')" placeholder="请输入偏差值" maxlength="20">' +
-                    '</div>';
+                var head = ''
+                //'<div class="form-group border-left">' +
+                //'<label for="isDifference" class="text-info">是否微调：</label>' +
+                //'<input type="checkbox" id="isDifference" class="icb_minimal">' +
+                //'</div>' +
+                //'<div class="form-group form-inline hidden" id="differenceDiv">' +
+                //'<label class="control-label" for="difference">当前厚度：</label>' +
+                //'<input class="form-control" id="difference" oninput="value=value.replace(/[^\\d]/g,\'\')" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9">' +
+                //'<label class="adt label-danger hidden" id="differenceTip"></label>' +
+                //'</div>';
 
                 $("#info").append(head);
             }
@@ -172,6 +165,7 @@ function queryFlowCard() {
                 } else {
                     $("#differenceDiv").addClass("hidden");
                 }
+                showProcessData();
             });
             var flowCard = ret.flowCard;
             var html = '<p><b>计划号：</b>{0}</p>' +
@@ -190,35 +184,11 @@ function queryFlowCard() {
             id = deviceId;
             processId = flowCard.ProcessId;
             flowCardId = flowCard.flowCardId;
-            var tr1 = '<tr><td>{0}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{1}</td><td>{2}</td></tr>';
-            var tr2 =
-                '<tr>' +
-                '    <td style="vertical-align: middle;"><span>{0}</span></td>' +
-                '    <td class="form-inline">' +
-                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" />' +
-                '        <span style="width: 10%;">:</span>' +
-                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" />' +
-                '    </td>' +
-                '    <td class="form-inline">' +
-                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" />' +
-                '        <span style="width: 10%;">:</span>' +
-                '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" />' +
-                '    </td>' +
-                '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" /></td>' +
-                '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" /></td>' +
-                '</tr>';
+
             processData = flowCard.processData.sort(function (a, b) {
                 return a.ProcessOrder > b.ProcessOrder ? 1 : -1;
             });
-
-            if (processData.length > 0) {
-                var tr = !checkPermission(156) ? tr1 : tr2;
-                $("#run").removeClass("disabled");
-                for (var j = 0; j < processData.length; j++) {
-                    var pd = processData[j];
-                    $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
-                }
-            }
+            showProcessData();
 
             var processSteps = flowCard.processSteps.sort(function (a, b) {
                 return a.ProcessStepOrder > b.ProcessStepOrder ? 1 : -1;
@@ -229,63 +199,105 @@ function queryFlowCard() {
                     var ps = processSteps[j];
                     $("#processSteps").append(tr.format(ps.ProcessStepOrderName, ps.StepName, ps.ProcessStepRequirements, ps.QualifiedRange, ps.QualifiedMode == 0 ? "" : ps.QualifiedMode));
                 }
+                if (processSteps.length == 2) {
+                    LastLand = processSteps[0].QualifiedMode != 0
+                        ? processSteps[0].QualifiedMode
+                        : processSteps[0].ProcessStepRequirementMid;
+                    TarLand = processSteps[1].ProcessStepRequirementMid;
+                }
             }
-
         });
 }
 
-function queryProcessData(processNumber) {
-    processNumber = unescape(processNumber);
-    var opType = 300;
+var newProcessData = null;
+var LastLand = 0;
+var TarLand = 0;
+function queryProcessData() {
+    if (!$("#isDifference").is(":checked"))
+        return;
+    var opType = 323;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    //工艺编号
-    if (isStrEmptyOrUndefined(processNumber)) {
-        layer.msg("工艺编号不存在");
+    newProcessData = null;
+
+    //当前厚度
+    var difference = $("#difference").val().trim();
+    if (isStrEmptyOrUndefined(difference)) {
+        showTip("differenceTip", "当前厚度不能为空");
+        return;
     }
+    difference = parseFloat(difference);
+    if (difference <= 0) {
+        showTip("differenceTip", "当前厚度必须大于0");
+        return;
+    }
+    if (LastLand == 0) {
+        layer.msg("上道工序厚度缺失");
+        return;
+    }
+    if (TarLand == 0) {
+        layer.msg("当前工序加工厚度缺失");
+        return;
+    }
+    if (difference < TarLand) {
+        layer.msg("当前厚度必须大于加工要求");
+        return;
+    }
+    var pd = {
+        // 工艺编号
+        Id: processId,
+        CurLand: difference,
+        LastLand: LastLand,
+        TarLand: TarLand
+    }
+
+    $("#pData").empty();
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({
-        id: processNumber
-    });
+    data.opData = JSON.stringify(pd);
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            //加压时间(M:S)
-            var pressurizeTime = function (data, type, row) {
-                return data.PressurizeMinute + " : " + data.PressurizeSecond;
-            }
-            //工序时间(M:S)
-            var processTime = function (data, type, row) {
-                return data.ProcessMinute + " : " + data.ProcessSecond;
-            }
-            $("#processDataList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": false,
-                    "bSort": false,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [10, 15, 20], //更改显示记录数选项  
-                    "iDisplayLength": 10, //默认显示的记录数  
-                    "columns": [
-                        { "data": "ProcessOrder", "title": "工序" },
-                        { "data": null, "title": "加压时间(分:秒)", "render": pressurizeTime },
-                        { "data": null, "title": "工序时间(分:秒)", "render": processTime },
-                        { "data": "Pressure", "title": "设定压力(Kg)" },
-                        { "data": "Speed", "title": "下盘速度(rpm)" }
-                    ]
-                });
-
-            $("#dataModel").modal("show");
+            newProcessData = ret.datas.sort(function (a, b) {
+                return a.ProcessOrder > b.ProcessOrder ? 1 : -1;
+            });
+            showProcessData();
         });
+}
+
+function showProcessData() {
+    var pds = !$("#isDifference").is(":checked") ? processData : newProcessData;
+    var tr1 = '<tr><td>{0}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{3}&nbsp;:&nbsp;{4}</td><td>{5}</td><td>{6}</td></tr>';
+    var tr2 =
+        '<tr>' +
+        '    <td style="vertical-align: middle;"><span>{0}</span></td>' +
+        '    <td class="form-inline">' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" />' +
+        '        <span style="width: 10%;">:</span>' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" />' +
+        '    </td>' +
+        '    <td class="form-inline">' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" />' +
+        '        <span style="width: 10%;">:</span>' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" />' +
+        '    </td>' +
+        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" /></td>' +
+        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" /></td>' +
+        '</tr>';
+    if (pds != null && pds.length > 0) {
+        $("#pData").empty();
+        var tr = !checkPermission(156) ? tr1 : tr2;
+        $("#run").removeClass("disabled");
+        for (var j = 0; j < pds.length; j++) {
+            var pd = pds[j];
+            $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
+        }
+    }
 }
 
 var id = null;
@@ -306,8 +318,15 @@ function setProcessData() {
     if (isStrEmptyOrUndefined(processId)) {
         return;
     }
-
     var opType = 110;
+    if ($("#isDifference").is(":checked")) {
+        opType = 155;
+        if (newProcessData == null || newProcessData.length == 0) {
+            layer.msg("缺少工艺数据");
+            return;
+        }
+    }
+
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;

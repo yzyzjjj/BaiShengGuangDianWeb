@@ -111,13 +111,13 @@ function getProcessList(type = 307) {
                             { "orderable": false, "targets": 0 },
                             {
                                 "targets": [4],
-                                "render": function(data, type, full, meta) {
+                                "render": function (data, type, full, meta) {
 
                                     if (full.ProcessNumber) {
                                         if (full.ProcessNumber.length > tdShowLength) {
                                             return full.ProcessNumber.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
-                                                .format(escape(full.ProcessNumber));
+                                                    .format(escape(full.ProcessNumber));
                                         } else {
                                             return full.ProcessNumber;
                                         }
@@ -128,13 +128,13 @@ function getProcessList(type = 307) {
                             },
                             {
                                 "targets": [5],
-                                "render": function(data, type, full, meta) {
+                                "render": function (data, type, full, meta) {
 
                                     if (full.ModelName) {
                                         if (full.ModelName.length > tdShowLength) {
                                             return full.ModelName.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
-                                                .format(escape(full.ModelName));
+                                                    .format(escape(full.ModelName));
                                         } else {
                                             return full.ModelName;
                                         }
@@ -145,13 +145,13 @@ function getProcessList(type = 307) {
                             },
                             {
                                 "targets": [6],
-                                "render": function(data, type, full, meta) {
+                                "render": function (data, type, full, meta) {
 
                                     if (full.ProductionProcessName) {
                                         if (full.ProductionProcessName.length > tdShowLength) {
                                             return full.ProductionProcessName.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
-                                                .format(escape(full.ProductionProcessName));
+                                                    .format(escape(full.ProductionProcessName));
                                         } else {
                                             return full.ProductionProcessName;
                                         }
@@ -162,13 +162,13 @@ function getProcessList(type = 307) {
                             },
                             {
                                 "targets": [7],
-                                "render": function(data, type, full, meta) {
+                                "render": function (data, type, full, meta) {
 
                                     if (full.Code) {
                                         if (full.Code.length > tdShowLength) {
                                             return full.Code.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
-                                                .format(escape(full.Code));
+                                                    .format(escape(full.Code));
                                         } else {
                                             return full.Code;
                                         }
@@ -337,7 +337,8 @@ function showProcessDetailModel(id) {
                 data = {};
                 data.opType = 300;
                 data.opData = JSON.stringify({
-                    id: id
+                    // 工艺编号
+                    Id: id
                 });
                 ajaxPost("/Relay/Post",
                     data,
@@ -564,7 +565,8 @@ function showAddModel(id) {
         var data = {};
         data.opType = 300;
         data.opData = JSON.stringify({
-            id: id
+            // 工艺编号
+            Id: id
         });
         ajaxPost("/Relay/Post",
             data,
@@ -866,7 +868,8 @@ function showUpdateProcessModel(id) {
     var data = {};
     data.opType = 300;
     data.opData = JSON.stringify({
-        id: id
+        // 工艺编号
+        Id: id
     });
     var f = false;
     for (var i = 0; i < lastData.length; i++) {

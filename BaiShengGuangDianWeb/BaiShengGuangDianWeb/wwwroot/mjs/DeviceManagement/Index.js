@@ -289,46 +289,46 @@ function addDevice() {
     //识别码
     var identifier = $("#addIdentifier").val();
     //设备类型
-    var deviceCategoryId = $("#addDeviceCategory").val().trim();
+    var deviceCategoryId = $("#addDeviceCategory").val();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
         showTip("addDeviceCategoryTip", "设备类型错误");
         add = false;
     }
 
     //设备型号编号
-    var deviceModelId = $("#addDeviceModel").val().trim();
+    var deviceModelId = $("#addDeviceModel").val();
     if (isStrEmptyOrUndefined(deviceModelId)) {
         showTip("addDeviceModelTip", "设备型号错误");
         add = false;
     }
 
     //流程脚本版本
-    var scriptId = $("#addScript").val().trim();
+    var scriptId = $("#addScript").val();
     if (isStrEmptyOrUndefined(scriptId)) {
         showTip("addScriptTip", "流程脚本版本错误");
         add = false;
     }
 
     //设备固件版本编号
-    var firmwareId = $("#addFirmware").val().trim();
+    var firmwareId = $("#addFirmware").val();
     if (isStrEmptyOrUndefined(firmwareId)) {
         showTip("addFirmwareTip", "固件版本错误");
         add = false;
     }
     //设备应用层版本编号
-    var applicationId = $("#addApplication").val().trim();
+    var applicationId = $("#addApplication").val();
     if (isStrEmptyOrUndefined(applicationId)) {
         showTip("addApplicationTip", "应用层版本错误");
         add = false;
     }
     //设备硬件版本编号
-    var hardwareId = $("#addHardware").val().trim();
+    var hardwareId = $("#addHardware").val();
     if (isStrEmptyOrUndefined(hardwareId)) {
         showTip("addHardwareTip", "硬件版本错误");
         add = false;
     }
     //设备所在场地编号
-    var siteId = $("#addSite").val().trim();
+    var siteId = $("#addSite").val();
     if (isStrEmptyOrUndefined(siteId)) {
         showTip("addSiteTip", "场地错误");
         add = false;
@@ -524,21 +524,21 @@ function updateDevice() {
     //识别码
     var identifier = $("#updateIdentifier").val();
     //设备类型
-    var deviceCategoryId = $("#updateDeviceCategory").val().trim();
+    var deviceCategoryId = $("#updateDeviceCategory").val();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
         showTip("updateDeviceCategoryTip", "设备类型错误");
         update = false;
     }
 
     //设备型号编号
-    var deviceModelId = $("#updateDeviceModel").val().trim();
+    var deviceModelId = $("#updateDeviceModel").val();
     if (isStrEmptyOrUndefined(deviceModelId)) {
         showTip("updateDeviceModelTip", "设备型号错误");
         update = false;
     }
 
     //流程脚本版本
-    var scriptId = $("#updateScript").val().trim();
+    var scriptId = $("#updateScript").val()
     if (isStrEmptyOrUndefined(scriptId)) {
         showTip("updateScriptTip", "流程脚本版本错误");
         update = false;
@@ -547,23 +547,23 @@ function updateDevice() {
     //设备固件版本编号
     var firmwareId = $("#updateFirmware").val();
     if (isStrEmptyOrUndefined(firmwareId)) {
-        showTip("updateFirmwareTip", "固件版本错误").trim();
+        showTip("updateFirmwareTip", "固件版本错误");
         update = false;
     }
     //设备应用层版本编号
     var applicationId = $("#updateApplication").val();
     if (isStrEmptyOrUndefined(applicationId)) {
-        showTip("updateApplicationTip", "应用层版本错误").trim();
+        showTip("updateApplicationTip", "应用层版本错误");
         update = false;
     }
     //设备硬件版本编号
-    var hardwareId = $("#updateHardware").val().trim();
+    var hardwareId = $("#updateHardware").val();
     if (isStrEmptyOrUndefined(hardwareId)) {
         showTip("updateHardwareTip", "硬件版本错误");
         update = false;
     }
     //设备所在场地编号
-    var siteId = $("#updateSite").val().trim();
+    var siteId = $("#updateSite").val();
     if (isStrEmptyOrUndefined(siteId)) {
         showTip("updateSiteTip", "场地错误");
         update = false;

@@ -28,11 +28,21 @@
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div class="form-inline">
-                            <input class="form-control" id="flowCard" value="" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
+                            <input class="form-control" id="flowCard" value="031906128500" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()">查询</button>
                         </div>
                     </div>
                     <div class="box box-primary">
+                        <div class="form-group border-left">
+                            <label for="isDifference" class="text-info">是否微调：</label>
+                            <input type="checkbox" id="isDifference" class="icb_minimal">
+                        </div>
+                        <div class="form-group form-inline hidden" id="differenceDiv">
+                            <label class="control-label" for="difference">当前厚度：</label>
+                            <input class="form-control" id="difference" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9"
+                                   onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">
+                            <label class="adt label-danger hidden" id="differenceTip"></label>
+                        </div>
                         <div class="box-header with-border">
                             <h3 class="box-title">信息(先查询后设置)</h3>
                             <div class="box-tools pull-right">
@@ -44,13 +54,13 @@
                                 <h4 class="text-blue text-center">工序数据</h4>
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                    <tr>
-                                        <td>工序</td>
-                                        <td>工序名称</td>
-                                        <td>加工要求</td>
-                                        <td>成厚范围</td>
-                                        <td>成厚均值</td>
-                                    </tr>
+                                        <tr>
+                                            <td>工序</td>
+                                            <td>工序名称</td>
+                                            <td>加工要求</td>
+                                            <td>成厚范围</td>
+                                            <td>成厚均值</td>
+                                        </tr>
                                     </thead>
                                     <tbody id="processSteps"></tbody>
                                 </table>
@@ -62,13 +72,13 @@
                                 <h4 class="text-blue text-center">工艺数据</h4>
                                 <table class="table table-bordered table-hover">
                                     <thead>
-                                    <tr>
-                                        <td>工序</td>
-                                        <td>加压时间(分:秒)</td>
-                                        <td>工序时间(分:秒)</td>
-                                        <td>设定压力(Kg)</td>
-                                        <td>下盘速度(rpm)</td>
-                                    </tr>
+                                        <tr>
+                                            <td>工序</td>
+                                            <td>加压时间(分:秒)</td>
+                                            <td>工序时间(分:秒)</td>
+                                            <td>设定压力(Kg)</td>
+                                            <td>下盘速度(rpm)</td>
+                                        </tr>
                                     </thead>
                                     <tbody id="pData"></tbody>
                                 </table>
