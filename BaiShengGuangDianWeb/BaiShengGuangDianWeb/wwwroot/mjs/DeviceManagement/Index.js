@@ -197,16 +197,21 @@ function initAddSelect() {
         $("#addDeviceCategory").append(option.format(data.Id, data.CategoryName));
     }
     var categoryId = categories[0].Id;
+    var modelId = 0;
     for (i = 0; i < models.length; i++) {
         data = models[i];
-        if (data.DeviceCategoryId == categoryId)
+        if (data.DeviceCategoryId == categoryId) {
+            if (modelId == 0)
+                modelId = data.Id;
             $("#addDeviceModel").append(option.format(data.Id, data.ModelName));
+        }
     }
-    var modelId = models[0].Id;
-    for (i = 0; i < scripts.length; i++) {
-        data = scripts[i];
-        if (data.DeviceModelId.indexOf(modelId) != -1)
-            $("#addScript").append(option.format(data.Id, data.ScriptName));
+    if (modelId != 0) {
+        for (i = 0; i < scripts.length; i++) {
+            data = scripts[i];
+            if (data.DeviceModelId.indexOf(modelId) != -1)
+                $("#addScript").append(option.format(data.Id, data.ScriptName));
+        }
     }
 }
 
@@ -406,7 +411,8 @@ function initUpdateSelect(categoryId, modelId, scriptId) {
     $("#updateDeviceModel").val(modelId);
     for (i = 0; i < scripts.length; i++) {
         data = scripts[i];
-        $("#updateScript").append(option.format(data.Id, data.ScriptName));
+        if (data.DeviceModelId.indexOf(modelId) != -1)
+            $("#updateScript").append(option.format(data.Id, data.ScriptName));
     }
     $("#updateScript").val(scriptId);
 }
