@@ -29,6 +29,41 @@
     if (!checkPermission(opType)) {
         $("#showAddUsuallyFaultModel").addClass("hidden");
     }
+    //定时器
+    window.onload = function () {
+        (function ($) {
+            funObj = {
+                timeUserFun: 'timeUserFun',
+            }
+            $[funObj.timeUserFun] = function (time) {
+                var userTime = time * 60;
+                var objTime = {
+                    init: 0,
+                    time: function () {
+                        objTime.init += 1;
+                        if (objTime.init == userTime) {
+                            getFaultDeviceList(); // 用户未操作任何事件,刷新故障设备列表
+                            objTime.init = 0;
+                        }
+                    },
+                    eventFun: function () {
+                        clearInterval(testUser);
+                        objTime.init = 0;
+                        testUser = setInterval(objTime.time, 1000);
+                    }
+                }
+                var testUser = setInterval(objTime.time, 1000);
+                //添加事件语柄
+                var body = document.querySelector('html');
+                body.addEventListener("click", objTime.eventFun);
+                body.addEventListener("keydown", objTime.eventFun);
+                body.addEventListener("mousemove", objTime.eventFun);
+                body.addEventListener("mousewheel", objTime.eventFun);
+            }
+        })(window)
+        //   直接调用 参数代表分钟数,可以有一位小数;
+        timeUserFun(1);
+    }
 }
 var faultData = null;
 function getFaultType() {
@@ -466,7 +501,7 @@ function getRepairRecordList() {
                                         if (full.FaultDescription.length > tdShowLength) {
                                             return full.FaultDescription.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
-                                            .format(full.FaultTypeId, escape(full.FaultDescription))
+                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
                                         } else {
                                             return full.FaultDescription;
                                         }
@@ -507,7 +542,7 @@ function getRepairRecordList() {
                                         if (full.FaultDescription.length > tdShowLength) {
                                             return full.FaultDescription.substr(0, tdShowLength) +
                                                 ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
-                                                .format(full.FaultTypeId, escape(full.FaultDescription))
+                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
                                         } else {
                                             return full.FaultDescription;
                                         }
