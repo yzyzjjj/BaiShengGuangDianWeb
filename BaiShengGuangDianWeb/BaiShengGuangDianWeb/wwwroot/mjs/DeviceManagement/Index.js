@@ -28,7 +28,7 @@
         $("#addScript").empty();
         for (i = 0; i < scripts.length; i++) {
             data = scripts[i];
-            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.indexOf(modelId) > -1) {
                 $("#addScript").append(option.format(data.Id, data.ScriptName));
             }
         }
@@ -40,7 +40,7 @@
         $("#addScript").empty();
         for (var i = 0; i < scripts.length; i++) {
             var data = scripts[i];
-            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.indexOf(modelId) > -1) {
                 $("#addScript").append(option.format(data.Id, data.ScriptName));
             }
         }
@@ -65,7 +65,7 @@
         $("#updateScript").empty();
         for (i = 0; i < scripts.length; i++) {
             data = scripts[i];
-            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.indexOf(modelId) > -1) {
                 $("#updateScript").append(option.format(data.Id, data.ScriptName));
             }
         }
@@ -76,7 +76,7 @@
         $("#updateScript").empty();
         for (var i = 0; i < scripts.length; i++) {
             var data = scripts[i];
-            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.split(",").indexOf(modelId.toString()) > -1) {
+            if (!isStrEmptyOrUndefined(data.DeviceModelId) && data.DeviceModelId.indexOf(modelId) > -1) {
                 hideTip("updateScriptTip");
                 $("#updateScript").append(option.format(data.Id, data.ScriptName));
             }
@@ -185,10 +185,11 @@ function getDeviceList() {
         });
 }
 
+var categories, models, scripts;
 var option = '<option value="{0}">{1}</option>';
-function initAddSelect(categories, models, scripts) {
+function initAddSelect() {
     //if (categories.length == 0 || models.length == 0 || scripts.length == 0)
-    //    return;
+    //    return;var categories, models, scripts;
     var i;
     var data;
     for (i = 0; i < categories.length; i++) {
@@ -204,7 +205,7 @@ function initAddSelect(categories, models, scripts) {
     var modelId = models[0].Id;
     for (i = 0; i < scripts.length; i++) {
         data = scripts[i];
-        if (data.DeviceModelId == modelId)
+        if (data.DeviceModelId.indexOf(modelId) != -1)
             $("#addScript").append(option.format(data.Id, data.ScriptName));
     }
 }
@@ -243,7 +244,11 @@ function showAddModel() {
                 data = ret.sites[i];
                 $("#addSite").append(option.format(data.Id, data.SiteName));
             }
-            initAddSelect(ret.deviceCategories, ret.deviceModels, ret.scriptVersions);
+
+            categories = ret.deviceCategories;
+            models = ret.deviceModels;
+            scripts = ret.scriptVersions;
+            initAddSelect();
             hideClassTip("adt");
             $("#addModel").modal("show");
         });
@@ -385,7 +390,6 @@ function addDevice() {
     showConfirm("添加机台号：" + code, doSth);
 }
 
-var categories, models, scripts;
 function initUpdateSelect(categoryId, modelId, scriptId) {
     var i;
     var data;
@@ -396,7 +400,8 @@ function initUpdateSelect(categoryId, modelId, scriptId) {
     $("#updateDeviceCategory").val(categoryId);
     for (i = 0; i < models.length; i++) {
         data = models[i];
-        $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
+        if (data.DeviceCategoryId == categoryId)
+            $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
     }
     $("#updateDeviceModel").val(modelId);
     for (i = 0; i < scripts.length; i++) {
