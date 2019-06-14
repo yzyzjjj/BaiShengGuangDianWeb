@@ -269,3 +269,30 @@
         </div>
     </div>
 </section>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" tabindex="-1" id="placeNameModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">摆放位置</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label" for="siteName">场地名：</label>
+                    <textarea class="form-control" disabled="disabled" id="siteName" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="regionDescription">场地位置：</label>
+                    <textarea class="form-control" disabled="disabled" id="regionDescription" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>

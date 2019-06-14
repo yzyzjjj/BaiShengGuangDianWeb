@@ -83,7 +83,6 @@
         }
     });
 }
-
 function getDeviceList() {
     var opType = 100;
     if (!checkPermission(opType)) {
@@ -171,7 +170,7 @@ function getDeviceList() {
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": null, "title": "设备型号", "render": modelName },
-                        { "data": "SiteName", "title": "摆放位置" },
+                        { "data": null, "title": "摆放位置" },
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorUser", "title": "管理员" },
                         { "data": null, "title": "运行状态", "render": state },
@@ -179,9 +178,46 @@ function getDeviceList() {
                         { "data": null, "title": "操作", "render": op }
                     ],
                     "columnDefs": [
-                        { "orderable": false, "targets": 9 }
+                        { "orderable": false, "targets": 9 },
+                        {
+                            "targets": [4],
+                            "render": function (data, type, meta) {
+                                var placeName = data.SiteName + "\u279E" + data.RegionDescription;
+                                return ("" + placeName).length > 10
+                                    ? placeName.substr(0, 10) +
+                                    ' . . .<a href = \"javascript:void(0);\" onclick = \"showPlaceNameModel({0})\" >全部显示</a> '
+                                        .format(data.Id)
+                                    : placeName;
+                            }
+                        }
                     ]
                 });
+        });
+}
+
+function showPlaceNameModel(id) {
+    var opType = 100;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#siteName").html(ret.datas[0].SiteName);
+                $("#regionDescription").html(ret.datas[0].RegionDescription);
+            }
+            $("#placeNameModel").modal("show");
         });
 }
 
@@ -241,7 +277,7 @@ function showAddModel() {
             }
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
-                $("#addSite").append(option.format(data.Id, data.SiteName));
+                $("#addSite").append(option.format(data.Id, data.SiteName + "\u279E" + data.RegionDescription));
             }
             initAddSelect(ret.deviceCategories, ret.deviceModels, ret.scriptVersions);
             hideClassTip("adt");
@@ -454,7 +490,7 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             }
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
-                $("#updateSite").append(option.format(data.Id, data.SiteName));
+                $("#updateSite").append(option.format(data.Id, data.SiteName + "\u279E" + data.RegionDescription));
             }
 
             categories = ret.deviceCategories;

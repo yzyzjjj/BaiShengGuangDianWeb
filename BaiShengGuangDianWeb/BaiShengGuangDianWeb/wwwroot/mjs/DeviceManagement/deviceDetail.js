@@ -93,7 +93,7 @@ function selectChange(datas) {
         $("#detailFirmware").attr("oval", firstData.FirmwareId);
         $("#detailHardware").val(firstData.HardwareName);
         $("#detailApplication").val(firstData.ApplicationName);
-        $("#detailSite").val(firstData.SiteName);
+        $("#detailSite").val(firstData.SiteName + "\u279E" + firstData.RegionDescription);
         $("#detailAdministratorUser").val(firstData.AdministratorUser);
         $("#detailRemark").val(firstData.Remark);
     }
@@ -127,7 +127,10 @@ function getStateList() {
                 var key = data.Item1;
                 var val = data.Item2;
                 switch (key) {
-                    case 1: info = firstData.DeviceStateStr; break;
+                    case 1: if (!isStrEmptyOrUndefined(info)) {
+                            info = firstData.DeviceStateStr;
+                        }
+                        break;
                     default:
                         info = val;
                 }
