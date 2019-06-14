@@ -139,16 +139,16 @@ function queryFlowCard() {
             $("#fcBody").removeClass("hidden");
 
             if (checkPermission(323)) {
-                var head = ''
-                //'<div class="form-group border-left">' +
-                //'<label for="isDifference" class="text-info">是否微调：</label>' +
-                //'<input type="checkbox" id="isDifference" class="icb_minimal">' +
-                //'</div>' +
-                //'<div class="form-group form-inline hidden" id="differenceDiv">' +
-                //'<label class="control-label" for="difference">当前厚度：</label>' +
-                //'<input class="form-control" id="difference" oninput="value=value.replace(/[^\\d]/g,\'\')" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9">' +
-                //'<label class="adt label-danger hidden" id="differenceTip"></label>' +
-                //'</div>';
+                var head = 
+                '<div class="form-group border-left">' +
+                '<label for="isDifference" class="text-info">是否微调：</label>' +
+                '<input type="checkbox" id="isDifference" class="icb_minimal">' +
+                '</div>' +
+                '<div class="form-group form-inline hidden" id="differenceDiv">' +
+                '<label class="control-label" for="difference">当前厚度：</label>' +
+                '<input class="form-control" id="difference" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                '<label class="label-danger hidden" id="differenceTip"></label>' +
+                '</div>';
 
                 $("#info").append(head);
             }
