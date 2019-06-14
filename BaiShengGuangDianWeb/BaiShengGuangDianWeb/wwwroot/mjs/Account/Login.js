@@ -40,4 +40,12 @@
                 window.location.href = indexUrl;
             });
     });
+
+    var acc = getQueryString("acc");
+    var pwd = getQueryString("pwd");
+    if (!isStrEmptyOrUndefined(acc) && !isStrEmptyOrUndefined(acc)) {
+        $("#account").val(acc);
+        $("#password").val(pwd);
+        $("#loginBtn").click();
+    }
 });

@@ -28,6 +28,11 @@
         allowClear: true,
         placeholder: "请选择"
     });
+
+    $("#isChange").on('ifChanged', function (event) {
+        var ui = $(this);
+        showProcessData(ui.is(":checked"));
+    });
 }
 
 var faultData = null;
@@ -134,6 +139,7 @@ function queryFlowCard() {
     }
 
     $("#fcBody").addClass("hidden");
+    $("#isChangeDiv").addClass("hidden");
     $("#processSteps").empty();
     $("#info").empty();
     $("#pData").empty();
@@ -168,19 +174,23 @@ function queryFlowCard() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            if (checkPermission(156))
+                $("#isChangeDiv").removeClass("hidden");
+
+
             $("#fcBody").removeClass("hidden");
 
             if (checkPermission(323)) {
-                var head = 
-                '<div class="form-group border-left">' +
-                '<label for="isDifference" class="text-info">是否微调：</label>' +
-                '<input type="checkbox" id="isDifference" class="icb_minimal">' +
-                '</div>' +
-                '<div class="form-group form-inline hidden" id="differenceDiv">' +
-                '<label class="control-label" for="difference">当前厚度：</label>' +
-                '<input class="form-control" id="difference" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
-                '<label class="label-danger hidden" id="differenceTip"></label>' +
-                '</div>';
+                var head =
+                    '<div class="form-group border-left">' +
+                    '<label for="isDifference" class="text-danger">是否微调：</label>' +
+                    '<input type="checkbox" id="isDifference" class="icb_minimal">' +
+                    '</div>' +
+                    '<div class="form-group form-inline hidden" id="differenceDiv">' +
+                    '<label class="control-label" for="difference">当前厚度：</label>' +
+                    '<input class="form-control" id="difference" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                    '<label class="label-danger hidden" id="differenceTip"></label>' +
+                    '</div>';
 
                 $("#info").append(head);
             }
@@ -302,7 +312,9 @@ function queryProcessData() {
         });
 }
 
-function showProcessData() {
+function showProcessData(canChange = false) {
+    if (!canChange)
+        canChange = $("#isChange").is(":checked");
     var pds = !$("#isDifference").is(":checked") ? processData : newProcessData;
     var tr1 = '<tr><td>{0}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{3}&nbsp;:&nbsp;{4}</td><td>{5}</td><td>{6}</td></tr>';
     var tr2 =
@@ -323,7 +335,7 @@ function showProcessData() {
         '</tr>';
     if (pds != null && pds.length > 0) {
         $("#pData").empty();
-        var tr = !checkPermission(156) ? tr1 : tr2;
+        var tr = !canChange ? tr1 : tr2;
         $("#run").removeClass("disabled");
         for (var j = 0; j < pds.length; j++) {
             var pd = pds[j];
@@ -350,6 +362,15 @@ function setProcessData() {
     if (isStrEmptyOrUndefined(processId)) {
         return;
     }
+
+    var da = {
+        //设备id
+        DeviceId: id,
+        //程序文件的位置及名称
+        ProcessId: processId,
+        //描述
+        FlowCardId: flowCardId
+    };
     var opType = 110;
     if ($("#isDifference").is(":checked")) {
         opType = 155;
@@ -357,24 +378,49 @@ function setProcessData() {
             layer.msg("缺少工艺数据");
             return;
         }
+        da.ProcessDatas = newProcessData;
     }
 
+    if ($("#isChange").is(":checked")) {
+        opType = 156;
+        var pd = new Array();
+        var pdInput = $("#pData input");
+        //$("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
+        var valN = 6;
+        if (pdInput.length > 0) {
+            for (var j = 0; j < pdInput.length; j++) {
+                if (!isStrEmptyOrUndefined(pdInput[j].value) && isNumber(pdInput[j].value)) {
+                    if ((j + 1) % valN == 0) {
+                        pd.push({
+                            ProcessOrder: parseInt(j / valN) + 1,
+                            PressurizeMinute: pdInput[j - 5].value,
+                            PressurizeSecond: pdInput[j - 4].value,
+                            ProcessMinute: pdInput[j - 3].value,
+                            ProcessSecond: pdInput[j - 2].value,
+                            Pressure: pdInput[j - 1].value,
+                            Speed: pdInput[j].value
+                        });
+                    }
+                } else {
+                    layer.msg("工艺数据错误");
+                    return;
+                }
+            }
+        } else {
+            layer.msg("缺少工艺数据");
+            return;
+        }
+        da.ProcessDatas = pd;
+    }
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-
     var doSth = function () {
         var data = {}
         data.opType = opType;
-        data.opData = JSON.stringify({
-            //设备id
-            DeviceId: id,
-            //程序文件的位置及名称
-            ProcessId: processId,
-            //描述
-            FlowCardId: flowCardId
-        });
+        data.opData = JSON.stringify(da);
+
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
