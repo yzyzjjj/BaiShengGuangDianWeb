@@ -272,7 +272,12 @@ function getFlowCardList(t = 0) {
                             { "data": "Id", "title": "Id", "bVisible": false },
                             { "data": "CreateTime", "title": "创建时间" },
                             { "data": "ProductionProcessName", "title": "计划号" },
-                            { "data": "FlowCardName", "title": "流程卡号" },
+                            { "data": "WorkshopName", "title": "卡类型" },
+                            {
+                                "data": null, "title": "流程卡号", "render": function (data, type, row) {
+                                    return data.FlowCardName.substring(2);
+                                }
+                            },
                             { "data": "RawMateriaName", "title": "原料批次" },
                             { "data": null, "title": "优先级", "render": priority },
                             { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },
@@ -383,7 +388,7 @@ function showUpdateFlowCard(type) {
                 $("#ufRawMateria").val(r.RawMateriaName);
                 $("#ufPriority").val(r.Priority);
                 $("#ufRawMaterialQuantity").val(r.RawMaterialQuantity);
-                $("#ufFlowCardName").val(r.FlowCardName);
+                $("#ufFlowCardName").val(r.FlowCardName.substring(2));
                 $("#ufSender").val(r.Sender);
                 $("#ufInboundNum").val(r.InboundNum);
                 $("#ufRemarks").val(r.Remarks);
