@@ -148,13 +148,16 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailFirmware">固件版本：</label>
-                            <div class="col-sm-7">
-                                <select class="form-control" style="width: 95%" id="detailFirmware"></select>
+                                <label class="control-label col-sm-3" for="detailFirmware">固件版本：</label>
+                            <div class="col-sm-9">
+                                <div class="col-xs-11" style="margin-left:-15px;">
+                                    <select class="form-control" style="width: 100%" id="detailFirmware"></select>
+                                </div>
+                                <div class="col-xs-1" style="margin-left:-15px;">
+                                    <button type="button" class="btn btn-primary hidden" disabled="disabled" onclick="upgradeFirmware()" id="upgradeFirmwareBtn">升级</button>
+                                </div>
                             </div>
-                            <div class="col-sm-2">
-                                <button type="button" style="float: right" class="btn btn-primary hidden" disabled="disabled" onclick="upgradeFirmware()" id="upgradeFirmwareBtn">升级</button>
-                            </div>
+                            
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="detailHardware">硬件版本：</label>

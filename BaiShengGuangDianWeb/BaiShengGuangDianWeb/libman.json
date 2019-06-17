@@ -31,6 +31,10 @@
     {
       "library": "bootstrap-fileinput@5.0.3",
       "destination": "wwwroot/lib/bootstrap-fileinput/"
+    },
+    {
+      "library": "echarts@4.2.1",
+      "destination": "wwwroot/lib/echarts/"
     }
   ]
 }

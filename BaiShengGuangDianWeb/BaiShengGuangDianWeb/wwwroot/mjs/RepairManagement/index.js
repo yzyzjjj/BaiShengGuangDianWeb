@@ -170,7 +170,7 @@ function getFaultDeviceList() {
                                 "targets": [8],
                                 "render": function (data, type, full, meta) {
                                     full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                                    return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
+                                    return full.FaultDescription.substr(0, tdShowLength) + '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >...全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
                                 }
                             }
                         ]
@@ -201,11 +201,8 @@ function getFaultDeviceList() {
                             {
                                 "targets": [8],
                                 "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
-                                    } else {
-                                        return "";
-                                    }
+                                    full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
+                                    return full.FaultDescription.substr(0, tdShowLength) + '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >...全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
                                 }
                             }
                         ]
@@ -500,7 +497,7 @@ function getRepairRecordList() {
                                     if (full.FaultDescription) {
                                         if (full.FaultDescription.length > tdShowLength) {
                                             return full.FaultDescription.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
+                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >...全部显示</a> '
                                                     .format(full.FaultTypeId, escape(full.FaultDescription))
                                         } else {
                                             return full.FaultDescription;
@@ -541,8 +538,8 @@ function getRepairRecordList() {
                                     if (full.FaultDescription) {
                                         if (full.FaultDescription.length > tdShowLength) {
                                             return full.FaultDescription.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >全部显示</a> '
-                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
+                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >...全部显示</a> '
+                                                    .format(full.FaultTypeId, escape(full.FaultDescription));
                                         } else {
                                             return full.FaultDescription;
                                         }
@@ -799,8 +796,8 @@ function getUsuallyFaultList() {
                                 "targets": [2],
                                 "render": function (data, type, full, meta) {
                                     if (full.SolverPlan) {
-                                        if (full.SolverPlan.length > tdShowLength) {
-                                            return full.SolverPlan.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                        if (full.SolverPlan.length > tdShowLength - 12) {
+                                            return full.SolverPlan.substr(0, tdShowLength - 12) + ' <a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >...全部显示</a> '.format(full.Id);
                                         } else {
                                             return full.SolverPlan;
                                         }
@@ -833,8 +830,8 @@ function getUsuallyFaultList() {
                                 "targets": [2],
                                 "render": function (data, type, full, meta) {
                                     if (full.SolverPlan) {
-                                        if (full.SolverPlan.length > tdShowLength) {
-                                            return full.SolverPlan.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                        if (full.SolverPlan.length > tdShowLength - 12) {
+                                            return full.SolverPlan.substr(0, tdShowLength - 12) + '<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >...全部显示</a> '.format(full.Id);
                                         } else {
                                             return full.SolverPlan;
                                         }
@@ -1084,9 +1081,9 @@ function getFaultTypeList() {
                                 "targets": [3],
                                 "render": function (data, type, full, meta) {
                                     if (full.FaultDescription) {
-                                        if (full.FaultDescription.length > tdShowLength) {
-                                            return full.FaultDescription.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >全部显示</a> '
+                                        if (("" + full.FaultDescription).length > 5) {
+                                            return full.FaultDescription.substr(0, 5) +
+                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >...全部显示</a> '
                                                     .format(full.Id);
                                         } else {
                                             return full.FaultDescription;
@@ -1120,8 +1117,10 @@ function getFaultTypeList() {
                                 "targets": [3],
                                 "render": function (data, type, full, meta) {
                                     if (full.FaultDescription) {
-                                        if (full.FaultDescription.length > tdShowLength) {
-                                            return full.FaultDescription.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >全部显示</a> '.format(full.Id);
+                                        if (("" + full.FaultDescription).length > 5) {
+                                            return full.FaultDescription.substr(0, 5) +
+                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >...全部显示</a> '
+                                                .format(full.Id);
                                         } else {
                                             return full.FaultDescription;
                                         }

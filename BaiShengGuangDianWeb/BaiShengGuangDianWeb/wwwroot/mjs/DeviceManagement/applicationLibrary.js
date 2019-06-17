@@ -65,7 +65,33 @@ function getApplicationList() {
                             { "data": null, "title": "操作", "render": op },
                         ],
                         "columnDefs": [
-                            { "orderable": false, "targets": 5 }
+                            { "orderable": false, "targets": 5 },
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.FilePath = full.FilePath ? full.FilePath : "";
+                                    if (full.FilePath.length > tdShowLength - 14) {
+                                        return full.FilePath.substr(0, tdShowLength - 14) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.FilePath;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [4],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 16) {
+                                        return full.Description.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
                         ]
                     });
             } else {
@@ -84,9 +110,87 @@ function getApplicationList() {
                             { "data": "ApplicationName", "title": "名称" },
                             { "data": "FilePath", "title": "程序文件的位置及名称" },
                             { "data": "Description", "title": "描述" },
+                        ],
+                        "columnDefs": [
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.FilePath = full.FilePath ? full.FilePath : "";
+                                    if (full.FilePath.length > tdShowLength - 14) {
+                                        return full.FilePath.substr(0, tdShowLength - 14) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.FilePath;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [4],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 16) {
+                                        return full.Description.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
                         ]
                     });
             }
+        });
+}
+
+function showFilePathModel(id) {
+    var opType = 145;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#filePath").html(ret.datas[0].FilePath);
+            }
+            $("#filePathModel").modal("show");
+        });
+}
+
+function showDescriptionModel(id) {
+    var opType = 145;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#description").html(ret.datas[0].Description);
+            }
+            $("#descriptionModel").modal("show");
         });
 }
 

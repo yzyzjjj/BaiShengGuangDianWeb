@@ -66,8 +66,34 @@ function getSiteList() {
                             { "data": null, "title": "操作", "render": op },
                         ],
                         "columnDefs": [
-                            { "orderable": false, "targets": 5 }
-                        ],
+                            { "orderable": false, "targets": 5 },
+                            {
+                                "targets": [2],
+                                "render": function (data, type, full, meta) {
+                                    full.SiteName = full.SiteName ? full.SiteName : "";
+                                    if (full.SiteName.length > tdShowLength - 16) {
+                                        return full.SiteName.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showSiteNameModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.SiteName;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.RegionDescription = full.RegionDescription ? full.RegionDescription : "";
+                                    if (full.RegionDescription.length > tdShowLength - 16) {
+                                        return full.RegionDescription.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showRegionDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.RegionDescription;
+                                    }
+                                }
+                            }
+                        ]
                     });
             } else {
                 $("#siteList")
@@ -85,9 +111,87 @@ function getSiteList() {
                             { "data": "SiteName", "title": "场地名" },
                             { "data": "RegionDescription", "title": "场地位置" },
                             { "data": "Manager", "title": "管理人" },
+                        ],
+                        "columnDefs": [
+                            {
+                                "targets": [2],
+                                "render": function (data, type, full, meta) {
+                                    full.SiteName = full.SiteName ? full.SiteName : "";
+                                    if (full.SiteName.length > tdShowLength - 16) {
+                                        return full.SiteName.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showSiteNameModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.SiteName;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.RegionDescription = full.RegionDescription ? full.RegionDescription : "";
+                                    if (full.RegionDescription.length > tdShowLength - 16) {
+                                        return full.RegionDescription.substr(0, tdShowLength - 16) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showRegionDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.RegionDescription;
+                                    }
+                                }
+                            }
                         ]
                     });
             }
+        });
+}
+
+function showSiteNameModel(id) {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#siteName").html(ret.datas[0].SiteName);
+            }
+            $("#siteNameModel").modal("show");
+        });
+}
+
+function showRegionDescriptionModel(id) {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#regionDescription").html(ret.datas[0].RegionDescription);
+            }
+            $("#regionDescriptionModel").modal("show");
         });
 }
 

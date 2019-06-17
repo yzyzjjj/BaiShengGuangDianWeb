@@ -65,8 +65,21 @@ function getCategoryList() {
                             { "data": null, "title": "操作", "render": op },
                         ],
                         "columnDefs": [
-                            { "orderable": false, "targets": 4 }
-                        ],
+                            { "orderable": false, "targets": 4 },
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 13) {
+                                        return full.Description.substr(0, tdShowLength - 13) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
+                        ]
                     });
             } else {
                 $("#categoryList")
@@ -83,9 +96,49 @@ function getCategoryList() {
                             { "data": "Id", "title": "Id", "bVisible": false },
                             { "data": "CategoryName", "title": "类型名" },
                             { "data": "Description", "title": "描述" },
+                        ],
+                        "columnDefs": [
+                            {
+                                "targets": [3],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 13) {
+                                        return full.Description.substr(0, tdShowLength - 13) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
                         ]
                     });
             }
+        });
+}
+
+function showDescriptionModel(id) {
+    var opType = 140;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#description").html(ret.datas[0].Description);
+            }
+            $("#descriptionModel").modal("show");
         });
 }
 

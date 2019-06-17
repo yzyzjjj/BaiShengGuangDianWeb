@@ -67,8 +67,34 @@ function getFirmwareList() {
                             { "data": null, "title": "操作", "render": op },
                         ],
                         "columnDefs": [
-                            { "orderable": false, "targets": 6 }
-                        ],
+                            { "orderable": false, "targets": 6 },
+                            {
+                                "targets": [4],
+                                "render": function (data, type, full, meta) {
+                                    full.FilePath = full.FilePath ? full.FilePath : "";
+                                    if (full.FilePath.length > tdShowLength - 12) {
+                                        return full.FilePath.substr(0, tdShowLength - 12) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.FilePath;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [5],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 14) {
+                                        return full.Description.substr(0, tdShowLength - 14) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
+                        ]
                     });
             } else {
                 $("#firmLibraryList")
@@ -88,9 +114,87 @@ function getFirmwareList() {
                             //{ "data": "CommunicationProtocol", "title": "通信协议" },
                             { "data": "FilePath", "title": "程序文件的位置及名称" },
                             { "data": "Description", "title": "描述" },
+                        ],
+                        "columnDefs": [
+                            {
+                                "targets": [4],
+                                "render": function (data, type, full, meta) {
+                                    full.FilePath = full.FilePath ? full.FilePath : "";
+                                    if (full.FilePath.length > tdShowLength - 12) {
+                                        return full.FilePath.substr(0, tdShowLength - 12) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.FilePath;
+                                    }
+                                }
+                            },
+                            {
+                                "targets": [5],
+                                "render": function (data, type, full, meta) {
+                                    full.Description = full.Description ? full.Description : "";
+                                    if (full.Description.length > tdShowLength - 14) {
+                                        return full.Description.substr(0, tdShowLength - 14) +
+                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
+                                            .format(full.Id);
+                                    } else {
+                                        return full.Description;
+                                    }
+                                }
+                            }
                         ]
                     });
             }
+        });
+}
+
+function showFilePathModel(id) {
+    var opType = 130;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#filePath").html(ret.datas[0].FilePath);
+            }
+            $("#filePathModel").modal("show");
+        });
+}
+
+function showDescriptionModel(id) {
+    var opType = 130;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#description").html(ret.datas[0].Description);
+            }
+            $("#descriptionModel").modal("show");
         });
 }
 

@@ -112,7 +112,6 @@ function getProcessList(type = 307) {
                             {
                                 "targets": [4],
                                 "render": function (data, type, full, meta) {
-
                                     if (full.ProcessNumber) {
                                         if (full.ProcessNumber.length > tdShowLength) {
                                             return full.ProcessNumber.substr(0, tdShowLength) +

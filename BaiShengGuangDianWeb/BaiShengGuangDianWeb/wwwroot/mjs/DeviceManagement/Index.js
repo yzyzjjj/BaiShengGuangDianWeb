@@ -182,10 +182,10 @@ function getDeviceList() {
                         {
                             "targets": [4],
                             "render": function (data, type, meta) {
-                                var placeName = data.SiteName + "\u279E" + data.RegionDescription;
+                                var placeName = data.SiteName + data.RegionDescription;
                                 return ("" + placeName).length > 10
                                     ? placeName.substr(0, 10) +
-                                    ' . . .<a href = \"javascript:void(0);\" onclick = \"showPlaceNameModel({0})\" >全部显示</a> '
+                                    ' <a href = \"javascript:void(0);\" onclick = \"showPlaceNameModel({0})\" >...全部显示</a> '
                                         .format(data.Id)
                                     : placeName;
                             }
@@ -283,7 +283,7 @@ function showAddModel() {
             }
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
-                $("#addSite").append(option.format(data.Id, data.SiteName + "\u279E" + data.RegionDescription));
+                $("#addSite").append(option.format(data.Id, data.SiteName + data.RegionDescription));
             }
 
             categories = ret.deviceCategories;
@@ -501,7 +501,7 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             }
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
-                $("#updateSite").append(option.format(data.Id, data.SiteName + "\u279E" + data.RegionDescription));
+                $("#updateSite").append(option.format(data.Id, data.SiteName + data.RegionDescription));
             }
 
             categories = ret.deviceCategories;

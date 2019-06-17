@@ -93,7 +93,7 @@ function selectChange(datas) {
         $("#detailFirmware").attr("oval", firstData.FirmwareId);
         $("#detailHardware").val(firstData.HardwareName);
         $("#detailApplication").val(firstData.ApplicationName);
-        $("#detailSite").val(firstData.SiteName + "\u279E" + firstData.RegionDescription);
+        $("#detailSite").val(firstData.SiteName + firstData.RegionDescription);
         $("#detailAdministratorUser").val(firstData.AdministratorUser);
         $("#detailRemark").val(firstData.Remark);
     }
