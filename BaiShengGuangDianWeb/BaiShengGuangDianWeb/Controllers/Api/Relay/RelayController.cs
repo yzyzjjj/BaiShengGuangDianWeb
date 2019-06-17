@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ServiceStack;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Relay
@@ -114,23 +113,20 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
                     return JObject.Parse(result);
                 }
 
-                if (StringHelper.IsAnyNullOrWhiteSpace(AccountHelper.CurrentUser.DeviceIds))
+                var ret = new DataResult();
+                if (!AccountHelper.CurrentUser.DeviceIds.IsNullOrEmpty())
                 {
-                    return JObject.Parse(result);
-                }
-
-                var ret = JsonConvert.DeserializeObject<DataResult>(result);
-                var datas = new List<dynamic>();
-                foreach (var data in ret.datas)
-                {
-                    var id = (JObject.Parse(data.ToString()))["Id"].ToObject<int>();
-                    if (AccountHelper.CurrentUser.DeviceIdsList.Contains(id))
+                    var dataResult = JsonConvert.DeserializeObject<DataResult>(result);
+                    foreach (var data in dataResult.datas)
                     {
-                        datas.Add(data);
+                        var id = (JObject.Parse(data.ToString()))["Id"].ToObject<int>();
+                        if (AccountHelper.CurrentUser.DeviceIdsList.Contains(id))
+                        {
+                            ret.datas.Add(data);
+                        }
                     }
                 }
 
-                ret.datas = datas;
                 return ret;
             }
             catch (Exception e)
