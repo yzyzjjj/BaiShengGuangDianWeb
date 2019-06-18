@@ -590,16 +590,12 @@ function getUsuallyFaultList() {
                         {
                             "targets": [2],
                             "render": function (data, type, full, meta) {
-
-                                if (full.SolverPlan) {
-                                    if (full.SolverPlan.length > tdShowLength) {
-                                        return full.SolverPlan.substr(0, tdShowLength) + ' . . .<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >全部显示</a> '.format(full.Id);
-                                    } else {
-                                        return full.SolverPlan;
-                                    }
-                                } else {
-                                    return "";
-                                }
+                                full.SolverPlan = full.SolverPlan ? full.SolverPlan : "";
+                                return full.SolverPlan.length > tdShowContentLength
+                                    ? full.SolverPlan.substr(0, tdShowContentLength) +
+                                    ' <a href = \"javascript:showUsuallyFaultDetailModel({0})\">. . .</a> '.format(
+                                        full.Id)
+                                    : full.SolverPlan;
                             }
                         }
                     ]

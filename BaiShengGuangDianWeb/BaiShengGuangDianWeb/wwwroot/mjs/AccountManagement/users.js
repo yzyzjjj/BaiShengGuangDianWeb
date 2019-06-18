@@ -72,53 +72,43 @@ function getUsersList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 76;
-            var opType2 = 75;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#userTable")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "id", "title": "id", "bVisible": false },
-                            { "data": "account", "title": "用户名" },
-                            { "data": "name", "title": "姓名" },
-                            { "data": "roleName", "title": "角色" },
-                            { "data": "emailAddress", "title": "邮箱" },
-                            { "data": null, "title": "删除", "render": del },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 7 }
-                        ],
-                    });
-            } else {
-                $("#userTable")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "id", "title": "id", "bVisible": false },
-                            { "data": "account", "title": "用户名" },
-                            { "data": "name", "title": "姓名" },
-                            { "data": "roleName", "title": "角色" },
-                            { "data": "emailAddress", "title": "邮箱" },
-                            { "data": null, "title": "删除", "render": del },
-                        ]
-                    });
-            }
+            var columns = checkPermission(76) || checkPermission(75)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "id", "title": "id", "bVisible": false },
+                    { "data": "account", "title": "用户名" },
+                    { "data": "name", "title": "姓名" },
+                    { "data": "roleName", "title": "角色" },
+                    { "data": "emailAddress", "title": "邮箱" },
+                    { "data": null, "title": "删除", "render": del },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "id", "title": "id", "bVisible": false },
+                    { "data": "account", "title": "用户名" },
+                    { "data": "name", "title": "姓名" },
+                    { "data": "roleName", "title": "角色" },
+                    { "data": "emailAddress", "title": "邮箱" },
+                    { "data": null, "title": "删除", "render": del }
+                ];
+            var defs = checkPermission(76) || checkPermission(75)
+                ? [
+                    { "orderable": false, "targets": 7 }
+                ]
+                : "";
+            $("#userTable")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 

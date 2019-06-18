@@ -1,8 +1,7 @@
 ﻿
 function pageReady() {
     getFirmwareList();
-    var opType = 133;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(133)) {
         $("#showAddFirmwareModal").addClass("hidden");
     }
 }
@@ -44,53 +43,108 @@ function getFirmwareList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 132;
-            var opType2 = 134;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#firmLibraryList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "FirmwareName", "title": "固件版本名称" },
-                            { "data": "VarNumber", "title": "变量数量" },
-                            //{ "data": "CommunicationProtocol", "title": "通信协议" },
-                            { "data": "FilePath", "title": "程序文件的位置及名称" },
-                            { "data": "Description", "title": "描述" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 6 }
-                        ],
-                    });
-            } else {
-                $("#firmLibraryList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "FirmwareName", "title": "固件版本名称" },
-                            { "data": "VarNumber", "title": "变量数量" },
-                            //{ "data": "CommunicationProtocol", "title": "通信协议" },
-                            { "data": "FilePath", "title": "程序文件的位置及名称" },
-                            { "data": "Description", "title": "描述" },
-                        ]
-                    });
+            var columns = checkPermission(132) || checkPermission(134)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "FirmwareName", "title": "固件版本名称" },
+                    { "data": "VarNumber", "title": "变量数量" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "FirmwareName", "title": "固件版本名称" },
+                    { "data": "VarNumber", "title": "变量数量" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.Description = full.Description ? full.Description : "";
+                return full.Description.length > tdShowContentLength
+                    ? full.Description.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
+                        .format(full.Id)
+                    : full.Description;
+            };
+            var defs = checkPermission(132) || checkPermission(134)
+                ? [
+                    { "orderable": false, "targets": 6 },
+                    {
+                        "targets": [5],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [5],
+                        "render": rModel
+                    }
+                ];
+            $("#firmLibraryList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
+        });
+}
+
+function showFilePathModel(id) {
+    var opType = 130;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
             }
+            if (ret.datas.length > 0) {
+                $("#filePath").html(ret.datas[0].FilePath);
+            }
+            $("#filePathModel").modal("show");
+        });
+}
+
+function showDescriptionModel(id) {
+    var opType = 130;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            if (ret.datas.length > 0) {
+                $("#description").html(ret.datas[0].Description);
+            }
+            $("#descriptionModel").modal("show");
         });
 }
 

@@ -1,7 +1,6 @@
 ﻿function pageReady() {
     getRoleList();
-    var opType = 78;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(78)) {
         $("#showAddRoles").addClass("hidden");
     }
 }
@@ -24,7 +23,7 @@ function getRoleList() {
                     '    <ul class="dropdown-menu" role="menu">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upRole =  '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions));
+                var upRole = '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions));
                 var delRole = '<li><a onclick="deleteRole({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.name));
                 html = html.format(
                     checkPermission(80) ? upRole : "",
@@ -35,45 +34,35 @@ function getRoleList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 80;
-            var opType2 = 79;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#rolesList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "id", "title": "Id", "bVisible": false },
-                            { "data": "name", "title": "角色名称" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 3 }
-                        ]
-                    });
-            } else {
-                $("#rolesList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "id", "title": "Id", "bVisible": false },
-                            { "data": "name", "title": "角色名称" },
-                        ]
-                    });
-            }
+            var columns = checkPermission(80) || checkPermission(79)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "id", "title": "Id", "bVisible": false },
+                    { "data": "name", "title": "角色名称" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "id", "title": "Id", "bVisible": false },
+                    { "data": "name", "title": "角色名称" }
+                ];
+            var defs = checkPermission(80) || checkPermission(79)
+                ? [
+                    { "orderable": false, "targets": 3 }
+                ]
+                : "";
+            $("#rolesList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "iDisplayLength": 10, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 

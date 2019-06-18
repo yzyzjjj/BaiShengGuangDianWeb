@@ -8,8 +8,7 @@
             $("#cbDiv").addClass("hidden");
         }
     });
-    var opType = 66;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(66)) {
         $("#showAddOrganizationUnitModal").addClass("hidden");
     }
 }
@@ -225,7 +224,8 @@ function getMemberList(id, name) {
     memberList = new Array();
     $("#unName").text(name);
     $("#unName").attr("value", id);
-    $("#showAddMemberModal").removeClass("hidden");
+    $("#showAddMemberModal").removeClass("hidden"); 
+    $("#showBolModal").removeClass("hidden");
     var opType = 71;
     if (!checkPermission(opType)) {
         $("#showAddMemberModal").addClass("hidden");

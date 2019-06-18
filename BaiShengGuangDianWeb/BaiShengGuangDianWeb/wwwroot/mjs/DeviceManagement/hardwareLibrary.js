@@ -1,8 +1,7 @@
 ﻿
 function pageReady() {
     getHardwareList();
-    var opType = 138;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(138)) {
         $("#showAddHardwareModal").addClass("hidden");
     }
 }
@@ -45,59 +44,91 @@ function getHardwareList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 137;
-            var opType2 = 139;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#hardwareList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "HardwareName", "title": "版本名称" },
-                            { "data": "InputNumber", "title": "输入口数量" },
-                            { "data": "OutputNumber", "title": "输出口数量" },
-                            { "data": "DacNumber", "title": "数模转换数量" },
-                            { "data": "AdcNumber", "title": "模数转换数量" },
-                            { "data": "AxisNumber", "title": "主轴数量" },
-                            { "data": "ComNumber", "title": "通用串口数量" },
-                            { "data": "Description", "title": "描述" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 10 }
-                        ],
-                    });
-            } else {
-                $("#hardwareList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "HardwareName", "title": "版本名称" },
-                            { "data": "InputNumber", "title": "输入口数量" },
-                            { "data": "OutputNumber", "title": "输出口数量" },
-                            { "data": "DacNumber", "title": "数模转换数量" },
-                            { "data": "AdcNumber", "title": "模数转换数量" },
-                            { "data": "AxisNumber", "title": "主轴数量" },
-                            { "data": "ComNumber", "title": "通用串口数量" },
-                            { "data": "Description", "title": "描述" },
-                        ]
-                    });
+            var columns = checkPermission(137) || checkPermission(139)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "HardwareName", "title": "版本名称" },
+                    { "data": "InputNumber", "title": "输入口数量" },
+                    { "data": "OutputNumber", "title": "输出口数量" },
+                    { "data": "DacNumber", "title": "数模转换数量" },
+                    { "data": "AdcNumber", "title": "模数转换数量" },
+                    { "data": "AxisNumber", "title": "主轴数量" },
+                    { "data": "ComNumber", "title": "通用串口数量" },
+                    { "data": "Description", "title": "描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "HardwareName", "title": "版本名称" },
+                    { "data": "InputNumber", "title": "输入口数量" },
+                    { "data": "OutputNumber", "title": "输出口数量" },
+                    { "data": "DacNumber", "title": "数模转换数量" },
+                    { "data": "AdcNumber", "title": "模数转换数量" },
+                    { "data": "AxisNumber", "title": "主轴数量" },
+                    { "data": "ComNumber", "title": "通用串口数量" },
+                    { "data": "Description", "title": "描述" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.Description = full.Description ? full.Description : "";
+                return full.Description.length > tdShowContentLength
+                    ? full.Description.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
+                        .format(full.Id)
+                    : full.Description;
+            };
+            var defs = checkPermission(137) || checkPermission(139)
+                ? [
+                    { "orderable": false, "targets": 10 },
+                    {
+                        "targets": [9],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [9],
+                        "render": rModel
+                    }
+                ];
+            $("#hardwareList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
+        });
+}
+
+function showDescriptionModel(id) {
+    var opType = 135;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        id: id
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
             }
+            if (ret.datas.length > 0) {
+                $("#description").html(ret.datas[0].Description);
+            }
+            $("#descriptionModel").modal("show");
         });
 }
 
