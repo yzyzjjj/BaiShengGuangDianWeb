@@ -44,103 +44,56 @@ function getApplicationList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 147;
-            var opType2 = 149;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#applicationList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "ApplicationName", "title": "名称" },
-                            { "data": "FilePath", "title": "程序文件的位置及名称" },
-                            { "data": "Description", "title": "描述" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 5 },
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    full.FilePath = full.FilePath ? full.FilePath : "";
-                                    if (full.FilePath.length > tdShowLength - 14) {
-                                        return full.FilePath.substr(0, tdShowLength - 14) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.FilePath;
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [4],
-                                "render": function (data, type, full, meta) {
-                                    full.Description = full.Description ? full.Description : "";
-                                    if (full.Description.length > tdShowLength - 16) {
-                                        return full.Description.substr(0, tdShowLength - 16) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.Description;
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#applicationList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "ApplicationName", "title": "名称" },
-                            { "data": "FilePath", "title": "程序文件的位置及名称" },
-                            { "data": "Description", "title": "描述" },
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    full.FilePath = full.FilePath ? full.FilePath : "";
-                                    if (full.FilePath.length > tdShowLength - 14) {
-                                        return full.FilePath.substr(0, tdShowLength - 14) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showFilePathModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.FilePath;
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [4],
-                                "render": function (data, type, full, meta) {
-                                    full.Description = full.Description ? full.Description : "";
-                                    if (full.Description.length > tdShowLength - 16) {
-                                        return full.Description.substr(0, tdShowLength - 16) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.Description;
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(147) || checkPermission(149)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ApplicationName", "title": "名称" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ApplicationName", "title": "名称" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述" }
+                ];
+            var rModel = function(data, type, full, meta) {
+                full.Description = full.Description ? full.Description : "";
+                return full.Description.length > tdShowContentLength
+                    ? full.Description.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
+                    .format(full.Id)
+                    : full.Description;
+            };
+            var defs = checkPermission(147) || checkPermission(149)
+                ? [
+                    { "orderable": false, "targets": 5 },
+                    {
+                        "targets": [4],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [4],
+                        "render": rModel
+                    }
+                ];
+            $("#applicationList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 

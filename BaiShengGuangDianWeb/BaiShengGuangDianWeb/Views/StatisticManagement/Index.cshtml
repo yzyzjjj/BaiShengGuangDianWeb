@@ -2,8 +2,24 @@
 @model object
 
 @{
-    ViewBag.Title = "数据统计1";
+    ViewBag.Title = "趋势图统计";
     Layout = "_Layout";
 }
-<h2>数据统计1</h2>
-<div id="main" style="border:1px solid red;width:600px;height:600px;position:absolute;left:calc(50% - 300px);top:calc(50% - 300px)"></div>
+<script src="~/mjs/StatisticManagement/Index.js"></script>
+<section class="content">
+    <h2 class="text-center">趋势图统计</h2>
+    <div class="box box-primary">
+        <div class="box-header">
+            <h3 class="box-title">趋势图</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary" onclick="getStatisticList()">重新加载</button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="col-sm-12">
+                <div id="main" style="border: 1px solid red; width: 50rem; height: 50rem"></div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -7,16 +7,13 @@
     //getFlowCardList();
     //getProductionProcessList();
     //getRawMateriaList();
-    var opType = 210;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(210)) {
         $("#showAddFlowCardModel").addClass("hidden");
     }
-    opType = 220;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(220)) {
         $("#showProductionProcessModel").addClass("hidden");
     }
-    opType = 237;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(237)) {
         $("#showAddRawMateriaModel").addClass("hidden");
     }
 }
@@ -214,69 +211,58 @@ function getFlowCardList() {
                     return '<span class="text-warning"><span class="hidden">1</span>中</span>';
                 return '<span class="text-success"><span class="hidden">0</span>低</span>';
             }
-            if (checkPermission(207) || checkPermission(208) || checkPermission(211)) {
-                $("#flowCardList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        //"deferRender": true,
-                        "autoWidth": true,
-                        //"paginationType": "full_numbers", 
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[1, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "操作", "render": op },
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "CreateTime", "title": "创建时间" },
-                            { "data": "ProductionProcessName", "title": "计划号" },
-                            { "data": "FlowCardName", "title": "流程卡号" },
-                            { "data": "RawMateriaName", "title": "原料批次" },
-                            { "data": null, "title": "优先级", "render": priority },
-                            { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },
-                            { "data": null, "title": "加工时间", "render": processTime, "sClass": "text-info" },
-                            { "data": "QualifiedNumber", "title": "当前合格数", "sClass": "text-info" },
-                            { "data": "Code", "title": "当前机台号", "sClass": "text-info" },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 0 }
-                        ],
-
-                    });
-            } else {
-                $("#flowCardList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        //"deferRender": true,
-                        "autoWidth": true,
-                        //"paginationType": "full_numbers", 
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "CreateTime", "title": "创建时间" },
-                            { "data": "ProductionProcessName", "title": "计划号" },
-                            { "data": "FlowCardName", "title": "流程卡号" },
-                            { "data": "RawMateriaName", "title": "原料批次" },
-                            { "data": null, "title": "优先级", "render": priority },
-                            { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },
-                            { "data": null, "title": "加工时间", "render": processTime, "sClass": "text-info" },
-                            { "data": "QualifiedNumber", "title": "当前合格数", "sClass": "text-info" },
-                            { "data": "Code", "title": "当前机台号", "sClass": "text-info" },
-                        ]
-
-                    });
-            }
+            var columns = checkPermission(207) || checkPermission(208) || checkPermission(211)
+                ? [
+                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CreateTime", "title": "创建时间" },
+                    { "data": "ProductionProcessName", "title": "计划号" },
+                    { "data": "FlowCardName", "title": "流程卡号" },
+                    { "data": "RawMateriaName", "title": "原料批次" },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },
+                    { "data": null, "title": "加工时间", "render": processTime, "sClass": "text-info" },
+                    { "data": "QualifiedNumber", "title": "当前合格数", "sClass": "text-info" },
+                    { "data": "Code", "title": "当前机台号", "sClass": "text-info" }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CreateTime", "title": "创建时间" },
+                    { "data": "ProductionProcessName", "title": "计划号" },
+                    { "data": "FlowCardName", "title": "流程卡号" },
+                    { "data": "RawMateriaName", "title": "原料批次" },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": null, "title": "当前工序", "render": processStepName, "sClass": "text-info" },
+                    { "data": null, "title": "加工时间", "render": processTime, "sClass": "text-info" },
+                    { "data": "QualifiedNumber", "title": "当前合格数", "sClass": "text-info" },
+                    { "data": "Code", "title": "当前机台号", "sClass": "text-info" }
+                ];
+            var aaSorting = checkPermission(207) || checkPermission(208) || checkPermission(211)
+                ? [[1, "asc"]]
+                : [[0, "asc"]];
+            var defs = checkPermission(207) || checkPermission(208) || checkPermission(211)
+                ? [
+                    { "orderable": false, "targets": 0 }
+                ]
+                : "";
+            $("#flowCardList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    //"deferRender": true,
+                    "autoWidth": true,
+                    //"paginationType": "full_numbers", 
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": aaSorting,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 
@@ -1116,61 +1102,52 @@ function getProductionProcessList(first = false) {
             var order = function (data, type, row) {
                 return ++o;
             }
-            if (checkPermission(218) || checkPermission(221)) {
-                $("#productionProcessList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "autoWidth": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[1, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "操作", "render": op },
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "ProductionProcessName", "title": "计划号" },
-                            { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
-                            { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
-                            { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
-                            { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
-                            { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
-                            { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 0 }
-                        ],
-                    });
-            } else {
-                $("#productionProcessList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "autoWidth": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "ProductionProcessName", "title": "计划号" },
-                            { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
-                            { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
-                            { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
-                            { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
-                            { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
-                            { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
-                        ]
-                    });
-            }
+            var columns = checkPermission(218) || checkPermission(221)
+                ? [
+                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProductionProcessName", "title": "计划号" },
+                    { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
+                    { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
+                    { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
+                    { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
+                    { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
+                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProductionProcessName", "title": "计划号" },
+                    { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
+                    { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
+                    { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
+                    { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
+                    { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
+                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
+                ];
+            var aaSorting = checkPermission(218) || checkPermission(221) ? [[1, "asc"]] : [[0, "asc"]];
+            var defs = checkPermission(218) || checkPermission(221)
+                ? [
+                    { "orderable": false, "targets": 0 }
+                ]
+                : "";
+            $("#productionProcessList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "autoWidth": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": aaSorting,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 
@@ -1690,49 +1667,40 @@ function getRawMateriaList(first = false) {
             var order = function (data, type, row) {
                 return ++o;
             }
-            if (checkPermission(235) || checkPermission(239)) {
-                $("#rawMateriaList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "autoWidth": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[1, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "操作", "render": op },
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "RawMateriaName", "title": "原料批号" },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 0 }
-                        ],
-                    });
-            } else {
-                $("#rawMateriaList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "autoWidth": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "RawMateriaName", "title": "原料批号" },
-                        ]
-                    });
-            }
+            var columns = checkPermission(235) || checkPermission(239)
+                ? [
+                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "RawMateriaName", "title": "原料批号" }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "RawMateriaName", "title": "原料批号" },
+                ];
+            var aaSorting = checkPermission(235) || checkPermission(239) ? [[1, "asc"]] : [[0, "asc"]];
+            var defs = checkPermission(235) || checkPermission(239)
+                ? [
+                    { "orderable": false, "targets": 0 }
+                ]
+                : "";
+            $("#rawMateriaList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "autoWidth": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": aaSorting,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 

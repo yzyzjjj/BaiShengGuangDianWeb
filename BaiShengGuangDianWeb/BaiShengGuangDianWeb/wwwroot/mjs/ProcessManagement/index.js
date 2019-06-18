@@ -36,8 +36,7 @@
     $("#apProductionProcessName").on("select2:unselect", function (e) {
         getDeviceList(-1);
     });
-    var opType = 316;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(316)) {
         $("#showAddModel").addClass("hidden");
     }
 }
@@ -113,9 +112,9 @@ function getProcessList(type = 307) {
                                 "targets": [4],
                                 "render": function (data, type, full, meta) {
                                     if (full.ProcessNumber) {
-                                        if (full.ProcessNumber.length > tdShowLength) {
-                                            return full.ProcessNumber.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
+                                        if (full.ProcessNumber.length > tdShowContentLength) {
+                                            return full.ProcessNumber.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
                                                     .format(escape(full.ProcessNumber));
                                         } else {
                                             return full.ProcessNumber;
@@ -130,9 +129,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.ModelName) {
-                                        if (full.ModelName.length > tdShowLength) {
-                                            return full.ModelName.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
+                                        if (full.ModelName.length > tdShowContentLength) {
+                                            return full.ModelName.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
                                                     .format(escape(full.ModelName));
                                         } else {
                                             return full.ModelName;
@@ -147,9 +146,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.ProductionProcessName) {
-                                        if (full.ProductionProcessName.length > tdShowLength) {
-                                            return full.ProductionProcessName.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
+                                        if (full.ProductionProcessName.length > tdShowContentLength) {
+                                            return full.ProductionProcessName.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
                                                     .format(escape(full.ProductionProcessName));
                                         } else {
                                             return full.ProductionProcessName;
@@ -164,9 +163,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.Code) {
-                                        if (full.Code.length > tdShowLength) {
-                                            return full.Code.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '
+                                        if (full.Code.length > tdShowContentLength) {
+                                            return full.Code.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
                                                     .format(escape(full.Code));
                                         } else {
                                             return full.Code;
@@ -204,9 +203,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.ProcessNumber) {
-                                        if (full.ProcessNumber.length > tdShowLength) {
-                                            return full.ProcessNumber.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ProcessNumber));
+                                        if (full.ProcessNumber.length > tdShowContentLength) {
+                                            return full.ProcessNumber.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ProcessNumber));
                                         } else {
                                             return full.ProcessNumber;
                                         }
@@ -220,9 +219,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.ModelName) {
-                                        if (full.ModelName.length > tdShowLength) {
-                                            return full.ModelName.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ModelName));
+                                        if (full.ModelName.length > tdShowContentLength) {
+                                            return full.ModelName.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ModelName));
                                         } else {
                                             return full.ModelName;
                                         }
@@ -236,9 +235,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.ProductionProcessName) {
-                                        if (full.ProductionProcessName.length > tdShowLength) {
-                                            return full.ProductionProcessName.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.ProductionProcessName));
+                                        if (full.ProductionProcessName.length > tdShowContentLength) {
+                                            return full.ProductionProcessName.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ProductionProcessName));
                                         } else {
                                             return full.ProductionProcessName;
                                         }
@@ -252,9 +251,9 @@ function getProcessList(type = 307) {
                                 "render": function (data, type, full, meta) {
 
                                     if (full.Code) {
-                                        if (full.Code.length > tdShowLength) {
-                                            return full.Code.substr(0, tdShowLength) +
-                                                ' . . .<a href = \"javascript:void(0);\" onclick = \"showDetailModel(\'{0}\')\" >全部显示</a> '.format(escape(full.Code));
+                                        if (full.Code.length > tdShowContentLength) {
+                                            return full.Code.substr(0, tdShowContentLength) +
+                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.Code));
                                         } else {
                                             return full.Code;
                                         }

@@ -1,8 +1,7 @@
 ﻿
 function pageReady() {
     getCategoryList();
-    var opType = 143;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(143)) {
         $("#showAddCategory").addClass("hidden");
     }
 }
@@ -45,75 +44,54 @@ function getCategoryList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType1 = 142;
-            var opType2 = 144;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#categoryList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "CategoryName", "title": "类型名" },
-                            { "data": "Description", "title": "描述" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 4 },
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    full.Description = full.Description ? full.Description : "";
-                                    if (full.Description.length > tdShowLength - 13) {
-                                        return full.Description.substr(0, tdShowLength - 13) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.Description;
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#categoryList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "CategoryName", "title": "类型名" },
-                            { "data": "Description", "title": "描述" },
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    full.Description = full.Description ? full.Description : "";
-                                    if (full.Description.length > tdShowLength - 13) {
-                                        return full.Description.substr(0, tdShowLength - 13) +
-                                            '<a href = \"javascript:void(0);\" onclick = \"showDescriptionModel({0})\" >...全部显示</a> '
-                                            .format(full.Id);
-                                    } else {
-                                        return full.Description;
-                                    }
-                                }
-                            }
-                        ]
-                    });
+            var columns = checkPermission(142) || checkPermission(144)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CategoryName", "title": "类型名" },
+                    { "data": "Description", "title": "描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CategoryName", "title": "类型名" },
+                    { "data": "Description", "title": "描述" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.Description = full.Description ? full.Description : "";
+                return full.Description.length > tdShowContentLength
+                    ? full.Description.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showDescriptionModel({0})\">...全部显示</a> '
+                        .format(full.Id)
+                    : full.Description;
             }
+            var defs = checkPermission(142) || checkPermission(144)
+                ? [
+                    { "orderable": false, "targets": 4 },
+                    {
+                        "targets": [3],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [3],
+                        "render": rModel
+                    }
+                ];
+            $("#categoryList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 

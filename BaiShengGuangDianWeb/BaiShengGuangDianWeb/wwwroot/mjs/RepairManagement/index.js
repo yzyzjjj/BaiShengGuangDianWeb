@@ -17,16 +17,13 @@
         }
         $("#singleFaultDefaultDesc").val(desc);
     });
-    var opType = 410;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(410)) {
         $("#showAddFaultTypeModel").addClass("hidden");
     }
-    opType = 415;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(415)) {
         $("#rChange").addClass("hidden");
     }
-    opType = 403;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(403)) {
         $("#showAddUsuallyFaultModel").addClass("hidden");
     }
     //定时器
@@ -140,74 +137,65 @@ function getFaultDeviceList() {
                     return '<span class="text-warning"><span class="hidden">1</span>已确认</span>';
                 return '<span class="text-success"><span class="hidden">2</span>维修中</span>';
             }
-            var opType = 420;
-            if (checkPermission(opType)) {
-                $("#faultDeviceList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "DeviceCode", "title": "机台号" },
-                            { "data": "FaultTime", "title": "故障时间" },
-                            { "data": null, "title": "状态", "render": rState },
-                            { "data": null, "title": "优先级", "render": priority },
-                            { "data": "Proposer", "title": "报修人" },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                            { "data": "FaultDescription", "title": "故障描述" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 9 },
-                            {
-                                "targets": [8],
-                                "render": function (data, type, full, meta) {
-                                    full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                                    return full.FaultDescription.substr(0, tdShowLength) + '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >...全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#faultDeviceList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "DeviceCode", "title": "机台号" },
-                            { "data": "FaultTime", "title": "故障时间" },
-                            { "data": null, "title": "状态", "render": rState },
-                            { "data": null, "title": "优先级", "render": priority },
-                            { "data": "Proposer", "title": "报修人" },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                            { "data": "FaultDescription", "title": "故障描述" },
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [8],
-                                "render": function (data, type, full, meta) {
-                                    full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                                    return full.FaultDescription.substr(0, tdShowLength) + '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0}, \'{1}\')\" >...全部显示</a> '.format(full.FaultTypeId, escape(full.FaultDescription));
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(420)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": null, "title": "状态", "render": rState },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": "FaultDescription", "title": "故障描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": null, "title": "状态", "render": rState },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": "FaultDescription", "title": "故障描述" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
+                return full.FaultDescription.length > tdShowContentLength
+                    ? full.FaultDescription.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
+                        .format(full.FaultTypeId, escape(full.FaultDescription))
+                    : full.FaultDescription;
+            };
+            var defs = checkPermission(420)
+                ? [
+                    { "orderable": false, "targets": 9 },
+                    {
+                        "targets": [8],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [8],
+                        "render": rModel
+                    }
+                ];
+            $("#faultDeviceList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
 
             $("#singleFaultCode").empty();
             var option = '<option value="{0}">{1}</option>';
@@ -465,92 +453,65 @@ function getRepairRecordList() {
                 html = html.format(checkPermission(414) ? changeBtn : "");
                 return html;
             }
-            var opType = 414;
-            if (checkPermission(opType)) {
-                $("#repairRecordList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "DeviceCode", "title": "机台号" },
-                            { "data": "FaultTime", "title": "故障时间" },
-                            { "data": "Proposer", "title": "报修人" },
-                            { "data": "FaultSolver", "title": "解决人员" },
-                            { "data": "FaultDescription", "title": "故障描述" },
-                            { "data": "SolveTime", "title": "解决时间" },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                            { "data": null, "title": "操作", "render": op },
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 9 },
-                            {
-                                "targets": [6],
-                                "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        if (full.FaultDescription.length > tdShowLength) {
-                                            return full.FaultDescription.substr(0, tdShowLength) +
-                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >...全部显示</a> '
-                                                    .format(full.FaultTypeId, escape(full.FaultDescription))
-                                        } else {
-                                            return full.FaultDescription;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ],
-                    });
-            } else {
-                $("#repairRecordList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "DeviceCode", "title": "机台号" },
-                            { "data": "FaultTime", "title": "故障时间" },
-                            { "data": "Proposer", "title": "报修人" },
-                            { "data": "FaultSolver", "title": "解决人员" },
-                            { "data": "FaultDescription", "title": "故障描述" },
-                            { "data": "SolveTime", "title": "解决时间" },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [6],
-                                "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        if (full.FaultDescription.length > tdShowLength) {
-                                            return full.FaultDescription.substr(0, tdShowLength) +
-                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0},\'{1}\')\" >...全部显示</a> '
-                                                    .format(full.FaultTypeId, escape(full.FaultDescription));
-                                        } else {
-                                            return full.FaultDescription;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(414)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultSolver", "title": "解决人员" },
+                    { "data": "FaultDescription", "title": "故障描述" },
+                    { "data": "SolveTime", "title": "解决时间" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultSolver", "title": "解决人员" },
+                    { "data": "FaultDescription", "title": "故障描述" },
+                    { "data": "SolveTime", "title": "解决时间" },
+                    { "data": "FaultTypeName", "title": "故障类型" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
+                return full.FaultDescription.length > tdShowContentLength
+                    ? full.FaultDescription.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
+                        .format(full.FaultTypeId, escape(full.FaultDescription))
+                    : full.FaultDescription;
+            };
+            var defs = checkPermission(414)
+                ? [
+                    { "orderable": false, "targets": 9 },
+                    {
+                        "targets": [6],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [6],
+                        "render": rModel
+                    }
+                ];
+            $("#repairRecordList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 
@@ -602,6 +563,7 @@ function rChange(id, type) {
                     var d = data.SolveTime.split(' ');
                     $("#singleSolveDate").val(d[0]);
                     $("#singleSolveTime").val(d[1]);
+                    $("#singleSolvePlan").val(data.SolvePlan);
 
                     $("#singleFaultType").val(data.FaultTypeId).trigger("change");
                     $("#solveDiv").removeClass("hidden");
@@ -770,79 +732,55 @@ function getUsuallyFaultList() {
 
                 return html;
             }
-            var opType1 = 402;
-            var opType2 = 405;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#usuallyFaultList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数
-                        "columns": [
-                            { "data": "Id", "title": "序号" },
-                            { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                            { "data": "SolverPlan", "title": "解决方法" },
-                            { "data": null, "title": "操作", "render": op }
-                        ],
-                        "bAutoWidth": true,
-                        "columnDefs": [
-                            { "orderable": false, "targets": 3 },
-                            {
-                                "targets": [2],
-                                "render": function (data, type, full, meta) {
-                                    if (full.SolverPlan) {
-                                        if (full.SolverPlan.length > tdShowLength - 12) {
-                                            return full.SolverPlan.substr(0, tdShowLength - 12) + ' <a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >...全部显示</a> '.format(full.Id);
-                                        } else {
-                                            return full.SolverPlan;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#usuallyFaultList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数
-                        "columns": [
-                            { "data": "Id", "title": "序号" },
-                            { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                            { "data": "SolverPlan", "title": "解决方法" },
-                        ],
-                        "bAutoWidth": true,
-                        "columnDefs": [
-                            {
-                                "targets": [2],
-                                "render": function (data, type, full, meta) {
-                                    if (full.SolverPlan) {
-                                        if (full.SolverPlan.length > tdShowLength - 12) {
-                                            return full.SolverPlan.substr(0, tdShowLength - 12) + '<a href = \"javascript:void(0);\" onclick = \"showUsuallyFaultDetailModel({0})\" >...全部显示</a> '.format(full.Id);
-                                        } else {
-                                            return full.SolverPlan;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(402) || checkPermission(405)
+                ? [
+                    { "data": "Id", "title": "序号" },
+                    { "data": "UsuallyFaultDesc", "title": "常见故障" },
+                    { "data": "SolverPlan", "title": "解决方法" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": "Id", "title": "序号" },
+                    { "data": "UsuallyFaultDesc", "title": "常见故障" },
+                    { "data": "SolverPlan", "title": "解决方法" },
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.SolverPlan = full.SolverPlan ? full.SolverPlan : "";
+                return full.SolverPlan.length > tdShowContentLength
+                    ? full.SolverPlan.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showUsuallyFaultDetailModel({0})\">...</a> '
+                        .format(full.Id)
+                    : full.SolverPlan;
+            };
+            var defs = checkPermission(402) || checkPermission(405)
+                ? [
+                    { "orderable": false, "targets": 3 },
+                    {
+                        "targets": [2],
+                        "render": rModel
+                    }
+                ]
+                : [
+
+                    {
+                        "targets": [2],
+                        "render": rModel
+                    }
+                ];
+            $("#usuallyFaultList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "iDisplayLength": 10, //默认显示的记录数
+                    "columns": columns,
+                    "bAutoWidth": true,
+                    "columnDefs": defs
+                });
             $("#usuallyFaultModel").modal("show");
 
         });
@@ -1055,83 +993,55 @@ function getFaultTypeList() {
 
                 return html;
             }
-            var opType1 = 408;
-            var opType2 = 411;
-            if (checkPermission(opType1) || checkPermission(opType2)) {
-                $("#faultTypeList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                            { "data": "FaultDescription", "title": "故障类型描述" },
-                            { "data": null, "title": "操作", "render": op }
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 4 },
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        if (("" + full.FaultDescription).length > 5) {
-                                            return full.FaultDescription.substr(0, 5) +
-                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >...全部显示</a> '
-                                                    .format(full.Id);
-                                        } else {
-                                            return full.FaultDescription;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#faultTypeList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                        "iDisplayLength": 10, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "FaultTypeName", "title": "故障类型" },
-                            { "data": "FaultDescription", "title": "故障类型描述" },
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-                                    if (full.FaultDescription) {
-                                        if (("" + full.FaultDescription).length > 5) {
-                                            return full.FaultDescription.substr(0, 5) +
-                                                '<a href = \"javascript:void(0);\" onclick = \"showFaultTypeDetailModel({0})\" >...全部显示</a> '
-                                                .format(full.Id);
-                                        } else {
-                                            return full.FaultDescription;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(408) || checkPermission(411)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": "FaultDescription", "title": "故障类型描述" },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": "FaultDescription", "title": "故障类型描述" }
+                ];
+            var rModel = function (data, type, full, meta) {
+                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
+                return full.FaultDescription.length > tdShowContentLength
+                    ? full.FaultDescription.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showFaultTypeDetailModel({0})\">...</a> '
+                        .format(full.Id)
+                    : full.FaultDescription;
+            };
+            var defs = checkPermission(408) || checkPermission(411)
+                ? [
+                    { "orderable": false, "targets": 4 },
+                    {
+                        "targets": [3],
+                        "render": rModel
+                    }
+                ]
+                : [
+                    {
+                        "targets": [3],
+                        "render": rModel
+                    }
+                ];
+            $("#faultTypeList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
+                    "iDisplayLength": 10, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
 
             $("#singleFaultType").empty();
             $("#singleFaultType1").empty();

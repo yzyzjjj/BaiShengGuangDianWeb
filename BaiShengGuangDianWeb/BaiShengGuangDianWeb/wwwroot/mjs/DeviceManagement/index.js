@@ -4,8 +4,7 @@
     $(".col-sm-2").addClass("mcolsm2");
     $("#addIp").inputmask("ip");
     $("#updateIp").inputmask("ip");
-    var opType = 103;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(103)) {
         $("#showAddModel").addClass("hidden");
     }
 
@@ -183,9 +182,9 @@ function getDeviceList() {
                             "targets": [4],
                             "render": function (data, type, meta) {
                                 var placeName = data.SiteName + data.RegionDescription;
-                                return ("" + placeName).length > 10
-                                    ? placeName.substr(0, 10) +
-                                    ' <a href = \"javascript:void(0);\" onclick = \"showPlaceNameModel({0})\" >...全部显示</a> '
+                                return ("" + placeName).length > tdShowContentLength
+                                    ? placeName.substr(0, tdShowContentLength) +
+                                    ' <a href = \"javascript:showPlaceNameModel({0})\">...</a> '
                                         .format(data.Id)
                                     : placeName;
                             }

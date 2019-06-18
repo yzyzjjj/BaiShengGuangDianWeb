@@ -8,8 +8,7 @@
             $("#cbDiv").addClass("hidden");
         }
     });
-    var opType = 66;
-    if (!checkPermission(opType)) {
+    if (!checkPermission(66)) {
         $("#showAddOrganizationUnitModal").addClass("hidden");
     }
 }

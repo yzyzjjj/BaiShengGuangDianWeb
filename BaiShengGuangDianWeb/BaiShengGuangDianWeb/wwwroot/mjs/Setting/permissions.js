@@ -1,5 +1,8 @@
 ﻿function pageReady() {
     getPermissionsList();
+    if (!checkPermission(81)) {
+        $("#delPermission").addClass("hidden");
+    }
 }
 
 var delList = null;
@@ -21,90 +24,60 @@ function getPermissionsList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var opType = 81;
-            if (!checkPermission(opType)) {
-                $("#delPermission").addClass("hidden");
-                $("#permissionsList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
-                        "iDisplayLength": 15, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "name", "title": "Name" },
-                            { "data": "isPage", "title": "IsPage" },
-                            { "data": "type", "title": "Type" },
-                            { "data": "label", "title": "Label" }
-                        ],
-                        "drawCallback": function() {
-                            $("#permissionsList .icb_minimal").iCheck({
-                                handle: 'checkbox',
-                                checkboxClass: 'icheckbox_minimal-red',
-                                radioClass: 'iradio_minimal-red',
-                                increaseArea: '20%' // optional
-                            });
-                            $("#permissionsList .icb_minimal").on('ifChanged',
-                                function(event) {
-                                    var ui = $(this);
-                                    var v = ui.attr("value");
-                                    if (ui.is(":checked")) {
-                                        delList.push(v);
-                                    } else {
-                                        if (ui.parents("tr:first").hasClass("odd"));
-                                        delList.splice(delList.indexOf(v), 1);
-                                    }
-                                });
-                        }
-                    });
-            } else {
-                $("#permissionsList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[1, "asc"]],
-                        "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
-                        "iDisplayLength": 15, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "请选择", "render": op },
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "name", "title": "Name" },
-                            { "data": "isPage", "title": "IsPage" },
-                            { "data": "type", "title": "Type" },
-                            { "data": "label", "title": "Label" }
-                        ],
-                        //关闭第一列排序功能
-                        "columnDefs": [
-                            { "orderable": false, "targets": 0 }
-                        ],
-                        "drawCallback": function () {
-                            $("#permissionsList .icb_minimal").iCheck({
-                                handle: 'checkbox',
-                                checkboxClass: 'icheckbox_minimal-red',
-                                radioClass: 'iradio_minimal-red',
-                                increaseArea: '20%' // optional
-                            });
-                            $("#permissionsList .icb_minimal").on('ifChanged', function (event) {
+            var columns = checkPermission(81)
+                ? [
+                    { "data": null, "title": "请选择", "render": op },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "name", "title": "Name" },
+                    { "data": "isPage", "title": "IsPage" },
+                    { "data": "type", "title": "Type" },
+                    { "data": "label", "title": "Label" }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "name", "title": "Name" },
+                    { "data": "isPage", "title": "IsPage" },
+                    { "data": "type", "title": "Type" },
+                    { "data": "label", "title": "Label" }
+                ];
+            var aaSorting = checkPermission(81) ? [[1, "asc"]] : [[0, "asc"]];
+            var defs = checkPermission(81)
+                ? [
+                    { "orderable": false, "targets": 0}
+                ]
+                : "";
+            $("#permissionsList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": aaSorting,
+                    "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
+                    "iDisplayLength": 15, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs,
+                    "drawCallback": function () {
+                        $("#permissionsList .icb_minimal").iCheck({
+                            handle: 'checkbox',
+                            checkboxClass: 'icheckbox_minimal-red',
+                            radioClass: 'iradio_minimal-red',
+                            increaseArea: '20%' // optional
+                        });
+                        $("#permissionsList .icb_minimal").on('ifChanged',
+                            function (event) {
                                 var ui = $(this);
                                 var v = ui.attr("value");
                                 if (ui.is(":checked")) {
                                     delList.push(v);
-                                }
-                                else {
+                                } else {
                                     if (ui.parents("tr:first").hasClass("odd"));
                                     delList.splice(delList.indexOf(v), 1);
                                 }
                             });
-                        }
-                    });
-            }
+                    }
+                });
         });
 }
 

@@ -5,6 +5,7 @@ var hubConnection = null;
 var maxProcessData = 8;
 var lastLocation = "lastLocation";
 var tdShowLength = 20;
+var tdShowContentLength = 10;
 var oLanguage = {
     "sLengthMenu": "每页显示 _MENU_ 条记录",
     "sZeroRecords": "对不起，查询不到任何相关数据",
