@@ -1,4 +1,4 @@
-var loginUrl = "/Account/Login";
+ï»¿var loginUrl = "/Account/Login";
 var indexUrl = "/Home";
 var hubConnection = null;
 
@@ -7,49 +7,60 @@ var lastLocation = "lastLocation";
 var tdShowLength = 20;
 var tdShowContentLength = 10;
 var oLanguage = {
-    "sLengthMenu": "Ã¿Ò³ÏÔÊ¾ _MENU_ Ìõ¼ÇÂ¼",
-    "sZeroRecords": "¶Ô²»Æğ£¬²éÑ¯²»µ½ÈÎºÎÏà¹ØÊı¾İ",
-    "sInfo": "µ±Ç°ÏÔÊ¾ _START_ µ½ _END_ Ìõ£¬¹² _TOTAL_Ìõ¼ÇÂ¼",
-    "sInfoEmtpy": "ÕÒ²»µ½Ïà¹ØÊı¾İ",
-    "sInfoFiltered": "Êı¾İ±íÖĞ¹²Îª _MAX_ Ìõ¼ÇÂ¼)",
-    "sProcessing": "ÕıÔÚ¼ÓÔØÖĞ...",
-    "sSearch": "ËÑË÷",
+    "sLengthMenu": "æ¯é¡µæ˜¾ç¤º _MENU_ æ¡è®°å½•",
+    "sZeroRecords": "å¯¹ä¸èµ·ï¼ŒæŸ¥è¯¢ä¸åˆ°ä»»ä½•ç›¸å…³æ•°æ®",
+    "sInfo": "å½“å‰æ˜¾ç¤º _START_ åˆ° _END_ æ¡ï¼Œå…± _TOTAL_æ¡è®°å½•",
+    "sInfoEmtpy": "æ‰¾ä¸åˆ°ç›¸å…³æ•°æ®",
+    "sInfoFiltered": "æ•°æ®è¡¨ä¸­å…±ä¸º _MAX_ æ¡è®°å½•)",
+    "sProcessing": "æ­£åœ¨åŠ è½½ä¸­...",
+    "sSearch": "æœç´¢",
     "oPaginate": {
-        "sFirst": "µÚÒ»Ò³",
-        "sPrevious": " ÉÏÒ»Ò³ ",
-        "sNext": " ÏÂÒ»Ò³ ",
-        "sLast": " ×îºóÒ»Ò³ "
+        "sFirst": "ç¬¬ä¸€é¡µ",
+        "sPrevious": " ä¸Šä¸€é¡µ ",
+        "sNext": " ä¸‹ä¸€é¡µ ",
+        "sLast": " æœ€åä¸€é¡µ "
     }
 }
 
+var PermissionPages = [{ id: -1, name: "ç½‘é¡µ", isPage: true }, { id: -2, name: "æ¥å£", isPage: false }];
+var PermissionTypes = [];
+PermissionTypes[0] = {};
+PermissionTypes[1] = { id: -3, name: "é¡µé¢ç®¡ç†" };
+PermissionTypes[2] = { id: -4, name: "ç»„ç»‡ç®¡ç†" };
+PermissionTypes[3] = { id: -5, name: "è®¾å¤‡ç®¡ç†" };
+PermissionTypes[4] = { id: -6, name: "æµç¨‹å¡ç®¡ç†" };
+PermissionTypes[5] = { id: -7, name: "å·¥è‰ºç®¡ç†" };
+PermissionTypes[6] = { id: -8, name: "ç»´ä¿®ç®¡ç†" };
+PermissionTypes[7] = { id: -9, name: "æ•°æ®ç»Ÿè®¡" };
+
 var chatEnum = {
     Default: 0,
-    //Á¬½Ó
+    //è¿æ¥
     Connect: 1,
-    // ¹ÊÕÏÉè±¸
+    // æ•…éšœè®¾å¤‡
     FaultDevice: 2
 }
 
 var fileEnum = {
     Default: 0,
-    // ¹Ì¼ş
+    // å›ºä»¶
     FirmwareLibrary: 1,
-    // Ó¦ÓÃ²ã
+    // åº”ç”¨å±‚
     ApplicationLibrary: 2
 }
 
-//ÎÄ¼şÀ©Õ¹Ãû
+//æ–‡ä»¶æ‰©å±•å
 var fileExt = [];
 fileExt[fileEnum.Default] = [];
-// ¹Ì¼ş
+// å›ºä»¶
 fileExt[fileEnum.FirmwareLibrary] = ["bin"];
-// Ó¦ÓÃ²ã
+// åº”ç”¨å±‚
 fileExt[fileEnum.ApplicationLibrary] = [];
 
-//ÎÄ¼şÉÏ´«»Øµ÷
+//æ–‡ä»¶ä¸Šä¼ å›è°ƒ
 var fileCallBack = [];
 fileCallBack[fileEnum.Default] = function () { };
-// ¹Ì¼ş
+// å›ºä»¶
 fileCallBack[fileEnum.FirmwareLibrary] = function () { };
-// Ó¦ÓÃ²ã
+// åº”ç”¨å±‚
 fileCallBack[fileEnum.ApplicationLibrary] = function () { };
