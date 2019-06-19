@@ -16,7 +16,8 @@ namespace BaiShengGuangDianWeb.Controllers.Page.StatisticManagement
         {
             return View();
         }
-        public IActionResult Index()
+
+        public IActionResult Trend()
         {
             return View();
         }
