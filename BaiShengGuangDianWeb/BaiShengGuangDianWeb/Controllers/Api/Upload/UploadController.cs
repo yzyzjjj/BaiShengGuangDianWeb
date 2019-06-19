@@ -78,7 +78,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
 
                     using (var stream = new FileStream(filePath, FileMode.OpenOrCreate))
                     {
-                        var s = formFile.CopyToAsync(stream).GetResult();
+                        var s = formFile.CopyToAsync(stream);
                     }
                     var result = new CommonResult { data = fileName };
                     return result;
