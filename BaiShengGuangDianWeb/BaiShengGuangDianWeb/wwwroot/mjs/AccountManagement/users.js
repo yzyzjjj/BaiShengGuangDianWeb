@@ -698,15 +698,10 @@ function showPermissions(uiName, datas) {
         '</li>';
 
 
-    var pages = [{ id: -1, name: "网页", isPage: true }, { id: -2, name: "接口", isPage: false }];
-    var types = {}
-    types[1] = { id: -3, name: "页面管理" };
-    types[2] = { id: -4, name: "组织管理" };
-    types[3] = { id: -5, name: "设备管理" };
-    types[4] = { id: -6, name: "流程卡管理" };
-    types[5] = { id: -7, name: "工艺管理" };
-    types[6] = { id: -8, name: "维修管理" };
-    var lbI = -9;
+
+    var pages = PermissionPages;
+    var types = PermissionTypes;
+    var lbI = PermissionTypes[PermissionTypes.length - 1].id - 1;
     for (var i = 0; i < pages.length; i++) {
         var page = pages[i];
         var pageData = getPageData(datas, page.isPage);
@@ -722,6 +717,9 @@ function showPermissions(uiName, datas) {
         for (var j = 0; j < dTypes.length; j++) {
             var dType = dTypes[j];
             var type = types[dType];
+            if (type == null) {
+                continue;
+            }
             var typeData = getTypeData(pageData, dType);
 
             option = $("<li>" + mOptionStr1 + "<li>").clone();
