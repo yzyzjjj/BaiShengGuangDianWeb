@@ -138,9 +138,15 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group form-inline">
-                        <label class="control-label" for="faultCode"><span class="text-red">* </span>机台号：</label>
+                        <label class="control-label" for="faultCode"><span class="text-blue">* </span>机台号：</label>
                         <select class="ms2 form-control" style="width: 88%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
-                        <label class="adt label-danger hidden" id="faultCodeTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="faultOther"><span class="text-blue">* </span>其他机台号：</label>
+                            <input type="text" class="form-control" id="faultOther" placeholder="请输入"  maxlength="20">
+                        </div>
+                        <label class="adt label-danger" id="faultOtherTip"></label>
                     </div>
                     <div class="form-group form-inline">
                         <label class="control-label" for="proposer"><span class="text-red">* </span>报修人：</label>
@@ -237,7 +243,7 @@
                         <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
                         <label class="label-danger hidden" id="rpFlowCardTip"></label>
                     </div>
-                    <div class="table-responsive mailbox-messages">
+                    <div class="table-responsive mailbox-messages" id="tableFlowCard">
                         <table class="table table-hover table-striped" id="gxList"></table>
                     </div>
                 </div>

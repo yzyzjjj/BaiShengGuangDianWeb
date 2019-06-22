@@ -24,7 +24,6 @@
         allowClear: true,
         placeholder: "请选择"
     });
-
     $("#isChange").on('ifChanged', function (event) {
         var ui = $(this);
         showProcessData(ui.is(":checked"));
@@ -406,7 +405,9 @@ function showFaultModel() {
         layer.msg("没有权限");
         return;
     }
-    hideClassTip('adt');
+    hideClassTip('adt'); 
+    $("#faultCode").val("").trigger("change");
+    $("#faultOther").val(""); 
     $("#faultDate").val(getDate()).datepicker('update');
     $("#faultTime").val(getTime());
     var info = getCookieTokenInfo();
@@ -437,6 +438,7 @@ function showFaultModel() {
         });
 }
 
+var codes = null;
 function reportFault() {
     var opType = 422;
     if (!checkPermission(opType)) {
@@ -444,13 +446,25 @@ function reportFault() {
         return;
     }
     var report = true;
-    var codes = $("#faultCode").val();
+    var faultCode = $("#faultCode").val();
+    var faultOther = $("#faultOther").val().split(",");
     //机台号
-    if (codes == null || codes.length <= 0) {
-        showTip($("#faultCodeTip"), "请选择设备");
+    if (!isStrEmptyOrUndefined(faultCode) && !isStrEmptyOrUndefined(faultOther)) {
+        codes = faultCode.concat(faultOther);
+        for (var i = 0; i < faultCode.length; i++) {
+            if (faultOther == faultCode[i]) {
+                showTip($("#faultOtherTip"), "该机台号已选择，请重新输入");
+                report = false;
+            }
+        }
+    } else if (!isStrEmptyOrUndefined(faultCode) && isStrEmptyOrUndefined(faultOther)) {
+        codes = faultCode;
+    } else if (isStrEmptyOrUndefined(faultCode) && !isStrEmptyOrUndefined(faultOther)) {
+        codes = faultOther;
+    } else {
+        layer.msg('请选择或输入机台号');
         report = false;
     }
-
     var proposer = $("#proposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
@@ -498,7 +512,6 @@ function reportFault() {
             });
         }
     }
-
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify(faults);
@@ -600,6 +613,9 @@ function showUsuallyFaultDetailModel(id) {
 
 function showInputReport() {
     var info = getCookieTokenInfo();
+    clearRpFlowCard();
+    $("#rpFlowCardTip").addClass("hidden");
+    $("#tableFlowCard").addClass("hidden");
     var p = info.proleList.indexOf(0) == -1;
     var s = info.proleList.indexOf(1) == -1;
 
@@ -611,6 +627,7 @@ function showInputReport() {
 
 function queryRpFlowCard() {
     $("#gxList").empty();
+    $("#tableFlowCard").removeClass("hidden");
     var opType = 202;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -620,6 +637,7 @@ function queryRpFlowCard() {
     var flowCard = $("#rpFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("rpFlowCardTip", "流程卡号不能为空");
+        $("#tableFlowCard").addClass("hidden");
         return;
     }
     var data = {}
@@ -965,4 +983,5 @@ function reportFlowCard() {
 function clearRpFlowCard() {
     $("#rpFlowCard").val("");
     $("#gxList").empty();
+    $("#tableFlowCard").addClass("hidden");
 }

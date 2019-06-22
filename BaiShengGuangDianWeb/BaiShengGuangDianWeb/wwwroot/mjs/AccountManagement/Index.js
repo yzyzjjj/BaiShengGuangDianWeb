@@ -110,6 +110,7 @@ function showAddOrganizationUnitModal() {
     $("#rdo2").iCheck("check");
     $("#cbDiv").removeClass("hidden");
     $("#addOrganizationUnit").empty();
+    $("#addName").val("");
     ajaxGet("/OrganizationUnitManagement/List", null,
         function (ret) {
             if (ret.errno != 0) {

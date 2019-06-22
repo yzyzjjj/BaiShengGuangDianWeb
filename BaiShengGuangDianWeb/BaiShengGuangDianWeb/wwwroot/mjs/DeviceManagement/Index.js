@@ -265,7 +265,15 @@ function showAddModel() {
                 return;
             };
             $(".ads").empty();
-            $(".ads").select2();
+            $(".ads").select2(); 
+            $("#addCode").val("");
+            $("#addDeviceName").val("");
+            $("#addMacAddress").val("");
+            $("#addIp").val("");
+            $("#addPort").val("60000");
+            $("#addIdentifier").val("");
+            $("#addAdministratorUser").val("");
+            $("#addRemark").val("");
             var i;
             var data;
             for (i = 0; i < ret.firmwareLibraries.length; i++) {
@@ -315,10 +323,10 @@ function addDevice() {
     }
     //设备MAC地址
     var macAddress = $("#addMacAddress").val().trim();
-    //if (isStrEmptyOrUndefined(macAddress)) {
-    //    showTip("addMacAddressTip", "MAC地址不能为空");
-    //    add = false;
-    //}
+    if (!isMac(macAddress) && !isStrEmptyOrUndefined(macAddress)) {
+        showTip("addMacAddressTip", "MAC地址格式不正确，请以xx:xx:xx:xx:xx:xx或xx-xx-xx-xx-xx-xx的形式输入，x为数字或字母（A-F大小写均可）");
+        add = false;
+    }
     //IP
     var ip = $("#addIp").val().trim().replace("_", "");
     if (!isIp(ip)) {
@@ -551,8 +559,8 @@ function updateDevice() {
     }
     //设备MAC地址
     var macAddress = $("#updateMacAddress").val().trim();
-    if (isStrEmptyOrUndefined(macAddress)) {
-        showTip("updateMacAddressTip", "MAC地址不能为空");
+    if (!isMac(macAddress) && !isStrEmptyOrUndefined(macAddress)) {
+        showTip("updateMacAddressTip", "MAC地址格式不正确，请以xx:xx:xx:xx:xx:xx或xx-xx-xx-xx-xx-xx的形式输入，x为数字或字母（A-F大小写均可）");
         update = false;
     }
     //IP
