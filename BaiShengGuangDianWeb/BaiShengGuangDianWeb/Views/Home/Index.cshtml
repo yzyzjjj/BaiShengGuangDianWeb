@@ -64,7 +64,7 @@
                                     <label for="isChange" class="text-danger">是否修改：</label>
                                     <input type="checkbox" id="isChange" class="icb_minimal">
                                 </div>
-                                
+
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
@@ -141,11 +141,9 @@
                         <label class="control-label" for="faultCode"><span class="text-blue">* </span>机台号：</label>
                         <select class="ms2 form-control" style="width: 88%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
                     </div>
-                    <div class="form-group">
-                        <div class="form-group form-inline">
-                            <label class="control-label" for="faultOther"><span class="text-blue">* </span>其他机台号：</label>
-                            <input type="text" class="form-control" id="faultOther" placeholder="请输入"  maxlength="20">
-                        </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="faultOther"><span class="text-blue">* </span>其他机台号：</label>
+                        <input type="text" class="form-control" id="faultOther" placeholder="请输入" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="faultOtherTip"></label>
                     </div>
                     <div class="form-group form-inline">
