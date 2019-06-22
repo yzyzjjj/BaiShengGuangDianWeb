@@ -8,7 +8,16 @@ namespace BaiShengGuangDianWeb.Controllers.Page.StatisticManagement
 {
     public class StatisticManagementController : Controller
     {
+        /// <summary>
+        /// 加工记录
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Trend()
         {
             return View();
         }
