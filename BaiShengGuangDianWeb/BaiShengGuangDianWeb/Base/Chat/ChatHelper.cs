@@ -8,11 +8,18 @@ namespace BaiShengGuangDianWeb.Base.Chat
 {
     public class ChatHelper
     {
+        private static bool _isRun = false;
         private static Timer _clearConnectionId = new Timer(ClearConnectionId, null, 5000, 5 * 60 * 1000);
 
         private static void ClearConnectionId(object state)
         {
-            var keys = GetAllKeys();
+            if (_isRun)
+            {
+                return;
+            }
+
+            _isRun = true;
+            var keys = GetAllKeys().Where(x => x.Contains(_redisPre));
             foreach (var key in keys)
             {
                 var connectionInfos = ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key);
@@ -25,6 +32,8 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     }
                 }
             }
+
+            _isRun = false;
         }
 
         private static string _redisPre = "Chat:";
