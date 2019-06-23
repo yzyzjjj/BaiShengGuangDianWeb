@@ -66,8 +66,13 @@
                         <label class="control-label" for="singleFaultCode">机台号：</label>
                         <input class="dd form-control" disabled="disabled" id="singleFaultCode">
                         <div class="hidden" id="rFaultCodeDiv">
-                            <select class="form-control" style="width: 100%" id="rFaultCode" onchange="focusIn($(this))"></select>
-                            <label class="adt label-danger hidden" id="rFaultCodeTip"></label>
+                            <select class="form-control" style="width: 80%" id="rFaultCode" onchange="focusIn($(this))"></select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="faultOtherDiv">
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="faultOther">其他机台号：</label>
+                            <input type="text" class="form-control" id="faultOther" placeholder="请输入"  maxlength="20">
                         </div>
                     </div>
                     <div class="form-group form-inline">
@@ -113,13 +118,13 @@
                                 <input type="text" id="singleSolveDate" class="form_date form-control">
                                 <input type="time" id="singleSolveTime" class="form_time form-control">
                             </div>
-                            <div class="form-group">
-                                <label class="control-label" for="singleSolvePlan">解决方案：</label>
-                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
-                            </div>
                             <div class="form-group form-inline">
                                 <label class="control-label" for="singleFaultType">故障类型：</label>
                                 <select class="form-control" id="singleFaultType" style="width: 88%"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="singleSolvePlan">解决方案：</label>
+                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
                             </div>
                         </div>
                     </div>

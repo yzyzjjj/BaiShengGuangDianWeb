@@ -33,7 +33,7 @@ function getStatisticList() {
                 cc.push(aa[i]);
             }
             var myChart = echarts.init(document.getElementById('main'));
-            var option = ({
+            var option = {
                 title: {
                     text: "123"
                 },
@@ -81,8 +81,10 @@ function getStatisticList() {
                         saveAsImage: {}
                     }
                 }
-            });
+            };
             myChart.setOption(option);
-            window.onresize = myChart.resize();
+            window.addEventListener('resize', function () {
+                myChart.resize();
+            });
         });
 }

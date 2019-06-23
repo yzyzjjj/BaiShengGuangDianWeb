@@ -128,6 +128,9 @@ function showDescriptionModel(id) {
 
 
 function showAddModel() {
+    $("#addStepName").val(""); 
+    $("#addDesc").val("");
+    addStepNameCheck();
     var opType = 140;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");

@@ -54,6 +54,12 @@ var fRawMateriaList = false;
 //流程卡
 function showAddFlowCardModel() {
     hideClassTip("adt");
+    $("#afRawMaterialQuantity").val("");
+    $("#afStartFlowCard").val("");
+    $("#afFlowCardNumber").val("1");
+    $("#afSender").val("");
+    $("#afInboundNum").val("");
+    $("#afRemarks").val("");
     var opType = 215;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -67,7 +73,6 @@ function showAddFlowCardModel() {
                 layer.msg(ret.errmsg);
                 return;
             };
-
             $("#afProductionProcess").empty();
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
@@ -1335,6 +1340,9 @@ function showProductionProcessModel(type) {
                 });
         } else {
             $("#appBtn").removeClass("hidden");
+            $("#productionProcessName").val("");
+            addResetGG();
+            addResetGX();
             if (lastType != type) {
                 $("#productionProcessName").val("");
                 $("#appBtn").removeClass("hidden");
@@ -1912,6 +1920,8 @@ function reset1() {
 
 function showAddRawMateriaModel() {
     hideClassTip("adt");
+    $("#arRawMateriaName").val("");
+    reset();
     $("#addRawMateriaModel").modal("show");
 }
 

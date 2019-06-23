@@ -5,7 +5,7 @@
         return res
     }
     res = /^1[0-9]{10}$/i.test(phoneNum)
-    return res
+    return res;
 }
 
 function isEmail(mail) {
@@ -22,9 +22,19 @@ function isStrEmptyOrUndefined(val) {
         return true;
     }
     if (val == undefined) {
-        return true
+        return true;
     }
-    return false
+    return false;
+}
+
+function isMac(mac) {
+    var reg = /^[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}$/;
+    var reg1 = /^[A-Fa-f\d]{2}-[A-Fa-f\d]{2}-[A-Fa-f\d]{2}-[A-Fa-f\d]{2}-[A-Fa-f\d]{2}-[A-Fa-f\d]{2}$/;
+    if (reg.test(mac) || reg1.test(mac)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function isIp(ip) {
