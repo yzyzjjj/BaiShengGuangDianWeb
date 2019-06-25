@@ -541,7 +541,7 @@ function getRepairRecordList() {
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aaSorting": [[0, "desc"]],
+                    //"aaSorting": [[0, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": columns,
