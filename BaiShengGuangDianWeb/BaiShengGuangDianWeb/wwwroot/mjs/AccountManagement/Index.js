@@ -22,7 +22,7 @@ function getOrganizationUnits() {
                 return;
             }
 
-            var doAction = '<div class="btn-group" style="float:right;">' +
+            var doAction = '<div class="btn-group pull-right">' +
                 '<button type = "button" class="btn btn-default btn-sm" > <i class="fa fa-asterisk"></i>操作</button >' +
                 '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                 '        <span class="caret"></span>' +

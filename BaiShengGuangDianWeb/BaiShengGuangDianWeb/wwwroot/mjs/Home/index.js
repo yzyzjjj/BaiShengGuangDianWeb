@@ -68,6 +68,7 @@ function getDeviceList() {
             }
             $("#deviceList")
                 .DataTable({
+                    "pagingType": "full",
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -437,9 +438,9 @@ function showFaultModel() {
         layer.msg("没有权限");
         return;
     }
-    hideClassTip('adt'); 
+    hideClassTip('adt');
     $("#faultCode").val("").trigger("change");
-    $("#faultOther").val(""); 
+    $("#faultOther").val("");
     $("#faultDate").val(getDate()).datepicker('update');
     $("#faultTime").val(getTime());
     var info = getCookieTokenInfo();

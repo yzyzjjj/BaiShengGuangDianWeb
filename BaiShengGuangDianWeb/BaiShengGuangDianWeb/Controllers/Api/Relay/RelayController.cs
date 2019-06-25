@@ -51,6 +51,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
+            //url = "http://localhost:62101" + permission.Url;
             //设备升级
             if (opType == 108)
             {

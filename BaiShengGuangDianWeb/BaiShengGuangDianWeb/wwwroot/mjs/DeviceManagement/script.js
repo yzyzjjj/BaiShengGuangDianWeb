@@ -216,17 +216,17 @@ function getScriptVersionAllList(type) {
                 { "data": "InputNumber", "title": "输入口数" },
                 { "data": "OutputNumber", "title": "输出口数" },
             ];
-            $("#scriptVersionList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns
-                });
+        $("#scriptVersionList")
+            .DataTable({
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": { "url": "/content/datatables_language.json" },
+                "data": ret.datas,
+                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 20, //默认显示的记录数  
+                "columns": columns
+            });
         if (type == 1)
             $("#scriptVersionModel").modal("show");
     });
@@ -474,6 +474,10 @@ function getScriptVersionDetailList() {
         //设备类型
         id: sScrId
     });
+
+    $("#valList").empty();
+    $("#inList").empty();
+    $("#outList").empty();
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -495,12 +499,9 @@ function getScriptVersionDetailList() {
         var order1 = function (data, type, row) {
             return ++o1;
         }
-
-        $("#valList").empty();
-        $("#inList").empty();
-        $("#outList").empty();
         $("#valList")
             .DataTable({
+                "pagingType": "full",
                 "destroy": true,
                 "paging": true,
                 "deferRender": false,
@@ -527,6 +528,7 @@ function getScriptVersionDetailList() {
         }
         $("#inList")
             .DataTable({
+                "pagingType": "full",
                 "destroy": true,
                 "paging": true,
                 "deferRender": false,
@@ -553,6 +555,7 @@ function getScriptVersionDetailList() {
         }
         $("#outList")
             .DataTable({
+                "pagingType": "full",
                 "destroy": true,
                 "paging": true,
                 "deferRender": false,
@@ -989,7 +992,7 @@ function updateUdt() {
         var postData = [];
         for (var d in usData) {
             var dt = usData[d];
-            var val = $("#udtList").find(".mSel").filter("[vid=vid1_" + dt.VariableNameId +"]");
+            var val = $("#udtList").find(".mSel").filter("[vid=vid1_" + dt.VariableNameId + "]");
             var dic = $("#udtList").find(".mSel").filter("[vid=vid2_" + dt.VariableNameId + "]");
             if (val.length > 0) {
                 var dictionaryId = $(dic).val();
