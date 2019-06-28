@@ -74,8 +74,7 @@ function getUsersList() {
             }
             var columns = checkPermission(76) || checkPermission(75)
                 ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "id", "title": "id", "bVisible": false },
+                    { "data": "id", "title": "id", "render": order },
                     { "data": "account", "title": "用户名" },
                     { "data": "name", "title": "姓名" },
                     { "data": "roleName", "title": "角色" },
@@ -84,8 +83,7 @@ function getUsersList() {
                     { "data": null, "title": "操作", "render": op }
                 ]
                 : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "id", "title": "id", "bVisible": false },
+                    { "data": "id", "title": "id", "render": order },
                     { "data": "account", "title": "用户名" },
                     { "data": "name", "title": "姓名" },
                     { "data": "roleName", "title": "角色" },
@@ -94,7 +92,7 @@ function getUsersList() {
                 ];
             var defs = checkPermission(76) || checkPermission(75)
                 ? [
-                    { "orderable": false, "targets": 7 }
+                    { "orderable": false, "targets": 6 }
                 ]
                 : "";
             $("#userTable")
@@ -220,8 +218,7 @@ function showAddUserModal(type = 0) {
                     "aaSorting": [[1, "asc"]],
                     "columns": [
                         { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op },
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "Id", "title": "Id", "render": order },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],
@@ -453,8 +450,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                     "aaSorting": [[1, "asc"]],
                     "columns": [
                         { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='upCheckAll'>", "render": op },
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Id", "title": "Id", "bVisible": false },
+                        { "data": "Id", "title": "Id", "render": order },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],

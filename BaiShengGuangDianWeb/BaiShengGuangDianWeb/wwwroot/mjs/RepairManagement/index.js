@@ -436,6 +436,11 @@ function getRepairRecordList() {
     }
     var data = {}
     data.opType = opType;
+    //data.opData = JSON.stringify({
+    //    id: 1,
+    //    startTime: '2019-05-09 10:23:36',
+    //    endTime: '2019-05-09 10:23:36',
+    //});
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -456,8 +461,7 @@ function getRepairRecordList() {
             }
             var columns = checkPermission(414)
                 ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "Id", "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间" },
                     { "data": "Proposer", "title": "报修人" },
@@ -465,49 +469,79 @@ function getRepairRecordList() {
                     { "data": "FaultDescription", "title": "故障描述" },
                     { "data": "SolveTime", "title": "解决时间" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": "SolvePlan", "title": "解决方案", "visible": false },
+                    { "data": null, "title": "操作", "render": op },
                 ]
                 : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "Id", "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间" },
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultSolver", "title": "解决人员" },
                     { "data": "FaultDescription", "title": "故障描述" },
                     { "data": "SolveTime", "title": "解决时间" },
-                    { "data": "FaultTypeName", "title": "故障类型" }
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": "SolvePlan", "title": "解决方案", "visible": false }
                 ];
+            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
             var rModel = function (data, type, full, meta) {
                 full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
                 return full.FaultDescription.length > tdShowContentLength
                     ? full.FaultDescription.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
+                    '<a tittle = \'{1}\'  href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
                         .format(full.FaultTypeId, escape(full.FaultDescription))
                     : full.FaultDescription;
             };
             var defs = checkPermission(414)
                 ? [
                     { "orderable": false, "targets": 9 },
-                    {
-                        "targets": [6],
-                        "render": rModel
-                    }
+                    { "targets": [5], "render": rModel }
                 ]
                 : [
-                    {
-                        "targets": [6],
-                        "render": rModel
-                    }
+                    { "targets": [5], "render": rModel }
                 ];
             $("#repairRecordList")
                 .DataTable({
+                    dom: 'B<"clear">lfrtip',
+                    buttons: {
+                        dom: {
+                            container: {
+                                tag: 'div',
+                                className: 'pull-right'
+                            }
+                        },
+                        buttons: [
+                            {
+                                extend: 'excel',
+                                text: '导出Excel',
+                                className: 'btn-primary btn-sm', //按钮的class样式
+                                exportOptions: {
+                                    columns: excelColumns,
+                                    format: {
+                                        // format有三个子标签，header，body和foot
+                                        body: function (data, row, column, node) {
+                                            //操作需要导出excel的数据格式                        
+                                            if (column === 5) {
+                                                var a = $(node).find("a").attr("tittle");
+                                                if (a != null) {
+                                                    return "\u200C" + unescape(a);
+                                                }
+                                            }
+                                            return "\u200C" + node.textContent;
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    //"pagingType": "input",
+                    //"serverSide": true,
                     "destroy": true,
                     "paging": true,
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,
-                    "aaSorting": [[0, "desc"]],
+                    //"aaSorting": [[0, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": columns,
@@ -610,8 +644,8 @@ function rChange(id, type) {
                 $("#singleProposer").val(info.name);
                 $("#singleFaultType1").val(fType).trigger("change");
                 $("#singleFaultDesc").val("");
-                $("#singleSolvePlan").val(""); 
-                $("#singleFaultPriority").val("0"); 
+                $("#singleSolvePlan").val("");
+                $("#singleFaultPriority").val("0");
                 $("#faultOther").val("");
                 var desc = "";
                 for (var i = 0; i < faultData.length; i++) {
@@ -635,7 +669,7 @@ function rChange(id, type) {
                 var option = '<option value="{0}">{1}</option>';
                 for (var i = 0; i < ret.datas.length; i++) {
                     var data = ret.datas[i];
-                    $("#rFaultCode").append('<option></option>'+option.format(data.Code, data.Code));
+                    $("#rFaultCode").append('<option></option>' + option.format(data.Code, data.Code));
                 }
                 $("#recordAdd").removeClass("hidden");
                 $("#singleFaultModel").modal("show");
