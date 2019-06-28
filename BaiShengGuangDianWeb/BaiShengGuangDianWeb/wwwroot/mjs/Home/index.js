@@ -82,7 +82,7 @@ function getDeviceList() {
                         { "data": "Id", "title": "Id", "bVisible": false },
                         { "data": "Code", "title": "机台号" },
                         { "data": null, "title": "设备状态", "render": deviceState },
-                        { "data": "FlowCard", "title": "流程卡号" },
+                        { "data": null, "title": "流程卡号", "render": function (data, type, row) { return data.FlowCard.substring(2); } },
                         { "data": "ProcessTime", "title": "加工时间" },
                         { "data": "LeftTime", "title": "剩余时间" },
                     ]
