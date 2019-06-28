@@ -87,7 +87,7 @@ function delPermission() {
     //分割以","为界的字符串组成新的数组
     var newList = list.split(",");
     //定义两个新数组
-    var listId = [], listName = [], newList;
+    var listId = [], listName = [];
     //根据数组ID下标奇偶数组成新的数组(delId偶数数组,delName奇数数组)
     for (var i = 0; i < newList.length; i++) {
         if (i % 2 == 0) {
