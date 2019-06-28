@@ -588,7 +588,7 @@ function showAddModel(id) {
                     var processData = ret.datas[j];
                     $("#apBody").append(tr.format(max, maxV, processData.Id,
                         processData.PressurizeMinute, processData.PressurizeSecond,
-                        processData.ProcessMinute, processData.ProcessMinute,
+                        processData.ProcessMinute, processData.ProcessSecond,
                         processData.Pressure, processData.Speed));
                     max++;
                     maxV++;
