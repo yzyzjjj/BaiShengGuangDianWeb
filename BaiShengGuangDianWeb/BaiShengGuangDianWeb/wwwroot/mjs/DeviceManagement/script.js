@@ -858,7 +858,6 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
     }
 }
 var usData = null;
-var max = 0;
 function showUsuallyDictionary() {
     var opType = 106;
     if (!checkPermission(opType)) {
@@ -891,7 +890,6 @@ function showUsuallyDictionary() {
         vData["1"] = getData(ret.datas, 1);
         vData["2"] = getData(ret.datas, 2);
         vData["3"] = getData(ret.datas, 3);
-        max = usData.length;
         var o = 0;
         var order = function (data, type, row) {
             return ++o;
@@ -982,7 +980,7 @@ function updateUdt() {
     if (scrId == null)
         return;
 
-    if (max > 0) {
+    if (usData.length > 0) {
         var opType = 119;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
