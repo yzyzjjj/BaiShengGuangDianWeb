@@ -114,7 +114,7 @@ function checkPermission(opType) {
     var info = getCookieTokenInfo();
 
     if (info == null || !isTokenValid()) {
-        SetCookie(lastLocation, window.location.href);
+        SetCookie(lastLocation, window.location.pathname);
         window.location.href = loginUrl;
         return -1;
     } else {
@@ -231,9 +231,9 @@ function errorHandle(ret) {
  参数：name，cookie名字；value，值
  */
 function SetCookie(name, value) {
-    var Days = 30 * 12;  //cookie 将被保存一年
+    var days = 30 * 12;  //cookie 将被保存一年
     var exp = new Date(); //获得当前时间
-    exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000); //换成毫秒
+    exp.setTime(exp.getTime() + days * 24 * 60 * 60 * 1000); //换成毫秒
     document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
 }
 /*

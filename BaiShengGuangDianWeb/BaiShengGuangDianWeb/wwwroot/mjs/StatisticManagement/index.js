@@ -1,6 +1,10 @@
 ﻿function pageReady() {
-    getDeviceChart();
-    getStatisticList();
+    $(".ms2").select2();
+    //getDeviceChart();
+    //getStatisticList();
+    getDeviceList();
+    $("#selectStartDate").val(getDate()).datepicker('update');
+    $("#selectEndDate").val(getDate()).datepicker('update');
 }
 
 var aaa = null;
@@ -148,6 +152,179 @@ function getStatisticList() {
                         dataView: { readOnly: false },//数据视图
                         restore: {},
                         saveAsImage: {}
+                    }
+                }
+            };
+            myChart.setOption(option, true);
+            window.addEventListener('resize', function () {
+                myChart.resize();
+            });
+        });
+}
+
+//2019-7-3 15:40:38
+
+function getDeviceList() {
+    var opType = 100;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var option = '<option value="{0}">{1}</option>';
+            $("#selectDevice").append(option.format(0, "所有"));
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                $("#selectDevice").append(option.format(data.Id, data.Code));
+            }
+        });
+}
+
+var time = null;
+var v = null;
+function createChart() {
+    $("#recordChart").empty();
+    time = new Array();
+    v = new Object();
+    var opType = 502;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var device = $("#selectDevice").val();
+    var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
+    var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
+
+    if (compareDate(start, end)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+    var dataTime = 0;
+    if (100000000 > (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) && (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 1000000) {
+        dataTime = 1;
+    }
+    if ((end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 100000000) {
+        dataTime = 2;
+    }
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        DeviceId: device,
+        StartTime: start,
+        EndTime: end,
+        DataType: dataTime
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var time = [];
+            var listName = [];
+            listName["每日加工次数"] = "ProcessCount";
+            listName["每日加工时间"] = "ProcessTime";
+            listName["总加工次数"] = "TotalProcessCount";
+            listName["总加工时间"] = "TotalProcessTime";
+            listName["同时加工台数"] = "Use";
+            listName["总台数"] = "Total";
+            listName["使用率"] = "Rate";
+            var legend = ["每日加工次数", "每日加工时间", "总加工次数", "总加工时间", "同时加工台数", "总台数", "使用率"];
+            var data = [];
+            var key;
+            for (key in listName) {
+                if (listName.hasOwnProperty(key)) {
+                    data[key] = [];
+                }
+            }
+            var i;
+            for (i = 0; i < ret.datas.length; i++) {
+                if (dataTime == 2) {
+                    time[i] = ret.datas[i].Time.split(" ")[0];
+                }
+                if (dataTime == 1) {
+                    time[i] = ret.datas[i].Time.split(":")[0]+"00:00";
+                }
+                if (dataTime == 0) {
+                    time[i] = ret.datas[i].Time.split(" ")[1];
+                }
+                var d = ret.datas[i];
+                for (key in listName) {
+                    if (listName.hasOwnProperty(key)) {
+                        data[key].push(d[listName[key]]);
+                    }
+                }
+            }
+            var rData = [];
+            i = 0;
+
+            for (key in listName) {
+                if (listName.hasOwnProperty(key)) {
+                    rData.push({
+                        name: key,
+                        type: "line",
+                        data: data[key]
+                    });
+                }
+            }
+            var charts = '<div id="chart' + i + '" style="width: 100%; height: 500px">' + '</div>';
+            $("#recordChart").append(charts);
+            var parName = listName[i];
+            var myChart = echarts.init(document.getElementById("chart" + i));
+            var option = {
+                title: {
+                    text: parName
+                },
+                tooltip: {
+                    trigger: "axis",
+                    formatter: function (params, ticket, callback) {
+                        var formatter1 = "{0}: {1}<br/>";
+                        var formatter2 = "{0}: {1}%<br/>";
+                        var formatter = "";
+                        for (var i = 0, l = params.length; i < l; i++) {
+                            formatter += (params[i].seriesName == "使用率" ? formatter2 : formatter1).format(params[i].seriesName, params[i].value);
+                        }
+                        return formatter;
+                    }
+                },
+                xAxis: {
+                    data: time
+                },
+                yAxis: {},
+                legend: {
+                    data: legend
+                },
+                series: rData,
+                dataZoom: [{
+                    type: "slider",
+                    start: 0,
+                    end: 20
+                },
+                {
+                    type: "inside",
+                    start: 0,
+                    end: 20
+                }],
+                toolbox: {
+                    top: 18,
+                    left: "center",
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: "none"
+                        },
+                        dataView: { readOnly: false },//数据视图
+                        restore: {},
+                        magicType: {
+                            type: ['line', 'bar']
+                        }
                     }
                 }
             };
