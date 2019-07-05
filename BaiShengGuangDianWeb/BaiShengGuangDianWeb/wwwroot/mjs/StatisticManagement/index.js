@@ -1,5 +1,19 @@
 ﻿function pageReady() {
     $(".ms2").select2();
+    $("#selectDevice").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
+
+    $("#selectDevice").on("select2:select", function (e) {
+        var v = $("#selectDevice").val();
+        if (v.indexOf("0") > -1) {
+            $("#selectDevice").val([0]).trigger("change");
+        }
+    });
+    //$("#selectDevice").on("select2:unselect", function (e) {
+    //    var v = $("#selectDevice").val();
+    //});
     //getDeviceChart();
     //getStatisticList();
     getDeviceList();
@@ -217,10 +231,11 @@ function createChart() {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        DeviceId: device,
+        DeviceId: device.join(","),
         StartTime: start,
         EndTime: end,
-        DataType: dataTime
+        DataType: dataTime,
+        Compare: device.length == 1 ? 0 : 1
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -251,7 +266,7 @@ function createChart() {
                     time[i] = ret.datas[i].Time.split(" ")[0];
                 }
                 if (dataTime == 1) {
-                    time[i] = ret.datas[i].Time.split(":")[0]+"00:00";
+                    time[i] = ret.datas[i].Time.split(":")[0] + "00:00";
                 }
                 if (dataTime == 0) {
                     time[i] = ret.datas[i].Time.split(" ")[1];
