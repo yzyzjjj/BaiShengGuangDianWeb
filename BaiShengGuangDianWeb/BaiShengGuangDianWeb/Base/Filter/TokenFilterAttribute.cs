@@ -32,6 +32,7 @@ namespace BaiShengGuangDianWeb.Base.Filter
                 CookieHelper.DelCookie("token", context.HttpContext.Response);
                 //未通过验证则跳转到无权限提示页
                 context.Result = new RedirectToActionResult("Login", "Account", null);
+                return;
             }
 
             if (needUpdate)
@@ -39,6 +40,7 @@ namespace BaiShengGuangDianWeb.Base.Filter
                 var newToken = TokenHelper.CreateJwtToken(AccountHelper.CurrentUser);
                 CookieHelper.SetCookie("token", newToken, context.HttpContext.Response);
             }
+            base.OnActionExecuting(context);
         }
     }
 }
