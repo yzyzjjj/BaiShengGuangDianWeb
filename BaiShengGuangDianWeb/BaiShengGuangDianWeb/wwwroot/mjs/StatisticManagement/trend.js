@@ -57,7 +57,7 @@ function getDevicePar() {
                 handle: 'checkbox',
                 checkboxClass: 'icheckbox_minimal-blue',
                 radioClass: 'iradio_minimal-blue',
-                increaseArea: '20%' // optional
+                increaseArea: '20%'
             });
             $("#selectPar .icb_minimal").on('ifChanged',
                 function (event) {
