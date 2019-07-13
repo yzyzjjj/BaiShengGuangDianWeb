@@ -658,7 +658,7 @@ function getScriptVersionList1(type) {
     });
 }
 
- function showAddModel() {
+function showAddModel() {
     //$("#fScriptVersion").val(0).trigger("change");
     getDeviceModelList1(1);
 }
@@ -959,8 +959,8 @@ function showUsuallyDictionary() {
                             if (sel1s.indexOf(ov) == -1)
                                 sel1s.push(ov);
                         }
-                        for (var va in sel1s) {
-                            var val = sel1s[va];
+                        for (var j = 0; j < sel1s.length; j++) {
+                            var val = sel1s[j];
                             $(".vt" + val).empty();
                             //$(".vt" + val).append(option.format(0, "未设置"));
                             for (var i = 0; i < vData[val].length; i++) {
