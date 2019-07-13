@@ -135,7 +135,7 @@ function removeCover() {
 
 function reLogin() {
     //window.location.href = loginUrl
-    console.log("err")
+    console.log("err");
 }
 
 //ajax 包装 data 必须是张表，或者null,带token

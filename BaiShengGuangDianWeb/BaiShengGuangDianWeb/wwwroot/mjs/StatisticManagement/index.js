@@ -226,7 +226,13 @@ function createChart() {
         }
     }
     var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
+    if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")) % 10 == start.slice(start.indexOf(" ") + 1, start.indexOf(":"))) {
+        start = $("#selectStartDate").val() + " " + "0" + $("#selectStartTime").val();
+    }
     var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
+    if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf(" ") + 1, end.indexOf(":"))) {
+        end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
+    }
 
     if (compareDate(start, end)) {
         layer.msg("结束时间不能小于开始时间");
@@ -255,6 +261,7 @@ function createChart() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var dataDeviceId = [];
             var time = [];
             var listName = [];
             listName["每日加工次数"] = "ProcessCount";
@@ -272,26 +279,64 @@ function createChart() {
                     data[key] = [];
                 }
             }
+            ret.datas.sort(function (x, y) {
+                return x.DeviceId < y.DeviceId ? 1 : -1;
+            });
+            ret.datas.sort(function (x, y) {
+                return x.Time > y.Time ? 1 : -1;
+            });
+            for (var k = 0; k < ret.datas.length; k++) {
+                dataDeviceId[k] = ret.datas[k].DeviceId;
+            }
+            dataDeviceId = dataDeviceId.filter(function (item, index, array) {
+                return dataDeviceId.indexOf(item) === index;
+            });
             var i;
             for (i = 0; i < ret.datas.length; i++) {
-                if (i % deviceId.length == 0) {
-                    if (dataTime == 2) {
-                        time[i] = ret.datas[i].Time.split(" ")[0];
-                    }
-                    if (dataTime == 1) {
-                        time[i] = ret.datas[i].Time.split(":")[0] + ":00:00";
-                    }
-                    if (dataTime == 0) {
+                if (dataTime == 2) {
+                    time[i] = ret.datas[i].Time.split(" ")[0];
+                }
+                if (dataTime == 1) {
+                    time[i] = ret.datas[i].Time.split(":")[0] + ":00:00";
+                }
+                if (dataTime == 0) {
+                    if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
+                        time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
+                    } else {
                         time[i] = ret.datas[i].Time.split(" ")[1];
                     }
                 }
                 var d = ret.datas[i];
                 for (key in listName) {
+                    //if (listName.hasOwnProperty(key) && deviceId[i % deviceId.length] == d.DeviceId) {
+                    //    data[key].push(d[listName[key]]);
+                    //} else {
+                    //    data[key].push("");
+                    //}
                     if (listName.hasOwnProperty(key)) {
-                        data[key].push(d[listName[key]]);
+                        if (deviceId.length != dataDeviceId.length) {
+                            for (var j = 0; j < deviceId.length; j++) {
+                                if (deviceId[j % deviceId.length] == d.DeviceId) {
+                                    data[key].push(d[listName[key]]);
+                                } else {
+                                    data[key].push("");
+                                }
+                            }
+                            //if (deviceId[i % deviceId.length] == dataDeviceId[i % deviceId.length]) {
+                            //    data[key].push(d[listName[key]]);
+                            //} else {
+                            //    data[key].push("");
+                            //    data[key].push(d[listName[key]]);
+                            //}
+                        } else {
+                            data[key].push(d[listName[key]]);
+                        }
                     }
                 }
             }
+            time = time.filter(function (item, index, array) {
+                return time.indexOf(item) === index;
+            });
             var rData = [];
             i = 0;
 
@@ -299,11 +344,24 @@ function createChart() {
                 if (listName.hasOwnProperty(key)) {
                     if (deviceId.length > 1) {
                         for (var i = 0; i < deviceId.length; i++) {
-                            rData.push({
-                                name: key,
-                                type: "line",
-                                data: [data[key][i]]
-                            });
+                            if (key == "同时加工台数" || key == "总台数" || key == "使用率") {
+                                rData.push({
+                                    name: key,
+                                    type: "line",
+                                    data: data[key].filter(function (item, index, array) {
+                                        return index % deviceId.length == i;
+                                    })
+                                });
+                                break;
+                            } else {
+                                rData.push({
+                                    name: key,
+                                    type: "line",
+                                    data: data[key].filter(function (item, index, array) {
+                                        return index % deviceId.length == i;
+                                    })
+                                });
+                            }
                         }
                     } else {
                         rData.push({
@@ -325,18 +383,22 @@ function createChart() {
                         var formatter2 = "{0}: {1}%<br/>";
                         var formatter = "";
                         for (var i = 0, l = params.length; i < l; i++) {
+                            var xName = params[i].name;
                             if (deviceId.length > 1) {
-                                formatter += deviceName[i % deviceName.length] +
-                                    (params[i].seriesName == "使用率" ? formatter2 : formatter1).format(
-                                        params[i].seriesName,
-                                        params[i].value);
+                                formatter += (params[i].seriesName == "使用率" ? formatter2 : formatter1).format(
+                                    params[i].seriesName == "同时加工台数" ||
+                                        params[i].seriesName == "总台数" ||
+                                        params[i].seriesName == "使用率"
+                                        ? params[i].seriesName
+                                        : deviceName[i % deviceName.length] + params[i].seriesName,
+                                    params[i].value);
                             } else {
                                 formatter += (params[i].seriesName == "使用率" ? formatter2 : formatter1).format(
                                     params[i].seriesName,
                                     params[i].value);
                             }
                         }
-                        return formatter;
+                        return xName + "<br/>" + formatter;
                     }
                 },
                 xAxis: {
