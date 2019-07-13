@@ -84,13 +84,13 @@ function createChart() {
         return;
     }
     var device = $("#selectDevice").val();
-    var start = $("#selectStartDate").val() + "T" + $("#selectStartTime").val();
-    if (start.slice(start.indexOf("T") + 1, start.indexOf(":")) % 10 == start.slice(start.indexOf("T") + 1, start.indexOf(":"))) {
-        start = $("#selectStartDate").val() + "T" + "0" + $("#selectStartTime").val();
+    var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
+    if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")) % 10 == start.slice(start.indexOf(" ") + 1, start.indexOf(":"))) {
+        start = $("#selectStartDate").val() + " " + "0" + $("#selectStartTime").val();
     }
-    var end = $("#selectEndDate").val() + "T" + $("#selectEndTime").val();
-    if (end.slice(end.indexOf("T") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf("T") + 1, end.indexOf(":"))) {
-        end = $("#selectEndDate").val() + "T" + "0" + $("#selectEndTime").val();
+    var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
+    if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf(" ") + 1, end.indexOf(":"))) {
+        end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
     }
     if (compareDate(start, end)) {
         layer.msg("结束时间不能小于开始时间");
@@ -143,7 +143,12 @@ function createChart() {
                     time[i] = ret.datas[i].time;
                 }
                 if (dataTime == 0) {
-                    time[i] = (ret.datas[i].time).slice((ret.datas[i].time).indexOf(" "), (ret.datas[i].time).length);
+                    var firstTime = (ret.datas[i].time).slice((ret.datas[i].time).indexOf(" ")+1, (ret.datas[i].time).length);
+                    if (firstTime.slice(0, 1) == 0) {
+                        time[i] = firstTime.replace(firstTime.slice(0, 1), "");
+                    } else {
+                        time[i] = firstTime;
+                    }
                 }
                 for (var j = 0; j < listId.length; j++) {
                     var key = "v" + listId[j];

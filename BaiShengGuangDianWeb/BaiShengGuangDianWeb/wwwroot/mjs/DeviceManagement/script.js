@@ -178,58 +178,64 @@ function getScriptVersionAllList(type) {
     }
     var data = {}
     data.opType = opType;
-    ajaxPost("/Relay/Post", data, function (ret) {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
-        }
-        scriptData = ret.datas;
-        var o = 0;
-        var order = function (data, type, row) {
-            return ++o;
-        }
-        var op = function (data, type, row) {
-            var html = '<div class="btn-group">{0}{1}</div>';
-            var changeBtn = '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'.format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
-            var delBtn = '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ScriptName));
+    ajaxPost("/Relay/Post",
+        data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            scriptData = ret.datas;
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">{0}{1}</div>';
+                var changeBtn =
+                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'
+                        .format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
+                var delBtn =
+                    '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'
+                        .format(data.Id, escape(data.ScriptName));
 
-            html = html.format(
-                checkPermission(115) ? changeBtn : "",
-                checkPermission(116) ? delBtn : "");
-            return html;
-        };
-        var columns = checkPermission(115) || checkPermission(116)
-            ? [
-                { "data": null, "title": "序号", "render": order },
-                { "data": "Id", "title": "Id", "bVisible": false },
-                { "data": "ScriptName", "title": "脚本名称" },
-                { "data": "ValueNumber", "title": "变量数" },
-                { "data": "InputNumber", "title": "输入口数" },
-                { "data": "OutputNumber", "title": "输出口数" },
-                { "data": null, "title": "操作", "render": op },
-            ]
-            : [
-                { "data": null, "title": "序号", "render": order },
-                { "data": "Id", "title": "Id", "bVisible": false },
-                { "data": "ScriptName", "title": "脚本名称" },
-                { "data": "ValueNumber", "title": "变量数" },
-                { "data": "InputNumber", "title": "输入口数" },
-                { "data": "OutputNumber", "title": "输出口数" },
-            ];
-        $("#scriptVersionList")
-            .DataTable({
-                "destroy": true,
-                "paging": true,
-                "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": ret.datas,
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数  
-                "columns": columns
-            });
-        if (type == 1)
-            $("#scriptVersionModel").modal("show");
-    });
+                html = html.format(
+                    checkPermission(115) ? changeBtn : "",
+                    checkPermission(116) ? delBtn : "");
+                return html;
+            };
+            var columns = checkPermission(115) || checkPermission(116)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ScriptName", "title": "脚本名称" },
+                    { "data": "ValueNumber", "title": "变量数" },
+                    { "data": "InputNumber", "title": "输入口数" },
+                    { "data": "OutputNumber", "title": "输出口数" },
+                    { "data": null, "title": "操作", "render": op },
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ScriptName", "title": "脚本名称" },
+                    { "data": "ValueNumber", "title": "变量数" },
+                    { "data": "InputNumber", "title": "输入口数" },
+                    { "data": "OutputNumber", "title": "输出口数" },
+                ];
+            $("#scriptVersionList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": columns
+                });
+            if (type == 1)
+                $("#scriptVersionModel").modal("show");
+        });
 }
 
 function showManageModel() {
@@ -380,6 +386,12 @@ function getDataTypeList() {
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 $("#aDataType").append(option.format(data.Id, data.TypeName));
+            }
+            $("#addDataType").empty();
+            var option1 = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data1 = ret.datas[i];
+                $("#addDataType").append(option1.format(data1.Id, data1.TypeName));
             }
         });
 }
@@ -646,7 +658,7 @@ function getScriptVersionList1(type) {
     });
 }
 
-function showAddModel() {
+ function showAddModel() {
     //$("#fScriptVersion").val(0).trigger("change");
     getDeviceModelList1(1);
 }
@@ -928,7 +940,6 @@ function showUsuallyDictionary() {
                     }
                     if (init)
                         return;
-
                     $(".mSel2").select2();
                     $(".mSel1").empty();
                     var option = '<option value="{0}">{1}</option>';
@@ -1034,4 +1045,179 @@ function updateUdt() {
         }
         showConfirm("修改", doSth);
     }
+}
+
+function showUsuallyVariableTypeModel() {
+    var opType = 157;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">{0}{1}</div>';
+                var changeBtn =
+                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateVariableTypeModel({0}, \'{1}\')">修改</button>'
+                        .format(data.Id, escape(data.VariableName));
+                var delBtn =
+                    '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteVariableType({0}, \'{1}\')">删除</button>'
+                        .format(data.Id, escape(data.VariableName));
+
+                html = html.format(
+                    checkPermission(160) ? changeBtn : "",
+                    checkPermission(161) ? delBtn : "");
+                return html;
+            };
+            var o = 0;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            var statistic = function (data, type, full, meta) {
+                if (full.StatisticType == 0) {
+                    return "";
+                }
+                if (full.StatisticType == 1) {
+                    return "趋势图";
+                }
+                if (full.StatisticType == 2) {
+                    return "加工记录";
+                }
+            }
+            var yesNo = function (data, type, full, meta) {
+                return full.IsDetail == true ? "是" : "否";
+            }
+            $("#usuallyVariableTypeList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [0, "asc"],
+                    "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
+                    "iDisplayLength": 15, //默认显示的记录数
+                    "columns": [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "VariableName", "title": "变量名称" },
+                        { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
+                        { "data": "StatisticType", "title": "统计字段", "render": statistic },
+                        { "data": null, "title": "操作", "render": op }
+                    ],
+                    "columnDefs": [
+                        { "orderable": false, "targets": 4 }
+                    ]
+                });
+        });
+    $("#usuallyVariableTypeModel").modal("show");
+}
+
+function deleteVariableType(id, name) {
+    var opType = 161;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showUsuallyVariableTypeModel();
+                }
+            });
+    }
+    showConfirm("删除变量：" + unescape(name), doSth);
+}
+
+function showAddUsuallyVariableTypeModel() {
+    $("#addVariableName").val("");
+    $("#addVariableSite").val("");
+    $("#addUsuallyVariableTypeModel").modal("show");
+}
+
+function addVariableType() {
+    var opType = 159;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var variableName = $("#addVariableName").val().trim();
+    var dataType = $("#addDataType").val();
+    var variableSite = $("#addVariableSite").val().replace(/\b(0+)/gi, "");
+    if (isStrEmptyOrUndefined(variableName)) {
+        showTip($("#addVariableNameTip"), "变量名称不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(variableSite)) {
+        showTip($("#addVariableSiteTip"), "变量名称不能为空");
+        return;
+    }
+    var doSth = function () {
+        $("#addUsuallyVariableTypeModel").modal("hide");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            VariableTypeId: dataType,
+            DictionaryId: variableSite,
+            VariableName: variableName
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showUsuallyVariableTypeModel();
+                }
+            });
+    }
+    showConfirm("添加", doSth);
+}
+
+function showUpdateVariableTypeModel(id, variableName) {
+    $("#updateVariableId").html(id);
+    variableName = unescape(variableName);
+    $("#updateVariableName").val(variableName);
+    $("#updateUsuallyVariableTypeModel").modal("show");
+}
+
+function updateVariableType() {
+    var opType = 160;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var updateVariableName = $("#updateVariableName").val().trim();
+    if (isStrEmptyOrUndefined(updateVariableName)) {
+        showTip($("#updateVariableNameTip"), "变量名称不能为空");
+        return;
+    }
+    var id = parseInt($("#updateVariableId").html());
+    var doSth = function () {
+        $("#updateUsuallyVariableTypeModel").modal("hide");
+        var data = {};
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: id,
+            VariableName: updateVariableName
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showUsuallyVariableTypeModel();
+                }
+            });
+    }
+    showConfirm("修改", doSth);
 }

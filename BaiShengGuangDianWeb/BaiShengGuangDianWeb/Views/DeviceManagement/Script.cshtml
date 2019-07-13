@@ -8,14 +8,20 @@
 <section class="content">
     <h2 class="text-center">流程脚本管理</h2>
     <div class="box box-primary">
-        <div class="box-header">
+        <div class="box-header with-border">
             <h3 class="box-title"></h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-primary btn-sm" onclick="showManageModel()">管理脚本版本</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyDictionaryTypeModel()">设置常用变量</button>
-                <button type="button" class="btn btn-primary btn-sm" id="showAddModel" onclick="showAddModel()">添加脚本数据</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="tableToExcel()">导出脚本数据</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="getDeviceModelList()">重新加载</button>
+            </div>
+        </div>
+        <div class="box-header">
+            <h3 class="box-title"></h3>
+            <div class="form-group pull-right">
+                <button type="button" class="btn btn-primary btn-sm" onclick="showManageModel()">管理脚本版本</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyDictionaryTypeModel()">设置常用变量</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyVariableTypeModel()">常用变量类型</button>
+                <button type="button" class="btn btn-primary btn-sm" id="showAddModel" onclick="showAddModel()">添加脚本数据</button>
             </div>
         </div>
         <div class="box-body">
@@ -39,7 +45,7 @@
                         </div>
                     </div>
                     <div class="box-body">
-                        <div class="table-responsive mailbox-messages" style="width:100%">
+                        <div class="table-responsive mailbox-messages" style="width: 100%">
                             <table class="table table-hover table-striped" id="valList"></table>
                         </div>
                     </div>
@@ -187,7 +193,7 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="aDataType">请选择数据类型：</label>
-                        <select class="form-control" id="aDataType"></select>
+                        <select class="ads form-control" id="aDataType"></select>
                     </div>
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-primary btn-sm" onclick="addValues()">添加</button>
@@ -279,6 +285,89 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="updateUdt()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="usuallyVariableTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常用变量类型</h4>
+                    <button type="button" class="btn btn-primary pull-right btn-sm" id="showAddUsuallyVariableTypeModel" onclick="showAddUsuallyVariableTypeModel()">添加类型</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="usuallyVariableTypeList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addUsuallyVariableTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常用变量</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="addVariableName"><span class="text-red">* </span>变量名称：</label>
+                        <input class="form-control" id="addVariableName" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="label-danger hidden" id="addVariableNameTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="addDataType"><span class="text-red">* </span>请选择数据类型：</label>
+                        <select class="ads form-control" id="addDataType"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="addVariableSite"><span class="text-red">* </span>变量地址：</label>
+                        <input class="form-control" id="addVariableSite" onfocusin="focusIn($(this))" onkeyup='value=value.replace(/[^0-9\-]+/g,"")' maxlength="20">
+                        <label class="label-danger hidden" id="addVariableSiteTip"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addVariableType()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="updateUsuallyVariableTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">常用变量</h4>
+                    <label class="hidden" id="updateVariableId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="updateVariableName"><span class="text-red">* </span>变量名称：</label>
+                        <input class="form-control" id="updateVariableName" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger hidden" id="updateVariableNameTip"></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateVariableType()">修改</button>
                 </div>
             </div>
         </div>

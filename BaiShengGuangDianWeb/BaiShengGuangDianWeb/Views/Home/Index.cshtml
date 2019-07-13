@@ -2,7 +2,12 @@
     ViewBag.Title = "工作台";
     Layout = "_Layout";
 }
-
+<style>
+    .mark{
+        opacity:0.5;
+        background:#000;
+    }
+</style>
 <script src="~/mjs/Home/index.js"></script>
 <section class="content ">
     <h2>
@@ -16,10 +21,16 @@
                 <div class="box-header with-border">
                     <h3 class="box-title">生产加工</h3>
                     <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-primary btn-sm" id="scanning">扫描</button>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
                 <div class="box-body">
+                    <div class="form-group">
+                        <video id="video" class="hidden mark" width="300" height="400" autoplay></video>
+                        <canvas id="canvas" class="hidden" width="500" height="500"></canvas>
+                        <button onclick="takePhoto()" class="hidden">开始扫描</button>
+                    </div>
                     <div class="form-group">
                         <label class="control-label" for="processCode">选择设备：</label>
                         <select class="ms2 form-control" style="width: 100%" id="processCode" onchange="focusIn($(this))"></select>
