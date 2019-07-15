@@ -658,7 +658,7 @@ function getScriptVersionList1(type) {
     });
 }
 
-function showAddModel() {
+ function showAddModel() {
     //$("#fScriptVersion").val(0).trigger("change");
     getDeviceModelList1(1);
 }
@@ -959,8 +959,8 @@ function showUsuallyDictionary() {
                             if (sel1s.indexOf(ov) == -1)
                                 sel1s.push(ov);
                         }
-                        for (var j = 0; j < sel1s.length; j++) {
-                            var val = sel1s[j];
+                        for (var va in sel1s) {
+                            var val = sel1s[va];
                             $(".vt" + val).empty();
                             //$(".vt" + val).append(option.format(0, "未设置"));
                             for (var i = 0; i < vData[val].length; i++) {
@@ -1093,6 +1093,25 @@ function showUsuallyVariableTypeModel() {
             var yesNo = function (data, type, full, meta) {
                 return full.IsDetail == true ? "是" : "否";
             }
+            var columns = checkPermission(160) || checkPermission(161)
+                ? [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "VariableName", "title": "变量名称" },
+                    { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
+                    { "data": "StatisticType", "title": "统计字段", "render": statistic },
+                    { "data": null, "title": "操作", "render": op }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "VariableName", "title": "变量名称" },
+                    { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
+                    { "data": "StatisticType", "title": "统计字段", "render": statistic }
+                ];
+            var defs = checkPermission(160) || checkPermission(161)
+                ? [
+                    { "orderable": false, "targets": 4 }
+                ]
+                : [];
             $("#usuallyVariableTypeList")
                 .DataTable({
                     "destroy": true,
@@ -1103,19 +1122,11 @@ function showUsuallyVariableTypeModel() {
                     "aaSorting": [0, "asc"],
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
                     "iDisplayLength": 15, //默认显示的记录数
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "VariableName", "title": "变量名称" },
-                        { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
-                        { "data": "StatisticType", "title": "统计字段", "render": statistic },
-                        { "data": null, "title": "操作", "render": op }
-                    ],
-                    "columnDefs": [
-                        { "orderable": false, "targets": 4 }
-                    ]
+                    "columns": columns,
+                    "columnDefs": defs
                 });
+            $("#usuallyVariableTypeModel").modal("show");
         });
-    $("#usuallyVariableTypeModel").modal("show");
 }
 
 function deleteVariableType(id, name) {
