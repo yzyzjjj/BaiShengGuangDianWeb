@@ -28,11 +28,8 @@
         var ui = $(this);
         showProcessData(ui.is(":checked"));
     });
-    $("#scanning").click(function () {
-        getMedia();
-        $("#video").removeClass("hidden");
-        setInterval("takePhoto()", 1000);
-        //$(this).addClass("hidden");
+    $("#flowCardEmpty").click(function () {
+        $("#flowCard").val("");
     });
 }
 
@@ -994,89 +991,59 @@ function clearRpFlowCard() {
     $("#tableFlowCard").addClass("hidden");
 }
 
-//function scanning() {
-//    //访问用户媒体设备的兼容方法
-//    var getUserMedia = function(constraints, success, error) {
-//        if (navigator.mediaDevices.getUserMedia) {
-//            //最新的标准API
-//            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
-//        } else if (navigator.webkitGetUserMedia) {
-//            //webkit核心浏览器
-//            navigator.webkitGetUserMedia(constraints, success, error)
-//        } else if (navigator.mozGetUserMedia) {
-//            //firfox浏览器
-//            navigator.mozGetUserMedia(constraints, success, error);
-//        } else if (navigator.getUserMedia) {
-//            //旧版API
-//            navigator.getUserMedia(constraints, success, error);
-//        }
-//    };
-//    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-//        //调用用户媒体设备, 访问摄像头
-//        getUserMedia({ video: { width: 480, height: 320, facingMode: "environment" } }, success, error);
-//    } else {
-//        alert('不支持访问用户媒体');
-//    }
-//    $("#video").removeClass("hidden");
-//    //setInterval("capture()", 2000);
-//}
-//function capture() {
-
-//    var canvas = document.getElementById('canvas');
-//    var context = canvas.getContext('2d');
-//    context.drawImage(video, 0, 0, 200, 320);
-//    var imgData = canvas.toDataURL("image/png");
-//    $("#img").prop("src", imgData);
-//    //alert($("#img").prop("src"));
-//    var aa = qrcode.decode(document.getElementById('img').getAttribute('src'));
-//    //alert(document.getElementById('img').getAttribute('src'));
-//    alert(aa);
-//}
-//function success(stream) {
-//    var video = document.getElementById('video');
-//    //兼容webkit核心浏览器
-//    //var CompatibleURL = window.URL || window.webkitURL;
-//    //将视频流设置为video元素的源
-//    console.log(stream);
-
-//    //video.src = CompatibleURL.createObjectURL(stream);
-//    video.srcObject = stream;
-//    video.play();
-//}
-//function error() {
-//    $("#video").addClass("hidden");
-//    layer.msg("访问用户媒体设备失败");
-//}
-var ctx, video, canvas;
-function getMedia() {
-    var config = {
-        video: {height: 400, facingMode: "environment" },
-        audio: false
-    }
-    video = document.getElementById("video");
-    var promise = navigator.mediaDevices.getUserMedia(config);
-
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
-    promise.then(function (stream) {
-        if (stream.active) {
-            video.srcObject = stream;
-            video.play();
-        } else {
-            getMedia();
+var canImg;
+function scanning() {
+    //访问用户媒体设备的兼容方法
+    var getUserMedia = function (constraints, success, error) {
+        if (navigator.mediaDevices.getUserMedia) {
+            //最新的标准API
+            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.webkitGetUserMedia) {
+            //webkit核心浏览器
+            navigator.webkitGetUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.mozGetUserMedia) {
+            //firfox浏览器
+            navigator.mozGetUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.getUserMedia) {
+            //旧版API
+            navigator.getUserMedia(constraints).then(success).catch(error);
         }
-
-    });
-
+    };
+    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+        //调用用户媒体设备, 访问摄像头
+        getUserMedia({ video: { width: 290, height: 290, facingMode: "environment" } }, success, error);
+    } else {
+        alert('不支持访问用户媒体');
+    }
+    $("#video").removeClass("hidden");
+    canImg = setInterval("capture()", 1000);
     qrcode.callback = function (e) {
         //结果回调
         if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
             $("#video").addClass("hidden");
             $("#flowCard").val(e.split(",")[2]);
+            clearInterval(canImg);
         }
     }
-}
-function takePhoto() {
-    ctx.drawImage(video, 0, 0, 400, 500);
+} 
+function capture() {
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, 290, 290);
     qrcode.decode(canvas.toDataURL('image/png'));
+}
+function success(stream) {
+    var video = document.getElementById('video');
+    //兼容webkit核心浏览器
+    //var CompatibleURL = window.URL || window.webkitURL;
+    //将视频流设置为video元素的源
+    console.log(stream);
+    //video.src = CompatibleURL.createObjectURL(stream);
+    video.srcObject = stream;
+    video.play();
+}
+function error() {
+    $("#video").addClass("hidden");
+    layer.msg("访问用户媒体设备失败");
+    clearInterval(canImg);
 }
