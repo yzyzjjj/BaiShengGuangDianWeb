@@ -158,7 +158,6 @@
             valueType = ret.datas;
         });
     $("#udtScriptVersion").on("select2:select", function (e) {
-        max = 0;
         showUsuallyDictionaryTypeModel(true);
     });
     if (!checkPermission(111)) {
@@ -658,7 +657,7 @@ function getScriptVersionList1(type) {
     });
 }
 
- function showAddModel() {
+function showAddModel() {
     //$("#fScriptVersion").val(0).trigger("change");
     getDeviceModelList1(1);
 }
@@ -719,6 +718,7 @@ function addOther() {
 
 function delSelf(id) {
     $("#avBody").find("[id=av" + id + "]").remove();
+    max--;
     maxV--;
     var o = 1;
     var childs = $("#avBody").find("label");
@@ -1047,6 +1047,7 @@ function updateUdt() {
     }
 }
 
+var statisticTypeName;
 function showUsuallyVariableTypeModel() {
     var opType = 157;
     if (!checkPermission(opType)) {
@@ -1064,8 +1065,8 @@ function showUsuallyVariableTypeModel() {
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">{0}{1}</div>';
                 var changeBtn =
-                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateVariableTypeModel({0}, \'{1}\')">修改</button>'
-                        .format(data.Id, escape(data.VariableName));
+                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateVariableTypeModel({0}, \'{1}\',\'{2}\')">修改</button>'
+                        .format(data.Id, escape(data.VariableName), escape(data.StatisticType));
                 var delBtn =
                     '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteVariableType({0}, \'{1}\')">删除</button>'
                         .format(data.Id, escape(data.VariableName));
@@ -1126,6 +1127,23 @@ function showUsuallyVariableTypeModel() {
                     "columnDefs": defs
                 });
             $("#usuallyVariableTypeModel").modal("show");
+            $("#updateStatisticType").empty();
+            var option = '<option value="{0}">{1}</option>';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                if (data.StatisticType == 0) {
+                    statisticTypeName = "无";
+                }
+                if (data.StatisticType == 1) {
+                    statisticTypeName = "趋势图";
+                }
+                if (data.StatisticType == 2) {
+                    statisticTypeName = "加工记录";
+                }
+                if (data.StatisticType != $("#updateStatisticType").val()) {
+                    $("#updateStatisticType").append(option.format(data.StatisticType, statisticTypeName));
+                }
+            }
         });
 }
 
@@ -1195,10 +1213,12 @@ function addVariableType() {
     showConfirm("添加", doSth);
 }
 
-function showUpdateVariableTypeModel(id, variableName) {
+function showUpdateVariableTypeModel(id, variableName, statisticType) {
     $("#updateVariableId").html(id);
     variableName = unescape(variableName);
+    statisticType = unescape(statisticType);
     $("#updateVariableName").val(variableName);
+    $("#updateStatisticType").val(statisticType);
     $("#updateUsuallyVariableTypeModel").modal("show");
 }
 
