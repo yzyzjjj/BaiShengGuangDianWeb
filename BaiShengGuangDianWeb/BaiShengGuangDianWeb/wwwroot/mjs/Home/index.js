@@ -1,5 +1,4 @@
 ﻿function pageReady() {
-
     $(".ms2").select2();
     $("#run").addClass("disabled");
     getDeviceList();
@@ -31,8 +30,52 @@
     $("#flowCardEmpty").click(function () {
         $("#flowCard").val("");
     });
+    $("#scanning").click(function () {
+        videos++;
+        if (videos % 2 == 0) {
+            closeVideo.stop();
+            clearInterval(canImg);
+            $("#video").addClass("hidden");
+            return;
+        }
+        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+            //调用用户媒体设备, 访问摄像头
+            getUserMedia({
+                video: {
+                    width: 290,
+                    height: 290,
+                    facingMode: "environment"
+                }
+            },
+                success,
+                error);
+        } else {
+            layer.msg('不支持访问用户媒体');
+        }
+        $("#video").removeClass("hidden");
+        canImg = setInterval("capture()", 1000);
+    });
+    $("#upload").click(function () {
+        if (videos % 2 != 0) {
+            closeVideo.stop();
+        }
+        clearInterval(canImg);
+        $("#video").addClass("hidden");
+        var uploadImg = setInterval($("#file").click(), 1000);
+        clearInterval(uploadImg);
+        videos = 0;
+    });
+    $("#file").change(function () {
+        addCover();
+        capture(this.files[0]);
+        fileImg = setInterval("file()", 1000);
+    });
+    if (!/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        $("#scanning").addClass("hidden");
+    }
 }
 
+var videos = 0;
 var x = 0;
 var faultData = null;
 function getDeviceList() {
@@ -992,58 +1035,96 @@ function clearRpFlowCard() {
 }
 
 var canImg;
-function scanning() {
-    //访问用户媒体设备的兼容方法
-    var getUserMedia = function (constraints, success, error) {
-        if (navigator.mediaDevices.getUserMedia) {
-            //最新的标准API
-            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
-        } else if (navigator.webkitGetUserMedia) {
-            //webkit核心浏览器
-            navigator.webkitGetUserMedia(constraints).then(success).catch(error);
-        } else if (navigator.mozGetUserMedia) {
-            //firfox浏览器
-            navigator.mozGetUserMedia(constraints).then(success).catch(error);
-        } else if (navigator.getUserMedia) {
-            //旧版API
-            navigator.getUserMedia(constraints).then(success).catch(error);
-        }
-    };
-    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-        //调用用户媒体设备, 访问摄像头
-        getUserMedia({ video: { width: 290, height: 290, facingMode: "environment" } }, success, error);
-    } else {
-        alert('不支持访问用户媒体');
+var fileImg;
+//访问用户媒体设备的兼容方法
+function getUserMedia(constraints, success, error) {
+    if (navigator.mediaDevices.getUserMedia) {
+        //最新的标准API
+        navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.webkitGetUserMedia) {
+        //webkit核心浏览器
+        navigator.webkitGetUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.mozGetUserMedia) {
+        //firfox浏览器
+        navigator.mozGetUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.getUserMedia) {
+        //旧版API
+        navigator.getUserMedia(constraints).then(success).catch(error);
     }
-    $("#video").removeClass("hidden");
-    canImg = setInterval("capture()", 1000);
+};
+
+function capture(file) {
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    if (!isStrEmptyOrUndefined($("#file").val())) {
+        var imgUrl = URL.createObjectURL(file);
+        var image = new Image();
+        image.src = imgUrl;
+        image.onload = function () {
+            context.drawImage(image, 0, 0, 290, 290);
+        }
+        return;
+    } else {
+        context.drawImage(video, 0, 0, 290, 290);
+    }
+    qrcode.decode(canvas.toDataURL('image/png'));
     qrcode.callback = function (e) {
         //结果回调
         if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
+            addCover();
             $("#video").addClass("hidden");
             $("#flowCard").val(e.split(",")[2]);
             clearInterval(canImg);
+            removeCover();
+            closeVideo.stop();
+            videos = 0;
         }
     }
-} 
-function capture() {
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, 290, 290);
-    qrcode.decode(canvas.toDataURL('image/png'));
 }
+
+var closeVideo;
 function success(stream) {
     var video = document.getElementById('video');
     //兼容webkit核心浏览器
     //var CompatibleURL = window.URL || window.webkitURL;
     //将视频流设置为video元素的源
-    console.log(stream);
+    //console.log(stream);
     //video.src = CompatibleURL.createObjectURL(stream);
     video.srcObject = stream;
     video.play();
+    closeVideo = stream.getTracks()[0];
 }
+
 function error() {
     $("#video").addClass("hidden");
     layer.msg("访问用户媒体设备失败");
     clearInterval(canImg);
 }
+
+function file() {
+    qrcode.decode(canvas.toDataURL('image/png'));
+    qrcode.callback = function (e) {
+        //结果回调
+        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
+            $("#video").addClass("hidden");
+            $("#flowCard").val(e.split(",")[2]);
+            clearInterval(fileImg);
+            $("#file").val("");
+            removeCover();
+            clearCanvas();
+        } else {
+            clearInterval(fileImg);
+            layer.msg("请上传正确的二维码图片");
+            $("#file").val("");
+            $("#flowCard").val("");
+            removeCover();
+            clearCanvas();
+        }
+    }
+}
+
+function clearCanvas() {
+    var c = document.getElementById("canvas");
+    var cxt = c.getContext("2d");
+    cxt.clearRect(0, 0, c.width, c.height);
+}  
