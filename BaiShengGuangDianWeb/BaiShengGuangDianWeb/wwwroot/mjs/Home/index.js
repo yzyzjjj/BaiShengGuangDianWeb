@@ -71,10 +71,10 @@
     });
     $("#file").change(function () {
         addCover();
-        capture(this.files[0]);
-        fileImg = setInterval("file()", 1000);
+        //capture(this.files[0]);
+        fileImg = setInterval("fileUp()", 1000);
     });
-    if (!/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+    if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
     }
 }
@@ -1092,17 +1092,17 @@ function getUserMedia(constraints, success, error) {
 function capture(file) {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
-    if (!isStrEmptyOrUndefined($("#file").val())) {
-        var imgUrl = URL.createObjectURL(file);
-        var image = new Image();
-        image.src = imgUrl;
-        image.onload = function () {
-            context.drawImage(image, 0, 0, 290, 290);
-        }
-        return;
-    } else {
+    //if (!isStrEmptyOrUndefined($("#file").val())) {
+    //    var imgUrl = URL.createObjectURL(file);
+    //    var image = new Image();
+    //    image.src = imgUrl;
+    //    image.onload = function () {
+    //        context.drawImage(image, 0, 0, 290, 290);
+    //    }
+    //    return;
+    //} else {
         context.drawImage(video, 0, 0, 290, 290);
-    }
+    //}
     qrcode.decode(canvas.toDataURL('image/png'));
     qrcode.callback = function (e) {
         //结果回调
@@ -1135,10 +1135,52 @@ function error() {
     $("#video").addClass("hidden");
     layer.msg("访问用户媒体设备失败");
     clearInterval(canImg);
+    videos = 0;
 }
 
-function file() {
-    qrcode.decode(canvas.toDataURL('image/png'));
+//function file() {
+//    qrcode.decode(canvas.toDataURL('image/png'));
+//    qrcode.callback = function (e) {
+//        //结果回调
+//        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
+//            $("#video").addClass("hidden");
+//            $("#flowCard").val(e.split(",")[2]);
+//            clearInterval(fileImg);
+//            $("#file").val("");
+//            removeCover();
+//        } else {
+//            clearInterval(fileImg);
+//            layer.msg("请上传正确的二维码图片");
+//            $("#file").val("");
+//            $("#flowCard").val("");
+//            removeCover();
+//        }
+//    }
+//}
+
+function clearCanvas() {
+    var c = document.getElementById("canvas");
+    var cxt = c.getContext("2d");
+    cxt.clearRect(0, 0, c.width, c.height);
+}
+
+function getObjectURL(file) {
+    var url = null;
+    if (window.createObjectURL != undefined) {          // basic
+        url = window.createObjectURL(file);
+    } else if (window.URL != undefined) {               // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+    } else if (window.webkitURL != undefined) {         // webkit or chrome
+        url = window.webkitURL.createObjectURL(file);
+    }
+    return url;
+}
+
+function fileUp() {
+    var newFile = document.getElementById('file');
+    //   console.log(newfile[0]);
+    //console.log(getObjectURL(this.files[0]));           // newfile[0]是通过input file上传的二维码图片文件
+    qrcode.decode(getObjectURL(newFile.files[0]));
     qrcode.callback = function (e) {
         //结果回调
         if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
@@ -1147,20 +1189,12 @@ function file() {
             clearInterval(fileImg);
             $("#file").val("");
             removeCover();
-            clearCanvas();
         } else {
             clearInterval(fileImg);
             layer.msg("请上传正确的二维码图片");
             $("#file").val("");
             $("#flowCard").val("");
             removeCover();
-            clearCanvas();
         }
     }
 }
-
-function clearCanvas() {
-    var c = document.getElementById("canvas");
-    var cxt = c.getContext("2d");
-    cxt.clearRect(0, 0, c.width, c.height);
-}  

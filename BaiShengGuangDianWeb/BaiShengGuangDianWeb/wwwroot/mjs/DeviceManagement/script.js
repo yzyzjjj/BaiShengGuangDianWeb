@@ -1048,7 +1048,9 @@ function updateUdt() {
 }
 
 var statisticTypeName;
+var dataStatisticType;
 function showUsuallyVariableTypeModel() {
+    dataStatisticType = new Array();
     var opType = 157;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -1066,7 +1068,7 @@ function showUsuallyVariableTypeModel() {
                 var html = '<div class="btn-group">{0}{1}</div>';
                 var changeBtn =
                     '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateVariableTypeModel({0}, \'{1}\',\'{2}\')">修改</button>'
-                        .format(data.Id, escape(data.VariableName), escape(data.StatisticType));
+                        .format(data.Id, escape(data.VariableName), data.StatisticType);
                 var delBtn =
                     '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteVariableType({0}, \'{1}\')">删除</button>'
                         .format(data.Id, escape(data.VariableName));
@@ -1127,22 +1129,32 @@ function showUsuallyVariableTypeModel() {
                     "columnDefs": defs
                 });
             $("#usuallyVariableTypeModel").modal("show");
+
+            for (var i = 0; i < ret.datas.length; i++) {
+                dataStatisticType[i] = ret.datas[i].StatisticType;
+            }
+
+            dataStatisticType = dataStatisticType.filter(function (item, index, array) {
+                return dataStatisticType.indexOf(item) === index;
+            });
+
+            dataStatisticType = dataStatisticType.sort(function (a, b) {
+                return a > b ? 1 : -1;
+            });
+
             $("#updateStatisticType").empty();
             var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (data.StatisticType == 0) {
+            for (var j = 0; j < dataStatisticType.length; j++) {
+                if (dataStatisticType[j] == 0) {
                     statisticTypeName = "无";
                 }
-                if (data.StatisticType == 1) {
+                if (dataStatisticType[j] == 1) {
                     statisticTypeName = "趋势图";
                 }
-                if (data.StatisticType == 2) {
+                if (dataStatisticType[j] == 2) {
                     statisticTypeName = "加工记录";
                 }
-                if (data.StatisticType != $("#updateStatisticType").val()) {
-                    $("#updateStatisticType").append(option.format(data.StatisticType, statisticTypeName));
-                }
+                $("#updateStatisticType").append(option.format(dataStatisticType[j], statisticTypeName));
             }
         });
 }
@@ -1173,6 +1185,7 @@ function deleteVariableType(id, name) {
 function showAddUsuallyVariableTypeModel() {
     $("#addVariableName").val("");
     $("#addVariableSite").val("");
+    $("#addDataType").val("1").trigger("change");
     $("#addUsuallyVariableTypeModel").modal("show");
 }
 
@@ -1216,9 +1229,8 @@ function addVariableType() {
 function showUpdateVariableTypeModel(id, variableName, statisticType) {
     $("#updateVariableId").html(id);
     variableName = unescape(variableName);
-    statisticType = unescape(statisticType);
     $("#updateVariableName").val(variableName);
-    $("#updateStatisticType").val(statisticType);
+    $("#updateStatisticType").val(statisticType).trigger("change");
     $("#updateUsuallyVariableTypeModel").modal("show");
 }
 
@@ -1229,6 +1241,7 @@ function updateVariableType() {
         return;
     }
     var updateVariableName = $("#updateVariableName").val().trim();
+    var updateStatisticType = $("#updateStatisticType").val().trim();
     if (isStrEmptyOrUndefined(updateVariableName)) {
         showTip($("#updateVariableNameTip"), "变量名称不能为空");
         return;
@@ -1240,7 +1253,8 @@ function updateVariableType() {
         data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
-            VariableName: updateVariableName
+            VariableName: updateVariableName,
+            StatisticType: updateStatisticType
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {

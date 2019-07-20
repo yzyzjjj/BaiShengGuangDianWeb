@@ -955,4 +955,11 @@ function autoCal(obj, ui) {
     ui.val(p);
 }
 
-
+//判断当前页面是pc端还是移动端
+function pcAndroid() {
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        return true;
+    } else {
+        return false;
+    }
+}
