@@ -906,7 +906,7 @@ function autoCal(obj, ui) {
     var t = 0;
     if (obj.value.indexOf("±") > -1)
         t = 1;
-    else if (obj.value.indexOf("～") > -1)
+    else if (obj.value.indexOf("～") > -1 || obj.value.indexOf("~") > -1)
         t = 2;
     else if (obj.value.indexOf("±") > -1)
         t = 3;
