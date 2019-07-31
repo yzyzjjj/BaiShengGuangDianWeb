@@ -16,8 +16,8 @@
                     <h3 class="box-title">生产加工</h3>
                     <div class="box-tools pull-right">
                         <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
-                        <button type="button" class="btn btn-primary btn-sm" id="upload">上传</button>
-                        <button type="button" class="btn btn-primary btn-sm" id="scanning">扫描</button>
+                        <button type="button" class="btn btn-primary btn-sm" title="二维码图片" onclick="upload(0)">上传</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="scanning" onclick="scanning(0)">扫描</button>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
@@ -239,14 +239,24 @@
                         &times;
                     </button>
                     <h4 class="modal-title">报表输入</h4>
-                    <label class="hidden" id="rpFCId"></label>
                 </div>
                 <div class="modal-body">
-                    <div class="form-inline">
-                        <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" maxlength="20">
-                        <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
-                        <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button>
-                        <label class="label-danger hidden" id="rpFlowCardTip"></label>
+                    <div class="form-group">
+                        <label class="control-label">快捷操作：</label>
+                        <button type="button" class="btn btn-primary" id="scanning1" onclick="scanning(1)">扫描</button>
+                        <button type="button" class="btn btn-primary" title="二维码图片" onclick="upload(1)">上传</button>
+                    </div>
+                    <div class="form-group">
+                        <video id="video1" class="hidden" style="width: 100%;height:290px"></video>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">流程卡号：</label>
+                        <div class="form-inline">
+                            <input class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
+                            <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
+                            <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button><br>
+                            <label class="label-danger hidden" id="rpFlowCardTip"></label>
+                        </div>
                     </div>
                     <div class="table-responsive mailbox-messages" id="tableFlowCard">
                         <table class="table table-hover table-striped" id="gxList"></table>

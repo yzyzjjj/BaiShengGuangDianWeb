@@ -4,7 +4,6 @@
         radioClass: 'iradio_square-blue',
         increaseArea: '20%' // optional
     });
-
     $("#loginBtn").click(function () {
         var account = $("#account").val();
         var password = $("#password").val();
@@ -48,4 +47,9 @@
         $("#password").val(pwd);
         $("#loginBtn").click();
     }
+    $(document).keydown(function (event) {
+        if (event.keyCode === 13) {
+            $("#loginBtn").click();
+        }
+    });
 });

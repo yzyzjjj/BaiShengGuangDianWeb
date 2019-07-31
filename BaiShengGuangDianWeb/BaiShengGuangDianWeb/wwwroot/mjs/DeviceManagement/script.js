@@ -1185,7 +1185,7 @@ function deleteVariableType(id, name) {
 function showAddUsuallyVariableTypeModel() {
     $("#addVariableName").val("");
     $("#addVariableSite").val("");
-    $("#addDataType").val("1").trigger("change");
+    $("#addDataType").val($("#addDataType option").eq(0).val()).trigger("change");
     $("#addUsuallyVariableTypeModel").modal("show");
 }
 
