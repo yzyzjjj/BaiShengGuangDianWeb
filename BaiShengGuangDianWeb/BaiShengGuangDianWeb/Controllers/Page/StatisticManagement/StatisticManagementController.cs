@@ -21,6 +21,10 @@ namespace BaiShengGuangDianWeb.Controllers.Page.StatisticManagement
         {
             return View();
         }
+        public IActionResult Fault()
+        {
+            return View();
+        }
 
         public IActionResult Kanban()
         {
