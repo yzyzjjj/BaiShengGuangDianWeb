@@ -55,13 +55,36 @@ function isPort(port) {
     }
 }
 //非负浮点数
-function isNumber(num) {
-    var regPos = /^\d+(\.\d+)?$/; //非负浮点数
-    //  var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; //负浮点数
-    //  if(regPos.test(num) || regNeg.test(num)){
-    if (regPos.test(num)) {
+function isNumber(value) {
+    //判断是不是一个数字 或者 一个字符串里全是数字
+    if (value === undefined || value === null || value === '') {
+        return false;
+    }
+
+    if (typeof (value) === 'string') {
+        //正整数
+        var reNumber = /^\d+$/;
+        //负整数
+        var reNeNumber = /^-\d+$/;
+        //正实数
+        var reRealNumber1 = /^[1-9]\d*[.]\d+$/;  //非零开头
+        var reRealNumber2 = /^0[.]\d+$/; //零开头
+        //负实数
+        var reNeRealNumber1 = /^-[1-9]\d*[.]\d+$/;  //非零开头
+        var reNeRealNumber2 = /^-0[.]\d+$/; //零开头
+        if (reNumber.test(value) || reNeNumber.test(value)
+            || reRealNumber1.test(value) || reRealNumber2.test(value)
+            || reNeRealNumber1.test(value) || reNeRealNumber2.test(value)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else if (typeof (value) === 'number') {
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
@@ -906,10 +929,10 @@ function autoCal(obj, ui) {
     var t = 0;
     if (obj.value.indexOf("±") > -1)
         t = 1;
-    else if (obj.value.indexOf("～") > -1 || obj.value.indexOf("~") > -1)
-        t = 2;
-    else if (obj.value.indexOf("±") > -1)
+    else if (obj.value.indexOf("+") > -1 && obj.value.indexOf("/") > -1 && obj.value.indexOf("-") > -1)
         t = 3;
+    else if (obj.value.indexOf("～") > -1 || obj.value.indexOf("~") > -1 || obj.value.indexOf("-") > -1)
+        t = 2;
 
     ui = $("#" + ui);
     var num = [];
@@ -917,12 +940,22 @@ function autoCal(obj, ui) {
     s.push(";");
     var n = "";
     for (var i = 0; i < s.length; i++) {
-        if (isNumber(s[i]) || s[i] == '.') {
-            n += s[i];
+        if (t == 3) {
+            if (isNumber(s[i]) || s[i] == '.' || s[i] == '-') {
+                n += s[i];
+            } else {
+                if (isNumber(n))
+                    num[num.length] = parseFloat(n);
+                n = "";
+            }
         } else {
-            if (isNumber(n))
-                num[num.length] = parseFloat(n);
-            n = "";
+            if (isNumber(s[i]) || s[i] == '.') {
+                n += s[i];
+            } else {
+                if (isNumber(n))
+                    num[num.length] = parseFloat(n);
+                n = "";
+            }
         }
     }
 
@@ -930,22 +963,33 @@ function autoCal(obj, ui) {
     switch (t) {
         case 1:
             if (num.length >= 1) {
-                p = num[0]; break;
+                p = num[0];
             }
+            break;
         case 2:
             if (num.length == 1) {
-                p = num[0]; break;
+                p = num[0];
             } else if (num.length >= 2) {
-                p = (num[0] + num[1]) / 2.0; break;
+                p = (num[0] + num[1]) / 2.0;
             }
+            break;
+        case 3:
+            if (num.length == 1) {
+                p = num[0];
+            }
+            else if (num.length >= 3) {
+                p = num[0] + (num[1] + num[2]) / 2;
+            }
+            break;
         default:
             if (num.length >= 1) {
                 p = num[0];
-                break;
+            } else {
+                p = 0;
             }
-            p = 0; break;
+            break;
     }
-
+    p = p.toFixed(4);
     p = input(p.toString());
     p = inputEnd(p.toString());
     ui.val(p);
