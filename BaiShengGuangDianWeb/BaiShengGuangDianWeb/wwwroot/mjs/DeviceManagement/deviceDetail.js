@@ -37,6 +37,9 @@ function getControlList() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        hard: true
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -127,7 +130,8 @@ function getStateList() {
                 var key = data.Item1;
                 var val = data.Item2;
                 switch (key) {
-                    case 1: if (!isStrEmptyOrUndefined(info)) {
+                    case 1:
+                        if (val == 0) {
                             info = firstData.DeviceStateStr;
                         }
                         break;
