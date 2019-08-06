@@ -90,6 +90,9 @@ function getDeviceList() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        hard: true
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
