@@ -959,3 +959,30 @@ function pcAndroid() {
         return false;
     }
 }
+
+//秒换算成时间
+function codeTime(second) {
+    if (second < 60) {
+        return second + "秒";
+    }
+    if (second < 3600) {
+        return (second - (second % 60)) / 60 + "分钟" + (second % 60) + "秒";
+    }
+    if (second < 86400) {
+        return (second - (second % 3600)) / 3600 +
+            "小时" +
+            ((second - (second % 60)) / 60) % 60 +
+            "分钟" +
+            (second % 60) +
+            "秒";
+    } else {
+        return (second - (second % 86400)) / 86400 +
+            "天" +
+            ((second - (second % 3600)) / 3600) % 24 +
+            "小时" +
+            ((second - (second % 60)) / 60) % 60 +
+            "分钟" +
+            (second % 60) +
+            "秒";
+    }
+}

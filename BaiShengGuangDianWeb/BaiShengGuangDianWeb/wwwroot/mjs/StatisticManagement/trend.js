@@ -42,7 +42,7 @@
     $("#flowCardEmpty").click(function () {
         $("#inputFlowCard").val("");
     });
-    $("#inputFlowCard")[0].addEventListener("input",function() {
+    $("#inputFlowCard")[0].addEventListener("input", function () {
         $("#main").empty();
         $("#deviceCode").text("趋势图");
         $("#selectProcess").empty();
@@ -60,12 +60,12 @@
         if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
             //调用用户媒体设备, 访问摄像头
             getUserMedia({
-                    video: {
-                        width: 290,
-                        height: 290,
-                        facingMode: "environment"
-                    }
-                },
+                video: {
+                    width: 290,
+                    height: 290,
+                    facingMode: "environment"
+                }
+            },
                 success,
                 error);
         } else {
@@ -90,7 +90,6 @@
     });
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
-        $("#chartLeft").css("position","fixed");
     }
 }
 
@@ -129,7 +128,8 @@ function getDevicePar() {
     }
     var data = {}
     data.opType = opType;
-    ajaxPost("/Relay/Post", data,
+    ajaxPost("/Relay/Post",
+        data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -194,7 +194,7 @@ function createChart(type) {
         if ((end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 100000000) {
             dataTime = 2;
         }
-        parList.sort(function(x, y) {
+        parList.sort(function (x, y) {
             return parseInt(x.slice(0, x.indexOf(","))) > parseInt(y.slice(0, y.indexOf(","))) ? 1 : -1;
         });
         var list = parList.join();
@@ -308,10 +308,12 @@ function createChart(type) {
                         }
                     };
                     myChart.setOption(option, true);
-                    window.addEventListener('resize', function () {
-                        myChart.resize();
-                    });
                 }
+                $("section").resize(function() {
+                    for (var k = 0; k < listName.length; k++) {
+                        echarts.init(document.getElementById("chart" + k)).resize();
+                    }
+                });
             });
     }
     if (type == 1) {
@@ -326,7 +328,7 @@ function createChart(type) {
         }
         var flowCardId = $("#selectProcess").val().trim();
         var order = $("#selectProcess option:selected").attr("order");
-        parList.sort(function(x, y) {
+        parList.sort(function (x, y) {
             return parseInt(x.slice(0, x.indexOf(","))) > parseInt(y.slice(0, y.indexOf(","))) ? 1 : -1;
         });
         var list1 = parList.join();
@@ -425,10 +427,12 @@ function createChart(type) {
                         }
                     };
                     myChart.setOption(option, true);
-                    window.addEventListener('resize', function () {
-                        myChart.resize();
-                    });
                 }
+                $("section").resize(function () {
+                    for (var k = 0; k < listName2.length; k++) {
+                        echarts.init(document.getElementById("chart" + k)).resize();
+                    }
+                });
             });
     }
 }
