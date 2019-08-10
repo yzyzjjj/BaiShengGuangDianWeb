@@ -224,6 +224,8 @@ function queryFlowCard() {
     $("#info").empty();
     $("#pData").empty();
     $("#run").addClass("disabled");
+    $("#isChange").iCheck("uncheck");
+
     var query = true;
     //机台号
     var deviceId = $("#processCode").val();
@@ -282,6 +284,7 @@ function queryFlowCard() {
             $("#isDifference").on('ifChanged', function (event) {
                 var ui = $(this);
                 if (ui.is(":checked")) {
+                    hideTip("differenceTip");
                     $("#differenceDiv").removeClass("hidden");
                 } else {
                     $("#differenceDiv").addClass("hidden");
@@ -309,6 +312,7 @@ function queryFlowCard() {
             processData = flowCard.processData.sort(function (a, b) {
                 return a.ProcessOrder > b.ProcessOrder ? 1 : -1;
             });
+            newProcessData = null;
             showProcessData();
 
             var processSteps = flowCard.processSteps.sort(function (a, b) {
