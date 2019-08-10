@@ -19,6 +19,9 @@ function getBoardData() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            if (isStrEmptyOrUndefined(ret.data)) {
+                return;
+            }
             //总设备
             var allDevice = ret.data.AllDevice + ",总设备";
             deviceSum.push(allDevice);
@@ -267,4 +270,3 @@ function getBoardData() {
             });
         });
 }
-
