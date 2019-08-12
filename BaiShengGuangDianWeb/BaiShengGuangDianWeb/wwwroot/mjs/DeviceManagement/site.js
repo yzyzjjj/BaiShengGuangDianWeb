@@ -48,7 +48,7 @@ function getSiteList() {
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "SiteName", "title": "场地名" },
+                    { "data": "SiteName", "title": "车间名" },
                     { "data": "RegionDescription", "title": "场地位置" },
                     { "data": "Manager", "title": "管理人" },
                     { "data": null, "title": "操作", "render": op }
@@ -56,7 +56,7 @@ function getSiteList() {
                 : [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "SiteName", "title": "场地名" },
+                    { "data": "SiteName", "title": "车间名" },
                     { "data": "RegionDescription", "title": "场地位置" },
                     { "data": "Manager", "title": "管理人" }
                 ];
@@ -165,7 +165,7 @@ function addSite() {
     var addLocations = $("#addLocations").val().trim();
     var manager = $("#addManager").val();
     if (isStrEmptyOrUndefined(addSiteName)) {
-        showTip($("#addSiteNameTip"), "场地名不能为空");
+        showTip($("#addSiteNameTip"), "车间名不能为空");
         return;
     }
     if (isStrEmptyOrUndefined(addLocations)) {
@@ -178,7 +178,7 @@ function addSite() {
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
-            //场地名称
+            //车间名称
             SiteName: addSiteName,
             //场地位置
             RegionDescription: addLocations,
@@ -246,7 +246,7 @@ function updateSite() {
     var manager = $("#updateManager").val();
 
     if (isStrEmptyOrUndefined(updateSiteName)) {
-        showTip($("#updateSiteNameTip"), "场地名不能为空");
+        showTip($("#updateSiteNameTip"), "车间名不能为空");
         return;
     }
     if (isStrEmptyOrUndefined(updateRegions)) {
@@ -261,7 +261,7 @@ function updateSite() {
         data.opType = opType;
         data.opData = JSON.stringify({
             id: id,
-            //场地名称
+            //车间名称
             SiteName: updateSiteName,
             //场地地址
             RegionDescription: updateRegions,
