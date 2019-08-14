@@ -162,8 +162,10 @@ function reLogin() {
 }
 
 //ajax 包装 data 必须是张表，或者null,带token
-function ajaxPost(url, data, func) {
-    addCover();
+function ajaxPost(url, data, func, tf) {
+    if (tf != 0) {
+        addCover();
+    }
     if (data == null) {
         data = {}
     }
@@ -173,7 +175,9 @@ function ajaxPost(url, data, func) {
     //    data.token = token
     //}
     var funcC = function (e) {
-        removeCover();
+        if (tf != 0) {
+            removeCover();
+        }
         func(e);
     }
     $.post(url, data, funcC).error(reLogin);
