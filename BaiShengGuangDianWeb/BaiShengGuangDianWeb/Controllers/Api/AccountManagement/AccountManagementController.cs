@@ -434,6 +434,19 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 accountInfo.EmailAddress = email;
             }
 
+            //EmailAddress
+            var emailType = param.GetValue("emailType");
+            if (accountInfo.EmailType != emailType)
+            {
+                if (AccountHelper.GetAccountInfoByName(name) != null)
+                {
+                    return Result.GenError<Result>(Error.NameIsExist);
+                }
+                logParam = $",邮件类型:{accountInfo.EmailType},新邮件类型:{emailType}";
+                accountInfo.EmailType = emailType;
+                fName = true;
+            }
+
             //Role
             var roleStr = param.GetValue("role");
             if (!roleStr.IsNullOrEmpty())

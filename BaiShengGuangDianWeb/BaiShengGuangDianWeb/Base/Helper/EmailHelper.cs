@@ -19,7 +19,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
     {
         public static IEnumerable<MailType> GetTypes()
         {
-            return ServerConfig.WebDb.Query<MailType>("SELECT * FROM `mail_type`;");
+            return ServerConfig.WebDb.Query<MailType>("SELECT * FROM `email_type`;");
         }
 
         /// <summary>
