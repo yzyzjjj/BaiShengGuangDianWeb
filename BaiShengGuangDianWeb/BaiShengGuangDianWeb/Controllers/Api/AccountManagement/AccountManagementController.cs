@@ -74,6 +74,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var permissions = param.GetValue("permissions");
             var isProcessor = param.GetValue("isProcessor");
             var deviceIds = param.GetValue("deviceIds");
+            var emailType = param.GetValue("emailType");
             if (account.IsNullOrEmpty() || account.IsNullOrEmpty() || name.IsNullOrEmpty() || roleStr.IsNullOrEmpty())
             {
                 return Result.GenError<Result>(Error.ParamError);
@@ -125,7 +126,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
-            var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},特殊权限列表:{permissions}";
+            var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
             if (!isProcessor.IsNullOrEmpty())
             {
                 try
@@ -211,6 +212,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 Password = AccountHelper.GenAccountPwdByOrignalPwd(account, password),
                 Name = name,
                 Role = role,
+                EmailType = emailType,
                 EmailAddress = email,
                 SelfPermissions = permissions ?? "",
                 DeviceIds = deviceIds ?? "",
