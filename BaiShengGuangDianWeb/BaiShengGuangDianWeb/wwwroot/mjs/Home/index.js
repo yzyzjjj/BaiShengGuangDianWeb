@@ -647,7 +647,6 @@ function reportFault() {
                     }
                     //调用服务器方法
                     hubConnection.invoke('SendMsg', info);
-
                 }
             }
         });

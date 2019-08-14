@@ -163,5 +163,23 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return Result.GenError<Result>(Error.Success);
         }
+
+        [HttpGet("MailType")]
+        public CommonResult MailType()
+        {
+            var accountInfo = AccountHelper.CurrentUser;
+            if (accountInfo == null)
+            {
+                return Result.GenError<CommonResult>(Error.AccountNotExist);
+            }
+
+            if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            {
+                return Result.GenError<CommonResult>(Error.NoAuth);
+            }
+            var result = new CommonResult { data = EmailHelper.GetTypes() };
+            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+            return result;
+        }
     }
 }

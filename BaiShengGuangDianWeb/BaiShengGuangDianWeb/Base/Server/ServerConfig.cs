@@ -1,4 +1,5 @@
-﻿using BaiShengGuangDianWeb.Base.Helper;
+﻿using BaiShengGuangDianWeb.Base.FileConfig;
+using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.Extensions.Configuration;
 using ModelBase.Base.Dapper;
 using ModelBase.Base.Logger;
@@ -6,7 +7,8 @@ using ModelBase.Base.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BaiShengGuangDianWeb.Base.FileConfig;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BaiShengGuangDianWeb.Base.Server
 {
@@ -14,12 +16,16 @@ namespace BaiShengGuangDianWeb.Base.Server
     {
         public static DataBase WebDb;
         public static string PasswordKey;
+        public static string EmailAccount;
+        public static string EmailPassword;
         public static RedisCacheHelper RedisHelper;
         public static Dictionary<string, Action> Loads;
         public static void Init(IConfiguration configuration)
         {
             WebDb = new DataBase(configuration.GetConnectionString("WebDb"));
             PasswordKey = configuration.GetAppSettings<string>("PasswordKey");
+            EmailAccount = configuration.GetAppSettings<string>("EmailAccount");
+            EmailPassword = configuration.GetAppSettings<string>("EmailPassword");
             RedisHelper = new RedisCacheHelper(configuration);
             Loads = new Dictionary<string, Action>
             {

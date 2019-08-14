@@ -1,6 +1,8 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BaiShengGuangDianWeb.Base.Chat
@@ -35,7 +37,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
                         Groups.AddToGroupAsync(connectionInfo.ConnectionId, groupName);
                     }
                     Clients.Group(groupName).SendAsync(info.ChatEnum.ToString(), info.Message);
-
+                    EmailHelper.Send($"{msg["Code"].ToObject<string>()} 故障提醒!!!", $"<span style=\"color: red\">{msg["Code"].ToObject<string>()}</span>出现故障, 上报时间:{DateTime.Now}", new List<string> { acc.EmailAddress }, 1);
                     break;
             }
 
