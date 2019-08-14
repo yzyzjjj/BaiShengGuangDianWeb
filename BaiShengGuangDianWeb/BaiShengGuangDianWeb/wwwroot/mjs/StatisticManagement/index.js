@@ -50,7 +50,7 @@ function getDeviceList() {
 }
 
 var time = null;
-function createChart() {
+function createChart(start1, end1) {
     $("#recordChart").empty();
     time = new Array();
     var opType = 502;
@@ -74,12 +74,26 @@ function createChart() {
             deviceName.push(newList[i]);
         }
     }
-    var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
-    if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")) % 10 == start.slice(start.indexOf(" ") + 1, start.indexOf(":"))) {
+    var start;
+    if (isStrEmptyOrUndefined(start1)) {
+        start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
+    } else {
+        start = start1;
+        $("#selectStartDate").val(start1.split(" ")[0]).datepicker('update');
+        $("#selectStartTime").val(start1.split(" ")[1]);
+    }
+    if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")).length == 1 && isStrEmptyOrUndefined(start1)) {
         start = $("#selectStartDate").val() + " " + "0" + $("#selectStartTime").val();
     }
-    var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
-    if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf(" ") + 1, end.indexOf(":"))) {
+    var end;
+    if (isStrEmptyOrUndefined(end1)) {
+        end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
+    } else {
+        end = end1;
+        $("#selectEndDate").val(end.split(" ")[0]).datepicker('update');
+        $("#selectEndTime").val(end.split(" ")[1]);
+    }
+    if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")).length == 1 && isStrEmptyOrUndefined(end1)) {
         end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
     }
 
@@ -88,13 +102,16 @@ function createChart() {
         return;
     }
     var dataTime = 0;
-    if (100000000 > (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) && (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 1000000) {
+    var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
+    if (100000000 > endStart && endStart >= 1000000) {
         dataTime = 1;
     }
-    if ((end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 100000000) {
+    if (endStart >= 100000000) {
         dataTime = 2;
     }
-
+    if ((endStart >= 10000 && endStart < 1000000) || endStart == 770000) {
+        dataTime = 3;
+    }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -112,7 +129,6 @@ function createChart() {
                 return;
             }
             //var dataDeviceId = [];
-            var time = [];
             var timeS = [];
             var listName = [];
             var comName = [];
@@ -173,19 +189,25 @@ function createChart() {
             //});
             var i;
             for (i = 0; i < ret.datas.length; i++) {
+                time[i] = ret.datas[i].Time;
                 if (dataTime == 2) {
                     time[i] = ret.datas[i].Time.split(" ")[0];
                 }
-                if (dataTime == 1) {
-                    time[i] = ret.datas[i].Time.split(":")[0] + ":00:00";
-                }
-                if (dataTime == 0) {
-                    if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
-                        time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
-                    } else {
-                        time[i] = ret.datas[i].Time.split(" ")[1];
-                    }
-                }
+                //if (dataTime == 1) {
+                //    time[i] = ret.datas[i].Time.split(":")[0] + ":00:00";
+                //}
+                //if (dataTime == 0 || dataTime == 3) {
+                //    if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
+                //        time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
+                //    } else {
+                //        time[i] = ret.datas[i].Time.split(" ")[1];
+                //    }
+                //}
+                //if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
+                //    time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
+                //} else {
+                //    time[i] = ret.datas[i].Time.split(" ")[1];
+                //}
                 timeS[i] = ret.datas[i].Time;
                 var d = ret.datas[i];
                 for (key in listName) {
@@ -274,6 +296,7 @@ function createChart() {
                 }
             }
             rData = rData.concat(uData);
+            $("#recordChart").empty();
             var charts = '<div id="chart" style="width: 100%; height: 500px">' + '</div>';
             $("#recordChart").append(charts);
             var myChart = echarts.init(document.getElementById("chart"));
@@ -317,12 +340,12 @@ function createChart() {
                 dataZoom: [{
                     type: "slider",
                     start: 0,
-                    end: 20
+                    end: 100
                 },
                 {
                     type: "inside",
                     start: 0,
-                    end: 20
+                    end: 100
                 }],
                 toolbox: {
                     top: 20,
@@ -343,7 +366,80 @@ function createChart() {
             $("section").resize(function () {
                 myChart.resize();
             });
+            var tf = true;
+            myChart.on('dataZoom', function (params) {
+                var chartData = myChart.getOption();
+                var chartZoom = chartData.dataZoom[0];
+                var starts = chartData.xAxis[0].data[chartZoom.startValue];
+                var ends = chartData.xAxis[0].data[chartZoom.endValue];
+                var timeX = ends.replace(/[^0-9]+/g, "") - starts.replace(/[^0-9]+/g, "");
+                if (time.length == 0) {
+                    return;
+                }
+                var timeY = time[time.length - 1].replace(/[^0-9]+/g, "") - time[0].replace(/[^0-9]+/g, "");
+                if (timeX == 1 && timeY != 1 && tf && ends.length == 10) {
+                    tf = false;
+                    starts = starts + " 00:00:00";
+                    ends = ends + " 00:00:00";
+                    setTimeout(function () {
+                        createChart(starts, ends);
+                        tf = true;
+                    }, 1000);
+                }
+                if ((timeX == 10000 || timeX == 770000) && timeY != 10000 && tf) {
+                    tf = false;
+                    setTimeout(function () {
+                        createChart(starts, ends);
+                        tf = true;
+                    }, 1000);
+                }
+                if (timeX == 100 && timeY != 100 && tf) {
+                    tf = false;
+                    setTimeout(function () {
+                        createChart(starts, ends);
+                        tf = true;
+                    }, 1000);
+                }
+            });
         });
+}
+
+function hourChart() {
+    var endTime = getFullTime();
+    var hour = new Date().format(" hh");;
+    var day = new Date().format("dd ");
+    var startTime;
+    if ((hour-1).toString().length == 1) {
+        startTime = endTime.replace(hour, " 0" + (hour - 1));
+    } else {
+        startTime = endTime.replace(hour, " " + (hour - 1));
+    }
+    if (hour == " 00") {
+        startTime = endTime.replace(hour, " 23").replace(day, (day - 1) + " ");
+        if ((day - 1).toString().length != 1) {
+            startTime = endTime.replace(hour, " 23").replace(day, "0" + (day - 1) + " ");
+        }
+    }
+    createChart(startTime, endTime);
+}
+
+function dayChart() {
+    var endTime = getFullTime();
+    var startTime = getDayAgo(1) + " " + getTime();
+    createChart(startTime, endTime);
+}
+
+function monthChart() {
+    var endTime = getFullTime();
+    var mouth = new Date().format("-MM");
+    var mouthSum = new Date().format("MM");;
+    var startTime;
+    if ((mouthSum-1).toString().length == 1) {
+        startTime = endTime.replace(mouth, "-0" + (mouthSum - 1));
+    } else {
+        startTime = endTime.replace(mouth, "-" + (mouthSum - 1));
+    }
+    createChart(startTime, endTime);
 }
 
 function getWorkShopList() {
