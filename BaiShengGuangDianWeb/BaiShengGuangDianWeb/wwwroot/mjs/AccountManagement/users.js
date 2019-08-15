@@ -1,6 +1,6 @@
 ﻿function pageReady() {
     getUsersList();
-
+    $(".ms2").select2();
     $("#addProcessor").on("ifChanged", function (event) {
         if ($(this).is(":checked")) {
             $("#add_deviceDiv").removeClass("hidden");
@@ -29,6 +29,7 @@
     $("#updatePassword").on("ifChanged", function (event) {
         if (!$(this).is(":checked")) {
             $("#updateNewPassword").attr("disabled", "disabled");
+            $("#updateNewPassword").val("");
         } else {
             $("#updateNewPassword").removeAttr("disabled");
         }
@@ -56,7 +57,7 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole));
+                var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType));
                 var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
                 !checkPermission(76) && checkPermission(75) && data.isDeleted
                     ? html = ""
@@ -147,6 +148,7 @@ function addReset() {
 var addList = null;
 var deviceId = null;
 function showAddUserModal(type = 0) {
+    emailType();
     addList = new Array();
     $("#add_protoDiv").click();
     $(".dd").val("");
@@ -295,10 +297,41 @@ function showAddUserModal(type = 0) {
         });
 }
 
+var emailTypeData = [];
+function emailType() {
+    ajaxGet("/AccountManagement/EmailType", null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            $("#addEmailType").empty();
+            var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                $("#addEmailType").append(option.format(data.type, data.name));
+            }
+            $("#addEmailType .icb_minimal").iCheck({
+                checkboxClass: 'icheckbox_minimal-blue',
+                radioClass: 'iradio_minimal',
+                increaseArea: '20%'
+            });
+            emailTypeData = [];
+            $("#addEmailType .icb_minimal").on("ifChanged", function (event) {
+                if ($(this).is(":checked")) {
+                    emailTypeData.push($(this).val());
+                } else {
+                    emailTypeData.splice(emailTypeData.indexOf($(this).val()), 1);
+                }
+            });
+        });
+}
+
 function addUser() {
     var addAccount = $("#addAccount").val();
     var addName = $("#addName").val();
     var addEmail = $("#addEmail").val();
+    var addEmailType = emailTypeData.join();
     var addPassword = $("#addPassword").val();
     var addRole = $("#addRole").val();
     var pRole = new Array();
@@ -347,6 +380,7 @@ function addUser() {
             password: addPassword,
             name: addName,
             email: addEmail,
+            emailType: addEmailType,
             role: addRole,
             permissions: roleIds,
             isProcessor: pRoles,
@@ -366,13 +400,14 @@ function addUser() {
 
 var updateList = new Array();
 var permission = null;
-function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole) {
+function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole, emailType) {
     account = unescape(account);
     name = unescape(name);
     emailAddress = unescape(emailAddress);
     permissions = unescape(permissions);
     deviceIds = unescape(deviceIds);
     productionRole = unescape(productionRole);
+    emailType = unescape(emailType);
     if (!isStrEmptyOrUndefined(deviceIds))
         updateList = deviceIds.split(",");
     $("#update_protoDiv").click();
@@ -390,6 +425,33 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
     $("#updateProcessor").iCheck(productionRoleList.indexOf("0") > -1 ? 'check' : 'uncheck');
     $("#updateSurveyor").iCheck(productionRoleList.indexOf("1") > -1 ? 'check' : 'uncheck');
 
+    ajaxGet("/AccountManagement/EmailType", null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            $("#upEmailType").empty();
+            var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
+            for (var i = 0; i < ret.datas.length; i++) {
+                var data = ret.datas[i];
+                $("#upEmailType").append(option.format(data.type, data.name));
+            }
+            $("#upEmailType .icb_minimal").iCheck({
+                checkboxClass: 'icheckbox_minimal-blue',
+                radioClass: 'iradio_minimal',
+                increaseArea: '20%'
+            });
+            var emailTypeList = emailType.split(",");
+            var upCks = $("#upEmailType .icb_minimal");
+            for (var j = 0; j < upCks.length; j++) {
+                if (emailTypeList.indexOf(upCks[j].value) == -1) {
+                    $(upCks[j]).iCheck('uncheck');
+                } else {
+                    $(upCks[j]).iCheck('check');
+                }
+            }
+        });
     $("#updateRole").empty();
     ajaxGet("/RoleManagement/List",
         null,
@@ -534,6 +596,15 @@ function updateUser() {
     var id = parseInt($("#updateId").html());
     var updateName = $("#updateName").val();
     var updateEmail = $("#updateEmail").val();
+    var upEmailTypeData = [];
+    var cks = $("#upEmailType .icb_minimal");
+    for (var j = 0; j < cks.length; j++) {
+        var s = cks[j];
+        if ($(s).is(":checked")) {
+            upEmailTypeData.push(s.value);
+        }
+    }
+    var updateEmailType = upEmailTypeData.join();
     var updateRole = $("#updateRole").val();
     var pRole = new Array();
     if ($("#updateProcessor").is(":checked"))
@@ -570,6 +641,7 @@ function updateUser() {
         id: id,
         name: updateName,
         email: updateEmail,
+        emailType: updateEmailType,
         role: updateRole,
         permissions: roleIds,
         isProcessor: pRoles,
@@ -598,9 +670,6 @@ function updateUser() {
     }
     showConfirm("修改", doSth);
 }
-
-
-
 
 var lastAddRole = 0;
 var lastUpdateRole = 0;

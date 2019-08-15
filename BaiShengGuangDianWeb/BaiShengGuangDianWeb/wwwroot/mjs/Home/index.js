@@ -525,7 +525,7 @@ function showFaultModel() {
     $("#faultCode").val("").trigger("change");
     $("#faultOther").val("");
     $("#faultDate").val(getDate()).datepicker('update');
-    $("#faultTime").val(getTime());
+    $("#faultTime").val(getTime()).timepicker('setTime', getTime());
     var info = getCookieTokenInfo();
     $("#proposer").val(info.name);
     $("#faultDesc").val("");
