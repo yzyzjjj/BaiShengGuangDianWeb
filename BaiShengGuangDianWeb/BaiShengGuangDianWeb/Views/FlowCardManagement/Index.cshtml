@@ -29,12 +29,42 @@
                             </div>
                         </div>
                         <div class="box-body">
+                            <div class="form-group fcHead">
+                                <button type="button" class="btn btn-info btn-sm">创建时间</button>
+                                <button type="button" class="btn btn-info btn-sm">计划号</button>
+                                <button type="button" class="btn btn-info btn-sm">流程卡</button>
+                            </div>
                             <div class="form-group form-inline">
-                                <label class="control-label" for="flowCardStartDate"><span class="text-red">* </span>创建时间：</label>
-                                <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 20%;">
-                                -
-                                <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 20%;">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="getFlowCardList()">查询</button>
+                                <div class="fcBody form-group">
+                                    <label class="control-label" for="flowCardStartDate"><span class="text-red">* </span>创建时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 130px">
+                                        <span>&nbsp;-&nbsp;</span>
+                                        <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 130px">
+                                        <button type="button" class="btn btn-primary" onclick="getFlowCardList(1)" style="margin-left:4px">查询</button>
+                                    </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="selectPlanList"><span class="text-red">* </span>计划号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="form-control" id="selectPlanList" style="width: 160px"></select>
+                                        <button type="button" class="btn btn-primary" onclick="getFlowCardList(2)" style="margin-left:4px">查询</button>
+                                    </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="flowCardId"><span class="text-red">* </span>流程卡号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="flowCardId" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
+                                        <button type="button" class="btn btn-primary" onclick="getFlowCardList(3)" style="margin-left:4px">查询</button>
+                                        <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
+                                        <button type="button" class="btn btn-primary" id="scanning">扫描</button>
+                                        <button type="button" class="btn btn-primary" id="upload" title="二维码图片">上传</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <video id="video" class="hidden" style="width: 100%; height: 290px"></video>
+                                <canvas id="canvas" class="hidden" width="290" height="290"></canvas>
                             </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="flowCardList"></table>

@@ -268,7 +268,7 @@ function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommu
     $("#updateName").val(firmwareName);
     $("#updateNumber").val(firmwareNumber);
     $("#updateCommunication").val(firmwareCommunication);
-    $("#oldUpdateFilePath").val(firmwareLocationName);
+    $(".file-caption-name").val(firmwareLocationName);
     $("#updateDesc").val(firmwareDescription);
     $("#updateFirm").modal("show");
 }

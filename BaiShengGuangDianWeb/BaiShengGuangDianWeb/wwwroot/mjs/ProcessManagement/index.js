@@ -773,11 +773,18 @@ function addProcess() {
         return;
     }
     var deviceModels = $("#apDeviceModel").val();
+    if (isStrEmptyOrUndefined(deviceModels)) {
+        layer.msg("请选择适用设备型号");
+        return;
+    }
     var productModels = $("#apProductionProcessName").val();
+    if (isStrEmptyOrUndefined(productModels)) {
+        layer.msg("请选择适用产品型号");
+        return;
+    }
     var deviceIds = $("#apCode").val();
-    if (deviceModels == null ||
-        productModels == null ||
-        deviceIds == null) {
+    if (isStrEmptyOrUndefined(deviceIds)) {
+        layer.msg("请选择适用机台号");
         return;
     }
     var inputData = new Array();
@@ -926,11 +933,18 @@ function updateProcess() {
         return;
     }
     var deviceModels = $("#apDeviceModel").val();
+    if (isStrEmptyOrUndefined(deviceModels)) {
+        layer.msg("请选择适用设备型号");
+        return;
+    }
     var productModels = $("#apProductionProcessName").val();
+    if (isStrEmptyOrUndefined(productModels)) {
+        layer.msg("请选择适用产品型号");
+        return;
+    }
     var deviceIds = $("#apCode").val();
-    if (deviceModels == null ||
-        productModels == null ||
-        deviceIds == null) {
+    if (isStrEmptyOrUndefined(deviceIds)) {
+        layer.msg("请选择适用机台号");
         return;
     }
     var inputData = new Array();

@@ -12,8 +12,8 @@
         $("#selectDevice").val($("#selectDevice option").eq(0).val()).trigger("change");
         $("#selectStartDate").val(getDate()).datepicker('update');
         $("#selectEndDate").val(getDate()).datepicker('update');
-        $("#selectStartTime").val(getTime());
-        $("#selectEndTime").val(getTime());
+        $("#selectStartTime").val(getTime()).timepicker('setTime', getTime());
+        $("#selectEndTime").val(getTime()).timepicker('setTime', getTime());
         $("#selectPar .icb_minimal").iCheck('uncheck');
         $("#deviceCode").text("趋势图");
         $("#body").css("display", "none");

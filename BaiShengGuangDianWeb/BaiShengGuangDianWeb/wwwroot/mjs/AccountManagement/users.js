@@ -37,6 +37,9 @@
     if (!checkPermission(74)) {
         $("#showAddUserModal").addClass("hidden");
     }
+    $("#addEmail,#updateEmail").on("input", function () {
+        $(this)[0].value = $(this)[0].value.replace(/[^\w\@\.\-]+/g, "");
+    });
 }
 
 function getUsersList() {
@@ -369,6 +372,10 @@ function addUser() {
         layer.msg("姓名不能为空");
         return;
     }
+    if (!isEmail(addEmail) && !isStrEmptyOrUndefined(addEmail)) {
+        showTip("addEmailTip", "邮箱格式不正确，请输入：登录名@主机名.域名的格式");
+        return;
+    }
     if (isStrEmptyOrUndefined(addPassword)) {
         layer.msg("密码不能为空");
         return;
@@ -647,9 +654,11 @@ function updateUser() {
         isProcessor: pRoles,
         deviceIds: deviceIds
     }
-
+    if (!isEmail(updateEmail) && !isStrEmptyOrUndefined(updateEmail)) {
+        showTip("updateEmailTip", "邮箱格式不正确，请输入：登录名@主机名.域名的格式");
+        return;
+    }
     if ($("#updatePassword").is(":checked")) {
-
         var updateNewPassword = $("#updateNewPassword").val();
         if (isStrEmptyOrUndefined(updateNewPassword)) {
             layer.msg("密码不能为空");

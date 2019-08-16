@@ -606,8 +606,8 @@ function rChange(id, type) {
 
                     $("#singleFaultSolver").val(data.FaultSolver);
                     var d = data.SolveTime.split(' ');
-                    $("#singleSolveDate").val(d[0]);
-                    $("#singleSolveTime").val(d[1]);
+                    $("#singleSolveDate").val(d[0]).datepicker('update');
+                    $("#singleSolveTime").val(d[1]).timepicker('setTime', d[1]);
                     $("#singleSolvePlan").val(data.SolvePlan);
 
                     $("#singleFaultType").val(data.FaultTypeId).trigger("change");
@@ -632,9 +632,8 @@ function rChange(id, type) {
                     return;
                 }
                 $("#faultOtherDiv").removeClass("hidden");
-                $("#singleSolveDate").val(getDate());
-                $("#singleSolveDate").datepicker('update');
-                $("#singleSolveTime").val(getTime());
+                $("#singleSolveDate").val(getDate()).datepicker('update');
+                $("#singleSolveTime").val(getTime()).timepicker('setTime', getTime());
                 var info = getCookieTokenInfo();
                 if (id == 0)
                     $("#singleFaultSolver").val(info.name);
@@ -655,9 +654,8 @@ function rChange(id, type) {
                     }
                 }
                 $("#singleFaultDefaultDesc").val(desc);
-                $("#singleFaultDate").val(getDate());
-                $("#singleFaultDate").datepicker('update');
-                $("#singleFaultTime").val(getTime());
+                $("#singleFaultDate").val(getDate()).datepicker('update');
+                $("#singleFaultTime").val(getTime()).timepicker('setTime',getTime());
                 $(".dd").removeAttr("disabled");
                 $("#solveDiv").removeClass("hidden");
 

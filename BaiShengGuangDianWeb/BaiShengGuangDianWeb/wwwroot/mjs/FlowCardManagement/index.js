@@ -16,8 +16,59 @@
     if (!checkPermission(237)) {
         $("#showAddRawMateriaModel").addClass("hidden");
     }
+    selectPlan();
+    $(".fcHead button").click(function () {
+        $(this).css("background", "green").siblings().css("background","");
+        var e = $(this).index();
+        $(".fcBody").eq(e).removeClass("hidden").siblings().addClass("hidden");
+    });
+    $("#scanning").click(function () {
+        videos++;
+        if (videos % 2 == 0) {
+            closeVideo.stop();
+            clearInterval(canImg);
+            $("#video").addClass("hidden");
+            return;
+        }
+        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+            //调用用户媒体设备, 访问摄像头
+            getUserMedia({
+                    video: {
+                        width: 290,
+                        height: 290,
+                        facingMode: "environment"
+                    }
+                },
+                success,
+                error);
+        } else {
+            layer.msg('不支持访问用户媒体');
+        }
+        $("#video").removeClass("hidden");
+        canImg = setInterval("capture()", 500);
+    });
+    $("#upload").click(function () {
+        if (videos % 2 != 0) {
+            closeVideo.stop();
+        }
+        clearInterval(canImg);
+        $("#video").addClass("hidden");
+        var uploadImg = setInterval($("#file").click(), 1000);
+        clearInterval(uploadImg);
+        videos = 0;
+    });
+    $("#file").change(function () {
+        addCover();
+        fileImg = setInterval("fileUp()", 1000);
+    });
+    if (!pcAndroid()) {
+        $("#scanning").addClass("hidden");
+    }
 }
 
+var videos = 0;
+var canImg;
+var fileImg;
 var fProductionProcessList = false;
 var fRawMateriaList = false;
 //流程卡
@@ -155,26 +206,90 @@ function addFlowCard() {
     showConfirm("添加", doSth);
 }
 
-function getFlowCardList() {
-    var opType = 200;
+function selectPlan() {
+    var opType = 215;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-
-    var start = $("#flowCardStartDate").val();
-    var end = $("#flowCardEndDate").val();
-    if (compareDate(start, end)) {
-        layer.msg("结束时间不能小于开始时间");
-        return;
-    }
-
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({
-        StartTime: start,
-        EndTime: end
-    });
+    ajaxPost("/Relay/Post",data,
+        function(ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            $("#selectPlanList").empty();
+            var option = "<option value='{0}'>{0}</option>";
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#selectPlanList").append(option.format(d.ProductionProcessName, d.ProductionProcessName));
+            }
+        });
+}
+
+function getFlowCardList(par) {
+    var opType;
+    var data;
+    switch (par) {
+        case 1:
+            opType = 200;
+            if (!checkPermission(opType)) {
+                layer.msg("没有权限");
+                return;
+            }
+            var start = $("#flowCardStartDate").val();
+            var end = $("#flowCardEndDate").val();
+            if (compareDate(start, end)) {
+                layer.msg("结束时间不能小于开始时间");
+                return;
+            }
+
+            data = {}
+            data.opType = opType;
+            data.opData = JSON.stringify({
+                StartTime: start,
+                EndTime: end
+            });
+            break;
+        case 2:
+            opType = 203;
+            if (!checkPermission(opType)) {
+                layer.msg("没有权限");
+                return;
+            }
+            var plan = $("#selectPlanList").val();
+            if (isStrEmptyOrUndefined(plan)) {
+                layer.msg("请选择计划号");
+                return;
+            }
+
+            data = {}
+            data.opType = opType;
+            data.opData = JSON.stringify({
+                id: plan
+            });
+            break;
+        case 3:
+            opType = 209;
+            if (!checkPermission(opType)) {
+                layer.msg("没有权限");
+                return;
+            }
+            var fcId = $("#flowCardId").val();
+            if (isStrEmptyOrUndefined(fcId)) {
+                layer.msg("请输入流程卡号");
+                return;
+            }
+
+            data = {}
+            data.opType = opType;
+            data.opData = JSON.stringify({
+                id: fcId
+            });
+    }
+
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -430,7 +545,7 @@ function updateFlowCard() {
 
     var ufGGdata = new Array();
     var i;
-    var id;
+    var ufId;
     for (i = 1; i < ufGGmax; i++) {
         if ($("#ufGG" + i).length > 0) {
             var specificationName = $("#ufGGm" + i).val().trim();
@@ -444,9 +559,9 @@ function updateFlowCard() {
                 layer.msg("规格值不能为空");
                 return;
             }
-            id = $("#ufGG" + i).attr("value");
+            ufId = $("#ufGG" + i).attr("value");
             ufGGdata.push({
-                Id: id,
+                Id: ufId,
                 SpecificationName: specificationName,
                 SpecificationValue: specificationValue
             });
@@ -475,9 +590,9 @@ function updateFlowCard() {
                 return;
             }
 
-            id = $("#ufGX" + i).attr("value");
+            ufId = $("#ufGX" + i).attr("value");
             ufGXdata.push({
-                Id: id,
+                Id: ufId,
                 ProcessStepOrder: l++,
                 ProcessStepId: processStepId,
                 ProcessStepRequirements: processStepRequirements,
@@ -1059,7 +1174,6 @@ function changeFlowCard() {
         return;
     if ($("#gxList").find(".cancel1-btn").length <= 0 && $("#gxList").find(".cancel2-btn").length <= 0)
         return;
-    return;
     var doSth = function () {
         var data = {}
         data.opType = opType;
@@ -1981,4 +2095,98 @@ function addRawMateria() {
             });
     }
     showConfirm("添加", doSth);
+}
+
+//访问用户媒体设备的兼容方法
+function getUserMedia(constraints, success, error) {
+    if (navigator.mediaDevices.getUserMedia) {
+        //最新的标准API
+        navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.webkitGetUserMedia) {
+        //webkit核心浏览器
+        navigator.webkitGetUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.mozGetUserMedia) {
+        //firfox浏览器
+        navigator.mozGetUserMedia(constraints).then(success).catch(error);
+    } else if (navigator.getUserMedia) {
+        //旧版API
+        navigator.getUserMedia(constraints).then(success).catch(error);
+    }
+};
+
+function capture() {
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, 290, 290);
+    qrcode.decode(canvas.toDataURL('image/png'));
+    qrcode.callback = function (e) {
+        //结果回调
+        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
+            addCover();
+            $("#video").addClass("hidden");
+            $("#flowCardId").val(e.split(",")[2]);
+            clearInterval(canImg);
+            removeCover();
+            clearCanvas();
+            closeVideo.stop();
+            videos = 0;
+        }
+    }
+}
+
+var closeVideo;
+function success(stream) {
+    var video = document.getElementById('video');
+    video.srcObject = stream;
+    video.play();
+    closeVideo = stream.getTracks()[0];
+}
+
+function error() {
+    $("#video").addClass("hidden");
+    layer.msg("访问用户媒体设备失败");
+    clearInterval(canImg);
+    videos = 0;
+}
+
+function clearCanvas() {
+    var c = document.getElementById("canvas");
+    var cxt = c.getContext("2d");
+    cxt.clearRect(0, 0, c.width, c.height);
+}
+
+function getObjectURL(file) {
+    var url = null;
+    if (window.createObjectURL != undefined) {          // basic
+        url = window.createObjectURL(file);
+    } else if (window.URL != undefined) {               // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+    } else if (window.webkitURL != undefined) {         // webkit or chrome
+        url = window.webkitURL.createObjectURL(file);
+    }
+    return url;
+}
+
+//上传图片识别二维码
+function fileUp() {
+    var newFile = document.getElementById('file');
+    //   console.log(newfile[0]);
+    //console.log(getObjectURL(this.files[0]));           // newfile[0]是通过input file上传的二维码图片文件
+    qrcode.decode(getObjectURL(newFile.files[0]));
+    qrcode.callback = function (e) {
+        //结果回调
+        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
+            $("#video").addClass("hidden");
+            $("#flowCardId").val(e.split(",")[2]);
+            clearInterval(fileImg);
+            $("#file").val("");
+            removeCover();
+        } else {
+            clearInterval(fileImg);
+            layer.msg("请上传正确的二维码图片");
+            $("#file").val("");
+            $("#flowCardId").val("");
+            removeCover();
+        }
+    }
 }

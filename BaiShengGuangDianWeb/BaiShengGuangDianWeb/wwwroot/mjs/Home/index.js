@@ -747,6 +747,7 @@ function showInputReport() {
     $("#inputReportModel").modal("show");
 }
 
+var rpFcId;
 function queryRpFlowCard() {
     $("#gxList").empty();
     $("#tableFlowCard").removeClass("hidden");
@@ -786,7 +787,7 @@ function queryRpFlowCard() {
             var sIndex = -1;
             var datas = ret.processSteps.sort(processStepOrder);
             if (datas.length > 0)
-                $("#rpFCId").html(datas[0].FlowCardId);
+                rpFcId = datas[0].FlowCardId;
             for (var j = 0; j < datas.length; j++) {
                 var d = datas[j];
                 if (d.IsReport)
@@ -977,7 +978,7 @@ function reportFlowCard() {
         layer.msg("没有权限");
         return;
     }
-    var flowCardId = parseInt($("#rpFCId").html());
+    var flowCardId = parseInt(rpFcId);
     var oData = $("#gxList tbody").children();
     var postData = new Array();
     var canSave = false;
