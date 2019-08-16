@@ -440,10 +440,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var emailType = param.GetValue("emailType");
             if (accountInfo.EmailType != emailType)
             {
-                if (AccountHelper.GetAccountInfoByName(name) != null)
-                {
-                    return Result.GenError<Result>(Error.NameIsExist);
-                }
                 logParam = $",邮件类型:{accountInfo.EmailType},新邮件类型:{emailType}";
                 accountInfo.EmailType = emailType;
                 fName = true;
