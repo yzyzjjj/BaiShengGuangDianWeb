@@ -25,6 +25,11 @@
     });
     $("#isChange").on('ifChanged', function (event) {
         var ui = $(this);
+        //当前厚度
+        var difference = $("#difference").val().trim();
+        if (isStrEmptyOrUndefined(difference)) {
+            $("#isDifference").iCheck("uncheck");
+        };
         showProcessData(ui.is(":checked"));
     });
     $("#flowCardEmpty").click(function () {
