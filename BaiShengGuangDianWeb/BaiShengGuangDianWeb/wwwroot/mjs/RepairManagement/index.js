@@ -655,7 +655,7 @@ function rChange(id, type) {
                 }
                 $("#singleFaultDefaultDesc").val(desc);
                 $("#singleFaultDate").val(getDate()).datepicker('update');
-                $("#singleFaultTime").val(getTime()).timepicker('setTime',getTime());
+                $("#singleFaultTime").val(getTime()).timepicker('setTime', getTime());
                 $(".dd").removeAttr("disabled");
                 $("#solveDiv").removeClass("hidden");
 
@@ -1289,6 +1289,8 @@ function updateFaultType() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getFaultTypeList();
+                    getFaultDeviceList();
+                    getRepairRecordList();
                 }
             });
     }
