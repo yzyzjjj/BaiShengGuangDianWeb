@@ -1,7 +1,7 @@
 ﻿function pageReady() {
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
-
+    $("#selectPlanList").select2();
     $("#flowCardStartDate").val(getDate()).datepicker('update');
     $("#flowCardEndDate").val(getDate()).datepicker('update');
     //getFlowCardList();

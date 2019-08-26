@@ -93,4 +93,8 @@ function compareDate(date1, date2) {
     var oDate1 = new Date(date1);
     var oDate2 = new Date(date2);
     return oDate1.getTime() > oDate2.getTime();
-}     
+}   
+
+function getWeek() {
+    return getNowYear() + "第" + $.datepicker.iso8601Week(new Date()) + "周";
+}

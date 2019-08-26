@@ -165,7 +165,6 @@ function getDevicePar() {
 var time = null;
 var v = null;
 function createChart(type) {
-    $("#main").empty();
     time = new Array();
     v = new Object();
     if (type == 0) {
@@ -183,15 +182,20 @@ function createChart(type) {
         if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf(" ") + 1, end.indexOf(":"))) {
             end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
         }
+        var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
         if (compareDate(start, end)) {
             layer.msg("结束时间不能小于开始时间");
             return;
         }
+        //if (endStart > 20000 || (endStart > 764042 && endStart <780000)) {
+        //    layer.msg("时间范围不能超过两小时");
+        //    return;
+        //}
         var dataTime = 0;
-        if (100000000 > (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) && (end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 1000000) {
+        if (100000000 > endStart && endStart >= 1000000) {
             dataTime = 1;
         }
-        if ((end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "")) >= 100000000) {
+        if (endStart >= 100000000) {
             dataTime = 2;
         }
         parList.sort(function (x, y) {
@@ -205,11 +209,11 @@ function createChart(type) {
         }
         var newList = list.split(",");
         var listId = [], listName = [];
-        for (var i = 0; i < newList.length; i++) {
-            if (i % 2 == 0) {
-                listId.push(newList[i]);
+        for (var j = 0; j < newList.length; j++) {
+            if (j % 2 == 0) {
+                listId.push(newList[j]);
             } else {
-                listName.push(newList[i]);
+                listName.push(newList[j]);
             }
         }
         var parId = listId.join(",");
@@ -246,23 +250,24 @@ function createChart(type) {
                             time[i] = firstTime;
                         }
                     }
-                    for (var j = 0; j < listId.length; j++) {
-                        var key = "v" + listId[j];
+                    for (var d = 0; d < listId.length; d++) {
+                        var key = "v" + listId[d];
                         if (isStrEmptyOrUndefined(v[key])) {
                             v[key] = [];
                         }
                         v[key].push(ret.datas[i][key]);
                     }
                 }
-                for (var i = 0; i < listName.length; i++) {
-                    var charts = '<div id="chart' + i + '" style="width: 100%; height: 500px">' + '</div>';
-                    if (i > 0) {
+                $("#main").empty();
+                for (var s = 0; s < listName.length; s++) {
+                    var charts = '<div id="chart' + s + '" style="width: 100%; height: 500px">' + '</div>';
+                    if (s > 0) {
                         $("#main").append('<div class="box-footer">' + charts + "</div>");
                     } else {
                         $("#main").append(charts);
                     }
-                    var parName = listName[i];
-                    var myChart = echarts.init(document.getElementById("chart" + i));
+                    var parName = listName[s];
+                    var myChart = echarts.init(document.getElementById("chart" + s));
                     var option = {
                         title: {
                             text: parName
@@ -280,7 +285,7 @@ function createChart(type) {
                         series: [{
                             name: parName,
                             type: "line",
-                            data: v[Object.keys(v)[i]]
+                            data: v[Object.keys(v)[s]]
                         }],
                         dataZoom: [{
                             type: "slider",
@@ -309,7 +314,7 @@ function createChart(type) {
                     };
                     myChart.setOption(option, true);
                 }
-                $("section").resize(function() {
+                $("#main").resize(function() {
                     for (var k = 0; k < listName.length; k++) {
                         echarts.init(document.getElementById("chart" + k)).resize();
                     }
@@ -373,6 +378,7 @@ function createChart(type) {
                         v[key].push(ret.datas[i][key]);
                     }
                 }
+                $("#main").empty();
                 for (var i = 0; i < listName2.length; i++) {
                     var charts = '<div id="chart' + i + '" style="width: 100%; height: 500px">' + '</div>';
                     if (i > 0) {
@@ -428,7 +434,7 @@ function createChart(type) {
                     };
                     myChart.setOption(option, true);
                 }
-                $("section").resize(function () {
+                $("#main").resize(function () {
                     for (var k = 0; k < listName2.length; k++) {
                         echarts.init(document.getElementById("chart" + k)).resize();
                     }

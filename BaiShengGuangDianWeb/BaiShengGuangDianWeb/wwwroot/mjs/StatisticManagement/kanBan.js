@@ -112,7 +112,7 @@ function getBoardData() {
                 },
                 tooltip: {
                     trigger: "axis",
-                    formatter: "{a}<br/>{b} : {c}%",
+                    formatter: "{a}<br/>{b} : {c}%"
                 },
                 xAxis: {
                     type: 'category',
@@ -143,7 +143,15 @@ function getBoardData() {
                         return res;
                     })()
                 },
-                yAxis: {},
+                yAxis: {
+                    name: '百分比',
+                    type: 'value',
+                    scale: true,
+                    axisLabel: {
+                        show: true,
+                        formatter: '{value} %'
+                    }
+                },
                 legend: {
                     data: ["利用率"]
                 },

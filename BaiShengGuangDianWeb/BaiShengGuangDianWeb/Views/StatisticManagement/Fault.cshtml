@@ -7,13 +7,189 @@
 <script src="~/mjs/StatisticManagement/fault.js"></script>
 <section class="content">
     <h2 class="text-center">故障统计</h2>
-    <div class="box box-primary">
-        <div class="box-header">
-            <h3 class="box-title">故障列表</h3>
-            <div class="box-tools pull-right">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#trendDetail" data-toggle="tab" aria-expanded="true">故障趋势</a></li>
+                <li><a href="#dataContrast" data-toggle="tab" aria-expanded="false">数据对比</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="trendDetail">
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="selectWorkShop"><span class="text-blue">* </span>（可选）请选择车间：</label>
+                                <select class="ms2 form-control" style="width: 100%" multiple="multiple" id="selectWorkShop" onchange="focusIn($(this))"></select>
+                            </div>
+                            <div class="form-group" id="selectDeviceList">
+                                <label class="control-label" for="selectDevice"><span class="text-blue">* </span>（可选）请选择车间设备：</label>
+                                <select class="ms2 form-control" style="width: 100%" multiple="multiple" id="selectDevice" onchange="focusIn($(this))"></select>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="form-group">
+                                    <label class="control-label"><span class="text-red">* </span>请选择时间段：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="startDate" class="form_date form-control" style="width: 130px">
+                                        <span>&nbsp;-&nbsp;</span>
+                                        <input type="text" id="endDate" class="form_date form-control" style="width: 130px">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" onclick="getFaultChart()">生成图表</button>
+                                </div>
+                            </div>
+                            <div id="faultChart">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="dataContrast">
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="selectWorkShop">请选择车间：</label>
+                                <select class="ms3 form-control" style="width: 100%" id="selectWorkShop1"></select>
+                            </div>
+                            <div class="col-md-6" style="padding:0">
+                                <div class="form-group fcHead">
+                                    <button type="button" class="btn btn-info btn-sm" style="background-color: green">日数据对比</button>
+                                    <button type="button" class="btn btn-info btn-sm">周数据对比</button>
+                                    <button type="button" class="btn btn-info btn-sm">月数据对比</button>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <div class="fcBody form-group">
+                                        <label class="control-label" for="selectDay">选择天：</label>
+                                        <input type="text" id="selectDay" class="form_date form-control" style="width: 130px">
+                                        <label class="control-label" for="">对比天：</label>
+                                        <input type="text" id="conDay" class="form_date form-control" style="width: 130px">
+                                        <button type="button" class="btn btn-primary" onclick="contrastChart(0)">生成图表</button>
+                                    </div>
+                                    <div class="fcBody form-group hidden">
+                                        <label class="control-label" for="selectWeek">选择周：</label>
+                                        <input type="text" id="selectWeek" readonly="readonly" class="week form-control" style="width: 130px">
+                                        <label class="control-label" for="">对比周：</label>
+                                        <input type="text" id="conWeek" readonly="readonly" class="week form-control" style="width: 130px">
+                                        <button type="button" class="btn btn-primary" onclick="contrastChart(1)">生成图表</button>
+                                    </div>
+                                    <div class="fcBody form-group hidden">
+                                        <label class="control-label" for="selectMonth">选择月：</label>
+                                        <input type="text" id="selectMonth" readonly="readonly" class="month-picker form-control" style="width: 130px">
+                                        <label class="control-label" for="">对比月：</label>
+                                        <input type="text" id="conMonth" readonly="readonly" class="month-picker form-control" style="width: 130px">
+                                        <button type="button" class="btn btn-primary" onclick="contrastChart(2)">生成图表</button>
+                                    </div>
+                                </div>
+                                <div id="contrastChart">
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="padding: 0;display:none" id="bodyRight">
+                                <div class="form-group form-inline">
+                                    <label class="control-label" for="time">数据详情：</label>
+                                    <select class="ms3 form-control" id="time" style="width: 200px"></select>
+                                </div>
+                                <div class="form-group">
+                                    <div class="nav-tabs-custom">
+                                        <ul class="nav nav-tabs ui-sortable-handle">
+                                            <li class="active"><a href="#faultAppear" data-toggle="tab" aria-expanded="true" id="first0">单个故障上报情况</a></li>
+                                            <li><a href="#faultService" data-toggle="tab" aria-expanded="false">单个故障维修次数</a></li>
+                                        </ul>
+                                        <div class="tab-content no-padding">
+                                            <div class="tab-pane active in" id="faultAppear">
+                                                <div id="faultAppear0">
+                                                    <div class="form-group" style="padding-top: 10px; padding-left: 15px">
+                                                        <label class="control-label" for="faultAppearType">故障上报类型：</label>
+                                                        <select class="ms3 form-control" id="faultAppearType" style="width: 200px"></select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="panel panel-primary">
+                                                            <div class="panel-heading">
+                                                                <h3 class="panel-title">设备故障详情</h3>
+                                                            </div>
+                                                            <div class="table-responsive mailbox-messages" style="padding-left: 15px; padding-right: 15px">
+                                                                <table class="table table-hover table-striped" id="faultAppear1"></table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="panel panel-primary">
+                                                            <div class="panel-heading">
+                                                                <h3 class="panel-title">员工上报详情</h3>
+                                                            </div>
+                                                            <div class="table-responsive mailbox-messages" style="padding-left: 15px; padding-right: 15px">
+                                                                <table class="table table-hover table-striped" id="faultAppear2"></table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="padding: 15px; color: red; font-size: 18px;font-weight:bold">无故障上报记录</div>
+                                            </div>
+                                            <div class="tab-pane fade in" id="faultService">
+                                                <div id="faultService0">
+                                                    <div class="form-group" style="padding-top: 10px; padding-left: 15px">
+                                                        <label class="control-label" for="faultServiceType">维修故障类型：</label>
+                                                        <select class="ms3 form-control" id="faultServiceType" style="width: 200px"></select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="panel panel-primary">
+                                                            <div class="panel-heading">
+                                                                <h3 class="panel-title">设备故障详情</h3>
+                                                            </div>
+                                                            <div class="table-responsive mailbox-messages" style="padding-left: 15px; padding-right: 15px">
+                                                                <table class="table table-hover table-striped" id="faultService1"></table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="panel panel-primary">
+                                                            <div class="panel-heading">
+                                                                <h3 class="panel-title">维修工详情</h3>
+                                                            </div>
+                                                            <div class="table-responsive mailbox-messages" style="padding-left: 15px; padding-right: 15px">
+                                                                <table class="table table-hover table-striped" id="faultService2"></table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style="padding: 15px; color: red; font-size: 18px;font-weight:bold">无维修记录</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="box-body">
+    </div>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="faultModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="timeTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a href="#reportSingleFaultType" data-toggle="tab" aria-expanded="true" id="first">单个故障上报情况</a></li>
+                            <li><a href="#repairSingleFaultType" data-toggle="tab" aria-expanded="false">单个故障维修次数</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active in" id="reportSingleFaultType">
+                            </div>
+                            <div class="tab-pane fade in" id="repairSingleFaultType">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>

@@ -380,6 +380,10 @@ function addUser() {
         layer.msg("密码不能为空");
         return;
     }
+    if (isStrEmptyOrUndefined(addEmail) && !isStrEmptyOrUndefined(addEmailType)) {
+        layer.msg("选择邮件类型邮箱不能为空");
+        return;
+    }
     var doSth = function () {
         $("#addUserModal").modal("hide");
         var data = {
@@ -666,7 +670,10 @@ function updateUser() {
         }
         data.password = updateNewPassword;
     }
-
+    if (isStrEmptyOrUndefined(updateEmail) && !isStrEmptyOrUndefined(updateEmailType)) {
+        layer.msg("选择邮件类型邮箱不能为空");
+        return;
+    }
     var doSth = function () {
         $("#updateUserModal").modal("hide");
         ajaxPost("/AccountManagement/Update", data,

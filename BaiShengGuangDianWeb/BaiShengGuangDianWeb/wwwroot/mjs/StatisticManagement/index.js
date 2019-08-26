@@ -20,7 +20,7 @@
     getWorkShopList();
     $("#selectStartDate").val(getDate()).datepicker('update');
     $("#selectEndDate").val(getDate()).datepicker('update');
-    $("#selectWorkShop").on("change", function (e) {
+    $("#selectWorkShop").on("select2:select", function (e) {
         $("#recordChart").empty();
         getWorkShopDeviceList();
     });
@@ -40,6 +40,7 @@ function getDeviceList() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            $("#selectDevice").empty();
             var option = '<option value="{0},{1}">{1}</option>';
             $("#selectDevice").append(option.format(0, "所有"));
             for (var i = 0; i < ret.datas.length; i++) {
@@ -51,7 +52,6 @@ function getDeviceList() {
 
 var time = null;
 function createChart(start1, end1) {
-    $("#recordChart").empty();
     time = new Array();
     var opType = 502;
     if (!checkPermission(opType)) {
@@ -160,71 +160,20 @@ function createChart(start1, end1) {
             ret.datas.sort(function (x, y) {
                 return x.Time > y.Time ? 1 : -1;
             });
-
-            //for (var m = 0; m < ret.datas.length; m++) {
-            //    if (ret.datas[m].DeviceId == deviceId[m % deviceId.length]) {
-            //        aa.push(ret.datas[m]);
-            //    } else {
-            //        aa.push({});
-            //        //for (var n = m % deviceId.length; n < deviceId.length; n++) {
-            //        //    if (deviceId[aa.length % deviceId.length] != ret.datas[m].DeviceId) {
-            //        //        aa.push({});
-            //        //    } else {
-            //        //        aa.push(ret.datas[m]);
-            //        //    }
-            //        //}
-            //        if (deviceId[aa.length % deviceId.length] != ret.datas[m].DeviceId) {
-            //            aa.push({});
-            //        } else {
-            //            aa.push(ret.datas[m]);
-            //        }
-            //    }
-            //}
-
-            //for (var k = 0; k < ret.datas.length; k++) {
-            //    dataDeviceId[k] = ret.datas[k].DeviceId;
-            //}
-            //dataDeviceId = dataDeviceId.filter(function (item, index, array) {
-            //    return dataDeviceId.indexOf(item) === index;
-            //});
             var i;
             for (i = 0; i < ret.datas.length; i++) {
                 time[i] = ret.datas[i].Time;
                 if (dataTime == 2) {
                     time[i] = ret.datas[i].Time.split(" ")[0];
                 }
-                //if (dataTime == 1) {
-                //    time[i] = ret.datas[i].Time.split(":")[0] + ":00:00";
-                //}
-                //if (dataTime == 0 || dataTime == 3) {
-                //    if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
-                //        time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
-                //    } else {
-                //        time[i] = ret.datas[i].Time.split(" ")[1];
-                //    }
-                //}
-                //if ((ret.datas[i].Time.split(" ")[1]).slice(0, 1) == 0) {
-                //    time[i] = (ret.datas[i].Time.split(" ")[1]).replace(0, "");
-                //} else {
-                //    time[i] = ret.datas[i].Time.split(" ")[1];
-                //}
                 timeS[i] = ret.datas[i].Time;
                 var d = ret.datas[i];
                 for (key in listName) {
-                    //if (listName.hasOwnProperty(key) && deviceId[i % deviceId.length] == d.DeviceId) {
-                    //    data[key].push(d[listName[key]]);
-                    //} else {
-                    //    data[key].push("");
-                    //}
                     if (listName.hasOwnProperty(key)) {
-                        //if (deviceId.length != dataDeviceId.length) {
                         for (var j = data[key].length % deviceId.length; j < deviceId.length; j++) {
                             if (deviceId[j] == d.DeviceId) {
                                 data[key].push(d[listName[key]]);
-                                //break;
                                 if (i == ret.datas.length - 1 && data[key].length % deviceId.length != 0) {
-                                    //data[key].push("");
-                                    //break;
                                     for (var q = 0; q < data[key].length % deviceId.length; q++) {
                                         data[key].push("x");
                                     }
@@ -233,18 +182,10 @@ function createChart(start1, end1) {
                                     break;
                                 }
                             } else {
-                                //if (deviceId.indexOf(deviceId[j]) + 1 == deviceId.length) {
-                                //    data[key].push("");
-                                //    data[key].push(d[listName[key]]);
-                                //    //if (i == ret.datas.length - 1 && data[key].length % deviceId.length != 0) {
-                                //    //    data[key].push("");
-                                //    //}
-                                //} else {
                                 data[key].push("x");
                                 if (key == "总加工时间" && j == deviceId.length - 1) {
                                     i--;
                                 }
-                                //}
                             }
                         }
                     }
@@ -315,7 +256,7 @@ function createChart(start1, end1) {
                                         params[i].seriesName == "总台数" ||
                                         params[i].seriesName == "使用率"
                                         ? params[i].seriesName
-                                        : deviceName[i % deviceName.length] + params[i].seriesName,
+                                        : "<span style='color:#99ff00'>" + deviceName[i % deviceName.length] + "</span>" + "-" + params[i].seriesName,
                                     params[i].value);
                             } else {
                                 formatter += (params[i].seriesName == "使用率" ? formatter2 : formatter1).format(
@@ -368,14 +309,14 @@ function createChart(start1, end1) {
             });
             var tf = true;
             myChart.on('dataZoom', function (params) {
+                if (time.length == 0) {
+                    return;
+                }
                 var chartData = myChart.getOption();
                 var chartZoom = chartData.dataZoom[0];
                 var starts = chartData.xAxis[0].data[chartZoom.startValue];
                 var ends = chartData.xAxis[0].data[chartZoom.endValue];
                 var timeX = ends.replace(/[^0-9]+/g, "") - starts.replace(/[^0-9]+/g, "");
-                if (time.length == 0) {
-                    return;
-                }
                 var timeY = time[time.length - 1].replace(/[^0-9]+/g, "") - time[0].replace(/[^0-9]+/g, "");
                 if (timeX == 1 && timeY != 1 && tf && ends.length == 10) {
                     tf = false;
@@ -409,7 +350,7 @@ function hourChart() {
     var hour = new Date().format(" hh");;
     var day = new Date().format("dd ");
     var startTime;
-    if ((hour-1).toString().length == 1) {
+    if ((hour - 1).toString().length == 1) {
         startTime = endTime.replace(hour, " 0" + (hour - 1));
     } else {
         startTime = endTime.replace(hour, " " + (hour - 1));
@@ -434,7 +375,7 @@ function monthChart() {
     var mouth = new Date().format("-MM");
     var mouthSum = new Date().format("MM");;
     var startTime;
-    if ((mouthSum-1).toString().length == 1) {
+    if ((mouthSum - 1).toString().length == 1) {
         startTime = endTime.replace(mouth, "-0" + (mouthSum - 1));
     } else {
         startTime = endTime.replace(mouth, "-" + (mouthSum - 1));
@@ -455,6 +396,7 @@ function getWorkShopList() {
             layer.msg(ret.errmsg);
             return;
         }
+        $("#selectWorkShop").empty();
         var option = '<option value = "{0}">{1}</option>';
         $("#selectWorkShop").append(option.format("", "所有车间"));
         for (var i = 0; i < ret.datas.length; i++) {

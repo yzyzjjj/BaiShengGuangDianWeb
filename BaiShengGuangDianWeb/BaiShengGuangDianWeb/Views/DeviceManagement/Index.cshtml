@@ -176,7 +176,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label" for="updateMacAddress">MAC地址：</label>
                             <div class="col-sm-10">
-                                <input class="form-control" id="updateMacAddress" oninput='value=value.replace(/[^A-Fa-f0-9\-\:]+/g,"")' maxlength="48">
+                                <input class="form-control" id="updateMacAddress" oninput='value=value.replace(/[^A-Fa-f0-9\-\:]+/g,"")' onfocusin="focusIn($(this))" maxlength="48">
                                 <label class="adt label-danger hidden" id="updateMacAddressTip"></label>
                             </div>
                         </div>
