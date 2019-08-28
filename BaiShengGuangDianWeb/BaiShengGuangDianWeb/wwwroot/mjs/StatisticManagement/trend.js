@@ -137,7 +137,7 @@ function getDevicePar() {
             }
             var option2 = '<div class="form-inline" style="margin:10px 0 0 20px">' +
                 '<input type="checkbox" value="{0},{1}"class="icb_minimal">' +
-                '<label style="margin-left:10px">{1}</label>' +
+                '<label class="control-label" style="margin-left:5px">{1}</label>' +
                 '</div>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];

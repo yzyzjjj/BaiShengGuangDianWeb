@@ -2,11 +2,14 @@
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
     $("#selectPlanList").select2();
+    $("#selectJhList").select2();
+    $("#selectYlList").select2();
     $("#flowCardStartDate").val(getDate()).datepicker('update');
     $("#flowCardEndDate").val(getDate()).datepicker('update');
-    //getFlowCardList();
-    //getProductionProcessList();
-    //getRawMateriaList();
+    $("#jhStartDate").val(getDate()).datepicker('update');
+    $("#jhEndDate").val(getDate()).datepicker('update');
+    $("#ylStartDate").val(getDate()).datepicker('update');
+    $("#ylEndDate").val(getDate()).datepicker('update');
     if (!checkPermission(210)) {
         $("#showAddFlowCardModel").addClass("hidden");
     }
@@ -17,11 +20,7 @@
         $("#showAddRawMateriaModel").addClass("hidden");
     }
     selectPlan();
-    $(".fcHead button").click(function () {
-        $(this).css("background", "green").siblings().css("background","");
-        var e = $(this).index();
-        $(".fcBody").eq(e).removeClass("hidden").siblings().addClass("hidden");
-    });
+    selectRaw();
     $("#scanning").click(function () {
         videos++;
         if (videos % 2 == 0) {
@@ -33,12 +32,12 @@
         if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
             //调用用户媒体设备, 访问摄像头
             getUserMedia({
-                    video: {
-                        width: 290,
-                        height: 290,
-                        facingMode: "environment"
-                    }
-                },
+                video: {
+                    width: 290,
+                    height: 290,
+                    facingMode: "environment"
+                }
+            },
                 success,
                 error);
         } else {
@@ -64,13 +63,81 @@
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
     }
+    $(".fcHead input,.fcHead span").css("verticalAlign", "middle");
+    $(".jhHead input,.jhHead span").css("verticalAlign", "middle");
+    $(".ylHead input,.ylHead span").css("verticalAlign", "middle");
+    $(".icb_minimal").iCheck({
+        checkboxClass: 'icheckbox_minimal-blue',
+        increaseArea: '20%' // optional
+    });
+    $(".fcHead label").on("ifChanged", function () {
+        var e = $(this).index();
+        if ($(this).find(".icb_minimal").is(":checked")) {
+            $(".fcBody").eq(e).removeClass("hidden");
+        } else {
+            $(".fcBody").eq(e).addClass("hidden");
+            if (e == 0) {
+                $("#flowCardId").val("");
+            }
+            if (e == 1) {
+                $("#flowCardStartDate").val(getDate()).datepicker('update');
+                $("#flowCardEndDate").val(getDate()).datepicker('update');
+            }
+            if (e == 2) {
+                $("#selectPlanList").val($("#selectPlanList").find("option:first").val()).trigger("change");
+            }
+        }
+        if (!$(".fcHead .icb_minimal").is(":checked")) {
+            $("#fcBtn").removeClass("hidden");
+        } else {
+            $("#fcBtn").addClass("hidden");
+        }
+    });
+    $(".jhHead label").on("ifChanged", function () {
+        var e = $(this).index();
+        if ($(this).find(".icb_minimal").is(":checked")) {
+            $(".jhBody").eq(e).removeClass("hidden");
+        } else {
+            $(".jhBody").eq(e).addClass("hidden");
+            if (e == 0) {
+                $("#selectJhList").val($("#selectJhList").find("option:first").val()).trigger("change");
+            }
+            if (e == 1) {
+                $("#jhStartDate").val(getDate()).datepicker('update');
+                $("#jhEndDate").val(getDate()).datepicker('update');
+            }
+        }
+        if (!$(".jhHead .icb_minimal").is(":checked")) {
+            $("#jhBtn").removeClass("hidden");
+        } else {
+            $("#jhBtn").addClass("hidden");
+        }
+    });
+    $(".ylHead label").on("ifChanged", function () {
+        var e = $(this).index();
+        if ($(this).find(".icb_minimal").is(":checked")) {
+            $(".ylBody").eq(e).removeClass("hidden");
+        } else {
+            $(".ylBody").eq(e).addClass("hidden");
+            if (e == 0) {
+                $("#selectYlList").val($("#selectYlList").find("option:first").val()).trigger("change");
+            }
+            if (e == 1) {
+                $("#ylStartDate").val(getDate()).datepicker('update');
+                $("#ylEndDate").val(getDate()).datepicker('update');
+            }
+        }
+        if (!$(".ylHead .icb_minimal").is(":checked")) {
+            $("#ylBtn").removeClass("hidden");
+        } else {
+            $("#ylBtn").addClass("hidden");
+        }
+    });
 }
 
 var videos = 0;
 var canImg;
 var fileImg;
-var fProductionProcessList = false;
-var fRawMateriaList = false;
 //流程卡
 function showAddFlowCardModel() {
     hideClassTip("adt");
@@ -214,82 +281,91 @@ function selectPlan() {
     }
     var data = {}
     data.opType = opType;
-    ajaxPost("/Relay/Post",data,
-        function(ret) {
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
             $("#selectPlanList").empty();
+            $("#selectJhList").empty();
             var option = "<option value='{0}'>{0}</option>";
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
                 $("#selectPlanList").append(option.format(d.ProductionProcessName, d.ProductionProcessName));
+                $("#selectJhList").append(option.format(d.ProductionProcessName, d.ProductionProcessName));
             }
         });
 }
 
-function getFlowCardList(par) {
-    var opType;
-    var data;
-    switch (par) {
-        case 1:
-            opType = 200;
-            if (!checkPermission(opType)) {
-                layer.msg("没有权限");
+function selectRaw() {
+    var opType = 232;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
                 return;
             }
-            var start = $("#flowCardStartDate").val();
-            var end = $("#flowCardEndDate").val();
-            if (compareDate(start, end)) {
-                layer.msg("结束时间不能小于开始时间");
-                return;
+            $("#selectYlList").empty();
+            var option = "<option value='{0}'>{0}</option>";
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                $("#selectYlList").append(option.format(d.RawMateriaName, d.RawMateriaName));
             }
+        },0);
+}
 
-            data = {}
-            data.opType = opType;
-            data.opData = JSON.stringify({
-                StartTime: start,
-                EndTime: end
-            });
-            break;
-        case 2:
-            opType = 203;
-            if (!checkPermission(opType)) {
-                layer.msg("没有权限");
-                return;
-            }
-            var plan = $("#selectPlanList").val();
-            if (isStrEmptyOrUndefined(plan)) {
-                layer.msg("请选择计划号");
-                return;
-            }
-
-            data = {}
-            data.opType = opType;
-            data.opData = JSON.stringify({
-                id: plan
-            });
-            break;
-        case 3:
-            opType = 209;
-            if (!checkPermission(opType)) {
-                layer.msg("没有权限");
-                return;
-            }
-            var fcId = $("#flowCardId").val();
-            if (isStrEmptyOrUndefined(fcId)) {
+function getFlowCardList() {
+    var opType = 200;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    var list = {}
+    data.opType = opType;
+    if ($(".fcHead .icb_minimal").is(":checked")) {
+        var fcName = $("#flowCardId").val().trim();
+        if ($(".fcHead .icb_minimal").eq(0).is(":checked")) {
+            if (isStrEmptyOrUndefined(fcName)) {
                 layer.msg("请输入流程卡号");
                 return;
+            } else {
+                list["flowCardName"] = fcName;
             }
-
-            data = {}
-            data.opType = opType;
-            data.opData = JSON.stringify({
-                id: fcId
-            });
+        }
+        var startTime = $("#flowCardStartDate").val();
+        var endTime = $("#flowCardEndDate").val();
+        if (compareDate(startTime, endTime)) {
+            layer.msg("结束时间不能小于开始时间");
+            return;
+        }
+        if ($(".fcHead .icb_minimal").eq(1).is(":checked")) {
+            if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+                layer.msg("请选择创建时间");
+                return;
+            } else {
+                list["startTime"] = startTime;
+                list["endTime"] = endTime;
+            }
+        }
+        var productionProcessName = $("#selectPlanList").val();
+        if ($(".fcHead .icb_minimal").eq(2).is(":checked")) {
+            if (isStrEmptyOrUndefined(productionProcessName)) {
+                layer.msg("请选择计划号");
+                return;
+            } else {
+                list["productionProcessName"] = productionProcessName;
+            }
+        }
+        data.opData = JSON.stringify(list);
     }
-
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1190,18 +1266,43 @@ function changeFlowCard() {
 }
 
 //计划号
-function getProductionProcessList(first = false) {
-    if (first && fProductionProcessList)
-        return;
-    if (first)
-        fProductionProcessList = true;
+function getProductionProcessList() {
     var opType = 215;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
+
     var data = {}
+    var list = {}
     data.opType = opType;
+    if ($(".jhHead .icb_minimal").is(":checked")) {
+        var productionName = $("#selectJhList").val();
+        if ($(".jhHead .icb_minimal").eq(0).is(":checked")) {
+            if (isStrEmptyOrUndefined(productionName)) {
+                layer.msg("请选择计划号");
+                return;
+            } else {
+                list["productionName"] = productionName;
+            }
+        }
+        var startTime = $("#jhStartDate").val();
+        var endTime = $("#jhEndDate").val();
+        if (compareDate(startTime, endTime)) {
+            layer.msg("结束时间不能小于开始时间");
+            return;
+        }
+        if ($(".jhHead .icb_minimal").eq(1).is(":checked")) {
+            if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+                layer.msg("请选择修改时间");
+                return;
+            } else {
+                list["startTime"] = startTime;
+                list["endTime"] = endTime;
+            }
+        }
+        data.opData = JSON.stringify(list);
+    }
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1758,18 +1859,43 @@ function updateProductionProcess() {
 }
 
 //原料
-function getRawMateriaList(first = false) {
-    if (first && fRawMateriaList)
-        return;
-    if (first)
-        fRawMateriaList = true;
+function getRawMateriaList() {
     var opType = 232;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
+
     var data = {}
+    var list = {}
     data.opType = opType;
+    if ($(".ylHead .icb_minimal").is(":checked")) {
+        var rawMateriaName = $("#selectYlList").val();
+        if ($(".ylHead .icb_minimal").eq(0).is(":checked")) {
+            if (isStrEmptyOrUndefined(rawMateriaName)) {
+                layer.msg("请选择原料批号");
+                return;
+            } else {
+                list["rawMateriaName"] = rawMateriaName;
+            }
+        }
+        var startTime = $("#ylStartDate").val();
+        var endTime = $("#ylEndDate").val();
+        if (compareDate(startTime, endTime)) {
+            layer.msg("结束时间不能小于开始时间");
+            return;
+        }
+        if ($(".ylHead .icb_minimal").eq(1).is(":checked")) {
+            if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+                layer.msg("请选择修改时间");
+                return;
+            } else {
+                list["startTime"] = startTime;
+                list["endTime"] = endTime;
+            }
+        }
+        data.opData = JSON.stringify(list);
+    }
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {

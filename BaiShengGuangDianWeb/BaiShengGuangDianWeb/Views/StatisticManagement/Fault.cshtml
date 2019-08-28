@@ -29,9 +29,9 @@
                                 <div class="form-group">
                                     <label class="control-label"><span class="text-red">* </span>请选择时间段：</label>
                                     <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                        <input type="text" id="startDate" class="form_date form-control" style="width: 130px">
+                                        <input type="text" id="startDate" class="form_date form-control" style="width: 130px;cursor:pointer">
                                         <span>&nbsp;-&nbsp;</span>
-                                        <input type="text" id="endDate" class="form_date form-control" style="width: 130px">
+                                        <input type="text" id="endDate" class="form_date form-control" style="width: 130px;cursor:pointer">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -59,23 +59,23 @@
                                 <div class="form-group form-inline">
                                     <div class="fcBody form-group">
                                         <label class="control-label" for="selectDay">选择天：</label>
-                                        <input type="text" id="selectDay" class="form_date form-control" style="width: 130px">
-                                        <label class="control-label" for="">对比天：</label>
-                                        <input type="text" id="conDay" class="form_date form-control" style="width: 130px">
+                                        <input type="text" id="selectDay" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                        <label class="control-label" for="conDay">对比天：</label>
+                                        <input type="text" id="conDay" class="form_date form-control" style="width: 130px;cursor:pointer">
                                         <button type="button" class="btn btn-primary" onclick="contrastChart(0)">生成图表</button>
                                     </div>
                                     <div class="fcBody form-group hidden">
                                         <label class="control-label" for="selectWeek">选择周：</label>
-                                        <input type="text" id="selectWeek" readonly="readonly" class="week form-control" style="width: 130px">
-                                        <label class="control-label" for="">对比周：</label>
-                                        <input type="text" id="conWeek" readonly="readonly" class="week form-control" style="width: 130px">
+                                        <input type="text" id="selectWeek" readonly="readonly" class="week form-control" style="width: 130px;cursor:pointer">
+                                        <label class="control-label" for="conWeek">对比周：</label>
+                                        <input type="text" id="conWeek" readonly="readonly" class="week form-control" style="width: 130px;cursor:pointer">
                                         <button type="button" class="btn btn-primary" onclick="contrastChart(1)">生成图表</button>
                                     </div>
                                     <div class="fcBody form-group hidden">
                                         <label class="control-label" for="selectMonth">选择月：</label>
-                                        <input type="text" id="selectMonth" readonly="readonly" class="month-picker form-control" style="width: 130px">
-                                        <label class="control-label" for="">对比月：</label>
-                                        <input type="text" id="conMonth" readonly="readonly" class="month-picker form-control" style="width: 130px">
+                                        <input type="text" id="selectMonth" readonly="readonly" class="month-picker form-control" style="width: 130px;cursor:pointer">
+                                        <label class="control-label" for="conMonth">对比月：</label>
+                                        <input type="text" id="conMonth" readonly="readonly" class="month-picker form-control" style="width: 130px;cursor:pointer">
                                         <button type="button" class="btn btn-primary" onclick="contrastChart(2)">生成图表</button>
                                     </div>
                                 </div>

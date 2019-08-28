@@ -6,8 +6,8 @@
         placeholder: "请选择"
     });
     getWorkShopList();
-    $("#startDate,#selectDay").val(getDate()).datepicker('update');
-    $("#endDate,#conDay").val(getDate()).datepicker('update');
+    $("#startDate,#endDate").val(getDate()).datepicker('update');
+    $("#selectDay,#conDay").val(getDate()).datepicker('update');
     $(".month-picker").val(getNowMonth()).datepicker({
         format: "yyyy-mm",
         language: "zh-CN",

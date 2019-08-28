@@ -14,8 +14,8 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li class="active"><a href="#flowCardMgs" data-toggle="tab" aria-expanded="true">流程卡管理</a></li>
-                <li onclick="getProductionProcessList(true)"><a href="#productionProcessMgs" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
-                <li onclick="getRawMateriaList(true)"><a href="#rawMateriaMgs" data-toggle="tab" aria-expanded="false">原料管理</a></li>
+                <li><a href="#productionProcessMgs" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li><a href="#rawMateriaMgs" data-toggle="tab" aria-expanded="false">原料管理</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane active in" id="flowCardMgs">
@@ -29,37 +29,41 @@
                             </div>
                         </div>
                         <div class="box-body">
-                            <div class="form-group fcHead">
-                                <button type="button" class="btn btn-info btn-sm" style="background-color: green">创建时间</button>
-                                <button type="button" class="btn btn-info btn-sm">计划号</button>
-                                <button type="button" class="btn btn-info btn-sm">流程卡</button>
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="flowCardStartDate">查询方式：</label>
+                                <div class="fcHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">流程卡</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">计划号</span></label>
+                                </div>
                             </div>
                             <div class="form-group form-inline">
                                 <div class="fcBody form-group">
-                                    <label class="control-label" for="flowCardStartDate"><span class="text-red">* </span>创建时间：</label>
-                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                        <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 130px">
-                                        <span>&nbsp;-&nbsp;</span>
-                                        <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 130px">
-                                        <button type="button" class="btn btn-primary" onclick="getFlowCardList(1)" style="margin-left:4px">查询</button>
-                                    </div>
-                                </div>
-                                <div class="fcBody form-group hidden">
-                                    <label class="control-label" for="selectPlanList"><span class="text-red">* </span>计划号：</label>
-                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                        <select class="form-control" id="selectPlanList" style="width: 130px"></select>
-                                    </div>
-                                    <button type="button" class="btn btn-primary" onclick="getFlowCardList(2)" style="margin-left:4px">查询</button>
-                                </div>
-                                <div class="fcBody form-group hidden">
-                                    <label class="control-label" for="flowCardId"><span class="text-red">* </span>流程卡号：</label>
+                                    <label class="control-label" for="flowCardId">流程卡号：</label>
                                     <div class="form-group no-margin" style="display: -webkit-inline-box">
                                         <input type="text" id="flowCardId" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
-                                        <button type="button" class="btn btn-primary" onclick="getFlowCardList(3)" style="margin-left:4px">查询</button>
                                         <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
                                         <button type="button" class="btn btn-primary" id="scanning">扫描</button>
-                                        <button type="button" class="btn btn-primary" id="upload" title="二维码图片">上传</button>
+                                        <button type="button" class="btn btn-primary" id="upload" title="二维码图片" style="margin-left: 5px">上传</button>
                                     </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="flowCardStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                        <span>&nbsp;-&nbsp;</span>
+                                        <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                    </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="selectPlanList">计划号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="form-control" id="selectPlanList" style="width: 160px"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="fcBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getFlowCardList()" style="margin-left: 4px">查询</button>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -83,6 +87,33 @@
                             </div>
                         </div>
                         <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="flowCardStartDate">查询方式：</label>
+                                <div class="jhHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">计划号</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="jhBody form-group">
+                                    <label class="control-label" for="selectPlanList">计划号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="form-control" id="selectJhList" style="width: 160px"></select>
+                                    </div>
+                                </div>
+                                <div class="jhBody form-group hidden">
+                                    <label class="control-label" for="flowCardStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="jhStartDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                        <span>&nbsp;-&nbsp;</span>
+                                        <input type="text" id="jhEndDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="jhBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getProductionProcessList()" style="margin-left: 4px">查询</button>
+                                </div>
+                            </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="productionProcessList"></table>
                             </div>
@@ -100,6 +131,33 @@
                             </div>
                         </div>
                         <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="flowCardStartDate">查询方式：</label>
+                                <div class="ylHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">原料批号</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="ylBody form-group">
+                                    <label class="control-label" for="selectPlanList">原料批号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="form-control" id="selectYlList" style="width: 260px"></select>
+                                    </div>
+                                </div>
+                                <div class="ylBody form-group hidden">
+                                    <label class="control-label" for="flowCardStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="ylStartDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                        <span>&nbsp;-&nbsp;</span>
+                                        <input type="text" id="ylEndDate" class="form_date form-control" style="width: 130px;cursor:pointer">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="ylBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getRawMateriaList()" style="margin-left: 4px">查询</button>
+                                </div>
+                            </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="rawMateriaList"></table>
                             </div>
