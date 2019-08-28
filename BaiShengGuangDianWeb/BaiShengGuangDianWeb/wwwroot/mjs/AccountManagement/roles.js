@@ -399,11 +399,13 @@ function getLabels(datas) {
 }
 
 function rule(a, b) {
-    if (a.order == b.order) {
-        return a.id > b.id ? 1 : -1;
-    } else {
+    if (a.parent != b.parent) {
+        return a.parent > b.parent ? 1 : -1;
+    }
+    if (a.order != b.order) {
         return a.order > b.order ? 1 : -1;
     }
+    return a.id > b.id ? 1 : -1;
 }
 
 function getLabelData(datas, label) {
