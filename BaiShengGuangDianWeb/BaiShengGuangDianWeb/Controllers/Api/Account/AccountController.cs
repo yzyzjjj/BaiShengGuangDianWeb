@@ -3,9 +3,11 @@ using BaiShengGuangDianWeb.Models.RequestBody;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.EnumConfig;
+using ModelBase.Base.HttpServer;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BaiShengGuangDianWeb.Controllers.Api.Account
@@ -21,23 +23,55 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
         [AllowAnonymous]
         public Result Login()
         {
+            var special = true;
             var param = Request.GetRequestParams();
             var loginBody = new LoginBody
             {
                 Account = param.GetValue("account"),
                 Password = param.GetValue("password")
             };
-
             var accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
-            if (accountInfo == null)
+            if (!special)
             {
-                return Result.GenError<Result>(Error.AccountNotExist);
-            }
+                if (accountInfo == null)
+                {
+                    return Result.GenError<Result>(Error.AccountNotExist);
+                }
 
-            var pwd = AccountHelper.GenAccountPwd(accountInfo.Account, loginBody.Password);
-            if (accountInfo.Password != pwd)
+                var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
+                if (accountInfo.Password != pwd)
+                {
+                    return Result.GenError<Result>(Error.PasswordError);
+                }
+            }
+            else
             {
-                return Result.GenError<Result>(Error.PasswordError);
+                //0 成功  1 账号不存在 2 密码错误
+                var url = "http://192.168.1.100/indexlogins.php";
+                if (accountInfo == null)
+                {
+                    return Result.GenError<Result>(Error.AccountNotExist);
+                }
+
+                var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
+                if (accountInfo.Password != pwd)
+                {
+                    var res = HttpServer.Post(url, new Dictionary<string, string>
+                    {
+                        {"dlname", loginBody.Account},
+                        {"password", loginBody.Password},
+                    });
+                    if (res.Contains("0"))
+                    {
+                        accountInfo.Password = pwd;
+                        AccountHelper.UpdateAccountInfo(accountInfo);
+                        accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
+                    }
+                    else
+                    {
+                        return Result.GenError<Result>(Error.PasswordError);
+                    }
+                }
             }
 
             var token = TokenHelper.CreateJwtToken(accountInfo);

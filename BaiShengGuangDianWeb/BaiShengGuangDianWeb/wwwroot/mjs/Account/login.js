@@ -17,7 +17,9 @@
             return;
         }
 
-        var pwdMd5 = window.md5(window.md5(password));
+        //var pwdMd5 = password;
+        var pwdMd5 = window.md5(password);
+        //var pwdMd5 = window.md5(window.md5(password));
         
         var data = {}
         data.account = account;
