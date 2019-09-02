@@ -33,21 +33,15 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             var mailMessage = new MailMessage();
             emailAddress = emailAddress.Where(RegexString.IsEmail).ToList();
+            emailAddress.AddRange(ServerConfig.WebDb.Query<string>("SELECT EmailAddress FROM `accounts` WHERE IsDeleted = 0 AND FIND_IN_SET(@EmailType, EmailType)", new
+            {
+                EmailType = mailType
+            }).Where(RegexString.IsEmail));
             if (!emailAddress.Any())
             {
                 return;
             }
             emailAddress.ForEach(e => mailMessage.To.Add(e));
-
-            var ccEmails = ServerConfig.WebDb.Query<string>("SELECT EmailAddress FROM `accounts` WHERE IsDeleted = 0 AND FIND_IN_SET(@EmailType, EmailType)", new
-            {
-                EmailType = mailType
-            }).Where(RegexString.IsEmail).ToList();
-            if (!ccEmails.Any())
-            {
-                return;
-            }
-            ccEmails.ToList().ForEach(e => mailMessage.CC.Add(e));
 
             mailMessage.From = new MailAddress(ServerConfig.EmailAccount);
             mailMessage.Subject = subject;

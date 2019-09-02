@@ -23,21 +23,24 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     break;
                 case ChatEnum.FaultDevice:
                     msg = JObject.Parse(info.Message.ToString());
+                    var mailList = new List<string>();
                     var admin = msg["Admin"].ToObject<string>();
                     var acc = AccountHelper.GetAccountInfoByName(admin);
-                    if (acc == null)
+                    if (acc != null)
                     {
-                        break;
+                        mailList.Add(acc.EmailAddress);
+                        var connectionInfos = ChatHelper.GetSingleConnectionId(acc.Id);
+                        var groupName = acc.Id.ToString();
+                        foreach (var connectionInfo in connectionInfos)
+                        {
+                            Groups.AddToGroupAsync(connectionInfo.ConnectionId, groupName);
+                        }
+
+                        Clients.Group(groupName).SendAsync(info.ChatEnum.ToString(), info.Message);
                     }
 
-                    var connectionInfos = ChatHelper.GetSingleConnectionId(acc.Id);
-                    var groupName = acc.Id.ToString();
-                    foreach (var connectionInfo in connectionInfos)
-                    {
-                        Groups.AddToGroupAsync(connectionInfo.ConnectionId, groupName);
-                    }
-                    Clients.Group(groupName).SendAsync(info.ChatEnum.ToString(), info.Message);
-                    EmailHelper.Send($"{msg["Code"].ToObject<string>()} 故障提醒!!!", $"<span style=\"color: red\">{msg["Code"].ToObject<string>()}</span>出现故障, 上报时间:{DateTime.Now}", new List<string> { acc.EmailAddress }, 1);
+                    EmailHelper.Send($"{msg["Code"].ToObject<string>()} 故障提醒!!!",
+                        $"<span style=\"color: red\">{msg["Code"].ToObject<string>()}</span>出现故障, 上报时间:{DateTime.Now}", mailList, 1);
                     break;
             }
 
