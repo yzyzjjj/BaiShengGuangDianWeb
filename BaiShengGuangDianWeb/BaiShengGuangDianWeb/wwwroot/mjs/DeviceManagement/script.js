@@ -659,6 +659,7 @@ function getScriptVersionList1(type) {
 
 function showAddModel() {
     //$("#fScriptVersion").val(0).trigger("change");
+    reset();
     getDeviceModelList1(1);
 }
 

@@ -1,13 +1,20 @@
 ﻿function pageReady() {
     $(".ms2").select2();
     $(".ms3").select2();
-    $(".ms2").select2({
+    $("#selectDevice,#selectDeviceDev").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
+    $("#selectWorkShop1").select2({
         allowClear: true,
         placeholder: "请选择"
     });
     getWorkShopList();
+    getDeviceList();
     $("#startDate,#endDate").val(getDate()).datepicker('update');
     $("#selectDay,#conDay").val(getDate()).datepicker('update');
+    $("#startDate1,#endDate1").val(getDate()).datepicker('update');
+    $("#startDateDev,#endDateDev").val(getDate()).datepicker('update');
     $(".month-picker").val(getNowMonth()).datepicker({
         format: "yyyy-mm",
         language: "zh-CN",
@@ -24,57 +31,111 @@
         todayBtn: "linked",
         onSelect: getWeeks
     }).on('hide', getWeeks);
-    $(".week").on("focus", function() {
+    $(".week").on("focus", function () {
         $(".cw").eq(1).text("周数");
         $(".datepicker .datepicker-days .active").siblings(".cw").css("backgroundColor", "#ffff00");
-        $(".datepicker .datepicker-days .active").siblings(".day").css("color","blue");
+        $(".datepicker .datepicker-days .active").siblings(".day").css("color", "blue");
     });
+    $("#selectWorkShop").on("select2:select", function () {
+        getWorkShopDeviceList();
+        $("#par .parCk").removeClass("hidden");
+    });
+    $("#selectWorkShop").on("select2:select", function () {
+        getWorkShopDeviceList();
+        $("#par .parCk").removeClass("hidden");
+    });
+    //var tf = true;
+    //$("#selectWorkShop").on("select2:select", function (e) {
+    //    $("#faultChart").empty();
+    //    var v = $("#selectWorkShop").val();
+    //    if (v.indexOf("所有车间") > -1) {
+    //        $("#selectWorkShop").val("所有车间").trigger("change");
+    //        if (tf) {
+    //            tf = false;
+    //            getDeviceList();
+    //            $("#selectDeviceList").show();
+    //        }
+    //    } else {
+    //        if (v.length > 1) {
+    //            $("#selectDevice").empty();
+    //            $("#selectDeviceList").hide();
+    //        } else {
+    //            getWorkShopDeviceList();
+    //        }
+    //        tf = true;
+    //    }
+    //});
+    //$("#selectWorkShop").on("select2:unselect", function () {
+    //    $("#faultChart").empty();
+    //    var v = $("#selectWorkShop").val();
+    //    if (v && v.length == 1) {
+    //        getWorkShopDeviceList();
+    //        $("#selectDeviceList").show();
+    //    } else {
+    //        $("#selectDevice").empty();
+    //    }
+    //    tf = true;
+    //});
+    //$("#time").on("select2:select", function () {
+    //    dataDetails();
+    //    $("#first0").click();
+    //});
+    //$("#faultAppearType").on("select2:select", function () {
+    //    appearDataList();
+    //});
+    //$("#faultServiceType").on("select2:select", function () {
+    //    serviceDataList();
+    //});
+    $(".icb_minimal").iCheck({
+        checkboxClass: 'icheckbox_minimal-blue',
+        increaseArea: '20%' // optional
+    });
+    $("#par input,#par span").css("verticalAlign", "middle");
+    $("#shopPar input,#shopPar span").css("verticalAlign", "middle");
     var tf = true;
-    $("#selectWorkShop").on("select2:select", function (e) {
-        $("#faultChart").empty();
-        var v = $("#selectWorkShop").val();
-        if (v.indexOf("所有车间") > -1) {
-            $("#selectWorkShop").val("所有车间").trigger("change");
+    $("#selectDevice").on("change", function () {
+        var v = $(this).val();
+        if (!isStrEmptyOrUndefined(v)) {
+            $("#par .parCk").addClass("hidden");
             if (tf) {
                 tf = false;
-                getDeviceList();
-                $("#selectDeviceList").show();
+                $("#par label").find(".icb_minimal").iCheck('uncheck');
             }
         } else {
-            if (v.length > 1) {
-                $("#selectDevice").empty();
-                $("#selectDeviceList").hide();
-            } else {
-                getWorkShopDeviceList();
-            }
             tf = true;
+            $("#par .parCk").removeClass("hidden");
+            $("#par label").find(".icb_minimal").iCheck('uncheck');
         }
     });
-    $("#selectWorkShop").on("select2:unselect", function () {
-        $("#faultChart").empty();
-        var v = $("#selectWorkShop").val();
-        if (v && v.length == 1) {
-            getWorkShopDeviceList();
-            $("#selectDeviceList").show();
-        } else {
-            $("#selectDevice").empty();
-        }
-        tf = true;
+    $("#faultApp").on("select2:select", function () {
+        getFaultAppChart();
     });
-    $(".fcHead button").click(function () {
-        $(this).css("background", "green").siblings().css("background", "");
-        var e = $(this).index();
-        $(".fcBody").eq(e).removeClass("hidden").siblings().addClass("hidden");
+    $("#faultSer").on("select2:select", function () {
+        getFaultSerChart();
     });
-    $("#time").on("select2:select", function() {
-        dataDetails();
-        $("#first0").click();
+    $("#dayFaultAppearType").on("select2:select", function () {
+        dayAppChart();
     });
-    $("#faultAppearType").on("select2:select", function () {
-        appearDataList();
+    $("#dayFaultServiceType").on("select2:select", function () {
+        daySerChart();
     });
-    $("#faultServiceType").on("select2:select", function () {
-        serviceDataList();
+    $("#weekFaultAppearType").on("select2:select", function () {
+        weekAppChart();
+    });
+    $("#weekFaultServiceType").on("select2:select", function () {
+        weekSerChart();
+    });
+    $("#monthFaultAppearType").on("select2:select", function () {
+        monthAppChart();
+    });
+    $("#monthFaultServiceType").on("select2:select", function () {
+        monthSerChart();
+    });
+    $("#shopFaultAppearType").on("select2:select", function () {
+        shopAppChart();
+    });
+    $("#shopFaultServiceType").on("select2:select", function () {
+        shopSerChart();
     });
 }
 
@@ -108,12 +169,12 @@ function getWorkShopList() {
         ret.datas.sort(function (x, y) {
             return x.SiteName > y.SiteName ? 1 : -1;
         });
-        $("#selectWorkShop,#selectWorkShop1").empty();
+        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev").empty();
         var option = '<option value = "{0}">{1}</option>';
-        $("#selectWorkShop,#selectWorkShop1").append(option.format("所有车间", "所有车间"));
+        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShopDev").append(option.format("所有车间", "所有车间"));
         for (var i = 0; i < ret.datas.length; i++) {
             var d = ret.datas[i];
-            $("#selectWorkShop,#selectWorkShop1").append(option.format(d.SiteName, d.SiteName));
+            $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev").append(option.format(d.SiteName, d.SiteName));
         }
     });
 }
@@ -133,7 +194,7 @@ function getWorkShopDeviceList() {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        workshopName: workShop.join()
+        workshopName: workShop
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -141,10 +202,11 @@ function getWorkShopDeviceList() {
             return;
         }
         $("#selectDevice").empty();
-        var option = '<option value = "{0},{1}">{1}</option>';
+        var option = '<option value="{0}">{0}</option>';
+        $("#selectDevice").append('<option></option>');
         for (var i = 0; i < ret.datas.length; i++) {
             var d = ret.datas[i];
-            $("#selectDevice").append(option.format(d.Id, d.Code));
+            $("#selectDevice").append(option.format(d.Code));
         }
     });
 }
@@ -163,61 +225,47 @@ function getDeviceList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            $("#selectDevice").empty();
-            var option = '<option value="{0},{1}">{1}</option>';
+            $("#selectDevice,#selectDeviceDev").empty();
+            var option = '<option value="{0}">{0}</option>';
+            $("#selectDevice,#selectDeviceDev").append('<option></option>');
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
-                $("#selectDevice").append(option.format(d.Id, d.Code));
+                $("#selectDevice,#selectDeviceDev").append(option.format(d.Code));
             }
         });
 }
 
+var FaultsData;
 function getFaultChart() {
     var opType = 505;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
+    if (!$("#par label").find(".icb_minimal").is(":checked")) {
+        layer.msg("请选择参数");
+        return;
+    }
     var workShopName = $("#selectWorkShop").val();
-    if (!isStrEmptyOrUndefined(workShopName) && workShopName.join() == "所有车间") {
+    if (workShopName == "所有车间") {
         workShopName = "";
     }
-    if (isStrEmptyOrUndefined(workShopName)) {
-        workShopName = "";
-    }
+    var compare = 0;
     var startTime = $("#startDate").val();
     var endTime = $("#endDate").val();
     if (compareDate(startTime, endTime)) {
         layer.msg("结束时间不能小于开始时间");
         return;
     }
-    var compare;
-    workShopName.length > 1 ? compare = 1 : compare = 0;
-    if (!isStrEmptyOrUndefined(workShopName)) {
-        workShopName = workShopName.join();
-    }
     var workDeviceName = $("#selectDevice").val();
-    var codeId = null;
-    var codeName;
     if (!isStrEmptyOrUndefined(workDeviceName)) {
         compare = 2;
-        workDeviceName = workDeviceName.join().split(",");
-        codeId = [];
-        codeName = [];
-        for (var i = 0; i < workDeviceName.length; i++) {
-            if (i % 2 == 0) {
-                codeId.push(workDeviceName[i]);
-            } else {
-                codeName.push(workDeviceName[i]);
-            }
-        }
-        codeId = codeId.join();
     }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
-        DeviceId: codeId,
+        DeviceId: workDeviceName,
         StartTime: startTime,
         EndTime: endTime,
         Compare: compare
@@ -228,223 +276,98 @@ function getFaultChart() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            FaultsData = ret.datas;
             var time = [];
-            var legend;
-            var colors;
             var rData = [];
-            var listName = [];
             var data = [];
             var key;
-            var j, a, q, k;
+            var j;
             var timeData;
             var parData;
-            var workShop = $("#selectWorkShop").val();
-            if (workShop == "所有车间") {
-                workShop = "";
+            var listName = [];
+            var legend = [];
+            var app = [], ser = [];
+            var i, len = $("#par label").find(".icb_minimal").length;
+            for (i = 0; i < len; i++) {
+                var ick = $("#par label").find(".icb_minimal")[i];
+                var span = $("#par label")[i];
+                if ($(ick).is(":checked")) {
+                    listName[$(span).text()] = $(ick).val();
+                    legend.push($(span).text());
+                }
             }
+            for (key in listName) {
+                if (listName.hasOwnProperty(key)) {
+                    data[key] = [];
+                }
+            }
+            for (j = 0; j < ret.datas.length; j++) {
+                timeData = ret.datas[j].Date.split(" ")[0];
+                time.push(timeData);
+                parData = ret.datas[j];
+                for (key in listName) {
+                    if (listName.hasOwnProperty(key)) {
+                        data[key].push(parData[listName[key]]);
+                    }
+                }
+                var lens;
+                var report = parData.ReportSingleFaultType;
+                var repair = parData.RepairSingleFaultType;
+                if (report != []) {
+                    lens = report.length;
+                    for (i = 0; i < lens; i++) {
+                        app.push(report[i].FaultName);
+                    }
+                }
+                if (repair != []) {
+                    lens = repair.length;
+                    for (i = 0; i < lens; i++) {
+                        ser.push(repair[i].FaultName);
+                    }
+                }
+            }
+            for (key in listName) {
+                if (listName.hasOwnProperty(key)) {
+                    rData.push({
+                        name: key,
+                        type: "line",
+                        data: data[key]
+                    });
+                }
+            }
+            var chartTitle;
             if (compare != 2) {
-                listName["设备总数"] = "AllDevice";
-                listName["上报故障设备数量"] = "FaultDevice";
-                listName["上报故障类型数量"] = "ReportFaultType";
-                listName["上报故障总次数"] = "ReportCount";
-                listName["上报故障故障率"] = "ReportFaultRate";
-                listName["已确认故障"] = "Confirmed";
-                listName["维修中故障"] = "Repairing";
-                listName["维修故障类型数量"] = "RepairFaultType";
-                listName["维修故障总次数"] = "RepairCount";
-                legend = ["设备总数", "上报故障设备数量", "上报故障类型数量", "上报故障总次数", "上报故障故障率", "已确认故障", "维修中故障", "维修故障类型数量", "维修故障总次数"];
-                colors = ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"];
-                for (key in listName) {
-                    if (listName.hasOwnProperty(key)) {
-                        data[key] = [];
-                    }
-                }
-                ret.datas.sort(function (x, y) {
-                    return x.Workshop < y.Workshop ? 1 : -1;
-                });
-                ret.datas.sort(function (x, y) {
-                    return x.Date > y.Date ? 1 : -1;
-                });
-                for (j = 0; j < ret.datas.length; j++) {
-                    timeData = ret.datas[j].Date.split(" ")[0];
-                    time.push(timeData);
-                    parData = ret.datas[j];
-                    for (key in listName) {
-                        if (listName.hasOwnProperty(key)) {
-                            if (!isStrEmptyOrUndefined(workShop)) {
-                                for (a = data[key].length % workShop.length; a < workShop.length; a++) {
-                                    if (workShop[a] == parData.Workshop) {
-                                        data[key].push(parData[listName[key]]);
-                                        if (j == ret.datas.length - 1 && data[key].length % workShop.length != 0) {
-                                            for (q = 0; q < data[key].length % workShop.length; q++) {
-                                                data[key].push("x");
-                                            }
-                                            break;
-                                        } else {
-                                            break;
-                                        }
-                                    } else {
-                                        data[key].push("x");
-                                        if (key == "维修故障总次数" && a == workShop.length - 1) {
-                                            j--;
-                                        }
-                                    }
-                                }
-                            } else {
-                                data[key].push(parData[listName[key]]);
-                            }
-                        }
-                    }
-                }
-                time = time.filter(function (item, index, array) {
-                    return time.indexOf(item) === index;
-                });
-                for (key in listName) {
-                    if (listName.hasOwnProperty(key)) {
-                        if (!isStrEmptyOrUndefined(workShop)) {
-                            for (k = 0; k < workShop.length; k++) {
-                                rData.push({
-                                    name: key,
-                                    type: "line",
-                                    data: data[key].filter(function (item, index, array) {
-                                        return index % workShop.length == k;
-                                    })
-                                });
-                            }
-                        } else {
-                            rData.push({
-                                name: key,
-                                type: "line",
-                                data: data[key]
-                            });
-                        }
-                    }
-                }
+                chartTitle = $("#selectWorkShop").val();
             } else {
-                listName["上报故障类型数量"] = "ReportFaultType";
-                listName["该机台号上报故障类型数量"] = "CodeReportFaultType";
-                listName["今日上报故障总次数"] = "ReportCount";
-                listName["上报故障故障率"] = "ReportFaultRate";
-                listName["维修故障类型数量"] = "RepairFaultType";
-                listName["维修故障总次数"] = "RepairCount";
-                legend = ["上报故障类型数量", "该机台号上报故障类型数量", "今日上报故障总次数", "上报故障故障率", "维修故障类型数量", "维修故障总次数"];
-                colors = ["red", "#ff00ff", "#cc3300", "#ff9900", "#0099ff", "#660066"];
-                for (key in listName) {
-                    if (listName.hasOwnProperty(key)) {
-                        data[key] = [];
-                    }
-                }
-                ret.datas.sort(function (x, y) {
-                    return parseInt(x.Code) < parseInt(y.Code) ? 1 : -1;
-                });
-                ret.datas.sort(function (x, y) {
-                    return x.Date > y.Date ? 1 : -1;
-                });
-                codeId = codeId.split(",");
-                for (j = 0; j < ret.datas.length; j++) {
-                    timeData = ret.datas[j].Date.split(" ")[0];
-                    time.push(timeData);
-                    parData = ret.datas[j];
-                    for (key in listName) {
-                        if (listName.hasOwnProperty(key)) {
-                            for (a = data[key].length % codeId.length; a < codeId.length; a++) {
-                                if (codeId[a] == parData.Code) {
-                                    data[key].push(parData[listName[key]]);
-                                    if (j == ret.datas.length - 1 && data[key].length % codeId.length != 0) {
-                                        for (q = 0; q < data[key].length % codeId.length; q++) {
-                                            data[key].push("x");
-                                        }
-                                        break;
-                                    } else {
-                                        break;
-                                    }
-                                } else {
-                                    data[key].push("x");
-                                    if (key == "维修故障总次数" && a == codeId.length - 1) {
-                                        j--;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                time = time.filter(function (item, index, array) {
-                    return time.indexOf(item) === index;
-                });
-                for (key in listName) {
-                    if (listName.hasOwnProperty(key)) {
-                        for (k = 0; k < codeName.length; k++) {
-                            rData.push({
-                                name: key,
-                                type: "line",
-                                data: data[key].filter(function (item, index, array) {
-                                    return index % codeName.length == k;
-                                })
-                            });
-                        }
-                    }
-                }
+                chartTitle = workDeviceName;
             }
+            var colors = ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"];
             $("#faultChart").empty();
-            var charts = '<div id="chart" style="width: 100%; height: 500px">' + '</div>';
+            var charts = '<div id="chart" style="width: 100%; height: 500px"></div>';
             $("#faultChart").append(charts);
             var myChart = echarts.init(document.getElementById("chart"));
             var option = {
+                title: {
+                    text: chartTitle
+                },
                 tooltip: {
                     trigger: "axis",
                     formatter: function (params, ticket, callback) {
                         var formatter1 = "{0}: {1}<br/>";
-                        //var formatter2 = "{0}: {1}%<br/>";
                         var formatter = "";
                         for (var i = 0, l = params.length; i < l; i++) {
                             var xName = params[i].name;
-                            if (compare != 2) {
-                                if (!isStrEmptyOrUndefined(workShop) && workShop.length > 1) {
-                                    //formatter += (params[i].seriesName == "上报故障故障率" ? formatter2 : formatter1).format(
-                                    //    "<span style='color:blue'>" + workShop[i % workShop.length] + "</span>" + params[i].seriesName,
-                                    //    params[i].value);
-                                    formatter += formatter1.format(
-                                        "<span style='color:#99ff00'>" +
-                                        workShop[i % workShop.length] +
-                                        "</span>" +
-                                        "-" +
-                                        params[i].seriesName,
-                                        params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
-                                            ? ((params[i].value) * 100).toFixed(2) + "%"
-                                            : params[i].value);
-                                } else {
-                                    formatter += formatter1.format(
-                                        params[i].seriesName,
-                                        params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
-                                            ? ((params[i].value) * 100).toFixed(2) + "%"
-                                            : params[i].value);
-                                }
-                            } else {
-                                if (codeName.length > 1) {
-                                    formatter += formatter1.format(
-                                        "<span style='color:#99ff00'>" +
-                                        codeName[i % codeName.length] +
-                                        "</span>" +
-                                        "-" +
-                                        params[i].seriesName,
-                                        params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
-                                            ? ((params[i].value) * 100).toFixed(2) + "%"
-                                            : params[i].value);
-                                } else {
-                                    formatter += formatter1.format(
-                                        params[i].seriesName,
-                                        params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
-                                            ? ((params[i].value) * 100).toFixed(2) + "%"
-                                            : params[i].value);
-                                }
-                            }
+                            formatter += formatter1.format(
+                                params[i].seriesName,
+                                params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
+                                    ? ((params[i].value) * 100).toFixed(2) + "%"
+                                    : params[i].value);
 
                         }
                         return xName + "<br/>" + formatter + "<span style='color:#33ffff'>点击查看详情</span>";
                     }
                 },
                 xAxis: {
-                    //triggerEvent: true,
                     data: time,
                     axisLine: {
                         onZero: false
@@ -475,7 +398,6 @@ function getFaultChart() {
                         dataZoom: {
                             yAxisIndex: "none"
                         },
-                        dataView: { readOnly: false },//数据视图
                         restore: {},
                         magicType: {
                             type: ['line', 'bar']
@@ -487,6 +409,37 @@ function getFaultChart() {
             $("#faultChart").resize(function () {
                 myChart.resize();
             });
+            $("#faultApp").empty();
+            $("#faultSer").empty();
+            var appOption = '<option value={0}>{0}</option>';
+            var serOption = '<option value={0}>{0}</option>';
+            $("#appSer").css("display","none");
+            $("#appSer").fadeIn(1000);
+            $("#faultFirst").click();
+            if (app.length != 0) {
+                app = app.filter(function (item, index) {
+                    return app.indexOf(item) == index;
+                });
+                $.each(app, function (index, item) {
+                    $("#faultApp").append(appOption.format(item));
+                });
+                $("#faults").removeClass("hidden").siblings().addClass("hidden");
+                getFaultAppChart();
+            } else {
+                $("#faults").addClass("hidden").siblings().removeClass("hidden");
+            }
+            if (ser.length != 0) {
+                ser = ser.filter(function (item, index) {
+                    return ser.indexOf(item) == index;
+                });
+                $.each(ser, function (index, item) {
+                    $("#faultSer").append(serOption.format(item));
+                });
+                $("#services").removeClass("hidden").siblings().addClass("hidden");
+                getFaultSerChart();
+            } else {
+                $("#services").addClass("hidden").siblings().removeClass("hidden");
+            }
             myChart.getZr().on('click', function (params) {
                 var pointInPixel = [params.offsetX, params.offsetY];
                 if (myChart.containPixel('grid', pointInPixel)) {
@@ -688,9 +641,175 @@ function getFaultChart() {
         });
 }
 
-var faultData;
-var compare;
-function contrastChart(par) {
+function getFaultAppChart() {
+    var appLegend = $("#faultApp").val();
+    var i, len = FaultsData.length;
+    var time = [];
+    var appCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = FaultsData[i].Date.split(" ")[0];
+        time.push(timeData);
+        var appList = FaultsData[i].ReportSingleFaultType;
+        if (appList.length != 0) {
+            $.each(appList, function (index, item) {
+                if (item.FaultName == appLegend) {
+                    appCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                appCount.push(0);
+            }
+            tf = true;
+        } else {
+            appCount.push(0);
+        }
+    }
+    $("#faultAppChart").empty();
+    var charts = '<div id="appChart" style="width: 100%; height: 500px"></div>';
+    $("#faultAppChart").append(charts);
+    var myChart = echarts.init(document.getElementById("appChart"));
+    var option = {
+        title: {
+            text: appLegend
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: "故障次数",
+            type: "value"
+        },
+        legend: {
+            data: [appLegend]
+        },
+        series: {
+            name: appLegend,
+            type: "line",
+            data: appCount
+        },
+        dataZoom: [{
+            type: "slider",
+            start: 0,
+            end: 100
+        },
+        {
+            type: "inside",
+            start: 0,
+            end: 100
+        }],
+        toolbox: {
+            top: 20,
+            left: "center",
+            feature: {
+                dataZoom: {
+                    yAxisIndex: "none"
+                },
+                restore: {},
+                magicType: {
+                    type: ['line', 'bar']
+                }
+            }
+        }
+    };
+    myChart.setOption(option, true);
+    $("#faultAppChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+function getFaultSerChart() {
+    var serLegend = $("#faultSer").val();
+    var i, len = FaultsData.length;
+    var time = [];
+    var serCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = FaultsData[i].Date.split(" ")[0];
+        time.push(timeData);
+        var serList = FaultsData[i].RepairSingleFaultType;
+        if (serList.length != 0) {
+            $.each(serList, function (index, item) {
+                if (item.FaultName == serLegend) {
+                    serCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                serCount.push(0);
+            }
+            tf = true;
+        } else {
+            serCount.push(0);
+        }
+    }
+    $("#faultSerChart").empty();
+    var charts = '<div id="serChart" style="width: 100%; height: 500px"></div>';
+    $("#faultSerChart").append(charts);
+    var myChart = echarts.init(document.getElementById("serChart"));
+    var option = {
+        title: {
+            text: serLegend
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: "维修次数",
+            type: "value"
+        },
+        legend: {
+            data: [serLegend]
+        },
+        series: {
+            name: serLegend,
+            type: "line",
+            data: serCount
+        },
+        dataZoom: [{
+            type: "slider",
+            start: 0,
+            end: 100
+        },
+        {
+            type: "inside",
+            start: 0,
+            end: 100
+        }],
+        toolbox: {
+            top: 20,
+            left: "center",
+            feature: {
+                dataZoom: {
+                    yAxisIndex: "none"
+                },
+                restore: {},
+                magicType: {
+                    type: ['line', 'bar']
+                }
+            }
+        }
+    };
+    myChart.setOption(option, true);
+    $("#faultSerChart").resize(function () {
+        myChart.resize();
+    });
+}
+var dayData;
+function dayChart() {
     var opType = 505;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -700,62 +819,27 @@ function contrastChart(par) {
     if (workShopName == "所有车间") {
         workShopName = "";
     }
-    var title;
-    var oneTime, twoTime;
-    switch (par) {
-        case 0:
-            compare = 3;
-            title = "日数据对比";
-            oneTime = $("#selectDay").val();
-            twoTime = $("#conDay").val();
-            break;
-        case 1:
-            compare = 4;
-            title = "周数据对比";
-            oneTime = weekTimeOne;
-            twoTime = weekTimeTwo;
-            break;
-        case 2:
-            compare = 5;
-            title = "月数据对比";
-            oneTime = $("#selectMonth").val();
-            twoTime = $("#conMonth").val();
-    }
+    var oneTime = $("#selectDay").val();
+    var twoTime = $("#conDay").val();
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         StartTime: oneTime,
         EndTime: twoTime,
-        Compare: compare
+        Compare: 3
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        faultData = ret.datas;
+        dayData = ret.datas;
         var time = [], yData = [];
         var i, len = ret.datas.length;
-        $("#time").empty();
-        var timeOption = '<option value="{0}">{1}</option>';
         for (i = 0; i < len; i++) {
             var timeData = ret.datas[i].Date.split(" ")[0];
-            switch (compare) {
-                case 3:
-                    time.push(timeData);
-                    break;
-                case 4:
-                    timeData = $(".week").eq(i).val();
-                    time.push(timeData);
-                    break;
-                case 5:
-                    timeData = timeData.slice(0, timeData.indexOf("-") + 3);
-                    time.push(timeData);
-            }
-            compare == 4
-                ? $("#time").append(timeOption.format(ret.datas[i].Date.split(" ")[0], timeData))
-                : $("#time").append(timeOption.format(timeData, timeData));
+            time.push(timeData);
             var data = ret.datas[i];
             var yList = {
                 name: timeData,
@@ -767,13 +851,13 @@ function contrastChart(par) {
                 break;
             }
         }
-        $("#contrastChart").empty();
-        var charts = '<div id="chart1" style="width: 100%; height: 550px">' + '</div>';
-        $("#contrastChart").append(charts);
-        var myChart = echarts.init(document.getElementById("chart1"));
+        $("#dayConChart").empty();
+        var charts = '<div id="dayChart" style="width: 100%; height: 550px">' + '</div>';
+        $("#dayConChart").append(charts);
+        var myChart = echarts.init(document.getElementById("dayChart"));
         var option = {
             title: {
-                text: title
+                text: "日数据对比"
             },
             tooltip: {
                 trigger: 'axis',
@@ -814,147 +898,1271 @@ function contrastChart(par) {
             series: yData
         };
         myChart.setOption(option, true);
-        $("#contrastChart").resize(function () {
+        $("#dayConChart").resize(function () {
             myChart.resize();
         });
-        $("#bodyRight").css("display","none");
-        $("#bodyRight").fadeIn(1000);
-        dataDetails();
-        $("#first0").click();
+        $("#dayRight").css("display", "none");
+        $("#dayRight").fadeIn(1000);
+        dayDataDetails();
+        $("#dayFirst").click();
     });
 }
 
-var appearData, serviceData;
-function dataDetails() {
-    $("#faultAppearType").empty();
-    $("#faultServiceType").empty();
-    var faultAppearType = '<option value="{0}">{0}</option>';
-    var faultServiceType = '<option value="{0}">{0}</option>';
-    var i, len = faultData.length;
-    var time = $("#time").val();
+function dayDataDetails() {
+    $("#dayFaultAppearType").empty();
+    $("#dayFaultServiceType").empty();
+    var dayFaultAppearType = '<option value="{0}">{0}</option>';
+    var dayFaultServiceType = '<option value="{0}">{0}</option>';
+    var i, len = dayData.length;
+    var dayApp = [], daySer = [];
     for (i = 0; i < len; i++) {
-        if (faultData[i].Date.indexOf(time) > -1) {
-            appearData = faultData[i].ReportSingleFaultType;
-            serviceData = faultData[i].RepairSingleFaultType;
-            if (appearData.length == 0) {
-                $("#faultAppear0").addClass("hidden").siblings().removeClass("hidden");
-            } else {
-                $("#faultAppear0").removeClass("hidden").siblings().addClass("hidden");
-                $.each(appearData, function (index, item) {
-                    $("#faultAppearType").append(faultAppearType.format(item.FaultName));
-                });
-            }
-            if (serviceData.length == 0) {
-                $("#faultService0").addClass("hidden").siblings().removeClass("hidden");
-            } else {
-                $("#faultService0").removeClass("hidden").siblings().addClass("hidden");
-                $.each(serviceData, function (index, item) {
-                    $("#faultServiceType").append(faultServiceType.format(item.FaultName));
-                });
-            }
+        var appearData = dayData[i].ReportSingleFaultType;
+        var serviceData = dayData[i].RepairSingleFaultType;
+        if (appearData.length != 0) {
+            $.each(appearData, function (index, item) {
+                dayApp.push(item.FaultName);
+            });
         }
-        if (len == 2 && faultData[0].Date == faultData[1].Date) {
+        if (serviceData.length != 0) {
+            $.each(serviceData, function (index, item) {
+                daySer.push(item.FaultName);
+            });
+        }
+        if (len == 2 && dayData[0].Date == dayData[1].Date) {
             break;
         }
     }
-    appearDataList();
-    serviceDataList();
-}
-
-function appearDataList() {
-    var num;
-    var order = function (data, type, row) {
-        return ++num;
+    if (dayApp.length != 0) {
+        dayApp = dayApp.filter(function (item, index) {
+            return dayApp.indexOf(item) == index;
+        });
+        $.each(dayApp, function (index, item) {
+            $("#dayFaultAppearType").append(dayFaultAppearType.format(item));
+        });
+        $("#dayApp").removeClass("hidden").siblings().addClass("hidden");
+        dayAppChart();
+    } else {
+        $("#dayApp").addClass("hidden").siblings().removeClass("hidden");
     }
-    var i, len = appearData.length;
-    var name = $("#faultAppearType").val();
-    for (i = 0; i < len; i++) {
-        if (appearData[i].FaultName == name) {
-            num = 0;
-            $("#faultAppear1").DataTable({
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "searching": false,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": appearData[i].DeviceFaultTypes,
-                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-                "iDisplayLength": 5, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Code", "title": "机台号" },
-                    { "data": "Count", "title": "故障次数" }
-                ]
-            });
-            num = 0;
-            $("#faultAppear2").DataTable({
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "searching": false,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": appearData[i].Operators,
-                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-                "iDisplayLength": 5, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Name", "title": "上报人" },
-                    { "data": "Count", "title": "上报次数" }
-                ]
-            });
-        }
+    if (daySer.length != 0) {
+        daySer = daySer.filter(function (item, index) {
+            return daySer.indexOf(item) == index;
+        });
+        $.each(daySer, function (index, item) {
+            $("#dayFaultServiceType").append(dayFaultServiceType.format(item));
+        });
+        $("#daySer").removeClass("hidden").siblings().addClass("hidden");
+        daySerChart();
+    } else {
+        $("#daySer").addClass("hidden").siblings().removeClass("hidden");
     }
 }
 
-function serviceDataList() {
-    var num;
-    var order = function (data, type, row) {
-        return ++num;
-    }
-    var i, len = serviceData.length;
-    var name = $("#faultServiceType").val();
+function dayAppChart() {
+    var appType = $("#dayFaultAppearType").val();
+    var i, len = dayData.length;
+    var time = [];
+    var appCount = [];
+    var tf = true;
     for (i = 0; i < len; i++) {
-        if (serviceData[i].FaultName == name) {
-            num = 0;
-            $("#faultService1").DataTable({
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "searching": false,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": serviceData[i].DeviceFaultTypes,
-                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-                "iDisplayLength": 5, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Code", "title": "机台号" },
-                    { "data": "Count", "title": "故障次数" }
-                ]
+        var timeData = dayData[i].Date.split(" ")[0];
+        time.push(timeData);
+        var appList = dayData[i].ReportSingleFaultType;
+        if (appList.length != 0) {
+            $.each(appList, function (index, item) {
+                if (item.FaultName == appType) {
+                    appCount.push(item.Count);
+                    tf = false;
+                }
             });
-            num = 0;
-            var serviceTime = function (data, type, row) {
-                return codeTime(data.Time);
+            if (tf) {
+                appCount.push(0);
             }
-            $("#faultService2").DataTable({
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "searching": false,
-                "language": { "url": "/content/datatables_language.json" },
-                "data": serviceData[i].Operators,
-                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-                "iDisplayLength": 5, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Name", "title": "维修人" },
-                    { "data": "Count", "title": "维修次数" },
-                    { "data": null, "title": "维修时间", "render": serviceTime }
-                ]
-            });
+            tf = true;
+        } else {
+            appCount.push(0);
+        }
+        if (len == 2 && dayData[0].Date == dayData[1].Date) {
+            break;
         }
     }
+    $("#dayFaultAppearTypeChart").empty();
+    var charts = '<div id="dayAppChart" style="width: 100%; height: 470px"></div>';
+    $("#dayFaultAppearTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("dayAppChart"));
+    var option = {
+        title: {
+            text: appType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '故障次数',
+            type: "value"
+        },
+        series: {
+            name: appType,
+            type: "bar",
+            data: appCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#dayFaultAppearTypeChart").resize(function () {
+        myChart.resize();
+    });
 }
+
+function daySerChart() {
+    var serType = $("#dayFaultServiceType").val();
+    var i, len = dayData.length;
+    var time = [];
+    var serCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = dayData[i].Date.split(" ")[0];
+        time.push(timeData);
+        var serList = dayData[i].RepairSingleFaultType;
+        if (serList.length != 0) {
+            $.each(serList, function (index, item) {
+                if (item.FaultName == serType) {
+                    serCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                serCount.push(0);
+            }
+            tf = true;
+        } else {
+            serCount.push(0);
+        }
+        if (len == 2 && dayData[0].Date == dayData[1].Date) {
+            break;
+        }
+    }
+    $("#dayFaultServiceTypeChart").empty();
+    var charts = '<div id="daySerChart" style="width: 100%; height: 470px"></div>';
+    $("#dayFaultServiceTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("daySerChart"));
+    var option = {
+        title: {
+            text: serType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '维修次数',
+            type: "value"
+        },
+        series: {
+            name: serType,
+            type: "bar",
+            data: serCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#dayFaultServiceTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+var weekData;
+function weekChart() {
+    var opType = 505;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var workShopName = $("#selectWorkShop1").val();
+    if (workShopName == "所有车间") {
+        workShopName = "";
+    }
+    var oneTime = weekTimeOne;
+    var twoTime = weekTimeTwo;
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        WorkshopName: workShopName,
+        StartTime: oneTime,
+        EndTime: twoTime,
+        Compare: 4
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        weekData = ret.datas;
+        var time = [], yData = [];
+        var i, len = ret.datas.length;
+        for (i = 0; i < len; i++) {
+            var timeData = $(".week").eq(i).val();
+            time.push(timeData);
+            var data = ret.datas[i];
+            var yList = {
+                name: timeData,
+                type: 'bar',
+                data: [data.RepairCount, data.RepairFaultType, data.Repairing, data.Confirmed, data.ReportFaultRate, data.ReportCount, data.ReportFaultType, data.FaultDevice, data.AllDevice]
+            }
+            yData.push(yList);
+            if (len == 2 && ret.datas[0].Date == ret.datas[1].Date) {
+                break;
+            }
+        }
+        $("#weekConChart").empty();
+        var charts = '<div id="weekChart" style="width: 100%; height: 550px">' + '</div>';
+        $("#weekConChart").append(charts);
+        var myChart = echarts.init(document.getElementById("weekChart"));
+        var option = {
+            title: {
+                text: "周数据对比"
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params, ticket, callback) {
+                    var formatter1 = "{0}: {1}<br/>";
+                    var formatter = "";
+                    for (var i = 0, l = params.length; i < l; i++) {
+                        var xName = params[i].name;
+                        formatter += formatter1.format(
+                            params[i].seriesName,
+                            params[i].name == "上报故障故障率" && typeof (params[i].value) == "number"
+                                ? ((params[i].value) * 100).toFixed(2) + "%"
+                                : params[i].value);
+                    }
+                    return xName + "<br/>" + formatter;
+                },
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            legend: {
+                data: time
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value'
+            },
+            yAxis: {
+                type: 'category',
+                data: ["维修故障总次数", "维修故障类型数量", "维修中故障", "已确认故障", "上报故障故障率", "上报故障总次数", "上报故障类型数量", "上报故障设备数量", "设备总数"]
+            },
+            color: ["#9900ff", "#3333ff"],
+            series: yData
+        };
+        myChart.setOption(option, true);
+        $("#weekConChart").resize(function () {
+            myChart.resize();
+        });
+        $("#weekRight").css("display", "none");
+        $("#weekRight").fadeIn(1000);
+        weekDataDetails();
+        $("#weekFirst").click();
+    });
+}
+
+function weekDataDetails() {
+    $("#weekFaultAppearType").empty();
+    $("#weekFaultServiceType").empty();
+    var weekFaultAppearType = '<option value="{0}">{0}</option>';
+    var weekFaultServiceType = '<option value="{0}">{0}</option>';
+    var i, len = weekData.length;
+    var weekApp = [], weekSer = [];
+    for (i = 0; i < len; i++) {
+        var appearData = weekData[i].ReportSingleFaultType;
+        var serviceData = weekData[i].RepairSingleFaultType;
+        if (appearData.length != 0) {
+            $.each(appearData, function (index, item) {
+                weekApp.push(item.FaultName);
+            });
+        }
+        if (serviceData.length != 0) {
+            $.each(serviceData, function (index, item) {
+                weekSer.push(item.FaultName);
+            });
+        }
+        if (len == 2 && weekData[0].Date == weekData[1].Date) {
+            break;
+        }
+    }
+    if (weekApp.length != 0) {
+        weekApp = weekApp.filter(function (item, index) {
+            return weekApp.indexOf(item) == index;
+        });
+        $.each(weekApp, function (index, item) {
+            $("#weekFaultAppearType").append(weekFaultAppearType.format(item));
+        });
+        $("#weekApp").removeClass("hidden").siblings().addClass("hidden");
+        weekAppChart();
+    } else {
+        $("#weekApp").addClass("hidden").siblings().removeClass("hidden");
+    }
+    if (weekSer.length != 0) {
+        weekSer = weekSer.filter(function (item, index) {
+            return weekSer.indexOf(item) == index;
+        });
+        $.each(weekSer, function (index, item) {
+            $("#weekFaultServiceType").append(weekFaultServiceType.format(item));
+        });
+        $("#weekSer").removeClass("hidden").siblings().addClass("hidden");
+        weekSerChart();
+    } else {
+        $("#weekSer").addClass("hidden").siblings().removeClass("hidden");
+    }
+}
+
+function weekAppChart() {
+    var appType = $("#weekFaultAppearType").val();
+    var i, len = weekData.length;
+    var time = [];
+    var appCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = $(".week").eq(i).val();
+        time.push(timeData);
+        var appList = weekData[i].ReportSingleFaultType;
+        if (appList.length != 0) {
+            $.each(appList, function (index, item) {
+                if (item.FaultName == appType) {
+                    appCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                appCount.push(0);
+            }
+            tf = true;
+        } else {
+            appCount.push(0);
+        }
+        if (len == 2 && weekData[0].Date == weekData[1].Date) {
+            break;
+        }
+    }
+    $("#weekFaultAppearTypeChart").empty();
+    var charts = '<div id="weekAppChart" style="width: 100%; height: 470px"></div>';
+    $("#weekFaultAppearTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("weekAppChart"));
+    var option = {
+        title: {
+            text: appType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '故障次数',
+            type: "value"
+        },
+        series: {
+            name: appType,
+            type: "bar",
+            data: appCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#weekFaultAppearTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+function weekSerChart() {
+    var serType = $("#weekFaultServiceType").val();
+    var i, len = weekData.length;
+    var time = [];
+    var serCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = $(".week").eq(i).val();
+        time.push(timeData);
+        var serList = weekData[i].RepairSingleFaultType;
+        if (serList.length != 0) {
+            $.each(serList, function (index, item) {
+                if (item.FaultName == serType) {
+                    serCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                serCount.push(0);
+            }
+            tf = true;
+        } else {
+            serCount.push(0);
+        }
+        if (len == 2 && weekData[0].Date == weekData[1].Date) {
+            break;
+        }
+    }
+    $("#weekFaultServiceTypeChart").empty();
+    var charts = '<div id="weekSerChart" style="width: 100%; height: 470px"></div>';
+    $("#weekFaultServiceTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("weekSerChart"));
+    var option = {
+        title: {
+            text: serType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '维修次数',
+            type: "value"
+        },
+        series: {
+            name: serType,
+            type: "bar",
+            data: serCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#weekFaultServiceTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+var monthData;
+function monthChart() {
+    var opType = 505;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var workShopName = $("#selectWorkShopMonth").val();
+    if (workShopName == "所有车间") {
+        workShopName = "";
+    }
+    var oneTime = $("#selectMonth").val();
+    var twoTime = $("#conMonth").val();
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        WorkshopName: workShopName,
+        StartTime: oneTime,
+        EndTime: twoTime,
+        Compare: 5
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        monthData = ret.datas;
+        var time = [], yData = [];
+        var i, len = ret.datas.length;
+        for (i = 0; i < len; i++) {
+            var timeData = ret.datas[i].Date.split(" ")[0];
+            timeData = timeData.slice(0, timeData.indexOf("-") + 3);
+            time.push(timeData);
+            var data = ret.datas[i];
+            var yList = {
+                name: timeData,
+                type: 'bar',
+                data: [data.RepairCount, data.RepairFaultType, data.Repairing, data.Confirmed, data.ReportFaultRate, data.ReportCount, data.ReportFaultType, data.FaultDevice, data.AllDevice]
+            }
+            yData.push(yList);
+            if (len == 2 && ret.datas[0].Date == ret.datas[1].Date) {
+                break;
+            }
+        }
+        $("#monthConChart").empty();
+        var charts = '<div id="monthChart" style="width: 100%; height: 550px">' + '</div>';
+        $("#monthConChart").append(charts);
+        var myChart = echarts.init(document.getElementById("monthChart"));
+        var option = {
+            title: {
+                text: "月数据对比"
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params, ticket, callback) {
+                    var formatter1 = "{0}: {1}<br/>";
+                    var formatter = "";
+                    for (var i = 0, l = params.length; i < l; i++) {
+                        var xName = params[i].name;
+                        formatter += formatter1.format(
+                            params[i].seriesName,
+                            params[i].name == "上报故障故障率" && typeof (params[i].value) == "number"
+                                ? ((params[i].value) * 100).toFixed(2) + "%"
+                                : params[i].value);
+                    }
+                    return xName + "<br/>" + formatter;
+                },
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            legend: {
+                data: time
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value'
+            },
+            yAxis: {
+                type: 'category',
+                data: ["维修故障总次数", "维修故障类型数量", "维修中故障", "已确认故障", "上报故障故障率", "上报故障总次数", "上报故障类型数量", "上报故障设备数量", "设备总数"]
+            },
+            color: ["#9900ff", "#3333ff"],
+            series: yData
+        };
+        myChart.setOption(option, true);
+        $("#monthConChart").resize(function () {
+            myChart.resize();
+        });
+        $("#monthRight").css("display", "none");
+        $("#monthRight").fadeIn(1000);
+        monthDataDetails();
+        $("#monthFirst").click();
+    });
+}
+
+function monthDataDetails() {
+    $("#monthFaultAppearType").empty();
+    $("#monthFaultServiceType").empty();
+    var monthFaultAppearType = '<option value="{0}">{0}</option>';
+    var monthFaultServiceType = '<option value="{0}">{0}</option>';
+    var i, len = monthData.length;
+    var monthApp = [], monthSer = [];
+    for (i = 0; i < len; i++) {
+        var appearData = monthData[i].ReportSingleFaultType;
+        var serviceData = monthData[i].RepairSingleFaultType;
+        if (appearData.length != 0) {
+            $.each(appearData, function (index, item) {
+                monthApp.push(item.FaultName);
+            });
+        }
+        if (serviceData.length != 0) {
+            $.each(serviceData, function (index, item) {
+                monthSer.push(item.FaultName);
+            });
+        }
+        if (len == 2 && monthData[0].Date == monthData[1].Date) {
+            break;
+        }
+    }
+    if (monthApp.length != 0) {
+        monthApp = monthApp.filter(function (item, index) {
+            return monthApp.indexOf(item) == index;
+        });
+        $.each(monthApp, function (index, item) {
+            $("#monthFaultAppearType").append(monthFaultAppearType.format(item));
+        });
+        $("#dayApp").removeClass("hidden").siblings().addClass("hidden");
+        monthAppChart();
+    } else {
+        $("#dayApp").addClass("hidden").siblings().removeClass("hidden");
+    }
+    if (monthSer.length != 0) {
+        monthSer = monthSer.filter(function (item, index) {
+            return monthSer.indexOf(item) == index;
+        });
+        $.each(monthSer, function (index, item) {
+            $("#monthFaultServiceType").append(monthFaultServiceType.format(item));
+        });
+        $("#monthSer").removeClass("hidden").siblings().addClass("hidden");
+        monthSerChart();
+    } else {
+        $("#monthSer").addClass("hidden").siblings().removeClass("hidden");
+    }
+}
+
+function monthAppChart() {
+    var appType = $("#monthFaultAppearType").val();
+    var i, len = monthData.length;
+    var time = [];
+    var appCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = monthData[i].Date.split(" ")[0];
+        timeData = timeData.slice(0, timeData.indexOf("-") + 3);
+        time.push(timeData);
+        var appList = monthData[i].ReportSingleFaultType;
+        if (appList.length != 0) {
+            $.each(appList, function (index, item) {
+                if (item.FaultName == appType) {
+                    appCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                appCount.push(0);
+            }
+            tf = true;
+        } else {
+            appCount.push(0);
+        }
+        if (len == 2 && monthData[0].Date == monthData[1].Date) {
+            break;
+        }
+    }
+    $("#monthFaultAppearTypeChart").empty();
+    var charts = '<div id="monthAppChart" style="width: 100%; height: 470px"></div>';
+    $("#monthFaultAppearTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("monthAppChart"));
+    var option = {
+        title: {
+            text: appType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '故障次数',
+            type: "value"
+        },
+        series: {
+            name: appType,
+            type: "bar",
+            data: appCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#monthFaultAppearTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+function monthSerChart() {
+    var serType = $("#monthFaultServiceType").val();
+    var i, len = monthData.length;
+    var time = [];
+    var serCount = [];
+    var tf = true;
+    for (i = 0; i < len; i++) {
+        var timeData = monthData[i].Date.split(" ")[0];
+        timeData = timeData.slice(0, timeData.indexOf("-") + 3);
+        time.push(timeData);
+        var serList = monthData[i].RepairSingleFaultType;
+        if (serList.length != 0) {
+            $.each(serList, function (index, item) {
+                if (item.FaultName == serType) {
+                    serCount.push(item.Count);
+                    tf = false;
+                }
+            });
+            if (tf) {
+                serCount.push(0);
+            }
+            tf = true;
+        } else {
+            serCount.push(0);
+        }
+        if (len == 2 && monthData[0].Date == monthData[1].Date) {
+            break;
+        }
+    }
+    $("#monthFaultServiceTypeChart").empty();
+    var charts = '<div id="monthSerChart" style="width: 100%; height: 470px"></div>';
+    $("#monthFaultServiceTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("monthSerChart"));
+    var option = {
+        title: {
+            text: serType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: time,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: '维修次数',
+            type: "value"
+        },
+        series: {
+            name: serType,
+            type: "bar",
+            data: serCount
+        }
+    };
+    myChart.setOption(option, true);
+    $("#monthFaultServiceTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+var shopData, shopTime;
+function shopChart() {
+    var opType = 505;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var workShopName = $("#selectWorkShop1").val();
+    if (isStrEmptyOrUndefined(workShopName) || workShopName.length < 2) {
+        layer.msg("请选择两个及以上的车间");
+        return;
+    }
+    workShopName = workShopName.join(",");
+    if (!$("#shopPar label").find(".icb_minimal").is(":checked")) {
+        layer.msg("请选择参数");
+        return;
+    }
+    var startTime = $("#startDate1").val();
+    var endTime = $("#endDate1").val();
+    if (compareDate(startTime, endTime)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        WorkshopName: workShopName,
+        StartTime: startTime,
+        EndTime: endTime,
+        Compare: 1
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        shopData = ret.datas;
+        var workShop = $("#selectWorkShop1").val();
+        $("#shopConChart").empty();
+        var i, len = $("#shopPar label").find(".icb_minimal").length;
+        for (i = 0; i < len; i++) {
+            var ick = $("#shopPar label").find(".icb_minimal")[i];
+            var span = $("#shopPar label")[i];
+            var listName = [];
+            var legend = [];
+            var data = [];
+            var j, a, q, k;
+            if ($(ick).is(":checked")) {
+                listName[$(span).text()] = $(ick).val();
+                legend.push($(span).text());
+                var key;
+                for (key in listName) {
+                    if (listName.hasOwnProperty(key)) {
+                        data[key] = [];
+                    }
+                }
+                ret.datas.sort(function (x, y) {
+                    return x.Workshop < y.Workshop ? 1 : -1;
+                });
+                ret.datas.sort(function (x, y) {
+                    return x.Date > y.Date ? 1 : -1;
+                });
+                var time = [];
+                for (j = 0; j < ret.datas.length; j++) {
+                    var timeData = ret.datas[j].Date.split(" ")[0];
+                    time.push(timeData);
+                    var parData = ret.datas[j];
+                    for (key in listName) {
+                        if (listName.hasOwnProperty(key)) {
+                            for (a = data[key].length % workShop.length; a < workShop.length; a++) {
+                                if (workShop[a] == parData.Workshop) {
+                                    data[key].push(parData[listName[key]]);
+                                    if (j == ret.datas.length - 1 && data[key].length % workShop.length != 0) {
+                                        for (q = 0; q < data[key].length % workShop.length; q++) {
+                                            data[key].push("x");
+                                        }
+                                        break;
+                                    } else {
+                                        break;
+                                    }
+                                } else {
+                                    data[key].push("x");
+                                    if (key == legend[legend.length - 1] && a == workShop.length - 1) {
+                                        j--;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                time = time.filter(function (item, index, array) {
+                    return time.indexOf(item) === index;
+                });
+                shopTime = time;
+                var rData = [];
+                for (key in listName) {
+                    if (listName.hasOwnProperty(key)) {
+                        for (k = 0; k < workShop.length; k++) {
+                            rData.push({
+                                name: workShop[k],
+                                type: "line",
+                                data: data[key].filter(function (item, index, array) {
+                                    return index % workShop.length == k;
+                                })
+                            });
+                        }
+                    }
+                }
+                console.log(rData);
+                var charts = '<div id="shopChart' + i + '" style="width: 100%; height: 500px">' + '</div>';
+                $("#shopConChart").append(charts);
+                var myChart = echarts.init(document.getElementById("shopChart" + i));
+                var option = {
+                    title: {
+                        text: legend[0]
+                    },
+                    tooltip: {
+                        trigger: "axis",
+                        formatter: function (params, ticket, callback) {
+                            var formatter1 = "{0}: {1}<br/>";
+                            var formatter = "";
+                            for (var i = 0, l = params.length; i < l; i++) {
+                                var xName = params[i].name;
+                                formatter += formatter1.format(
+                                    params[i].seriesName,
+                                    params[i].seriesName == "上报故障故障率" && typeof (params[i].value) == "number"
+                                        ? ((params[i].value) * 100).toFixed(2) + "%"
+                                        : params[i].value);
+                            }
+                            return xName + "<br/>" + formatter;
+                        }
+                    },
+                    xAxis: {
+                        data: time,
+                        axisLine: {
+                            onZero: false
+                        }
+                    },
+                    yAxis: {
+                        type: "value"
+                    },
+                    legend: {
+                        data: workShop
+                    },
+                    color: ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+                    series: rData,
+                    dataZoom: [{
+                        type: "slider",
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        type: "inside",
+                        start: 0,
+                        end: 100
+                    }],
+                    toolbox: {
+                        top: 20,
+                        left: "center",
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: "none"
+                            },
+                            restore: {},
+                            magicType: {
+                                type: ['line', 'bar']
+                            }
+                        }
+                    }
+                };
+                myChart.setOption(option, true);
+            }
+        }
+        $("#shopConChart").resize(function () {
+            for (i = 0; i < len; i++) {
+                var ks = $("#shopPar label").find(".icb_minimal")[i];
+                if ($(ks).is(":checked")) {
+                    echarts.init(document.getElementById("shopChart" + i)).resize();
+                }
+            }
+        });
+        $("#shopRight").css("display", "none");
+        $("#shopRight").fadeIn(1000);
+        shopDataDetails();
+        $("#shopFirst").click();
+    });
+}
+
+function shopDataDetails() {
+    $("#shopFaultAppearType").empty();
+    $("#shopFaultServiceType").empty();
+    var shopFaultAppearType = '<option value="{0}">{0}</option>';
+    var shopFaultServiceType = '<option value="{0}">{0}</option>';
+    var i, len = shopData.length;
+    var shopApp = [], shopSer = [];
+    for (i = 0; i < len; i++) {
+        var appearData = shopData[i].ReportSingleFaultType;
+        var serviceData = shopData[i].RepairSingleFaultType;
+        if (appearData.length != 0) {
+            $.each(appearData, function (index, item) {
+                shopApp.push(item.FaultName);
+            });
+        }
+        if (serviceData.length != 0) {
+            $.each(serviceData, function (index, item) {
+                shopSer.push(item.FaultName);
+            });
+        }
+        if (len == 2 && shopData[0].Date == shopData[1].Date) {
+            break;
+        }
+    }
+    if (shopApp.length != 0) {
+        shopApp = shopApp.filter(function (item, index) {
+            return shopApp.indexOf(item) == index;
+        });
+        $.each(shopApp, function (index, item) {
+            $("#shopFaultAppearType").append(shopFaultAppearType.format(item));
+        });
+        $("#shopApp").removeClass("hidden").siblings().addClass("hidden");
+        shopAppChart();
+    } else {
+        $("#shopApp").addClass("hidden").siblings().removeClass("hidden");
+    }
+    if (shopSer.length != 0) {
+        shopSer = shopSer.filter(function (item, index) {
+            return shopSer.indexOf(item) == index;
+        });
+        $.each(shopSer, function (index, item) {
+            $("#shopFaultServiceType").append(shopFaultServiceType.format(item));
+        });
+        $("#shopSer").removeClass("hidden").siblings().addClass("hidden");
+        shopSerChart();
+    } else {
+        $("#shopSer").addClass("hidden").siblings().removeClass("hidden");
+    }
+}
+
+function shopAppChart() {
+    var appType = $("#shopFaultAppearType").val();
+    var legend = $("#selectWorkShop1").val();
+    var i, len = shopData.length;
+    var appData = [];
+    var tf = true;
+    var num = 0;
+    for (i = 0; i < len; i++) {
+        var workShop = shopData[i].Workshop;
+        var appList = shopData[i].ReportSingleFaultType;
+        if (workShop == legend[num++ % legend.length]) {
+            if (appList.length != 0) {
+                $.each(appList, function (index, item) {
+                    if (item.FaultName == appType) {
+                        appData.push(item.Count);
+                        tf = false;
+                    }
+                });
+                if (tf) {
+                    appData.push(0);
+                }
+                tf = true;
+            } else {
+                appData.push(0);
+            }
+        } else {
+            appData.push(0);
+            i--;
+        }
+        if (i == len - 1 && appData.length % legend.length != 0) {
+            for (var q = 0; q < appData.length % legend.length; q++) {
+                appData.push(0);
+            }
+        }
+    }
+    var rData = [];
+    len = legend.length;
+    for (i = 0; i < len; i++) {
+        rData.push({
+            name: legend[i],
+            type: "line",
+            data: appData.filter(function (item, index, array) {
+                return index % len == i;
+            })
+        });
+    }
+    $("#shopFaultAppearTypeChart").empty();
+    var charts = '<div id="shopAppChart" style="width: 100%; height: 500px"></div>';
+    $("#shopFaultAppearTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("shopAppChart"));
+    var option = {
+        title: {
+            text: appType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: shopTime,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: "故障次数",
+            type: "value"
+        },
+        legend: {
+            data: legend
+        },
+        color: ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+        series: rData,
+        dataZoom: [{
+            type: "slider",
+            start: 0,
+            end: 100
+        },
+        {
+            type: "inside",
+            start: 0,
+            end: 100
+        }],
+        toolbox: {
+            top: 20,
+            left: "center",
+            feature: {
+                dataZoom: {
+                    yAxisIndex: "none"
+                },
+                restore: {},
+                magicType: {
+                    type: ['line', 'bar']
+                }
+            }
+        }
+    };
+    myChart.setOption(option, true);
+    $("#shopFaultAppearTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+function shopSerChart() {
+    var serType = $("#shopFaultServiceType").val();
+    var legend = $("#selectWorkShop1").val();
+    var i, len = shopData.length;
+    var serData = [];
+    var tf = true;
+    var num = 0;
+    for (i = 0; i < len; i++) {
+        var workShop = shopData[i].Workshop;
+        var serList = shopData[i].RepairSingleFaultType;
+        if (workShop == legend[num++ % legend.length]) {
+            if (serList.length != 0) {
+                $.each(serList, function (index, item) {
+                    if (item.FaultName == serType) {
+                        serData.push(item.Count);
+                        tf = false;
+                    }
+                });
+                if (tf) {
+                    serData.push(0);
+                }
+                tf = true;
+            } else {
+                serData.push(0);
+            }
+        } else {
+            serData.push(0);
+            i--;
+        }
+        if (i == len - 1 && serData.length % legend.length != 0) {
+            for (var q = 0; q < serData.length % legend.length; q++) {
+                serData.push(0);
+            }
+        }
+    }
+    var rData = [];
+    len = legend.length;
+    for (i = 0; i < len; i++) {
+        rData.push({
+            name: legend[i],
+            type: "line",
+            data: serData.filter(function (item, index, array) {
+                return index % len == i;
+            })
+        });
+    }
+    $("#shopFaultServiceTypeChart").empty();
+    var charts = '<div id="shopSerChart" style="width: 100%; height: 500px"></div>';
+    $("#shopFaultServiceTypeChart").append(charts);
+    var myChart = echarts.init(document.getElementById("shopSerChart"));
+    var option = {
+        title: {
+            text: serType
+        },
+        tooltip: {
+            trigger: "axis"
+        },
+        xAxis: {
+            data: shopTime,
+            axisLine: {
+                onZero: false
+            }
+        },
+        yAxis: {
+            name: "维修次数",
+            type: "value"
+        },
+        legend: {
+            data: legend
+        },
+        color: ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+        series: rData,
+        dataZoom: [{
+            type: "slider",
+            start: 0,
+            end: 100
+        },
+        {
+            type: "inside",
+            start: 0,
+            end: 100
+        }],
+        toolbox: {
+            top: 20,
+            left: "center",
+            feature: {
+                dataZoom: {
+                    yAxisIndex: "none"
+                },
+                restore: {},
+                magicType: {
+                    type: ['line', 'bar']
+                }
+            }
+        }
+    };
+    myChart.setOption(option, true);
+    $("#shopFaultServiceTypeChart").resize(function () {
+        myChart.resize();
+    });
+}
+
+//function appearDataList(appearData) {
+//    var num;
+//    var order = function (data, type, row) {
+//        return ++num;
+//    }
+//    var i, len = appearData.length;
+//    var name = $("#faultAppearType").val();
+//    for (i = 0; i < len; i++) {
+//        if (appearData[i].FaultName == name) {
+//            num = 0;
+//            $("#faultAppear1").DataTable({
+//                "destroy": true,
+//                "paging": true,
+//                "deferRender": false,
+//                "bLengthChange": false,
+//                "searching": false,
+//                "language": { "url": "/content/datatables_language.json" },
+//                "data": appearData[i].DeviceFaultTypes,
+//                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+//                "iDisplayLength": 5, //默认显示的记录数  
+//                "columns": [
+//                    { "data": null, "title": "序号", "render": order },
+//                    { "data": "Code", "title": "机台号" },
+//                    { "data": "Count", "title": "故障次数" }
+//                ]
+//            });
+//            num = 0;
+//            $("#faultAppear2").DataTable({
+//                "destroy": true,
+//                "paging": true,
+//                "deferRender": false,
+//                "bLengthChange": false,
+//                "searching": false,
+//                "language": { "url": "/content/datatables_language.json" },
+//                "data": appearData[i].Operators,
+//                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+//                "iDisplayLength": 5, //默认显示的记录数  
+//                "columns": [
+//                    { "data": null, "title": "序号", "render": order },
+//                    { "data": "Name", "title": "上报人" },
+//                    { "data": "Count", "title": "上报次数" }
+//                ]
+//            });
+//        }
+//    }
+//}
+
+//function serviceDataList(serviceData) {
+//    var num;
+//    var order = function (data, type, row) {
+//        return ++num;
+//    }
+//    var i, len = serviceData.length;
+//    var name = $("#faultServiceType").val();
+//    for (i = 0; i < len; i++) {
+//        if (serviceData[i].FaultName == name) {
+//            num = 0;
+//            $("#faultService1").DataTable({
+//                "destroy": true,
+//                "paging": true,
+//                "deferRender": false,
+//                "bLengthChange": false,
+//                "searching": false,
+//                "language": { "url": "/content/datatables_language.json" },
+//                "data": serviceData[i].DeviceFaultTypes,
+//                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+//                "iDisplayLength": 5, //默认显示的记录数  
+//                "columns": [
+//                    { "data": null, "title": "序号", "render": order },
+//                    { "data": "Code", "title": "机台号" },
+//                    { "data": "Count", "title": "故障次数" }
+//                ]
+//            });
+//            num = 0;
+//            var serviceTime = function (data, type, row) {
+//                return codeTime(data.Time);
+//            }
+//            $("#faultService2").DataTable({
+//                "destroy": true,
+//                "paging": true,
+//                "deferRender": false,
+//                "bLengthChange": false,
+//                "searching": false,
+//                "language": { "url": "/content/datatables_language.json" },
+//                "data": serviceData[i].Operators,
+//                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+//                "iDisplayLength": 5, //默认显示的记录数  
+//                "columns": [
+//                    { "data": null, "title": "序号", "render": order },
+//                    { "data": "Name", "title": "维修人" },
+//                    { "data": "Count", "title": "维修次数" },
+//                    { "data": null, "title": "维修时间", "render": serviceTime }
+//                ]
+//            });
+//        }
+//    }
+//}
