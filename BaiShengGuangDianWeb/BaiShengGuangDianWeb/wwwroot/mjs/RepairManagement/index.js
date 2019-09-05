@@ -415,7 +415,9 @@ function singleChange(type) {
                 //故障类型表Id
                 FaultTypeId: singleFaultType,
                 //故障类型表Id
-                FaultTypeId1: singleFaultType1
+                FaultTypeId1: singleFaultType1,
+                //故障记录Id
+                FaultLogId: id
             });
         ajaxPost("/Relay/Post",
             data,
@@ -618,6 +620,7 @@ function rChange(id, type) {
                 $("#singleFaultModel").modal("show");
             });
     } else {
+        $("#singleUpdateId").html(0);
         opType = 100;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
@@ -751,7 +754,9 @@ function recordChange(type) {
         //故障类型表Id
         FaultTypeId: singleFaultType,
         //故障类型Id
-        FaultTypeId1: singleFaultType1
+        FaultTypeId1: singleFaultType1,
+        //故障记录Id
+        FaultLogId: id
     }
     if (type == 0)
         record.id = id;
@@ -764,7 +769,6 @@ function recordChange(type) {
                 getRepairRecordList();
             }
         });
-
 }
 
 function getUsuallyFaultList() {

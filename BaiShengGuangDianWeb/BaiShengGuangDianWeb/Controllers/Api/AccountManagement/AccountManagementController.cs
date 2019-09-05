@@ -430,7 +430,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             //EmailAddress
             var email = param.GetValue("email");
-            if (!email.IsNullOrEmpty() && accountInfo.EmailAddress != email)
+            if (accountInfo.EmailAddress != email)
             {
                 logParam = $",邮箱:{accountInfo.EmailAddress},新邮箱:{email}";
                 accountInfo.EmailAddress = email;
