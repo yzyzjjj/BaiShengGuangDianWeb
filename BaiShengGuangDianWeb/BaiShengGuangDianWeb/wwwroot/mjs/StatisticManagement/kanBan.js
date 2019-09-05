@@ -104,8 +104,6 @@ function getBoardData() {
             $("#codeRateChart").empty();
             $("#codeRateChart").append('<div style="width: 100%; height: 488px" id="codeRate"></div>');
             var myChart1 = echarts.init(document.getElementById("codeRate"));
-            var res1 = -1;
-            var res2 = -1;
             var option1 = {
                 title: {
                     text: "单台加工利用率"
@@ -128,12 +126,8 @@ function getBoardData() {
                         onZero: false
                     },
                     data: (function () {
-                        if (code.length - res1 == 20) {
-                            res1 = 0;
-                        }
-                        res1++;
                         var res = [];
-                        for (var j = res1; j < code.length; j++) {
+                        for (var j = 0; j < code.length; j++) {
                             if (res.length != 20) {
                                 res.push(code[j]);
                             } else {
@@ -175,12 +169,8 @@ function getBoardData() {
                         }
                     },
                     data: (function () {
-                        if (codeRate.length - res2 == 20) {
-                            res2 = 0;
-                        }
-                        res2++;
                         var res = [];
-                        for (var j = res2; j < codeRate.length; j++) {
+                        for (var j = 0; j < codeRate.length; j++) {
                             if (res.length != 20) {
                                 res.push(codeRate[j]);
                             } else {
@@ -194,20 +184,6 @@ function getBoardData() {
                     type: "inside",
                     start: 0,
                     end: 100
-                },
-                toolbox: {
-                    top: 18,
-                    left: "center",
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: "none"
-                        },
-                        dataView: { readOnly: false }, //数据视图
-                        restore: {},
-                        magicType: {
-                            type: ['line', 'bar']
-                        }
-                    }
                 }
             };
             myChart1.setOption(option1, true);

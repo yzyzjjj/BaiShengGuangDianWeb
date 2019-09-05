@@ -710,7 +710,10 @@ function recordChange(type) {
     var faultDate = $("#singleFaultDate").val();
     var faultTime = $("#singleFaultTime").val();
     var time = "{0} {1}".format(faultDate, faultTime);
-
+    if (exceedTime(time)) {
+        layer.msg("故障时间不能大于当前时间");
+        return;
+    }
     var faultDesc = $("#singleFaultDesc").val();
     var priority = $("#singleFaultPriority").val();
 
@@ -720,6 +723,10 @@ function recordChange(type) {
     var singleSolveDate = $("#singleSolveDate").val();
     var singleSolveTime = $("#singleSolveTime").val();
     var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
+    if (exceedTime(solveTime)) {
+        layer.msg("解决时间不能大于当前时间");
+        return;
+    }
     var singleFaultType1 = $("#singleFaultType1").val();
     var singleFaultType = $("#singleFaultType").val();
 

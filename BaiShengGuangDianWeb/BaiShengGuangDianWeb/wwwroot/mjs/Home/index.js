@@ -605,8 +605,12 @@ function reportFault() {
     if (!report)
         return;
 
-    $("#faultModel").modal("hide");
     var time = "{0} {1}".format(faultDate, faultTime);
+    if (exceedTime(time)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
+    $("#faultModel").modal("hide");
     var faults = new Array();
     var admins = new Array();
     for (var i = 0; i < codes.length; i++) {

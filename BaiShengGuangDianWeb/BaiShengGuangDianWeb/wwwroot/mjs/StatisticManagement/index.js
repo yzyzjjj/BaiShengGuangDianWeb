@@ -4,7 +4,10 @@
         allowClear: true,
         placeholder: "请选择"
     });
-
+    $("#selectDevice1").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
     $("#selectDevice").on("select2:select", function (e) {
         var v = $("#selectDevice").val();
         if (v.indexOf("0,所有") > -1) {
@@ -53,7 +56,7 @@ function getDeviceList(par) {
                 }
             } else {
                 $("#selectDevice1").empty();
-                option = '<option value="{0},{1}">{1}</option>';
+                option = '<option value="{0}">{1}</option>';
                 for (i = 0; i < len; i++) {
                     d = ret.datas[i];
                     $("#selectDevice1").append(option.format(d.Id, d.Code));
@@ -196,7 +199,10 @@ function createChart(start1, end1) {
     if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")).length == 1 && isStrEmptyOrUndefined(end1)) {
         end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
     }
-
+    if (exceedTime(start) || exceedTime(end)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     if (compareDate(start, end)) {
         layer.msg("结束时间不能小于开始时间");
         return;
@@ -495,10 +501,14 @@ function getProcessDetail() {
         return;
     }
     var dayDate = $("#selectDayDate").val();
+    if (exceedTime(dayDate)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        DeviceId: deviceId,
+        DeviceId: deviceId.join(","),
         StartTime: dayDate
     });
     ajaxPost("/Relay/Post", data,
@@ -507,26 +517,6 @@ function getProcessDetail() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var o = 0;
-            var order = function(data, type, row) {
-                return ++o;
-            }
-            $("#processDetailList")
-                .DataTable({
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.ProcessLog,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "StartTime", "title": "开始时间" },
-                        { "data": "EndTime", "title": "结束时间" },
-                        { "data": "FlowCardName", "title": "加工流程卡" },
-                        { "data": "ProcessorName", "title": "加工人" }
-                    ]
-                });
+
         });
 }
