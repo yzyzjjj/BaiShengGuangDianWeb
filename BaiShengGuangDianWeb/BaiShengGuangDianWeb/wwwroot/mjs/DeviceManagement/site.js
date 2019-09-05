@@ -17,7 +17,7 @@ var op = function (data, type, row) {
         '    </ul>' +
         '</div>';
     var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.SiteName), escape(data.RegionDescription), escape(data.Manager));
-    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.SiteName));
+    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.SiteName + " " + data.RegionDescription));
     html = html.format(
         checkPermission(127) ? updateLi : "",
         checkPermission(129) ? deleteLi : "");
