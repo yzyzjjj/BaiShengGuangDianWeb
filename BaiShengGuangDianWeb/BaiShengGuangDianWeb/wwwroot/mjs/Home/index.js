@@ -324,10 +324,10 @@ function queryFlowCard() {
                 return a.ProcessStepOrder > b.ProcessStepOrder ? 1 : -1;
             });
             if (processSteps.length > 0) {
-                var tr = '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>';
+                var tr = '<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{5}</td><td>{3}</td><td>{4}</td></tr>';
                 for (var j = 0; j < processSteps.length; j++) {
                     var ps = processSteps[j];
-                    $("#processSteps").append(tr.format(ps.ProcessStepOrderName, ps.StepName, ps.ProcessStepRequirements, ps.QualifiedRange, ps.QualifiedMode == 0 ? "" : ps.QualifiedMode));
+                    $("#processSteps").append(tr.format(ps.ProcessStepOrderName, ps.StepName, ps.ProcessStepRequirements, ps.QualifiedRange, ps.QualifiedMode == 0 ? "" : ps.QualifiedMode, ps.ProcessStepRequirementMid));
                 }
                 if (processSteps.length == 2) {
                     LastLand = processSteps[0].QualifiedMode != 0
