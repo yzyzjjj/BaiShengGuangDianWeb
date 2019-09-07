@@ -62,6 +62,8 @@
     });
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
+    } else {
+        $("#upload").addClass("hidden");
     }
     $(".fcHead input,.fcHead span").css("verticalAlign", "middle");
     $(".jhHead input,.jhHead span").css("verticalAlign", "middle");

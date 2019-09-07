@@ -90,6 +90,8 @@
     });
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
+    } else {
+        $("#upload").addClass("hidden");
     }
 }
 

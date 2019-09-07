@@ -61,6 +61,9 @@
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
         $("#scanning1").addClass("hidden");
+    } else {
+        $("#upload").addClass("hidden");
+        $("#upload1").addClass("hidden");
     }
     $("#inputReportModel").on("hidden.bs.modal",
         function () {

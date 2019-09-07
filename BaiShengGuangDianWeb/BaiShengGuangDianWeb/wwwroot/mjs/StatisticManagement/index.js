@@ -500,6 +500,11 @@ function getProcessDetail() {
         layer.msg("请选择车间设备");
         return;
     }
+    var j, lens = deviceId.length, deviceName = [];
+    for (j = 0; j < lens; j++) {
+        var num = deviceId[j];
+        deviceName.push($("#selectDevice1").find("option[value=" + num + "]").text());
+    }
     var dayDate = $("#selectDayDate").val();
     if (exceedTime(dayDate)) {
         layer.msg("所选时间不能大于当前时间");
@@ -512,11 +517,74 @@ function getProcessDetail() {
         StartTime: dayDate
     });
     ajaxPost("/Relay/Post", data,
-        function(ret) {
+        function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var panel = '<div class="col-md-6">' +
+                '<div class="panel panel-primary">' +
+                '<div class="panel-heading">' +
+                '<h3 class="panel-title" id="code{0}">' +
+                '<span class="badge" id="num{0}" style="margin-left:5px;color:green;font-size:18px">' +
+                '</span>' +
+                '</h3>' +
+                '</div>' +
+                '<div class="table-responsive mailbox-messages" style="padding:10px">' +
+                '<table class="table table-hover table-striped" id="processList{0}">' +
+                '</table>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            var i, len = ret.datas.length;
+            $("#processDetailData").empty();
+            var o;
+            var order = function (data, type, row) {
+                return ++o;
+            }
+            var code = [];
+            for (i = 0; i < len; i++) {
+                var processData = ret.datas[i];
+                if (processData.ProcessLog.length != 0) {
+                    var option = $(panel.format(i)).clone();
+                    $("#processDetailData").append(option);
+                    var codeName = processData.ProcessLog[0].Code;
+                    code.push(codeName);
+                    $("#code" + i).prepend(codeName);
+                    $("#num" + i).text("每日加工次数：" + processData.ProcessCount + "次");
+                    o = 0;
+                    $("#processList" + i).DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "deferRender": false,
+                        "bLengthChange": false,
+                        "searching": false,
+                        "language": { "url": "/content/datatables_language.json" },
+                        "data": processData.ProcessLog,
+                        "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+                        "iDisplayLength": 5, //默认显示的记录数  
+                        "columns": [
+                            { "data": null, "title": "序号", "render": order },
+                            { "data": "StartTime", "title": "开始时间" },
+                            { "data": "EndTime", "title": "结束时间" },
+                            { "data": "FlowCardName", "title": "流程卡号" },
+                            { "data": "ProcessorName", "title": "加工人" }
+                        ]
+                    });
+                }
+            }
+            var noProcess = deviceName.filter(function (item) {
+                return code.indexOf(item) === -1;
+            });
+            $("#noProcessDetailData").empty();
+            if (noProcess.length > 0) {
+                $("#noProcessDetailData").removeClass("hidden");
+                $("#noProcessDetailData").append('<label class="control-label">无加工详情设备：</label>');
+                $.each(noProcess, function (index, item) {
+                    $("#noProcessDetailData").append('<span style="margin-left:5px">' + item + '</span>');
+                });
+            } else {
+                $("#noProcessDetailData").addClass("hidden");
+            }
         });
 }
