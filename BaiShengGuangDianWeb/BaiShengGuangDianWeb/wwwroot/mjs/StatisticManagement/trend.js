@@ -183,6 +183,10 @@ function createChart(type) {
             end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
         }
         var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
+        if (exceedTime(start) || exceedTime(end)) {
+            layer.msg("所选时间不能大于当前时间");
+            return;
+        }
         if (compareDate(start, end)) {
             layer.msg("结束时间不能小于开始时间");
             return;

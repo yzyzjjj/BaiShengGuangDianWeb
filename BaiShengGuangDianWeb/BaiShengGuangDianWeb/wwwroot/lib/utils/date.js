@@ -93,8 +93,46 @@ function compareDate(date1, date2) {
     var oDate1 = new Date(date1);
     var oDate2 = new Date(date2);
     return oDate1.getTime() > oDate2.getTime();
-}   
-
+}
+//获得当前第几周
 function getWeek() {
     return getNowYear() + "第" + $.datepicker.iso8601Week(new Date()) + "周";
+}
+
+//秒换算成时间
+function codeTime(second) {
+    if (second < 60) {
+        return second + "秒";
+    }
+    if (second < 3600) {
+        return (second - (second % 60)) / 60 + "分钟" + (second % 60) + "秒";
+    }
+    if (second < 86400) {
+        return (second - (second % 3600)) / 3600 +
+            "小时" +
+            ((second - (second % 60)) / 60) % 60 +
+            "分钟" +
+            (second % 60) +
+            "秒";
+    } else {
+        return (second - (second % 86400)) / 86400 +
+            "天" +
+            ((second - (second % 3600)) / 3600) % 24 +
+            "小时" +
+            ((second - (second % 60)) / 60) % 60 +
+            "分钟" +
+            (second % 60) +
+            "秒";
+    }
+}
+
+//选择时间是否超过当前时间
+function exceedTime(date) {
+    if (date.indexOf(" ") > -1) {
+        return new Date(date).getTime() > new Date(getFullTime()).getTime();
+    } else if (date.indexOf("-") > -1) {
+        return new Date(date).getTime() > new Date(getDate()).getTime();
+    } else {
+        return new Date(getDate() + " " + date).getTime() > new Date(getFullTime()).getTime();
+    }
 }

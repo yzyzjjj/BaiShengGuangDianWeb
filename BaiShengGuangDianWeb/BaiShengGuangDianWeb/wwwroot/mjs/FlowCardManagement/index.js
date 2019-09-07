@@ -342,6 +342,10 @@ function getFlowCardList() {
         }
         var startTime = $("#flowCardStartDate").val();
         var endTime = $("#flowCardEndDate").val();
+        if (exceedTime(startTime) || exceedTime(endTime)) {
+            layer.msg("所选时间不能大于当前时间");
+            return;
+        }
         if (compareDate(startTime, endTime)) {
             layer.msg("结束时间不能小于开始时间");
             return;
@@ -1288,6 +1292,10 @@ function getProductionProcessList() {
         }
         var startTime = $("#jhStartDate").val();
         var endTime = $("#jhEndDate").val();
+        if (exceedTime(startTime) || exceedTime(endTime)) {
+            layer.msg("所选时间不能大于当前时间");
+            return;
+        }
         if (compareDate(startTime, endTime)) {
             layer.msg("结束时间不能小于开始时间");
             return;
@@ -1881,6 +1889,10 @@ function getRawMateriaList() {
         }
         var startTime = $("#ylStartDate").val();
         var endTime = $("#ylEndDate").val();
+        if (exceedTime(startTime) || exceedTime(endTime)) {
+            layer.msg("所选时间不能大于当前时间");
+            return;
+        }
         if (compareDate(startTime, endTime)) {
             layer.msg("结束时间不能小于开始时间");
             return;

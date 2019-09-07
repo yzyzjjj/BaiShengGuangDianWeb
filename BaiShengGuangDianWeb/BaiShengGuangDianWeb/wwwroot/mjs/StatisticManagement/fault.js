@@ -16,6 +16,30 @@
     $("#selectDay,#conDay").val(getDate()).datepicker('update');
     $("#startDate1,#endDate1").val(getDate()).datepicker('update');
     $("#startDateDev,#endDateDev").val(getDate()).datepicker('update');
+    $("#startDayTime,#endDayTime").val(getDate()).datepicker('update');
+    var hourTime = new Date().format("hh-00-00");
+    $("#startTime").val(hourTime).timepicker('setTime', hourTime);
+    $("#endTime").val(hourTime).timepicker('setTime', hourTime);
+    $("#startTime").one("focus", function () {
+        var timeTop = $(".bootstrap-timepicker-widget")[0];
+        var time = $(timeTop).find("table tbody tr");
+        $(time[0]).find("td")[2].remove();
+        $(time[0]).find("td")[3].remove();
+        $(time[1]).find("td input")[1].setAttribute("disabled", "disabled");
+        $(time[1]).find("td input")[2].setAttribute("disabled", "disabled");
+        $(time[2]).find("td")[2].remove();
+        $(time[2]).find("td")[3].remove();
+    });
+    $("#endTime").one("focus", function () {
+        var timeTop = $(".bootstrap-timepicker-widget")[0];
+        var time = $(timeTop).find("table tbody tr");
+        $(time[0]).find("td")[2].remove();
+        $(time[0]).find("td")[3].remove();
+        $(time[1]).find("td input")[1].setAttribute("disabled", "disabled");
+        $(time[1]).find("td input")[2].setAttribute("disabled", "disabled");
+        $(time[2]).find("td")[2].remove();
+        $(time[2]).find("td")[3].remove();
+    });
     $(".month-picker").val(getNowMonth()).datepicker({
         format: "yyyy-mm",
         language: "zh-CN",
@@ -109,12 +133,12 @@ function getWorkShopList() {
         ret.datas.sort(function (x, y) {
             return x.SiteName > y.SiteName ? 1 : -1;
         });
-        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev").empty();
+        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev,#selectWorkShopTime").empty();
         var option = '<option value = "{0}">{1}</option>';
-        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShopDev").append(option.format("所有车间", "所有车间"));
+        $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShopDev,#selectWorkShopTime").append(option.format("所有车间", "所有车间"));
         for (var i = 0; i < ret.datas.length; i++) {
             var d = ret.datas[i];
-            $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev").append(option.format(d.SiteName, d.SiteName));
+            $("#selectWorkShop,#selectWorkShopDay,#selectWorkShopWeek,#selectWorkShopMonth,#selectWorkShop1,#selectWorkShopDev,#selectWorkShopTime").append(option.format(d.SiteName, d.SiteName));
         }
     });
 }
@@ -236,6 +260,10 @@ function getFaultChart() {
     var compare = 0;
     var startTime = $("#startDate").val();
     var endTime = $("#endDate").val();
+    if (exceedTime(startTime) || exceedTime(endTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     if (compareDate(startTime, endTime)) {
         layer.msg("结束时间不能小于开始时间");
         return;
@@ -333,6 +361,7 @@ function getFaultChart() {
                             }
                         },
                         yAxis: {
+                            name: "故障次数",
                             type: "value"
                         },
                         legend: {
@@ -778,6 +807,10 @@ function dayChart() {
     }
     var oneTime = $("#selectDay").val();
     var twoTime = $("#conDay").val();
+    if (exceedTime(oneTime) || exceedTime(twoTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -1051,6 +1084,10 @@ function weekChart() {
     }
     var oneTime = weekTimeOne;
     var twoTime = weekTimeTwo;
+    if (exceedTime(oneTime) || exceedTime(twoTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -1324,6 +1361,10 @@ function monthChart() {
     }
     var oneTime = $("#selectMonth").val();
     var twoTime = $("#conMonth").val();
+    if (exceedTime(oneTime) || exceedTime(twoTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -1606,6 +1647,10 @@ function shopChart() {
     }
     var startTime = $("#startDate1").val();
     var endTime = $("#endDate1").val();
+    if (exceedTime(startTime) || exceedTime(endTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     if (compareDate(startTime, endTime)) {
         layer.msg("结束时间不能小于开始时间");
         return;
@@ -2049,6 +2094,10 @@ function devChart() {
     }
     var startTime = $("#startDateDev").val();
     var endTime = $("#endDateDev").val();
+    if (exceedTime(startTime) || exceedTime(endTime)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
     if (compareDate(startTime, endTime)) {
         layer.msg("结束时间不能小于开始时间");
         return;
@@ -2338,6 +2387,231 @@ function devAppChart() {
     $("#devFaultAppearTypeChart").resize(function () {
         myChart.resize();
     });
+}
+
+var hourData,hourTime;
+function getFaultTimeChart() {
+    var opType = 505;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var workShop = $("#selectWorkShopTime").val();
+    if (workShop == "所有车间") {
+        workShop = "";
+    }
+    var startDay = $("#startDayTime").val();
+    var endDay = $("#endDayTime").val();
+    if (exceedTime(startDay) || exceedTime(endDay)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
+    if (compareDate(startDay, endDay)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+    var startTime = $("#startTime").val();
+    var endTime = $("#endTime").val();
+    if (exceedTime(startDay + " " + startTime) || exceedTime(endDay + " " + endTime)) {
+        layer.msg("所选时间区间大于当前时间");
+        return;
+    }
+    var startHour = startTime.slice(0, startTime.indexOf(":"));
+    var endHour = endTime.slice(0, endTime.indexOf(":"));
+    if (parseInt(startHour) > parseInt(endHour)) {
+        layer.msg("结束区间不能小于开始区间");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        WorkshopName: workShop,
+        StartTime: startDay,
+        EndTime: endDay,
+        StartHour: startHour,
+        EndHour: endHour,
+        Compare: 6
+    });
+    ajaxPost("/Relay/Post",
+        data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            hourData = ret.datas;
+            var i, len = ret.datas.length;
+            var xData = [], yData = [];
+            for (i = 0; i < len - 1; i++) {
+                var time = ret.datas[i].Date.split(" ")[1];
+                xData.push(time);
+                var faultCount = ret.datas[i].ReportCount;
+                yData.push(faultCount);
+            }
+            hourTime = xData;
+            var yDataCount = [];
+            yDataCount.push({
+                name: "上报故障次数",
+                type: "line",
+                data: yData
+            });
+            $("#faultTimeChart").empty();
+            var charts = '<div id="timeChart" style="width: 100%; height: 500px">' + '</div>';
+            $("#faultTimeChart").append(charts);
+            var myChart = echarts.init(document.getElementById("timeChart"));
+            var option = {
+                title: {
+                    text: "上报故障次数"
+                },
+                tooltip: {
+                    trigger: "axis"
+                },
+                xAxis: {
+                    data: xData,
+                    axisLine: {
+                        onZero: false
+                    }
+                },
+                yAxis: {
+                    name: "故障次数",
+                    type: "value"
+                },
+                legend: {
+                    data: ["上报故障次数"]
+                },
+                color: ["red"],
+                series: yDataCount,
+                dataZoom: [{
+                    type: "slider",
+                    start: 0,
+                    end: 100
+                }, {
+                    type: "inside",
+                    start: 0,
+                    end: 100
+                }],
+                toolbox: {
+                    top: 20,
+                    left: "center",
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: "none"
+                        },
+                        restore: {},
+                        magicType: {
+                            type:["line","bar"]
+                        }
+                    }
+                }
+            };
+            myChart.setOption(option, true);
+            $("#faultTimeChart").resize(function () {
+                myChart.resize();
+            });
+            $("#timeRight").css("display", "none");
+            $("#timeRight").fadeIn(1000);
+            timeAppChart();
+        });
+}
+
+function timeAppChart() {
+    var data = hourData;
+    var i, len = data.length - 1;
+    var app = [];
+    for (i = 0; i < len; i++) {
+        var report = data[i].ReportSingleFaultType;
+        if (report.length != 0) {
+            $.each(report, function (index, item) {
+                app.push(item.FaultName);
+            });
+        }
+    }
+    if (app.length == 0) {
+        $("#timeApp").addClass("hidden").siblings().removeClass("hidden");
+    } else {
+        $("#timeApp").removeClass("hidden").siblings().addClass("hidden");
+        app = app.filter(function (item, index) {
+            return app.indexOf(item) == index;
+        });
+        var rData = [];
+        var tf = true;
+        $.each(app, function (index, item) {
+            var appCount = [];
+            for (i = 0; i < len; i++) {
+                var appList = data[i].ReportSingleFaultType;
+                if (appList.length != 0) {
+                    $.each(appList, function (x, e) {
+                        if (item == e.FaultName) {
+                            appCount.push(e.Count);
+                            tf = false;
+                        }
+                    });
+                    if (tf) {
+                        appCount.push(0);
+                    }
+                    tf = true;
+                } else {
+                    appCount.push(0);
+                }
+            }
+            rData.push({
+                name: item,
+                type: "line",
+                data: appCount
+            });
+        });
+        $("#timeFaultAppearTypeChart").empty();
+        var charts = '<div id="timeAppChart" style="width: 100%; height: 500px"></div>';
+        $("#timeFaultAppearTypeChart").append(charts);
+        var myChart = echarts.init(document.getElementById("timeAppChart"));
+        var option = {
+            tooltip: {
+                trigger: "axis"
+            },
+            xAxis: {
+                data: hourTime,
+                axisLine: {
+                    onZero: false
+                }
+            },
+            yAxis: {
+                name: "故障次数",
+                type: "value"
+            },
+            legend: {
+                data: app
+            },
+            color: ["green", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+            series: rData,
+            dataZoom: [{
+                type: "slider",
+                start: 0,
+                end: 100
+            },
+            {
+                type: "inside",
+                start: 0,
+                end: 100
+            }],
+            toolbox: {
+                top: 20,
+                left: "center",
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: "none"
+                    },
+                    restore: {},
+                    magicType: {
+                        type: ['line', 'bar']
+                    }
+                }
+            }
+        };
+        myChart.setOption(option, true);
+        $("#timeFaultAppearTypeChart").resize(function () {
+            myChart.resize();
+        });
+    }
 }
 //function appearDataList(appearData) {
 //    var num;
