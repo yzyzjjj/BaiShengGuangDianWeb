@@ -1007,3 +1007,25 @@ function pcAndroid() {
         return false;
     }
 }
+
+//数组对象排序
+function objectSort(array,par) {
+    var i, j, tmp, len = array.length;
+    for (i = 0; i < len - 1; i++) {
+        //假设排序ok
+        var isSort = true;
+        for (j = 0; j < len - 1 - i; j++) {
+            if (array[j][par] > array[j + 1][par]) {
+                //没有排序好
+                isSort = false;
+                tmp = array[j];
+                array[j] = array[j + 1];
+                array[j + 1] = tmp;
+            }
+        }
+        if (isSort) {
+            //如果排序好了
+            break;
+        }
+    }
+}

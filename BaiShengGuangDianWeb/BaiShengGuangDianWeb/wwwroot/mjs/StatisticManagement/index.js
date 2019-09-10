@@ -8,6 +8,10 @@
         allowClear: true,
         placeholder: "请选择"
     });
+    $(".icb_minimal").iCheck({
+        checkboxClass: 'icheckbox_minimal-blue',
+        increaseArea: '20%'
+    });
     $("#selectDevice").on("select2:select", function (e) {
         var v = $("#selectDevice").val();
         if (v.indexOf("0,所有") > -1) {
@@ -24,9 +28,38 @@
         $("#recordChart").empty();
         getWorkShopDeviceList();
     });
+    var tf = true;
     $("#selectWorkShop1").on("select2:select", function (e) {
         $("#processDetailList").empty();
         getWorkShopDevList();
+        $("#checkAll").iCheck("uncheck");
+    });
+    $("#checkAll").on("ifChanged", function () {
+        var i, len = $("#selectDevice1").find("option").length;
+        if ($(this).is(":checked")) {
+            var v = [];
+            for (i = 0; i < len; i++) {
+                var option = $("#selectDevice1").find("option").eq(i).val();
+                v.push(option);
+            }
+            $("#selectDevice1").val(v).trigger("change");
+            tf = true;
+        } else {
+            if (tf) {
+                $("#selectDevice1").val([]).trigger("change");
+            }
+        }
+    });
+    $("#selectDevice1").on("select2:unselect", function () {
+        tf = false;
+        $("#checkAll").iCheck("uncheck");
+    });
+    $("#selectDevice1").on("select2:select", function () {
+        var op = $("#selectDevice1").find("option").length;
+        var v = $("#selectDevice1").val().length;
+        if (op == v) {
+            $("#checkAll").iCheck("check");
+        }
     });
 }
 
@@ -145,7 +178,7 @@ function getWorkShopDevList() {
             return;
         }
         $("#selectDevice1").empty();
-        var option = '<option value = "{0},{1}">{1}</option>';
+        var option = '<option value = "{0}">{1}</option>';
         for (var i = 0; i < ret.datas.length; i++) {
             var data = ret.datas[i];
             $("#selectDevice1").append(option.format(data.Id, data.Code));
@@ -260,13 +293,9 @@ function createChart(start1, end1) {
                     dataCom[keyCom] = [];
                 }
             }
-            ret.datas.sort(function (x, y) {
-                return x.DeviceId < y.DeviceId ? 1 : -1;
-            });
-            ret.datas.sort(function (x, y) {
-                return x.Time > y.Time ? 1 : -1;
-            });
-            var i;
+            objectSort(ret.datas, "DeviceId");
+            objectSort(ret.datas, "Time");
+            var i, j;
             for (i = 0; i < ret.datas.length; i++) {
                 time[i] = ret.datas[i].Time;
                 if (dataTime == 2) {
@@ -276,7 +305,7 @@ function createChart(start1, end1) {
                 var d = ret.datas[i];
                 for (key in listName) {
                     if (listName.hasOwnProperty(key)) {
-                        for (var j = data[key].length % deviceId.length; j < deviceId.length; j++) {
+                        for (j = data[key].length % deviceId.length; j < deviceId.length; j++) {
                             if (deviceId[j] == d.DeviceId) {
                                 data[key].push(d[listName[key]]);
                                 if (i == ret.datas.length - 1 && data[key].length % deviceId.length != 0) {
@@ -579,9 +608,9 @@ function getProcessDetail() {
             $("#noProcessDetailData").empty();
             if (noProcess.length > 0) {
                 $("#noProcessDetailData").removeClass("hidden");
-                $("#noProcessDetailData").append('<label class="control-label">无加工详情设备：</label>');
+                $("#noProcessDetailData").append('<label class="control-label">无加工详情设备:</label>');
                 $.each(noProcess, function (index, item) {
-                    $("#noProcessDetailData").append('<span style="margin-left:5px">' + item + '</span>');
+                    $("#noProcessDetailData").append('<span style="margin-left:5px;color:red;font-weight:bold">' + item + '</span>');
                 });
             } else {
                 $("#noProcessDetailData").addClass("hidden");

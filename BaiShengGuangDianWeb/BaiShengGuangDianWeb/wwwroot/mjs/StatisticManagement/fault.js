@@ -56,6 +56,7 @@
         todayBtn: "linked",
         onSelect: getWeeks
     }).on('hide', getWeeks);
+    var tf = true;
     $(".week").on("focus", function () {
         $(".cw").eq(1).text("周数");
         $(".datepicker .datepicker-days .active").siblings(".cw").css("backgroundColor", "#ffff00");
@@ -63,6 +64,8 @@
     });
     $("#selectWorkShop").on("select2:select", function () {
         getWorkShopDeviceList();
+        $("#par .parCk").removeClass("hidden");
+        tf = true;
     });
     $("#selectWorkShopDev").on("select2:select", function () {
         getWorkShopDevList();
@@ -74,6 +77,20 @@
     $("#par input,#par span").css("verticalAlign", "middle");
     $("#shopPar input,#shopPar span").css("verticalAlign", "middle");
     $("#devPar input,#devPar span").css("verticalAlign", "middle");
+    $("#selectDevice").on("change", function () {
+        var v = $(this).val();
+        if (!isStrEmptyOrUndefined(v)) {
+            $("#par .parCk").addClass("hidden");
+            if (tf) {
+                tf = false;
+                $("#par label").find(".icb_minimal").iCheck('uncheck');
+            }
+        } else {
+            tf = true;
+            $("#par .parCk").removeClass("hidden");
+            $("#par label").find(".icb_minimal").iCheck('uncheck');
+        }
+    });
     $("#dayFaultAppearType").on("select2:select", function () {
         dayAppChart();
     });
@@ -302,9 +319,9 @@ function getFaultChart() {
                     var timeData;
                     var parData;
                     var listName = [];
-                    var legend = [];
+                    var legend;
                     listName[$(span).text()] = $(ick).val();
-                    legend.push($(span).text());
+                    legend = $(span).text();
 
                     for (key in listName) {
                         if (listName.hasOwnProperty(key)) {
@@ -321,6 +338,7 @@ function getFaultChart() {
                             }
                         }
                     }
+                    var num = 0;
                     for (key in listName) {
                         if (listName.hasOwnProperty(key)) {
                             rData.push({
@@ -328,6 +346,12 @@ function getFaultChart() {
                                 type: "line",
                                 data: data[key]
                             });
+                            if (key == "上报故障总次数") {
+                                $.each(data[key], function(index, item) {
+                                    return num += item;
+                                });
+                                legend = legend + "(总:" + num + "次)";
+                            }
                         }
                     }
                     var charts = '<div id="chart' + i + '" style="width: 100%; height: 500px"></div>';
@@ -335,7 +359,7 @@ function getFaultChart() {
                     var myChart = echarts.init(document.getElementById("chart" + i));
                     var option = {
                         title: {
-                            text: legend[0]
+                            text: legend
                         },
                         tooltip: {
                             trigger: "axis",
@@ -361,11 +385,10 @@ function getFaultChart() {
                             }
                         },
                         yAxis: {
-                            name: "故障次数",
                             type: "value"
                         },
                         legend: {
-                            data: legend
+                            data: [legend]
                         },
                         color: ["green"],
                         series: rData,
@@ -1688,12 +1711,14 @@ function shopChart() {
                         data[key] = [];
                     }
                 }
-                ret.datas.sort(function (x, y) {
-                    return x.Workshop < y.Workshop ? 1 : -1;
-                });
-                ret.datas.sort(function (x, y) {
-                    return x.Date > y.Date ? 1 : -1;
-                });
+                //ret.datas.sort(function (x, y) {
+                //    return x.Workshop < y.Workshop ? 1 : -1;
+                //});
+                //ret.datas.sort(function (x, y) {
+                //    return x.Date > y.Date ? 1 : -1;
+                //});
+                objectSort(ret.datas, "Workshop");
+                objectSort(ret.datas, "Date");
                 var time = [];
                 for (j = 0; j < ret.datas.length; j++) {
                     var timeData = ret.datas[j].Date.split(" ")[0];
@@ -2448,6 +2473,8 @@ function getFaultTimeChart() {
                 var faultCount = ret.datas[i].ReportCount;
                 yData.push(faultCount);
             }
+            var num = "(总:" + ret.datas[len - 1].ReportCount + "次)";
+            console.log(num);
             hourTime = xData;
             var yDataCount = [];
             yDataCount.push({
@@ -2461,7 +2488,7 @@ function getFaultTimeChart() {
             var myChart = echarts.init(document.getElementById("timeChart"));
             var option = {
                 title: {
-                    text: "上报故障次数"
+                    text: "上报故障次数" + num
                 },
                 tooltip: {
                     trigger: "axis"

@@ -301,6 +301,7 @@ function showAddUserModal(type = 0) {
 }
 
 var emailTypeData = [];
+var tf = true;
 function emailType() {
     ajaxGet("/AccountManagement/EmailType", null,
         function (ret) {
@@ -309,6 +310,10 @@ function emailType() {
                 return;
             }
             $("#addEmailType").empty();
+            if (tf) {
+                tf = false;
+                $("#addEmailType").before('<label class="control-label">邮件类型：</label>');
+            }
             var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -411,6 +416,7 @@ function addUser() {
 
 var updateList = new Array();
 var permission = null;
+var tf1 = true;
 function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole, emailType) {
     account = unescape(account);
     name = unescape(name);
@@ -443,6 +449,10 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                 return;
             }
             $("#upEmailType").empty();
+            if (tf1) {
+                tf1 = false;
+                $("#upEmailType").before('<label class="control-label">邮件类型：</label>');
+            }
             var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];

@@ -326,7 +326,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="control-label" for="addVariableName"><span class="text-red">* </span>变量名称：</label>
-                        <input class="form-control" id="addVariableName" onfocusin="focusIn($(this))" maxlength="20">
+                        <input class="form-control" autocomplete="off" id="addVariableName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="label-danger hidden" id="addVariableNameTip"></label>
                     </div>
                     <div class="form-group">
@@ -335,7 +335,7 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="addVariableSite"><span class="text-red">* </span>变量地址：</label>
-                        <input class="form-control" id="addVariableSite" onfocusin="focusIn($(this))" onkeyup='value=value.replace(/[^0-9\-]+/g,"")' maxlength="20">
+                        <input class="form-control" id="addVariableSite" autocomplete="off" onfocusin="focusIn($(this))" oninput='value=value.replace(/[^0-9]+/g,"")' maxlength="20">
                         <label class="label-danger hidden" id="addVariableSiteTip"></label>
                     </div>
                 </div>
