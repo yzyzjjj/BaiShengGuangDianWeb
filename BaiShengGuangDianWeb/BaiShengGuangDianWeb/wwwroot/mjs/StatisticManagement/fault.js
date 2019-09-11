@@ -2474,7 +2474,6 @@ function getFaultTimeChart() {
                 yData.push(faultCount);
             }
             var num = "(总:" + ret.datas[len - 1].ReportCount + "次)";
-            console.log(num);
             hourTime = xData;
             var yDataCount = [];
             yDataCount.push({

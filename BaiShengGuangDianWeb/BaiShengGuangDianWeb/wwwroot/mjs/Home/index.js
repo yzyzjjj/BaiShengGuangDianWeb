@@ -30,7 +30,11 @@
         if (isStrEmptyOrUndefined(difference)) {
             $("#isDifference").iCheck("uncheck");
         };
+        ui.is(":checked") ? $("#refresh").removeClass("hidden") : $("#refresh").addClass("hidden");
         showProcessData(ui.is(":checked"));
+    });
+    $("#refresh").on("click", function () {
+        $("#pData").find("input").val(0);
     });
     $("#flowCardEmpty").click(function () {
         $("#flowCard").val("");
@@ -277,10 +281,11 @@ function queryFlowCard() {
                     '</div>' +
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度：</label>' +
-                    '<input class="form-control" id="difference" placeholder="请输入当前厚度" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
-                    '<label class="label-danger hidden" id="differenceTip"></label>' +
+                    '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
+                    '<input class="form-control" id="difference" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                    '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
+                    '</div>' +
                     '</div>';
-
                 $("#info").append(head);
             }
             $("#isDifference").iCheck({

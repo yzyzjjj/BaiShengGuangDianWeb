@@ -567,6 +567,10 @@ function getProcessDetail() {
                 '</div>';
             var i, len = ret.datas.length;
             $("#processDetailData").empty();
+            var op = function (data, type, row) {
+                var detailBtn = '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'.format(escape(data.ProcessData));
+                return detailBtn;
+            }
             var o;
             var order = function (data, type, row) {
                 return ++o;
@@ -597,7 +601,8 @@ function getProcessDetail() {
                             { "data": "StartTime", "title": "开始时间" },
                             { "data": "EndTime", "title": "结束时间" },
                             { "data": "FlowCardName", "title": "流程卡号" },
-                            { "data": "ProcessorName", "title": "加工人" }
+                            { "data": "ProcessorName", "title": "加工人" },
+                            { "data": null, "title": "工艺", "render": op }
                         ]
                     });
                 }
@@ -616,4 +621,44 @@ function getProcessDetail() {
                 $("#noProcessDetailData").addClass("hidden");
             }
         });
+}
+
+function showProcessDetailModel(data) {
+    data = unescape(data);
+    data = JSON.parse(data);
+    var rData = [];
+    var i, len = Object.keys(data).length;
+    for (i = 0; i < len; i++) {
+        var v = Object.keys(data)[i];
+        rData.push({
+            forcing: data[v][0] + " : " + data[v][1],
+            process: data[v][2] + " : " + data[v][3],
+            stress: data[v][4],
+            rotate: data[v][5]
+        });
+    }
+    var o = 0;
+    var order = function (data, type, row) {
+        return ++o;
+    }
+    $("#processList").DataTable({
+        "destroy": true,
+        "paging": true,
+        "deferRender": false,
+        "bLengthChange": false,
+        "info": false,
+        "searching": false,
+        "language": { "url": "/content/datatables_language.json" },
+        "data": rData,
+        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+        "iDisplayLength": 20, //默认显示的记录数  
+        "columns": [
+            { "data": null, "title": "工序", "render": order },
+            { "data": "forcing", "title": "加压时间(分:秒)"},
+            { "data": "process", "title": "工序时间(分:秒)"},
+            { "data": "stress", "title": "设定压力(Kg)"},
+            { "data": "rotate", "title": "下盘速度(rpm)"}
+        ]
+    });
+    $("#processModel").modal("show");
 }
