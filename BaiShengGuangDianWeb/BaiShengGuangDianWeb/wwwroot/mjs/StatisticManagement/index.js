@@ -430,7 +430,43 @@ function createChart(start1, end1) {
                         dataZoom: {
                             yAxisIndex: "none"
                         },
-                        dataView: { readOnly: false },//数据视图
+                        dataView: {
+                            show: true, title: '数据视图', readOnly: true, optionToContent: function (opt) {
+                                var axisData = opt.xAxis[0].data;//坐标数据
+                                var series = opt.series;//折线图数据
+                                var tdHead = '<td style="padding:0 10px">时间</td>';//表头
+                                var tdBody = '';//数据
+                                series.forEach(function (item, index) {
+                                    //组装表头
+                                    if (deviceName.length > 1) {
+                                        var len = deviceName.length;
+                                        var devName = '<font color="blue">' + deviceName[index % len] + '</font>';
+                                        if (item.name == "同时加工台数" || item.name == "总台数" || item.name == "使用率") {
+                                            tdHead += '<td style="padding: 0 10px">' + item.name + '</td>';
+                                        } else {
+                                            tdHead += '<td style="padding: 0 10px">' + devName + item.name + '</td>';
+                                        }
+                                    } else {
+                                        tdHead += '<td style="padding: 0 10px">' + item.name + '</td>';
+                                    }
+                                });
+                                var table = '<table border="1" style="margin-left:20px;border-collapse:collapse;font-size:14px;text-align:center"><tbody><tr>' + tdHead + '</tr>';
+                                for (var i = 0, l = axisData.length; i < l; i++) {
+                                    for (var j = 0; j < series.length; j++) {
+                                        //组装表数据
+                                        if (series[j].name == "使用率") {
+                                            tdBody += '<td>' + series[j].data[i] + '%' + '</td>';
+                                        } else {
+                                            tdBody += '<td>' + series[j].data[i] + '</td>';
+                                        }
+                                    }
+                                    table += '<tr><td style="padding: 0 10px">' + axisData[i] + '</td>' + tdBody + '</tr>';
+                                    tdBody = '';
+                                }
+                                table += '</tbody></table>';
+                                return table;
+                            }
+                        },
                         restore: {},
                         magicType: {
                             type: ['line', 'bar']
@@ -568,12 +604,17 @@ function getProcessDetail() {
             var i, len = ret.datas.length;
             $("#processDetailData").empty();
             var op = function (data, type, row) {
-                var detailBtn = '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'.format(escape(data.ProcessData));
-                return detailBtn;
+                return data.OpName == "加工"
+                    ? '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'
+                        .format(escape(data.ProcessData))
+                    : "";
             }
             var o;
             var order = function (data, type, row) {
                 return ++o;
+            }
+            var time = function (data, type, row) {
+                return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
             }
             var code = [];
             for (i = 0; i < len; i++) {
@@ -599,9 +640,11 @@ function getProcessDetail() {
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
                             { "data": "StartTime", "title": "开始时间" },
-                            { "data": "EndTime", "title": "结束时间" },
+                            { "data": null, "title": "结束时间", "render": time },
                             { "data": "FlowCardName", "title": "流程卡号" },
+                            { "data": "ProductionProcessName", "title": "计划号" },
                             { "data": "ProcessorName", "title": "加工人" },
+                            { "data": "OpName", "title": "操作" },
                             { "data": null, "title": "工艺", "render": op }
                         ]
                     });
@@ -643,7 +686,7 @@ function showProcessDetailModel(data) {
     }
     $("#processList").DataTable({
         "destroy": true,
-        "paging": true,
+        "paging": false,
         "deferRender": false,
         "bLengthChange": false,
         "info": false,
@@ -654,10 +697,10 @@ function showProcessDetailModel(data) {
         "iDisplayLength": 20, //默认显示的记录数  
         "columns": [
             { "data": null, "title": "工序", "render": order },
-            { "data": "forcing", "title": "加压时间(分:秒)"},
-            { "data": "process", "title": "工序时间(分:秒)"},
-            { "data": "stress", "title": "设定压力(Kg)"},
-            { "data": "rotate", "title": "下盘速度(rpm)"}
+            { "data": "forcing", "title": "加压时间(分:秒)" },
+            { "data": "process", "title": "工序时间(分:秒)" },
+            { "data": "stress", "title": "设定压力(Kg)" },
+            { "data": "rotate", "title": "下盘速度(rpm)" }
         ]
     });
     $("#processModel").modal("show");

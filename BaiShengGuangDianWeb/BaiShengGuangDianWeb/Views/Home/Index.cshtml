@@ -15,6 +15,7 @@
                 <div class="box-header with-border">
                     <h3 class="box-title">生产加工</h3>
                     <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addCraftModal()">操作</button>
                         <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
                         <button type="button" class="btn btn-primary btn-sm" title="二维码图片" onclick="upload(0)" id="upload">上传</button>
                         <button type="button" class="btn btn-primary btn-sm" id="scanning" onclick="scanning(0)">扫描</button>
@@ -269,6 +270,41 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="reportFlowCard()" id="reportFlowCard">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addCraftModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">操作</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="addCraftCode">选择设备：</label>
+                        <select class="ms2 form-control" id="addCraftCode" style="width:80%"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="processCode">操作时间：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box;">
+                            <input type="text" id="addCraftDate" class="form_date form-control" style="width: 120px; cursor: pointer">
+                            <span style="display: table-cell; vertical-align: middle;height:32px">&nbsp;-&nbsp;</span>
+                            <input type="text" id="addCraftTime" class="form_time form-control" style="width: 120px; cursor: pointer">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="addCraftOp">操作名称：</label>
+                        <select class="ms2 form-control" id="addCraftOp" style="width:80%"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addCraft()">添加</button>
                 </div>
             </div>
         </div>

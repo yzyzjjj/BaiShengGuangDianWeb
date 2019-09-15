@@ -310,7 +310,6 @@ function createChart(type) {
                                 dataZoom: {
                                     yAxisIndex: "none"
                                 },
-                                dataView: { readOnly: false },//数据视图
                                 restore: {},
                                 magicType: {
                                     type: ['line', 'bar']
@@ -430,7 +429,6 @@ function createChart(type) {
                                 dataZoom: {
                                     yAxisIndex: "none"
                                 },
-                                dataView: { readOnly: false },//数据视图
                                 restore: {},
                                 magicType: {
                                     type: ['line', 'bar']
