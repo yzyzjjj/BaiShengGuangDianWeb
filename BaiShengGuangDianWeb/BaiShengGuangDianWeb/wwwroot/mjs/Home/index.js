@@ -38,12 +38,6 @@
     });
     $("#flowCardEmpty").click(function () {
         $("#flowCard").val("");
-        $("#fcBody").addClass("hidden");
-        $("#isChangeDiv").addClass("hidden");
-        $("#processSteps").empty();
-        $("#info").empty();
-        $("#pData").empty();
-        $("#run").addClass("disabled");
     });
     $("#file").change(function () {
         addCover();
@@ -206,15 +200,13 @@ function getDeviceList() {
                         { "data": "LeftTime", "title": "剩余时间" },
                     ]
                 });
-
-
             $(".ms2").empty();
             var option = '<option value="{0}" id="{2}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 var state = data.DeviceStateStr;
                 if (state == '待加工' || state == '加工中') {
-                    $("#processCode").append(option.format(data.Id, data.Code, ''));
+                    $("#processCode,#addCraftCode").append(option.format(data.Id, data.Code, ''));
                 }
                 $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
             }
@@ -1124,6 +1116,54 @@ function clearRpFlowCard() {
     $("#rpFlowCard").val("");
     $("#gxList").empty();
     $("#tableFlowCard").addClass("hidden");
+}
+
+function addCraftModal() {
+    var v = $("#processCode").val();
+    $("#addCraftCode").val(v).trigger("change");
+    $("#addCraftDate").val(getDate()).datepicker('update');
+    $("#addCraftTime").val(getTime()).timepicker('setTime',getTime());
+    $("#addCraftOp").empty();
+    $("#addCraftOp").append('<option value="换沙">换沙</option>');
+    $("#addCraftModel").modal("show");
+}
+
+function addCraft() {
+    var opType = 166;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var addCode = $("#addCraftCode").val();
+    if (isStrEmptyOrUndefined(addCode)) {
+        layer.msg("请选择设备");
+        return;
+    }
+    var time = $("#addCraftDate").val() + " " + $("#addCraftTime").val();
+    if (exceedTime(time)) {
+        layer.msg("操作时间不能大于当前时间");
+        return;
+    }
+    var op = $("#addCraftOp").val();
+    if (isStrEmptyOrUndefined(op)) {
+        layer.msg("请选择操作名称");
+        return;
+    }
+    var doSth = function () {
+        $("#addCraftModel").modal("hide");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            DeviceId: addCode,
+            Time: time,
+            OpName: op
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+            });
+    }
+    showConfirm("添加", doSth);
 }
 
 var canImg;
