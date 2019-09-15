@@ -105,13 +105,13 @@ function codeTime(second) {
         return second + "秒";
     }
     if (second < 3600) {
-        return (second - (second % 60)) / 60 + "分钟" + (second % 60) + "秒";
+        return (second - (second % 60)) / 60 + "分" + (second % 60) + "秒";
     }
     if (second < 86400) {
         return (second - (second % 3600)) / 3600 +
             "小时" +
             ((second - (second % 60)) / 60) % 60 +
-            "分钟" +
+            "分" +
             (second % 60) +
             "秒";
     } else {
@@ -120,7 +120,7 @@ function codeTime(second) {
             ((second - (second % 3600)) / 3600) % 24 +
             "小时" +
             ((second - (second % 60)) / 60) % 60 +
-            "分钟" +
+            "分" +
             (second % 60) +
             "秒";
     }

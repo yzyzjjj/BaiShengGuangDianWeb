@@ -616,6 +616,9 @@ function getProcessDetail() {
             var time = function (data, type, row) {
                 return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
             }
+            var totalTime = function(data, type, row) {
+                return codeTime(data.TotalTime);
+            }
             var code = [];
             for (i = 0; i < len; i++) {
                 var processData = ret.datas[i];
@@ -639,12 +642,13 @@ function getProcessDetail() {
                         "iDisplayLength": 5, //默认显示的记录数  
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
+                            { "data": "OpName", "title": "操作" },
                             { "data": "StartTime", "title": "开始时间" },
                             { "data": null, "title": "结束时间", "render": time },
-                            { "data": "FlowCardName", "title": "流程卡号" },
+                            { "data": null, "title": "加工时间", "render": totalTime },
                             { "data": "ProductionProcessName", "title": "计划号" },
+                            { "data": "FlowCardName", "title": "流程卡号" },
                             { "data": "ProcessorName", "title": "加工人" },
-                            { "data": "OpName", "title": "操作" },
                             { "data": null, "title": "工艺", "render": op }
                         ]
                     });
