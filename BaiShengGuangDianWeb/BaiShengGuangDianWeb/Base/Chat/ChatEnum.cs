@@ -16,5 +16,9 @@ namespace BaiShengGuangDianWeb.Base.Chat
         /// 故障设备
         /// </summary>
         FaultDevice,
+        /// <summary>
+        /// 登出
+        /// </summary>
+        Logout,
     }
 }

@@ -12,6 +12,16 @@ var commonfunc = function () {
     $("#user_email").text(tkinfo.email);
 
     $("#logoutBtn").click(function () {
+        var tkinfo = getCookieTokenInfo();
+        var info = {
+            ChatEnum: chatEnum.Logout,
+            Message: {
+                Id: tkinfo.id
+            }
+        }
+        //调用服务器方法
+        hubConnection.invoke('SendMsg', info);
+
         ajaxPost("/Account/Logout",
             null,
             function (ret) {

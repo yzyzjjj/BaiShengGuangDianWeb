@@ -38,7 +38,9 @@ var chatEnum = {
     //连接
     Connect: 1,
     // 故障设备
-    FaultDevice: 2
+    FaultDevice: 2,
+    // 登出
+    Logout: 3
 }
 
 var fileEnum = {

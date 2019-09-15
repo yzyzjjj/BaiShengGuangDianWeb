@@ -8,6 +8,8 @@ namespace BaiShengGuangDianWeb.Base.Chat
 {
     public class ChatHelper
     {
+        private static string _redisPre = "Chat:";
+        private static int _hour = 24;
         private static bool _isRun = false;
         private static Timer _clearConnectionId = new Timer(ClearConnectionId, null, 5000, 5 * 60 * 1000);
 
@@ -23,7 +25,6 @@ namespace BaiShengGuangDianWeb.Base.Chat
             foreach (var key in keys)
             {
                 var connectionInfos = ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key);
-
                 foreach (var connectionInfo in connectionInfos)
                 {
                     if (connectionInfo.ExpireTime < DateTime.Now)
@@ -36,8 +37,6 @@ namespace BaiShengGuangDianWeb.Base.Chat
             _isRun = false;
         }
 
-        private static string _redisPre = "Chat:";
-        private static int _hour = 24;
         private static string GetKey(int accountId)
         {
             return _redisPre + accountId;
@@ -53,6 +52,16 @@ namespace BaiShengGuangDianWeb.Base.Chat
                 ExpireTime = DateTime.Now.AddHours(_hour)
             };
             ServerConfig.RedisHelper.List_Add(key, connectionInfo, TimeSpan.FromHours(_hour));
+        }
+
+        public static void RemoveConnectionId(int accountId, string connectionId)
+        {
+            var key = GetKey(accountId);
+            var connectionInfo = GetSingleConnectionId(accountId).FirstOrDefault(x => x.ConnectionId == connectionId);
+            if (connectionInfo != null)
+            {
+                ServerConfig.RedisHelper.List_Remove(key, connectionInfo);
+            }
         }
 
         public static IEnumerable<ConnectionInfo> GetSingleConnectionId(int accountId = 0)

@@ -21,6 +21,10 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     msg = JObject.Parse(info.Message.ToString());
                     ChatHelper.AddConnectionId(msg["Id"].ToObject<int>(), cid);
                     break;
+                case ChatEnum.Logout:
+                    msg = JObject.Parse(info.Message.ToString());
+                    ChatHelper.RemoveConnectionId(msg["Id"].ToObject<int>(), cid);
+                    break;
                 case ChatEnum.FaultDevice:
                     msg = JObject.Parse(info.Message.ToString());
                     var mailList = new List<string>();
