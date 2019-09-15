@@ -45,13 +45,13 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 new Claim("permissions", accountInfo.Permissions),
                 new Claim("prole", accountInfo.ProductionRole)
             };
-            var creds = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 issuer: Issuer,
                 audience: Audience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(3),
-                signingCredentials: creds);
+                expires: DateTime.Now.AddHours(24),
+                signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

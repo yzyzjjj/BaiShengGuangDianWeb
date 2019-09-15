@@ -50,7 +50,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
             {
                 AccountId = accountId,
                 ConnectionId = connectionId,
-                ExpireTime = DateTime.Now.AddHours(_hour / 2.0)
+                ExpireTime = DateTime.Now.AddHours(_hour)
             };
             ServerConfig.RedisHelper.List_Add(key, connectionInfo, TimeSpan.FromHours(_hour));
         }
