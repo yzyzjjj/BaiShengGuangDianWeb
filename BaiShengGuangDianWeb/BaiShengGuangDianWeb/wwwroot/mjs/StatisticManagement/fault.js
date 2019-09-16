@@ -387,9 +387,6 @@ function getFaultChart() {
                         yAxis: {
                             type: "value"
                         },
-                        legend: {
-                            data: [legend]
-                        },
                         color: ["green"],
                         series: rData,
                         dataZoom: [{

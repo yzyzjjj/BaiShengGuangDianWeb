@@ -101,7 +101,6 @@ function selectChange(datas) {
         $("#detailRemark").val(firstData.Remark);
     }
     getStateList();
-    getDataList();
 }
 
 //状态信息
@@ -141,27 +140,6 @@ function getStateList() {
                 $("#StateBox").find("[name=" + key + "]").val(info);
             };
         });
-}
-
-//加工数据
-function getDataList() {
-
-}
-
-function openDevice() {
-
-}
-
-function closeDevice() {
-
-}
-
-function lockDevice() {
-
-}
-
-function unlockDevice() {
-
 }
 
 function getFirmwareList(func) {

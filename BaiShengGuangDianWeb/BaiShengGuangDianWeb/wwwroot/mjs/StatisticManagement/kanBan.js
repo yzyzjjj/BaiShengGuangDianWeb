@@ -146,9 +146,6 @@ function getBoardData() {
                         formatter: '{value} %'
                     }
                 },
-                legend: {
-                    data: ["利用率"]
-                },
                 series: [{
                     name: "利用率",
                     type: "bar",
@@ -179,12 +176,7 @@ function getBoardData() {
                         }
                         return res;
                     })()
-                }],
-                dataZoom: {
-                    type: "inside",
-                    start: 0,
-                    end: 100
-                }
+                }]
             };
             myChart1.setOption(option1, true);
             var setRate;

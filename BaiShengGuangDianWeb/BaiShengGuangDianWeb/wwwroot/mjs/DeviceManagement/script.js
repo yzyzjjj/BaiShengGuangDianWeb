@@ -855,14 +855,14 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
                     return;
                 }
 
-                if (ret.datas.length > 0) {
-                    usData = ret.datas;
-                    showUsuallyDictionary();
-                } else {
-                    if (!refresh) {
-                        $("#usuallyDictionaryTypeModel").modal("show");
-                    }
-                }
+                //if (ret.datas.length > 0) {
+                usData = ret.datas;
+                showUsuallyDictionary();
+                //} else {
+                //    if (!refresh) {
+                $("#usuallyDictionaryTypeModel").modal("show");
+                //    }
+                //}
             });
     } else {
         if (!refresh) {

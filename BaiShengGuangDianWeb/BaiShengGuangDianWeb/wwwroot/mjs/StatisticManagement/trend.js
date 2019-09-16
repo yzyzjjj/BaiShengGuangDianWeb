@@ -112,6 +112,7 @@ function getDeviceChart() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            $("#selectDevice").empty();
             var option1 = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -193,10 +194,10 @@ function createChart(type) {
             layer.msg("结束时间不能小于开始时间");
             return;
         }
-        //if (endStart > 20000 || (endStart > 764042 && endStart <780000)) {
-        //    layer.msg("时间范围不能超过两小时");
-        //    return;
-        //}
+        if (new Date(end).getTime() - new Date(start).getTime() > 259200000) {
+            layer.msg("时间范围不能超过3天");
+            return;
+        }
         var dataTime = 0;
         if (100000000 > endStart && endStart >= 1000000) {
             dataTime = 1;
@@ -285,9 +286,6 @@ function createChart(type) {
                             data: time
                         },
                         yAxis: {},
-                        legend: {
-                            data: [parName]
-                        },
                         series: [{
                             name: parName,
                             type: "line",
@@ -310,16 +308,13 @@ function createChart(type) {
                                 dataZoom: {
                                     yAxisIndex: "none"
                                 },
-                                restore: {},
-                                magicType: {
-                                    type: ['line', 'bar']
-                                }
+                                restore: {}
                             }
                         }
                     };
                     myChart.setOption(option, true);
                 }
-                $("#main").resize(function() {
+                $("#main").resize(function () {
                     for (var k = 0; k < listName.length; k++) {
                         echarts.init(document.getElementById("chart" + k)).resize();
                     }
@@ -404,9 +399,6 @@ function createChart(type) {
                             data: time
                         },
                         yAxis: {},
-                        legend: {
-                            data: [parName]
-                        },
                         series: [{
                             name: parName,
                             type: "line",
@@ -429,10 +421,7 @@ function createChart(type) {
                                 dataZoom: {
                                     yAxisIndex: "none"
                                 },
-                                restore: {},
-                                magicType: {
-                                    type: ['line', 'bar']
-                                }
+                                restore: {}
                             }
                         }
                     };

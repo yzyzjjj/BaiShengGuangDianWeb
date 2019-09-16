@@ -44,6 +44,7 @@
             }
             $("#selectDevice1").val(v).trigger("change");
             tf = true;
+            $(".select2-selection__clear").css("marginTop", "9px");
         } else {
             if (tf) {
                 $("#selectDevice1").val([]).trigger("change");
@@ -55,12 +56,14 @@
         $("#checkAll").iCheck("uncheck");
     });
     $("#selectDevice1").on("select2:select", function () {
+        $(".select2-selection__clear").css("marginTop","9px");
         var op = $("#selectDevice1").find("option").length;
         var v = $("#selectDevice1").val().length;
         if (op == v) {
             $("#checkAll").iCheck("check");
         }
     });
+    $("#selectDevice1").next(".select2-container").css("maxHeight", "37px").css("overflowY","auto");
 }
 
 function getDeviceList(par) {
@@ -587,12 +590,13 @@ function getProcessDetail() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var rows = '<div class="row" id="row{0}"></div>';
             var panel = '<div class="col-md-6">' +
                 '<div class="panel panel-primary">' +
                 '<div class="panel-heading">' +
-                '<h3 class="panel-title" id="code{0}">' +
-                '<span class="badge" id="num{0}" style="margin-left:5px;color:green;font-size:18px">' +
-                '</span>' +
+                '<h3 class="panel-title badge" id="code{0}" style="color:green">' +
+                '</h3>' +
+                '<h3 class="panel-title pull-right badge" id="num{0}">' +
                 '</h3>' +
                 '</div>' +
                 '<div class="table-responsive mailbox-messages" style="padding:10px">' +
@@ -619,12 +623,20 @@ function getProcessDetail() {
             var totalTime = function(data, type, row) {
                 return codeTime(data.TotalTime);
             }
+            var n = 0;
             var code = [];
+            var row = $(rows.format(n)).clone();
+            $("#processDetailData").append(row);
             for (i = 0; i < len; i++) {
                 var processData = ret.datas[i];
                 if (processData.ProcessLog.length != 0) {
+                    if ($(row).children().length == 2) {
+                        n++;
+                        row = $(rows.format(n)).clone();
+                        $("#processDetailData").append(row);
+                    }
                     var option = $(panel.format(i)).clone();
-                    $("#processDetailData").append(option);
+                    $("#row" + n).append(option);
                     var codeName = processData.ProcessLog[0].Code;
                     code.push(codeName);
                     $("#code" + i).prepend(codeName);
@@ -667,6 +679,7 @@ function getProcessDetail() {
             } else {
                 $("#noProcessDetailData").addClass("hidden");
             }
+
         });
 }
 
@@ -695,12 +708,13 @@ function showProcessDetailModel(data) {
         "bLengthChange": false,
         "info": false,
         "searching": false,
+        "bSort": false,
         "language": { "url": "/content/datatables_language.json" },
         "data": rData,
         "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
         "iDisplayLength": 20, //默认显示的记录数  
         "columns": [
-            { "data": null, "title": "工序", "render": order },
+            { "data": null, "title": "NO", "render": order },
             { "data": "forcing", "title": "加压时间(分:秒)" },
             { "data": "process", "title": "工序时间(分:秒)" },
             { "data": "stress", "title": "设定压力(Kg)" },
