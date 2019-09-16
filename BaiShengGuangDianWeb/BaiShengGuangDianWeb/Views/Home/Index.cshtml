@@ -287,7 +287,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="control-label" for="addCraftCode">选择设备：</label>
-                        <select class="ms2 form-control" id="addCraftCode" style="width:80%"></select>
+                        <select class="ms2 form-control" id="addCraftCode" style="width:90%"></select>
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="processCode">操作时间：</label>
@@ -297,9 +297,13 @@
                             <input type="text" id="addCraftTime" class="form_time form-control" style="width: 120px; cursor: pointer">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group form-inline">
                         <label class="control-label" for="addCraftOp">操作名称：</label>
-                        <select class="ms2 form-control" id="addCraftOp" style="width:80%"></select>
+                        <select class="form-control" id="addCraftOp" style="width:90%">></select>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="addCraftThickness">片厚：</label>
+                        <input class="form-control" id="addCraftThickness" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">
                     </div>
                 </div>
                 <div class="modal-footer">

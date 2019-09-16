@@ -8,6 +8,14 @@
     $("#processCode").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
+    $("#addCraftOp").change(function () {
+        var selectValue = $("#addCraftOp").val();
+        if (selectValue == "片厚") {
+            $("#addCraftThickness").parent().removeAttr("hidden");
+        } else {
+            $("#addCraftThickness").parent().attr("hidden", "hidden");
+        }
+    });
     $("#faultType").on("select2:select", function (e) {
         var desc = "";
         for (var i = 0; i < faultData.length; i++) {
@@ -461,6 +469,12 @@ function setProcessData() {
     };
     var opType = 110;
     if ($("#isDifference").is(":checked")) {
+        //当前厚度
+        var difference = $("#difference").val().trim();
+        if (isStrEmptyOrUndefined(difference)) {
+            showTip("differenceTip", "当前厚度不能为空");
+            return;
+        }
         opType = 155;
         if (newProcessData == null || newProcessData.length == 0) {
             layer.msg("缺少工艺数据");
@@ -514,6 +528,25 @@ function setProcessData() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     //getDeviceList();
+                    if ($("#isDifference").is(":checked")) {
+                        var difference = $("#difference").val().trim();
+                        if (isStrEmptyOrUndefined(difference)) {
+                            return;
+                        }
+                        difference = parseFloat(difference);
+                        data = {}
+                        data.opType = 166;
+                        data.opData = JSON.stringify({
+                            DeviceId: id,
+                            Time: getFullTime(),
+                            OpName: "片厚",
+                            Thickness: difference
+                        });
+                        ajaxPost("/Relay/Post", data,
+                            function (ret) {
+                                //layer.msg(ret.errmsg);
+                            });
+                    }
                 }
             });
     }
@@ -1122,8 +1155,11 @@ function addCraftModal() {
     var v = $("#processCode").val();
     $("#addCraftCode").val(v).trigger("change");
     $("#addCraftDate").val(getDate()).datepicker('update');
-    $("#addCraftTime").val(getTime()).timepicker('setTime',getTime());
+    $("#addCraftTime").val(getTime()).timepicker('setTime', getTime());
+    $("#addCraftThickness").parent().removeAttr("hidden");
+
     $("#addCraftOp").empty();
+    $("#addCraftOp").append('<option value="片厚">片厚</option>');
     $("#addCraftOp").append('<option value="换沙">换沙</option>');
     $("#addCraftModel").modal("show");
 }
@@ -1149,6 +1185,15 @@ function addCraft() {
         layer.msg("请选择操作名称");
         return;
     }
+    var h = 0;
+    if (op == "片厚") {
+        var difference = $("#addCraftThickness").val().trim();
+        if (isStrEmptyOrUndefined(difference)) {
+            layer.msg("请输入片厚");
+        return;
+        };
+        h = difference;
+    }
     var doSth = function () {
         $("#addCraftModel").modal("hide");
         var data = {}
@@ -1156,7 +1201,8 @@ function addCraft() {
         data.opData = JSON.stringify({
             DeviceId: addCode,
             Time: time,
-            OpName: op
+            OpName: op,
+            Thickness: h
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1165,6 +1211,8 @@ function addCraft() {
     }
     showConfirm("添加", doSth);
 }
+
+
 
 var canImg;
 var fileImg;
