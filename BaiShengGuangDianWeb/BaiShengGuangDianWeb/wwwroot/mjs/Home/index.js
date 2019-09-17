@@ -282,7 +282,7 @@ function queryFlowCard() {
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input class="form-control" id="difference" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                    '<input class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
                     '</div>' +
                     '</div>';
@@ -415,7 +415,7 @@ function showProcessData(canChange = false) {
     var tr1 = '<tr><td>{0}</td><td>{1}&nbsp;:&nbsp;{2}</td><td>{3}&nbsp;:&nbsp;{4}</td><td>{5}</td><td>{6}</td></tr>';
     var tr2 =
         '<tr>' +
-        '    <td style="vertical-align: middle;"><span>{0}</span></td>' +
+        '    <td style="vertical-align: middle;"><span class="num">{0}</span></td>' +
         '    <td class="form-inline">' +
         '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" />' +
         '        <span style="width: 10%;">:</span>' +
@@ -428,6 +428,8 @@ function showProcessData(canChange = false) {
         '    </td>' +
         '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" /></td>' +
         '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" /></td>' +
+        '    <td><button type="button" class="minus btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>' +
+        '<button type="button" class="plus btn btn-success btn-xs"><i class="fa fa-plus"></i></button></td>' +
         '</tr>';
     if (pds != null && pds.length > 0) {
         $("#pData").empty();
@@ -437,7 +439,36 @@ function showProcessData(canChange = false) {
             var pd = pds[j];
             $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));
         }
+        $("#tableP td").css("padding", "2px");
+        $("#tableP td").css("paddingTop", "8px").css("paddingBottom", "8px");
     }
+    $("#pData").off('click').on("click", ".plus", function () {
+        var op = $(this).parents("tr");
+        op.after(tr2.format(0, 0, 0, 0, 0, 0, 0));
+        $("#tableP td").css("padding", "2px");
+        $("#tableP td").css("paddingTop", "8px").css("paddingBottom", "8px");
+        var i, len = $("#pData .num").length;
+        for (i = 0; i < len; i++) {
+            $($("#pData .num")[i]).text(i + 1);
+        }
+        if (len == 8) {
+            $(".plus").addClass("hidden");
+        }
+    });
+    $("#pData").on("click", ".minus", function () {
+        var op = $(this).parents("tr");
+        op.remove();
+        $(".plus").removeClass("hidden");
+        var i, len = $("#pData .num").length;
+        for (i = 0; i < len; i++) {
+            $($("#pData .num")[i]).text(i + 1);
+        }
+    });
+}
+
+function minus() {
+    var tr = $(this).parents("tr");
+    tr.remove();
 }
 
 var id = null;
@@ -1157,7 +1188,6 @@ function addCraftModal() {
     $("#addCraftDate").val(getDate()).datepicker('update');
     $("#addCraftTime").val(getTime()).timepicker('setTime', getTime());
     $("#addCraftThickness").parent().removeAttr("hidden");
-
     $("#addCraftOp").empty();
     $("#addCraftOp").append('<option value="片厚">片厚</option>');
     $("#addCraftOp").append('<option value="换沙">换沙</option>');

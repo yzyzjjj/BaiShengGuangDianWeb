@@ -107,11 +107,11 @@ function getDeviceList() {
                     '   <span class="caret"></span>' +
                     '   <span class="sr-only">Toggle Dropdown</span>' +
                     '</button>' +
-                    '<ul class="dropdown-menu" role="menu">{0}{1}{2}{3}{4}' +
+                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}{2}{3}{4}' +
                     '</ul>' +
                     '</div>';
 
-                var controlLi = '<li><a onclick="showControl({0})">控制</a></li>'.format(data.Id);
+                var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
                 var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15})">修改</a></li>'
                     .format(data.Id, escape(data.DeviceName), escape(data.Code), escape(data.MacAddress), escape(data.Ip), escape(data.Port), escape(data.Identifier), escape(data.DeviceModelId), escape(data.ScriptId),
@@ -682,8 +682,13 @@ function showDetail(id) {
     window.location = '/DeviceManagement/Detail?id=' + id;
 }
 
-function showControl(id) {
-    window.location = '/DeviceManagement/Control?id=' + id;
+function showControl(id, str) {
+    str = unescape(str);
+    if (str == "待加工" || str == "加工中") {
+        window.location = '/DeviceManagement/Control?id=' + id;
+    } else {
+        layer.msg("该设备" + str);
+    }
 }
 
 function showUpgrade(id) {
