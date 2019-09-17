@@ -56,14 +56,14 @@
         $("#checkAll").iCheck("uncheck");
     });
     $("#selectDevice1").on("select2:select", function () {
-        $(".select2-selection__clear").css("marginTop","9px");
+        $(".select2-selection__clear").css("marginTop", "9px");
         var op = $("#selectDevice1").find("option").length;
         var v = $("#selectDevice1").val().length;
         if (op == v) {
             $("#checkAll").iCheck("check");
         }
     });
-    $("#selectDevice1").next(".select2-container").css("maxHeight", "37px").css("overflowY","auto");
+    $("#selectDevice1").next(".select2-container").css("maxHeight", "37px").css("overflowY", "auto");
 }
 
 function getDeviceList(par) {
@@ -596,6 +596,8 @@ function getProcessDetail() {
                 '<div class="panel-heading">' +
                 '<h3 class="panel-title badge" id="code{0}" style="color:green">' +
                 '</h3>' +
+                '<h3 class="panel-title pull-right badge" style="cursor:pointer" onclick="rateList({0},{1},\'{2}\')">' + '刷新' +
+                '</h3>' +
                 '<h3 class="panel-title pull-right badge" id="num{0}">' +
                 '</h3>' +
                 '</div>' +
@@ -620,7 +622,7 @@ function getProcessDetail() {
             var time = function (data, type, row) {
                 return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
             }
-            var totalTime = function(data, type, row) {
+            var totalTime = function (data, type, row) {
                 return codeTime(data.TotalTime);
             }
             var n = 0;
@@ -635,7 +637,7 @@ function getProcessDetail() {
                         row = $(rows.format(n)).clone();
                         $("#processDetailData").append(row);
                     }
-                    var option = $(panel.format(i)).clone();
+                    var option = $(panel.format(i, processData.DeviceId, escape(dayDate))).clone();
                     $("#row" + n).append(option);
                     var codeName = processData.ProcessLog[0].Code;
                     code.push(codeName);
@@ -681,6 +683,67 @@ function getProcessDetail() {
             }
 
         });
+}
+
+function rateList(i, deviceId, time) {
+    var opType = 506;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        DeviceId: deviceId,
+        StartTime: time
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var processCount = ret.datas[0].ProcessCount + "次";
+        var rData = ret.datas[0].ProcessLog;
+        $("#num" + i).text("每日加工次数：" + processCount);
+        var o = 0;
+        var order = function (data, type, row) {
+            return ++o;
+        }
+        var time = function (data, type, row) {
+            return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
+        }
+        var totalTime = function (data, type, row) {
+            return codeTime(data.TotalTime);
+        }
+        var op = function (data, type, row) {
+            return data.OpName == "加工"
+                ? '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'
+                .format(escape(data.ProcessData))
+                : "";
+        }
+        $("#processList" + i).DataTable({
+            "destroy": true,
+            "paging": true,
+            "deferRender": false,
+            "bLengthChange": false,
+            "searching": false,
+            "language": { "url": "/content/datatables_language.json" },
+            "data": rData,
+            "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
+            "iDisplayLength": 5, //默认显示的记录数  
+            "columns": [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "OpName", "title": "操作" },
+                { "data": "StartTime", "title": "开始时间" },
+                { "data": null, "title": "结束时间", "render": time },
+                { "data": null, "title": "加工时间", "render": totalTime },
+                { "data": "ProductionProcessName", "title": "计划号" },
+                { "data": "FlowCardName", "title": "流程卡号" },
+                { "data": "ProcessorName", "title": "加工人" },
+                { "data": null, "title": "工艺", "render": op }
+            ]
+        });
+    });
 }
 
 function showProcessDetailModel(data) {

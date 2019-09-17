@@ -1,18 +1,20 @@
 ﻿function pageReady() {
     $(".ms2").select2();
+    idStr = getQueryString("id");
     getCodeList();
     $("#selectCode").on("select2:select", function () {
         getVarTypeList();
     });
 }
 
+var idStr;
 function getCodeList() {
     var opType = 100;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    var data = {}
+    var data = {};
     data.opType = opType;
     data.opData = JSON.stringify({
         hard: true
@@ -32,6 +34,9 @@ function getCodeList() {
                 $("#selectCode").append(option.format(d.Id, d.Code));
             }
         }
+        if (idStr != null) {
+            $("#selectCode").val(idStr).trigger("change");
+        }
         getVarTypeList();
     });
 }
@@ -47,7 +52,7 @@ function getVarTypeList() {
         layer.msg("请选择设备");
         return;
     }
-    var data = {}
+    var data = {};
     data.opType = opType;
     data.opData = JSON.stringify({
         DeviceId: deviceId
@@ -88,6 +93,20 @@ function setCodeVarPar() {
         layer.msg("请输入重置值");
         return;
     }
+    return;
+    var data = {};
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        DeviceId: deviceId,
+        UsuallyDictionaryId: codeVarId,
+        Value: resetValue
+    });
+    ajaxPost("/Relay/Post", data, function(ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+    });
 }
 
 //加工数据
