@@ -140,7 +140,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             return info;
         }
         /// <summary>
-        /// 获取所有账号信息
+        /// 获取所有账号信息  不包括已删除
         /// </summary>
         /// <returns></returns>
         public static IEnumerable<AccountInfo> GetAccountInfo()

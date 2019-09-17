@@ -39,7 +39,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var result = new DataResult();
             if (id == 0)
             {
-                result.datas.AddRange(AccountHelper.GetAccountInfo());
+                result.datas.AddRange(AccountHelper.GetAccountInfoAll());
             }
             else
             {
