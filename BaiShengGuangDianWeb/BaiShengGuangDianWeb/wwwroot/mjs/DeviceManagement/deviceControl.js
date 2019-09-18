@@ -93,7 +93,6 @@ function setCodeVarPar() {
         layer.msg("请输入重置值");
         return;
     }
-    return;
     var data = {};
     data.opType = opType;
     data.opData = JSON.stringify({
