@@ -19,7 +19,7 @@ function getCodeList() {
     data.opData = JSON.stringify({
         hard: true
     });
-    ajaxPost("/Relay/Post", data, function(ret) {
+    ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -57,7 +57,7 @@ function getVarTypeList() {
     data.opData = JSON.stringify({
         DeviceId: deviceId
     });
-    ajaxPost("/Relay/Post", data, function(ret) {
+    ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -100,11 +100,8 @@ function setCodeVarPar() {
         UsuallyDictionaryId: codeVarId,
         Value: resetValue
     });
-    ajaxPost("/Relay/Post", data, function(ret) {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
-        }
+    ajaxPost("/Relay/Post", data, function (ret) {
+        layer.msg(ret.errmsg);
     });
 }
 
