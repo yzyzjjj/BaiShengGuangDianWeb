@@ -15,12 +15,12 @@ function getRoleList() {
 
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '        <span class="caret"></span>' +
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
                 var upRole = '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions));

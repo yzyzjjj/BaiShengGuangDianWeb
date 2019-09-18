@@ -81,6 +81,16 @@
                 videos = 0;
             }
         });
+    $("#opUl").on("click", "a", function () {
+        $(this).css("backgroundColor", "#d3d3d3").parent().siblings().find("a").css("backgroundColor", "");
+        $("#addCraftDate").val(getDate()).datepicker('update');
+        $("#addCraftTime").val(getTime()).timepicker('setTime', getTime());
+        if ($(this).text() == "片厚") {
+            $("#thick").removeClass("hidden");
+        } else {
+            $("#thick").addClass("hidden");
+        }
+    });
 }
 
 var loads;
@@ -417,17 +427,17 @@ function showProcessData(canChange = false) {
         '<tr>' +
         '    <td style="vertical-align: middle;"><span class="num">{0}</span></td>' +
         '    <td class="form-inline">' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" />' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" />' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
         '    <td class="form-inline">' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" />' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" />' +
+        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
-        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" /></td>' +
-        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" /></td>' +
+        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" maxlength="9" /></td>' +
+        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" maxlength="9" /></td>' +
         '    <td><button type="button" class="minus btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>' +
         '<button type="button" class="plus btn btn-success btn-xs"><i class="fa fa-plus"></i></button></td>' +
         '</tr>';
@@ -442,7 +452,7 @@ function showProcessData(canChange = false) {
         $("#tableP td").css("padding", "2px");
         $("#tableP td").css("paddingTop", "8px").css("paddingBottom", "8px");
     }
-    $("#pData").off('click').on("click", ".plus", function () {
+    $("#pData").off("click").on("click", ".plus", function () {
         var op = $(this).parents("tr");
         op.after(tr2.format(0, 0, 0, 0, 0, 0, 0));
         $("#tableP td").css("padding", "2px");
@@ -462,6 +472,18 @@ function showProcessData(canChange = false) {
         var i, len = $("#pData .num").length;
         for (i = 0; i < len; i++) {
             $($("#pData .num")[i]).text(i + 1);
+        }
+    });
+    $("#pData").off("focusin").on("focusin", "input", function (e) {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val("");
+        }
+    });
+    $("#pData").off("focusout").on("focusout", "input", function (e) {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val("0");
         }
     });
 }
@@ -1187,10 +1209,8 @@ function addCraftModal() {
     $("#addCraftCode").val(v).trigger("change");
     $("#addCraftDate").val(getDate()).datepicker('update');
     $("#addCraftTime").val(getTime()).timepicker('setTime', getTime());
-    $("#addCraftThickness").parent().removeAttr("hidden");
-    $("#addCraftOp").empty();
-    $("#addCraftOp").append('<option value="片厚">片厚</option>');
-    $("#addCraftOp").append('<option value="换沙">换沙</option>');
+    $("#addCraftThickness").val("");
+    $("#op1").click();
     $("#addCraftModel").modal("show");
 }
 
@@ -1210,17 +1230,19 @@ function addCraft() {
         layer.msg("操作时间不能大于当前时间");
         return;
     }
-    var op = $("#addCraftOp").val();
-    if (isStrEmptyOrUndefined(op)) {
-        layer.msg("请选择操作名称");
-        return;
+    var i, len = $("#opUl a").length, opName;
+    for (i = 0; i < len; i++) {
+        var op = $("#opUl a")[i];
+        if ($(op).attr("aria-expanded") == "true") {
+            opName = $(op).text();
+        }
     }
     var h = 0;
-    if (op == "片厚") {
+    if (opName == "片厚") {
         var difference = $("#addCraftThickness").val().trim();
         if (isStrEmptyOrUndefined(difference)) {
             layer.msg("请输入片厚");
-        return;
+            return;
         };
         h = difference;
     }
@@ -1231,7 +1253,7 @@ function addCraft() {
         data.opData = JSON.stringify({
             DeviceId: addCode,
             Time: time,
-            OpName: op,
+            OpName: opName,
             Thickness: h
         });
         ajaxPost("/Relay/Post", data,

@@ -146,12 +146,12 @@ function getFaultDeviceList() {
                 var repairingBtn = '<button type="button" class="btn btn-info" onclick="sChange({0}, 2)">开始维修</button>'.format(data.Id);
                 var repairedBtn = '<button type="button" class="btn btn-success" onclick="sChange({0}, 3)">维修完成</button>'.format(data.Id);
                 var upDel = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '        <span class="caret"></span>' +
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
                 var changeBtn = '<li><a onclick="sChange({0}, 0)">修改</a></li>'.format(data.Id);
@@ -593,12 +593,12 @@ function getRepairRecordList() {
             }
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '        <span class="caret"></span>' +
                     '        <span class="sr-only">Toggle Dropdown</span>' +
                     '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
                 var changeBtn = '<li><a onclick="rChange({0}, 0)">修改</a></li>'.format(data.Id);
@@ -1039,12 +1039,12 @@ function getUsuallyFaultList() {
             }
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '   <span class="caret"></span>' +
                     '   <span class="sr-only">Toggle Dropdown</span>' +
                     '</button>' +
-                    '<ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '</ul>' +
                     '</div>';
 
@@ -1300,12 +1300,12 @@ function getFaultTypeList() {
             }
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" > <i class="fa fa-asterisk"></i>操作</button >' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '   <span class="caret"></span>' +
                     '   <span class="sr-only">Toggle Dropdown</span>' +
                     '</button>' +
-                    '<ul class="dropdown-menu" role="menu">{0}{1}' +
+                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '</ul>' +
                     '</div>';
 

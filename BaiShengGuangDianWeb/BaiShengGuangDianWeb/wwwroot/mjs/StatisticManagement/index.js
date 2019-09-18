@@ -729,6 +729,7 @@ function rateList(i, deviceId, time) {
                 .format(escape(data.ProcessData))
                 : "";
         }
+        $("#processList" + i).empty();
         $("#processList" + i).DataTable({
             "destroy": true,
             "paging": true,

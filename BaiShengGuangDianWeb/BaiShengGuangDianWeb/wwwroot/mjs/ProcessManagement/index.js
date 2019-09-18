@@ -39,6 +39,18 @@
     if (!checkPermission(316)) {
         $("#showAddModel").addClass("hidden");
     }
+    $("#apBody").off("focusin").on("focusin", "input", function () {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val("");
+        }
+    });
+    $("#apBody").off("focusout").on("focusout", "input", function () {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val("0");
+        }
+    });
 }
 
 var lastData = null;

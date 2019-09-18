@@ -23,12 +23,12 @@ function getOrganizationUnits() {
             }
 
             var doAction = '<div class="btn-group pull-right">' +
-                '<button type = "button" class="btn btn-default btn-sm" > <i class="fa fa-asterisk"></i>操作</button >' +
+                '<button type = "button" class="btn btn-default btn-sm" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                 '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                 '        <span class="caret"></span>' +
                 '        <span class="sr-only">Toggle Dropdown</span>' +
                 '    </button>' +
-                '    <ul class="dropdown-menu" role="menu">{0}{1}' +
+                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                 '    </ul>' +
                 '</div>';
 
