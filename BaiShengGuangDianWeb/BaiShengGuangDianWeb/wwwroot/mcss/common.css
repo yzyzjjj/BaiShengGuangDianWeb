@@ -50,6 +50,10 @@ th, td {
     width: 100% !important;
 }
 
+.mtd {
+    text-align: inherit;
+}
+
 
 
 

@@ -197,6 +197,9 @@ function getDeviceList() {
             var order = function (data, type, row) {
                 return ++o;
             }
+            var Code = function (data, type, row) {
+                return "{0} ({1})".format(data.Code, data.CategoryName.substring(0, 2));
+            }
             $("#deviceList")
                 .DataTable({
                     "pagingType": "full",
@@ -211,7 +214,7 @@ function getDeviceList() {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "Code", "title": "机台号" },
+                        { "data": null, "title": "机台号(类型)", "render": Code, "className": "mtd"},
                         { "data": null, "title": "设备状态", "render": deviceState },
                         { "data": "FlowCard", "title": "流程卡号" },
                         { "data": "ProcessTime", "title": "加工时间" },
