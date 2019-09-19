@@ -767,9 +767,12 @@ function showProcessDetailModel(data) {
     data = unescape(data);
     data = JSON.parse(data);
     var rData = [];
+    var forcing = 0, process = 0;
     var i, len = Object.keys(data).length;
     for (i = 0; i < len; i++) {
         var v = Object.keys(data)[i];
+        forcing += data[v][0] * 60 + data[v][1];
+        process += data[v][2] * 60 + data[v][3];
         rData.push({
             forcing: data[v][0] + " : " + data[v][1],
             process: data[v][2] + " : " + data[v][3],
@@ -777,8 +780,19 @@ function showProcessDetailModel(data) {
             rotate: data[v][5]
         });
     }
+    var forcingM = Math.floor(forcing / 60) + " : " + forcing % 60;
+    var processM = Math.floor(process / 60) + " : " + process % 60;
+    rData.push({
+        forcing: forcingM,
+        process: processM,
+        stress: "",
+        rotate: ""
+    });
     var o = 0;
     var order = function (data, type, row) {
+        if (o == rData.length - 1) {
+            return "总计";
+        }
         return ++o;
     }
     $("#processList").DataTable({
