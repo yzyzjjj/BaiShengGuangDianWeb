@@ -70,22 +70,12 @@
     $(document).on("visibilitychange", function () {
         var page = this.visibilityState;
         if (page == "hidden" && (!$("#video").is(":hidden") || !$("#video1").is(":hidden"))) {
+            clearCanvas();
             closeVideo.stop();
-        }
-        if (page == "visible") {
-            if (!$("#video").is(":hidden")) {
-                videos--;
-                scanning(0);
-            }
-            if (!$("#video1").is(":hidden")) {
-                videos--;
-                scanning(1);
-            }
+            clearInterval(canImg);
+            videos = 0;
         }
     });
-    window.unonload = function (e) {
-        e.returnValue = ("确定离开当前页面吗？");
-    } 
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
         $("#scanning1").addClass("hidden");
@@ -142,9 +132,11 @@ function scanning(scan) {
         if (scan == 0) {
             scans = 0;
             $("#video").addClass("hidden");
+            videos = 0;
         } else {
             scans = 1;
             $("#video1").addClass("hidden");
+            videos = 0;
         }
         return;
     }
@@ -608,6 +600,7 @@ function setProcessData() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     //getDeviceList();
+                    addCraftModal();
                     if ($("#isDifference").is(":checked")) {
                         var difference = $("#difference").val().trim();
                         if (isStrEmptyOrUndefined(difference)) {
