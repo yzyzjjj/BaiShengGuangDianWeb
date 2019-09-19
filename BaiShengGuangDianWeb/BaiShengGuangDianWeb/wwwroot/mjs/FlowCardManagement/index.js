@@ -80,6 +80,10 @@
             $(".fcBody").eq(e).addClass("hidden");
             if (e == 0) {
                 $("#flowCardId").val("");
+                closeVideo.stop();
+                clearInterval(canImg);
+                $("#video").addClass("hidden");
+                videos = 0;
             }
             if (e == 1) {
                 $("#flowCardStartDate").val(getDate()).datepicker('update');
@@ -325,6 +329,12 @@ function getFlowCardList() {
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
+    }
+    if (!$("#video").is(":hidden")) {
+        closeVideo.stop();
+        clearInterval(canImg);
+        $("#video").addClass("hidden");
+        videos = 0;
     }
     var data = {}
     var list = {}
