@@ -619,7 +619,7 @@ function setProcessData() {
                         data.opData = JSON.stringify({
                             DeviceId: id,
                             Time: getFullTime(),
-                            OpName: "片厚",
+                            OpName: "微调",
                             Thickness: difference
                         });
                         ajaxPost("/Relay/Post", data,
