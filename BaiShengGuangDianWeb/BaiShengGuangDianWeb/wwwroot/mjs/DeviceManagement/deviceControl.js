@@ -100,9 +100,10 @@ function setCodeVarPar() {
         UsuallyDictionaryId: codeVarId,
         Value: resetValue
     });
-    ajaxPost("/Relay/Post", data, function (ret) {
-        layer.msg(ret.errmsg);
-    });
+    ajaxPost("/Relay/Post",data,
+        function(ret) {
+            layer.msg(ret.errmsg);
+        });
 }
 
 //加工数据

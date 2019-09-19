@@ -34,7 +34,10 @@
     $("#isChange").on('ifChanged', function (event) {
         var ui = $(this);
         //当前厚度
-        var difference = $("#difference").val().trim();
+        var difference = $("#difference").val();
+        if (difference || difference == "") {
+            difference = $("#difference").val().trim();
+        }
         if (isStrEmptyOrUndefined(difference)) {
             $("#isDifference").iCheck("uncheck");
         };
@@ -64,6 +67,25 @@
         }
         fileImg = setInterval("fileUp()", 1000);
     });
+    $(document).on("visibilitychange", function () {
+        var page = this.visibilityState;
+        if (page == "hidden" && (!$("#video").is(":hidden") || !$("#video1").is(":hidden"))) {
+            closeVideo.stop();
+        }
+        if (page == "visible") {
+            if (!$("#video").is(":hidden")) {
+                videos--;
+                scanning(0);
+            }
+            if (!$("#video1").is(":hidden")) {
+                videos--;
+                scanning(1);
+            }
+        }
+    });
+    window.unonload = function (e) {
+        e.returnValue = ("确定离开当前页面吗？");
+    } 
     if (!pcAndroid()) {
         $("#scanning").addClass("hidden");
         $("#scanning1").addClass("hidden");
@@ -195,6 +217,9 @@ function getDeviceList() {
             }
             var o = 0;
             var order = function (data, type, row) {
+                $("#deviceList").find("th").css("paddingRight", "22px").css("paddingLeft", 0);
+                $("#deviceList").find("td").css("padding", 0);
+                $("#deviceList").find("td").css("paddingTop", "8px").css("paddingBottom", "8px");
                 return ++o;
             }
 
@@ -217,7 +242,7 @@ function getDeviceList() {
                         { "data": null, "title": "设备状态", "render": deviceState },
                         { "data": "FlowCard", "title": "流程卡号" },
                         { "data": "ProcessTime", "title": "加工时间" },
-                        { "data": "LeftTime", "title": "剩余时间" },
+                        { "data": "LeftTime", "title": "剩余时间" }
                     ]
                 });
             $(".ms2").empty();
@@ -294,7 +319,7 @@ function queryFlowCard() {
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                    '<input type="number" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
                     '</div>' +
                     '</div>';
@@ -429,17 +454,17 @@ function showProcessData(canChange = false) {
         '<tr>' +
         '    <td style="vertical-align: middle;"><span class="num">{0}</span></td>' +
         '    <td class="form-inline">' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" maxlength="9" />' +
+        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
+        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
         '    <td class="form-inline">' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" maxlength="9" />' +
+        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
+        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
-        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" maxlength="9" /></td>' +
-        '    <td><input class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" maxlength="9" /></td>' +
+        '    <td><input type="number" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" maxlength="9" /></td>' +
+        '    <td><input type="number" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" maxlength="9" /></td>' +
         '    <td><button type="button" class="minus btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>' +
         '<button type="button" class="plus btn btn-success btn-xs"><i class="fa fa-plus"></i></button></td>' +
         '</tr>';

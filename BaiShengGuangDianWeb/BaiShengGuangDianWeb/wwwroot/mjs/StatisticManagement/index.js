@@ -729,6 +729,12 @@ function rateList(i, deviceId, time) {
                 .format(escape(data.ProcessData))
                 : "";
         }
+        var actualThickness = function (data, type, row) {
+            return data.ActualThickness == "0" ? "" : data.ActualThickness;
+        }
+        var requirementMid = function (data, type, row) {
+            return data.RequirementMid == "0" ? "" : data.RequirementMid;
+        }
         $("#processList" + i).empty();
         $("#processList" + i).DataTable({
             "destroy": true,
@@ -748,6 +754,8 @@ function rateList(i, deviceId, time) {
                 { "data": null, "title": "加工时间", "render": totalTime },
                 { "data": "ProductionProcessName", "title": "计划号" },
                 { "data": "FlowCardName", "title": "流程卡号" },
+                { "data": null, "title": "片厚", "render": actualThickness },
+                { "data": null, "title": "要求", "render": requirementMid },
                 { "data": "ProcessorName", "title": "加工人" },
                 { "data": null, "title": "工艺", "render": op }
             ]

@@ -267,9 +267,6 @@ function addFlowCard() {
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getFlowCardList();
-                }
             });
     }
     showConfirm("添加", doSth);
