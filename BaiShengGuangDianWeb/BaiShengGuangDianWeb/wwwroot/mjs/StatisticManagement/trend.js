@@ -74,6 +74,16 @@
         $("#video").removeClass("hidden");
         canImg = setInterval("capture()", 500);
     });
+    $(document).on("visibilitychange", function () {
+        var page = this.visibilityState;
+        if (page == "hidden" && !$("#video").is(":hidden")) {
+            clearCanvas();
+            closeVideo.stop();
+            clearInterval(canImg);
+            videos = 0;
+            $("#video").addClass("hidden");
+        }
+    });
     $("#upload").click(function () {
         if (videos % 2 != 0) {
             closeVideo.stop();

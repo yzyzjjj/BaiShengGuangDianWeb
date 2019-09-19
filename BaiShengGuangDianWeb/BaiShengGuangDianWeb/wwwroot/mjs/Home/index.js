@@ -74,6 +74,8 @@
             closeVideo.stop();
             clearInterval(canImg);
             videos = 0;
+            $("#video").addClass("hidden");
+            $("#video1").addClass("hidden");
         }
     });
     if (!pcAndroid()) {
@@ -1416,7 +1418,8 @@ function getObjectURL(file) {
 function fileUp() {
     var newFile = document.getElementById('file');
     //   console.log(newfile[0]);
-    //console.log(getObjectURL(this.files[0]));           // newfile[0]是通过input file上传的二维码图片文件
+    //console.log(getObjectURL(this.files[0]));
+    // newfile[0]是通过input file上传的二维码图片文件
     qrcode.decode(getObjectURL(newFile.files[0]));
     qrcode.callback = function (e) {
         //结果回调

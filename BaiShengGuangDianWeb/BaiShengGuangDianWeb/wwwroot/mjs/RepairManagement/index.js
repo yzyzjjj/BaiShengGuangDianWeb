@@ -23,7 +23,9 @@
             $("#fBtn").addClass("hidden");
             $("#fTime").removeClass("hidden");
             $("#fStartDate").val(getDate()).datepicker('update');
+            $("#fStartTime").val(getTime()).timepicker("setTime",getTime());
             $("#fEndDate").val(getDate()).datepicker('update');
+            $("#fEndTime").val(getTime()).timepicker("setTime", getTime());
         }
     });
     $(".rHead label").on("ifChanged", function () {
@@ -34,7 +36,9 @@
             $("#rBtn").addClass("hidden");
             $("#rTime").removeClass("hidden");
             $("#rStartDate").val(getDate()).datepicker('update');
+            $("#rStartTime").val(getTime()).timepicker("setTime", getTime());
             $("#rEndDate").val(getDate()).datepicker('update');
+            $("#rEndTime").val(getTime()).timepicker("setTime", getTime());
         }
     });
     $("#singleFaultType1").on("select2:select", function (e) {

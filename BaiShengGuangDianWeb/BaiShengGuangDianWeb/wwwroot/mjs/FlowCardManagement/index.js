@@ -46,6 +46,16 @@
         $("#video").removeClass("hidden");
         canImg = setInterval("capture()", 500);
     });
+    $(document).on("visibilitychange", function () {
+        var page = this.visibilityState;
+        if (page == "hidden" && !$("#video").is(":hidden")) {
+            clearCanvas();
+            closeVideo.stop();
+            clearInterval(canImg);
+            videos = 0;
+            $("#video").addClass("hidden");
+        }
+    });
     $("#upload").click(function () {
         if (videos % 2 != 0) {
             closeVideo.stop();
@@ -76,18 +86,20 @@
         var e = $(this).index();
         if ($(this).find(".icb_minimal").is(":checked")) {
             $(".fcBody").eq(e).removeClass("hidden");
+            if (e == 1) {
+                $("#flowCardStartDate").val(getDate()).datepicker('update');
+                $("#flowCardEndDate").val(getDate()).datepicker('update');
+            }
         } else {
             $(".fcBody").eq(e).addClass("hidden");
             if (e == 0) {
                 $("#flowCardId").val("");
-                closeVideo.stop();
-                clearInterval(canImg);
-                $("#video").addClass("hidden");
-                videos = 0;
-            }
-            if (e == 1) {
-                $("#flowCardStartDate").val(getDate()).datepicker('update');
-                $("#flowCardEndDate").val(getDate()).datepicker('update');
+                if (!$("#video").is(":hidden")) {
+                    closeVideo.stop();
+                    clearInterval(canImg);
+                    $("#video").addClass("hidden");
+                    videos = 0;
+                }
             }
             if (e == 2) {
                 $("#selectPlanList").val($("#selectPlanList").find("option:first").val()).trigger("change");
@@ -103,14 +115,14 @@
         var e = $(this).index();
         if ($(this).find(".icb_minimal").is(":checked")) {
             $(".jhBody").eq(e).removeClass("hidden");
+            if (e == 1) {
+                $("#jhStartDate").val(getDate()).datepicker('update');
+                $("#jhEndDate").val(getDate()).datepicker('update');
+            }
         } else {
             $(".jhBody").eq(e).addClass("hidden");
             if (e == 0) {
                 $("#selectJhList").val($("#selectJhList").find("option:first").val()).trigger("change");
-            }
-            if (e == 1) {
-                $("#jhStartDate").val(getDate()).datepicker('update');
-                $("#jhEndDate").val(getDate()).datepicker('update');
             }
         }
         if (!$(".jhHead .icb_minimal").is(":checked")) {
@@ -123,14 +135,14 @@
         var e = $(this).index();
         if ($(this).find(".icb_minimal").is(":checked")) {
             $(".ylBody").eq(e).removeClass("hidden");
+            if (e == 1) {
+                $("#ylStartDate").val(getDate()).datepicker('update');
+                $("#ylEndDate").val(getDate()).datepicker('update');
+            }
         } else {
             $(".ylBody").eq(e).addClass("hidden");
             if (e == 0) {
                 $("#selectYlList").val($("#selectYlList").find("option:first").val()).trigger("change");
-            }
-            if (e == 1) {
-                $("#ylStartDate").val(getDate()).datepicker('update');
-                $("#ylEndDate").val(getDate()).datepicker('update');
             }
         }
         if (!$(".ylHead .icb_minimal").is(":checked")) {
