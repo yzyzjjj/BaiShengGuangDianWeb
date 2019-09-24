@@ -15,7 +15,7 @@
     $("#rEndDate").val(getDate()).datepicker('update');
     $(".fHead input,.fHead span").css("verticalAlign", "middle");
     $(".rHead input,.rHead span").css("verticalAlign", "middle");
-    $(".fHead label").on("ifChanged", function() {
+    $(".fHead label").on("ifChanged", function () {
         if (!$(".fHead .icb_minimal").is(":checked")) {
             $("#fBtn").removeClass("hidden");
             $("#fTime").addClass("hidden");
@@ -23,7 +23,7 @@
             $("#fBtn").addClass("hidden");
             $("#fTime").removeClass("hidden");
             $("#fStartDate").val(getDate()).datepicker('update');
-            $("#fStartTime").val(getTime()).timepicker("setTime",getTime());
+            $("#fStartTime").val(getTime()).timepicker("setTime", getTime());
             $("#fEndDate").val(getDate()).datepicker('update');
             $("#fEndTime").val(getTime()).timepicker("setTime", getTime());
         }
@@ -95,6 +95,25 @@
         //   直接调用 参数代表分钟数,可以有一位小数;
         timeUserFun(1);
     }
+    var focus = null;
+    var currentTop = 0;
+    var time, date;
+    $("#singleFaultModel").on("scroll", function () {
+        if (focus != document.activeElement) {
+            focus = document.activeElement;
+            currentTop = $(focus).offset().top;
+            if ($(".bootstrap-timepicker-widget").length > 0) {
+                time = $(".bootstrap-timepicker-widget").offset().top;
+            }
+            if ($(".datepicker").length > 0) {
+                date = $(".datepicker").offset().top;
+            }
+        }
+        var nowTop = $(focus).offset().top;
+        var top = nowTop - currentTop;
+        $(".bootstrap-timepicker-widget").css("top", (time + top) + "px");
+        $(".datepicker").css("top", (date + top) + "px");
+    });
 }
 var faultData = null;
 function getFaultType() {
@@ -384,7 +403,7 @@ function getDelFaultDeviceList() {
             EndTime: endTime
         });
     }
-    ajaxPost("/Relay/Post", data, function(ret) {
+    ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -421,7 +440,7 @@ function getDelFaultDeviceList() {
                             return full.FaultDescription.length > tdShowContentLength
                                 ? full.FaultDescription.substr(0, tdShowContentLength) +
                                 '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                                .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
+                                    .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
                                 : full.FaultDescription;
                         }
                     }
@@ -766,7 +785,7 @@ function getDelRepairList() {
                             return full.FaultDescription.length > tdShowContentLength
                                 ? full.FaultDescription.substr(0, tdShowContentLength) +
                                 '<a tittle = \'{1}\'  href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                                .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
+                                    .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
                                 : full.FaultDescription;
                         }
                     }

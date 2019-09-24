@@ -1266,6 +1266,11 @@ function addCraft() {
             layer.msg("请输入片厚");
             return;
         };
+        difference = parseFloat(difference)
+        if (difference <= 0 || difference > 1) {
+            layer.msg("片厚范围在0-1之间");
+            return;
+        }
         h = difference;
     }
     var doSth = function () {

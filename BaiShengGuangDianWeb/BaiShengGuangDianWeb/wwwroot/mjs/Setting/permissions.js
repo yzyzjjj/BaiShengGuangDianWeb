@@ -94,7 +94,7 @@ function delPermission() {
             //向空数组添加新的元素
             listId.push(newList[i]);
         } else {
-            listName.push(newList[i]);
+            listName.push(newList[i].trim());
         }
     }
     var delId = listId.join(",");

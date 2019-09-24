@@ -207,13 +207,13 @@ function getBoardData() {
                     myChart1.setOption(option1, true);
                     if (xData[xData.length - 1] == code[code.length - 1] || isStrEmptyOrUndefined(xData[xData.length - 1])) {
                         clearInterval(setRate);
-                        setTimeout("getBoardData()", 4000);
+                        setTimeout(getBoardData, 4000);
                     }
                 }, 5000);
             }
             if (code.length <= 20) {
                 clearInterval(setRate);
-                setTimeout("getBoardData()", 4000);
+                setTimeout(getBoardData, 4000);
             }
             //当前加工设备
             var useCodeList = ret.data.UseCodeList;
