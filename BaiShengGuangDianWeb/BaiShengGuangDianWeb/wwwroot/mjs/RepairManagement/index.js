@@ -110,6 +110,7 @@
             }
         }
         var nowTop = $(focus).offset().top;
+        console.log(nowTop);
         var top = nowTop - currentTop;
         $(".bootstrap-timepicker-widget").css("top", (time + top) + "px");
         $(".datepicker").css("top", (date + top) + "px");

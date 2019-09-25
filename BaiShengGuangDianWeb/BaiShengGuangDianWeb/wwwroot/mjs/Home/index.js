@@ -105,6 +105,11 @@
             $("#thick").addClass("hidden");
         }
     });
+    $("#addCraftDate").on("change", function() {
+        if (isStrEmptyOrUndefined($(this).val())) {
+            $(this).val(getDate());
+        }
+    });
 }
 
 var loads;
@@ -1245,6 +1250,10 @@ function addCraft() {
     var addCode = $("#addCraftCode").val();
     if (isStrEmptyOrUndefined(addCode)) {
         layer.msg("请选择设备");
+        return;
+    }
+    if (isStrEmptyOrUndefined($("#addCraftDate").val())) {
+        layer.msg("请选择完整的时间");
         return;
     }
     var time = $("#addCraftDate").val() + " " + $("#addCraftTime").val();
