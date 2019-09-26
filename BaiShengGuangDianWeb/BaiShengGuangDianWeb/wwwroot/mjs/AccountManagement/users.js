@@ -62,11 +62,11 @@ function getUsersList() {
                     '</div>';
                 var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType));
                 var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
-                !checkPermission(76) && checkPermission(75) && data.isDeleted
+                (!checkPermission(76) && !checkPermission(75)) || data.isDeleted
                     ? html = ""
                     : html = html.format(
                         checkPermission(76) ? upUsers : "",
-                        checkPermission(75) && !data.isDeleted ? delUsers : "");
+                        checkPermission(75) ? delUsers : "");
                 return html;
             }
             var del = function (data, type, row) {

@@ -220,7 +220,7 @@ function initHubCallBack() {
     });
 }
 
-$(function () {
+$(function() {
     $('.form_date').datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm-dd',
@@ -239,7 +239,7 @@ $(function () {
         autoclose: true
     });
     $('.form_time').timepicker({
-        format:"HH:mm:ss",
+        format: "HH:mm:ss",
         language: 'zh-CN',
         showMeridian: false,
         minuteStep: 1,
@@ -259,14 +259,29 @@ $(function () {
         $(".form_date,.form_month,.form_time").attr("readonly", true);
     }
     $('.modal').on('hidden.bs.modal',
-        function () {
+        function() {
             if ($('.modal.in').size() >= 1) {
                 $('body').addClass('modal-open');
             }
         });
     //$("input").attr("onkeyup", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
     //$("input").attr("onpaste", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
-    $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
     $.fn.select2.defaults.set('width', '100%');
 
-})
+});
+//datatables自定义排序
+jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+    "html-percent-pre": function (a) {
+        var x = String(a).replace(/<[\s\S]*?>/g, "");    //去除html标记
+        x = x.replace(/&amp;nbsp;/ig, "");                   //去除空格
+        x = x.replace(/%/, "");                          //去除百分号
+        return parseFloat(x);
+    },
+    "html-percent-asc": function (a, b) {                //正序排序引用方法
+        return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    },
+    "html-percent-desc": function (a, b) {                //倒序排序引用方法
+        return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    }
+});

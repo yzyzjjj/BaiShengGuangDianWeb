@@ -191,7 +191,8 @@ function getDeviceList() {
                                         .format(data.Id)
                                     : placeName;
                             }
-                        }
+                        },
+                        { "type": "html-percent", "targets": [2] }
                     ]
                 });
         });

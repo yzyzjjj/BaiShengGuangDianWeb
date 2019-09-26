@@ -110,7 +110,6 @@
             }
         }
         var nowTop = $(focus).offset().top;
-        console.log(nowTop);
         var top = nowTop - currentTop;
         $(".bootstrap-timepicker-widget").css("top", (time + top) + "px");
         $(".datepicker").css("top", (date + top) + "px");
@@ -241,13 +240,15 @@ function getFaultDeviceList() {
                     {
                         "targets": [8],
                         "render": rModel
-                    }
+                    },
+                    { "type": "html-percent", "targets": [2] }
                 ]
                 : [
                     {
                         "targets": [8],
                         "render": rModel
-                    }
+                    },
+                    { "type": "html-percent", "targets": [2] }
                 ];
             $("#faultDeviceList")
                 .DataTable({
@@ -444,7 +445,8 @@ function getDelFaultDeviceList() {
                                     .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
                                 : full.FaultDescription;
                         }
-                    }
+                    },
+                    { "type": "html-percent", "targets": [2] }
                 ]
             });
     });
@@ -668,10 +670,12 @@ function getRepairRecordList() {
             var defs = checkPermission(414) || checkPermission(416)
                 ? [
                     { "orderable": false, "targets": 9 },
-                    { "targets": [5], "render": rModel }
+                    { "targets": [5], "render": rModel },
+                    { "type": "html-percent", "targets": [1] }
                 ]
                 : [
-                    { "targets": [5], "render": rModel }
+                    { "targets": [5], "render": rModel },
+                    { "type": "html-percent", "targets": [1] }
                 ];
             $("#repairRecordList")
                 .DataTable({
@@ -789,7 +793,8 @@ function getDelRepairList() {
                                     .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
                                 : full.FaultDescription;
                         }
-                    }
+                    },
+                    { "type": "html-percent", "targets": [1] }
                 ]
             });
     });

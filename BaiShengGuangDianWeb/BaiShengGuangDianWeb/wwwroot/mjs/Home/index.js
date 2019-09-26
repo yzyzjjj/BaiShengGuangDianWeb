@@ -242,6 +242,9 @@ function getDeviceList() {
                         { "data": "FlowCard", "title": "流程卡号" },
                         { "data": "ProcessTime", "title": "加工时间" },
                         { "data": "LeftTime", "title": "剩余时间" }
+                    ],
+                    "columnDefs": [
+                        { "type": "html-percent", "targets": [2] }
                     ]
                 });
             $(".ms2").empty();
