@@ -29,7 +29,14 @@ var commonfunc = function () {
                 window.location.href = loginUrl;
             });
     });
-
+    $("#search-select").select2({
+        allowClear: true,
+        placeholder: ""
+    });
+    $("#search-select").on('select2:select', function() {
+        $("#search-text").val($(this).find("option:selected").text());
+        $("#search-text").css('backgroundColor', 'white');
+    });
     //控制左侧菜单栏的权限控制
     $(".sidebar-menu li.mli").remove();
     ajaxGet("/Account/Pages",
@@ -39,7 +46,6 @@ var commonfunc = function () {
                 layer.msg(ret.msg);
                 return;
             }
-
             var mMenu1 = '<li class="mli">' +
                 '   <a class="menuitem">' +
                 '       <i class="mi fa"></i> <span class="mt"></span>' +
@@ -60,8 +66,15 @@ var commonfunc = function () {
             var mMenu3 = '<li>' +
                 '   <a class="menuitem" > <i class="fa fa-circle-o"></i><span></span></a>' +
                 '</li >';
-
+            var select = '<option value="{0}">{1}</option>';
             var datas = ret.datas;
+            $("#search-select").empty();
+            $("#search-select").append('<option></option>');
+            $.each(datas, function(index, item) {
+                if (!isStrEmptyOrUndefined(item.url)) {
+                    $("#search-select").append(select.format(item.url, item.name.trim()));
+                }
+            });
             var parents = getParent(datas);
             for (var i = 0; i < parents.length; i++) {
                 var childs = getChild(datas, parents[i]);
@@ -70,14 +83,14 @@ var commonfunc = function () {
                     var option = null;
                     if (child.parent == 0) {
                         if (child.url == "") {
-                            option = $(mMenu2).clone()
-                            option.find('.treeview-menu').attr('id', "main"+child.id);
+                            option = $(mMenu2).clone();
+                            option.find('.treeview-menu').attr('id', "main" + child.id);
                             option.find('i.mi').addClass(child.icon);
                             option.find('span.mt').text(child.name);
                             $(".sidebar-menu").append(option);
                         } else {
-                            option = $(mMenu1).clone()
-                            option.find('.menuitem').attr('id', "main" +child.id);
+                            option = $(mMenu1).clone();
+                            option.find('.menuitem').attr('id', "main" + child.id);
                             option.find('.menuitem').attr('href', child.url);
                             option.find('i.mi').addClass(child.icon);
                             option.find('span.mt').text(child.name);
@@ -85,7 +98,7 @@ var commonfunc = function () {
                         }
                     } else {
                         option = $(mMenu3).clone();
-                        option.find('.treeview-menu').attr('id', "main" +child.id);
+                        option.find('.treeview-menu').attr('id', "main" + child.id);
                         option.find('a').attr('href', child.url);
                         option.find('span').text(child.name);
                         $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
@@ -96,13 +109,20 @@ var commonfunc = function () {
             var url = window.location;
             $("a.menuitem[href]").filter(function () {
                 var u = this.pathname;
-                return this.pathname === url.pathname
+                return this.pathname === url.pathname;
             }).parent().addClass("active").parent().parent().addClass("active");
         });
 
     //服务地址
     initHub();
 
+}
+//搜索栏
+function searchPage() {
+    var url = $("#search-select").val();
+    if (!isStrEmptyOrUndefined(url)) {
+        window.location = url;
+    }
 }
 
 function sortRule(a, b) {
@@ -220,7 +240,17 @@ function initHubCallBack() {
     });
 }
 
-$(function() {
+$(function () {
+    $('.form_date').on("keydown", function (e) {
+        if (e.keyCode == 13) {
+            $(this).blur();
+        };
+        $('.form_date').on("change", function() {
+            if (isStrEmptyOrUndefined($(this).val())) {
+                $(this).val(getDate());
+            }
+        });
+    });
     $('.form_date').datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm-dd',
@@ -229,10 +259,20 @@ $(function() {
         todayBtn: "linked",
         autoclose: true
     });
+    $('.form_month').on("keydown", function (e) {
+        if (e.keyCode == 13) {
+            $(this).blur();
+        };
+        $('.form_month').on("change", function () {
+            if (isStrEmptyOrUndefined($(this).val())) {
+                $(this).val(getNowMonth());
+            }
+        });
+    });
     $('.form_month').datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm',
-        startView: 2,
+        startView: 1,
         minViewMode: 1,
         maxViewMode: 2,
         todayBtn: "linked",
@@ -259,14 +299,14 @@ $(function() {
         $(".form_date,.form_month,.form_time").attr("readonly", true);
     }
     $('.modal').on('hidden.bs.modal',
-        function() {
+        function () {
             if ($('.modal.in').size() >= 1) {
                 $('body').addClass('modal-open');
             }
         });
     //$("input").attr("onkeyup", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
     //$("input").attr("onpaste", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
-    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+    $.fn.modal.Constructor.prototype.enforceFocus = function () { };
     $.fn.select2.defaults.set('width', '100%');
 
 });

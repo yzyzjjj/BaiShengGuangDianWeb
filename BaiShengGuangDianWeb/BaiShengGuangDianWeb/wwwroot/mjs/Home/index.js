@@ -105,11 +105,6 @@
             $("#thick").addClass("hidden");
         }
     });
-    $("#addCraftDate").on("change", function() {
-        if (isStrEmptyOrUndefined($(this).val())) {
-            $(this).val(getDate());
-        }
-    });
 }
 
 var loads;
@@ -319,7 +314,7 @@ function queryFlowCard() {
                     '<input type="checkbox" id="isDifference" class="icb_minimal">' +
                     '</div>' +
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
-                    '<label class="control-label" for="difference">当前厚度：</label>' +
+                    '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
                     '<input type="number" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
@@ -406,8 +401,8 @@ function queryProcessData() {
         return;
     }
     difference = parseFloat(difference);
-    if (difference <= 0) {
-        showTip("differenceTip", "当前厚度必须大于0");
+    if (difference == 0 || difference > 20) {
+        showTip("differenceTip", "当前厚度必须在0-20之间");
         return;
     }
     if (LastLand == 0) {
@@ -1279,8 +1274,8 @@ function addCraft() {
             return;
         };
         difference = parseFloat(difference)
-        if (difference <= 0 || difference > 1) {
-            layer.msg("片厚范围在0-1之间");
+        if (difference == 0 || difference > 20) {
+            layer.msg("片厚范围在0-20之间");
             return;
         }
         h = difference;

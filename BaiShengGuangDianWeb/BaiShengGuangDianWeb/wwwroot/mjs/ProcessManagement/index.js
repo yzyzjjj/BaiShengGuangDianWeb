@@ -97,193 +97,139 @@ function getProcessList(type = 307) {
             var order = function (data, type, row) {
                 return ++o;
             }
-            if (checkPermission(313) || checkPermission(317)) {
-                $("#processList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[1, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "操作", "render": op },
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "ProcessNumber", "title": "工艺编号" },
-                            { "data": "ModelName", "title": "设备型号" },
-                            { "data": "ProductionProcessName", "title": "产品型号" },
-                            { "data": "Code", "title": "机台号" }
-                        ],
-                        "columnDefs": [
-                            { "orderable": false, "targets": 0 },
-                            {
-                                "targets": [4],
-                                "render": function (data, type, full, meta) {
-                                    if (full.ProcessNumber) {
-                                        if (full.ProcessNumber.length > tdShowContentLength) {
-                                            return full.ProcessNumber.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
-                                                    .format(escape(full.ProcessNumber));
-                                        } else {
-                                            return full.ProcessNumber;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [5],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.ModelName) {
-                                        if (full.ModelName.length > tdShowContentLength) {
-                                            return full.ModelName.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
-                                                    .format(escape(full.ModelName));
-                                        } else {
-                                            return full.ModelName;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [6],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.ProductionProcessName) {
-                                        if (full.ProductionProcessName.length > tdShowContentLength) {
-                                            return full.ProductionProcessName.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
-                                                    .format(escape(full.ProductionProcessName));
-                                        } else {
-                                            return full.ProductionProcessName;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [7],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.Code) {
-                                        if (full.Code.length > tdShowContentLength) {
-                                            return full.Code.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '
-                                                    .format(escape(full.Code));
-                                        } else {
-                                            return full.Code;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            } else {
-                $("#processList")
-                    .DataTable({
-                        "destroy": true,
-                        "paging": true,
-                        "searching": true,
-                        "language": { "url": "/content/datatables_language.json" },
-                        "data": ret.datas,
-                        "aaSorting": [[0, "asc"]],
-                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                        "iDisplayLength": 20, //默认显示的记录数
-                        "columns": [
-                            { "data": null, "title": "序号", "render": order },
-                            { "data": "Id", "title": "Id", "bVisible": false },
-                            { "data": "MarkedDateTime", "title": "修改时间" },
-                            { "data": "ProcessNumber", "title": "工艺编号" },
-                            { "data": "ModelName", "title": "设备型号" },
-                            { "data": "ProductionProcessName", "title": "产品型号" },
-                            { "data": "Code", "title": "机台号" }
-                        ],
-                        "columnDefs": [
-                            {
-                                "targets": [3],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.ProcessNumber) {
-                                        if (full.ProcessNumber.length > tdShowContentLength) {
-                                            return full.ProcessNumber.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ProcessNumber));
-                                        } else {
-                                            return full.ProcessNumber;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [4],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.ModelName) {
-                                        if (full.ModelName.length > tdShowContentLength) {
-                                            return full.ModelName.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ModelName));
-                                        } else {
-                                            return full.ModelName;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [5],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.ProductionProcessName) {
-                                        if (full.ProductionProcessName.length > tdShowContentLength) {
-                                            return full.ProductionProcessName.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.ProductionProcessName));
-                                        } else {
-                                            return full.ProductionProcessName;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            },
-                            {
-                                "targets": [6],
-                                "render": function (data, type, full, meta) {
-
-                                    if (full.Code) {
-                                        if (full.Code.length > tdShowContentLength) {
-                                            return full.Code.substr(0, tdShowContentLength) +
-                                                '<a href = \"javascript:showDetailModel(\'{0}\')\">...</a> '.format(escape(full.Code));
-                                        } else {
-                                            return full.Code;
-                                        }
-                                    } else {
-                                        return "";
-                                    }
-                                }
-                            }
-                        ]
-                    });
-            }
+            var columns = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
+                ? [
+                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProcessNumber", "title": "工艺编号" },
+                    { "data": "ModelName", "title": "设备型号" },
+                    { "data": "ProductionProcessName", "title": "产品型号" },
+                    { "data": "Code", "title": "机台号" }
+                ]
+                : [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProcessNumber", "title": "工艺编号" },
+                    { "data": "ModelName", "title": "设备型号" },
+                    { "data": "ProductionProcessName", "title": "产品型号" },
+                    { "data": "Code", "title": "机台号" }
+                ];
+            var rProcessNumber = function (data, type, full, meta) {
+                if (full.ProcessNumber) {
+                    if (full.ProcessNumber.length > tdShowContentLength) {
+                        return full.ProcessNumber.substr(0, tdShowContentLength) +
+                            '<a href = \"javascript:showDetailModel(\'{0}\', \'{1}\')\">...</a> '
+                                .format(escape(full.ProcessNumber), escape('工艺编号'));
+                    } else {
+                        return full.ProcessNumber;
+                    }
+                } else {
+                    return "";
+                }
+            };
+            var rModelName = function (data, type, full, meta) {
+                if (full.ModelName) {
+                    if (full.ModelName.length > tdShowContentLength) {
+                        return full.ModelName.substr(0, tdShowContentLength) +
+                            '<a href = \"javascript:showDetailModel(\'{0}\', \'{1}\')\">...</a> '
+                                .format(escape(full.ModelName), escape('设备型号'));
+                    } else {
+                        return full.ModelName;
+                    }
+                } else {
+                    return "";
+                }
+            };
+            var rProductionProcessName = function (data, type, full, meta) {
+                if (full.ProductionProcessName) {
+                    if (full.ProductionProcessName.length > tdShowContentLength) {
+                        return full.ProductionProcessName.substr(0, tdShowContentLength) +
+                            '<a href = \"javascript:showDetailModel(\'{0}\', \'{1}\')\">...</a> '
+                                .format(escape(full.ProductionProcessName), escape('产品型号'));
+                    } else {
+                        return full.ProductionProcessName;
+                    }
+                } else {
+                    return "";
+                }
+            };
+            var rCode = function (data, type, full, meta) {
+                if (full.Code) {
+                    if (full.Code.length > tdShowContentLength) {
+                        return full.Code.substr(0, tdShowContentLength) +
+                            '<a href = \"javascript:showDetailModel(\'{0}\', \'{1}\')\">...</a> '
+                                .format(escape(full.Code), escape('机台号'));
+                    } else {
+                        return full.Code;
+                    }
+                } else {
+                    return "";
+                }
+            };
+            var defs = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
+                ? [
+                    { "orderable": false, "targets": 0 },
+                    {
+                        "targets": [4],
+                        "render": rProcessNumber
+                    },
+                    {
+                        "targets": [5],
+                        "render": rModelName
+                    },
+                    {
+                        "targets": [6],
+                        "render": rProductionProcessName
+                    },
+                    {
+                        "targets": [7],
+                        "render": rCode,
+                        "type": "html-percent"
+                    }
+                ]
+                : [
+                    {
+                        "targets": [3],
+                        "render": rProcessNumber
+                    },
+                    {
+                        "targets": [4],
+                        "render": rModelName
+                    },
+                    {
+                        "targets": [5],
+                        "render": rProductionProcessName
+                    },
+                    {
+                        "targets": [6],
+                        "render": rCode,
+                        "type": "html-percent"
+                    }
+                ];
+            $("#processList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": { "url": "/content/datatables_language.json" },
+                    "data": ret.datas,
+                    "aaSorting": [[1, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "columnDefs": defs
+                });
         });
 }
 
-function showDetailModel(content) {
+function showDetailModel(content, title) {
     content = unescape(content);
-
-    $("#detail").html(content);
+    title = unescape(title);
+    $("#detailTitle").text(title);
+    $("#detail").text(content);
     $("#detailModel").modal("show");
 }
 
@@ -432,7 +378,25 @@ function showProcessDetailModel(id) {
                                     { "data": null, "title": "序号", "render": order },
                                     { "data": "Id", "title": "Id", "bVisible": false },
                                     { "data": "ProcessNumber", "title": "工艺编号" },
-                                    { "data": "Code", "title": "适用机台号" },
+                                    { "data": "Code", "title": "适用机台号" }
+                                ],
+                                "columnDefs": [
+                                    {
+                                        "targets": [3],
+                                        "render": function (data, type, full, meta) {
+                                            if (full.Code) {
+                                                if (full.Code.length > tdShowContentLength) {
+                                                    return full.Code.substr(0, tdShowContentLength) +
+                                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
+                                                            .format(escape(full.Code), escape("适用机台号"));
+                                                } else {
+                                                    return full.Code;
+                                                }
+                                            } else {
+                                                return "";
+                                            }
+                                        }
+                                    }
                                 ]
                             });
 
@@ -486,7 +450,26 @@ function showProcessDetailModel(id) {
                                     { "data": null, "title": "序号", "render": order },
                                     { "data": "Id", "title": "Id", "bVisible": false },
                                     { "data": "Code", "title": "机台号" },
-                                    { "data": "ProcessNumber", "title": "所用工艺编号" },
+                                    { "data": "ProcessNumber", "title": "所用工艺编号" }
+                                ],
+                                "columnDefs": [
+                                    { "type": "html-percent", "targets": [2] },
+                                    {
+                                        "targets": [3],
+                                        "render": function (data, type, full, meta) {
+                                            if (full.ProcessNumber) {
+                                                if (full.ProcessNumber.length > tdShowContentLength) {
+                                                    return full.ProcessNumber.substr(0, tdShowContentLength) +
+                                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
+                                                            .format(escape(full.ProcessNumber), escape("所用工艺编号"));
+                                                } else {
+                                                    return full.ProcessNumber;
+                                                }
+                                            } else {
+                                                return "";
+                                            }
+                                        }
+                                    }
                                 ]
                             });
 

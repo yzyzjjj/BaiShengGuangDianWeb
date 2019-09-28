@@ -917,9 +917,10 @@ function rChange(id, type) {
                     placeholder: "请选择"
                 });
                 var option = '<option value="{0}">{1}</option>';
+                $("#rFaultCode").append('<option></option>');
                 for (var i = 0; i < ret.datas.length; i++) {
                     var data = ret.datas[i];
-                    $("#rFaultCode").append('<option></option>' + option.format(data.Code, data.Code));
+                    $("#rFaultCode").append(option.format(data.Code, data.Code));
                 }
                 $("#recordAdd").removeClass("hidden");
                 $("#singleFaultModel").modal("show");

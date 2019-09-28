@@ -204,8 +204,8 @@ function createChart(type) {
             layer.msg("结束时间不能小于开始时间");
             return;
         }
-        if (new Date(end).getTime() - new Date(start).getTime() > 259200000) {
-            layer.msg("时间范围不能超过3天");
+        if (new Date(end) - new Date(start) > 86400000) {
+            layer.msg("时间范围不能超过一天");
             return;
         }
         var dataTime = 0;
@@ -293,13 +293,19 @@ function createChart(type) {
                             trigger: "axis"
                         },
                         xAxis: {
+                            type: "category",
                             data: time
                         },
-                        yAxis: {},
+                        yAxis: {
+                            type: "category"
+                        },
                         series: [{
                             name: parName,
                             type: "line",
-                            data: v[Object.keys(v)[s]]
+                            data: v[Object.keys(v)[s]],
+                            showSymbol: false,
+                            sampling: 'average',
+                            showAllSymbol: false
                         }],
                         dataZoom: [{
                             type: "slider",

@@ -40,15 +40,8 @@
         $(time[2]).find("td")[2].remove();
         $(time[2]).find("td")[3].remove();
     });
-    $(".month-picker").val(getNowMonth()).datepicker({
-        format: "yyyy-mm",
-        language: "zh-CN",
-        autoclose: true,
-        startView: 1,
-        minViewMode: 1,
-        maxViewMode: 2
-    });
-    $("#selectWeek,#conWeek").val(getWeek()).datepicker({
+    $(".form_month").val(getNowMonth()).datepicker("update");
+    $(".week").val(getWeek()).datepicker({
         format: "yyyy-mm-dd",
         language: "zh-CN",
         calendarWeeks: true,

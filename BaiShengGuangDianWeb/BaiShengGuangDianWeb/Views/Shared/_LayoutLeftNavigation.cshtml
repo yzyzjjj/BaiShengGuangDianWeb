@@ -13,16 +13,19 @@
             </div>
         </div>
         <!-- search form -->
-        <form action="#" method="get" class="sidebar-form">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Search...">
-                <span class="input-group-btn">
-                    <button type="submit" name="search" id="search-btn" class="btn btn-flat">
+        <div class="sidebar-form" style="position: relative">
+            <label class="control-label" for="search-text" style="margin: 0; opacity: 0; position: relative;z-index:10">
+                <select class="form-control" id="search-select" style="width:208px"></select>
+            </label>
+            <div class="input-group" style="position: absolute;top:0">
+                <input type="text" id="search-text" class="form-control" placeholder="Search..." autocomplete="off" style="position: relative;z-index:-1">
+                <span class="input-group-btn" style="position: relative;z-index:20">
+                    <button id="search-btn" class="btn btn-flat" onclick="searchPage()">
                         <i class="fa fa-search"></i>
                     </button>
                 </span>
             </div>
-        </form>
+        </div>
         <!-- /.search form -->
         <!-- sidebar menu: : style can be found in sidebar.less -->
         <ul class="sidebar-menu">
