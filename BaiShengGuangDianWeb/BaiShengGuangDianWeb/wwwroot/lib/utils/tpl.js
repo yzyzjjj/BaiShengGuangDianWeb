@@ -308,7 +308,6 @@ $(function () {
     //$("input").attr("onpaste", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
     $.fn.modal.Constructor.prototype.enforceFocus = function () { };
     $.fn.select2.defaults.set('width', '100%');
-
 });
 //datatables自定义排序
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {

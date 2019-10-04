@@ -316,7 +316,7 @@ function queryFlowCard() {
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input type="number" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" onblur="onInputEnd(this); queryProcessData();">' +
+                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" oninput="value=value.replace(/[^\\d\\.]/g,\'\')" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
                     '</div>' +
                     '</div>';
@@ -451,17 +451,17 @@ function showProcessData(canChange = false) {
         '<tr>' +
         '    <td style="vertical-align: middle;"><span class="num">{0}</span></td>' +
         '    <td class="form-inline">' +
-        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" maxlength="9" />' +
+        '        <input type="tel" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{1}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
+        '        <input type="tel" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{2}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
         '    <td class="form-inline">' +
-        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" maxlength="9" />' +
+        '        <input type="tel" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{3}" maxlength="9" />' +
         '        <span style="width: 10%;">:</span>' +
-        '        <input type="number" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
+        '        <input type="tel" class="text-center" style="width: 45%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{4}" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9" />' +
         '    </td>' +
-        '    <td><input type="number" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" maxlength="9" /></td>' +
-        '    <td><input type="number" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" maxlength="9" /></td>' +
+        '    <td><input type="tel" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{5}" maxlength="9" /></td>' +
+        '    <td><input type="tel" class="text-center" style="width: 80%;" oninput="value=value.replace(/[^\\d]/g,\'\')" value="{6}" maxlength="9" /></td>' +
         '    <td><button type="button" class="minus btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>' +
         '<button type="button" class="plus btn btn-success btn-xs"><i class="fa fa-plus"></i></button></td>' +
         '</tr>';

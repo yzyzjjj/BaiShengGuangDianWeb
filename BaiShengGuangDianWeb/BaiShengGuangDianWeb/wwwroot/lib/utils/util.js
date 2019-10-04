@@ -226,7 +226,7 @@ function addToken(data) {
 
 //获取带token的表
 function getTokenTable() {
-    var token = GetCookie("token")
+    var token = GetCookie("token");
     if (isStrEmptyOrUndefined(token)) {
         return {}
     }

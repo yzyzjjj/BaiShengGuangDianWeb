@@ -1097,7 +1097,7 @@ function getUsuallyFaultList() {
                 : [
                     { "data": "Id", "title": "序号" },
                     { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                    { "data": "SolverPlan", "title": "解决方法" },
+                    { "data": "SolverPlan", "title": "解决方法" }
                 ];
             var rModel = function (data, type, full, meta) {
                 full.SolverPlan = full.SolverPlan ? full.SolverPlan : "";

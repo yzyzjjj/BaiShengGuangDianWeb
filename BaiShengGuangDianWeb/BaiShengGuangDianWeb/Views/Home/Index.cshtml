@@ -36,7 +36,7 @@
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div class="form-inline">
                             <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                <input type="number" class="form-control" id="flowCard" value="" autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="width: 140px">
+                                <input type="tel" class="form-control" id="flowCard" value="" autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="width: 140px">
                                 <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left: 3px">查询</button>
                                 <button type="button" id="flowCardEmpty" class="btn btn-success">清空</button>
                             </div>
@@ -258,7 +258,7 @@
                     <div class="form-group">
                         <label class="control-label">流程卡号：</label>
                         <div class="form-inline">
-                            <input type="number" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
+                            <input type="tel" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                             <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
                             <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button><br>
                             <label class="label-danger hidden" id="rpFlowCardTip"></label>
@@ -328,7 +328,7 @@
                                 <div class="form-group form-inline hidden" id="thick">
                                     <label class="control-label" for="addCraftThickness">片厚(mm)：</label>
                                     <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                        <input type="number" class="form-control" id="addCraftThickness" placeholder="请输入当前厚度" oninput="value=value.replace(/[^\d\.]/g,'')" style="width:150px" onfocusin="focusIn($(this))" maxlength="9">
+                                        <input type="tel" class="form-control" id="addCraftThickness" placeholder="请输入当前厚度" oninput="value=value.replace(/[^\d\.]/g,'')" style="width:150px" onfocusin="focusIn($(this))" maxlength="6">
                                     </div>
                                 </div>
                             </div>

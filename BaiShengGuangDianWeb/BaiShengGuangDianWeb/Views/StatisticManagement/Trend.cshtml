@@ -55,7 +55,7 @@
                         <div class="form-group">
                             <label class="control-label" for="inputFlowCard">流程卡号：</label>
                             <div class="form-inline">
-                                <input type="number" class="form-control" id="inputFlowCard" autocomplete="off" placeholder="请输入流程卡号" onclick="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
+                                <input type="tel" class="form-control" id="inputFlowCard" autocomplete="off" placeholder="请输入流程卡号" onclick="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
                                 <button type="button" class="btn btn-primary" onclick="queryFlowCard()">查询</button>
                                 <button type="button" id="flowCardEmpty" class="btn btn-success">清空</button><br>
                                 <label class="label-danger hidden" id="inputFlowCardTip"></label>

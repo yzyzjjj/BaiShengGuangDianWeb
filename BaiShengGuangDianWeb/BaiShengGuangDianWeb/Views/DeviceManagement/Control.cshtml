@@ -37,7 +37,7 @@
                             <div class="form-group form-inline">
                                 <label class="control-label" for="resetValue" style="width: 70px">重置值：</label>
                                 <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                    <input type="number" class="form-control" autocomplete="off" id="resetValue" onchange="focusIn($(this))" style="width: 200px" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
+                                    <input type="tel" class="form-control" autocomplete="off" id="resetValue" onchange="focusIn($(this))" style="width: 200px" oninput="value=value.replace(/[^\d\-]/g,'')" maxlength="5">
                                 </div>
                             </div>
                         </div>
