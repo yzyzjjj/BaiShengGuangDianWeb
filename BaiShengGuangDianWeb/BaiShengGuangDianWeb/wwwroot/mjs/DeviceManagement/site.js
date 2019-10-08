@@ -71,14 +71,18 @@ function getSiteList() {
             var defs = checkPermission(127) || checkPermission(129)
                 ? [
                     { "orderable": false, "targets": 5 },
+                    { "type": "html-percent", "targets": [4] },
                     {
                         "targets": [3],
+                        "type": "html-percent",
                         "render": rModel
                     }
                 ]
                 : [
+                    { "type": "html-percent", "targets": [4] },
                     {
                         "targets": [3],
+                        "type": "html-percent",
                         "render": rModel
                     }
                 ];

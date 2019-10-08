@@ -1273,7 +1273,12 @@ function addCraft() {
             layer.msg("请输入片厚");
             return;
         };
-        difference = parseFloat(difference)
+        if (difference == parseFloat(difference)) {
+            difference = parseFloat(difference);
+        } else {
+            layer.msg("请输入正确的数值");
+            return;
+        }
         if (difference == 0 || difference > 20) {
             layer.msg("片厚范围在0-20之间");
             return;
