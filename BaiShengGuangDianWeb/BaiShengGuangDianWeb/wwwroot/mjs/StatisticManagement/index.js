@@ -243,15 +243,20 @@ function createChart(start1, end1) {
         layer.msg("结束时间不能小于开始时间");
         return;
     }
+    //秒
     var dataTime = 0;
-    var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
-    if (100000000 > endStart && endStart >= 1000000) {
+    //var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
+    var endStart = new Date(end) - new Date(start);
+    if (2592000000 > endStart && endStart >= 86400000) {
+        //小时
         dataTime = 1;
     }
-    if (endStart >= 100000000) {
+    if (endStart >= 2592000000) {
+        //天
         dataTime = 2;
     }
-    if ((endStart >= 10000 && endStart < 1000000) || endStart == 770000) {
+    if (endStart >= 3600000 && endStart < 86400000) {
+        //分钟
         dataTime = 3;
     }
     var data = {}
@@ -490,9 +495,11 @@ function createChart(start1, end1) {
                 var chartZoom = chartData.dataZoom[0];
                 var starts = chartData.xAxis[0].data[chartZoom.startValue];
                 var ends = chartData.xAxis[0].data[chartZoom.endValue];
-                var timeX = ends.replace(/[^0-9]+/g, "") - starts.replace(/[^0-9]+/g, "");
-                var timeY = time[time.length - 1].replace(/[^0-9]+/g, "") - time[0].replace(/[^0-9]+/g, "");
-                if (timeX == 1 && timeY != 1 && tf && ends.length == 10) {
+                //var timeX = ends.replace(/[^0-9]+/g, "") - starts.replace(/[^0-9]+/g, "");
+                var timeX = new Date(ends) - new Date(starts);
+                //var timeY = time[time.length - 1].replace(/[^0-9]+/g, "") - time[0].replace(/[^0-9]+/g, "");
+                var timeY = new Date(time[time.length - 1]) - new Date(time[0]);
+                if (timeX == 86400000 && timeY != 86400000 && tf && ends.length == 10) {
                     tf = false;
                     starts = starts + " 00:00:00";
                     ends = ends + " 00:00:00";
@@ -501,14 +508,14 @@ function createChart(start1, end1) {
                         tf = true;
                     }, 1000);
                 }
-                if ((timeX == 10000 || timeX == 770000) && timeY != 10000 && tf) {
+                if (timeX == 3600000 && timeY != 3600000 && tf) {
                     tf = false;
                     setTimeout(function () {
                         createChart(starts, ends);
                         tf = true;
                     }, 1000);
                 }
-                if (timeX == 100 && timeY != 100 && tf) {
+                if (timeX == 60000 && timeY != 60000 && tf) {
                     tf = false;
                     setTimeout(function () {
                         createChart(starts, ends);

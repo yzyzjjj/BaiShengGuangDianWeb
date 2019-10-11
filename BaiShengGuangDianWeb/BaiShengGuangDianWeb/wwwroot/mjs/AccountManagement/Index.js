@@ -91,7 +91,7 @@ function getOrganizationUnitsParent(list) {
             parents.push(data.parentId);
         }
     }
-    return parents.sort();
+    return parents.sort(function (a, b) { return a > b ? 1 : -1 });
 }
 
 function getOrganizationUnitsChild(list, parentId) {
@@ -103,7 +103,7 @@ function getOrganizationUnitsChild(list, parentId) {
         }
     }
 
-    return result.sort(rule)
+    return result.sort(rule);
 }
 
 function showAddOrganizationUnitModal() {
@@ -118,13 +118,48 @@ function showAddOrganizationUnitModal() {
                 return;
             };
             var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
+            var dataS = OrganizationUnitSort(ret.datas);
+            for (var i = 0; i < dataS.length; i++) {
+                var data = dataS[i];
                 $("#addOrganizationUnit").append(option.format(data.id, data.name));
             }
-
             $("#addOrganizationUnitModal").modal("show");
         });
+}
+
+function OrganizationUnitSort(dataS) {
+    var data = [];
+    var depName;
+    var parents = getOrganizationUnitsParent(dataS);
+    for (var i = 0; i < parents.length; i++) {
+        var children = getOrganizationUnitsChild(dataS, parents[i]);
+        for (var j = 0; j < children.length; j++) {
+            var child = children[j];
+            var parent = child.parentId;
+            if (parent == 0) {
+                data.push({
+                    id: child.id,
+                    name: child.name
+                });
+            } else {
+                depName = child.name;
+                while (parent != 0) {
+                    $.each(dataS, function (index, item) {
+                        if (item.id == parent) {
+                            depName = depName.replace("", item.name + " - ");
+                            parent = item.parentId;
+                            return false;
+                        }
+                    });
+                }
+                data.push({
+                    id: child.id,
+                    name: depName
+                });
+            }
+        }
+    }
+    return data;
 }
 
 function addOrganizationUnit() {
@@ -183,6 +218,9 @@ function updateOrganizationUnit() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getOrganizationUnits();
+                    if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
+                        $("#unName").text(organizationName);
+                    }
                 }
             });
     }
@@ -203,6 +241,13 @@ function deleteOrganizationUnit(id, organizationUnitName) {
                 if (ret.errno == 0) {
                     //getOrganizationUnits();
                     $("#on" + id).parents(".box-solid:first").remove();
+                    if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
+                        $("#memberDataTable").empty();
+                        $("#memberDataTable").append('<table class="table table-hover table-striped" id="memberListTable"></table>');
+                        $("#showAddMemberModal,#showBolModal").addClass("hidden");
+                        $("#unName").text("成员列表");
+                        $("#unName").removeAttr("value");
+                    }
                 }
             });
     }
@@ -215,7 +260,6 @@ function moveOrganizationUnits() {
 
 function onClick(id, name) {
     name = unescape(name);
-
     $("#memberListTable").empty();
     getMemberList(id, name);
 }
@@ -225,7 +269,7 @@ function getMemberList(id, name) {
     memberList = new Array();
     $("#unName").text(name);
     $("#unName").attr("value", id);
-    $("#showAddMemberModal").removeClass("hidden"); 
+    $("#showAddMemberModal").removeClass("hidden");
     $("#showBolModal").removeClass("hidden");
     var opType = 71;
     if (!checkPermission(opType)) {
@@ -258,13 +302,13 @@ function getMemberList(id, name) {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "Name", "title": "姓名" },
                     { "data": "RoleName", "title": "角色" },
-                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "操作", "render": op }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "Name", "title": "姓名" },
-                    { "data": "RoleName", "title": "角色" },
+                    { "data": "RoleName", "title": "角色" }
                 ];
             var defs = checkPermission(72)
                 ? [
@@ -282,7 +326,7 @@ function getMemberList(id, name) {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": columns,
-                    "columnDefs":defs,
+                    "columnDefs": defs,
                     "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
                         $("#memberListTable td").css("vertical-align", "middle");
@@ -304,10 +348,9 @@ function showAddMemberModal() {
 
             var data = new Array();
             for (var i = 0; i < ret.datas.length; i++) {
-                if (memberList.indexOf(ret.datas[i].id) == -1)
+                if (memberList.indexOf(ret.datas[i].id) == -1 && !ret.datas[i].isDeleted)
                     data.push(ret.datas[i]);
             }
-
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.id);
             }

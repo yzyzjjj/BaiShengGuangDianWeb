@@ -200,6 +200,10 @@ function createChart(type) {
             layer.msg("开始时间不能大于当前时间");
             return;
         }
+        if (exceedTime(end)) {
+            layer.msg("结束时间不能大于当前时间");
+            return;
+        }
         if (compareDate(start, end)) {
             layer.msg("结束时间不能小于开始时间");
             return;

@@ -211,12 +211,11 @@ function getDeviceList() {
             }
             var o = 0;
             var order = function (data, type, row) {
-                $("#deviceList").find("th").css("paddingRight", "22px").css("paddingLeft", 0);
-                $("#deviceList").find("td").css("padding", 0);
-                $("#deviceList").find("td").css("paddingTop", "8px").css("paddingBottom", "8px");
                 return ++o;
             }
-
+            var tdWidth = function () {
+                $("#deviceList th").css("paddingRight", "22px").css("paddingLeft", 0);
+            }
             $("#deviceList")
                 .DataTable({
                     "pagingType": "full",
@@ -240,7 +239,8 @@ function getDeviceList() {
                     ],
                     "columnDefs": [
                         { "type": "html-percent", "targets": [2] }
-                    ]
+                    ],
+                    "drawCallback": tdWidth
                 });
             $(".ms2").empty();
             var option = '<option value="{0}" id="{2}">{1}</option>';
