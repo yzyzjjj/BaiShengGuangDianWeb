@@ -299,11 +299,13 @@ function getFaultChart() {
             }
             FaultsData = ret.datas;
             var i, len = $("#par label").find(".icb_minimal").length;
+            var count = -1;
             $("#faultChart").empty();
             for (i = 0; i < len; i++) {
                 var ick = $("#par label").find(".icb_minimal")[i];
                 var span = $("#par label")[i];
                 if ($(ick).is(":checked")) {
+                    count++;
                     var time = [];
                     var rData = [];
                     var data = [];
@@ -340,16 +342,16 @@ function getFaultChart() {
                                 data: data[key]
                             });
                             if (key == "上报故障总次数") {
-                                $.each(data[key], function(index, item) {
+                                $.each(data[key], function (index, item) {
                                     return num += item;
                                 });
                                 legend = legend + "(总:" + num + "次)";
                             }
                         }
                     }
-                    var charts = '<div id="chart' + i + '" style="width: 100%; height: 500px"></div>';
+                    var charts = '<div id="chart' + count + '" style="width: 100%; height: 500px"></div>';
                     $("#faultChart").append(charts);
-                    var myChart = echarts.init(document.getElementById("chart" + i));
+                    var myChart = echarts.init(document.getElementById("chart" + count));
                     var option = {
                         title: {
                             text: legend
@@ -410,11 +412,9 @@ function getFaultChart() {
                 }
             }
             $("#faultChart").resize(function () {
+                len = $("#faultChart").children().length;
                 for (i = 0; i < len; i++) {
-                    var ks = $("#par label").find(".icb_minimal")[i];
-                    if ($(ks).is(":checked")) {
-                        echarts.init(document.getElementById("chart" + i)).resize();
-                    }
+                    echarts.init(document.getElementById("chart" + i)).resize();
                 }
             });
             $("#appSer").css("display", "none");
@@ -1685,6 +1685,7 @@ function shopChart() {
         var workShop = $("#selectWorkShop1").val();
         $("#shopConChart").empty();
         var i, len = $("#shopPar label").find(".icb_minimal").length;
+        var count = -1;
         for (i = 0; i < len; i++) {
             var ick = $("#shopPar label").find(".icb_minimal")[i];
             var span = $("#shopPar label")[i];
@@ -1693,6 +1694,7 @@ function shopChart() {
             var data = [];
             var j, a, q, k;
             if ($(ick).is(":checked")) {
+                count++;
                 listName[$(span).text()] = $(ick).val();
                 legend.push($(span).text());
                 var key;
@@ -1701,12 +1703,6 @@ function shopChart() {
                         data[key] = [];
                     }
                 }
-                //ret.datas.sort(function (x, y) {
-                //    return x.Workshop < y.Workshop ? 1 : -1;
-                //});
-                //ret.datas.sort(function (x, y) {
-                //    return x.Date > y.Date ? 1 : -1;
-                //});
                 objectSort(ret.datas, "Workshop");
                 objectSort(ret.datas, "Date");
                 var time = [];
@@ -1737,9 +1733,7 @@ function shopChart() {
                         }
                     }
                 }
-                time = time.filter(function (item, index, array) {
-                    return time.indexOf(item) === index;
-                });
+                time = distinct(time);
                 shopTime = time;
                 var rData = [];
                 for (key in listName) {
@@ -1755,9 +1749,9 @@ function shopChart() {
                         }
                     }
                 }
-                var charts = '<div id="shopChart' + i + '" style="width: 100%; height: 500px">' + '</div>';
+                var charts = '<div id="shopChart' + count + '" style="width: 100%; height: 500px">' + '</div>';
                 $("#shopConChart").append(charts);
-                var myChart = echarts.init(document.getElementById("shopChart" + i));
+                var myChart = echarts.init(document.getElementById("shopChart" + count));
                 var option = {
                     title: {
                         text: legend[0]
@@ -1820,11 +1814,9 @@ function shopChart() {
             }
         }
         $("#shopConChart").resize(function () {
+            len = $("#shopConChart").children().length;
             for (i = 0; i < len; i++) {
-                var ks = $("#shopPar label").find(".icb_minimal")[i];
-                if ($(ks).is(":checked")) {
-                    echarts.init(document.getElementById("shopChart" + i)).resize();
-                }
+                echarts.init(document.getElementById("shopChart" + i)).resize();
             }
         });
         $("#shopRight").css("display", "none");
@@ -2135,6 +2127,7 @@ function devChart() {
         var device = $("#selectDeviceDev").val();
         $("#devConChart").empty();
         var i, len = $("#devPar label").find(".icb_minimal").length;
+        var count = -1;
         for (i = 0; i < len; i++) {
             var ick = $("#devPar label").find(".icb_minimal")[i];
             var span = $("#devPar label")[i];
@@ -2143,6 +2136,7 @@ function devChart() {
             var data = [];
             var j, a, q, k;
             if ($(ick).is(":checked")) {
+                count++;
                 listName[$(span).text()] = $(ick).val();
                 legend.push($(span).text());
                 var key;
@@ -2179,9 +2173,7 @@ function devChart() {
                         }
                     }
                 }
-                time = time.filter(function (item, index, array) {
-                    return time.indexOf(item) === index;
-                });
+                time = distinct(time);
                 devTime = time;
                 var rData = [];
                 for (key in listName) {
@@ -2197,9 +2189,9 @@ function devChart() {
                         }
                     }
                 }
-                var charts = '<div id="devChart' + i + '" style="width: 100%; height: 500px">' + '</div>';
+                var charts = '<div id="devChart' + count + '" style="width: 100%; height: 500px">' + '</div>';
                 $("#devConChart").append(charts);
-                var myChart = echarts.init(document.getElementById("devChart" + i));
+                var myChart = echarts.init(document.getElementById("devChart" + count));
                 var option = {
                     title: {
                         text: legend[0]
@@ -2262,11 +2254,9 @@ function devChart() {
             }
         }
         $("#devConChart").resize(function () {
+            len = $("#devConChart").children().length;
             for (i = 0; i < len; i++) {
-                var ks = $("#devPar label").find(".icb_minimal")[i];
-                if ($(ks).is(":checked")) {
-                    echarts.init(document.getElementById("devChart" + i)).resize();
-                }
+                echarts.init(document.getElementById("devChart" + i)).resize();
             }
         });
         $("#devRight").css("display", "none");
@@ -2404,7 +2394,7 @@ function devAppChart() {
     });
 }
 
-var hourData,hourTime;
+var hourData, hourTime;
 function getFaultTimeChart() {
     var opType = 505;
     if (!checkPermission(opType)) {
@@ -2515,7 +2505,7 @@ function getFaultTimeChart() {
                         },
                         restore: {},
                         magicType: {
-                            type:["line","bar"]
+                            type: ["line", "bar"]
                         }
                     }
                 }

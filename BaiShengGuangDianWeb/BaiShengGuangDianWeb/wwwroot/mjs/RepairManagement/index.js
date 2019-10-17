@@ -309,7 +309,6 @@ function sChange(id, type) {
                 $("#singleFaultType1").val(data.FaultTypeId).trigger("change");
                 var d = data.FaultTime.split(' ');
                 $("#singleFaultDate").val(d[0]);
-                var t = d[1].split(':');
                 $("#singleFaultTime").val(d[1]);
 
                 var desc = "";
@@ -321,7 +320,7 @@ function sChange(id, type) {
                 }
                 $("#singleFaultDefaultDesc").val(desc);
 
-                $("#singleFaultDesc").html(data.FaultDescription);
+                $("#singleFaultDesc").val(data.FaultDescription);
                 $("#singleFaultPriority").val(data.Priority);
                 if (type == 0) {
                     $("#singleFaultPriority").removeAttr("disabled");
@@ -471,8 +470,8 @@ function singleChange(type) {
     var faultTime = $("#singleFaultTime").val();
     var time = "{0} {1}".format(faultDate, faultTime);
 
-    var faultDesc = $("#singleFaultDesc").val();
-    var priority = $("#singleFaultPriority").val();
+    var faultDesc = $("#singleFaultDesc").val().trim();
+    var priority = $("#singleFaultPriority").val().trim();
 
 
     var opType;

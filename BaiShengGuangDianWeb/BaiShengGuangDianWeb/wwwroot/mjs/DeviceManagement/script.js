@@ -211,7 +211,7 @@ function getScriptVersionAllList(type) {
                     { "data": "ValueNumber", "title": "变量数" },
                     { "data": "InputNumber", "title": "输入口数" },
                     { "data": "OutputNumber", "title": "输出口数" },
-                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "操作", "render": op }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -219,7 +219,7 @@ function getScriptVersionAllList(type) {
                     { "data": "ScriptName", "title": "脚本名称" },
                     { "data": "ValueNumber", "title": "变量数" },
                     { "data": "InputNumber", "title": "输入口数" },
-                    { "data": "OutputNumber", "title": "输出口数" },
+                    { "data": "OutputNumber", "title": "输出口数" }
                 ];
             $("#scriptVersionList")
                 .DataTable({
@@ -529,7 +529,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注" },
+                    { "data": "Remark", "title": "备注", "bVisible": false}
                 ]
             });
         var data2 = getData(ret.datas, 2);
@@ -556,7 +556,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注" },
+                    { "data": "Remark", "title": "备注", "bVisible": false}
                 ]
             });
         var data3 = getData(ret.datas, 3);
@@ -583,7 +583,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注" },
+                    { "data": "Remark", "title": "备注", "bVisible": false}
                 ]
             });
     });

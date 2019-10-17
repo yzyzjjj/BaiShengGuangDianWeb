@@ -1009,7 +1009,7 @@ function pcAndroid() {
 }
 
 //数组对象排序
-function objectSort(array,par) {
+function objectSort(array, par) {
     var i, j, tmp, len = array.length;
     for (i = 0; i < len - 1; i++) {
         //假设排序ok
@@ -1028,4 +1028,21 @@ function objectSort(array,par) {
             break;
         }
     }
+}
+//高性能数组去重
+//function distinct(a) {
+//    return Array.from(new Set([...a]));
+//}
+function distinct(arr) {
+    var result = [];
+    var obj = {};
+    var i, len = arr.length;
+    for (i = 0; i < len; i++) {
+        var d = arr[i];
+        if (!obj[d]) {
+            result.push(d);
+            obj[d] = 1;
+        }
+    }
+    return result;
 }

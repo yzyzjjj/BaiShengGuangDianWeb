@@ -329,10 +329,13 @@ function selectRaw() {
             }
             $("#selectYlList").empty();
             var option = "<option value='{0}'>{0}</option>";
+            var arr = [];
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
-                $("#selectYlList").append(option.format(d.RawMateriaName, d.RawMateriaName));
+                arr.push(option.format(d.RawMateriaName, d.RawMateriaName));
             }
+            arr = arr.join("");
+            $("#selectYlList").append(arr);
         },0);
 }
 

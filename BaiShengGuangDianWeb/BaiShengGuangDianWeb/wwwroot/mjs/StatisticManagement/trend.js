@@ -301,7 +301,7 @@ function createChart(type) {
                             data: time
                         },
                         yAxis: {
-                            type: "category"
+                            type: "value"
                         },
                         series: [{
                             name: parName,
@@ -335,7 +335,8 @@ function createChart(type) {
                     myChart.setOption(option, true);
                 }
                 $("#main").resize(function () {
-                    for (var k = 0; k < listName.length; k++) {
+                    var len = $("#main").children().length;
+                    for (var k = 0; k < len; k++) {
                         echarts.init(document.getElementById("chart" + k)).resize();
                     }
                 });
