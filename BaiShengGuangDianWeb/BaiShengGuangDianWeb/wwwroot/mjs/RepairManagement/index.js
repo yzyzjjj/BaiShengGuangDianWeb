@@ -915,11 +915,11 @@ function rChange(id, type) {
                     allowClear: true,
                     placeholder: "请选择"
                 });
-                var option = '<option value="{0}">{1}</option>';
+                var option = '<option value="{0}" id="{2}">{1}</option>';
                 $("#rFaultCode").append('<option></option>');
                 for (var i = 0; i < ret.datas.length; i++) {
                     var data = ret.datas[i];
-                    $("#rFaultCode").append(option.format(data.Code, data.Code));
+                    $("#rFaultCode").append(option.format(data.Code, data.Code, data.Id));
                 }
                 $("#recordAdd").removeClass("hidden");
                 $("#singleFaultModel").modal("show");
@@ -977,6 +977,8 @@ function recordChange(type) {
     } else {
         code = $("#singleFaultCode").val();
     }
+    var codeId = $("#rFaultCode").find("[value=" + code + "]").attr("id");
+    codeId = isStrEmptyOrUndefined(codeId) ? 0 : parseInt(codeId);
     var proposer = $("#singleProposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
@@ -1037,7 +1039,9 @@ function recordChange(type) {
         //故障类型Id
         FaultTypeId1: singleFaultType1,
         //故障记录Id
-        FaultLogId: id
+        FaultLogId: id,
+        //设备Id
+        DeviceId: codeId
     }
     if (type == 0)
         record.id = id;

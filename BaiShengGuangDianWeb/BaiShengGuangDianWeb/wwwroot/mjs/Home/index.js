@@ -243,14 +243,14 @@ function getDeviceList() {
                     "drawCallback": tdWidth
                 });
             $(".ms2").empty();
-            var option = '<option value="{0}" id="{2}">{1}</option>';
+            var option = '<option value="{0}" id="{2}" index="{3}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
                 var state = data.DeviceStateStr;
                 if (state == '待加工' || state == '加工中') {
                     $("#processCode,#addCraftCode").append(option.format(data.Id, data.Code, ''));
                 }
-                $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser));
+                $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser, data.Id));
             }
         });
 }
@@ -726,6 +726,8 @@ function reportFault() {
     var admins = new Array();
     for (var i = 0; i < codes.length; i++) {
         var code = codes[i];
+        var codeId = $("#faultCode").find("[value=" + code + "]").attr("index");
+        codeId = isStrEmptyOrUndefined(codeId) ? 0 : parseInt(codeId);
         faults.push({
             //机台号
             DeviceCode: code,
@@ -738,7 +740,9 @@ function reportFault() {
             //优先级
             Priority: 0,
             //故障类型
-            FaultTypeId: faultType
+            FaultTypeId: faultType,
+            //故障设备Id
+            DeviceId: codeId
         });
         var admin = $("#faultCode").find("[value=" + code + "]").attr("id");
         if (!isStrEmptyOrUndefined(admin)) {
