@@ -1201,6 +1201,8 @@ function deleteUsuallyFault(id, usuallyFaultDesc) {
 
 function showAddUsuallyFaultModel() {
     hideClassTip('adt');
+    $("#addUsuallyFaultDesc").val("");
+    $("#addSolverPlan").val("");
     $("#addUsuallyFaultModel").modal("show");
 }
 
@@ -1219,7 +1221,7 @@ function addUsuallyFault() {
     }
     var addSolverPlan = $("#addSolverPlan").val().trim();
     if (isStrEmptyOrUndefined(addSolverPlan)) {
-        showTip($("#addSolverPlanTip"), "解决方案不能为空");
+        showTip("addSolverPlanTip", "解决方案不能为空");
         add = false;
     }
     if (!add)

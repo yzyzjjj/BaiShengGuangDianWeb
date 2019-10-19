@@ -115,6 +115,8 @@ function radioTime() {
                 }
             }
         }
+    } else {
+        $("#parTime label").removeClass("hidden");
     }
 }
 //时差1分钟
@@ -297,8 +299,8 @@ function createChart(start1, end1) {
     if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")).length == 1 && isStrEmptyOrUndefined(end1)) {
         end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
     }
-    if (exceedTime(start) || exceedTime(end)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(start)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     if (compareDate(start, end)) {
