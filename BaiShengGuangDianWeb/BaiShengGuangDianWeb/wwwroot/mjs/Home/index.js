@@ -727,7 +727,7 @@ function reportFault() {
     for (var i = 0; i < codes.length; i++) {
         var code = codes[i];
         var codeId = $("#faultCode").find("[value=" + code + "]").attr("index");
-        codeId = isStrEmptyOrUndefined(codeId) ? 0 : parseInt(codeId);
+        codeId = isStrEmptyOrUndefined(codeId) || isStrEmptyOrUndefined(faultCode) ? 0 : parseInt(codeId);
         faults.push({
             //机台号
             DeviceCode: code,

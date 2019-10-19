@@ -304,6 +304,7 @@ function sChange(id, type) {
                 data = ret.datas[0];
                 $("#singleUpdateId").html(id);
                 $("#singleUpdateState").html(data.State);
+                $("#singleUpdateCodeId").html(data.DeviceId);
                 $("#singleFaultCode").val(data.DeviceCode);
                 $("#singleProposer").val(data.Proposer);
                 $("#singleFaultType1").val(data.FaultTypeId).trigger("change");
@@ -453,7 +454,8 @@ function getDelFaultDeviceList() {
 
 function singleChange(type) {
     var id = parseInt($("#singleUpdateId").html());
-    var state = parseInt($("#singleUpdateState").html());
+    var state = parseInt($("#singleUpdateState").html()); 
+    var codeId = parseInt($("#singleUpdateCodeId").html());
 
     var code = $("#singleFaultCode").val();
     //机台号
@@ -490,6 +492,8 @@ function singleChange(type) {
                 id: id,
                 //机台号
                 DeviceCode: code,
+                //机台号Id
+                DeviceId: codeId,
                 //故障时间
                 FaultTime: time,
                 //报修人
@@ -560,6 +564,8 @@ function singleChange(type) {
             {
                 //机台号
                 DeviceCode: code,
+                //机台号Id
+                DeviceId: codeId,
                 //故障时间
                 FaultTime: time,
                 //报修人
@@ -957,9 +963,9 @@ function recordChange(type) {
     var id = parseInt($("#singleUpdateId").html());
     //机台号
     var code;
+    var rFaultCode = $("#rFaultCode").val();
+    var faultOther = $("#faultOther").val();
     if (type != 0) {
-        var rFaultCode = $("#rFaultCode").val();
-        var faultOther = $("#faultOther").val();
         if (isStrEmptyOrUndefined(rFaultCode) && isStrEmptyOrUndefined(faultOther)) {
             layer.msg('请选择或输入一台机台号');
             return;
@@ -978,7 +984,7 @@ function recordChange(type) {
         code = $("#singleFaultCode").val();
     }
     var codeId = $("#rFaultCode").find("[value=" + code + "]").attr("id");
-    codeId = isStrEmptyOrUndefined(codeId) ? 0 : parseInt(codeId);
+    codeId = isStrEmptyOrUndefined(codeId) || isStrEmptyOrUndefined(rFaultCode) ? 0 : parseInt(codeId);
     var proposer = $("#singleProposer").val().trim();
     //报修人
     if (isStrEmptyOrUndefined(proposer)) {
