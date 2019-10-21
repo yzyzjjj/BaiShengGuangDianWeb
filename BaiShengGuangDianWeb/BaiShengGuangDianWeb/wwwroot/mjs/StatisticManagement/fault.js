@@ -2417,10 +2417,6 @@ function getFaultTimeChart() {
     }
     var startTime = $("#startTime").val();
     var endTime = $("#endTime").val();
-    if (exceedTime(startDay + " " + startTime) || exceedTime(endDay + " " + endTime)) {
-        layer.msg("所选时间区间大于当前时间");
-        return;
-    }
     var startHour = startTime.slice(0, startTime.indexOf(":"));
     var endHour = endTime.slice(0, endTime.indexOf(":"));
     if (parseInt(startHour) > parseInt(endHour)) {
@@ -2453,7 +2449,7 @@ function getFaultTimeChart() {
                 var faultCount = ret.datas[i].ReportCount;
                 yData.push(faultCount);
             }
-            var num = "(总:" + ret.datas[len - 1].ReportCount + "次)";
+            var num = len == 0 ? "(总:0次)" : "(总:" + ret.datas[len - 1].ReportCount + "次)";
             hourTime = xData;
             var yDataCount = [];
             yDataCount.push({

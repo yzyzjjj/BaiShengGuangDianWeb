@@ -531,18 +531,33 @@ function singleChange(type) {
             return;
         }
         //删除
-        opType = 423;
+        opType = 420;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
             return;
         }
         data = {};
         data.opType = opType;
-        data.opData = JSON.stringify(
-            {
-                //(自增Id)
-                id: id
-            });
+        data.opData = JSON.stringify([{
+            //(自增Id)
+            id: id,
+            //机台号
+            DeviceCode: code,
+            //机台号Id
+            DeviceId: codeId,
+            //故障时间
+            FaultTime: time,
+            //报修人
+            Proposer: proposer,
+            //故障描述
+            FaultDescription: faultDesc,
+            //优先级
+            Priority: priority,
+            //状态
+            State: state,
+            FaultLogId: id,
+            MarkedDelete: true
+        }]);
         $("#singleFaultModel").modal("hide");
         ajaxPost("/Relay/Post",
             data,
