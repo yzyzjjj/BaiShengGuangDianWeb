@@ -1787,7 +1787,7 @@ function addProductionProcess() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getProductionProcessList();
+                    selectPlan();
                 }
             });
     }
@@ -2252,7 +2252,7 @@ function addRawMateria() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getRawMateriaList();
+                    selectRaw();
                 }
             });
     }

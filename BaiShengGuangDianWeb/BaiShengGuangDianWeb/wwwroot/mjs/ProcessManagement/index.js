@@ -527,7 +527,7 @@ function showProcessDetailModel(id) {
                                     { "data": null, "title": "序号", "render": order },
                                     { "data": "Id", "title": "Id", "bVisible": false },
                                     { "data": "ProductionProcessName", "title": "产品型号" },
-                                    { "data": "ProcessNumber", "title": "工艺编号" },
+                                    { "data": "ProcessNumber", "title": "工艺编号" }
                                 ]
                             });
 

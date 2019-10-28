@@ -259,6 +259,14 @@ $(function () {
         todayBtn: "linked",
         autoclose: true
     });
+    $('.form_time').on("click", function () {
+        var val = $(this).val();
+        $(this).val(val).timepicker("setTime", val);
+        $('.bootstrap-timepicker-widget').find('input').off('input').on('input', function () {
+            var v = $(this).val().replace(/[^\d]/g, '');
+            $(this).val(v);
+        });
+    });
     $('.form_month').on("keydown", function (e) {
         if (e.keyCode == 13) {
             $(this).blur();
