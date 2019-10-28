@@ -355,6 +355,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
+            OrganizationUnitHelper.DeleteMemberByAccountId(accountInfo.Id);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam, accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }

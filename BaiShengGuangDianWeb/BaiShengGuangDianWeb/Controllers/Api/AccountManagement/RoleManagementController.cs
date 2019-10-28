@@ -125,6 +125,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.RoleNotOperate);
             }
+
+            if (RoleHelper.GetUseRoleCount(id) > 0)
+            {
+                return Result.GenError<Result>(Error.AccountUseRole);
+            }
+
             RoleHelper.DeleteRoleInfo(id);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, $"角色ID:{roleInfo.Id},角色名:{roleInfo.Name}");
             return Result.GenError<Result>(Error.Success);

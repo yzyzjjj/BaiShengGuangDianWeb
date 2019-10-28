@@ -161,6 +161,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <summary>
         /// 删除组织成员
         /// </summary>
+        /// <param name="AccountId"></param>
+        /// <returns></returns>
+        public static void DeleteMemberByAccountId(int AccountId)
+        {
+            var sql = "UPDATE account_organization_units SET `IsDeleted` = 1 WHERE `AccountId` = @AccountId;";
+            ServerConfig.WebDb.Execute(sql, new { AccountId });
+        }
+
+        /// <summary>
+        /// 删除组织成员
+        /// </summary>
         /// <param name="organizationUnit"></param>
         /// <param name="accountInfo"></param>
         /// <returns></returns>

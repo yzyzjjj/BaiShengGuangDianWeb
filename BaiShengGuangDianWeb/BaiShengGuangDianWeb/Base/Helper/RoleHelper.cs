@@ -73,5 +73,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = "UPDATE roles SET `Name` = @Name, `IsDeleted` = @IsDeleted, `Permissions` = @Permissions WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, roleInfo);
         }
+
+        /// <summary>
+        /// 获取角色使用次数
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static int GetUseRoleCount(int id)
+        {
+            var cnt =
+                ServerConfig.WebDb.Query<int>("SELECT COUNT(1) FROM `accounts` WHERE Role = @id AND `IsDeleted` = 0;", new { id }).FirstOrDefault();
+            return cnt;
+        }
     }
 }
