@@ -336,7 +336,7 @@ function selectRaw() {
             }
             arr = arr.join("");
             $("#selectYlList").append(arr);
-        },0);
+        }, 0);
 }
 
 function getFlowCardList() {
@@ -1423,11 +1423,12 @@ function deleteProductionProcess(id, name) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    selectPlan();
                     getProductionProcessList();
                 }
             });
     }
-    showConfirm("删除计划号：" + name, doSth);
+    showConfirm("删除计划号：" + name + "<p style='color:red'>该计划号的所有工艺也会被删除</p>", doSth);
 }
 
 function showProductionProcess(id) {
@@ -2008,6 +2009,7 @@ function deleteRawMateria(id, name) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    selectRaw();
                     getRawMateriaList();
                 }
             });
