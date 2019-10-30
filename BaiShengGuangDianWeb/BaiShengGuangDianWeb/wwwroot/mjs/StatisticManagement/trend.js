@@ -188,14 +188,7 @@ function createChart(type) {
         }
         var device = $("#selectDevice").val();
         var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
-        if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")) % 10 == start.slice(start.indexOf(" ") + 1, start.indexOf(":"))) {
-            start = $("#selectStartDate").val() + " " + "0" + $("#selectStartTime").val();
-        }
         var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
-        if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")) % 10 == end.slice(end.indexOf(" ") + 1, end.indexOf(":"))) {
-            end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
-        }
-        var endStart = end.replace(/[^0-9]+/g, "") - start.replace(/[^0-9]+/g, "");
         if (exceedTime(start)) {
             layer.msg("开始时间不能大于当前时间");
             return;
@@ -208,15 +201,20 @@ function createChart(type) {
             layer.msg("结束时间不能小于开始时间");
             return;
         }
-        if (new Date(end) - new Date(start) > 86400000) {
+        //时间间隔1天
+        var leadTimeDay = 86400000;
+        //时间间隔1月
+        var leadTimeMonth = 2592000000;
+        var endStart = new Date(end) - new Date(start);
+        if (endStart > leadTimeDay) {
             layer.msg("时间范围不能超过一天");
             return;
         }
         var dataTime = 0;
-        if (100000000 > endStart && endStart >= 1000000) {
+        if (leadTimeMonth > endStart && endStart >= leadTimeDay) {
             dataTime = 1;
         }
-        if (endStart >= 100000000) {
+        if (endStart >= leadTimeMonth) {
             dataTime = 2;
         }
         parList.sort(function (x, y) {
@@ -256,27 +254,29 @@ function createChart(type) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                for (var i = 0; i < ret.datas.length; i++) {
+                var len = listId.length;
+                for (var i = 0, lens = ret.datas.length; i < lens; i++) {
+                    var dt = ret.datas[i];
                     if (dataTime == 2) {
-                        time[i] = (ret.datas[i].time).slice(0, (ret.datas[i].time).indexOf(" "));
+                        time.push(dt.time.split(" ")[0]);
                     }
                     if (dataTime == 1) {
-                        time[i] = ret.datas[i].time;
+                        time.push(dt.time);
                     }
                     if (dataTime == 0) {
-                        var firstTime = (ret.datas[i].time).slice((ret.datas[i].time).indexOf(" ") + 1, (ret.datas[i].time).length);
+                        var firstTime = dt.time.split(" ")[1];
                         if (firstTime.slice(0, 1) == 0) {
-                            time[i] = firstTime.replace(firstTime.slice(0, 1), "");
+                            time.push(firstTime.slice(1, firstTime.length));
                         } else {
-                            time[i] = firstTime;
+                            time.push(firstTime);
                         }
                     }
-                    for (var d = 0; d < listId.length; d++) {
+                    for (var d = 0; d < len; d++) {
                         var key = "v" + listId[d];
                         if (isStrEmptyOrUndefined(v[key])) {
                             v[key] = [];
                         }
-                        v[key].push(ret.datas[i][key]);
+                        v[key].push(dt[key]);
                     }
                 }
                 $("#main").empty();

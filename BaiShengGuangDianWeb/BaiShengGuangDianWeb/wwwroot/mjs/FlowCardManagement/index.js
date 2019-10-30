@@ -364,10 +364,10 @@ function getFlowCardList() {
                 list["flowCardName"] = fcName;
             }
         }
-        var startTime = $("#flowCardStartDate").val();
-        var endTime = $("#flowCardEndDate").val();
-        if (exceedTime(startTime) || exceedTime(endTime)) {
-            layer.msg("所选时间不能大于当前时间");
+        var startTime = $("#flowCardStartDate").val() + " 00:00:00";
+        var endTime = $("#flowCardEndDate").val() + " 23:59:59";
+        if (exceedTime(startTime)) {
+            layer.msg("开始时间不能大于当前时间");
             return;
         }
         if (compareDate(startTime, endTime)) {
@@ -1314,10 +1314,10 @@ function getProductionProcessList() {
                 list["productionName"] = productionName;
             }
         }
-        var startTime = $("#jhStartDate").val();
-        var endTime = $("#jhEndDate").val();
-        if (exceedTime(startTime) || exceedTime(endTime)) {
-            layer.msg("所选时间不能大于当前时间");
+        var startTime = $("#jhStartDate").val() + " 00:00:00";
+        var endTime = $("#jhEndDate").val() + " 23:59:59";
+        if (exceedTime(startTime)) {
+            layer.msg("开始时间不能大于当前时间");
             return;
         }
         if (compareDate(startTime, endTime)) {
@@ -1912,10 +1912,10 @@ function getRawMateriaList() {
                 list["rawMateriaName"] = rawMateriaName;
             }
         }
-        var startTime = $("#ylStartDate").val();
-        var endTime = $("#ylEndDate").val();
-        if (exceedTime(startTime) || exceedTime(endTime)) {
-            layer.msg("所选时间不能大于当前时间");
+        var startTime = $("#ylStartDate").val() + " 00:00:00";
+        var endTime = $("#ylEndDate").val() + " 23:59:59";
+        if (exceedTime(startTime)) {
+            layer.msg("开始时间不能大于当前时间");
             return;
         }
         if (compareDate(startTime, endTime)) {

@@ -285,9 +285,6 @@ function createChart(start1, end1) {
         $("#selectStartDate").val(start1.split(" ")[0]).datepicker('update');
         $("#selectStartTime").val(start1.split(" ")[1]).timepicker('setTime', start1.split(" ")[1]);
     }
-    if (start.slice(start.indexOf(" ") + 1, start.indexOf(":")).length == 1 && isStrEmptyOrUndefined(start1)) {
-        start = $("#selectStartDate").val() + " " + "0" + $("#selectStartTime").val();
-    }
     var end;
     if (isStrEmptyOrUndefined(end1)) {
         end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
@@ -295,9 +292,6 @@ function createChart(start1, end1) {
         end = end1;
         $("#selectEndDate").val(end.split(" ")[0]).datepicker('update');
         $("#selectEndTime").val(end.split(" ")[1]).timepicker('setTime', end.split(" ")[1]);
-    }
-    if (end.slice(end.indexOf(" ") + 1, end.indexOf(":")).length == 1 && isStrEmptyOrUndefined(end1)) {
-        end = $("#selectEndDate").val() + " " + "0" + $("#selectEndTime").val();
     }
     if (exceedTime(start)) {
         layer.msg("开始时间不能大于当前时间");

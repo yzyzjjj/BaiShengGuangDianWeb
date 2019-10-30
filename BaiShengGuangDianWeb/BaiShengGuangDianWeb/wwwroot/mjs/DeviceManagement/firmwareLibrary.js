@@ -1,5 +1,4 @@
-﻿
-function pageReady() {
+﻿function pageReady() {
     getFirmwareList();
     if (!checkPermission(133)) {
         $("#showAddFirmwareModal").addClass("hidden");
@@ -153,7 +152,7 @@ function showAddFirmwareModal() {
     if (addFirmwareUpload == null)
         addFirmwareUpload = initFileInput("addFilePath", fileEnum.FirmwareLibrary);
     $("#addFilePath").fileinput('clear');
-
+    $(".file-caption-name").prop("disabled", true);
     hideClassTip('adt');
     $(".dd").val("");
     $("#addModel").modal("show");
@@ -269,6 +268,7 @@ function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommu
     $("#updateNumber").val(firmwareNumber);
     $("#updateCommunication").val(firmwareCommunication);
     $(".file-caption-name").val(firmwareLocationName);
+    $(".file-caption-name").prop("disabled", true);
     $("#oldUpdateFilePath").val(firmwareLocationName);
     $("#updateDesc").val(firmwareDescription);
     $("#updateFirm").modal("show");
@@ -365,5 +365,3 @@ function updateFirmware() {
     }
 
 }
-
-
