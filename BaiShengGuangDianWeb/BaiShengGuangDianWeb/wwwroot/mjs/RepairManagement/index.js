@@ -979,7 +979,7 @@ function recordChange(type) {
     //机台号
     var code;
     var rFaultCode = $("#rFaultCode").val();
-    var faultOther = $("#faultOther").val();
+    var faultOther = $("#faultOther").val().trim();
     if (type != 0) {
         if (isStrEmptyOrUndefined(rFaultCode) && isStrEmptyOrUndefined(faultOther)) {
             layer.msg('请选择或输入一台机台号');
@@ -998,7 +998,7 @@ function recordChange(type) {
     } else {
         code = $("#singleFaultCode").val();
     }
-    var codeId = $("#rFaultCode").find("[value=" + code + "]").attr("id");
+    var codeId = $("#rFaultCode").find("[value='" + code + "']").attr("id");
     codeId = isStrEmptyOrUndefined(codeId) || isStrEmptyOrUndefined(rFaultCode) ? 0 : parseInt(codeId);
     var proposer = $("#singleProposer").val().trim();
     //报修人

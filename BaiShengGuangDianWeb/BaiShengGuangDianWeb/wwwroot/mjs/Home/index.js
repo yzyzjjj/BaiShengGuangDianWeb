@@ -679,7 +679,7 @@ function reportFault() {
     }
     var report = true;
     var faultCode = $("#faultCode").val();
-    var faultOther = $("#faultOther").val().split(",");
+    var faultOther = $("#faultOther").val().trim().split(",");
     //机台号
     if (!isStrEmptyOrUndefined(faultCode) && !isStrEmptyOrUndefined(faultOther)) {
         codes = faultCode.concat(faultOther);
@@ -726,7 +726,7 @@ function reportFault() {
     var admins = new Array();
     for (var i = 0; i < codes.length; i++) {
         var code = codes[i];
-        var codeId = $("#faultCode").find("[value=" + code + "]").attr("index");
+        var codeId = $("#faultCode").find("option[value='" + code + "']").attr("index");
         codeId = isStrEmptyOrUndefined(codeId) || isStrEmptyOrUndefined(faultCode) ? 0 : parseInt(codeId);
         faults.push({
             //机台号
@@ -744,7 +744,7 @@ function reportFault() {
             //故障设备Id
             DeviceId: codeId
         });
-        var admin = $("#faultCode").find("[value=" + code + "]").attr("id");
+        var admin = $("#faultCode").find("option[value='" + code + "']").attr("id");
         if (!isStrEmptyOrUndefined(admin)) {
             admins.push({
                 Code: code,
