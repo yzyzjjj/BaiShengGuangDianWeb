@@ -339,6 +339,7 @@ function selectRaw() {
         }, 0);
 }
 
+var trOne = null;
 function getFlowCardList() {
     var opType = 200;
     if (!checkPermission(opType)) {
@@ -404,7 +405,7 @@ function getFlowCardList() {
             var op = function (data, type, row) {
                 var html = "{0}{1}{2}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateFlowCard({0})">修改</button>'.format(data.Id);
-                var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0})">更新</button>'.format(data.Id);
+                var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0}, \'{1}\')">更新</button>'.format(data.Id, escape(data.FlowCardName));
                 var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.FlowCardName));
 
                 html = html.format(
@@ -489,6 +490,9 @@ function getFlowCardList() {
                     "columns": columns,
                     "columnDefs": defs
                 });
+            $('#flowCardList tbody').on('focus', 'tr', function () {
+                trOne = this;
+            });
         });
 }
 
@@ -844,7 +848,7 @@ function ufGXDelSelf(id) {
 
 var cfRecover = 0;
 var gxLength = 1;
-function showChangeFlowCard(type) {
+function showChangeFlowCard(type, flowCardName) {
     $("#cfGXBody").empty();
     gxLength = 1;
     var opType = 202;
@@ -870,6 +874,7 @@ function showChangeFlowCard(type) {
             };
 
             $("#changeFCId").html(id);
+            $("#changeFCName").html(flowCardName);
             var option = '<option value="{0}">{1}</option>';
             var o = 0;
 
@@ -1287,10 +1292,36 @@ function changeFlowCard() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     showChangeFlowCard(-1);
+                    var fcName = $("#changeFCName").html();
+                    getChangeFCName(fcName);
                 }
             });
     }
     showConfirm("修改", doSth);
+}
+
+function getChangeFCName(fcName) {
+    var opType = 200;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {};
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        flowCardName: fcName
+    });
+    ajaxPost("/Relay/Post", data, function(ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var d = ret.datas[0];
+        var processStepName = d.CategoryName + "-" + d.StepName;
+        var qualifiedNumber = d.QualifiedNumber;
+        $(trOne).find('.text-info').eq(0).html(processStepName);
+        $(trOne).find('.text-info').eq(2).html(qualifiedNumber);
+    });
 }
 
 //计划号

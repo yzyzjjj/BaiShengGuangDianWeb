@@ -454,7 +454,7 @@ function getDelFaultDeviceList() {
 
 function singleChange(type) {
     var id = parseInt($("#singleUpdateId").html());
-    var state = parseInt($("#singleUpdateState").html()); 
+    var state = parseInt($("#singleUpdateState").html());
     var codeId = parseInt($("#singleUpdateCodeId").html());
 
     var code = $("#singleFaultCode").val();
@@ -654,6 +654,9 @@ function getRepairRecordList() {
                     checkPermission(416) ? deleteBtn : "");
                 return html;
             }
+            var isAdd = function (data, type, row) {
+                return data == false ? '否' : '是';
+            }
             var columns = checkPermission(414) || checkPermission(416)
                 ? [
                     { "data": "Id", "title": "序号", "render": order },
@@ -665,6 +668,7 @@ function getRepairRecordList() {
                     { "data": "SolveTime", "title": "解决时间" },
                     { "data": "FaultTypeName", "title": "故障类型" },
                     { "data": "SolvePlan", "title": "解决方案", "visible": false },
+                    { "data": "IsAdd", "title": "是否为添加记录", "render": isAdd },
                     { "data": null, "title": "操作", "render": op }
                 ]
                 : [
@@ -676,7 +680,8 @@ function getRepairRecordList() {
                     { "data": "FaultDescription", "title": "故障描述" },
                     { "data": "SolveTime", "title": "解决时间" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "SolvePlan", "title": "解决方案", "visible": false }
+                    { "data": "SolvePlan", "title": "解决方案", "visible": false },
+                    { "data": "IsAdd", "title": "是否为添加记录", "render": isAdd }
                 ];
             var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
             var rModel = function (data, type, full, meta) {
@@ -1062,7 +1067,9 @@ function recordChange(type) {
         //故障记录Id
         FaultLogId: id,
         //设备Id
-        DeviceId: codeId
+        DeviceId: codeId,
+        //添加维修记录
+        IsAdd: true
     }
     if (type == 0)
         record.id = id;

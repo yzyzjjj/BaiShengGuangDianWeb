@@ -86,7 +86,7 @@ function showAddRoles() {
 }
 
 function addRole() {
-    var roleNames = $("#addRoleName").val();
+    var roleNames = $("#addRoleName").val().trim();
 
     if (isStrEmptyOrUndefined(roleNames)) {
         layer.msg("角色名不能为空");

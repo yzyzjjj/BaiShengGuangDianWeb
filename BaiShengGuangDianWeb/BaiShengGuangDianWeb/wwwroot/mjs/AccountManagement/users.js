@@ -336,11 +336,11 @@ function emailType() {
 }
 
 function addUser() {
-    var addAccount = $("#addAccount").val();
-    var addName = $("#addName").val();
-    var addEmail = $("#addEmail").val();
+    var addAccount = $("#addAccount").val().trim();
+    var addName = $("#addName").val().trim();
+    var addEmail = $("#addEmail").val().trim();
     var addEmailType = emailTypeData.join();
-    var addPassword = $("#addPassword").val();
+    var addPassword = $("#addPassword").val().trim();
     var addRole = $("#addRole").val();
     var pRole = new Array();
     if ($("#addProcessor").is(":checked"))
