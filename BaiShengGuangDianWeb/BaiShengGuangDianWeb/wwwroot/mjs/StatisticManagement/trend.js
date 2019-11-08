@@ -276,7 +276,12 @@ function createChart(type) {
                         if (isStrEmptyOrUndefined(v[key])) {
                             v[key] = [];
                         }
-                        v[key].push(dt[key]);
+                        var par = listName[d];
+                        if (par.indexOf('转速') != -1) {
+                            v[key].push(Math.round(dt[key] / 100));
+                        } else {
+                            v[key].push(dt[key]);
+                        }
                     }
                 }
                 $("#main").empty();
