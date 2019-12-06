@@ -78,12 +78,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParentNotExist);
                 }
+            }
 
-                var underOrganizationUnits = OrganizationUnitHelper.GetUnderOrganizationUnits(parentId);
-                if (underOrganizationUnits.Any(x => x.Name == name))
-                {
-                    return Result.GenError<Result>(Error.OrganizationUnitIsExist);
-                }
+            var underOrganizationUnits = OrganizationUnitHelper.GetUnderOrganizationUnits(parentId);
+            if (underOrganizationUnits.Any(x => x.Name == name))
+            {
+                return Result.GenError<Result>(Error.OrganizationUnitIsExist);
             }
 
             var organizationUnit = new OrganizationUnit

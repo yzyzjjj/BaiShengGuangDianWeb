@@ -84,7 +84,7 @@ namespace BaiShengGuangDianWeb
             });
             app.UseMvcWithDefaultRoute();
 
-            FilePath.RootPath = env.ContentRootPath;
+            FilePath.RootPath = env.WebRootPath;
             foreach (var pair in FilePath.GetFileDictionary())
             {
                 var filePath = Path.Combine(FilePath.RootPath, pair.Value);

@@ -48,8 +48,20 @@ var fileEnum = {
     // 固件
     FirmwareLibrary: 1,
     // 应用层
-    ApplicationLibrary: 2
+    ApplicationLibrary: 2,
+    // 点检图片
+    SpotCheckImage: 3,
 }
+
+//文件Accept
+var fileAccept = [];
+fileAccept[fileEnum.Default] = [];
+// 固件
+fileAccept[fileEnum.FirmwareLibrary] = ".bin";
+// 应用层
+fileAccept[fileEnum.ApplicationLibrary] = "";
+// 点检图片
+fileAccept[fileEnum.SpotCheckImage] = "image/*";
 
 //文件扩展名
 var fileExt = [];
@@ -58,6 +70,8 @@ fileExt[fileEnum.Default] = [];
 fileExt[fileEnum.FirmwareLibrary] = ["bin"];
 // 应用层
 fileExt[fileEnum.ApplicationLibrary] = [];
+// 点检图片
+fileExt[fileEnum.SpotCheckImage] = ["bmp", "jpg", "jpeg", "png","gif"];
 
 //文件上传回调
 var fileCallBack = [];
@@ -66,3 +80,5 @@ fileCallBack[fileEnum.Default] = function () { };
 fileCallBack[fileEnum.FirmwareLibrary] = function () { };
 // 应用层
 fileCallBack[fileEnum.ApplicationLibrary] = function () { };
+// 点检图片
+fileCallBack[fileEnum.SpotCheckImage] = function () { };

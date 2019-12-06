@@ -58,7 +58,7 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称：</label>
                             <div class="col-sm-9">
-                                <input class="dd" id="addFilePath" type="file" accept=".bin" onchange="inputChange($(this),'col-sm-9')">
+                                <input class="dd" id="addFilePath" type="file" onchange="inputChange($(this),'col-sm-9')">
                                 <label class="adt label-danger hidden" id="addFilePathTip"></label>
                             </div>
                         </div>
@@ -114,7 +114,7 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label"><span class="text-red">* </span>程序文件的位置及名称(未选择不更新)：</label>
                             <div class="col-sm-9">
-                                <input class="dd" id="updateFilePath" type="file" accept=".bin" onchange="inputChange($(this),'col-sm-9')">
+                                <input class="dd" id="updateFilePath" type="file" onchange="inputChange($(this),'col-sm-9')">
                                 <input id="oldUpdateFilePath" class="hidden">
                                 <label class="adt label-danger hidden" id="updateFilePathTip"></label>
                             </div>

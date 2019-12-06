@@ -11,5 +11,9 @@
         /// 应用层
         /// </summary>
         ApplicationLibrary,
+        /// <summary>
+        /// 点检图片
+        /// </summary>
+        SpotCheckImage,
     }
 }

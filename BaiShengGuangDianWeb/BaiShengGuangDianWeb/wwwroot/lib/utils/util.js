@@ -802,12 +802,14 @@ function getQueryString(name) {
     if (r != null) return unescape(r[2]); return null;
 }
 
+//单个文件
 function initFileInput(uiEle, type, func = null) {
+    $("#" + uiEle).attr("accept", fileAccept[type]);
     var obj = $("#" + uiEle).fileinput({
         language: 'zh', //设置语言 
-        uploadUrl: '/Upload/Post',
+        uploadUrl: '/Upload/File',
         //enctype: 'multipart/form-data',
-        allowedFileExtensions: ['bin'],//接收的文件后缀
+        allowedFileExtensions: fileExt[type],//接收的文件后缀
         showUpload: false, //是否显示上传按钮
         showPreview: true, //展前预览
         showCaption: true,//是否显示标题
@@ -851,22 +853,155 @@ function initFileInput(uiEle, type, func = null) {
                 break;
             default:
         }
-    }).on('fileerror', function (event, data, msg) {  //一个文件上传失败
+    }).on('filepreupload', function (event, data, msg) {     //上传中
+        var form = data.form, files = data.files, extra = data.extra,
+            response = data.response, reader = data.reader;
+        console.log('文件正在上传');
+    }).on('fileerror', function (event, data, msg) {
         console.log('文件上传失败！' + msg);
         $(this).fileinput('clear');
     }).on("fileuploaded", function (event, fileRet, previewId, index) {
         console.log("文件上传成功！");
         $(this).fileinput('clear');
-        fileCallBack[fileEnum.FirmwareLibrary](fileRet.response);
+        fileCallBack[type](fileRet.response);
     });
 
     return obj;
 }
 
+var prepareUpload = [];
+//多个文件  也是单个上传的
+function initFileInputMultiple(uiEle, type, func = null) {
+    prepareUpload = [];
+    $("#" + uiEle).attr("multiple", "");
+    $("#" + uiEle).attr("accept", fileAccept[type]);
+
+    var obj = $("#" + uiEle).fileinput({
+        language: 'zh', //设置语言 
+        uploadUrl: '/Upload/FileMultiple',
+        //enctype: 'multipart/form-data',
+        allowedFileExtensions: fileExt[type],//接收的文件后缀
+        showUpload: false, //是否显示上传按钮
+        showPreview: true, //展前预览
+        showCaption: true,//是否显示标题
+        //maxFileSize: 10000,//上传文件最大的尺寸
+        minFileCount: 0,//每次上传允许的最少文件数。如果设置为0，则表示文件数是可选的。默认为0
+        maxFileCount: 0, //每次上传允许的最大文件数。如果设置为0，则表示允许的文件数是无限制的。默认为0
+        dropZoneEnabled: false,//是否显示拖拽区域
+        browseClass: "btn btn-primary", //按钮样式
+        uploadAsync: true,
+        autoReplace: false,
+        layoutTemplates: {
+            //actionDelete: '', //去除上传预览的缩略图中的删除图标
+            actionUpload: '',//去除上传预览缩略图中的上传图片；  
+            //actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。
+        },
+        uploadExtraData: function () {
+            //向后台传递type作为额外参数
+            var obj = {};
+            obj.type = type;
+            return obj;
+        }
+    }).on("filebatchselected", function (event, files) {
+        var name = "";
+        for (var key in files) {
+            if (files.hasOwnProperty(key)) {
+                name = key;
+                if (!checkFileExt(name, fileExt[type])) {
+                    $("#" + uiEle).fileinput('clear');
+                    break;
+                }
+                var pre = $("#" + $(this).attr("parent"))
+                    .find('[data-fileid="{0}"]'.format(name))
+                    .filter('.file-preview-frame')
+                    .first().attr("id");
+                if (!prepareUpload[pre]) {
+                    prepareUpload[pre] = {
+                        pre: pre,
+                        name: name,
+                        done: false
+                    };
+                }
+            }
+        }
+    }).on('fileclear', function (evt, file) {
+        // 点击右上角叉叉执行
+        console.log('删除所有选择文件');
+        prepareUpload = [];
+    }).on('fileremoved', function (evt, file) {
+        // 该事件钩子针对只选择不上传的情况
+        console.log('删除选择文件');
+        prepareUpload = removeArrayObj(prepareUpload, file);
+    }).on('filepreupload', function (event, data, msg) {     //上传中
+        console.log('文件正在上传');
+        var form = data.form, files = data.files, extra = data.extra,
+            response = data.response, reader = data.reader;
+    }).on('fileerror', function (event, data, msg) {
+        console.log('文件上传失败！' + msg);
+        $(this).fileinput('clear');
+        fileCallBack[type]({
+            errno: 1,
+            errmsg: "失败"
+        });
+    }).on("fileuploaded", function (event, fileRet, previewId, index) {
+        var res = fileRet.response;
+        if (res.errno == 0) {
+            console.log("文件上传成功！");
+            for (var j = 0; j < res.data.length; j++) {
+                var file = res.data[j];
+                prepareUpload[previewId].done = true;
+                prepareUpload[previewId].newName = file.newName;
+            }
+        } else {
+            console.log('文件上传失败！');
+            layer.msg(res.errmsg);
+        }
+    }).on('filebatchuploadcomplete', function (event, fileRet, previewId, index) {
+        console.log("文件全部上传成功！");
+        var r = true;
+        for (var key in prepareUpload) {
+            if (prepareUpload.hasOwnProperty(key)) {
+                if (!prepareUpload[key].done)
+                    r = false;
+            }
+        }
+        //$(this).fileinput('clear');
+        if (r) {
+            fileCallBack[type]({
+                errno: 0,
+                errmsg: "成功",
+                data: prepareUpload
+            });
+        } else {
+            fileCallBack[type]({
+                errno: 1,
+                errmsg: "失败"
+            });
+        }
+        prepareUpload = [];
+
+    });
+
+    return obj;
+}
+
+function hasPre() {
+    var r = false;
+    for (var key in prepareUpload) {
+        if (prepareUpload.hasOwnProperty(key)) {
+            r = true;
+        }
+    }
+    return r;
+}
+
 function checkFileExt(file, fileExt) {
-    for (var i = 0; i < fileExt.length; i++) {
-        if (file.indexOf(fileExt[i]) > -1)
-            return true;
+    var str = file.toLowerCase().split(".");
+    if (str.length > 1) {
+        for (var i = 0; i < fileExt.length; i++) {
+            if (str[str.length - 1] == fileExt[i])
+                return true;
+        }
     }
     return false;
 }
@@ -1045,4 +1180,43 @@ function distinct(arr) {
         }
     }
     return result;
+}
+
+// a[0] = {n1, n2, n3};
+// a[1] = {n1, n4, n5};
+// 参数 a  , n1,  1,  true/false
+function removeArray(arr, value, all = false) {
+    for (var key in arr) {
+        if (key.hasOwnProperty(value)) {
+            arr.splice(arr.indexOf(key), all ? arr.length : 1);
+            break;
+        }
+    }
+    return arr;
+}
+
+// a[0] = {n1 = 1, n2 = 2, n3 = 3};
+// a[1] = {n1 = 1, n4 = 4, n5 = 5};
+// 参数 a  , n1,  1,  true/false
+function removeArray(arr, key, value, all = false) {
+    for (var i = arr.length - 1; i >= 0; i--) {
+        if (arr[i][key] == value) {
+            arr.splice(arr.indexOf(arr[i]), all ? arr.length : 1);
+            break;
+        }
+    }
+    return arr;
+}
+
+// a["1"] = obj;
+function removeArrayObj(arr, key, all = false) {
+    var res = [];
+    for (var k in arr) {
+        if (k != key) {
+            if (!res[k] && !all) {
+                res[k] = arr[k];
+            }
+        }
+    }
+    return res;
 }

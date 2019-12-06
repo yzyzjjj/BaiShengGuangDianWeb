@@ -14,8 +14,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static IEnumerable<OrganizationUnit> GetOrganizationUnit()
         {
-            var sql = "SELECT *, IFNULL(b.cnt, 0) MemberCount FROM `organization_units` a LEFT JOIN ( SELECT OrganizationUnitId, COUNT(1) cnt " +
-                      "FROM `account_organization_units` WHERE IsDeleted = 0 GROUP BY OrganizationUnitId ) b ON a.Id = b.OrganizationUnitId WHERE IsDeleted = 0;";
+            var sql = "SELECT *, IFNULL(b.cnt, 0) MemberCount FROM `organization_units` a LEFT JOIN ( SELECT OrganizationUnitId, COUNT(1) cnt FROM `account_organization_units` " +
+                      "WHERE IsDeleted = 0 GROUP BY OrganizationUnitId ) b ON a.Id = b.OrganizationUnitId WHERE IsDeleted = 0 ORDER BY ParentId, `Name`, Id;";
             var infos = ServerConfig.WebDb.Query<OrganizationUnit>(sql);
             return infos;
         }
@@ -67,7 +67,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             sql = "UPDATE organization_units SET `Code` = @Code, `CodeLink` = @CodeLink WHERE `Id` = @Id;";
             organizationUnit.Id = id;
             organizationUnit.Code = (10000 + id).ToString();
-            organizationUnit.CodeLink = $"{organizationUnit.CodeLink},{organizationUnit.Code}";
+            organizationUnit.CodeLink = organizationUnit.ParentId == 0 ? $"{organizationUnit.Code}" : $"{organizationUnit.CodeLink},{organizationUnit.Code}";
             ServerConfig.WebDb.Execute(sql, organizationUnit);
         }
 

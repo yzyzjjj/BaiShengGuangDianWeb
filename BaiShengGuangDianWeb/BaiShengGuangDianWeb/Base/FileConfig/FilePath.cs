@@ -42,5 +42,15 @@ namespace BaiShengGuangDianWeb.Base.FileConfig
         {
             return Path.Combine(GetFileDictionary(fileEnum), fileName);
         }
+        /// <summary>
+        /// 相对路径
+        /// </summary>
+        /// <param name="fileEnum"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static string GetRelativePath(FileEnum fileEnum, string fileName)
+        {
+            return "/" + Path.Combine(GetFileDictionary(fileEnum), fileName).Replace("\\", "/");
+        }
     }
 }
