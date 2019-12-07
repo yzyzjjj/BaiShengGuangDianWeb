@@ -34,7 +34,7 @@ PermissionTypes[6] = { id: -8, name: "维修管理" };
 PermissionTypes[7] = { id: -9, name: "数据统计" };
 PermissionTypes[8] = { id: -10, name: "设备点检" };
 
-//0  默认权限；1  页面相关；2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检
+//接口顺序 2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检
 var PermissionTypesOrder = [];
 PermissionTypesOrder[2] = 1;
 PermissionTypesOrder[3] = 2;
