@@ -32,6 +32,17 @@ PermissionTypes[4] = { id: -6, name: "流程卡管理" };
 PermissionTypes[5] = { id: -7, name: "工艺管理" };
 PermissionTypes[6] = { id: -8, name: "维修管理" };
 PermissionTypes[7] = { id: -9, name: "数据统计" };
+PermissionTypes[8] = { id: -10, name: "设备点检" };
+
+//0  默认权限；1  页面相关；2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检
+var PermissionTypesOrder = [];
+PermissionTypesOrder[2] = 1;
+PermissionTypesOrder[3] = 2;
+PermissionTypesOrder[4] = 4;
+PermissionTypesOrder[5] = 5;
+PermissionTypesOrder[6] = 6;
+PermissionTypesOrder[7] = 7;
+PermissionTypesOrder[8] = 3;
 
 var chatEnum = {
     Default: 0,

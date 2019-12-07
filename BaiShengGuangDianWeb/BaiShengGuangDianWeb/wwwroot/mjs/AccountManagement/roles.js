@@ -278,7 +278,7 @@ function showPermissions(uiName, datas) {
             }
             var typeData = getTypeData(pageData, dType);
 
-            option = $("<li>" + mOptionStr1 + "<li>").clone();
+            option = $("<li>" + mOptionStr1 + "</li>").clone();
             option.find("h3").text(type.name);
             option.find(".on_cb").attr("value", type.id);
             option.find(".on_cb").attr("pid", page.id);
@@ -292,8 +292,9 @@ function showPermissions(uiName, datas) {
                 var labelData = getLabelData(pageData, dLabel);
                 if (page.isPage) {
                     var firstData = labelData.shift();
-                    option = $(labelData.length > 1 ? ("<li>" + mOptionStr1 + "<li>") : ("<li>" + mOptionStr2 + "<li>"))
+                    option = $(labelData.length > 1 ? ("<li>" + mOptionStr1 + "</li>") : ("<li>" + mOptionStr2 + "</li>"))
                         .clone();
+                    option.attr("id", "pli" + type.id);
                     option.find("h3").text(dLabel);
                     option.find(".on_cb").attr("value", firstData.id);
                     option.find(".on_cb").attr("pid", type.id);
@@ -314,9 +315,9 @@ function showPermissions(uiName, datas) {
                         option.find(".on_cb").addClass("4");
                         $("#" + uiName).find("[id=ul" + firstData.id + "]").append(option);
                     }
-
                 } else {
                     option = $("<li>" + mOptionStr1 + "<li>").clone();
+                    option.attr("id", "npli" + type.id);
                     option.find("h3").text(dLabel);
                     option.find(".on_cb").attr("value", lbI);
                     option.find(".on_cb").attr("pid", type.id);
@@ -365,6 +366,13 @@ function getPageData(datas, isPage) {
     return res;
 }
 
+function typeRule(a, b) {
+    if (PermissionTypesOrder[a] && PermissionTypesOrder[b]) {
+        return PermissionTypesOrder[a] > PermissionTypesOrder[b] ? 1 : -1;
+    }
+    return a > b ? 1 : -1;
+}
+
 function getTypes(datas) {
     var res = new Array();
     for (var i = 0; i < datas.length; i++) {
@@ -373,7 +381,7 @@ function getTypes(datas) {
             res.push(data.type);
         }
     }
-    return res.sort();
+    return res.sort(typeRule);
 }
 
 function getTypeData(datas, type) {
@@ -388,6 +396,7 @@ function getTypeData(datas, type) {
 }
 
 function getLabels(datas) {
+    datas.sort(rule);
     var res = new Array();
     for (var i = 0; i < datas.length; i++) {
         var data = datas[i];
