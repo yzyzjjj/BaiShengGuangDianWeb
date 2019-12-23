@@ -14,6 +14,10 @@
         /// <summary>
         /// 点检图片
         /// </summary>
-        SpotCheckImage,
+        SpotCheck,
+        /// <summary>
+        /// 物料图片
+        /// </summary>
+        Material,
     }
 }

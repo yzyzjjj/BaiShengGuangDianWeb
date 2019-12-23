@@ -52,11 +52,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                     return Result.GenError<Result>(Error.FileSingle);
                 }
 
-                var fileName = "";
+
+                var newFileName = string.Empty;
                 switch (fileEnum)
                 {
-                    case FileEnum.FirmwareLibrary: fileName = "NPC"; break;
-                    case FileEnum.SpotCheckImage: break;
+                    case FileEnum.FirmwareLibrary: newFileName = "NPC"; break;
+                    case FileEnum.SpotCheck: break;
+                    case FileEnum.Material: break;
                     default: Result.GenError<Result>(Error.Fail); break;
                 }
 
@@ -69,17 +71,18 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                     {
                         return Result.GenError<Result>(Error.FileExtError);
                     }
+                    var fileName = exts.Take(exts.Length - 1).Join(".");
+                    newFileName = $"{DateTime.Now.ToStrFile()}_{(newFileName != string.Empty ? newFileName : fileName)}.{ext}";
 
-                    fileName = $"{DateTime.Now.ToStrFile()}_{fileName}.{ext}";
-                    var filePath = Path.Combine(fullPath, fileName);
-                    var backName = $"{fileName}_back{DateTime.Now.ToStrFile()}.{ext}";
+                    var newFullPath = Path.Combine(fullPath, newFileName);
+                    var backName = $"{newFileName}_back{DateTime.Now.ToStrFile()}.{ext}";
                     var backPath = Path.Combine(fullPath, backName);
-                    if (System.IO.File.Exists(filePath))
+                    if (System.IO.File.Exists(newFullPath))
                     {
-                        System.IO.File.Move(filePath, backPath);
+                        System.IO.File.Move(newFullPath, backPath);
                     }
 
-                    using (var stream = new FileStream(filePath, FileMode.OpenOrCreate))
+                    using (var stream = new FileStream(newFullPath, FileMode.OpenOrCreate))
                     {
                         formFile.CopyTo(stream);
                         stream.Flush();
@@ -129,7 +132,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                 switch (fileEnum)
                 {
                     case FileEnum.FirmwareLibrary: newFileName = "NPC"; break;
-                    case FileEnum.SpotCheckImage: break;
+                    case FileEnum.SpotCheck: break;
+                    case FileEnum.Material: break;
                     default: Result.GenError<Result>(Error.Fail); break;
                 }
 

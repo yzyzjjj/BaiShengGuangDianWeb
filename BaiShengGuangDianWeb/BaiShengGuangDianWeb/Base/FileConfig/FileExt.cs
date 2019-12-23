@@ -8,7 +8,8 @@ namespace BaiShengGuangDianWeb.Base.FileConfig
         {
             {FileEnum.FirmwareLibrary, new List<string>{"bin"}},
             {FileEnum.ApplicationLibrary, new List<string>{"bin"}},
-            {FileEnum.SpotCheckImage, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
+            {FileEnum.SpotCheck, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
+            {FileEnum.Material, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
         };
 
         public static Dictionary<FileEnum, List<string>> GetFileExt()

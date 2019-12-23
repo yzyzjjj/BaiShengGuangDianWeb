@@ -33,7 +33,7 @@ var commonfunc = function () {
         allowClear: true,
         placeholder: ""
     });
-    $("#search-select").on('select2:select', function() {
+    $("#search-select").on('select2:select', function () {
         $("#search-text").val($(this).find("option:selected").text());
         $("#search-text").css('backgroundColor', 'white');
     });
@@ -70,12 +70,13 @@ var commonfunc = function () {
             var datas = ret.datas;
             $("#search-select").empty();
             $("#search-select").append('<option></option>');
-            $.each(datas, function(index, item) {
+            $.each(datas, function (index, item) {
                 if (!isStrEmptyOrUndefined(item.url)) {
                     $("#search-select").append(select.format(item.url, item.name.trim()));
                 }
             });
             var parents = getParent(datas);
+            var first = "/";
             for (var i = 0; i < parents.length; i++) {
                 var childs = getChild(datas, parents[i]);
                 for (var j = 0; j < childs.length; j++) {
@@ -89,6 +90,8 @@ var commonfunc = function () {
                             option.find('span.mt').text(child.name);
                             $(".sidebar-menu").append(option);
                         } else {
+                            if (first == "/")
+                                first = child.url;
                             option = $(mMenu1).clone();
                             option.find('.menuitem').attr('id', "main" + child.id);
                             option.find('.menuitem').attr('href', child.url);
@@ -97,6 +100,8 @@ var commonfunc = function () {
                             $(".sidebar-menu").append(option);
                         }
                     } else {
+                        if (first == "/")
+                            first = child.url;
                         option = $(mMenu3).clone();
                         option.find('.treeview-menu').attr('id', "main" + child.id);
                         option.find('a').attr('href', child.url);
@@ -106,11 +111,16 @@ var commonfunc = function () {
                 }
             }
 
-            var url = window.location;
+            var url = ((window.location.pathname == "/" || window.location.pathname == "/Home") && window.location.pathname != first)
+                ? (first == "" ? window.location.pathname : first)
+                : window.location.pathname;
             $("a.menuitem[href]").filter(function () {
-                var u = this.pathname;
-                return this.pathname === url.pathname;
+                return this.pathname === url;
             }).parent().addClass("active").parent().parent().addClass("active");
+
+            if (url != window.location.pathname) {
+                window.location = url;
+            }
         });
 
     //服务地址
@@ -245,7 +255,7 @@ $(function () {
         if (e.keyCode == 13) {
             $(this).blur();
         };
-        $('.form_date').on("change", function() {
+        $('.form_date').on("change", function () {
             if (isStrEmptyOrUndefined($(this).val())) {
                 $(this).val(getDate());
             }

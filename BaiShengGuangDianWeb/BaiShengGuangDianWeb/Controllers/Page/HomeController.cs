@@ -10,6 +10,10 @@ namespace BaiShengGuangDianWeb.Controllers.Page
         {
             return View();
         }
+        public IActionResult WorkSpace()
+        {
+            return View();
+        }
 
         public IActionResult Error()
         {
