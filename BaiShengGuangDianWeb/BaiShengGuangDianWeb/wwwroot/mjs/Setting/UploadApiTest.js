@@ -1,7 +1,7 @@
 ﻿var updateFirmwareUpload = null;
 function pageReady() {
     if (updateFirmwareUpload == null)
-        updateFirmwareUpload = initFileInputMultiple("addFile", fileEnum.SpotCheckImage);
+        updateFirmwareUpload = initFileInputMultiple("addFile", fileEnum.SpotCheck);
     $("#addFile").fileinput('clear');
 
 }
@@ -11,7 +11,7 @@ function addFile() {
     if (!hasPre())
         return;
 
-    fileCallBack[fileEnum.SpotCheckImage] = function (fileRet) {
+    fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         console.log(fileRet);
         if (fileRet.errno == 0) {
             var imgs = [];
@@ -21,7 +21,7 @@ function addFile() {
 
             //显示图片方法
             var data = {
-                type: fileEnum.SpotCheckImage,
+                type: fileEnum.SpotCheck,
                 files: JSON.stringify(imgs)
             };
 

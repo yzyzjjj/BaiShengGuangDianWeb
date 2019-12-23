@@ -33,16 +33,20 @@ PermissionTypes[5] = { id: -7, name: "工艺管理" };
 PermissionTypes[6] = { id: -8, name: "维修管理" };
 PermissionTypes[7] = { id: -9, name: "数据统计" };
 PermissionTypes[8] = { id: -10, name: "设备点检" };
+PermissionTypes[9] = { id: -11, name: "计划管理" };
+PermissionTypes[10] = { id: -12, name: "设备点检" };
 
-//接口顺序 2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检
+//2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检 9 计划管理 10 物料管理
 var PermissionTypesOrder = [];
 PermissionTypesOrder[2] = 1;
 PermissionTypesOrder[3] = 2;
 PermissionTypesOrder[4] = 4;
 PermissionTypesOrder[5] = 5;
-PermissionTypesOrder[6] = 6;
-PermissionTypesOrder[7] = 7;
+PermissionTypesOrder[6] = 8;
+PermissionTypesOrder[7] = 9;
 PermissionTypesOrder[8] = 3;
+PermissionTypesOrder[9] = 6;
+PermissionTypesOrder[10] = 7;
 
 var chatEnum = {
     Default: 0,
@@ -61,35 +65,37 @@ var fileEnum = {
     // 应用层
     ApplicationLibrary: 2,
     // 点检图片
-    SpotCheckImage: 3,
+    SpotCheck: 3,
+    // 物料图片
+    Material: 4,
 }
 
 //文件Accept
 var fileAccept = [];
-fileAccept[fileEnum.Default] = [];
-// 固件
-fileAccept[fileEnum.FirmwareLibrary] = ".bin";
-// 应用层
-fileAccept[fileEnum.ApplicationLibrary] = "";
-// 点检图片
-fileAccept[fileEnum.SpotCheckImage] = "image/*";
-
 //文件扩展名
 var fileExt = [];
-fileExt[fileEnum.Default] = [];
-// 固件
-fileExt[fileEnum.FirmwareLibrary] = ["bin"];
-// 应用层
-fileExt[fileEnum.ApplicationLibrary] = [];
-// 点检图片
-fileExt[fileEnum.SpotCheckImage] = ["bmp", "jpg", "jpeg", "png","gif"];
-
 //文件上传回调
 var fileCallBack = [];
-fileCallBack[fileEnum.Default] = function () { };
+
+fileAccept[fileEnum.Default] = [];
+fileExt[fileEnum.Default] = [];
+
 // 固件
+fileAccept[fileEnum.FirmwareLibrary] = ".bin";
+fileExt[fileEnum.FirmwareLibrary] = ["bin"];
 fileCallBack[fileEnum.FirmwareLibrary] = function () { };
+
 // 应用层
+fileAccept[fileEnum.ApplicationLibrary] = "";
+fileExt[fileEnum.ApplicationLibrary] = [];
 fileCallBack[fileEnum.ApplicationLibrary] = function () { };
+
 // 点检图片
-fileCallBack[fileEnum.SpotCheckImage] = function () { };
+fileAccept[fileEnum.SpotCheck] = "image/*";
+fileExt[fileEnum.SpotCheck] = ["bmp", "jpg", "jpeg", "png", "gif"];
+fileCallBack[fileEnum.SpotCheck] = function () { };
+
+// 物料图片
+fileAccept[fileEnum.Material] = "image/*";
+fileExt[fileEnum.Material] = ["bmp", "jpg", "jpeg", "png", "gif"];
+fileCallBack[fileEnum.Material] = function () { };
