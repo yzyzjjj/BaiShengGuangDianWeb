@@ -11,21 +11,19 @@
             <div class="row">
                 <div class="form-group col-md-6">
                     <label class="control-label">点检计划：</label>
-                    <div style="display: -webkit-inline-box; width: 84%">
-                        <select class="form-control"></select>
-                    </div>
+                    <select class="ms2 spotPlanSelect form-control" id="spotPlanSelect" style="width: 84%"></select>
                 </div>
                 <div class="form-group col-md-6">
                     <div class="box-tools pull-right">
                         <div class="form-group pull-right">
-                            <button type="button" class="btn btn-primary">添加计划</button>
-                            <button type="button" class="btn btn-primary">修改计划</button>
-                            <button type="button" class="btn btn-primary">删除计划</button>
+                            <button type="button" class="btn btn-primary" onclick="addSpotPlanCheckModal(0)">添加计划</button>
+                            <button type="button" class="btn btn-primary" onclick="showUpdateSpotPlan()">修改计划</button>
+                            <button type="button" class="btn btn-primary" onclick="delSpotPlan()">删除计划</button>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-primary">添加点检项</button>
-                            <button type="button" class="btn btn-primary">保存修改</button>
-                            <button type="button" class="btn btn-primary">删除点检</button>
+                            <button type="button" class="btn btn-primary" onclick="addSpotPlanCheckModal(1)">添加点检项</button>
+                            <button type="button" class="btn btn-primary" onclick="updateSportPlanCheck()">保存修改</button>
+                            <button type="button" class="btn btn-primary" onclick="delSpotPlanCheck()">删除点检</button>
                         </div>
                     </div>
                 </div>
@@ -35,7 +33,97 @@
             <div class="form-group">
                 <label class="control-label">已添加点检项：</label>
                 <div class="table-responsive mailbox-messages">
-                    <table class="table table-hover table-striped"></table>
+                    <table class="table table-hover table-striped" id="spotCheckList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 修改计划模态框 -->
+    <div class="modal fade" tabindex="-1" id="updateSpotPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">修改计划</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label"><span class="text-red">* </span>点检计划：</label>
+                                <div class="col-sm-9">
+                                    <select class="ms2 spotPlanSelect form-control" id="updateSpotPlanSelect" style="width: 100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label"><span class="text-red">* </span>计划名：</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="updateSpotPlan" onfocusin="focusIn($(this))" maxlength="20">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateSpotPlan()">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 添加新计划/点检项模态框 -->
+    <div class="modal fade" tabindex="-1" id="addSpotPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="addSpotPlanModalTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group planCheckOp">
+                            <label class="control-label"><span class="text-red">* </span>新计划：</label>
+                            <div style="display: -webkit-inline-box;width:84%">
+                                <input class="form-control" id="addSpotPlan" onfocusin="focusIn($(this))" maxlength="20">
+                            </div>
+                        </div>
+                        <div class="form-group planCheckOp">
+                            <label class="control-label"><span class="text-red">* </span>点检计划：</label>
+                            <select class="ms2 spotPlanSelect form-control" id="addSpotPlanCheck" style="width: 50%"></select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info btn-sm" id="addSpotPlanCheckBtn"><i class="fa fa-plus">点检项</i></button>
+                        </div>
+                        <div class="form-group" style="overflow-x: auto" id="addSpotPlanCheckTable">
+                            <label class="control-label">点检项：</label>
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>Id</td>
+                                        <td>点检名称</td>
+                                        <td>启用</td>
+                                        <td>提醒</td>
+                                        <td>下限</td>
+                                        <td>上限</td>
+                                        <td>单位</td>
+                                        <td>参考标准</td>
+                                        <td>备注</td>
+                                        <td>提醒间隔</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="addSpotPlanBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addSpotPlan()">添加</button>
+                    </div>
                 </div>
             </div>
         </div>

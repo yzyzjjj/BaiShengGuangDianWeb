@@ -3,7 +3,6 @@
     $(".ads").select2();
     getDataTypeList();
     getDeviceModelList();
-    //showAddModel();
     $("#fScriptVersion").change(function () {
         $(".sd ").addClass("hidden");
         var v = $("#fScriptVersion").val();

@@ -203,7 +203,7 @@ function showAddUserModal(type = 0) {
                 deviceId.push(ret.datas[d].Id.toString());
             }
             var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
+                return '<input type="checkbox" value="{0}" class="icb_minimal">'.format(data.Id);
             }
 
             var o = 0;
