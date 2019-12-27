@@ -38,15 +38,15 @@ PermissionTypes[10] = { id: -12, name: "物料管理" };
 
 //2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检 9 计划管理 10 物料管理
 var PermissionTypesOrder = [];
-PermissionTypesOrder[2] = 1;
-PermissionTypesOrder[3] = 2;
-PermissionTypesOrder[4] = 4;
-PermissionTypesOrder[5] = 5;
-PermissionTypesOrder[6] = 8;
+PermissionTypesOrder[6] = 1;
+PermissionTypesOrder[2] = 2;
+PermissionTypesOrder[3] = 3;
+PermissionTypesOrder[8] = 4;
+PermissionTypesOrder[4] = 5;
+PermissionTypesOrder[5] = 6;
+PermissionTypesOrder[9] = 7;
+PermissionTypesOrder[10] = 8;
 PermissionTypesOrder[7] = 9;
-PermissionTypesOrder[8] = 3;
-PermissionTypesOrder[9] = 6;
-PermissionTypesOrder[10] = 7;
 
 var chatEnum = {
     Default: 0,

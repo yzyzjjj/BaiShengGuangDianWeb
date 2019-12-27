@@ -819,6 +819,11 @@ function showPermissions(uiName, datas) {
             option.find(".on_cb").addClass("2");
             option.find(".on_ul").attr("id", "ul" + type.id);
             $("#" + uiName).find("[id=ul" + page.id + "]").append(option);
+            if (!page.isPage) {
+                option.find("div:first").addClass("collapsed-box");
+                option.find(".on_i").removeClass("fa-minus");
+                option.find(".on_i").addClass("fa-plus");
+            }
 
             var dLabels = getLabels(typeData);
             for (var k = 0; k < dLabels.length; k++) {
