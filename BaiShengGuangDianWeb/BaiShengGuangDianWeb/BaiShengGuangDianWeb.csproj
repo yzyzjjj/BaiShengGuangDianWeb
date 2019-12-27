@@ -8,13 +8,9 @@
 
   <ItemGroup>
     <Compile Remove="Views\Home\css\**" />
-    <Compile Remove="wwwroot\mjs\新文件夹\**" />
     <Content Remove="Views\Home\css\**" />
-    <Content Remove="wwwroot\mjs\新文件夹\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
-    <EmbeddedResource Remove="wwwroot\mjs\新文件夹\**" />
     <None Remove="Views\Home\css\**" />
-    <None Remove="wwwroot\mjs\新文件夹\**" />
   </ItemGroup>
 
   <ItemGroup>

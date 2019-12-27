@@ -87,7 +87,7 @@ var commonfunc = function () {
                             option = $(mMenu2).clone();
                             option.find('.treeview-menu').attr('id', "main" + child.id);
                             option.find('i.mi').addClass(child.icon);
-                            option.find('span.mt').text(child.name);
+                            option.find('span.mt').text(child.name.trim());
                             $(".sidebar-menu").append(option);
                         } else {
                             if (first == "/")
@@ -96,7 +96,7 @@ var commonfunc = function () {
                             option.find('.menuitem').attr('id', "main" + child.id);
                             option.find('.menuitem').attr('href', child.url);
                             option.find('i.mi').addClass(child.icon);
-                            option.find('span.mt').text(child.name);
+                            option.find('span.mt').text(child.name.trim());
                             $(".sidebar-menu").append(option);
                         }
                     } else {
@@ -105,7 +105,7 @@ var commonfunc = function () {
                         option = $(mMenu3).clone();
                         option.find('.treeview-menu').attr('id', "main" + child.id);
                         option.find('a').attr('href', child.url);
-                        option.find('span').text(child.name);
+                        option.find('span').text(child.name.trim());
                         $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
                     }
                 }
