@@ -34,7 +34,7 @@ PermissionTypes[6] = { id: -8, name: "维修管理" };
 PermissionTypes[7] = { id: -9, name: "数据统计" };
 PermissionTypes[8] = { id: -10, name: "设备点检" };
 PermissionTypes[9] = { id: -11, name: "计划管理" };
-PermissionTypes[10] = { id: -12, name: "设备点检" };
+PermissionTypes[10] = { id: -12, name: "物料管理" };
 
 //2 组织管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检 9 计划管理 10 物料管理
 var PermissionTypesOrder = [];
