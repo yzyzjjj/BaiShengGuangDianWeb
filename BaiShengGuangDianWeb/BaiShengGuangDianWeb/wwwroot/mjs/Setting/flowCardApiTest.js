@@ -980,7 +980,7 @@ function PostProcessors() {
 }
 function DeleteProcessor() {
     var data = {}
-    data.opType = 253
+    data.opType = 253;
     data.opData = JSON.stringify({
         id: 2
     })
@@ -997,7 +997,7 @@ function DeleteProcessor() {
 //检验员
 function GetSurveyor() {
     var data = {}
-    data.opType = 254
+    data.opType = 254;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1009,10 +1009,10 @@ function GetSurveyor() {
 }
 function GetSingleSurveyor() {
     var data = {}
-    data.opType = 255
+    data.opType = 255;
     data.opData = JSON.stringify({
         id: 1
-    })
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1024,12 +1024,12 @@ function GetSingleSurveyor() {
 }
 function PutSurveyor() {
     var data = {}
-    data.opType = 256
+    data.opType = 256;
     data.opData = JSON.stringify({
         id: 3,
         //名称
-        SurveyorName: "测试",
-    })
+        SurveyorName: "测试"
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1040,12 +1040,12 @@ function PutSurveyor() {
         });
 }
 function PostSurveyor() {
-    var data = {}
-    data.opType = 257
+    var data = {};
+    data.opType = 257;
     data.opData = JSON.stringify({
         //名称
-        SurveyorName: "测试1",
-    })
+        SurveyorName: "测试1"
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1056,15 +1056,17 @@ function PostSurveyor() {
         });
 }
 function PostSurveyors() {
-    var data = {}
-    data.opType = 258
-    data.opData = JSON.stringify([{
-        //名称
-        SurveyorName: "测试2",
-    }, {
-        //名称
-        SurveyorName: "测试3",
-    }])
+    var data = {};
+    data.opType = 258;
+    data.opData = JSON.stringify([
+        {
+            //名称
+            SurveyorName: "测试2"
+        }, {
+            //名称
+            SurveyorName: "测试3"
+        }
+    ]);
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1075,11 +1077,11 @@ function PostSurveyors() {
         });
 }
 function DeleteSurveyor() {
-    var data = {}
-    data.opType = 259
+    var data = {};
+    data.opType = 259;
     data.opData = JSON.stringify({
         id: 2
-    })
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {

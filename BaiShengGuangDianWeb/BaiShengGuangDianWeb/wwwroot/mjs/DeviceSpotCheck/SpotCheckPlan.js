@@ -86,7 +86,7 @@ function remindIntervalOption() {
     var op = '<div style="display:flex;justify-content:center;align-items:center">' +
         '<input type="radio" class="icb_minimal radio1 radioSelect icb_check" name="{2}">' +
         '<span>设置1：</span>' +
-        '<input class="form-control numTime radioOp1 numVal" maxlength="2" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:50px" value="0">' +
+        '<input class="form-control numTime radioOp1" maxlength="2" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:50px" value="1">' +
         '<select class="form-control timeSelect radioOp1" style="width:60px"><option value="0">日</option><option value="1">月</option></select>' +
         '<select class="form-control normalHour radioOp1" style="width:80px">{0}</select></div>' +
         '<div style="display:flex;justify-content:center;align-items:center">' +
@@ -110,9 +110,10 @@ function remindIntervalOption() {
 
 //获取已添加检点项列表
 function getSpotCheckList() {
+    _spotCheckBodyRow = 0;
     _spotCheckIdData = [];
     _spotCheckNameData = [];
-    var opType = 607;
+    var opType = 605;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -121,7 +122,7 @@ function getSpotCheckList() {
     var data = {};
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: _planId
+        qId: _planId
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -173,7 +174,7 @@ function getSpotCheckList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "  ", "render": isEnable },
+                    { "data": "Id", "title": "选择", "render": isEnable },
                     { "data": "Item", "title": "名称", "render": item },
                     { "data": "Enable", "title": "启用", "render": using },
                     { "data": "Remind", "title": "提醒", "render": remind },
@@ -188,7 +189,6 @@ function getSpotCheckList() {
                     { "orderable": false, "targets": 0 }
                 ],
                 "createdRow": function (row, data, index) {
-                    _spotCheckBodyRow = 0;
                     _spotCheckBodyRow++;
                     data.Enable ? $(row).find('.using').iCheck('check') : $(row).find('.using').iCheck('uncheck');
                     data.Remind ? $(row).find('.remind').iCheck('check') : $(row).find('.remind').iCheck('uncheck');
@@ -197,11 +197,11 @@ function getSpotCheckList() {
                             $(row).find('.radio1').iCheck('check');
                             if (data.Day) {
                                 $(row).find('.numTime').val(data.Day);
-                                $(row).find('.timeSelect option[value="day"]').attr("selected", true);
+                                $(row).find('.timeSelect option[value="0"]').attr("selected", true);
                             }
                             if (data.Month) {
                                 $(row).find('.numTime').val(data.Month);
-                                $(row).find('.timeSelect option[value="month"]').attr("selected", true);
+                                $(row).find('.timeSelect option[value="1"]').attr("selected", true);
                             }
                             $(row).find('.normalHour option[value=' + data.NormalHour + ']').attr("selected", true);
                             break;
@@ -275,13 +275,14 @@ function showUpdateSpotPlan() {
     if (_planId) {
         $('#updateSpotPlanSelect').val(_planId).trigger("change");
     }
-    $('#updateSpotPlan').val('');
+    var planName = $('#updateSpotPlanSelect').find(`[value=${_planId}]`).text();
+    $('#updateSpotPlan').val(planName);
     $('#updateSpotPlanModal').modal("show");
 }
 
 //修改计划
 function updateSpotPlan() {
-    var opType = 602;
+    var opType = 601;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -348,6 +349,8 @@ function setTableTrCount(el, count) {
 //表格设置
 function setTableStyle(el) {
     el.find('.icb_minimal').iCheck({
+        labelHover: false,
+        cursor: true, 
         checkboxClass: 'icheckbox_minimal-blue',
         radioClass: 'iradio_minimal-blue',
         increaseArea: '20%'
@@ -409,9 +412,27 @@ function getSpotCheckData(el, count) {
         var interval, day = 0, month = 0, normalHour = 0, week = 0, weekHour = 0;
         if (tr.find('.radio1').is(':checked')) {
             interval = 1;
-            tr.find('.timeSelect').val()
-                ? month = tr.find('.numTime').val().trim()
-                : day = tr.find('.numTime').val().trim();
+            if (tr.find('.timeSelect').val() == 1) {
+                month = tr.find('.numTime').val().trim();
+                if (isStrEmptyOrUndefined(month)) {
+                    layer.msg('请输入月数');
+                    return 1;
+                }
+                if (month == 0) {
+                    layer.msg('月数不能为零');
+                    return 1;
+                }
+            } else {
+                day = tr.find('.numTime').val().trim();
+                if (isStrEmptyOrUndefined(day)) {
+                    layer.msg('请输入天数');
+                    return 1;
+                }
+                if (day == 0) {
+                    layer.msg('天数不能为零');
+                    return 1;
+                }
+            }
             normalHour = tr.find('.normalHour').val();
         } else {
             interval = 2;
@@ -442,7 +463,7 @@ function getSpotCheckData(el, count) {
 function addSpotPlan() {
     var opType, spotCheckItems, planCheck, spotPlanId;
     if (_isPlanOP) {
-        opType = 609;
+        opType = 607;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
             return;
@@ -467,7 +488,7 @@ function addSpotPlan() {
         }
         planCheck = spotCheckItems;
     } else {
-        opType = 603;
+        opType = 602;
         if (!checkPermission(opType)) {
             layer.msg("没有权限");
             return;
@@ -508,7 +529,7 @@ function addSpotPlan() {
 
 //删除计划
 function delSpotPlan() {
-    var opType = 604;
+    var opType = 603;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -540,7 +561,7 @@ function delSpotPlan() {
 var _spotCheckBodyRow = 0;
 //保存修改
 function updateSportPlanCheck() {
-    var opType = 608;
+    var opType = 606;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -580,7 +601,7 @@ var _spotCheckIdData = [];
 var _spotCheckNameData = [];
 //删除点检
 function delSpotPlanCheck() {
-    var opType = 610;
+    var opType = 608;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
