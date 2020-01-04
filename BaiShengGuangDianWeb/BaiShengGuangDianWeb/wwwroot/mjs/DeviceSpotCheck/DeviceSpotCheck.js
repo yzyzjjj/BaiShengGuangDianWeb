@@ -7,6 +7,7 @@
     getWorkShop();
     surveyor();
     $('#selectWorkShop').on('select2:select', function () {
+        _isConfigPage = true;
         var workShopName = $(this).val();
         getWorkShopDevice(workShopName, $('#selectWorkShopDevice'));
     });
@@ -62,6 +63,7 @@ function getWorkShop() {
 }
 
 var _pageRead = true;
+var _isConfigPage = true;
 //获取车间设备
 function getWorkShopDevice(workShopName, el) {
     var opType = 163;
@@ -96,9 +98,12 @@ function getWorkShopDevice(workShopName, el) {
             options += option.format(d.Id, d.Code);
         }
         isStrEmptyOrUndefined(el) ? $('.selectWorkShopDevice').append(options) : el.append(options);
+        if (_isConfigPage) {
+            _isConfigPage = false;
+            getDeviceCheckPlan();
+        }
         if (_pageRead) {
             _pageRead = false;
-            getDeviceCheckPlan();
             getSpotPlan();
         }
     });
@@ -113,7 +118,8 @@ function getDeviceCheckPlan() {
     }
     var deviceId = $('#selectWorkShopDevice').val();
     if (isStrEmptyOrUndefined(deviceId)) {
-        layer.msg("没有权限");
+        layer.msg("请选择设备");
+        $('#selectSpotPlan').empty();
         return;
     }
     var data = {}

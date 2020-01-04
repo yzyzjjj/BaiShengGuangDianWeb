@@ -3,7 +3,6 @@ function pageReady() {
     if (updateFirmwareUpload == null)
         updateFirmwareUpload = initFileInputMultiple("addFile", fileEnum.SpotCheck);
     $("#addFile").fileinput('clear');
-
 }
 
 

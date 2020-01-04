@@ -41,7 +41,7 @@
             $(this).val("0");
         }
     });
-    $('#addSpotPlanCheckBtn').on('click', function() {
+    $('#addSpotPlanCheckBtn').on('click', function () {
         $(this).addClass('hidden');
         $('#addSpotPlanCheckTable').removeClass('hidden');
         setOneSpotPlanCheckTr();
@@ -130,11 +130,13 @@ function getSpotCheckList() {
             return;
         }
         var rData = ret.datas;
+        var flag = -1;
         var isEnable = function (data) {
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
+            flag++;
+            return `<input type="checkbox" class="icb_minimal isEnable" id=${flag} value=${data}>`;
         }
         var item = function (data) {
-            return `<input type="text" class="form-control text-center textIn item" maxlength="10" value=${data} style="width:100px">`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn item hidden" maxlength="10" style="width:100px" value=${data}>`;
         };
         var using = function () {
             return '<input type="checkbox" class="icb_minimal using icb_check">';
@@ -143,25 +145,51 @@ function getSpotCheckList() {
             return '<input type="checkbox" class="icb_minimal remind icb_check">';
         }
         var min = function (data) {
-            return `<input type="text" class="form-control text-center textIn min numVal" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn min numVal hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
         };
         var max = function (data) {
-            return `<input type="text" class="form-control text-center textIn max numVal" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn max numVal hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
         };
         var unit = function (data) {
-            return `<input type="text" class="form-control text-center textIn unit" maxlength="5" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn unit hidden" maxlength="5" style="width:80px" value=${data}>`;
         };
         var reference = function (data) {
-            return `<textarea class="form-control textIn reference" maxlength="500" style="resize: vertical;width:180px">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn reference hidden" maxlength="500" style="resize: vertical;width:180px">${data}</textarea>`;
         };
         var remarks = function (data) {
-            return `<textarea class="form-control textIn remarks" maxlength="500" style="resize: vertical;width:180px">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remarks hidden" maxlength="500" style="resize: vertical;width:180px">${data}</textarea>`;
         };
         var op = remindIntervalOption();
         var o = 0;
-        var remindInterval = function () {
+        var remindInterval = function (data) {
             o++;
-            return op.op.format(op.hourOp, op.weekOp, `spotCheck${o}`);
+            var setOp = data.Interval;
+            var intervalData = '';
+            switch (setOp) {
+                case 1:
+                    var day = data.Day;
+                    var month = data.Month;
+                    var hour = data.NormalHour;
+                    if (!day && !month) {
+                        intervalData = `每日${hour}点`;
+                    } else {
+                        if (day) {
+                            intervalData = day == 1 ? `每日${hour}点` : `每${day}日${hour}点`;
+                        }
+                        if (month) {
+                            intervalData = month == 1 ? `每月${hour}点` : `每${month}月${hour}点`;
+                        }
+                    }
+                    break;
+                case 2:
+                    var weeks = '日一二三四五六';
+                    intervalData = `每周${weeks[data.Week]}${data.WeekHour}点`;
+                    break;
+                default:
+                    intervalData = '';
+            }
+            var selectOp = op.op.format(op.hourOp, op.weekOp, `spotCheck${o}`);
+            return `<span class="textOn">${intervalData}</span><div class="textIn hidden">${selectOp}</div>`;
         }
         $("#spotCheckList")
             .DataTable({
@@ -183,7 +211,7 @@ function getSpotCheckList() {
                     { "data": "Unit", "title": "单位", "render": unit },
                     { "data": "Reference", "title": "参考标准", "render": reference },
                     { "data": "Remarks", "title": "备注", "render": remarks },
-                    { "data": "Interval", "title": "提醒间隔", "render": remindInterval }
+                    { "data": null, "title": "提醒间隔", "render": remindInterval }
                 ],
                 "columnDefs": [
                     { "orderable": false, "targets": 0 }
@@ -192,37 +220,53 @@ function getSpotCheckList() {
                     _spotCheckBodyRow++;
                     data.Enable ? $(row).find('.using').iCheck('check') : $(row).find('.using').iCheck('uncheck');
                     data.Remind ? $(row).find('.remind').iCheck('check') : $(row).find('.remind').iCheck('uncheck');
-                    switch (data.Interval) {
-                        case 1:
-                            $(row).find('.radio1').iCheck('check');
-                            if (data.Day) {
-                                $(row).find('.numTime').val(data.Day);
-                                $(row).find('.timeSelect option[value="0"]').attr("selected", true);
-                            }
-                            if (data.Month) {
-                                $(row).find('.numTime').val(data.Month);
-                                $(row).find('.timeSelect option[value="1"]').attr("selected", true);
-                            }
-                            $(row).find('.normalHour option[value=' + data.NormalHour + ']').attr("selected", true);
-                            break;
-                        case 2:
-                            $(row).find('.radio2').iCheck('check');
-                            $(row).find('.weekSelect option[value=' + data.Week + ']').attr("selected", true);
-                            $(row).find('.weekHour option[value=' + data.WeekHour + ']').attr("selected", true);
-                            break;
-                        default:
-                            $(row).find('.radio1').iCheck('uncheck');
-                            $(row).find('.radio2').iCheck('uncheck');
-                    }
                 },
                 "drawCallback": function (settings, json) {
                     setTableStyle($('#spotCheckList'));
                     $('#spotCheckList .isEnable').on('ifChanged', function () {
                         var tyInputOp = $(this).parents('tr');
                         setUpdateStatus($(this), tyInputOp);
+                        var thisId = parseInt($(this).attr('id'));
+                        var trData = rData[thisId];
+                        tyInputOp.find('.item').val(trData.Item);
+                        trData.Enable ? tyInputOp.find('.using').iCheck('check') : tyInputOp.find('.using').iCheck('uncheck');
+                        trData.Remind ? tyInputOp.find('.remind').iCheck('check') : tyInputOp.find('.remind').iCheck('uncheck');
+                        tyInputOp.find('.min').val(trData.Min);
+                        tyInputOp.find('.max').val(trData.Max);
+                        tyInputOp.find('.unit').val(trData.Unit);
+                        tyInputOp.find('.reference').val(trData.Reference);
+                        tyInputOp.find('.remarks').val(trData.Remarks);
+                        switch (trData.Interval) {
+                            case 1:
+                                tyInputOp.find('.radio1').iCheck('check');
+                                if (trData.Day) {
+                                    tyInputOp.find('.numTime').val(trData.Day);
+                                    tyInputOp.find('.timeSelect').val(0);
+                                }
+                                if (trData.Month) {
+                                    tyInputOp.find('.numTime').val(trData.Month);
+                                    tyInputOp.find('.timeSelect').val(1);
+                                }
+                                tyInputOp.find('.normalHour').val(trData.NormalHour);
+                                tyInputOp.find('.weekSelect').val(0);
+                                tyInputOp.find('.weekHour').val(0);
+                                break;
+                            case 2:
+                                tyInputOp.find('.radio2').iCheck('check');
+                                tyInputOp.find('.weekSelect').val(trData.Week);
+                                tyInputOp.find('.weekHour').val(trData.WeekHour);
+                                tyInputOp.find('.numTime').val(1);
+                                tyInputOp.find('.timeSelect').val(0);
+                                tyInputOp.find('.normalHour').val(0);
+                                break;
+                            default:
+                                tyInputOp.find('.radio1').iCheck('uncheck');
+                                tyInputOp.find('.radio2').iCheck('uncheck');
+                        }
                         var v = $(this).val();
-                        var name = tyInputOp.find('.item').val().trim();
+                        var name = trData.Item;
                         if ($(this).is(':checked')) {
+                            tyInputOp.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
                             _spotCheckIdData.push(v);
                             _spotCheckNameData.push(name);
                         } else {
@@ -230,6 +274,7 @@ function getSpotCheckList() {
                             var indexName = _spotCheckNameData.indexOf(name);
                             _spotCheckIdData.splice(indexId, 1);
                             _spotCheckNameData.splice(indexName, 1);
+                            tyInputOp.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
                         }
                     });
                     $('#spotCheckList .radioSelect').on('ifChecked', function () {
@@ -350,7 +395,7 @@ function setTableTrCount(el, count) {
 function setTableStyle(el) {
     el.find('.icb_minimal').iCheck({
         labelHover: false,
-        cursor: true, 
+        cursor: true,
         checkboxClass: 'icheckbox_minimal-blue',
         radioClass: 'iradio_minimal-blue',
         increaseArea: '20%'
@@ -385,7 +430,7 @@ function addSpotPlanCheckModal(e) {
         setOneSpotPlanCheckTr();
     } else {
         $('#addSpotPlanModalTitle').text('添加新计划');
-        $('#addSpotPlanCheckBtn').removeClass('hidden'); 
+        $('#addSpotPlanCheckBtn').removeClass('hidden');
         $('#addSpotPlanCheckTable').addClass('hidden');
         $('#addSpotPlanBody').empty();
     }
@@ -393,75 +438,72 @@ function addSpotPlanCheckModal(e) {
 }
 
 //点检项数据
-function getSpotCheckData(el, count) {
-    var spotCheckItems = [];
-    for (var i = 0; i < count; i++) {
-        var tr = el.find('tr').eq(i);
-        var item = tr.find('.item').val().trim();
-        if (isStrEmptyOrUndefined(item)) {
-            layer.msg('点检名称不能为空');
-            return 1;
-        }
-        var using = tr.find('.using').is(':checked');
-        var remind = tr.find('.remind').is(':checked');
-        var min = tr.find('.min').val().trim();
-        var max = tr.find('.max').val().trim();
-        var unit = tr.find('.unit').val().trim();
-        var reference = tr.find('.reference').val().trim();
-        var remarks = tr.find('.remarks').val().trim();
-        var interval, day = 0, month = 0, normalHour = 0, week = 0, weekHour = 0;
-        if (tr.find('.radio1').is(':checked')) {
-            interval = 1;
-            if (tr.find('.timeSelect').val() == 1) {
-                month = tr.find('.numTime').val().trim();
-                if (isStrEmptyOrUndefined(month)) {
-                    layer.msg('请输入月数');
-                    return 1;
-                }
-                if (month == 0) {
-                    layer.msg('月数不能为零');
-                    return 1;
-                }
-            } else {
-                day = tr.find('.numTime').val().trim();
-                if (isStrEmptyOrUndefined(day)) {
-                    layer.msg('请输入天数');
-                    return 1;
-                }
-                if (day == 0) {
-                    layer.msg('天数不能为零');
-                    return 1;
-                }
-            }
-            normalHour = tr.find('.normalHour').val();
-        } else {
-            interval = 2;
-            week = tr.find('.weekSelect').val();
-            weekHour = tr.find('.weekHour').val();
-        }
-        spotCheckItems.push({
-            Item: item,
-            Enable: using,
-            Remind: remind,
-            Min: min,
-            Max: max,
-            Unit: unit,
-            Reference: reference,
-            Remarks: remarks,
-            Interval: interval,
-            Day: day,
-            Month: month,
-            NormalHour: normalHour,
-            Week: week,
-            WeekHour: weekHour
-        });
+function getSpotCheckData(el, i) {
+    var tr = el.find('tr').eq(i);
+    var item = tr.find('.item').val().trim();
+    if (isStrEmptyOrUndefined(item)) {
+        layer.msg('点检名称不能为空');
+        return 1;
     }
+    var using = tr.find('.using').is(':checked');
+    var remind = tr.find('.remind').is(':checked');
+    var min = tr.find('.min').val().trim();
+    var max = tr.find('.max').val().trim();
+    var unit = tr.find('.unit').val().trim();
+    var reference = tr.find('.reference').val().trim();
+    var remarks = tr.find('.remarks').val().trim();
+    var interval, day = 0, month = 0, normalHour = 0, week = 0, weekHour = 0;
+    if (tr.find('.radio1').is(':checked')) {
+        interval = 1;
+        if (tr.find('.timeSelect').val() == 1) {
+            month = tr.find('.numTime').val().trim();
+            if (isStrEmptyOrUndefined(month)) {
+                layer.msg('请输入月数');
+                return 1;
+            }
+            if (month == 0) {
+                layer.msg('月数不能为零');
+                return 1;
+            }
+        } else {
+            day = tr.find('.numTime').val().trim();
+            if (isStrEmptyOrUndefined(day)) {
+                layer.msg('请输入天数');
+                return 1;
+            }
+            if (day == 0) {
+                layer.msg('天数不能为零');
+                return 1;
+            }
+        }
+        normalHour = tr.find('.normalHour').val();
+    } else {
+        interval = 2;
+        week = tr.find('.weekSelect').val();
+        weekHour = tr.find('.weekHour').val();
+    }
+    var spotCheckItems = {
+        Item: item,
+        Enable: using,
+        Remind: remind,
+        Min: parseInt(min),
+        Max: parseInt(max),
+        Unit: unit,
+        Reference: reference,
+        Remarks: remarks,
+        Interval: interval,
+        Day: parseInt(day),
+        Month: parseInt(month),
+        NormalHour: normalHour,
+        Week: week,
+        WeekHour: weekHour
+    };
     return spotCheckItems;
 }
 
 //添加计划/点检项
 function addSpotPlan() {
-    var opType, spotCheckItems, planCheck, spotPlanId;
+    var opType, spotCheckItems = [], planCheck, spotPlanId, i = 0, trData;
     if (_isPlanOP) {
         opType = 607;
         if (!checkPermission(opType)) {
@@ -473,18 +515,17 @@ function addSpotPlan() {
             layer.msg('请选择点检计划');
             return;
         }
-        spotCheckItems = getSpotCheckData($('#addSpotPlanBody'), _spotCheckCount);
-        if (spotCheckItems == 1) {
-            return;
-        }
-        if (spotCheckItems.length) {
-            var i = 0, len = spotCheckItems.length;
-            for (; i < len; i++) {
-                spotCheckItems[i].PlanId = spotPlanId;
-            }
-        } else {
+        if (!_spotCheckCount) {
             layer.msg('至少设置一条计划点检项');
             return;
+        }
+        for (; i < _spotCheckCount; i++) {
+            trData = getSpotCheckData($('#addSpotPlanBody'), i);
+            if (trData == 1) {
+                return;
+            }
+            trData.PlanId = spotPlanId;
+            spotCheckItems.push(trData);
         }
         planCheck = spotCheckItems;
     } else {
@@ -500,9 +541,12 @@ function addSpotPlan() {
             return;
         }
         planCheck.Plan = spotPlanName;
-        spotCheckItems = getSpotCheckData($('#addSpotPlanBody'), _spotCheckCount);
-        if (spotCheckItems == 1) {
-            return;
+        for (; i < _spotCheckCount; i++) {
+            trData = getSpotCheckData($('#addSpotPlanBody'), i);
+            if (trData == 1) {
+                return;
+            }
+            spotCheckItems.push(trData);
         }
         if (spotCheckItems.length) {
             planCheck.SpotCheckItems = spotCheckItems;
@@ -572,15 +616,23 @@ function updateSportPlanCheck() {
         layer.msg("未检测到点检项数据");
         return;
     }
-    var spotCheckItems = getSpotCheckData(planCheckBody, _spotCheckBodyRow);
-    if (spotCheckItems == 1) {
-        return;
-    }
-    var planCheckBodyIsEnable = $('#spotCheckList tbody').find('.isEnable');
+    var spotCheckItems = [];
+    var planCheckBodyIsEnable = planCheckBody.find('.isEnable');
     for (var i = 0; i < _spotCheckBodyRow; i++) {
-        spotCheckItems[i].PlanId = planId;
-        var id = planCheckBodyIsEnable.eq(i).val();
-        spotCheckItems[i].id = id;
+        if (planCheckBodyIsEnable.eq(i).is(':checked')) {
+            var trData = getSpotCheckData(planCheckBody, i);
+            if (trData == 1) {
+                return;
+            }
+            trData.PlanId = planId;
+            var id = planCheckBodyIsEnable.eq(i).val();
+            trData.id = id;
+            spotCheckItems.push(trData);
+        }
+    }
+    if (!spotCheckItems.length) {
+        layer.msg("请选择需要修改的数据");
+        return;
     }
     var doSth = function () {
         var data = {}
