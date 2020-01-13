@@ -227,7 +227,7 @@ function getThisCheckList() {
             var done = null, notPass = null, planDetails = '';
             for (; j < planLen; j++) {
                 var pd = planData[j];
-                done += pd.Total;
+                done += pd.Done;
                 notPass += pd.NotPass;
                 if (j === 3) {
                     planDetails += '...';
@@ -540,14 +540,14 @@ function showImgModel(id, item, img) {
                 var imgOp = '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
                     '<img src={0}>' +
-                    '<div class="caption">' +
-                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash"></button>' +
+                    '<div class="caption text-center">' +
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash" value="{}"></button>' +
                     '</div>' +
                     '</div>' +
                     '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path);
+                    imgOps += imgOp.format(ret.data[i].path,img[i]);
                 }
                 $("#imgOldList").append(imgOps);
             });
@@ -577,10 +577,13 @@ function updateImg() {
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;
-            data.opData = JSON.stringify({
-                Images: imgNew,
-                Id: id
-            });
+            //data.opData = JSON.stringify({
+            //    Images: imgNew,
+            //    Id: id
+            //});
+            data.opData = {
+                spotCheckLog: JSON.stringify({ "Images": "[\"200113144647_other.png\"]", "Id": "71" })
+            };
             ajaxPost("/Relay/Post", data,
                 function (ret) {
                     layer.msg(ret.errmsg);
