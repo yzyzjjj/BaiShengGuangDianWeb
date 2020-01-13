@@ -187,10 +187,10 @@ function getThisCheckList() {
             var plan = planData[0].PlanId;
             var j = 0, planLen = planData.length;
             //已检验,不合格总数,计划数据
-            var total = null, notPass = null, planDetails = '';
+            var done = null, notPass = null, planDetails = '';
             for (; j < planLen; j++) {
                 var pd = planData[j];
-                total += pd.Total;
+                done += pd.Done;
                 notPass += pd.NotPass;
                 if (j === 3) {
                     planDetails += '...';
@@ -201,11 +201,11 @@ function getThisCheckList() {
                     : `${pd.Plan}：${pd.Total}/${pd.Done}/<font style="color: red">${pd.NotPass}</font><br>`;
             }
             var rightTopColor = '';
-            if (total) {
-                if (total > 0 && notPass > 0) {
+            if (done) {
+                if (done > 0 && notPass > 0) {
                     rightTopColor = '#FF0000';
                 }
-                if (total > 0 && notPass === 0) {
+                if (done > 0 && notPass === 0) {
                     rightTopColor = '#008000';
                 }
             } else {

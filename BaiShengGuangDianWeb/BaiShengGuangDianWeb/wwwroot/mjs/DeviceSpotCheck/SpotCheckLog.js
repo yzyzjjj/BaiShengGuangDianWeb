@@ -41,6 +41,11 @@
     $('.selectTime').datepicker({
         onSelect: selectDate
     }).on('changeDate', selectDate);
+    $('#imgOldList').on('click', '.delImg', function() {
+        $(this).parents('.imgOption').remove();
+        var e = $(this).val();
+        _imgNameData.splice(_imgNameData.indexOf(e), 1);
+    });
 }
 
 var _selectTime = false;
@@ -227,7 +232,7 @@ function getThisCheckList() {
             var done = null, notPass = null, planDetails = '';
             for (; j < planLen; j++) {
                 var pd = planData[j];
-                done += pd.Total;
+                done += pd.Done;
                 notPass += pd.NotPass;
                 if (j === 3) {
                     planDetails += '...';
@@ -511,6 +516,7 @@ function updateDeviceCheck(isModal) {
 }
 
 var _updateFirmwareUpload = null;
+var _imgNameData = null;
 //图片详情模态框
 function showImgModel(id, item, img) {
     if (_updateFirmwareUpload == null) {
@@ -521,11 +527,15 @@ function showImgModel(id, item, img) {
     item = unescape(item);
     $('#checkName').val(item);
     img = unescape(img);
+    $('#imgOld').empty();
+    $("#imgOldList").empty();
+    _imgNameData = [];
     if (isStrEmptyOrUndefined(img)) {
-        $('#imgOld').empty();
         $('#imgOld').append('图片：<font style="color:red" size=5>无</font>');
     } else {
+        $('#imgOld').append('图片：');
         img = img.split(",");
+        _imgNameData = img;
         var data = {
             type: fileEnum.SpotCheck,
             files: JSON.stringify(img)
@@ -536,18 +546,17 @@ function showImgModel(id, item, img) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                $("#imgOldList").empty();
-                var imgOp = '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
+                var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
                     '<img src={0}>' +
-                    '<div class="caption">' +
-                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash"></button>' +
+                    '<div class="caption text-center">' +
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
                     '</div>' +
                     '</div>' +
                     '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path);
+                    imgOps += imgOp.format(ret.data[i].path,img[i]);
                 }
                 $("#imgOldList").append(imgOps);
             });
@@ -569,17 +578,20 @@ function updateImg() {
     }
     fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         if (fileRet.errno == 0) {
-            var imgNew = [];
+            var img = [];
             for (var key in fileRet.data) {
-                imgNew.push(fileRet.data[key].newName);
+                img.push(fileRet.data[key].newName);
             }
+            var imgNew = _imgNameData.concat(img);
             imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;
             data.opData = JSON.stringify({
-                Images: imgNew,
-                Id: id
+                spotCheckLog: {
+                    Images: imgNew,
+                    Id: id
+                }
             });
             ajaxPost("/Relay/Post", data,
                 function (ret) {
