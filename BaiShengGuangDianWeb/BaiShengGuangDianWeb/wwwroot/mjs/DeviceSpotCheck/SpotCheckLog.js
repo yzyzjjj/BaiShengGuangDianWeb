@@ -80,6 +80,7 @@ function getWorkShop() {
 }
 
 var _pageRead = true;
+var _deviceId = null;
 //获取车间设备
 function getWorkShopDevice(workShopName, el, all) {
     var opType = 163;
@@ -112,9 +113,11 @@ function getWorkShopDevice(workShopName, el, all) {
         if (len && !all) {
             $('#workShopDeviceRecent').append(option.format(0, '所有设备'));
         }
+        _deviceId = [];
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Code);
+            _deviceId.push(d.Id);
         }
         isStrEmptyOrUndefined(el) ? $('.workShopDevice').append(options) : el.append(options);
         if (_pageRead) {
@@ -183,9 +186,7 @@ function getThisCheckList() {
         layer.msg("请选择设备");
         return;
     }
-    if (deviceId != 0) {
-        list.ids = deviceId;
-    }
+    list.ids = deviceId != 0 ? deviceId : _deviceId.join();
     var planId = $('#spotPlanRecent').val();
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg("请选择点检计划");

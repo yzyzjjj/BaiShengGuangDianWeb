@@ -21,6 +21,7 @@ function surveyor() {
             layer.msg(ret.errmsg);
             return;
         }
+        $('#categorySelect').empty();
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
@@ -46,6 +47,10 @@ function getNameList() {
     }
     var list = {};
     var categoryId = $('#categorySelect').val();
+    if (isStrEmptyOrUndefined(categoryId)) {
+        layer.msg('请选择货品类别');
+        return;
+    }
     if (categoryId != 0) {
         list.categoryId = categoryId;
     }
@@ -230,7 +235,7 @@ function addCategory() {
 
 var _nameIdData = [];
 var _nameNameData = [];
-//删除货品类别
+//删除货品名称
 function delName() {
     var opType = 827;
     if (!checkPermission(opType)) {
