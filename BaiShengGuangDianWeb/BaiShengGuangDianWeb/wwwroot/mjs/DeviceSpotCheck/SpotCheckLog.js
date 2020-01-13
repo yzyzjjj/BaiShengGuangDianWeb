@@ -80,7 +80,6 @@ function getWorkShop() {
 }
 
 var _pageRead = true;
-var _deviceId = null;
 //获取车间设备
 function getWorkShopDevice(workShopName, el, all) {
     var opType = 163;
@@ -110,14 +109,14 @@ function getWorkShopDevice(workShopName, el, all) {
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
         var options = '';
-        if (len && !all) {
-            $('#workShopDeviceRecent').append(option.format(0, '所有设备'));
-        }
-        _deviceId = [];
+        var deviceId = [];
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Code);
-            _deviceId.push(d.Id);
+            deviceId.push(d.Id);
+        }
+        if (len && !all) {
+            $('#workShopDeviceRecent').prepend(option.format(deviceId, '所有设备'));
         }
         isStrEmptyOrUndefined(el) ? $('.workShopDevice').append(options) : el.append(options);
         if (_pageRead) {
@@ -186,7 +185,9 @@ function getThisCheckList() {
         layer.msg("请选择设备");
         return;
     }
-    list.ids = deviceId != 0 ? deviceId : _deviceId.join();
+    if (deviceId != 0) {
+        list.ids = deviceId;
+    }
     var planId = $('#spotPlanRecent').val();
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg("请选择点检计划");
@@ -213,6 +214,9 @@ function getThisCheckList() {
             '</div>';
         var ops = '';
         var i = 0, len = rData.length;
+        if (!len) {
+            $('#devicePlanDetail').append('<div style="font:bold 25px/35px 微软雅黑;color:red">无数据</div>');
+        }
         for (; i < len; i++) {
             var d = rData[i];
             var planData = d.Data;
@@ -223,7 +227,7 @@ function getThisCheckList() {
             var done = null, notPass = null, planDetails = '';
             for (; j < planLen; j++) {
                 var pd = planData[j];
-                done += pd.Done;
+                done += pd.Total;
                 notPass += pd.NotPass;
                 if (j === 3) {
                     planDetails += '...';
@@ -235,11 +239,10 @@ function getThisCheckList() {
             }
             var rightTopColor = '';
             if (done) {
-                var e = 0 + notPass;
-                if (done > e && e > 0) {
+                if (done > 0 && notPass > 0) {
                     rightTopColor = '#FF0000';
                 }
-                if (done > e && e === 0) {
+                if (done > 0 && notPass === 0) {
                     rightTopColor = '#008000';
                 }
             } else {
@@ -367,8 +370,8 @@ function detailPage(deviceId, planId, isModal) {
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
-                { "data": "PlannedTime", "title": "实际时间", "render": actualTime },
+                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "CheckTime", "title": "实际时间", "render": actualTime },
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
                 { "data": null, "title": "图片", "render": lookImg }
@@ -380,8 +383,8 @@ function detailPage(deviceId, planId, isModal) {
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
-                { "data": "PlannedTime", "title": "实际时间", "render": actualTime },
+                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "CheckTime", "title": "实际时间", "render": actualTime },
                 { "data": "SurveyorName", "title": "检验人"},
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
@@ -522,6 +525,7 @@ function showImgModel(id, item, img) {
         $('#imgOld').empty();
         $('#imgOld').append('图片：<font style="color:red" size=5>无</font>');
     } else {
+        img = img.split(",");
         var data = {
             type: fileEnum.SpotCheck,
             files: JSON.stringify(img)
@@ -533,7 +537,14 @@ function showImgModel(id, item, img) {
                     return;
                 }
                 $("#imgOldList").empty();
-                var imgOp = '<img height="200px" src="{0}"/>';
+                var imgOp = '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
+                    '<div class="thumbnail">' +
+                    '<img src={0}>' +
+                    '<div class="caption">' +
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash"></button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
                     imgOps += imgOp.format(ret.data[i].path);
@@ -547,7 +558,7 @@ function showImgModel(id, item, img) {
 
 //修改图片
 function updateImg() {
-    var opType = _isListModal ? 616 : 619;
+    var opType = 617;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -562,7 +573,7 @@ function updateImg() {
             for (var key in fileRet.data) {
                 imgNew.push(fileRet.data[key].newName);
             }
-            imgNew = imgNew.join();
+            imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;

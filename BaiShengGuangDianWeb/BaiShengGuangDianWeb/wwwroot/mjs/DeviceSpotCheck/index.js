@@ -77,12 +77,14 @@ function getWorkShopDevice(workShopName, el, all) {
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
         var options = '';
-        if (len && !all) {
-            $('#workShopDevice').append(option.format(0, '所有设备'));
-        }
+        var deviceId = [];
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Code);
+            deviceId.push(d.Id);
+        }
+        if (len && !all) {
+            $('#workShopDevice').prepend(option.format(deviceId, '所有设备'));
         }
         isStrEmptyOrUndefined(el) ? $('.workShopDevice').append(options) : el.append(options);
         if (_pageRead) {
@@ -175,6 +177,9 @@ function getThisCheckList() {
             '</div>';
         var ops = '';
         var i = 0, len = rData.length;
+        if (!len) {
+            $('#devicePlan').append('<div style="font:bold 25px/35px 微软雅黑;color:red">无数据</div>');
+        }
         for (; i < len; i++) {
             var d = rData[i];
             var planData = d.Data;
@@ -182,10 +187,10 @@ function getThisCheckList() {
             var plan = planData[0].PlanId;
             var j = 0, planLen = planData.length;
             //已检验,不合格总数,计划数据
-            var done = null, notPass = null, planDetails = '';
+            var total = null, notPass = null, planDetails = '';
             for (; j < planLen; j++) {
                 var pd = planData[j];
-                done += pd.Done;
+                total += pd.Total;
                 notPass += pd.NotPass;
                 if (j === 3) {
                     planDetails += '...';
@@ -196,12 +201,11 @@ function getThisCheckList() {
                     : `${pd.Plan}：${pd.Total}/${pd.Done}/<font style="color: red">${pd.NotPass}</font><br>`;
             }
             var rightTopColor = '';
-            if (done) {
-                var e = 0 + notPass;
-                if (done > e && e > 0) {
+            if (total) {
+                if (total > 0 && notPass > 0) {
                     rightTopColor = '#FF0000';
                 }
-                if (done > e && e === 0) {
+                if (total > 0 && notPass === 0) {
                     rightTopColor = '#008000';
                 }
             } else {
@@ -295,8 +299,8 @@ function detailPage(deviceId, planId) {
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
-                { "data": "PlannedTime", "title": "实际时间", "render": actualTime },
+                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "CheckTime", "title": "实际时间", "render": actualTime },
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
                 { "data": null, "title": "图片", "render": lookImg }
@@ -418,6 +422,7 @@ function showImgModel(id, item, img) {
         $('#imgOld').empty();
         $('#imgOld').append('图片：<font style="color:red" size=5>无</font>');
     } else {
+        img = img.split(",");
         var data = {
             type: fileEnum.SpotCheck,
             files: JSON.stringify(img)
