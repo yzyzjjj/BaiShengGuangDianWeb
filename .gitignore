@@ -246,6 +246,8 @@ _Pvt_Extensions
 .idea/
 *.sln.iml
 BaiShengGuangDianWeb/BaiShengGuangDianWeb/obj/
+BaiShengGuangDianWeb/BaiShengGuangDianWeb/Properties/
+BaiShengGuangDianWeb/BaiShengGuangDianWeb/wwwroot/File/
 logs/*.log
 
 tmp/
