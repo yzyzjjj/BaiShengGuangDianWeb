@@ -548,7 +548,7 @@ function showImgModel(id, item, img) {
                 }
                 var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
-                    '<img src={0}>' +
+                    '<img src={0} style="height:200px">' +
                     '<div class="caption text-center">' +
                     '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
                     '</div>' +
@@ -572,10 +572,10 @@ function updateImg() {
         layer.msg("没有权限");
         return;
     }
-    if (!hasPre()) {
-        layer.msg("请先上传图片");
-        return;
-    }
+    //if (!hasPre()) {
+    //    layer.msg("请先上传图片");
+    //    return;
+    //}
     fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -588,10 +588,8 @@ function updateImg() {
             var data = {}
             data.opType = opType;
             data.opData = JSON.stringify({
-                spotCheckLog: {
-                    Images: imgNew,
-                    Id: id
-                }
+                Images: imgNew,
+                Id: id
             });
             ajaxPost("/Relay/Post", data,
                 function (ret) {

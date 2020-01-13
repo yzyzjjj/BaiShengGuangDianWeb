@@ -17,6 +17,11 @@
     $('#workShopDeviceDetail, #spotPlanDetail').on('select2:select', function () {
         detailPage();
     });
+    $('#imgOldList').on('click', '.delImg', function () {
+        $(this).parents('.imgOption').remove();
+        var e = $(this).val();
+        _imgNameData.splice(_imgNameData.indexOf(e), 1);
+    });
 }
 
 //获取车间
@@ -408,6 +413,7 @@ function updateDeviceCheck() {
 }
 
 var _updateFirmwareUpload = null;
+var _imgNameData = null;
 //图片详情模态框
 function showImgModel(id, item, img) {
     if (_updateFirmwareUpload == null) {
@@ -418,11 +424,15 @@ function showImgModel(id, item, img) {
     item = unescape(item);
     $('#checkName').val(item);
     img = unescape(img);
+    $('#imgOld').empty();
+    $("#imgOldList").empty();
+    _imgNameData = [];
     if (isStrEmptyOrUndefined(img)) {
-        $('#imgOld').empty();
         $('#imgOld').append('图片：<font style="color:red" size=5>无</font>');
     } else {
+        $('#imgOld').append('图片：');
         img = img.split(",");
+        _imgNameData = img;
         var data = {
             type: fileEnum.SpotCheck,
             files: JSON.stringify(img)
@@ -433,11 +443,17 @@ function showImgModel(id, item, img) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                $("#imgOldList").empty();
-                var imgOp = '<img height="200px" src="{0}"/>';
+                var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
+                    '<div class="thumbnail">' +
+                    '<img src={0} style="height:200px">' +
+                    '<div class="caption text-center">' +
+                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path);
+                    imgOps += imgOp.format(ret.data[i].path, img[i]);
                 }
                 $("#imgOldList").append(imgOps);
             });
@@ -448,22 +464,23 @@ function showImgModel(id, item, img) {
 
 //修改图片
 function updateImg() {
-    var opType = 616;
+    var opType = 617;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    if (!hasPre()) {
-        layer.msg("请先上传图片");
-        return;
-    }
+    //if (!hasPre()) {
+    //    layer.msg("请先上传图片");
+    //    return;
+    //}
     fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         if (fileRet.errno == 0) {
-            var imgNew = [];
+            var img = [];
             for (var key in fileRet.data) {
-                imgNew.push(fileRet.data[key].newName);
+                img.push(fileRet.data[key].newName);
             }
-            imgNew = imgNew.join();
+            var imgNew = _imgNameData.concat(img);
+            imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;
@@ -476,7 +493,7 @@ function updateImg() {
                     layer.msg(ret.errmsg);
                     $('#showImgModel').modal('hide');
                     if (ret.errno == 0) {
-                        detailPage();
+                        detailPage(null, null, true);
                     }
                 });
         }
