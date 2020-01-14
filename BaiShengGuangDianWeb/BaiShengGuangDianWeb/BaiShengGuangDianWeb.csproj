@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Views\Home\css\**" />
+    <Compile Remove="wwwroot\mimages\**" />
     <Content Remove="Views\Home\css\**" />
+    <Content Remove="wwwroot\mimages\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
+    <EmbeddedResource Remove="wwwroot\mimages\**" />
     <None Remove="Views\Home\css\**" />
+    <None Remove="wwwroot\mimages\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,10 +64,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BaiShengGuangDianNpc\BaiShengGuangDianNpc\ModelBase\ModelBase.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\mimages\" />
   </ItemGroup>
 
   <ItemGroup>
