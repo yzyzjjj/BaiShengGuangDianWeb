@@ -41,7 +41,7 @@
     $('.selectTime').datepicker({
         onSelect: selectDate
     }).on('changeDate', selectDate);
-    $('#imgOldList').on('click', '.delImg', function() {
+    $('#imgOldList').on('click', '.delImg', function () {
         $(this).parents('.imgOption').remove();
         var e = $(this).val();
         _imgNameData.splice(_imgNameData.indexOf(e), 1);
@@ -163,12 +163,14 @@ function getSpotPlan() {
         var i, len = list.length;
         var option = '<option value="{0}">{1}</option>';
         var options = '';
-        if (len) {
-            $('#spotPlanRecent').append(option.format(0, '所有计划'));
-        }
+        var planId = [];
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Plan);
+            planId.push(d.Id);
+        }
+        if (len) {
+            $('#spotPlanRecent').prepend(option.format(planId, '所有计划'));
         }
         $('.spotPlan').append(options);
         getThisCheckList();
@@ -346,11 +348,18 @@ function detailPage(deviceId, planId, isModal) {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" id=${data.Id} surveyorId=${data.SurveyorId}>`;
         }
+        var number = 0;
+        var order = function() {
+            return ++number;
+        }
         var plannedTime = function (data) {
             return data.slice(0, data.indexOf(' '));
         }
         var actualTime = function (data) {
             var time = data.slice(0, data.indexOf(' '));
+            if (time == '0001-01-01') {
+                time = '';
+            }
             return `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn actualTime hidden" style="width:120px;cursor: pointer">`;
         }
         var actual = function (data) {
@@ -370,12 +379,13 @@ function detailPage(deviceId, planId, isModal) {
         var column = isModal
             ? [
                 { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
                 { "data": "CheckTime", "title": "实际时间", "render": actualTime },
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
@@ -383,14 +393,15 @@ function detailPage(deviceId, planId, isModal) {
             ]
             : [
                 { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
                 { "data": "CheckTime", "title": "实际时间", "render": actualTime },
-                { "data": "SurveyorName", "title": "检验人"},
+                { "data": "SurveyorName", "title": "检验人" },
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
                 { "data": null, "title": "图片", "render": lookImg }
@@ -401,12 +412,15 @@ function detailPage(deviceId, planId, isModal) {
             "searching": true,
             "language": { "url": "/content/datatables_language.json" },
             "data": rData,
-            "aaSorting": [[0, "asc"]],
+            "aaSorting": [[1, "asc"]],
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": column,
+            "columnDefs": [
+                { "orderable": false, "targets": 0 }
+            ],
             "createdRow": function (row, data, index) {
-                var time = data.PlannedTime.slice(0, data.PlannedTime.indexOf(' '));
+                var time = data.CheckTime.slice(0, data.PlannedTime.indexOf(' '));
                 var date = $(row).find('.form_date');
                 date.attr("readonly", true).datepicker({
                     language: 'zh-CN',
@@ -448,7 +462,7 @@ function detailPage(deviceId, planId, isModal) {
 
 //更新设备点检项
 function updateDeviceCheck(isModal) {
-    var opType, checkData = [],trs;
+    var opType, checkData = [], trs;
     if (isModal) {
         opType = 616;
         if (!checkPermission(opType)) {
@@ -556,18 +570,18 @@ function showImgModel(id, item, img) {
                     '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path,img[i]);
+                    imgOps += imgOp.format(ret.data[i].path, img[i]);
                 }
                 $("#imgOldList").append(imgOps);
             });
     }
-    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder','选择 张图片...');
+    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '选择 张图片...');
     $('#showImgModel').modal('show');
 }
 
 //修改图片
 function updateImg() {
-    var opType = 617;
+    var opType = _isListModal ? 617 : 620;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
@@ -596,7 +610,7 @@ function updateImg() {
                     layer.msg(ret.errmsg);
                     $('#showImgModel').modal('hide');
                     if (ret.errno == 0) {
-                        detailPage(null, null, true);
+                        _isListModal ? detailPage(null, null, true) : detailPage(null, null, false);
                     }
                 });
         }
@@ -654,6 +668,10 @@ function getNextExamineList() {
                 map[plan] = 1;
             }
         }
+        var number = 0;
+        var order = function() {
+            return ++number;
+        }
         var plannedTime = function (data) {
             return data.slice(0, data.indexOf(' '));
         }
@@ -672,6 +690,7 @@ function getNextExamineList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": "Plan", "title": "计划" },
+                    { "data": null, "title": "序号", "render": order },
                     { "data": "Item", "title": "点检项" },
                     { "data": "Max", "title": "上限" },
                     { "data": "Min", "title": "下限" },
@@ -700,11 +719,11 @@ function getNextExamineList() {
                 },
                 "columnDefs": [
                     {
-                        "targets": 6,
+                        "targets": 7,
                         "sClass": "text-primary"
                     },
                     {
-                        "targets": 7,
+                        "targets": 8,
                         "render": function (data, type, full, meta) {
                             full.Devices = full.Devices ? full.Devices : "";
                             return full.Devices.length > tdShowContentLength

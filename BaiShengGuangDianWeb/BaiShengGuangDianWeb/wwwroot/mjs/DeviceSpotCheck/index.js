@@ -267,11 +267,18 @@ function detailPage(deviceId, planId) {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" id=${data.Id} surveyorId=${data.SurveyorId}>`;
         }
+        var number = 0;
+        var order = function () {
+            return ++number;
+        }
         var plannedTime = function (data) {
             return data.slice(0, data.indexOf(' '));
         }
         var actualTime = function (data) {
             var time = data.slice(0, data.indexOf(' '));
+            if (time == '0001-01-01') {
+                time = '';
+            }
             return `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn actualTime hidden" style="width:120px;cursor: pointer">`;
         }
         var actual = function (data) {
@@ -294,24 +301,28 @@ function detailPage(deviceId, planId) {
             "searching": true,
             "language": { "url": "/content/datatables_language.json" },
             "data": rData,
-            "aaSorting": [[0, "asc"]],
+            "aaSorting": [[1, "asc"]],
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
                 { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
                 { "data": "Min", "title": "下限" },
                 { "data": "Unit", "title": "单位" },
                 { "data": "Reference", "title": "参考标准" },
-                { "data": "CheckTime", "title": "计划时间", "render": plannedTime },
+                { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
                 { "data": "CheckTime", "title": "实际时间", "render": actualTime },
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
                 { "data": null, "title": "图片", "render": lookImg }
             ],
+            "columnDefs": [
+                { "orderable": false, "targets": 0 }
+            ],
             "createdRow": function (row, data, index) {
-                var time = data.PlannedTime.slice(0, data.PlannedTime.indexOf(' '));
+                var time = data.CheckTime.slice(0, data.PlannedTime.indexOf(' '));
                 var date = $(row).find('.form_date');
                 date.attr("readonly", true).datepicker({
                     language: 'zh-CN',

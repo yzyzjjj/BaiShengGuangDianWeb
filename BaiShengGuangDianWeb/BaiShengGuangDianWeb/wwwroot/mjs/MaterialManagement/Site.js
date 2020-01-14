@@ -9,6 +9,8 @@ function getCargoSiteList() {
         layer.msg("没有权限");
         return;
     }
+    _siteIdData = [];
+    _siteNameData = [];
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data, function(ret) {
@@ -24,7 +26,11 @@ function getCargoSiteList() {
             return `<span class="textOn siteOld">${data}</span><input type="text" class="form-control text-center textIn site hidden" maxlength="20" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
+        }
+        var number = 0;
+        var order = function() {
+            return ++number;
         }
         $("#cargoSiteList")
             .DataTable({
@@ -38,6 +44,7 @@ function getCargoSiteList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": null, "title": "序号", "render": order },
                     { "data": "Site", "title": "位置", "render": site },
                     { "data": "Remark", "title": "备注", "render": remark }
                 ],
@@ -191,8 +198,6 @@ function delSite() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    _siteIdData = [];
-                    _siteNameData = [];
                     getCargoSiteList();
                 }
             });

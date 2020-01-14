@@ -30,7 +30,9 @@ function surveyor() {
             var d = list[i];
             options += option.format(d.Id, d.Category);
         }
-        $('#categorySelect').append(option.format(0, '所有类别'));
+        if (len) {
+            $('#categorySelect').append(option.format(0, '所有类别'));
+        }
         $('#categorySelect').append(options); 
         $('#addCategorySelect').append(options);
         _categorySelect = `<select class="form-control textIn category hidden">${options}</select>`;
@@ -45,6 +47,8 @@ function getNameList() {
         layer.msg("没有权限");
         return;
     }
+    _nameIdData = [];
+    _nameNameData = [];
     var list = {};
     var categoryId = $('#categorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
@@ -66,6 +70,10 @@ function getNameList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
+        var number = 0;
+        var order = function () {
+            return ++number;
+        }
         var category = function (data) {
             return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
         }
@@ -73,7 +81,7 @@ function getNameList() {
             return `<span class="textOn nameOld">${data}</span><input type="text" class="form-control text-center textIn name hidden" maxlength="20" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
         }
         $("#nameList")
             .DataTable({
@@ -87,6 +95,7 @@ function getNameList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": null, "title": "序号", "render": order },
                     { "data": null, "title": "类别", "render": category },
                     { "data": "Name", "title": "名称", "render": name },
                     { "data": "Remark", "title": "备注", "render": remark }
@@ -257,8 +266,6 @@ function delName() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    _nameIdData = [];
-                    _nameNameData = [];
                     getNameList();
                 }
             });
