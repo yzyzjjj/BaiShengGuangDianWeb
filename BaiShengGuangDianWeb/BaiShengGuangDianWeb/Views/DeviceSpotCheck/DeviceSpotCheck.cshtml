@@ -1,0 +1,124 @@
+﻿@model object
+
+@{
+    ViewBag.Title = "设备点检配置";
+    Layout = "_Layout";
+}
+<script src="~/mjs/DeviceSpotCheck/DeviceSpotCheck.js"></script>
+<section class="content ">
+    <h2 class="text-center" id="pageTitle">设备点检相关</h2>
+    <div class="nav-tabs-custom">
+        <ul class="nav nav-tabs ui-sortable-handle">
+            <li class="active"><a href="#config" data-toggle="tab" aria-expanded="true" class="setTitle">配置</a></li>
+            <li><a href="#setting" data-toggle="tab" aria-expanded="false" class="setTitle">设置</a></li>
+        </ul>
+        <div class="tab-content no-padding">
+            <div class="tab-pane active in" id="config">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <div class="form-inline" style="display: flex">
+                            <div style="flex: 1">
+                                <label class="control-label">选择车间：</label>
+                                <select class="ms2 form-control selectWorkShop" id="selectWorkShop" style="width: 85%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label">选择设备：</label>
+                                <select class="ms2 form-control selectWorkShopDevice" id="selectWorkShopDevice" style="width: 85%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label">点检计划：</label>
+                                <select class="ms2 form-control" id="selectSpotPlan" style="width: 85%"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+                            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center">
+                                <label class="control-label">点检项：</label>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="spotPlanCheckReload()">重新加载</button>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="spotPlanCheckList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade in" id="setting">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <div class="form-inline" style="display: flex">
+                            <div style="flex: 1">
+                                <label class="control-label">点检计划：</label>
+                                <select class="ms2 form-control selectSpotPlan" style="width: 85%" id="selectSpotPlanSet"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label">选择车间：</label>
+                                <select class="ms2 form-control selectWorkShop" style="width: 85%" id="selectWorkShopSet"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label">选择设备：</label>
+                                <select class="ms2 form-control selectWorkShopDevice" multiple="multiple" style="width: 85%" id="selectWorkShopDeviceSet"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+                            <div class="form-group" style="display: flex; justify-content: space-between;align-items: center">
+                                <label class="control-label">点检项：</label>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="delDevicePlanModal()">删除设备计划</button>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="spotPlanCheckListSet"></table>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-block btn-flat" style="width: 100px;margin: auto" onclick="setDeviceCheck()">设置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 删除设备计划模态框 -->
+    <div class="modal fade" tabindex="-1" id="delDevicePlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">删除设备计划</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>选择车间：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control selectWorkShop" style="width: 100%" id="selectWorkShopDel"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>选择设备：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control selectWorkShopDevice" multiple="multiple" style="width: 100%" id="selectWorkShopDeviceDel"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>点检计划：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control selectSpotPlan" style="width: 100%" id="selectSpotPlanDel"></select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-danger" onclick="delDevicePlan()">删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

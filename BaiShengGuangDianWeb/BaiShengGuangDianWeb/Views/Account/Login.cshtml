@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "登录";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link href="~/lib/AdminLTE-2.3.11/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/AdminLTE-2.3.11/dist/css/AdminLTE.min.css" rel="stylesheet" />
+    <link href="~/lib/AdminLTE-2.3.11/dist/css/AdminLTE.css" rel="stylesheet" />
+    <link href="~/lib/AdminLTE-2.3.11/plugins/iCheck/square/blue.css" rel="stylesheet" />
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#">欢迎登录<b>百盛光电</b></a>
+        </div>
+        <div class="login-box-body">
+            <p class="login-box-msg">登录</p>
+            <form>
+                <div class="form-group has-feedback">
+                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" type="text" onfocusin="focusIn($(this), 'adt')" maxlength="32" />
+                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                    <p id="accountTip" style="color: red" class="adt"></p>
+                </div>
+                <div class="form-group has-feedback">
+                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')" maxlength="32" />
+                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    <p id="passwordTip" style="color: red" class="adt"></p>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <input type="checkbox" id="rememberMe" class="icb_minimal">
+                        <span class="text-info media-middle">记住我</span>
+                    </div>
+                    <div class="col-xs-4">
+                        <button id="loginBtn" type="button" class="btn btn-primary btn-block btn-flat">登录</button>
+                    </div>
+                </div>
+            </form>
+            <p class="text-center">忘记密码请联系管理员</p>
+        </div>
+    </div>
+    <script src="~/lib/AdminLTE-2.3.11/plugins/jquery/jquery-2.2.3.min.js"></script>
+    <script src="~/lib/AdminLTE-2.3.11/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/AdminLTE-2.3.11/plugins/iCheck/icheck.min.js"></script>
+    <script src="~/lib/utils/md5.min.js"></script>
+    <script src="~/lib/utils/base64.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/layer/layer.js"></script>
+    <script src="~/lib/utils/util.js"></script>
+    <script src="~/lib/utils/const.js"></script>
+    <script src="~/mjs/Account/login.js"></script>
+</body>
+</html>

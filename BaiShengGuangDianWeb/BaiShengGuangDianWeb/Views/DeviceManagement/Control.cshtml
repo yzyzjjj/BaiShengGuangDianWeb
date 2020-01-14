@@ -1,0 +1,55 @@
+﻿@model object
+
+@{
+    ViewBag.Title = "设备控制";
+    Layout = "_Layout";
+}
+
+<script src="~/mjs/DeviceManagement/deviceControl.js"></script>
+<section class="content">
+    <h2 class="text-center">设备控制</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">设备操作</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <label class="control-label" for="selectCode">选择机台号：</label>
+                        <select class="ms2 form-control" style="width: 100%" id="selectCode" onchange="focusIn($(this))"></select>
+                    </div>
+                    <div class="form-group">
+                        <div class="text-center">
+                            <button type="button" class="btn btn-primary" onclick="openDevice()">开启设备</button>
+                            <button type="button" class="btn btn-primary" onclick="closeDevice()">关闭设备</button>
+                            <button type="button" class="btn btn-primary" onclick="lockDevice()">锁定设备</button>
+                            <button type="button" class="btn btn-primary" onclick="unlockDevice()">解锁设备</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">重置变量值：</label>
+                        <div class="form-horizontal" style="margin-left: 50px;margin-top: 10px">
+                            <div class="form-group">
+                                <label class="control-label" for="selectVarType">变量类型：</label>
+                                <select class="ms2 form-control" style="width: 200px" id="selectVarType"></select>
+                            </div>
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="resetValue" style="width: 70px">重置值：</label>
+                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                    <input type="tel" class="form-control" autocomplete="off" id="resetValue" onchange="focusIn($(this))" style="width: 200px" oninput="value=value.replace(/[^\d\-]/g,'')" maxlength="5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-primary btn-block btn-flat" onclick="setCodeVarPar()" style="width: 80px">设置</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8"></div>
+    </div>
+</section>
