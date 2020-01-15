@@ -23,10 +23,10 @@ function getCargoSiteList() {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
         var site = function(data) {
-            return `<span class="textOn siteOld">${data}</span><input type="text" class="form-control text-center textIn site hidden" maxlength="20" value=${data}>`;
+            return `<span class="textOn siteOld">${data}</span><input type="text" class="form-control text-center textIn site hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:300px;margin:auto">${data}</textarea>`;
         }
         var number = 0;
         var order = function() {
@@ -94,10 +94,6 @@ function updateSite() {
     var trs = $('#cargoSiteList tbody').find('tr');
     var siteData = [];
     var i = 0, len = trs.length;
-    if (!len) {
-        layer.msg("未检测到货品位置数据");
-        return;
-    }
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var isEnable = tr.find('.isEnable');

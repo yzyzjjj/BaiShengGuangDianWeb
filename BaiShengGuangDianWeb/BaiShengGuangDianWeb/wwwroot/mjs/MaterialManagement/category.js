@@ -27,10 +27,10 @@ function getCategoryList() {
             return ++number;
         }
         var category = function (data) {
-            return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" value=${data}>`;
+            return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:300px;margin:auto">${data}</textarea>`;
         }
         $("#categoryList")
             .DataTable({
@@ -94,10 +94,6 @@ function updateCategory() {
     var trs = $('#categoryList tbody').find('tr');
     var categoryData = [];
     var i = 0, len = trs.length;
-    if (!len) {
-        layer.msg("未检测到货品类别数据");
-        return;
-    }
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var isEnable = tr.find('.isEnable');

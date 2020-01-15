@@ -65,7 +65,7 @@ function categorySelect(resolve) {
             $('#categorySelect').append(option.format(0, '所有类别'));
         }
         $('.categorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden">${options}</select>`;
+        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(nameSelect);
         }
@@ -196,13 +196,13 @@ function getSupplierList() {
             return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
         }
         var name = function (data) {
-            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><select class="form-control textIn name hidden"></select>`;
+            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><select class="form-control textIn name hidden" style="width:100px"></select>`;
         }
         var supplier = function (data) {
-            return `<span class="textOn supplierOld">${data}</span><input type="text" class="form-control text-center textIn supplier hidden" maxlength="20" value=${data}>`;
+            return `<span class="textOn supplierOld">${data}</span><input type="text" class="form-control text-center textIn supplier hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize:vertical;width:250px;margin:auto">${data}</textarea>`;
         }
         $("#supplierList")
             .DataTable({
@@ -278,17 +278,21 @@ function updateSupplier() {
     var trs = $('#supplierList tbody').find('tr');
     var nameData = [];
     var i = 0, len = trs.length;
-    if (!len) {
-        layer.msg("未检测到货品名称数据");
-        return;
-    }
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var isEnable = tr.find('.isEnable');
         if (isEnable.is(':checked')) {
             var id = isEnable.val();
             var nameId = tr.find('.name').val();
+            if (isStrEmptyOrUndefined(nameId)) {
+                layer.msg("请选择名称");
+                return;
+            }
             var supplier = tr.find('.supplier').val().trim();
+            if (isStrEmptyOrUndefined(supplier)) {
+                layer.msg("供应商不能为空");
+                return;
+            }
             var remark = tr.find('.remark').val().trim();
             nameData.push({
                 NameId: nameId,
@@ -324,15 +328,7 @@ function addSupplierModal() {
         categoryId = $('#addCategorySelect option').eq(0).val();
     }
     $('#addCategorySelect').val(categoryId).trigger("change");
-    new Promise(function(resolve, reject) {
-        tableNameSelect(resolve, categoryId, $('#addNameSelect'), 0);
-    }).then(function() {
-        var nameId = $('#nameSelect').val();
-        if (nameId == 0) {
-            nameId = $('#addNameSelect option').eq(0).val();
-        }
-        $('#addNameSelect').val(nameId).trigger("change");
-    });
+    tableNameSelect(null, categoryId, $('#addNameSelect'), 0);
     $('#addSupplier').val('');
     $('#addRemark').val('');
     $('#addSupplierModal').modal('show');

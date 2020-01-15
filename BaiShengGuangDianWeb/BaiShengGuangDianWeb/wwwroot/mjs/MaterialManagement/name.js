@@ -35,7 +35,7 @@ function surveyor() {
         }
         $('#categorySelect').append(options); 
         $('#addCategorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden">${options}</select>`;
+        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
         getNameList();
     });
 }
@@ -78,10 +78,10 @@ function getNameList() {
             return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
         }
         var name = function (data) {
-            return `<span class="textOn nameOld">${data}</span><input type="text" class="form-control text-center textIn name hidden" maxlength="20" value=${data}>`;
+            return `<span class="textOn nameOld">${data}</span><input type="text" class="form-control text-center textIn name hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:100%">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:250px;margin:auto">${data}</textarea>`;
         }
         $("#nameList")
             .DataTable({
@@ -148,17 +148,21 @@ function updateName() {
     var trs = $('#nameList tbody').find('tr');
     var nameData = [];
     var i = 0, len = trs.length;
-    if (!len) {
-        layer.msg("未检测到货品名称数据");
-        return;
-    }
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var isEnable = tr.find('.isEnable');
         if (isEnable.is(':checked')) {
             var id = isEnable.val();
             var category = tr.find('.category').val();
+            if (isStrEmptyOrUndefined(category)) {
+                layer.msg("请选择货品类别");
+                return;
+            }
             var nameName = tr.find('.name').val().trim();
+            if (isStrEmptyOrUndefined(nameName)) {
+                layer.msg("名称不能为空");
+                return;
+            }
             var remark = tr.find('.remark').val().trim();
             nameData.push({
                 CategoryId: category,

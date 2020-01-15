@@ -353,7 +353,7 @@ function setDeviceCheck() {
         var op = trs.eq(i).find('.surveyor');
         var itemId = op.attr('item');
         if (isStrEmptyOrUndefined(itemId)) {
-            layer.msg('为检测到点检项数据');
+            layer.msg('未检测到点检项数据');
             return;
         }
         var surveyorId = op.val();
