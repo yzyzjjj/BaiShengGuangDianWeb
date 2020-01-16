@@ -575,7 +575,7 @@ function showImgModel(id, item, img) {
                 $("#imgOldList").append(imgOps);
             });
     }
-    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '选择 张图片...');
+    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择张图片...');
     $('#showImgModel').modal('show');
 }
 

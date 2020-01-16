@@ -18,7 +18,7 @@
     });
     //页面
     $('#categorySelect').on('select2:select', function () {
-        categoryId = $('#categorySelect').val();
+        categoryId = $(this).val();
         new Promise(function (resolve, reject) {
             nameSelect(resolve, categoryId, false);
         }).then(function (supplierSelect) {
