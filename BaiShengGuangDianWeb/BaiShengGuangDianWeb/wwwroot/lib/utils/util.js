@@ -1220,3 +1220,38 @@ function removeArrayObj(arr, key, all = false) {
     }
     return res;
 }
+
+//备注模态框
+function showAllContent(content, id = "") {
+    content = unescape(content);
+    if (id == "")
+        id = "remarkModel";
+    var html =
+        `<div class="modal fade" id="${id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">` +
+        `    <div class="modal-dialog">` +
+        `       <div class="modal-content">` +
+        `           <div class="modal-header">` +
+        `               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>` +
+        `               <h4 class="modal-title">备注</h4>` +
+        `           </div>` +
+        `           <div class="modal-body">` +
+        `           <div class="form-group">` +
+        `               <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;">${content}</textarea>` +
+        `           </div>` +
+        `       </div>` +
+        `       <div class="modal-footer">` +
+        `           <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>` +
+        `       </div>` +
+        `   </div>` +
+        `</div>`;
+
+    var modal = $(html);
+    $(".content").append(modal);
+
+    modal.modal("show");
+
+    modal.on('hidden.bs.modal',
+        function () {
+            modal.remove();
+        });
+}
