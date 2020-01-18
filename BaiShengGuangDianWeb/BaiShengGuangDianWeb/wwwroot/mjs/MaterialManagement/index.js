@@ -422,8 +422,8 @@ function getMaterialList() {
                     { "data": "Name", "title": "名称" },
                     { "data": "Supplier", "title": "供应商" },
                     { "data": "Specification", "title": "规格" },
-                    { "data": "Unit", "title": "单位" },
                     { "data": "Site", "title": "位置" },
+                    { "data": "Unit", "title": "单位" },
                     { "data": "Id", "title": "详情", "render": detail },
                     { "data": "Price", "title": "价格" },
                     { "data": "Stock", "title": "最低库存", "sClass": "text-blue" },
@@ -1156,7 +1156,7 @@ function showConsumeModel() {
 
         Promise.all([materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
             .then((result) => {
-                console.log(result);
+                //console.log(result);
                 $("#addConsumePlanListBtn").removeAttr("disabled");
                 $("#addConsumeOtherListBtn").removeAttr("disabled");
             });
