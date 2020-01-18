@@ -1,14 +1,190 @@
 ﻿@model object
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+@{
+    ViewBag.Title = "货品管理";
+    Layout = "_Layout";
+}
+<script src="~/mjs/MaterialManagement/product.js"></script>
+<section class="content ">
+    <h2 class="text-center">货品管理</h2>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="row">
+                <div class="form-group col-md-9">
+                    <div class="form-inline" style="display: flex">
+                        <div style="flex: 1">
+                            <label class="control-label" style="margin: 0;white-space:nowrap">类别：</label>
+                            <select class="ms2 form-control categorySelect" id="categorySelect" style="width:95%"></select>
+                        </div>
+                        <div style="flex: 1">
+                            <label class="control-label" style="margin: 0;white-space:nowrap">名称：</label>
+                            <select class="ms2 form-control" id="nameSelect" style="width:95%"></select>
+                        </div>
+                        <div style="flex: 1">
+                            <label class="control-label" style="margin: 0;white-space:nowrap">供应商：</label>
+                            <select class="ms2 form-control" id="supplierSelect" style="width:95%"></select>
+                        </div>
+                        <div style="flex: 1">
+                            <label class="control-label" style="margin: 0;white-space:nowrap">规格：</label>
+                            <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="updateMaterial()">保存</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addMaterialModal()">添加</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="delMaterial()">删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped" id="MaterialList"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 添加规格模态框 -->
+    <div class="modal fade" tabindex="-1" id="addMaterialModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加新货品</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>类别：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control categorySelect" id="addCategorySelect" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>名称：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control" id="addNameSelect" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>供应商：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control" id="addSupplierSelect" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>规格：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control" id="addSpecificationSelect" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>位置：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 form-control" id="addSiteSelect" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>编号：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addCode" onfocusin="focusIn($(this))" maxlength="20" oninput="value=value.replace(/[\u4e00-\u9fa5]/ig,'')">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>最低库存：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addStock" onfocusin="focusIn($(this))" maxlength="10" oninput="value=value.replace(/[^\d]/g,'')">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>单位：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addUnit" onfocusin="focusIn($(this))" maxlength="20">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">参考价格：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addPrice" onfocusin="focusIn($(this))" maxlength="10" oninput="value=value.replace(/[^\d]/g,'')">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">备注：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addRemark" onfocusin="focusIn($(this))" maxlength="200">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">图片：</label>
+                                <div class="col-sm-10" id="addImgBox">
+                                    <input id="addImg" parent="addImgBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addMaterial()">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 图片模态框模态框 -->
+    <div class="modal fade" tabindex="-1" id="showImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">图片查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="hidden" id="checkId"></div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">编号：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="codeName">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">类别：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="categoryName">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">名称：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="nameName">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">供应商：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 206px" id="supplierName">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">规格：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="specificationName">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" style="white-space: nowrap" id="imgOld">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="imgOldList"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" style="white-space: nowrap">新图：</label>
+                            <div class="" id="updateImgBox">
+                                <input id="updateImg" parent="updateImgBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateImg()">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

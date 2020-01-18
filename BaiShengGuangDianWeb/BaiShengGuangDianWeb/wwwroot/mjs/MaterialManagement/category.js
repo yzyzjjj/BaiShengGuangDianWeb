@@ -9,6 +9,8 @@ function getCategoryList() {
         layer.msg("没有权限");
         return;
     }
+    _categoryIdData = [];
+    _categoryNameData = [];
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data, function (ret) {
@@ -20,11 +22,15 @@ function getCategoryList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
+        var number = 0;
+        var order = function () {
+            return ++number;
+        }
         var category = function (data) {
-            return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" value=${data}>`;
+            return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical">${data}</textarea>`;
+            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:300px;margin:auto">${data}</textarea>`;
         }
         $("#categoryList")
             .DataTable({
@@ -38,6 +44,7 @@ function getCategoryList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": null, "title": "序号", "render": order },
                     { "data": "Category", "title": "类别", "render": category },
                     { "data": "Remark", "title": "备注", "render": remark }
                 ],
@@ -87,10 +94,6 @@ function updateCategory() {
     var trs = $('#categoryList tbody').find('tr');
     var categoryData = [];
     var i = 0, len = trs.length;
-    if (!len) {
-        layer.msg("未检测到货品类别数据");
-        return;
-    }
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var isEnable = tr.find('.isEnable');
@@ -191,8 +194,6 @@ function delCategory() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    _categoryIdData = [];
-                    _categoryNameData = [];
                     getCategoryList();
                 }
             });

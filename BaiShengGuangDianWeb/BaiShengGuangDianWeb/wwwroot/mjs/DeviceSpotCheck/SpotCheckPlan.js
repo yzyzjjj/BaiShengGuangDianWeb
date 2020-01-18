@@ -135,6 +135,10 @@ function getSpotCheckList() {
             flag++;
             return `<input type="checkbox" class="icb_minimal isEnable" id=${flag} value=${data}>`;
         }
+        var number = 0;
+        var order = function() {
+            return ++number;
+        }
         var item = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn item hidden" maxlength="10" style="width:100px" value=${data}>`;
         };
@@ -203,6 +207,7 @@ function getSpotCheckList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": null, "title": "序号", "render": order },
                     { "data": "Item", "title": "名称", "render": item },
                     { "data": "Enable", "title": "启用", "render": using },
                     { "data": "Remind", "title": "提醒", "render": remind },
