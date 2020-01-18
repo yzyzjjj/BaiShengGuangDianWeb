@@ -94,11 +94,11 @@
     });
 
     $("#logStartDate").val(getDate());
+    $("#logEndDate").val(getDate());
     $("#logStartDate").datepicker('update').on('changeDate', function (ev) {
         getLogList();
     });
 
-    $("#logEndDate").val(getDate());
     $("#logEndDate").datepicker('update').on('changeDate', function (ev) {
         getLogList();
     });
@@ -130,16 +130,68 @@
 
 
     $("#logConsumeStartDate").val(getDate());
+    $("#logConsumeEndDate").val(getDate());
     $("#logConsumeStartDate").datepicker('update').on('changeDate', function (ev) {
         getLogConsumeList();
     });
 
-    $("#logConsumeEndDate").val(getDate());
     $("#logConsumeEndDate").datepicker('update').on('changeDate', function (ev) {
         getLogConsumeList();
     });
+
+    $('#logConsumePlanSelect').on('select2:select', function () {
+        $('#logConsumeBillSelect').empty();
+        var list = {};
+        var planId = $('#logConsumePlanSelect').val();
+        list.planId = planId;
+        list.stock = true;
+
+        var data = {}
+        data.opType = 704;
+        data.opData = JSON.stringify(list);
+
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _logConsumePlanBill = ret.datas;
+            var option = '<option value = "{0}">{1}</option>';
+
+            var options = '';
+            for (var i = 0; i < _logConsumePlanBill.length; i++) {
+                var d = _logConsumePlanBill[i];
+                options += option.format(d.BillId, d.Code);
+            }
+
+            $('#logConsumeBillSelect').append(option.format(0, '所有编号'));
+            $('#logConsumeBillSelect').append(options);
+            getLogConsumeList(false);
+        });
+    });
+
+    $('#logConsumeBillSelect').on('select2:select', function () {
+        $('#billInfoConsume').addClass('hidden');
+        var id = $(this).val();
+        for (var i = 0; i < _logConsumePlanBill.length; i++) {
+            var d = _logConsumePlanBill[i];
+            if (id == d.BillId) {
+                $('#billInfoConsume').removeClass('hidden');
+                $('#logConsumeCategory').html(d.Category);
+                $('#logConsumeName').html(d.Name);
+                $('#logConsumeSupplier').html(d.Supplier);
+                $('#logConsumeSpecification').html(d.Specification);
+                $('#logConsumePrice').html(d.Price);
+            }
+        }
+
+        getLogConsumeList(false);
+    });
+
 }
 
+var _logConsumePlanBill = null;
 //类别选项
 function categorySelect(resolve) {
     var opType = 816;
@@ -441,6 +493,8 @@ function getMaterialList() {
 var _type = 0;
 //日志  1 入库; 2 出库;
 function showLogModel(type = 0, id = 0) {
+    $("#logStartDate").val(getDate());
+    $("#logEndDate").val(getDate());
     if (_type != type) {
         $("#logStartDate").val(getDate());
         $("#logEndDate").val(getDate());
@@ -608,6 +662,8 @@ function getLogList(show = false) {
 var _purposeConsume = 0;
 //日志 purpose 1 计划 2 其他;
 function showLogConsumeModel(id, purpose, planId = 0) {
+    $("#logConsumeStartDate").val(getDate());
+    $("#logConsumeEndDate").val(getDate());
     if (purpose == 1) {
         $('#logConsumePlanSelectDiv').removeClass('hidden');
     } else {
@@ -627,11 +683,13 @@ function showLogConsumeModel(id, purpose, planId = 0) {
     var title = "领用日志";
     $("#logConsumeModal").find("h4").html(title);
     $('#billInfoConsume').addClass('hidden');
+    $('#logConsumePlanSelect').empty();
+    $('#logConsumeBillSelect').empty();
 
     var option = '<option value = "{0}">{1}</option>';
     var options;
     if (purpose == 1) {
-        $('#logConsumePlanSelect').empty();
+        _logConsumePlanBill = _consumePlanBill;
         options = '';
         for (var i = 0; i < _consumePlan.length; i++) {
             var d = _consumePlan[i];
@@ -643,8 +701,8 @@ function showLogConsumeModel(id, purpose, planId = 0) {
         options = '';
         for (var i = 0; i < _consumePlanBill.length; i++) {
             var d = _consumePlanBill[i];
-            options += option.format(d.Id, d.Code);
-            if (id == d.Id) {
+            options += option.format(d.BillId, d.Code);
+            if (id == d.BillId) {
                 $('#billInfoConsume').removeClass('hidden');
                 $('#logConsumeCategory').html(d.Category);
                 $('#logConsumeName').html(d.Name);
@@ -653,17 +711,14 @@ function showLogConsumeModel(id, purpose, planId = 0) {
                 $('#logConsumePrice').html(d.Price);
             }
         }
-        $('#logConsumeBillSelect').append(option.format(0, '所有编号'));
-        $('#logConsumeBillSelect').append(options);
-        $("#logConsumeBillSelect").val(id).trigger("change");
     }
     else if (purpose == 2) {
-        $('#logConsumeBillSelect').empty();
+        _logConsumePlanBill = _materialList;
         options = '';
         for (var i = 0; i < _materialList.length; i++) {
             var d = _materialList[i];
-            options += option.format(d.Id, d.Code);
-            if (id == d.Id) {
+            options += option.format(d.BillId, d.Code);
+            if (id == d.BillId) {
                 $('#billInfoConsume').removeClass('hidden');
                 $('#logConsumeCategory').html(d.Category);
                 $('#logConsumeName').html(d.Name);
@@ -702,17 +757,18 @@ function getLogConsumeList(show = false) {
         return;
     }
     var planId = $('#logConsumePlanSelect').val();
-    if ($('#logConsumePlanSelectDiv').attr("hidden") && isStrEmptyOrUndefined(planId)) {
-        layer.msg('请选择计划号');
-        return;
-    } else {
+    if (!$('#logConsumePlanSelectDiv').attr("hidden")) {
+        if (isStrEmptyOrUndefined(planId)) {
+            layer.msg('请选择计划号');
+            return;
+        }
         if (planId != 0) {
             list.planId = planId;
         }
     }
     var billId = $('#logConsumeBillSelect').val();
     if (isStrEmptyOrUndefined(billId)) {
-        layer.msg('请选择货品编号');
+        layer.msg('计划中不存在该货品编号或货品编号不存在');
         return;
     }
     if (billId != 0) {
@@ -837,7 +893,7 @@ function addIncreaseList() {
             '    <td style="vertical-align: inherit;"><label class="control-label" id="inDw{0}"></label></td>' +
             '    <td style="vertical-align: inherit;"><label class="control-label" id="inJg{0}"></label></td>' +
             '    <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>' +
-            '    <td><button class="btn btn-info btn-sm" type="button" onclick="inDetail({0})">详情</button></td>' +
+            '    <td><button class="btn btn-info btn-sm" type="button" onclick="showDetailModel({0})">详情</button></td>' +
             '    <td><input class="form-control text-center" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
             '    <td class="form-inline">' +
             '       <input class="form-control text-center" id="inCg{0}" maxlength="64" />' +
@@ -1200,23 +1256,23 @@ function showPlanBill(find = false) {
             con1 = $("#consumePlanCondition1").val();
             var id = "";
             switch (con1) {
-            case "Code":
-                id = "conPlanBh";
-                break;
-            case "Category":
-                id = "conPlanLb";
-                break;
-            case "Name":
-                id = "conPlanMc";
-                break;
-            case "Supplier":
-                id = "conPlanGys";
-                break;
-            case "Specification":
-                id = "conPlanGg";
-                break;
-            default:
-                return;
+                case "Code":
+                    id = "conPlanBh";
+                    break;
+                case "Category":
+                    id = "conPlanLb";
+                    break;
+                case "Name":
+                    id = "conPlanMc";
+                    break;
+                case "Supplier":
+                    id = "conPlanGys";
+                    break;
+                case "Specification":
+                    id = "conPlanGg";
+                    break;
+                default:
+                    return;
             }
             con2 = $("#consumePlanCondition2").val();
             var trs = $("#consumePlanList tr");
@@ -1259,6 +1315,7 @@ function showPlanBill(find = false) {
         } else {
             $("#consumePlanList tr").removeClass("hidden");
         }
+        consumePlanDittoAuto();
     } else {
         var data = _consumePlanBill;
         $("#consumePlanList").empty();
@@ -1291,7 +1348,7 @@ function showPlanBill(find = false) {
                     </td>
                     <td class="form-inline">
                         <input class="form-control text-center" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
-                        <button class="btn btn-primary btn-sm" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" onclick="consumePlanDitto(${xh})">同上</button>
+                        <button class="btn btn-primary btn-sm conPlanDitto" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" onclick="consumePlanDitto(${xh})">同上</button>
                     </td>
                     <td>
                         <button type="button" class="btn btn-success btn-sm" onclick="showLogConsumeModel(${d.BillId}, 1, ${planId})">查看</button>
@@ -1792,17 +1849,32 @@ function delConsumePlanList(id) {
 
 //隐藏领用同上
 function consumePlanDittoAuto() {
-    var v = $("#consumePlanList").find(`tr[xh=1]:first`).attr("value");
-    $("#consumePlanDitto" + v).css("opacity", "0");
+    $("#consumePlanList").find(`.conPlanDitto`).css("opacity", "100");
+    $("#consumePlanList").find(`.conPlanDitto`).removeAttr("disable", "disable");
+    $("#consumePlanList tr").not(".hidden").first().find(`.conPlanDitto`).css("opacity", "0");
+    $("#consumePlanList tr").not(".hidden").first().find(`.conPlanDitto`).attr("disable", "disable");
 }
 
 //点击领用同上按钮
 function consumePlanDitto(v) {
-    var xh1 = $("#consumePlanList").find(`tr[value=${v}]:first`).attr("xh");
-    var xh2 = parseInt(xh1) - 1;
-    var id = $("#consumePlanList").find(`tr[xh=${xh2}]:first`).attr("value");
-    var name = $("#conPlanLyr" + id).val();
-    $("#conPlanLyr" + v).val(name);
+    var trs = $("#consumePlanList tr").not(".hidden");
+    if (trs.length <= 1) {
+        return;
+    }
+    var preI = -1;
+    for (var i = trs.length - 1; i >= 0; i--) {
+        var tr = trs[i];
+        var value = $(tr).attr("value");
+        if (v == value) {
+            preI = i - 1;
+            break;
+        }
+    }
+
+    if (preI > -1) {
+        var name = $("#conPlanLyr" + $(trs[preI]).attr("xh")).val();
+        $("#conPlanLyr" + v).val(name);
+    }
 }
 
 //实际领用
@@ -2463,4 +2535,59 @@ function consume() {
     }
     showConfirm("领用", doSth);
 }
+
+//详情
+function showDetailModel(id) {
+    var data = {}
+    data.opType = 800;
+    data.opData = JSON.stringify({
+        qId: id
+    });
+
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno == 0) {
+                var d = ret.datas[0];
+                $("#detailCode").val(d.Code);
+                $("#detailCategory").val(d.Category);
+                $("#detailName").val(d.Name);
+                $("#detailSupplier").val(d.Supplier);
+                $("#detailSpecification").val(d.Specification);
+                $("#detailSite").val(d.Site);
+                if (d.ImageList.length > 0) {
+                    data = {
+                        type: fileEnum.Material,
+                        files: d.Images
+                    };
+                    ajaxPost("/Upload/Path",
+                        data,
+                        function (ret) {
+                            if (ret.errno != 0) {
+                                layer.msg(ret.errmsg);
+                                return;
+                            }
+                            var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
+                                '<div class="thumbnail">' +
+                                '<img src={0} style="height:200px">' +
+                                '<div class="caption text-center">' +
+                                '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                            var imgOps = "";
+                            for (var i = 0; i < ret.data.length; i++) {
+                                imgOps += imgOp.format(ret.data[i].path, d.ImageList[i]);
+                            }
+                            $("#detailImgList").append(imgOps);
+                            $('#showDetailModel').modal('show');
+                        });
+                } else {
+                    $('#showDetailModel').modal('show');
+                }
+            } else {
+                layer.msg(ret.errmsg);
+            }
+        });
+}
+
 

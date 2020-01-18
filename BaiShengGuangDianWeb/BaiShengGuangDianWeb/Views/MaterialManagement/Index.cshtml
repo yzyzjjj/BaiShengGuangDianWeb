@@ -390,4 +390,55 @@
             </div>
         </div>
     </div>
+
+    <!-- 详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">编号：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailCode">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">类别：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailCategory">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">名称：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailName">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">供应商：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 206px" id="detailSupplier">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">规格：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailSpecification">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center">
+                            <label class="control-label" style="white-space: nowrap">位置：</label>
+                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailSite">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" style="white-space: nowrap">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="detailImgList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
