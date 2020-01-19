@@ -146,34 +146,32 @@
                 <div class="modal-body">
                     <div class="modal-body box">
                         <div class="hidden" id="checkId"></div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">编号：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="codeName">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">类别：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="categoryName">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">名称：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="nameName">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">供应商：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 206px" id="supplierName">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">规格：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="specificationName">
+                        <div class="form-group">
+                            <label class="control-label textOverTop">编号：<span id="codeName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" style="white-space: nowrap" id="imgOld">图片：</label>
+                            <label class="control-label textOverTop">类别：<span id="categoryName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">名称：<span id="nameName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">供应商：<span id="supplierName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">规格：<span id="specificationName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">位置：<span id="siteName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop" style="white-space: nowrap" id="imgOld">图片：</label>
                             <div class="form-group">
                                 <div class="row" id="imgOldList"></div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" style="white-space: nowrap">新图：</label>
+                            <label class="control-label textOverTop">新图：</label>
                             <div class="" id="updateImgBox">
                                 <input id="updateImg" parent="updateImgBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
                             </div>

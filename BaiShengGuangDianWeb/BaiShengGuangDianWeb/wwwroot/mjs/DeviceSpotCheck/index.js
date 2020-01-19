@@ -341,7 +341,6 @@ function detailPage(deviceId, planId) {
                     radioClass: 'iradio_minimal-blue',
                     increaseArea: '20%'
                 });
-                $(this).find('td').css("verticalAlign", "middle");
                 $(this).find('.isEnable').on('ifChanged',
                     function () {
                         var tr = $(this).parents('tr');
@@ -433,7 +432,7 @@ function showImgModel(id, item, img) {
     $("#addImg").fileinput('clear');
     $('#checkId').text(id);
     item = unescape(item);
-    $('#checkName').val(item);
+    $('#checkName').text(item);
     img = unescape(img);
     $('#imgOld').empty();
     $("#imgOldList").empty();

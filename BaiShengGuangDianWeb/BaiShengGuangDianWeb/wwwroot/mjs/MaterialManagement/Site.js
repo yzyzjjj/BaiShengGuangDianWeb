@@ -59,7 +59,6 @@ function getCargoSiteList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
-                    $(this).find('td').css("verticalAlign", "middle");
                     $('#cargoSiteList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();

@@ -98,26 +98,28 @@
                         <div class="form-group">
                             <button type="button" class="btn btn-info btn-sm" id="addSpotPlanCheckBtn"><i class="fa fa-plus">点检项</i></button>
                         </div>
-                        <div class="form-group" style="overflow-x: auto" id="addSpotPlanCheckTable">
-                            <label class="control-label">点检项：</label>
-                            <table class="table table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <td>Id</td>
-                                        <td>点检名称</td>
-                                        <td>启用</td>
-                                        <td>提醒</td>
-                                        <td>下限</td>
-                                        <td>上限</td>
-                                        <td>单位</td>
-                                        <td>参考标准</td>
-                                        <td>备注</td>
-                                        <td>提醒间隔</td>
-                                        <td></td>
-                                    </tr>
-                                </thead>
-                                <tbody id="addSpotPlanBody"></tbody>
-                            </table>
+                        <div id="addSpotPlanCheckTable">
+                            <label class="control-label textOverTop">点检项：</label>
+                            <div class="form-group" style="overflow-x: auto">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>点检名称</th>
+                                            <th>启用</th>
+                                            <th>提醒</th>
+                                            <th>下限</th>
+                                            <th>上限</th>
+                                            <th>单位</th>
+                                            <th>参考标准</th>
+                                            <th>备注</th>
+                                            <th>提醒间隔</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="addSpotPlanBody"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

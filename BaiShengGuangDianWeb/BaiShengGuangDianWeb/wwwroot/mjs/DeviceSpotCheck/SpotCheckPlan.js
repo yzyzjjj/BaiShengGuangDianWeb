@@ -405,7 +405,6 @@ function setTableStyle(el) {
         radioClass: 'iradio_minimal-blue',
         increaseArea: '20%'
     });
-    el.find('td').css("verticalAlign", "middle");
 }
 
 //默认一列点检项

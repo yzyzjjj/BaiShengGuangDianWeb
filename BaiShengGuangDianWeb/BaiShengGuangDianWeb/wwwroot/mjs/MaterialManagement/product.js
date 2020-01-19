@@ -193,13 +193,13 @@
             $('#addSpecificationSelect').append(e);
         });
     });
-    $('#addSupplierSelect').on('select2:select', function() {
+    $('#addSupplierSelect').on('select2:select', function () {
         categoryId = $('#addCategorySelect').val();
         nameId = $('#addNameSelect').val();
         supplierId = $(this).val();
         new Promise(function (resolve, reject) {
             specificationSelect(resolve, categoryId, nameId, supplierId, true);
-        }).then(function(e) {
+        }).then(function (e) {
             $('#addSpecificationSelect').empty();
             $('#addSpecificationSelect').append(e);
         });
@@ -508,8 +508,8 @@ function getMaterialList() {
             return `<span class="textOn" id=${data.SiteId}>${data.Site}</span>${_siteSelect}`;
         }
         var materialImg = function (data) {
-            var op = '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({0},\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',\'{6}\')">查看</button>';
-            return op.format(data.Id, escape(data.Code), escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.ImageList));
+            var op = '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({0},\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',\'{6}\',\'{7}\')">查看</button>';
+            return op.format(data.Id, escape(data.Code), escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.ImageList), escape(data.Site));
         }
         var price = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn price hidden" maxlength="10" style="width:80px" value=${data}>`;
@@ -556,7 +556,6 @@ function getMaterialList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
-                    $(this).find('td').css("verticalAlign", "middle");
                     $('#MaterialList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();
@@ -589,7 +588,7 @@ function getMaterialList() {
                                 tr.find('.specification').append(e);
                                 var specificationName = textOn.eq(4).attr('id');
                                 var unitName = textOn.eq(5).text();
-                                var siteName = textOn.eq(6).text();
+                                var siteName = textOn.eq(6).attr('id');
                                 var priceName = textOn.eq(7).text();
                                 var stockName = textOn.eq(8).text();
                                 var remarkName = textOn.eq(9).text();
@@ -858,7 +857,7 @@ function delMaterial() {
 var _updateFirmwareUpload = null;
 var _imgNameData = null;
 //查看图片模态框
-function showImgModel(id, code, category, name, supplier, specification, img) {
+function showImgModel(id, code, category, name, supplier, specification, img, site) {
     if (_updateFirmwareUpload == null) {
         _updateFirmwareUpload = initFileInputMultiple("updateImg", fileEnum.Material);
     }
@@ -866,15 +865,17 @@ function showImgModel(id, code, category, name, supplier, specification, img) {
     $('#updateImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择张图片...');
     $('#checkId').text(id);
     code = unescape(code);
-    $('#codeName').val(code);
+    $('#codeName').text(code);
     category = unescape(category);
-    $('#categoryName').val(category);
+    $('#categoryName').text(category);
     name = unescape(name);
-    $('#nameName').val(name);
+    $('#nameName').text(name);
     supplier = unescape(supplier);
-    $('#supplierName').val(supplier);
+    $('#supplierName').text(supplier);
     specification = unescape(specification);
-    $('#specificationName').val(specification);
+    $('#specificationName').text(specification);
+    site = unescape(site);
+    $('#siteName').text(site);
     img = unescape(img);
     $('#imgOld').empty();
     $("#imgOldList").empty();

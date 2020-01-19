@@ -59,7 +59,6 @@ function getCategoryList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
-                    $(this).find('td').css("verticalAlign", "middle");
                     $('#categoryList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();

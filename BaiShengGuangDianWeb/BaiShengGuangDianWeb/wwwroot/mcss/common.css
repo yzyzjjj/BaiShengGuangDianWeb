@@ -21,6 +21,7 @@
 th, td {
     text-align: center;
     white-space: nowrap;
+    vertical-align: middle !important;
 }
 
 .modal-dialog {
@@ -214,11 +215,17 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
- 
+
 input[type="number"] {
     -moz-appearance: textfield;
 }
 
 select {
     cursor: pointer;
+}
+
+.textOverTop {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

@@ -439,7 +439,6 @@ function detailPage(deviceId, planId, isModal) {
                     radioClass: 'iradio_minimal-blue',
                     increaseArea: '20%'
                 });
-                $(this).find('td').css("verticalAlign", "middle");
                 $(this).find('.isEnable').on('ifChanged', function () {
                     var tr = $(this).parents('tr');
                     if ($(this).is(':checked')) {
@@ -539,7 +538,7 @@ function showImgModel(id, item, img) {
     $("#addImg").fileinput('clear');
     $('#checkId').text(id);
     item = unescape(item);
-    $('#checkName').val(item);
+    $('#checkName').text(item);
     img = unescape(img);
     $('#imgOld').empty();
     $("#imgOldList").empty();
@@ -733,10 +732,7 @@ function getNextExamineList() {
                                 : full.Devices;
                         }
                     }
-                ],
-                "drawCallback": function (settings, json) {
-                    $(this).find('td').css("verticalAlign", "middle");
-                }
+                ]
             });
     });
 }
