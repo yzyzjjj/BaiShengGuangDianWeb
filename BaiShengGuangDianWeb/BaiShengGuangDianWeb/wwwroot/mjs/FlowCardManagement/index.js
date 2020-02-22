@@ -165,46 +165,70 @@ function showAddFlowCardModel() {
     $("#afSender").val("");
     $("#afInboundNum").val("");
     $("#afRemarks").val("");
-    var opType = 215;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
+
+    var afProductionProcessFunc = new Promise(function (resolve, reject) {
+        var opType = 215;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            menu: true
+        });
+        ajaxPost("/Relay/Post", data, function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
-            };
-            $("#afProductionProcess").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var opt = ret.datas[i];
-                $("#afProductionProcess").append(option.format(opt.Id, opt.ProductionProcessName));
             }
 
+            $("#afProductionProcess").empty();
+            var option = '<option value="{0}">{1}</option>';
+            var html = "";
+            for (var i = 0; i < ret.datas.length; i++) {
+                var opt = ret.datas[i];
+                html += option.format(opt.Id, opt.ProductionProcessName);
+            }
+            $("#afProductionProcess").append(html);
 
-            opType = 232;
-            data = {}
-            data.opType = opType;
-            ajaxPost("/Relay/Post", data,
-                function (ret) {
-                    if (ret.errno != 0) {
-                        layer.msg(ret.errmsg);
-                        return;
-                    };
+            resolve('success');
+        }, 0);
+    });
 
-                    $("#afRawMateria").empty();
-                    var option = '<option value="{0}">{1}</option>';
-                    for (var i = 0; i < ret.datas.length; i++) {
-                        var opt = ret.datas[i];
-                        $("#afRawMateria").append(option.format(opt.Id, opt.RawMateriaName));
-                    }
+    var afRawMateriaFunc = new Promise(function (resolve, reject) {
+        var opType = 232;
+        if (!checkPermission(opType)) {
+            layer.msg("没有权限");
+            return;
+        }
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            menu: true
+        });
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
 
-                    $("#addFlowCardModel").modal("show");
-                });
+            $("#afRawMateria").empty();
+            var option = '<option value="{0}">{1}</option>';
+            var html = "";
+            for (var i = 0; i < ret.datas.length; i++) {
+                var opt = ret.datas[i];
+                html += option.format(opt.Id, opt.RawMateriaName);
+            }
+            $("#afRawMateria").append(html);
+            resolve('success');
+        }, 0);
+    });
+
+    Promise.all([afProductionProcessFunc, afRawMateriaFunc])
+        .then((result) => {
+            //console.log(result);
+            $("#addFlowCardModel").modal("show");
         });
 }
 
@@ -675,10 +699,10 @@ function updateFlowCard() {
             });
         }
     }
-    if (ufGGdata.length <= 0) {
-        layer.msg("请填写规格数据");
-        return;
-    }
+    //if (ufGGdata.length <= 0) {
+    //    layer.msg("请填写规格数据");
+    //    return;
+    //}
 
     var ufGXdata = new Array();
     var l = 1;
@@ -1311,7 +1335,7 @@ function getChangeFCName(fcName) {
     data.opData = JSON.stringify({
         flowCardName: fcName
     });
-    ajaxPost("/Relay/Post", data, function(ret) {
+    ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -1768,10 +1792,10 @@ function addProductionProcess() {
             });
         }
     }
-    if (apGGdata.length <= 0) {
-        layer.msg("请填写规格数据");
-        return;
-    }
+    //if (apGGdata.length <= 0) {
+    //    layer.msg("请填写规格数据");
+    //    return;
+    //}
 
     var apGXdata = new Array();
     var l = 1;
@@ -1861,10 +1885,10 @@ function updateProductionProcess() {
             });
         }
     }
-    if (apGGdata.length <= 0) {
-        layer.msg("请填写规格数据");
-        return;
-    }
+    //if (apGGdata.length <= 0) {
+    //    layer.msg("请填写规格数据");
+    //    return;
+    //}
 
     var apGXdata = new Array();
     var l = 1;
@@ -2132,10 +2156,10 @@ function updateRawMateria() {
             });
         }
     }
-    if (inputData.length <= 0) {
-        layer.msg("请填写规格数据");
-        return;
-    }
+    //if (inputData.length <= 0) {
+    //    layer.msg("请填写规格数据");
+    //    return;
+    //}
     var postData = {
         id: parseInt($("#updateId").html()),
         RawMateriaName: urRawMateriaName,
@@ -2267,10 +2291,10 @@ function addRawMateria() {
             });
         }
     }
-    if (inputData.length <= 0) {
-        layer.msg("请填写规格数据");
-        return;
-    }
+    //if (inputData.length <= 0) {
+    //    layer.msg("请填写规格数据");
+    //    return;
+    //}
     var postData = {
         RawMateriaName: arRawMateriaName,
         RawMateriaSpecifications: inputData,

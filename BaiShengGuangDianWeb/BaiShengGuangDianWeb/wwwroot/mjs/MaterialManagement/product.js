@@ -78,6 +78,9 @@
     $('#specificationSelect').on('select2:select', function () {
         getMaterialList();
     });
+    $('#siteSelect').on('select2:select', function () {
+        getMaterialList();
+    });
     //表格
     $('#MaterialList').on('change', '.category', function () {
         var tr = $(this).parents('tr');
@@ -209,6 +212,8 @@
         var e = $(this).val();
         _imgNameData.splice(_imgNameData.indexOf(e), 1);
     });
+    $('#batchAddMaterialModal').attr("data-backdrop", "static");
+
 }
 
 var _categorySelect = null;
@@ -424,6 +429,9 @@ function siteSelect() {
             options += option.format(d.Id, d.Site);
         }
         $('#addSiteSelect').append(options);
+        $('#siteSelect').empty();
+        $('#siteSelect').append(option.format(0, '所有位置'));
+        $('#siteSelect').append(options);
         _siteSelect = `<select class="form-control textIn site hidden" style="width:100px">${options}</select>`;
     });
 }
@@ -469,6 +477,15 @@ function getMaterialList() {
     }
     if (specificationId != 0) {
         list.specificationId = specificationId;
+    }
+
+    var siteId = $('#siteSelect').val();
+    if (isStrEmptyOrUndefined(siteId)) {
+        layer.msg('请选择位置');
+        return;
+    }
+    if (siteId != 0) {
+        list.siteId = siteId;
     }
     var data = {}
     data.opType = opType;
@@ -518,7 +535,13 @@ function getMaterialList() {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn stock hidden" maxlength="10" style="width:80px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:250px;margin:auto">${data}</textarea>`;
+            if (data == null) {
+                data = "";
+            }
+            return (data.length > tdShowLength
+                ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                : `<span title = "${data}" class="textOn">${data}</span>`)
+                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
         }
         $("#MaterialList")
             .DataTable({
@@ -591,7 +614,7 @@ function getMaterialList() {
                                 var siteName = textOn.eq(6).attr('id');
                                 var priceName = textOn.eq(7).text();
                                 var stockName = textOn.eq(8).text();
-                                var remarkName = textOn.eq(9).text();
+                                var remarkName = textOn.eq(9).attr("title");
                                 tr.find('.code').val(codeName);
                                 tr.find('.category').val(categoryName);
                                 tr.find('.name').val(nameName);
@@ -699,7 +722,7 @@ function addMaterialModal() {
         _addFirmwareUpload = initFileInputMultiple("addImg", fileEnum.Material);
     }
     $("#addImg").fileinput('clear');
-    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择张图片...');
+    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
     var categoryId = $('#categorySelect').val();
     if (categoryId == 0) {
         categoryId = $('#addCategorySelect option').eq(0).val();
@@ -797,7 +820,7 @@ function addMaterial() {
             img = JSON.stringify(img);
             var data = {}
             data.opType = opType;
-            data.opData = JSON.stringify({
+            data.opData = JSON.stringify([{
                 SpecificationId: specificationId,
                 SiteId: siteId,
                 Code: code,
@@ -806,7 +829,7 @@ function addMaterial() {
                 Stock: stock,
                 Images: img,
                 Remark: remark
-            });
+            }]);
             ajaxPost("/Relay/Post", data,
                 function (ret) {
                     layer.msg(ret.errmsg);
@@ -951,4 +974,414 @@ function updateImg() {
         $('#updateImg').fileinput("upload");
     }
     showConfirm("操作", doSth);
+}
+
+var _categoryData = null, _nameData = null, _supplierData = null, _specificationData = null, _siteData = null;
+var batchAddMax = 0, batchAddMaxV = 0;
+
+//批量添加货品模态框
+function batchAddMaterialModal() {
+    var opType = 810;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    $('#batchAddMaterial').removeAttr("disabled");
+    $('.batchAddBtn').attr("disabled", "disabled");
+    resetBatchAddList();
+
+    var categoryFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 816;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _categoryData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var nameFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 824;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _nameData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var supplierFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 831;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _supplierData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var specificationFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 839;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _specificationData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var siteFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 847;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _siteData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    Promise.all([categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+        .then((result) => {
+            //console.log(result);
+            $('.batchAddBtn').removeAttr("disabled");
+        });
+    $('#batchAddMaterialModal').modal('show');
+}
+
+//批量添加重置
+function resetBatchAddList() {
+    batchAddMax = batchAddMaxV = 0;
+    $('#batchAddList').empty();
+}
+
+//批量添加 添加一行
+function addOneBatchAddList(categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0) {
+    //consumePlanList
+    batchAddMax++;
+    batchAddMaxV++;
+    var xh = batchAddMax;
+    var tr = `
+        <tr id="batchAdd${xh}" value="${xh}" xh="${batchAddMaxV}">
+            <td style="vertical-align: inherit;"><span class="control-label xh" id="batchAddXh${xh}">${batchAddMaxV}</span></td>
+            <td><select class="ms2 form-control" id="batchAddLb${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddMc${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddGys${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddGg${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddWz${xh}"></select></td>
+            <td><input class="form-control text-center" id="batchAddBh${xh}" maxlength="50"></td>
+            <td><input class="form-control text-center" id="batchAddKc${xh}" maxlength="10" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)"></td>
+            <td><input class="form-control text-center" id="batchAddDw${xh}" maxlength="50"></td>
+            <td><input class="form-control text-center" id="batchAddJg${xh}" maxlength="10" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)"></td>
+            <td>
+                <button type="button" class="btn btn-primary btn-sm" id="copyBatchAddList${xh}" onclick="copyBatchAddList(${xh})"><i class="fa fa-copy"></i></button>
+                <button type="button" class="btn btn-danger btn-sm" id="delBatchAddList${xh}" onclick="delBatchAddList(${xh})"><i class="fa fa-minus"></i></button>
+            </td>
+        </tr>`;
+
+    $("#batchAddList").append(tr);
+
+    /////////////////添加option
+    ////货品类别
+    //var _categoryData = [];
+    var selector = "#batchAddLb" + xh;
+    if (_categoryData && _categoryData.length > 0) {
+        if (categoryId == 0) {
+            categoryId = _categoryData[0].Id;
+        }
+
+        updateBatchAddSelect(selector, categoryId, _categoryData, "Category");
+        $(selector).on('select2:select', function () {
+            categoryId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////货品名称
+            //var _nameData = [];
+            for (var i = 0; i < _nameData.length; i++) {
+                var d = _nameData[i];
+                if (d.CategoryId == categoryId) {
+                    nameId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddMc" + xh;
+            nameId = updateBatchAddSelect(selector, nameId, _nameData, "Name", "CategoryId", categoryId);
+
+            ////供应商
+            //var _supplierData = [];
+            for (var i = 0; i < _supplierData.length; i++) {
+                var d = _supplierData[i];
+                if (d.NameId == nameId) {
+                    supplierId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGys" + xh;
+            supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        ////货品名称
+        //var _nameData = [];
+        selector = "#batchAddMc" + xh;
+        if (nameId == 0) {
+            nameId = updateBatchAddSelect(selector, nameId, _nameData, "Name", "CategoryId", categoryId);
+        } else {
+            updateBatchAddSelect(selector, nameId, _nameData, "Name", "CategoryId", categoryId);
+        }
+        $(selector).on('select2:select', function () {
+            nameId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////供应商
+            //var _supplierData = [];
+            for (var i = 0; i < _supplierData.length; i++) {
+                var d = _supplierData[i];
+                if (d.NameId == nameId) {
+                    supplierId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGys" + xh;
+            supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        ////供应商
+        //var _supplierData = [];
+        selector = "#batchAddGys" + xh;
+        if (supplierId == 0) {
+            supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+        } else {
+            updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+        }
+        $(selector).on('select2:select', function () {
+            supplierId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        ////规格型号
+        //var _specificationData = [];
+        selector = "#batchAddGg" + xh;
+        updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+
+        ////位置
+        //var _siteData = [];
+        selector = "#batchAddWz" + xh;
+        siteId = updateBatchAddSelect(selector, siteId, _siteData, "Site");
+
+        $("#batchAdd" + xh).find(".ms2").css("width", "100%");
+        $("#batchAdd" + xh).find(".ms2").select2({
+            width: "120px"
+        });
+    }
+}
+
+function updateBatchAddSelect(ele, id, res, field, parentField = "", parentId = -1) {
+    var firstId = 0;
+    $(ele).empty();
+    var html = "";
+    for (var i = 0; i < res.length; i++) {
+        var d = res[i];
+        if (parentId != -1) {
+            if (parentId != 0) {
+                if (d[parentField] == parentId) {
+                    html += `<option value="${d.Id}">${d[field]}</option>`;
+                    if (firstId == 0) {
+                        firstId = d.Id;
+                    }
+                }
+            }
+        } else {
+            html += `<option value="${d.Id}">${d[field]}</option>`;
+        }
+    }
+
+    $(ele).append(html);
+    if (id != 0) {
+        $(ele).val(id).trigger("change");
+    }
+    return firstId;
+}
+
+//批量添加删除一行
+function delBatchAddList(id) {
+    $("#batchAddList").find(`tr[value=${id}]:first`).remove();
+    batchAddMaxV--;
+    var o = 1;
+    var child = $("#batchAddList tr");
+    for (var i = 0; i < child.length; i++) {
+        $(child[i]).attr("xh", o);
+        var v = $(child[i]).attr("value");
+        $("#batchAddXh" + v).html(o);
+        o++;
+    }
+}
+
+//点击复制按钮
+function copyBatchAddList(id) {
+    var categoryId = $(`#batchAddLb${id}`).val();
+    var nameId = $(`#batchAddMc${id}`).val();
+    var supplierId = $(`#batchAddGys${id}`).val();
+    var specificationId = $(`#batchAddGg${id}`).val();
+    var siteId = $(`#batchAddWz${id}`).val();
+
+    addOneBatchAddList(categoryId, nameId, supplierId, specificationId, siteId);
+}
+
+//批量添加货品信息
+function batchAddMaterial() {
+    var opType = 810;
+    var bill = new Array();
+    var i;
+    for (i = 1; i <= batchAddMax; i++) {
+        if ($("#batchAddBh" + i).length > 0) {
+            var batchAddGg = $("#batchAddGg" + i).val();
+            var batchAddWz = $("#batchAddWz" + i).val();
+
+            var batchAddBh = $("#batchAddBh" + i).val().trim();
+            var batchAddKc = $("#batchAddKc" + i).val().trim();
+            var batchAddDw = $("#batchAddDw" + i).val().trim();
+            var batchAddJg = $("#batchAddJg" + i).val().trim();
+
+            if (isStrEmptyOrUndefined(batchAddGg)) {
+                layer.msg("请选择规格");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddWz)) {
+                layer.msg("请选择位置");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddBh)) {
+                layer.msg("货品编号不能为空");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddKc)) {
+                layer.msg("请输入最低库存");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddDw)) {
+                layer.msg("请输入单位");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddJg)) {
+                layer.msg("请输入价格");
+                return;
+            }
+            bill.push({
+                SpecificationId: batchAddGg,
+                SiteId: batchAddWz,
+                Code: batchAddBh,
+                Stock: batchAddKc,
+                Unit: batchAddDw,
+                Price: batchAddJg
+            });
+        }
+    }
+    if (bill.length <= 0) {
+        layer.msg("请输入货品");
+        return;
+    }
+    var doSth = function () {
+        $('#batchAddMaterial').attr("disabled", "disabled");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(bill);
+
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                var msg = ret.errmsg;
+                if (ret.errno == 0) {
+                    $("#batchAddMaterialModal").modal("hide");
+                    getMaterialList();
+                } else {
+                    if (ret.datas.length > 0) {
+                        var str = `[{0},{1}]`;
+                        var err = new Array();
+                        for (var j = 0; j < ret.datas.length; j++) {
+                            var d = ret.datas[j];
+                            if (typeof (d) === 'string') {
+                                err.push(d);
+                            } else {
+                                var specification = "", site = "";
+                                for (var k = 0; k < _specificationData.length; k++) {
+                                    if (_specificationData[k].Id == d.SpecificationId) {
+                                        specification = _specificationData[k].Specification;
+                                    }
+                                }
+                                for (var k = 0; k < _siteData.length; k++) {
+                                    if (_siteData[k].Id == d.SiteId) {
+                                        site = _siteData[k].Site;
+                                    }
+                                }
+                                if (specification != "" && site != "") {
+                                    err.push(str.format(specification, site));
+                                }
+                            }
+                        }
+                        var errMsg = `<span class='text-red'>${err.join(", ")}</span></br>`;
+                        msg = errMsg + msg;
+                    }
+                }
+                layer.msg(msg);
+                $('#batchAddMaterial').removeAttr("disabled");
+            });
+        function removeAttr() {
+            $('#batchAddMaterial').removeAttr("disabled");
+        }
+        setTimeout(removeAttr, 10000);
+    }
+    showConfirm("添加", doSth);
 }

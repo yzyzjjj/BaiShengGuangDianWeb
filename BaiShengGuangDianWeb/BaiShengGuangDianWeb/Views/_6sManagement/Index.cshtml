@@ -1,0 +1,103 @@
+﻿@model object
+@{
+    ViewBag.Title = "6s检查";
+    //Layout = "_Layout";
+}
+<script src="~/mjs/_6sManagement/index.js"></script>
+<section class="content ">
+    <h2 class="text-center">6S检查</h2>
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="form-group form-inline">
+                <label class="control-label" for="6sGroupSelect">6s分组：</label>
+                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                    <select class="ms2 form-control" id="6sGroupSelect" style="width: 120px"></select>
+                </div>
+                <label class="control-label text-blue">总计:</label>
+                <label id="6sGroupAll" class="control-label text-blue">0</label>
+                <label class="control-label text-success">已评:</label>
+                <label id="6sGroupCount" class="control-label text-success">0</label>
+                <label class="control-label text-red">总评分:</label>
+                <label id="6sGroupScore" class="control-label text-red">0</label>
+                <div class="form-group form-inline no-margin pull-right" style="display:flex">
+                    <div class="form-group no-margin">
+                        <select class="form-control" id="_6sCondition1" onchange="showItem()">
+                            <option value="0">负责人</option>
+                            <option value="1">检查项目</option>
+                            <option value="2">截止日期</option>
+                            <option value="3">评分</option>
+                        </select>
+                    </div>
+                    <div class="form-group no-margin">
+                        <select class="form-control" id="_6sCondition2" onchange="showItem()">
+                            <option value="0">等于</option>
+                        </select>
+                    </div>
+                    <div class="form-group no-margin" id="_6sConditionDiv" style="width:130px">
+                        <div class="form-group 0">
+                            <select class="ms2 form-control" id="_6sItemPerson" style="width:130px"></select>
+                        </div>
+                        <div class="form-group 1 hidden">
+                            <input class="form-control" id="_6sItemName" oninput="showItem()" style="width: 100%;" maxlength="40">
+                        </div>
+                        <div class="form-group 2 hidden">
+                            <input class="form_date form-control text-center" type="text" id="_6sItemTime" style="width: 100%;">
+                        </div>
+                        <div class="form-group 3 hidden">
+                            <input class="form-control text-center" type="tel" style="width: 100%;" id="_6sItemScore" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10" oninput="showItem()">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-left: 5px;">
+                        <button type="button" class="btn btn-primary" onclick="getItemList()">刷新</button>
+                        <button type="button" class="btn btn-success" onclick="report()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group">
+            </div>
+            <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped" id="itemList"></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片查看页面模态框 -->
+    <div class="modal fade" tabindex="-1" id="showImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">图片查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="hidden" id="checkId"></div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">检查项目：<span id="checkName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop" id="imgOld">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="imgOldList"></div>
+                            </div>
+                        </div>
+                        <div class="form-group new hidden">
+                            <label class="control-label textOverTop">新图：</label>
+                            <div id="addImgBox">
+                                <input id="addImg" parent="addImgBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary new hidden" onclick="updateImg()">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

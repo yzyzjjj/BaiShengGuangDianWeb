@@ -19,5 +19,9 @@
         /// 物料图片
         /// </summary>
         Material,
+        /// <summary>
+        /// 6s图片
+        /// </summary>
+        _6s,
     }
 }

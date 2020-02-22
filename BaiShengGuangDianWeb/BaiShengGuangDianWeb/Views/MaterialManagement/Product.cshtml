@@ -27,12 +27,17 @@
                             <label class="control-label" style="margin: 0;white-space:nowrap">规格：</label>
                             <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
                         </div>
+                        <div style="flex: 1">
+                            <label class="control-label" style="margin: 0;white-space:nowrap">位置：</label>
+                            <select class="ms2 form-control" id="siteSelect" style="width:95%"></select>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-primary btn-sm" onclick="updateMaterial()">保存</button>
                         <button type="button" class="btn btn-primary btn-sm" onclick="addMaterialModal()">添加</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="batchAddMaterialModal()">批量添加</button>
                         <button type="button" class="btn btn-danger btn-sm" onclick="delMaterial()">删除</button>
                     </div>
                 </div>
@@ -44,7 +49,8 @@
             </div>
         </div>
     </div>
-    <!-- 添加规格模态框 -->
+
+    <!-- 添加货品模态框 -->
     <div class="modal fade" tabindex="-1" id="addMaterialModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -133,6 +139,51 @@
             </div>
         </div>
     </div>
+
+    <!-- 批量添加货品模态框 -->
+    <div class="modal fade" tabindex="-1" id="batchAddMaterialModal" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">批量添加新货品</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group text-right no-margin">
+                        <button type="button" class="btn btn-default btn-sm batchAddBtn" onclick="resetBatchAddList()"><i class="fa fa-refresh"></i> 重置</button>
+                        <button type="button" class="btn btn-default btn-sm batchAddBtn" onclick="addOneBatchAddList()"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                    <div class="form-group" style="overflow-x: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td>序号</td>
+                                    <td>类别</td>
+                                    <td>名称</td>
+                                    <td>供应商</td>
+                                    <td>规格</td>
+                                    <td>位置</td>
+                                    <td>编号</td>
+                                    <td>最低库存</td>
+                                    <td>单位</td>
+                                    <td>价格</td>
+                                    <td>操作</td>
+                                </tr>
+                            </thead>
+                            <tbody id="batchAddList"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="batchAddMaterial()" id="batchAddMaterial">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 图片模态框模态框 -->
     <div class="modal fade" tabindex="-1" id="showImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">

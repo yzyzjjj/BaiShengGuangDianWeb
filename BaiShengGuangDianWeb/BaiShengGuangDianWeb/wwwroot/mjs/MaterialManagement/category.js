@@ -30,7 +30,10 @@ function getCategoryList() {
             return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:300px;margin:auto">${data}</textarea>`;
+            return (data.length > tdShowLength
+                    ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                    : `<span title = "${data}" class="textOn">${data}</span>`)
+                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
         }
         $("#categoryList")
             .DataTable({
@@ -69,7 +72,7 @@ function getCategoryList() {
                             tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
                             var textOn = tr.find('.textOn');
                             var categoryName = textOn.eq(0).text();
-                            var remarkName = textOn.eq(1).text();
+                            var remarkName = textOn.eq(1).attr("title");
                             tr.find('.category').val(categoryName);
                             tr.find('.remark').val(remarkName);
                         } else {

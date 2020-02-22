@@ -302,7 +302,10 @@ function getSpecificationList() {
             return `<span class="textOn specificationOld">${data}</span><input type="text" class="form-control text-center textIn specification hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize: vertical;width:250px;margin:auto">${data}</textarea>`;
+            return (data.length > tdShowLength
+                ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                : `<span title = "${data}" class="textOn">${data}</span>`)
+                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
         }
         $("#specificationList")
             .DataTable({
@@ -358,7 +361,7 @@ function getSpecificationList() {
                                 tr.find('.supplier').append(e);
                                 var supplierName = textOn.eq(2).attr('id');
                                 var specificationName = textOn.eq(3).text();
-                                var remarkName = textOn.eq(4).text();
+                                var remarkName = textOn.eq(4).attr("title");
                                 tr.find('.category').val(categoryName);
                                 tr.find('.name').val(nameName);
                                 tr.find('.supplier').val(supplierName);
@@ -486,11 +489,11 @@ function addSpecification() {
     var doSth = function () {
         var data = {}
         data.opType = opType;
-        data.opData = JSON.stringify({
+        data.opData = JSON.stringify([{
             SupplierId: supplierId,
             Specification: specification,
             Remark: remark
-        });
+        }]);
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
@@ -532,4 +535,324 @@ function delSpecification() {
             });
     }
     showConfirm(`删除以下货品规格：<pre style="color:red">${name}</pre>`, doSth);
+}
+
+
+var _categoryData = null, _nameData = null, _supplierData = null;
+var batchAddMax = 0, batchAddMaxV = 0;
+
+//批量添加模态框
+function batchAddModal() {
+    var opType = 841;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    $('#batchAdd').removeAttr("disabled");
+    $('.batchAddBtn').attr("disabled", "disabled");
+    resetBatchAddList();
+
+    var categoryFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 816;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _categoryData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var nameFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 824;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _nameData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var supplierFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 831;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _supplierData = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    Promise.all([categoryFunc, nameFunc, supplierFunc])
+        .then((result) => {
+            //console.log(result);
+            $('.batchAddBtn').removeAttr("disabled");
+        });
+    $('#batchAddModal').modal('show');
+}
+
+//批量添加重置
+function resetBatchAddList() {
+    batchAddMax = batchAddMaxV = 0;
+    $('#batchAddList').empty();
+}
+
+//批量添加 添加一行
+function addOneBatchAddList(categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0) {
+    //consumePlanList
+    batchAddMax++;
+    batchAddMaxV++;
+    var xh = batchAddMax;
+    var tr = `
+        <tr id="batchAdd${xh}" value="${xh}" xh="${batchAddMaxV}">
+            <td style="vertical-align: inherit;"><span class="control-label xh" id="batchAddXh${xh}">${batchAddMaxV}</span></td>
+            <td><select class="ms2 form-control" id="batchAddLb${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddMc${xh}"></select></td>
+            <td><select class="ms2 form-control" id="batchAddGys${xh}"></select></td>
+            <td><input class="form-control text-center" id="batchAddGg${xh}" maxlength="50"></td>
+            <td><input class="form-control text-center" id="batchAddBz${xh}" maxlength="50"></td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm" id="delBatchAddList${xh}" onclick="delBatchAddList(${xh})"><i class="fa fa-minus"></i></button>
+            </td>
+        </tr>`;
+
+    $("#batchAddList").append(tr);
+
+    /////////////////添加option
+    ////货品类别
+    //var _categoryData = [];
+    var selector = "#batchAddLb" + xh;
+    if (_categoryData && _categoryData.length > 0) {
+        if (categoryId == 0) {
+            categoryId = _categoryData[0].Id;
+        }
+
+        updateBatchAddSelect(selector, categoryId, _categoryData, "Category");
+        $(selector).on('select2:select', function () {
+            categoryId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////货品名称
+            //var _nameData = [];
+            for (var i = 0; i < _nameData.length; i++) {
+                var d = _nameData[i];
+                if (d.CategoryId == categoryId) {
+                    nameId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddMc" + xh;
+            nameId = updateBatchAddSelect(selector, nameId, _nameData, "Name", "CategoryId", categoryId);
+
+            ////供应商
+            //var _supplierData = [];
+            for (var i = 0; i < _supplierData.length; i++) {
+                var d = _supplierData[i];
+                if (d.NameId == nameId) {
+                    supplierId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGys" + xh;
+            supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        ////货品名称
+        //var _nameData = [];
+        selector = "#batchAddMc" + xh;
+        nameId = updateBatchAddSelect(selector, nameId, _nameData, "Name", "CategoryId", categoryId);
+        $(selector).on('select2:select', function () {
+            nameId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////供应商
+            //var _supplierData = [];
+            for (var i = 0; i < _supplierData.length; i++) {
+                var d = _supplierData[i];
+                if (d.NameId == nameId) {
+                    supplierId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGys" + xh;
+            supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        ////供应商
+        //var _supplierData = [];
+        selector = "#batchAddGys" + xh;
+        supplierId = updateBatchAddSelect(selector, supplierId, _supplierData, "Supplier", "NameId", nameId);
+        $(selector).on('select2:select', function () {
+            supplierId = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+
+            ////规格型号
+            //var _specificationData = [];
+            for (var i = 0; i < _specificationData.length; i++) {
+                var d = _specificationData[i];
+                if (d.SupplierId == supplierId) {
+                    specificationId = d.Id;
+                    break;
+                }
+            }
+            selector = "#batchAddGg" + xh;
+            updateBatchAddSelect(selector, specificationId, _specificationData, "Specification", "SupplierId", supplierId);
+        });
+
+        $("#batchAdd" + xh).find(".ms2").css("width", "100%");
+        $("#batchAdd" + xh).find(".ms2").select2({
+            width: "120px"
+        });
+    }
+}
+
+function updateBatchAddSelect(ele, id, res, field, parentField = "", parentId = -1) {
+    var firstId = 0;
+    $(ele).empty();
+    var html = "";
+    for (var i = 0; i < res.length; i++) {
+        var d = res[i];
+        if (parentId != -1) {
+            if (parentId != 0) {
+                if (d[parentField] == parentId) {
+                    html += `<option value="${d.Id}">${d[field]}</option>`;
+                    if (firstId == 0) {
+                        firstId = d.Id;
+                    }
+                }
+            }
+        } else {
+            html += `<option value="${d.Id}">${d[field]}</option>`;
+        }
+    }
+
+    $(ele).append(html);
+    if (id != 0) {
+        $(ele).val(id).trigger("change");
+    }
+    return firstId;
+}
+
+//批量添加删除一行
+function delBatchAddList(id) {
+    $("#batchAddList").find(`tr[value=${id}]:first`).remove();
+    batchAddMaxV--;
+    var o = 1;
+    var child = $("#batchAddList tr");
+    for (var i = 0; i < child.length; i++) {
+        $(child[i]).attr("xh", o);
+        var v = $(child[i]).attr("value");
+        $("#batchAddXh" + v).html(o);
+        o++;
+    }
+}
+
+//批量添加信息
+function batchAdd() {
+    var opType = 841;
+    var list = new Array();
+    var i;
+    for (i = 1; i <= batchAddMax; i++) {
+        if ($("#batchAdd" + i).length > 0) {
+            var batchAddGys = $("#batchAddGys" + i).val();
+
+            var batchAddGg = $("#batchAddGg" + i).val().trim();
+            var batchAddBz = $("#batchAddBz" + i).val().trim();
+
+            if (isStrEmptyOrUndefined(batchAddGys)) {
+                layer.msg("请选择供应商");
+                return;
+            }
+            if (isStrEmptyOrUndefined(batchAddGg)) {
+                layer.msg("请输入规格");
+                return;
+            }
+
+            list.push({
+                SupplierId: batchAddGys,
+                Specification: batchAddGg,
+                Remark: batchAddBz
+            });
+        }
+    }
+    if (list.length <= 0) {
+        layer.msg("请输入规格");
+        return;
+    }
+    var doSth = function () {
+        $('#batchAdd').attr("disabled", "disabled");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                var msg = ret.errmsg;
+                if (ret.errno == 0) {
+                    $("#batchAddModal").modal("hide");
+                    getSpecificationList();
+                } else {
+                    if (ret.datas.length > 0) {
+                        var str = `[{0},{1}]`;
+                        var err = new Array();
+                        for (var j = 0; j < ret.datas.length; j++) {
+                            var d = ret.datas[j];
+                            var supplier = "";
+                            for (var k = 0; k < _supplierData.length; k++) {
+                                if (_supplierData[k].Id == d.SupplierId) {
+                                    supplier = _supplierData[k].Supplier;
+                                }
+                            }
+
+                            if (supplier != "") {
+                                err.push(str.format(supplier, d.Specification));
+                            }
+                        }
+                        var errMsg = `<span class='text-red'>${err.join(", ")}</span></br>`;
+                        msg = errMsg + msg;
+                    }
+                }
+                layer.msg(msg);
+                $('#batchAdd').removeAttr("disabled");
+            });
+        function removeAttr() {
+            $('#batchAdd').removeAttr("disabled");
+        }
+        setTimeout(removeAttr, 10000);
+    }
+    showConfirm("添加", doSth);
 }

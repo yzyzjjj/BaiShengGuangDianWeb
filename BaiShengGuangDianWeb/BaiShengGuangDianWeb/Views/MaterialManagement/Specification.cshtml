@@ -29,6 +29,7 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-primary btn-sm" onclick="updateSpecification()">保存</button>
                         <button type="button" class="btn btn-primary btn-sm" onclick="addSpecificationModal()">添加</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="batchAddModal()">批量添加</button>
                         <button type="button" class="btn btn-danger btn-sm" onclick="delSpecification()">删除</button>
                     </div>
                 </div>
@@ -48,7 +49,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加新供应商</h4>
+                    <h4 class="modal-title">添加新规格</h4>
                 </div>
                 <div class="modal-body">
                     <div class="modal-body box">
@@ -89,6 +90,46 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                         <button type="button" class="btn btn-primary" onclick="addSpecification()">添加</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量添加规格模态框 -->
+    <div class="modal fade" tabindex="-1" id="batchAddModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">批量添加新规格</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group text-right no-margin">
+                        <button type="button" class="btn btn-default btn-sm batchAddBtn" onclick="resetBatchAddList()"><i class="fa fa-refresh"></i> 重置</button>
+                        <button type="button" class="btn btn-default btn-sm batchAddBtn" onclick="addOneBatchAddList()"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                    <div class="form-group" style="overflow-x: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td>序号</td>
+                                    <td>类别</td>
+                                    <td>名称</td>
+                                    <td>供应商</td>
+                                    <td>新规格</td>
+                                    <td>备注</td>
+                                    <td>操作</td>
+                                </tr>
+                            </thead>
+                            <tbody id="batchAddList"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="batchAdd()" id="batchAdd">添加</button>
                 </div>
             </div>
         </div>

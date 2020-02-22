@@ -1,4 +1,5 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
+using BaiShengGuangDianWeb.Models.Account;
 using BaiShengGuangDianWeb.Models.RequestBody;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
     {
         [HttpPost("Login")]
         [AllowAnonymous]
-        public Result Login()
+        public object Login()
         {
             var special = true;
             var param = Request.GetRequestParams();
@@ -50,12 +51,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 var url = "http://192.168.1.100/indexlogins.php";
                 if (accountInfo == null)
                 {
-                    return Result.GenError<Result>(Error.AccountNotExist);
-                }
-
-                var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
-                if (accountInfo.Password != pwd)
-                {
                     var res = HttpServer.Post(url, new Dictionary<string, string>
                     {
                         {"dlname", loginBody.Account},
@@ -63,13 +58,51 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                     });
                     if (res.Contains("0"))
                     {
-                        accountInfo.Password = pwd;
-                        AccountHelper.UpdateAccountInfo(accountInfo);
-                        accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
+                        var info = new AccountInfo
+                        {
+                            Account = loginBody.Account,
+                            Password = AccountHelper.GenAccountPwdByOne(loginBody.Account, loginBody.Password),
+                            Name = loginBody.Account,
+                            Role = 4,
+                            EmailType = "",
+                            EmailAddress = "",
+                            SelfPermissions = "",
+                            DeviceIds = "",
+                            ProductionRole = "",
+                            MaxProductionRole = ""
+                        };
+                        AccountHelper.AddAccountInfo(info);
+                        accountInfo = info;
+                    }
+                    else if (res.Contains("1"))
+                    {
+                        return Result.GenError<Result>(Error.AccountNotExist);
                     }
                     else
                     {
                         return Result.GenError<Result>(Error.PasswordError);
+                    }
+                }
+                else
+                {
+                    var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
+                    if (accountInfo.Password != pwd)
+                    {
+                        var res = HttpServer.Post(url, new Dictionary<string, string>
+                        {
+                            {"dlname", loginBody.Account},
+                            {"password", loginBody.Password},
+                        });
+                        if (res.Contains("0"))
+                        {
+                            accountInfo.Password = pwd;
+                            AccountHelper.UpdateAccountInfo(accountInfo);
+                            accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
+                        }
+                        else
+                        {
+                            return Result.GenError<Result>(Error.PasswordError);
+                        }
                     }
                 }
             }
@@ -77,10 +110,14 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             var token = TokenHelper.CreateJwtToken(accountInfo);
             CookieHelper.SetCookie("token", token, Response);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
-            return Result.GenError<Result>(Error.Success);
+            var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
+            var result = new DataResult();
+            result.datas.AddRange(pages);
+            return result;
         }
 
         [HttpPost("Logout")]
+        [AllowAnonymous]
         public Result Logout()
         {
             var accountInfo = AccountHelper.CurrentUser;
@@ -119,7 +156,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<DataResult>(Error.NoAuth);
             }
             var result = new DataResult();
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order, x.Parent }));
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
@@ -145,7 +182,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             }
 
             var result = new DataResult();
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !roleInfo.PermissionsList.Contains(x.Id)).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order, x.Parent }));
+            var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !roleInfo.PermissionsList.Contains(x.Id)).ToList();
+            result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
@@ -166,7 +204,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
 
             var result = new DataResult();
             result.datas.AddRange(PermissionHelper.PermissionsList.Values
-                .Where(x => !x.IsDelete && x.IsPage && x.IsMenu && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Icon, x.Order, x.Parent }));
+                .Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Order, x.Label }));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }

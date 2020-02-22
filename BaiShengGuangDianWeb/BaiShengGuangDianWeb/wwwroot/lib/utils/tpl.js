@@ -75,32 +75,38 @@ var commonfunc = function () {
                     $("#search-select").append(select.format(item.url, item.name.trim()));
                 }
             });
+            var local = window.location.pathname;
+            var canSee = false;
             var parents = getParent(datas);
-            var first = "/";
+            var first = null;
             for (var i = 0; i < parents.length; i++) {
-                var childs = getChild(datas, parents[i]);
-                for (var j = 0; j < childs.length; j++) {
-                    var child = childs[j];
-                    var option = null;
-                    if (child.parent == 0) {
-                        if (child.url == "") {
-                            option = $(mMenu2).clone();
-                            option.find('.treeview-menu').attr('id', "main" + child.id);
-                            option.find('i.mi').addClass(child.icon);
-                            option.find('span.mt').text(child.name.trim());
-                            $(".sidebar-menu").append(option);
-                        } else {
-                            if (first == "/")
-                                first = child.url;
-                            option = $(mMenu1).clone();
-                            option.find('.menuitem').attr('id', "main" + child.id);
-                            option.find('.menuitem').attr('href', child.url);
-                            option.find('i.mi').addClass(child.icon);
-                            option.find('span.mt').text(child.name.trim());
-                            $(".sidebar-menu").append(option);
-                        }
-                    } else {
-                        if (first == "/")
+                var parent = parents[i];
+                var childs = getChild(datas, parent);
+                var option = null;
+                var child = null;
+                if (parent.noChild) {
+                    child = childs[0];
+                    if (child.url == local)
+                        canSee = true;
+                    if (!first)
+                        first = child.url;
+                    option = $(mMenu1).clone();
+                    option.find('.menuitem').attr('id', "main" + parent.id);
+                    option.find('.menuitem').attr('href', child.url);
+                    option.find('i.mi').addClass(parent.icon);
+                    option.find('span.mt').text(parent.name);
+                    $(".sidebar-menu").append(option);
+                } else {
+                    option = $(mMenu2).clone();
+                    option.find('.treeview-menu').attr('id', "main" + parent.id);
+                    option.find('i.mi').addClass(parent.icon);
+                    option.find('span.mt').text(parent.name);
+                    $(".sidebar-menu").append(option);
+                    for (var j = 0; j < childs.length; j++) {
+                        child = childs[j];
+                        if (child.url == local)
+                            canSee = true;
+                        if (!first)
                             first = child.url;
                         option = $(mMenu3).clone();
                         option.find('.treeview-menu').attr('id', "main" + child.id);
@@ -111,9 +117,13 @@ var commonfunc = function () {
                 }
             }
 
-            var url = ((window.location.pathname == "/" || window.location.pathname == "/Home") && window.location.pathname != first)
-                ? (first == "" ? window.location.pathname : first)
-                : window.location.pathname;
+            if (!first)
+                first = "/";
+            if (!canSee) {
+                window.location = first;
+                return;
+            }
+            var url = window.location.pathname;
             $("a.menuitem[href]").filter(function () {
                 return this.pathname === url;
             }).parent().addClass("active").parent().parent().addClass("active");
@@ -149,23 +159,31 @@ function sortRule(a, b) {
 
 function getParent(list) {
     var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (result.indexOf(data.parent) < 0) {
-            result.push(data.parent);
+    var id = 0;
+    for (var i = 0; i < PermissionPageTypes.length; i++) {
+        var parent = PermissionPageTypes[i];
+        for (var j = 0; j < list.length; j++) {
+            var data = list[j];
+            if (data.label == parent.name) {
+                var d = clone(parent);
+                d.id = id--;
+                result.push(d);
+                break;
+            }
         }
     }
 
-    return result.sort(sortRule);
+    return result;
 }
 
-function getChild(list, parentId) {
-    var info = getCookieTokenInfo();
+function getChild(list, parent) {
     var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i]
-        if (data.parent == parentId && info.permissionsList.indexOf(data.id) >= 0) {
-            result.push(data);
+    for (var j = 0; j < list.length; j++) {
+        var data = list[j];
+        if (data.label == parent.name) {
+            var d = clone(data);
+            d.parent = parent.id;
+            result.push(d);
         }
     }
 

@@ -202,7 +202,10 @@ function getSupplierList() {
             return `<span class="textOn supplierOld">${data}</span><input type="text" class="form-control text-center textIn supplier hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
-            return `<span class="textOn">${data}</span><textarea class="form-control textIn remark hidden" maxlength="500" style="resize:vertical;width:250px;margin:auto">${data}</textarea>`;
+            return (data.length > tdShowLength
+                    ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                    : `<span title = "${data}" class="textOn">${data}</span>`)
+                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
         }
         $("#supplierList")
             .DataTable({
@@ -249,7 +252,7 @@ function getSupplierList() {
                                 tr.find('.name').append(e);
                                 var nameName = textOn.eq(1).attr('id');
                                 var supplierName = textOn.eq(2).text();
-                                var remarkName = textOn.eq(3).text();
+                                var remarkName = textOn.eq(3).attr("title");
                                 tr.find('.category').val(categoryName);
                                 tr.find('.name').val(nameName);
                                 tr.find('.supplier').val(supplierName);

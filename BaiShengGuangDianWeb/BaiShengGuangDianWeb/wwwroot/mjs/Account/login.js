@@ -9,18 +9,18 @@
         var password = $("#password").val();
 
         if (isStrEmptyOrUndefined(account)) {
-            showTip($("#accountTip"),"账号不能为空");
+            showTip($("#accountTip"), "账号不能为空");
             return;
         }
         if (isStrEmptyOrUndefined(password)) {
-            showTip($("#passwordTip"),"密码不能为空");
+            showTip($("#passwordTip"), "密码不能为空");
             return;
         }
 
         //var pwdMd5 = password;
         var pwdMd5 = window.md5(password);
         //var pwdMd5 = window.md5(window.md5(password));
-        
+
         var data = {}
         data.account = account;
         data.password = pwdMd5;
@@ -38,7 +38,21 @@
                     window.location.href = lastUrl;
                     return;
                 }
-                window.location.href = indexUrl;
+                var first = indexUrl;
+                var find = false;
+                for (var i = 0; i < PermissionPageTypes.length; i++) {
+                    if (find) break;
+                    const parent = PermissionPageTypes[i];
+                    for (var j = 0; j < ret.datas.length; j++) {
+                        if (find) break;
+                        var data = ret.datas[j];
+                        if (data.label == parent.name) {
+                            first = data.url;
+                            find = true;
+                        }
+                    }
+                }
+                window.location.href = first;
             });
     });
 

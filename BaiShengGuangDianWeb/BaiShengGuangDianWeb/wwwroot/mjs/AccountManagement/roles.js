@@ -67,7 +67,7 @@ function getRoleList() {
 }
 
 function showAddRoles() {
-    $("#add_protoDiv").click();
+    //$("#add_protoDiv").click();
     $("#addRoleName").val("");
     $("#add_per_body").empty();
     ajaxGet("/Account/Permissions", null,
@@ -223,124 +223,112 @@ function updateRole() {
     showConfirm("修改", doSth);
 }
 
-function showPermissions(uiName, datas) {
-    var mOptionStr1 = '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
-        '    <div class="box-header no-padding">' +
-        '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
-        '        <input type="checkbox" class="on_cb" style="width: 15px;"/>' +
-        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
-        '    </div>' +
-        '    <div class="box-body no-padding">' +
-        '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
-        '    </div>' +
-        '</div>';
-    var mOptionStr2 = '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
-        '    <div class="box-header no-padding">' +
-        '        <a type="button" class="btn btn-box-tool disabled" data-widget="collapse" style="opacity:0;"><i class="on_i fa fa-minus"></i></a>' +
-        '        <input type="checkbox" class="on_cb" style="width: 15px;"/>' +
-        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
-        '    </div>' +
-        '    <div class="box-body no-padding">' +
-        '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
-        '    </div>' +
-        '</div>';
+function showPermissions(uiName, list) {
+    var mOptionStr1 =
+        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
+            <div class="box-header no-padding">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
+                <input type="checkbox" class="on_cb" style="width: 15px;"/>
+                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
+            </div>
+            <div class="box-body no-padding">
+                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
+            </div>
+        </div>`;
+    var mOptionStr2 =
+        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
+            <div class="box-header no-padding">
+                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse" style="opacity:0;"><i class="on_i fa fa-minus"></i></a>
+                <input type="checkbox" class="on_cb" style="width: 15px;"/>
+                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
+            </div>
+            <div class="box-body no-padding">
+                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
+            </div>
+        </div>`;
 
-    var mNameStr = '<li>' +
-        '<div class="box box-solid noShadow" style="margin-bottom: 0;">' +
-        '    <div class="box-header no-padding">' +
-        '        <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>' +
-        '        <input type="checkbox" class="on_cb" style="width: 15px;" />' +
-        '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>' +
-        '    </div>' +
-        '    </div>' +
-        '</li>';
+    var mNameStr =
+        `<li>
+            <div class="box box-solid noShadow" style="margin-bottom: 0;">
+                <div class="box-header no-padding">
+                    <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
+                    <input type="checkbox" class="on_cb" style="width: 15px;" />
+                    <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
+                </div>
+            </div>
+         </li>`;
 
-    var pages = PermissionPages;
-    var types = PermissionTypes;
-    var lbI = PermissionTypes[PermissionTypes.length - 1].id - 1;
-    for (var i = 0; i < pages.length; i++) {
-        var page = pages[i];
-        var pageData = getPageData(datas, page.isPage);
-
-        var option = $(mOptionStr1).clone();
-        option.find("h3").text(page.name);
-        option.find(".on_cb").attr("value", page.id);
-        option.find(".on_cb").attr("lvl", 1);
+    var pageTypes = PermissionTypes;
+    var option = null;
+    for (var i = 0; i < pageTypes.length; i++) {
+        var pageType = pageTypes[i];
+        option = $(mOptionStr1).clone();
+        option.find("h3").text(pageType.name);
+        option.find(".on_cb").attr("value", pageType.id);
         option.find(".on_cb").addClass("1");
-        option.find(".on_ul").attr("id", "ul" + page.id);
+        option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + pageType.id);
         $("#" + uiName).append(option);
-        var dTypes = getTypes(pageData);
-        for (var j = 0; j < dTypes.length; j++) {
-            var dType = dTypes[j];
-            var type = types[dType];
-            if (type == null) {
-                continue;
-            }
-            var typeData = getTypeData(pageData, dType);
-
-            option = $("<li>" + mOptionStr1 + "</li>").clone();
-            option.find("h3").text(type.name);
-            option.find(".on_cb").attr("value", type.id);
-            option.find(".on_cb").attr("pid", page.id);
-            option.find(".on_cb").addClass("2");
-            option.find(".on_ul").attr("id", "ul" + type.id);
-            $("#" + uiName).find("[id=ul" + page.id + "]").append(option);
-            if (!page.isPage) {
-                option.find("div:first").addClass("collapsed-box");
-                option.find(".on_i").removeClass("fa-minus");
-                option.find(".on_i").addClass("fa-plus");
-            }
-            var dLabels = getLabels(typeData);
-            for (var k = 0; k < dLabels.length; k++) {
-                var dLabel = dLabels[k];
-                var labelData = getLabelData(pageData, dLabel);
-                if (page.isPage) {
-                    var firstData = labelData.shift();
-                    option = $(labelData.length > 1 ? ("<li>" + mOptionStr1 + "</li>") : ("<li>" + mOptionStr2 + "</li>"))
-                        .clone();
-                    option.attr("id", "pli" + type.id);
-                    option.find("h3").text(dLabel);
-                    option.find(".on_cb").attr("value", firstData.id);
-                    option.find(".on_cb").attr("pid", type.id);
-                    option.find(".on_cb").addClass("3");
-                    option.find(".on_ul").attr("id", "ul" + firstData.id);
-                    option.find("div:first").addClass("collapsed-box");
-                    option.find(".on_i").removeClass("fa-minus");
-                    option.find(".on_i").addClass("fa-plus");
-
-                    $("#" + uiName).find("[id=ul" + type.id + "]").append(option);
-                    for (var l = 0; l < labelData.length; l++) {
-                        var lData = labelData[l];
-
-                        option = $(mNameStr).clone();
-                        option.find("h3").text(lData.name);
-                        option.find(".on_cb").attr("value", lData.id);
-                        option.find(".on_cb").attr("pid", firstData.id);
-                        option.find(".on_cb").addClass("4");
-                        $("#" + uiName).find("[id=ul" + firstData.id + "]").append(option);
-                    }
+        var menus = getMenus(list, pageType);
+        for (var j = 0; j < menus.length; j++) {
+            var menu = menus[j];
+            var menuData = getMenuData(list, menu);
+            if (menuData.length > 0) {
+                if (pageType.isPage && menu.noChild) {
+                    var fData = menuData[0];
+                    option = $(mNameStr).clone();
+                    option.find("h3").text(fData.name);
+                    option.find(".on_cb").attr("value", fData.id);
+                    option.find(".on_cb").attr("pid", pageType.id);
+                    option.find(".on_cb").addClass("1");
+                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
                 } else {
                     option = $("<li>" + mOptionStr1 + "<li>").clone();
-                    option.attr("id", "npli" + type.id);
-                    option.find("h3").text(dLabel);
-                    option.find(".on_cb").attr("value", lbI);
-                    option.find(".on_cb").attr("pid", type.id);
-                    option.find(".on_cb").addClass("3");
-                    option.find(".on_ul").attr("id", "ul" + lbI);
+                    option.find("h3").text(menu.name);
+                    option.find(".on_cb").attr("value", menu.id);
+                    option.find(".on_cb").attr("pid", menu.parent);
+                    option.find(".on_cb").addClass("2");
+                    option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + menu.id);
                     option.find("div:first").addClass("collapsed-box");
                     option.find(".on_i").removeClass("fa-minus");
                     option.find(".on_i").addClass("fa-plus");
-                    $("#" + uiName).find("[id=ul" + type.id + "]").append(option);
-                    for (var l = 0; l < labelData.length; l++) {
-                        var lData = labelData[l];
-                        option = $(mNameStr).clone();
-                        option.find("h3").text(lData.name);
-                        option.find(".on_cb").attr("value", lData.id);
-                        option.find(".on_cb").attr("pid", lbI);
-                        option.find(".on_cb").addClass("4");
-                        $("#" + uiName).find("[id=ul" + lbI + "]").append(option);
+                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
+                    if (pageType.isPage) {
+                        for (var k = 0; k < menuData.length; k++) {
+                            var mData = menuData[k];
+                            option = $(mNameStr).clone();
+                            option.find("h3").text(mData.name);
+                            option.find(".on_cb").attr("value", mData.id);
+                            option.find(".on_cb").attr("pid", mData.parent);
+                            option.find(".on_cb").addClass("3");
+                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${mData.parent}]`).append(option);
+                        }
+                    } else {
+                        var dLabels = getLabels(menuData, menu);
+                        for (var k = 0; k < dLabels.length; k++) {
+                            var dLabel = dLabels[k];
+                            option = $("<li>" + mOptionStr1 + "<li>").clone();
+                            option.find("h3").text(dLabel.name);
+                            option.find(".on_cb").attr("value", dLabel.id);
+                            option.find(".on_cb").attr("pid", dLabel.parent);
+                            option.find(".on_cb").addClass("3");
+                            option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + dLabel.id);
+                            option.find("div:first").addClass("collapsed-box");
+                            option.find(".on_i").removeClass("fa-minus");
+                            option.find(".on_i").addClass("fa-plus");
+                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${dLabel.parent}]`).append(option);
+                            var labelData = getLabelData(menuData, dLabel);
+                            for (var l = 0; l < labelData.length; l++) {
+                                var lData = labelData[l];
+                                option = $(mNameStr).clone();
+                                option.find("h3").text(lData.name);
+                                option.find(".on_cb").attr("value", lData.id);
+                                option.find(".on_cb").attr("pid", lData.parent);
+                                option.find(".on_cb").addClass("4");
+                                $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${lData.parent}]`).append(option);
+                            }
+                        }
+
                     }
-                    lbI--;
                 }
             }
         }
@@ -348,7 +336,6 @@ function showPermissions(uiName, datas) {
 
     $(".on_cb").iCheck({
         checkboxClass: 'icheckbox_minimal',
-        radioClass: 'iradio_minimal',
         increaseArea: '20%' // optional
     });
 
@@ -357,58 +344,6 @@ function showPermissions(uiName, datas) {
         $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
         updateCheckBoxState(uiName, this, f);
     });
-}
-
-function getPageData(datas, isPage) {
-    var res = new Array();
-    for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        if (data.isPage == isPage) {
-            res.push(data);
-        }
-    }
-    return res;
-}
-
-function typeRule(a, b) {
-    if (PermissionTypesOrder[a] && PermissionTypesOrder[b]) {
-        return PermissionTypesOrder[a] > PermissionTypesOrder[b] ? 1 : -1;
-    }
-    return a > b ? 1 : -1;
-}
-
-function getTypes(datas) {
-    var res = new Array();
-    for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        if (res.indexOf(data.type) < 0) {
-            res.push(data.type);
-        }
-    }
-    return res.sort(typeRule);
-}
-
-function getTypeData(datas, type) {
-    var res = new Array();
-    for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        if (data.type == type) {
-            res.push(data);
-        }
-    }
-    return res;
-}
-
-function getLabels(datas) {
-    datas.sort(rule);
-    var res = new Array();
-    for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        if (res.indexOf(data.label) < 0) {
-            res.push(data.label);
-        }
-    }
-    return res;
 }
 
 function rule(a, b) {
@@ -421,15 +356,86 @@ function rule(a, b) {
     return a.id > b.id ? 1 : -1;
 }
 
-function getLabelData(datas, label) {
-    var res = new Array();
-    for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        if (data.label == label) {
-            res.push(data);
+var lid = -PermissionPageTypes.length;
+function getMenus(list, page) {
+    var result = new Array();
+    for (var i = 0; i < PermissionPageTypes.length; i++) {
+        var menu = PermissionPageTypes[i];
+        for (var j = 0; j < list.length; j++) {
+            var data = list[j];
+            var add = false;
+            if (page.isPage) {
+                if (data.isPage == page.isPage && data.label == menu.name) {
+                    add = true;
+                }
+            } else {
+                if (data.isPage == page.isPage && data.type == menu.type) {
+                    add = true;
+                }
+            }
+            if (add) {
+                var d = clone(menu);
+                d.id = !page.isPage ? lid-- : menu.id;
+                d.isPage = page.isPage;
+                d.parent = page.id;
+                result.push(d);
+                break;
+            }
         }
     }
-    return res.sort(rule);
+    return result;
+}
+
+function getMenuData(list, menu) {
+    var result = new Array();
+    for (var i = 0; i < list.length; i++) {
+        var data = list[i];
+        var add = false;
+        if (menu.isPage) {
+            if (data.isPage == menu.isPage && data.label == menu.name) {
+                add = true;
+            }
+        } else {
+            if (data.isPage == menu.isPage && data.type == menu.type) {
+                add = true;
+            }
+        }
+        if (add) {
+            var d = clone(data);
+            d.isPage = menu.isPage;
+            d.parent = menu.id;
+            result.push(d);
+        }
+    }
+    return result.sort(rule);
+}
+
+function getLabels(list, menu) {
+    var result = new Array();
+    for (var i = 0; i < list.length; i++) {
+        var data = list[i];
+        if (data.isPage == menu.isPage && data.type == menu.type && !existArrayObj(result, "name", data.label)) {
+            var d = clone(data);
+            d.id = lid--;
+            d.name = data.label;
+            d.parent = menu.id;
+            result.push(d);
+        }
+    }
+    return result.sort(rule);
+}
+
+function getLabelData(list, label) {
+    var result = new Array();
+    for (var i = 0; i < list.length; i++) {
+        var data = list[i];
+        if (data.isPage == label.isPage && data.type == label.type && data.label == label.name) {
+            var d = clone(data);
+            d.parent = label.id;
+            result.push(d);
+        }
+    }
+    return result.sort(rule);
 }
 
 function updateCheckBoxState(uiName, ui, f) {

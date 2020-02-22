@@ -9,12 +9,16 @@
   <ItemGroup>
     <Compile Remove="Views\Home\css\**" />
     <Compile Remove="wwwroot\mimages\**" />
+    <Compile Remove="wwwroot\mjs\新文件夹\**" />
     <Content Remove="Views\Home\css\**" />
     <Content Remove="wwwroot\mimages\**" />
+    <Content Remove="wwwroot\mjs\新文件夹\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
     <EmbeddedResource Remove="wwwroot\mimages\**" />
+    <EmbeddedResource Remove="wwwroot\mjs\新文件夹\**" />
     <None Remove="Views\Home\css\**" />
     <None Remove="wwwroot\mimages\**" />
+    <None Remove="wwwroot\mjs\新文件夹\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Views\_6sManagement\Log.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\_6sManagement\Set.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Home\WorkSpace.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

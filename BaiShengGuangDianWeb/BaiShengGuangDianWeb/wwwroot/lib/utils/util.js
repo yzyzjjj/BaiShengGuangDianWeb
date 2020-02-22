@@ -1036,10 +1036,17 @@ function input(s, zs = 5, xs = 4) {
 
     if (s != '') {
         s = s.split(".");
-        if (s.length > 0 && s[0].length > zs) {
+        if (s.length > 0 && s[0].length >= zs) {
             s[0] = s[0].substr(0, zs);
         }
-        s = s.join(".");
+        if (s.length > 0 && s[1] && s[1].length >= xs) {
+            s[1] = s[1].substr(0, xs);
+        }
+        if (xs > 0) {
+            s = s.join(".");
+        } else {
+            s = s.join("");
+        }
     }
     return s;
 }
@@ -1057,8 +1064,10 @@ function inputEnd(s) {
         while (s.substr(0, 1) == '.') {
             s = s.substr(1, s.length);
         }
+        return s.split("").reverse().join("");
+    } else {
+        return s;
     }
-    return s.split("").reverse().join("");
 }
 
 function autoCal(obj, ui) {
@@ -1221,8 +1230,52 @@ function removeArrayObj(arr, key, all = false) {
     return res;
 }
 
+// [n1, n2, n3];
+function existArray(arr, value) {
+    for (var key in arr) {
+        if (arr[key] == value)
+            return true;
+    }
+    return false;
+}
+
+// [{key:value}, {key:value}];
+function existArrayObj(arr, key, value) {
+    for (var k in arr) {
+        if (arr[k].hasOwnProperty(key)) {
+            if (arr[k][key] == value)
+                return true;
+        }
+    }
+    return false;
+}
+
+function clone(obj) {
+    var o;
+    if (typeof obj == "object") {
+        if (obj === null) {
+            o = null;
+        } else {
+            if (obj instanceof Array) {
+                o = [];
+                for (var i = 0, len = obj.length; i < len; i++) {
+                    o.push(clone(obj[i]));
+                }
+            } else {
+                o = {};
+                for (var k in obj) {
+                    o[k] = clone(obj[k]);
+                }
+            }
+        }
+    } else {
+        o = obj;
+    }
+    return o;
+}
+
 //备注模态框
-function showAllContent(content, id = "") {
+function showAllContent(content, title = "备注", id = "") {
     content = unescape(content);
     if (id == "")
         id = "remarkModel";
@@ -1232,7 +1285,7 @@ function showAllContent(content, id = "") {
         `       <div class="modal-content">` +
         `           <div class="modal-header">` +
         `               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>` +
-        `               <h4 class="modal-title">备注</h4>` +
+        `               <h4 class="modal-title">${title}</h4>` +
         `           </div>` +
         `           <div class="modal-body">` +
         `           <div class="form-group">` +
@@ -1254,4 +1307,54 @@ function showAllContent(content, id = "") {
         function () {
             modal.remove();
         });
+}
+
+function showBigImg(url) {
+    var html =
+        `<div id="outerDiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:10000;width:100%;height:100%;">
+            <div id="innerDiv" style="position:absolute;">
+                <img id="bigImg" style="border:5px solid #fff;" src="" />
+            </div>
+        </div>`;
+    var modal = $(html);
+    $(".content").append(modal);
+    var outerDiv = "#outerDiv";
+    var innerDiv = "#innerDiv";
+    var bigImg = "#bigImg";
+    $(bigImg).attr("src", url);//设置#bigImg元素的src属性
+
+    /*获取当前点击图片的真实大小，并显示弹出层及大图*/
+    $("<img/>").attr("src", url).load(function () {
+        var windowW = $(window).width();//获取当前窗口宽度
+        var windowH = $(window).height();//获取当前窗口高度
+        var realWidth = this.width;//获取图片真实宽度
+        var realHeight = this.height;//获取图片真实高度
+        var imgWidth, imgHeight;
+        var scale = 0.8;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+        if (realHeight > windowH * scale) {//判断图片高度
+            imgHeight = windowH * scale;//如大于窗口高度，图片高度进行缩放
+            imgWidth = imgHeight / realHeight * realWidth;//等比例缩放宽度
+            if (imgWidth > windowW * scale) {//如宽度扔大于窗口宽度
+                imgWidth = windowW * scale;//再对宽度进行缩放
+            }
+        } else if (realWidth > windowW * scale) {//如图片高度合适，判断图片宽度
+            imgWidth = windowW * scale;//如大于窗口宽度，图片宽度进行缩放
+            imgHeight = imgWidth / realWidth * realHeight;//等比例缩放高度
+        } else {//如果图片真实高度和宽度都符合要求，高宽不变
+            imgWidth = realWidth;
+            imgHeight = realHeight;
+        }
+        $(bigImg).css("width", imgWidth);//以最终的宽度对图片缩放
+
+        var w = (windowW - imgWidth) / 2;//计算图片与窗口左边距
+        var h = (windowH - imgHeight) / 2;//计算图片与窗口上边距
+        $(innerDiv).css({ "top": h, "left": w });//设置#innerdiv的top和left属性
+        $(outerDiv).fadeIn("fast");//淡入显示#outerdiv及.pimg
+    });
+
+    $(outerDiv).click(function () {//再次点击淡出消失弹出层
+        $(this).fadeOut("fast");
+        modal.remove();
+    });
 }

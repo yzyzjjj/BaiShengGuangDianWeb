@@ -10,6 +10,7 @@ namespace BaiShengGuangDianWeb.Base.FileConfig
             {FileEnum.ApplicationLibrary, new List<string>{"bin"}},
             {FileEnum.SpotCheck, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
             {FileEnum.Material, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
+            {FileEnum._6s, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
         };
 
         public static Dictionary<FileEnum, List<string>> GetFileExt()
