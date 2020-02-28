@@ -35,7 +35,7 @@
                         <div class="form-group" style="display: flex;align-items: center">
                             <label class="control-label" style="white-space: nowrap;margin: 0"><span class="text-red">* </span>新计划：</label>
                             <input class="form-control" id="addPlan" onfocusin="focusIn($(this))" maxlength="20" style="flex-basis: 205px;margin-right: 5px">
-                            <select class="ms2 form-control" id="addPlanSelect" style="width: 180px"></select>
+                            <select class="ms2 form-control planSelect" id="addPlanSelect" style="width: 180px"></select>
                             <button type="button" class="btn btn-info btn-sm" id="reuse" style="margin-left: 5px">复用</button>
                         </div>
                         <div class="form-group" style="display: flex;align-items: center">
@@ -62,6 +62,7 @@
                                             <th>规格型号</th>
                                             <th>货品位置</th>
                                             <th>货品详情</th>
+                                            <th>参考价格</th>
                                             <th>计划用量</th>
                                             <th>操作</th>
                                         </tr>
@@ -74,6 +75,95 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                         <button type="button" class="btn btn-primary" onclick="addPlan()">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 计划详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="planDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">计划详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" style="display: flex;align-items: center">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">计划：</label>
+                            <select class="ms2 form-control planSelect" id="PlanDetailSelect" style="width: 180px"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">备注：<span id="remarkName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">计划造价：<span id="plannedCostName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">实际造价：<span id="actualCostName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">清单：</label>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="planDetailList"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 货品详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="productDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">货品详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group">
+                            <label class="control-label textOverTop">类别：<span id="productCategory" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">名称：<span id="productName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">供应商：<span id="productSupplier" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">规格：<span id="productSpecification" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">位置：<span id="productSite" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">编号：<span id="productCode" style="text-decoration: underline; font-size: 20px; color: blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">最低库存：<span id="productStock" style="text-decoration: underline; font-size: 20px; color: blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop">备注：<span id="productRemark" style="text-decoration: underline; font-size: 20px; color: blue"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label textOverTop" id="imgLabel">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="productImg"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     </div>
                 </div>
             </div>
