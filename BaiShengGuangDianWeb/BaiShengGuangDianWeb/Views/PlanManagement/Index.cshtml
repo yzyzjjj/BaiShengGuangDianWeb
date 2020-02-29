@@ -11,7 +11,7 @@
             <h3 class="box-title"></h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-primary btn-sm" onclick="addPlanModal()">添加</button>
-                <button type="button" class="btn btn-success btn-sm" onclick="updatePlan()">日志</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="logModal(true)">日志</button>
             </div>
         </div>
         <div class="box-body">
@@ -28,15 +28,19 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加新计划</h4>
+                    <h4 class="modal-title"></h4>
                 </div>
                 <div class="modal-body">
                     <div class="modal-body box">
-                        <div class="form-group" style="display: flex;align-items: center">
+                        <div class="form-group addPlan" style="display: flex;align-items: center">
                             <label class="control-label" style="white-space: nowrap;margin: 0"><span class="text-red">* </span>新计划：</label>
                             <input class="form-control" id="addPlan" onfocusin="focusIn($(this))" maxlength="20" style="flex-basis: 205px;margin-right: 5px">
                             <select class="ms2 form-control planSelect" id="addPlanSelect" style="width: 180px"></select>
                             <button type="button" class="btn btn-info btn-sm" id="reuse" style="margin-left: 5px">复用</button>
+                        </div>
+                        <div class="form-group updatePlan" style="display: flex;align-items: center">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">计划：</label>
+                            <select class="ms2 form-control planSelect" id="updatePlanSelect" style="width: 180px"></select>
                         </div>
                         <div class="form-group" style="display: flex;align-items: center">
                             <label class="control-label" style="white-space: nowrap;margin: 0">备注：</label>
@@ -74,7 +78,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-primary" onclick="addPlan()">添加</button>
+                        <button type="button" class="btn btn-primary addPlan" onclick="addPlan()">添加</button>
+                        <button type="button" class="btn btn-primary updatePlan" onclick="updatePlan()">修改</button>
                     </div>
                 </div>
             </div>
@@ -165,6 +170,68 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志模态框 -->
+    <div class="modal fade" tabindex="-1" id="logModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">领用日志</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="logStartDate">时间范围：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <input type="text" id="logStartDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                            <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                            <input type="text" id="logEndDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: flex;align-items: center">
+                        <label class="control-label" for="logBillSelect">计划号：</label>
+                        <select class="ms2 form-control planSelect" id="logPlanSelect" style="width: 160px"></select>
+                    </div>
+                    <div class="form-group" style="display: flex;align-items: center">
+                        <label class="control-label" for="logBillSelect">货品编号：</label>
+                        <select class="ms2 form-control" id="logBillSelect" style="width: 160px"></select>
+                    </div>
+                    <div class="form-group" id="billInfo">
+                        <div class="form-group">
+                            <label class="control-label" for="logCategory">货品类别：</label>
+                            <label class="control-label" id="logCategory"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="logName">货品名称：</label>
+                            <label class="control-label" id="logName"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="logSpecification">规格型号：</label>
+                            <label class="control-label" id="logSpecification"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="logSupplier">供应商：</label>
+                            <label class="control-label" id="logSupplier"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="logPrice">货品价格：</label>
+                            <label class="control-label" id="logPrice"></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">领用日志：</label>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="logList"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

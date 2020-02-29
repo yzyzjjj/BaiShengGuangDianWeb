@@ -56,38 +56,7 @@
         }
         var plan = $('#addPlanSelect').find(`[value=${planId}]`).text();
         var doSth = function () {
-            new Promise(function (resolve, reject) {
-                getPlanList(true, resolve, planId, true);
-            }).then(function (e) {
-                var data = e[0];
-                $('#addPlan').val(data.Plan);
-                $('#addRemark').val(data.Remark);
-                var planData = data.FirstBill;
-                var i, len = planData.length;
-                $('#addPlanTableBtn').removeClass('hidden');
-                $('#addPlanBody').empty();
-                $('#addPlanTable').addClass('hidden');
-                _planTrCount = 0;
-                if (len) {
-                    $('#addPlanTableBtn').addClass('hidden');
-                    $('#addPlanTable').removeClass('hidden');
-                    var flag = -1;
-                    for (i = 0; i < len; i++) {
-                        var d = planData[i];
-                        if (_codeData[d.BillId]) {
-                            $('#addPlanBody').append(_planTr);
-                            _planTrCount++;
-                            flag++;
-                            $('#addPlanBody').find('.code').eq(flag).val(d.BillId);
-                            $('#addPlanBody').find('.plannedConsumption').eq(flag).val(d.PlannedConsumption);
-                            var tr = $('#addPlanBody').find('tr').eq(flag);
-                            setTableSelect(tr);
-                        }
-                    }
-                    getPriceSum();
-                    setTableTrCount($("#addPlanBody"), _planTrCount);
-                }
-            });
+            addUpPlanTable(planId, false);
         }
         showConfirm(`复用生产计划：${plan}`, doSth);
     });
@@ -110,7 +79,7 @@
         var id = $(this).val();
         planDetailModalData(id);
     });
-    $('#addPlanBody').on('click','.pdModal', function() {
+    $('#addPlanBody').on('click', '.pdModal', function () {
         var tr = $(this).parents('tr');
         var category = tr.find('.category').val();
         category = tr.find('.category').find(`option[value=${category}]`).text();
@@ -129,6 +98,50 @@
         var img = codeSelect.find(`option[value=${code}]`).attr('img');
         code = codeSelect.find(`option[value=${code}]`).text();
         productDetailModal(escape(category), escape(name), supplier, specification, site, code, stock, remark, img);
+    });
+    $('#updatePlanSelect').on('select2:select', function () {
+        var id = $(this).val();
+        addUpPlanTable(id, true);
+    });
+}
+
+//添加修改计划列表
+function addUpPlanTable(planId, isUp) {
+    new Promise(function (resolve, reject) {
+        getPlanList(true, resolve, planId, true);
+    }).then(function (e) {
+        var data = e[0];
+        $('#addPlan').val(data.Plan);
+        $('#addRemark').val(data.Remark);
+        var planData = data.FirstBill;
+        var i, len = planData.length;
+        $('#addPlanTableBtn').removeClass('hidden');
+        $('#addPlanBody').empty();
+        $('#addPlanTable').addClass('hidden');
+        _planTrCount = 0;
+        if (len) {
+            $('#addPlanTableBtn').addClass('hidden');
+            $('#addPlanTable').removeClass('hidden');
+            var flag = -1;
+            for (i = 0; i < len; i++) {
+                var d = planData[i];
+                if (_codeData[d.BillId]) {
+                    $('#addPlanBody').append(_planTr);
+                    _planTrCount++;
+                    flag++;
+                    $('#addPlanBody').find('.code').eq(flag).val(d.BillId);
+                    $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id);
+                    $('#addPlanBody').find('.plannedConsumption').eq(flag).val(d.PlannedConsumption);
+                    if (d.ActualConsumption != 0 && isUp) {
+                        $('#addPlanBody').find('.delPlanTr').addClass('hidden');
+                    }
+                    var tr = $('#addPlanBody').find('tr').eq(flag);
+                    setTableSelect(tr);
+                }
+            }
+            getPriceSum();
+            setTableTrCount($("#addPlanBody"), _planTrCount);
+        }
     });
 }
 
@@ -309,17 +322,17 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                 return ++number;
             }
             var status = function (data) {
-                //已/总/超-PlannedConsumption/ActualConsumption/ExtraConsumption
-                var planned = data.PlannedConsumption;
+                //已/总/超-ActualConsumption/PlannedConsumption/ExtraConsumption
                 var actual = data.ActualConsumption;
+                var planned = data.PlannedConsumption;
                 var extra = data.ExtraConsumption;
-                var op = `<font style="color:{0}">${planned}</font>/<font style="color:blue">${actual}</font>/<font style="color:{1}">${extra}</font>`;
-                return op.format(planned == actual ? 'blue' : 'green', extra > 0 ? 'red' : 'black');
+                var op = `<font style="color:{0}">${actual}</font>/<font style="color:blue">${planned}</font>/<font style="color:{1}">${extra}</font>`;
+                return op.format(actual == planned ? 'blue' : 'green', extra > 0 ? 'red' : 'black');
             }
             var operation = function (data) {
                 var op = '<button type="button" class="btn btn-info btn-sm" onclick="planDetailModal({0})">详情</button>' +
-                    '<button type="button" class="btn btn-primary btn-sm" style="margin-left:2px" onclick="updatePlanModal()">修改</button>' +
-                    '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px">日志</button>';
+                    '<button type="button" class="btn btn-primary btn-sm" style="margin-left:2px" onclick="updatePlanModal({0})">修改</button>' +
+                    '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px" onclick="logModal(false)">日志</button>';
                 return op.format(data.Id);
             }
             var del = function (data) {
@@ -625,10 +638,19 @@ function addPlanTr(resolve) {
 var _planTrCount = 0;
 //添加计划模态框
 function addPlanModal() {
-    _planTrCount = 0;
+    $('#addPlanModal .addPlan').removeClass('hidden');
+    $('#addPlanModal .updatePlan').addClass('hidden');
     $('#addPlan').val('');
     var planId = $('#addPlanSelect').find('option').eq(0).val();
     $('#addPlanSelect').val(planId).trigger('change');
+    addUpPlanClass();
+    $('#addPlanModal .modal-title').text('添加新计划');
+    $('#addPlanModal').modal('show');
+}
+
+//添加修改计划弹窗相同部分
+function addUpPlanClass(isUp, id) {
+    _planTrCount = 0;
     $('#addRemark').val('');
     $('#planCost').text('0.00');
     $('#addPlanTableBtn').removeClass('hidden');
@@ -638,8 +660,10 @@ function addPlanModal() {
         addPlanTr(resolve);
     }).then(function (e) {
         _planTr = e;
+        if (isUp) {
+            addUpPlanTable(id, isUp);
+        }
     });
-    $('#addPlanModal').modal('show');
 }
 
 //添加新计划
@@ -813,6 +837,87 @@ function productDetailModal(category, name, supplier, specification, site, code,
 }
 
 //修改计划弹窗
-function updatePlanModal() {
+function updatePlanModal(id) {
+    $('#addPlanModal .addPlan').addClass('hidden');
+    $('#addPlanModal .updatePlan').removeClass('hidden');
+    addUpPlanClass(true, id);
+    $('#updatePlanSelect').val(id).trigger('change');
+    $('#addPlanModal .modal-title').text('修改计划');
+    $('#addPlanModal').modal('show');
+}
 
+//修改计划
+function updatePlan() {
+    var opType = 701;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var planId = $('#updatePlanSelect').val();
+    var plan = $('#updatePlanSelect').find(`option[value=${planId}]`).text();
+    var remark = $('#addRemark').val().trim();
+    var list = {
+        id: planId,
+        Plan: plan,
+        Remark: remark
+    };
+    var bill = [];
+    var trs = $('#addPlanBody').find('tr');
+    var i = 0, len = trs.length;
+    for (; i < len; i++) {
+        var tr = trs.eq(i);
+        var codeId = tr.find('.code').val();
+        if (isStrEmptyOrUndefined(codeId)) {
+            layer.msg('请选择货品编号');
+            return;
+        }
+        var plannedConsumption = tr.find('.plannedConsumption').val();
+        if (plannedConsumption == 0) {
+            layer.msg('计划用量不能为零');
+            return;
+        }
+        var billData = {
+            BillId: codeId,
+            PlannedConsumption: plannedConsumption
+        };
+        var id = tr.find('.num').attr('list');
+        if (id) {
+            billData.Id = parseInt(id);
+        }
+        bill.push(billData);
+    }
+    if (bill.length) {
+        list.Bill = bill;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                $("#addPlanModal").modal("hide");
+                if (ret.errno == 0) {
+                    getPlanList(false);
+                }
+            });
+    }
+    showConfirm("修改", doSth);
+}
+
+//日志弹窗
+function logModal(isAll) {
+    $("#logStartDate").val(getDate()).datepicker('update');
+    $("#logEndDate").val(getDate()).datepicker('update');
+    if (isAll) {
+        $('#logPlanSelect').prepend('<option value="0">所有</option>');
+        $('#logPlanSelect').val('0').trigger('change');
+    }
+    $('#logBillSelect').append('<option value="0">所有</option>');
+    new Promise(function (resolve) {
+        codeSelect(resolve);
+    }).then(function(e) {
+        $('#logBillSelect').append(e);
+    });
+    $('#logModal').modal('show');
 }
