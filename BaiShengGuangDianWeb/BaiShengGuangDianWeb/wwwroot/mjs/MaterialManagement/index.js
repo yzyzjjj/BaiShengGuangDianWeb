@@ -2938,6 +2938,7 @@ function consumeOtherDitto(v) {
     var id = $("#consumeOtherList").find(`tr[xh=${xh2}]:first`).attr("value");
     var name = $("#consumeOtherLyr" + id).val();
     $("#consumeOtherLyr" + v).val(name);
+    consumeOtherActual();
 }
 
 //实际领用
@@ -3013,10 +3014,7 @@ function consumeShow() {
                 layer.msg(`货品编号：${d.Code}不存在, 无法领用`);
                 return;
             }
-            if (isStrEmptyOrUndefined(d.RelatedPerson)) {
-                layer.msg("请输入领用人");
-                return;
-            }
+
             if (isStrEmptyOrUndefined(d.RelatedPerson)) {
                 layer.msg("请输入领用人");
                 return;

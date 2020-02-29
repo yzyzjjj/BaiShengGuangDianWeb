@@ -870,7 +870,7 @@ function initFileInput(uiEle, type, func = null) {
 }
 
 var prepareUpload = [];
-//多个文件  也是单个上传的
+//多个文件
 function initFileInputMultiple(uiEle, type, func = null) {
     prepareUpload = [];
     $("#" + uiEle).attr("multiple", "");
@@ -883,6 +883,12 @@ function initFileInputMultiple(uiEle, type, func = null) {
         allowedFileExtensions: fileExt[type],//接收的文件后缀
         showUpload: false, //是否显示上传按钮
         showPreview: true, //展前预览
+
+        //resizeImage: true,
+        //maxImageWidth: 200,
+        //maxImageHeight: 200,
+        //resizePreference: 'width',
+
         showCaption: true,//是否显示标题
         //maxFileSize: 10000,//上传文件最大的尺寸
         minFileCount: 0,//每次上传允许的最少文件数。如果设置为0，则表示文件数是可选的。默认为0
