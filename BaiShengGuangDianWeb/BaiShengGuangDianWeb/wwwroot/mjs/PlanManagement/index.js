@@ -44,9 +44,13 @@
         var tr = $(this).parents('tr');
         setTrSelect(tr, 3);
     });
-    $('#addPlanBody').on('change', '.specification,.site', function () {
+    $('#addPlanBody').on('change', '.specification', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 4);
+    });
+    $('#addPlanBody').on('change', '.site', function () {
+        var tr = $(this).parents('tr');
+        setTrSelect(tr, 5);
     });
     $('#reuse').on('click', function () {
         var planId = $('#addPlanSelect').val();
@@ -103,6 +107,14 @@
         var id = $(this).val();
         addUpPlanTable(id, true);
     });
+    $('#logPlanSelect,#logBillSelect').on('select2:select', function () {
+        getLogList();
+    });
+    $("#logStartDate").val(getDate());
+    $("#logEndDate").val(getDate());
+    $("#logStartDate,#logEndDate").datepicker('update').on('changeDate', function (ev) {
+        getLogList();
+    });
 }
 
 //添加修改计划列表
@@ -151,6 +163,7 @@ function setTableTrCount(el, count) {
     for (var i = 0; i < count; i++) {
         el.find('.num').eq(i).text(i + 1);
     }
+    $(' #addPlanTable .ms2').select2();
 }
 
 //清单表格选项加载
@@ -198,6 +211,17 @@ function setTableSelect(el) {
     }
     el.find('.specification').append(options);
     el.find('.specification').val(specificationId);
+    el.find('.site').empty();
+    options = '';
+    len = _siteData.length;
+    for (i = 0; i < len; i++) {
+        var siteVal = _siteData[i].Id;
+        var siteName = _siteData[i].Site;
+        if (_cond[`${specificationId}${siteVal}`]) {
+            options += option.format(siteVal, siteName);
+        }
+    }
+    el.find('.site').append(options);
     el.find('.site').val(siteId);
     el.find('.price').text(price);
     setTableTrCount($("#addPlanBody"), _planTrCount);
@@ -249,9 +273,23 @@ function setTrSelect(tr, e) {
         tr.find('.specification').append(options);
     }
     if (e === 1 || e === 2 || e === 3 || e === 4) {
+        options = '';
         var specificationId = tr.find('.specification').val();
-        var siteId = tr.find('.site').val();
-        var cond = `${specificationId}${siteId}`;
+        tr.find('.site').empty();
+        len = _siteData.length;
+        for (i = 0; i < len; i++) {
+            var siteId = _siteData[i].Id;
+            var siteName = _siteData[i].Site;
+            if (_cond[`${specificationId}${siteId}`]) {
+                options += option.format(siteId, siteName);
+            }
+        }
+        tr.find('.site').append(options);
+    }
+    if (e === 1 || e === 2 || e === 3 || e === 4 || e === 5) {
+        var specificationVal = tr.find('.specification').val();
+        var siteVal = tr.find('.site').val();
+        var cond = `${specificationVal}${siteVal}`;
         var codeEl = tr.find('.code');
         var codeId = codeEl.find(`[cond=${cond}]`).val();
         codeEl.val(codeId);
@@ -332,7 +370,7 @@ function getPlanList(isSelect, resolve, planId, isAll) {
             var operation = function (data) {
                 var op = '<button type="button" class="btn btn-info btn-sm" onclick="planDetailModal({0})">详情</button>' +
                     '<button type="button" class="btn btn-primary btn-sm" style="margin-left:2px" onclick="updatePlanModal({0})">修改</button>' +
-                    '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px" onclick="logModal(false)">日志</button>';
+                    '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px" onclick="logModal(false,{0})">日志</button>';
                 return op.format(data.Id);
             }
             var del = function (data) {
@@ -395,6 +433,7 @@ function delPlan(id, plan) {
 }
 
 var _codeData = {};
+var _cond = {};
 //货品编号选项
 function codeSelect(resolve) {
     var opType = 808;
@@ -418,6 +457,7 @@ function codeSelect(resolve) {
             var cond = `${d.SpecificationId}${d.SiteId}`;
             options += option.format(d.Id, d.Code, cond, d.Remark, d.ImageList, d.Stock);
             _codeData[d.Id] = d;
+            _cond[cond] = 1;
         }
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(options);
@@ -453,6 +493,7 @@ function categorySelect(resolve) {
     }, 0);
 }
 
+var _siteData = null;
 //货品位置选项
 function siteSelect(resolve) {
     var opType = 847;
@@ -471,9 +512,14 @@ function siteSelect(resolve) {
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
         var options = '';
+        _siteData = [];
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Site);
+            _siteData.push({
+                Id: d.Id,
+                Site: d.Site
+            });
         }
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(options);
@@ -590,12 +636,12 @@ function specificationSelect(resolve) {
 function addPlanTr(resolve) {
     var bodyTr = '<tr>' +
         '<td class="num" style="font-weight:bold"></td>' +
-        '<td><select class="form-control code" style="width:140px;margin:auto">{0}</select></td>' +
-        '<td><select class="form-control category" style="width:140px;margin:auto">{1}</select></td>' +
-        '<td><select class="form-control name" style="width:140px;margin:auto">{2}</select></td>' +
-        '<td><select class="form-control supplier" style="width:140px;margin:auto">{3}</select></td>' +
-        '<td><select class="form-control specification" style="width:140px;margin:auto">{4}</select></td>' +
-        '<td><select class="form-control site" style="width:140px;margin:auto">{5}</select></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control code">{0}</select></div></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control category">{1}</select></div></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control name">{2}</select></div></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control supplier">{3}</select></div></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control specification">{4}</select></div></td>' +
+        '<td><div style="width:140px;margin:auto"><select class="ms2 form-control site">{5}</select></div></td>' +
         '<td><button type="button" class="btn btn-info btn-sm pdModal">详情</button></td>' +
         '<td class="price"></td>' +
         '<td><input type="text" class="form-control text-center plannedConsumption" maxlength="10" style="width:140px;margin:auto" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
@@ -905,19 +951,149 @@ function updatePlan() {
     showConfirm("修改", doSth);
 }
 
-//日志弹窗
-function logModal(isAll) {
-    $("#logStartDate").val(getDate()).datepicker('update');
-    $("#logEndDate").val(getDate()).datepicker('update');
-    if (isAll) {
-        $('#logPlanSelect').prepend('<option value="0">所有</option>');
-        $('#logPlanSelect').val('0').trigger('change');
+//日志计划选项
+function logPlanSelect(resolve) {
+    var opType = 700;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
     }
-    $('#logBillSelect').append('<option value="0">所有</option>');
-    new Promise(function (resolve) {
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var listData = ret.datas;
+        var i, len = listData.length;
+        var option = '<option value = "{0}">{1}</option>';
+        var options = '';
+        for (i = 0; i < len; i++) {
+            var d = listData[i];
+            options += option.format(d.Id, d.Plan);
+        }
+        resolve(options);
+    });
+}
+
+//日志弹窗
+function logModal(isAll, id) {
+    var planSt = new Promise(function (resolve) {
+        logPlanSelect(resolve);
+    });
+    var codeSt = new Promise(function (resolve) {
         codeSelect(resolve);
-    }).then(function(e) {
-        $('#logBillSelect').append(e);
+    });
+    Promise.all([planSt, codeSt]).then(function (results) {
+        var planOp = results[0];
+        var codeOp = results[1];
+        $('#logPlanSelect').empty();
+        $('#logBillSelect').empty();
+        var allOp = '<option value="0">所有</option>';
+        if (isAll) {
+            $('#logPlanSelect').append(allOp);
+        }
+        $('#logPlanSelect').append(planOp);
+        if (id) {
+            $('#logPlanSelect').val(id).trigger('change');
+        }
+        $('#logBillSelect').append(allOp);
+        $('#logBillSelect').append(codeOp);
+        getLogList();
     });
     $('#logModal').modal('show');
+}
+
+//获取日志详情
+function getLogList() {
+    var opType = 803;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var startTime = $('#logStartDate').val();
+    if (isStrEmptyOrUndefined(startTime)) {
+        layer.msg("请选择开始时间");
+        return;
+    }
+    var endTime = $('#logEndDate').val();
+    if (isStrEmptyOrUndefined(endTime)) {
+        layer.msg("请选择结束时间");
+        return;
+    }
+    if (exceedTime(startTime)) {
+        layer.msg("开始时间不能大于当前时间");
+        return;
+    }
+    if (compareDate(startTime, endTime)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+    startTime += " 00:00:00";
+    endTime += " 23:59:59";
+    var list = {
+        startTime: startTime,
+        endTime: endTime,
+        isPlan: 1,
+        type: 2
+    }
+    var planId = $('#logPlanSelect').val();
+    if (isStrEmptyOrUndefined(planId)) {
+        layer.msg("请选择计划号");
+        return;
+    }
+    if (planId != 0) {
+        list.planId = parseInt(planId);
+    }
+    var codeId = $('#logBillSelect').val();
+    if (isStrEmptyOrUndefined(codeId)) {
+        layer.msg("请选择货品编号");
+        return;
+    }
+    if (codeId != 0) {
+        list.billId = parseInt(codeId);
+        var billData = _codeData[codeId];
+        $('#logCategory').text(billData.Category);
+        $('#logName').text(billData.Name);
+        $('#logSpecification').text(billData.Specification);
+        $('#logSupplier').text(billData.Supplier);
+        $('#logPrice').text(billData.Price);
+        $('#billInfo').removeClass('hidden');
+    } else {
+        $('#billInfo').addClass('hidden');
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify(list);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var o = 0;
+        var order = function () {
+            return ++o;
+        }
+        $("#logList")
+            .DataTable({
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": { "url": "/content/datatables_language.json" },
+                "data": ret.datas,
+                "aaSorting": [[0, "asc"]],
+                "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
+                "iDisplayLength": 40, //默认显示的记录数
+                "columns": [
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Time", "title": "时间" },
+                    { "data": "Purpose", "title": "计划号" },
+                    { "data": "Code", "title": "货品编号" },
+                    { "data": "Number", "title": "数量"},
+                    { "data": "RelatedPerson", "title": "领用人" },
+                    { "data": "Manager", "title": "物管员" }
+                ]
+            });
+    });
 }
