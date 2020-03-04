@@ -1088,9 +1088,9 @@ function addOneBatchAddList(categoryId = 0, nameId = 0, supplierId = 0, specific
             <td><select class="ms2 form-control" id="batchAddGg${xh}"></select></td>
             <td><select class="ms2 form-control" id="batchAddWz${xh}"></select></td>
             <td><input class="form-control text-center" id="batchAddBh${xh}" maxlength="50"></td>
-            <td><input class="form-control text-center" id="batchAddKc${xh}" maxlength="10" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)"></td>
+            <td><input class="form-control text-center" id="batchAddKc${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)"></td>
             <td><input class="form-control text-center" id="batchAddDw${xh}" maxlength="50"></td>
-            <td><input class="form-control text-center" id="batchAddJg${xh}" maxlength="10" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)"></td>
+            <td><input class="form-control text-center" id="batchAddJg${xh}" value="0" onkeyup="onInput(this, 8, 2)" onblur="onInputEnd(this)"></td>
             <td>
                 <button type="button" class="btn btn-primary btn-sm" id="copyBatchAddList${xh}" onclick="copyBatchAddList(${xh})"><i class="fa fa-copy"></i></button>
                 <button type="button" class="btn btn-danger btn-sm" id="delBatchAddList${xh}" onclick="delBatchAddList(${xh})"><i class="fa fa-minus"></i></button>
