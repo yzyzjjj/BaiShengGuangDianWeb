@@ -49,7 +49,6 @@ function getUsersList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
@@ -102,7 +101,7 @@ function getUsersList() {
             $("#userTable")
                 .DataTable({
                     "destroy": true,
-                    "paging": true,
+                    "paging": false,
                     "searching": true,
                     "language": { "url": "/content/datatables_language.json" },
                     "data": ret.datas,

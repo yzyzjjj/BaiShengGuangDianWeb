@@ -208,9 +208,6 @@ function categorySelect(resolve) {
     var data = {}
     data.opType = opType;
     ajaxPost('/Relay/Post', data, function (ret) {
-        if (resolve != null)
-            resolve('success');
-
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -219,13 +216,14 @@ function categorySelect(resolve) {
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
-        var options = '';
+        var options = '<option value = "0">所有类别</option>';
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Category);
         }
-        $('#categorySelect').append(option.format(0, '所有类别'));
         $('#categorySelect').append(options);
+        if (resolve != null)
+            resolve(options);
     });
 }
 
@@ -252,8 +250,6 @@ function nameSelect(resolve, first = false) {
     data.opType = opType;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
-        if (resolve != null)
-            resolve('success');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -262,13 +258,14 @@ function nameSelect(resolve, first = false) {
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
-        var options = '';
+        var options = '<option value = "0">所有名称</option>';
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Name);
         }
-        $('#nameSelect').append(option.format(0, '所有名称'));
         $('#nameSelect').append(options);
+        if (resolve != null)
+            resolve(options);
     });
 }
 
@@ -304,8 +301,6 @@ function supplierSelect(resolve, first = false) {
     data.opType = opType;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
-        if (resolve != null)
-            resolve('success');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -314,13 +309,14 @@ function supplierSelect(resolve, first = false) {
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
-        var options = '';
+        var options = '<option value = "0">所有供应商</option>';
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Supplier);
         }
-        $('#supplierSelect').append(option.format(0, '所有供应商'));
         $('#supplierSelect').append(options);
+        if (resolve != null)
+            resolve(options);
     });
 }
 
@@ -364,8 +360,6 @@ function specificationSelect(resolve, first = false) {
     data.opType = opType;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
-        if (resolve != null)
-            resolve('success');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -374,13 +368,14 @@ function specificationSelect(resolve, first = false) {
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
-        var options = '';
+        var options = '<option value = "0">所有规格</option>';
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Specification);
         }
-        $('#specificationSelect').append(option.format(0, '所有规格'));
         $('#specificationSelect').append(options);
+        if (resolve != null)
+            resolve(options);
     });
 }
 
@@ -394,9 +389,6 @@ function siteSelect(resolve) {
     var data = {}
     data.opType = opType;
     ajaxPost('/Relay/Post', data, function (ret) {
-        if (resolve != null)
-            resolve('success');
-
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -405,13 +397,14 @@ function siteSelect(resolve) {
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
-        var options = '';
+        var options = '<option value = "0">所有位置</option>';
         for (i = 0; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Site);
         }
-        $('#siteSelect').append(option.format(0, '所有位置'));
         $('#siteSelect').append(options);
+        if (resolve != null)
+            resolve(options);
     });
 }
 
@@ -3144,4 +3137,36 @@ function showDetailModel(id) {
         });
 }
 
+//生成二维码弹窗
+function createQrModal() {
+    var categoryFunc = new Promise(function (resolve) {
+        categorySelect(resolve);
+    });
+    var nameFunc = new Promise(function (resolve) {
+        nameSelect(resolve, true);
+    });
+    var supplierFunc = new Promise(function (resolve) {
+        supplierSelect(resolve, true);
+    });
+    var specificationFunc = new Promise(function (resolve) {
+        specificationSelect(resolve, true);
+    });
+    var siteFunc = new Promise(function (resolve) {
+        siteSelect(resolve, true);
+    });
+    Promise.all([categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+        .then((result) => {
+            $('#categoryQr').empty();
+            $('#categoryQr').append(result[0]);
+            $('#nameQr').empty();
+            $('#nameQr').append(result[1]);
+            $('#supplierQr').empty();
+            $('#supplierQr').append(result[2]);
+            $('#specificationQr').empty();
+            $('#specificationQr').append(result[3]);
+            $('#siteQr').empty();
+            $('#siteQr').append(result[4]);
+        });
+    $('#createQrModal').modal('show');
+}
 

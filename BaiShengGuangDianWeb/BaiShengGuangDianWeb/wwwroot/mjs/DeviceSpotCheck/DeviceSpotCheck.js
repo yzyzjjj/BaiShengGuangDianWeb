@@ -212,7 +212,6 @@ function getSpotPlanCheckList(e, el) {
         }
         planId = $('#selectSpotPlanSet').val();
         if (isStrEmptyOrUndefined(planId)) {
-            layer.msg('请选择点检计划');
             return;
         }
         jsonData.qId = planId;
@@ -230,7 +229,6 @@ function getSpotPlanCheckList(e, el) {
         jsonData.deviceId = deviceId;
         planId = $('#selectSpotPlan').val();
         if (isStrEmptyOrUndefined(planId)) {
-            layer.msg('请选择点检计划');
             return;
         }
         jsonData.planId = planId;

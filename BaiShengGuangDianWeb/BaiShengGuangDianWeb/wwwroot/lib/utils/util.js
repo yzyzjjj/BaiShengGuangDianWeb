@@ -1364,3 +1364,40 @@ function showBigImg(url) {
         modal.remove();
     });
 }
+
+//打印
+function printCode(contentId, hiddenId) {
+    var userAgent = navigator.userAgent.toLowerCase(); //取得浏览器的userAgent字符串
+    if (userAgent.indexOf("trident") > -1) {
+        alert("请使用google或者360浏览器打印");
+        return;
+    } else if (userAgent.indexOf('msie') > -1) {
+        var onlyChoseAlert = simpleAlert({
+            "content": "请使用Google或者360浏览器打印",
+            "buttons": {
+                "确定": function () {
+                    onlyChoseAlert.close();
+                }
+            }
+        });
+        alert("请使用google或者360浏览器打印");
+        return;
+    } else {//其它浏览器使用lodop
+        var oldStr = document.body.innerHTML;
+        var headStr = "<html><head><title></title></head><body>";
+        var footStr = "</body></html>";
+        //执行隐藏打印区域不需要打印的内容
+        if (!isStrEmptyOrUndefined(hiddenId)) {
+            document.getElementById(hiddenId).style.display = "none";
+        }
+        //此处id换为你自己的id
+        var printData = document.getElementById(contentId).innerHTML; //获得 div 里的所有 html 数据
+        document.body.innerHTML = `${headStr}${printData}${footStr}`;
+        window.print();
+        //打印结束后，放开隐藏内容
+        if (!isStrEmptyOrUndefined(hiddenId)) {
+            document.getElementById(hiddenId).style.display = "block";
+        }
+        document.body.innerHTML = oldStr;
+    }
+}

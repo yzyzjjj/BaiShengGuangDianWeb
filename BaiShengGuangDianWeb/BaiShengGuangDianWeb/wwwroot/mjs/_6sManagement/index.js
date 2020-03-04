@@ -289,16 +289,16 @@ function initItemList() {
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
                     { "data": null, "title": "序号", "render": order, "sWidth": "20px" },
+                    { "data": "PersonName", "title": "负责人" },
                     { "data": "Item", "title": "检查项目" },
                     { "data": "Standard", "title": "标准分", "sWidth": "20px" },
-                    { "data": "Reference", "title": "要求及目标", "render": reference },
-                    { "data": null, "title": "频次", "render": interval },
-                    { "data": "PersonName", "title": "负责人" },
-                    { "data": null, "title": "截止日期", "render": plannedTime, "sClass": "text-red" },
-                    { "data": null, "title": "检查日期", "render": checkTime },
                     { "data": null, "title": "评分", "render": score },
                     { "data": null, "title": "评语", "render": desc, "sClass": "no-padding" },
-                    { "data": null, "title": "图片", "render": lookImg }
+                    { "data": null, "title": "图片", "render": lookImg },
+                    { "data": "Reference", "title": "要求及目标", "render": reference },
+                    { "data": null, "title": "频次", "render": interval },
+                    { "data": null, "title": "截止日期", "render": plannedTime, "sClass": "text-red" },
+                    { "data": null, "title": "检查日期", "render": checkTime }
                 ],
                 "createdRow": function (row, data, index) {
                     var date = $(row).find('.form_date');
