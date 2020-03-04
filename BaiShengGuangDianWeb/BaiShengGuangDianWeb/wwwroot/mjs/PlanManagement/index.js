@@ -28,27 +28,27 @@
             $('#planCost').text('0.00');
         }
     });
-    $('#addPlanBody').on('change', '.code', function () {
+    $('#addPlanBody').on('select2:select', '.code', function () {
         var tr = $(this).parents('tr');
         setTableSelect(tr);
     });
-    $('#addPlanBody').on('change', '.category', function () {
+    $('#addPlanBody').on('select2:select', '.category', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 1);
     });
-    $('#addPlanBody').on('change', '.name', function () {
+    $('#addPlanBody').on('select2:select', '.name', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 2);
     });
-    $('#addPlanBody').on('change', '.supplier', function () {
+    $('#addPlanBody').on('select2:select', '.supplier', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 3);
     });
-    $('#addPlanBody').on('change', '.specification', function () {
+    $('#addPlanBody').on('select2:select', '.specification', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 4);
     });
-    $('#addPlanBody').on('change', '.site', function () {
+    $('#addPlanBody').on('select2:select', '.site', function () {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 5);
     });
@@ -98,10 +98,11 @@
         var codeSelect = tr.find('.code');
         var code = codeSelect.val();
         var stock = codeSelect.find(`option[value=${code}]`).attr('stock');
+        var price = tr.find('.price').text();
         var remark = codeSelect.find(`option[value=${code}]`).attr('remark');
         var img = codeSelect.find(`option[value=${code}]`).attr('img');
         code = codeSelect.find(`option[value=${code}]`).text();
-        productDetailModal(escape(category), escape(name), supplier, specification, site, code, stock, remark, img);
+        productDetailModal(escape(category), escape(name), supplier, specification, site, code, stock, price, remark, img);
     });
     $('#updatePlanSelect').on('select2:select', function () {
         var id = $(this).val();
@@ -135,35 +136,66 @@ function addUpPlanTable(planId, isUp) {
             $('#addPlanTableBtn').addClass('hidden');
             $('#addPlanTable').removeClass('hidden');
             var flag = -1;
+            var trInfo = '<tr style="color:red">' +
+                '<td class="num" style="font-weight:bold"></td>' +
+                '<td>{5}</td>' +
+                '<td>{0}</td>' +
+                '<td>{1}</td>' +
+                '<td>{2}</td>' +
+                '<td>{3}</td>' +
+                '<td>{4}</td>' +
+                '<td><button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button></td>' +
+                '<td>{7}</td>' +
+                '<td>{10}</td>' +
+                '<td>{11}</td>' +
+                '<td><button type="button" class="btn btn-danger btn-sm delPlanTr" style="margin-left:5px"><i class="fa fa-minus"></i></button></td>' +
+                '</tr>';
             for (i = 0; i < len; i++) {
                 var d = planData[i];
+                _planTrCount++;
+                flag++;
                 if (_codeData[d.BillId]) {
                     $('#addPlanBody').append(_planTr);
-                    _planTrCount++;
-                    flag++;
                     $('#addPlanBody').find('.code').eq(flag).val(d.BillId);
-                    $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id);
                     $('#addPlanBody').find('.plannedConsumption').eq(flag).val(d.PlannedConsumption);
+                    $('#addPlanBody').find('.actualConsumption').eq(flag).text(d.ActualConsumption);
                     if (d.ActualConsumption != 0 && isUp) {
                         $('#addPlanBody').find('.delPlanTr').addClass('hidden');
                     }
                     var tr = $('#addPlanBody').find('tr').eq(flag);
                     setTableSelect(tr);
+                } else {
+                    if (isUp) {
+                        $('#addPlanBody').append(trInfo.format(d.Category,
+                            d.Name,
+                            d.Supplier,
+                            d.Specification,
+                            d.Site,
+                            d.Code,
+                            d.Stock,
+                            d.Price,
+                            d.Remark,
+                            d.ImageList,
+                            d.PlannedConsumption,
+                            d.ActualConsumption));
+                    }
                 }
+                $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id);
             }
             getPriceSum();
-            setTableTrCount($("#addPlanBody"), _planTrCount);
+            setTableTrCount($("#addPlanBody"), _planTrCount, isUp);
         }
     });
 }
 
 var _planTr = null;
 //操作清单表格行数序号设置
-function setTableTrCount(el, count) {
+function setTableTrCount(el, count, isUp) {
     for (var i = 0; i < count; i++) {
         el.find('.num').eq(i).text(i + 1);
     }
-    $(' #addPlanTable .ms2').select2();
+    $(' #addPlanBody .ms2').select2();
+    isUp ? $(' #addPlanTable .actualConsumption').removeClass('hidden') : $(' #addPlanTable .actualConsumption').addClass('hidden');
 }
 
 //清单表格选项加载
@@ -176,7 +208,7 @@ function setTableSelect(el) {
     var specificationId = data.SpecificationId;
     var siteId = data.SiteId;
     var price = data.Price;
-    el.find('.category').val(categoryId);
+    el.find('.category').val(categoryId).trigger('change');
     var i, len = _nameData.length;
     var option = '<option value = "{0}">{1}</option>';
     var options = '';
@@ -188,7 +220,7 @@ function setTableSelect(el) {
         }
     }
     el.find('.name').append(options);
-    el.find('.name').val(nameId);
+    el.find('.name').val(nameId).trigger('change');
     el.find('.supplier').empty();
     options = '';
     len = _supplierData.length;
@@ -199,7 +231,7 @@ function setTableSelect(el) {
         }
     }
     el.find('.supplier').append(options);
-    el.find('.supplier').val(supplierId);
+    el.find('.supplier').val(supplierId).trigger('change');
     el.find('.specification').empty();
     options = '';
     len = _specificationData.length;
@@ -210,7 +242,7 @@ function setTableSelect(el) {
         }
     }
     el.find('.specification').append(options);
-    el.find('.specification').val(specificationId);
+    el.find('.specification').val(specificationId).trigger('change');
     el.find('.site').empty();
     options = '';
     len = _siteData.length;
@@ -222,7 +254,7 @@ function setTableSelect(el) {
         }
     }
     el.find('.site').append(options);
-    el.find('.site').val(siteId);
+    el.find('.site').val(siteId).trigger('change');
     el.find('.price').text(price);
     setTableTrCount($("#addPlanBody"), _planTrCount);
     getPriceSum();
@@ -292,7 +324,7 @@ function setTrSelect(tr, e) {
         var cond = `${specificationVal}${siteVal}`;
         var codeEl = tr.find('.code');
         var codeId = codeEl.find(`[cond=${cond}]`).val();
-        codeEl.val(codeId);
+        codeEl.val(codeId).trigger('change');
         if (isStrEmptyOrUndefined(codeId)) {
             tr.find('.price').text('');
         } else {
@@ -645,6 +677,7 @@ function addPlanTr(resolve) {
         '<td><button type="button" class="btn btn-info btn-sm pdModal">详情</button></td>' +
         '<td class="price"></td>' +
         '<td><input type="text" class="form-control text-center plannedConsumption" maxlength="10" style="width:140px;margin:auto" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+        '<td class="actualConsumption"></td>' +
         '<td style="width:100px">' +
         '<button type="button" class="btn btn-danger btn-sm delPlanTr"><i class="fa fa-minus"></i></button>' +
         '<button type="button" class="btn btn-success btn-sm addPlanTr" style="margin-left:5px"><i class="fa fa-plus"></i></button>' +
@@ -788,8 +821,8 @@ function planDetailModalData(id) {
             return op.format(data.Extra ? 'red' : 'black');
         }
         var detailBtn = function (data) {
-            var op = '<button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\')">详情</button>';
-            return op.format(escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.Site), escape(data.Code), data.Stock, escape(data.Remark), escape(data.ImageList));
+            var op = '<button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button>';
+            return op.format(escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.Site), escape(data.Code), data.Stock, escape(data.Price), escape(data.Remark), escape(data.ImageList));
         }
         var actualConsumption = function (data) {
             var actual = data.ActualConsumption;
@@ -829,7 +862,7 @@ function planDetailModal(id) {
 }
 
 //货品详情模态框
-function productDetailModal(category, name, supplier, specification, site, code, stock, remark, img) {
+function productDetailModal(category, name, supplier, specification, site, code, stock, price, remark,img) {
     category = unescape(category);
     name = unescape(name);
     supplier = unescape(supplier);
@@ -844,6 +877,7 @@ function productDetailModal(category, name, supplier, specification, site, code,
     $('#productSite').text(site);
     $('#productCode').text(code);
     $('#productStock').text(stock);
+    $('#productPrice').text(price);
     $('#productRemark').text(remark);
     img = unescape(img);
     $('#imgLabel').empty();

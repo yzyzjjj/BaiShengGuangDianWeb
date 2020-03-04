@@ -2,26 +2,25 @@
     $('.ms2').select2();
     siteSelect();
     var categoryId, nameId, supplierId;
-    new Promise(function (resolve, reject) {
+    var categoryFunc = new Promise(function (resolve) {
         categorySelect(resolve);
-    }).then(function (nameSelect) {
-        categoryId = $('#categorySelect').val();
-        return new Promise(function (resolve, reject) {
-            nameSelect(resolve, categoryId, false);
-        });
-    }).then(function (supplierSelect) {
-        nameId = $('#nameSelect').val();
-        return new Promise(function (resolve, reject) {
-            supplierSelect(resolve, categoryId, nameId, false);
-        });
-    }).then(function (specificationSelect) {
-        supplierId = $('#supplierSelect').val();
-        return new Promise(function (resolve, reject) {
-            specificationSelect(resolve, categoryId, nameId, supplierId, false);
-        });
-    }).then(function (getMaterialList) {
-        getMaterialList();
     });
+    var nameFunc = new Promise(function (resolve) {
+        nameSelect(resolve, '0', false);
+    });
+    var supplierFunc = new Promise(function (resolve) {
+        supplierSelect(resolve, '0', '0', false);
+    });
+    var specificationFunc = new Promise(function (resolve) {
+        specificationSelect(resolve, '0', '0', '0', false);
+    });
+    var siteFunc = new Promise(function (resolve) {
+        siteSelect(resolve);
+    });
+    Promise.all([categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+        .then((result) => {
+            getMaterialList();
+        });
     //页面
     $('#categorySelect').on('select2:select', function () {
         categoryId = $(this).val();
@@ -240,9 +239,9 @@ function categorySelect(resolve) {
             var d = list[i];
             options += option.format(d.Id, d.Category);
         }
-        if (len) {
-            $('#categorySelect').append(option.format(0, '所有类别'));
-        }
+        //if (len) {
+        $('#categorySelect').append(option.format(0, '所有类别'));
+        //}
         $('.categorySelect').append(options);
         _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
@@ -284,9 +283,9 @@ function nameSelect(resolve, categoryId, isTable) {
         }
         if (!isTable) {
             $('#nameSelect').empty();
-            if (len) {
-                $('#nameSelect').append(option.format(0, '所有名称'));
-            }
+            //if (len) {
+            $('#nameSelect').append(option.format(0, '所有名称'));
+            //}
             $('#nameSelect').append(options);
         }
         if (!isStrEmptyOrUndefined(resolve)) {
@@ -335,9 +334,9 @@ function supplierSelect(resolve, categoryId, nameId, isTable) {
         }
         if (!isTable) {
             $('#supplierSelect').empty();
-            if (len) {
-                $('#supplierSelect').append(option.format(0, '所有供应商'));
-            }
+            //if (len) {
+            $('#supplierSelect').append(option.format(0, '所有供应商'));
+            //}
             $('#supplierSelect').append(options);
         }
         if (!isStrEmptyOrUndefined(resolve)) {
@@ -393,9 +392,9 @@ function specificationSelect(resolve, categoryId, nameId, supplierId, isTable) {
         }
         if (!isTable) {
             $('#specificationSelect').empty();
-            if (len) {
-                $('#specificationSelect').append(option.format(0, '所有规格'));
-            }
+            //if (len) {
+            $('#specificationSelect').append(option.format(0, '所有规格'));
+            //}
             $('#specificationSelect').append(options);
         }
         if (!isStrEmptyOrUndefined(resolve)) {
@@ -406,7 +405,7 @@ function specificationSelect(resolve, categoryId, nameId, supplierId, isTable) {
 
 var _siteSelect = null;
 //位置选项
-function siteSelect() {
+function siteSelect(resolve) {
     var opType = 847;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -433,6 +432,9 @@ function siteSelect() {
         $('#siteSelect').append(option.format(0, '所有位置'));
         $('#siteSelect').append(options);
         _siteSelect = `<select class="form-control textIn site hidden" style="width:100px">${options}</select>`;
+        if (!isStrEmptyOrUndefined(resolve)) {
+            resolve('success');
+        }
     });
 }
 

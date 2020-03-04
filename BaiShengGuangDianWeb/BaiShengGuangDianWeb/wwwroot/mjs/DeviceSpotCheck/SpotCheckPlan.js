@@ -119,6 +119,9 @@ function getSpotCheckList() {
         return;
     }
     _planId = $('#spotPlanSelect').val();
+    if (isStrEmptyOrUndefined(_planId)) {
+        return;
+    }
     var data = {};
     data.opType = opType;
     data.opData = JSON.stringify({
@@ -143,10 +146,10 @@ function getSpotCheckList() {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn item hidden" maxlength="10" style="width:100px" value=${data}>`;
         };
         var using = function () {
-            return '<input type="checkbox" class="icb_minimal using icb_check">';
+            return '<input type="checkbox" class="icb_minimal using icb_check prominent">';
         }
         var remind = function () {
-            return '<input type="checkbox" class="icb_minimal remind icb_check">';
+            return '<input type="checkbox" class="icb_minimal remind icb_check prominent">';
         }
         var min = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn min numVal hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
@@ -371,8 +374,8 @@ function setSpotCheckOption(i) {
     var bodyTr = '<tr>' +
         '<td class="num" style="font-weight:bold"></td>' +
         '<td><input type="text" class="form-control text-center item" maxlength="10" style="width:170px"></td>' +
-        '<td><input type="checkbox" class="icb_minimal using"></td>' +
-        '<td><input type="checkbox" class="icb_minimal remind"></td>' +
+        '<td><input type="checkbox" class="icb_minimal using prominent"></td>' +
+        '<td><input type="checkbox" class="icb_minimal remind prominent"></td>' +
         '<td><input type="text" class="form-control text-center min numVal" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10" style="width:80px"></td>' +
         '<td><input type="text" class="form-control text-center max numVal" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10" style="width:80px"></td>' +
         '<td><input type="text" class="form-control text-center unit" maxlength="5" style="width:80px"></td>' +
@@ -398,11 +401,14 @@ function setTableTrCount(el, count) {
 
 //表格设置
 function setTableStyle(el) {
-    el.find('.icb_minimal').iCheck({
-        labelHover: false,
-        cursor: true,
+    el.find('.isEnable').iCheck({
+        handle: 'checkbox',
         checkboxClass: 'icheckbox_minimal-blue',
-        radioClass: 'iradio_minimal-blue',
+        increaseArea: '20%'
+    });
+    el.find('.prominent').iCheck({
+        handle: 'checkbox',
+        checkboxClass: 'icheckbox_polaris',
         increaseArea: '20%'
     });
 }
