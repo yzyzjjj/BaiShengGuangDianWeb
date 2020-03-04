@@ -43,14 +43,17 @@
 }
 
 function getUsersList() {
-    ajaxGet("/AccountManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
+    var getUsersListFunc = new Promise(function (resolve) {
+        ajaxGet("/AccountManagement/List", null,
+            function (ret) {
+                resolve('success');
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                var checkPermission76 = checkPermission(76);
+                var checkPermission75 = checkPermission(75);
+                var htmlFormat = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
                     '        <span class="caret"></span>' +
@@ -59,63 +62,59 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsers = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>'.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType));
-                var delUsers = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.account));
-                (!checkPermission(76) && !checkPermission(75)) || data.isDeleted
-                    ? html = ""
-                    : html = html.format(
-                        checkPermission(76) ? upUsers : "",
-                        checkPermission(75) ? delUsers : "");
-                return html;
-            }
-            var del = function (data, type, row) {
-                return data.isDeleted ? "<span class='text-red'>是</span>" : "否";
-            }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-            var columns = checkPermission(76) || checkPermission(75)
-                ? [
-                    { "data": "id", "title": "id", "render": order },
-                    { "data": "account", "title": "用户名" },
-                    { "data": "name", "title": "姓名" },
-                    { "data": "roleName", "title": "角色" },
-                    { "data": "emailAddress", "title": "邮箱" },
-                    { "data": null, "title": "删除", "render": del },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": "id", "title": "id", "render": order },
-                    { "data": "account", "title": "用户名" },
-                    { "data": "name", "title": "姓名" },
-                    { "data": "roleName", "title": "角色" },
-                    { "data": "emailAddress", "title": "邮箱" },
-                    { "data": null, "title": "删除", "render": del }
-                ];
-            var defs = checkPermission(76) || checkPermission(75)
-                ? [
-                    { "orderable": false, "targets": 6 }
-                ]
-                : "";
-            $("#userTable")
-                .DataTable({
-                    "destroy": true,
-                    "paging": false,
-                    "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
-                });
+                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>';
+                var delUsersFormat = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>';
+
+                var op = function (data, type, row) {
+                    var upUsers = upUsersFormat.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType))
+                    var delUsers = delUsersFormat.format(data.id, escape(data.account));
+                    return (!checkPermission76 && !checkPermission75) || data.isDeleted ? "" : htmlFormat.format(checkPermission76 ? upUsers : "", checkPermission75 ? delUsers : "");
+                }
+                var del = function (data, type, row) {
+                    return data.isDeleted ? "<span class='text-red'>是</span>" : "否";
+                }
+                var order = function (data, type, row, meta) {
+                    return meta.row + 1;
+                }
+                var columns =
+                    [
+                        { "data": "id", "title": "id", "render": order },
+                        { "data": "account", "title": "用户名" },
+                        { "data": "name", "title": "姓名" },
+                        { "data": "roleName", "title": "角色" },
+                        { "data": "emailAddress", "title": "邮箱" },
+                        { "data": null, "title": "删除", "render": del }
+                    ];
+
+                var defs = "";
+                if (checkPermission76 || checkPermission75) {
+                    columns.push({ "data": null, "title": "操作", "render": op });
+                    defs = [
+                        { "orderable": false, "targets": 6 }
+                    ];
+                }
+
+                $("#userTable")
+                    .DataTable({
+                        "destroy": true,
+                        "paging": true,
+                        "searching": true,
+                        "language": oLanguage,
+                        "data": ret.datas,
+                        "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                        "iDisplayLength": 20, //默认显示的记录数  
+                        "columns": columns,
+                        "columnDefs": defs
+                    });
+            });
+    });
+    Promise.all([getUsersListFunc])
+        .then((result) => {
         });
 }
 
 function deleteUser(id, account) {
     account = unescape(account);
-
     var doSth = function () {
         var data = {
             id: id,
