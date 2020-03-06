@@ -1331,15 +1331,6 @@ function getUserMedia(constraints, success, error) {
 function capture() {
     var canvas = document.getElementById('canvas');
     var context = canvas.getContext('2d');
-    //if (!isStrEmptyOrUndefined($("#file").val())) {
-    //    var imgUrl = URL.createObjectURL(file);
-    //    var image = new Image();
-    //    image.src = imgUrl;
-    //    image.onload = function () {
-    //        context.drawImage(image, 0, 0, 290, 290);
-    //    }
-    //    return;
-    //} else {
     if (scans == 0) {
         context.drawImage(video, 0, 0, 290, 290);
     } else {

@@ -215,6 +215,16 @@
             }
         }
     });
+    $('#increaseList').on('click', '.scanPrint', function () {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                var codeId = result.split(',')[0];
+                $(this).next().val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
 }
 
 var _qrCode = null;
@@ -1050,6 +1060,7 @@ function addIncreaseList() {
                 </select>
             </td>
             <td>
+                <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
                 <select class="ms2 form-control" id="inBh{0}"></select>
             </td>
             <td><select class="ms2 form-control" id="inLb{0}"></select></td>
@@ -1063,13 +1074,18 @@ function addIncreaseList() {
             <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
             <td><input class="form-control text-center" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10"></td>
-            <td class="form-inline">
+            <td>
+               <div style="display:flex;width:160px">
                <input class="form-control text-center" id="inCg{0}" maxlength="64" />
-               <button class="btn btn-primary btn-sm pull-right" type="button" id="inDitto{0}" onclick="inDitto({0})">同上</button>
+               <button class="btn btn-primary btn-sm pull-right" type="button" id="inDitto{0}" onclick="inDitto({0})" style="margin-left:3px">同上</button>
+               </div>
             </td>
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delIncreaseList({0})"><i class="fa fa-minus"></i></button></td>
         </tr>`).format(increaseMax, increaseMaxV);
     $("#increaseList").append(tr);
+    if (!pcAndroid()) {
+        $("#increaseList").find('.scanPrint').addClass('hidden');
+    }
     var xh = increaseMax;
     if (_materialList != null) {
         var option = '<option value="{0}">{1}</option>';

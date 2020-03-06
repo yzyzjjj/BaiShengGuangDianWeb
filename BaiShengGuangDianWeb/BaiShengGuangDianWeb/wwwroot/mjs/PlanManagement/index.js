@@ -14,6 +14,8 @@
         tr.after(_planTr);
         var trNew = tr.next();
         setTableSelect(trNew);
+        var billId = trNew.find('.code').val();
+        trNew.find('.num').attr('bill', billId);
     });
     $('#addPlanBody').on('click', '.delPlanTr', function () {
         _planTrCount--;
@@ -157,7 +159,7 @@ function addUpPlanTable(planId, isUp) {
                 if (_codeData[d.BillId]) {
                     $('#addPlanBody').append(_planTr);
                     $('#addPlanBody').find('.code').eq(flag).val(d.BillId);
-                    $('#addPlanBody').find('.plannedConsumption').eq(flag).val(d.PlannedConsumption);
+                    $('#addPlanBody').find('.plannedConsumption').eq(flag).val(isUp ? d.PlannedConsumption : d.ActualConsumption);
                     $('#addPlanBody').find('.actualConsumption').eq(flag).text(d.ActualConsumption);
                     if (d.ActualConsumption != 0 && isUp) {
                         $('#addPlanBody').find('.delPlanTr').eq(flag).addClass('hidden');
@@ -864,7 +866,7 @@ function planDetailModal(id) {
 }
 
 //货品详情模态框
-function productDetailModal(category, name, supplier, specification, site, code, stock, price, remark,img) {
+function productDetailModal(category, name, supplier, specification, site, code, stock, price, remark, img) {
     category = unescape(category);
     name = unescape(name);
     supplier = unescape(supplier);
@@ -1130,7 +1132,7 @@ function getLogList() {
                     { "data": "Time", "title": "时间" },
                     { "data": "Purpose", "title": "计划号" },
                     { "data": "Code", "title": "货品编号" },
-                    { "data": "Number", "title": "数量"},
+                    { "data": "Number", "title": "数量" },
                     { "data": "RelatedPerson", "title": "领用人" },
                     { "data": "Manager", "title": "物管员" }
                 ]

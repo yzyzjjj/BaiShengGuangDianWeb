@@ -1286,23 +1286,24 @@ function showAllContent(content, title = "备注", id = "") {
     if (id == "")
         id = "remarkModel";
     var html =
-        `<div class="modal fade" id="${id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">` +
-        `    <div class="modal-dialog">` +
-        `       <div class="modal-content">` +
-        `           <div class="modal-header">` +
-        `               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>` +
-        `               <h4 class="modal-title">${title}</h4>` +
-        `           </div>` +
-        `           <div class="modal-body">` +
-        `           <div class="form-group">` +
-        `               <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;">${content}</textarea>` +
-        `           </div>` +
-        `       </div>` +
-        `       <div class="modal-footer">` +
-        `           <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>` +
-        `       </div>` +
-        `   </div>` +
-        `</div>`;
+        `<div class="modal fade" id="${id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                   <div class="modal-header">
+                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                       <h4 class="modal-title">${title}</h4>
+                   </div>
+                   <div class="modal-body">
+                       <div class="form-group">
+                           <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;">${content}</textarea>
+                       </div>
+                   </div>
+                   <div class="modal-footer">
+                       <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                   </div>
+                </div>
+           </div>
+        </div>`;
 
     var modal = $(html);
     $(".content").append(modal);
@@ -1313,6 +1314,97 @@ function showAllContent(content, title = "备注", id = "") {
         function () {
             modal.remove();
         });
+}
+
+//二维码扫描模态框
+function showPrintModal(resolve) {
+    var modalId = '_printModal';
+    var html =
+        `<div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+               <div class="modal-content">
+                   <div class="modal-header hidden">
+                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                       <h4 class="modal-title"></h4>
+                   </div>
+                   <div class="modal-body">
+                        <video style="width: 100%;height:300px"></video>
+                        <canvas class="hidden" width="300" height="300"></canvas>
+                   </div>
+                   <div class="modal-footer">
+                       <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                   </div>
+               </div>
+           </div>
+        </div>`;
+    var modal = $(html);
+    $(".content").append(modal);
+    var closeVideo, canvasImg,qrCode;
+    var video = $('#_printModal video')[0];
+    var canvas = $('#_printModal canvas')[0];
+    modal.on('hidden.bs.modal',
+        function () {
+            resolve(qrCode);
+            if (closeVideo) {
+                closeVideo.stop();
+            }
+            if (canvasImg) {
+                clearInterval(canvasImg);
+            }
+            modal.remove();
+        });
+    var getUserMedia = function (constraints, success, error) {
+        if (navigator.mediaDevices.getUserMedia) {
+            //最新的标准API
+            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.webkitGetUserMedia) {
+            //webkit核心浏览器
+            navigator.webkitGetUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.mozGetUserMedia) {
+            //firfox浏览器
+            navigator.mozGetUserMedia(constraints).then(success).catch(error);
+        } else if (navigator.getUserMedia) {
+            //旧版API
+            navigator.getUserMedia(constraints).then(success).catch(error);
+        }
+    }
+    var capture = function () {
+        var context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, 300, 300);
+        qrcode.decode(canvas.toDataURL('image/png'));
+        qrcode.callback = function (e) {
+            //结果回调
+            if (e != "error decoding QR Code") {
+                qrCode = e;
+                clearInterval(canvasImg);
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                modal.modal('hide');
+            }
+        }
+    }
+    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+        //调用用户媒体设备, 访问摄像头
+        getUserMedia({
+            video: {
+                width: 500,
+                height: 500,
+                //user前置摄像头
+                facingMode: { exact: "environment" }
+            }
+        }, function (stream) {
+            modal.modal("show");
+            video.srcObject = stream;
+            video.play();
+            closeVideo = stream.getTracks()[0];
+            canvasImg = setInterval(capture, 500);
+        }, function () {
+            modal.modal('hide');
+            layer.msg("访问用户媒体设备失败");
+        });
+    } else {
+        modal.modal('hide');
+        layer.msg('不支持访问用户媒体');
+    }
 }
 
 function showBigImg(url) {
