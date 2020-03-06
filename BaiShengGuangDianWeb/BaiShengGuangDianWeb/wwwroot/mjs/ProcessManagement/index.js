@@ -550,7 +550,7 @@ function showAddModel(id) {
     $("#apProcess").val("");
     if (id == null) {
         apReset();
-        getDeviceModelList();
+        getMenuList();
     } else {
         $("#apBody").empty();
         $("#addOtherBtn").removeClass("hidden");
@@ -568,35 +568,53 @@ function showAddModel(id) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-
-                var tr = '<tr id="ap{0}" value="{2}">' +
-                    '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                    '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                    '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
-                    '</tr>';
-                for (var j = 0; j < ret.datas.length; j++) {
-                    var processData = ret.datas[j];
-                    $("#apBody").append(tr.format(max, maxV, processData.Id,
-                        processData.PressurizeMinute, processData.PressurizeSecond,
-                        processData.ProcessMinute, processData.ProcessSecond,
-                        processData.Pressure, processData.Speed));
-                    max++;
-                    maxV++;
+                if (ret.datas.length > 0) {
+                    var tr = '<tr id="ap{0}" value="{2}">' +
+                        '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                        '</tr>';
+                    for (var j = 0; j < ret.datas.length; j++) {
+                        var processData = ret.datas[j];
+                        $("#apBody").append(tr.format(max, maxV, processData.Id,
+                            processData.PressurizeMinute, processData.PressurizeSecond,
+                            processData.ProcessMinute, processData.ProcessSecond,
+                            processData.Pressure, processData.Speed));
+                        max++;
+                        maxV++;
+                    }
+                    if (ret.datas.length == maxProcessData) {
+                        $("#addOtherBtn").addClass("hidden");
+                    }
                 }
-                if (ret.datas.length == maxProcessData) {
-                    $("#addOtherBtn").addClass("hidden");
-                }
-                getDeviceModelList();
+                getMenuList();
             });
     }
 }
 
-function getDeviceModelList() {
+function getMenuList() {
+    var getDeviceModelListFunc = new Promise(function (resolve, reject) {
+        getDeviceModelList(resolve);
+    });
+    var getProductionProcessListFunc = new Promise(function (resolve, reject) {
+        getProductionProcessList(resolve);
+    });
+    var getDeviceListFunc = new Promise(function (resolve, reject) {
+        getDeviceList(0, resolve);
+    });
+    Promise.all([getDeviceModelListFunc, getProductionProcessListFunc, getDeviceListFunc ])
+        .then((result) => {
+            //console.log('准备工作完毕');
+            //console.log(result);
+        });
+}
+
+function getDeviceModelList(resolve = null) {
     $("#apDeviceModel").empty();
     var opType = 120;
     if (!checkPermission(opType)) {
@@ -608,6 +626,8 @@ function getDeviceModelList() {
             opType: opType
         },
         function (ret) {
+            if (resolve != null)
+                resolve("success");
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -621,11 +641,11 @@ function getDeviceModelList() {
             if (cData != null)
                 $("#apDeviceModel").val(cData.DeviceModels.split(",")).trigger("change");
 
-            getProductionProcessList();
+            //getProductionProcessList();
         });
 }
 
-function getProductionProcessList() {
+function getProductionProcessList(resolve = null) {
     $("#apProductionProcessName").empty();
     var opType = 215;
     if (!checkPermission(opType)) {
@@ -634,8 +654,13 @@ function getProductionProcessList() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
+            if (resolve != null)
+                resolve("success");
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -654,7 +679,7 @@ function getProductionProcessList() {
         });
 }
 
-function getDeviceList(type = 0) {
+function getDeviceList(type = 0, resolve = null) {
     $("#apCode").empty();
     var opType = 319;
     if (!checkPermission(opType)) {
@@ -682,6 +707,8 @@ function getDeviceList(type = 0) {
     data.opData = JSON.stringify(d);
     ajaxPost("/Relay/Post", data,
         function (ret) {
+            if (resolve != null)
+                resolve("success");
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -912,7 +939,7 @@ function showUpdateProcessModel(id) {
             if (ret.datas.length == maxProcessData) {
                 $("#addOtherBtn").addClass("hidden");
             }
-            getDeviceModelList();
+            getMenuList();
         });
 }
 

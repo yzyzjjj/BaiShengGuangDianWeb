@@ -44,6 +44,12 @@
         showItem();
     });
     init();
+
+    $('#imgOldList').on('click', '.delImg', function () {
+        $(this).parents('.imgOption').remove();
+        var e = $(this).val();
+        _imgNameData.splice(_imgNameData.indexOf(e), 1);
+    });
 }
 
 function init() {
@@ -271,10 +277,10 @@ function initItemList() {
                 `<textarea class="form-control" id="itemDesc${xh}" maxlength = "500" style="resize: vertical;width:100%;margin:auto"></textarea>`;
         }
         var lookImg = function (data) {
-            var op = '<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>' +
-                '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({2},\'{3}\',\'{4}\', {5})">查看</button>';
-            return data.ImageList.length ? op.format('ok', 'green', data.Id, escape(data.Item), escape(data.ImageList), data.ImageCheck)
-                : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList), data.ImageCheck);
+            var op = '<span id="imgFlag{2}" class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>' +
+                '<button id="imgBtn{2}" type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({2},\'{3}\',\'{4}\')">查看</button>';
+            return data.ImageList.length ? op.format('ok', 'green', data.Id, escape(data.Item), escape(data.ImageList))
+                : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList));
         }
         $("#itemList")
             .DataTable({
@@ -376,12 +382,14 @@ function report() {
 
 var _imgNameData = null;
 var _imgUpload = null;
+var tid, titem, timg;
 //图片详情模态框
-function showImgModel(id, item, img, imageCheck) {
+function showImgModel(id, item, img) {
+    tid = id;
+    titem = item;
+    timg = img;
     $('#showImgModel .new').addClass("hidden");
-    if (!imageCheck) {
-        $('#showImgModel .new').removeClass("hidden");
-    }
+    $('#showImgModel .new').removeClass("hidden");
     if (_imgUpload == null) {
         _imgUpload = initFileInputMultiple("addImg", fileEnum._6s);
     }
@@ -409,13 +417,15 @@ function showImgModel(id, item, img, imageCheck) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
-                    '<div class="thumbnail">' +
-                    '<img src={0} style="height:200px" onclick="showBigImg(\'{0}\')">' +
-                    '<div class="caption text-center">' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
+                var imgOp =
+                    `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                        <div class="thumbnail">
+                        <img src={0} style="height:200px" onclick="showBigImg(\'{0}\')">
+                        <div class="caption text-center">
+                            <button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>
+                        </div>
+                        </div>
+                    </div>`;
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
                     imgOps += imgOp.format(ret.data[i].path, img[i]);
@@ -444,8 +454,9 @@ function updateImg() {
             for (var key in fileRet.data) {
                 img.push(fileRet.data[key].newName);
             }
-            var imgNew = _imgNameData.concat(img);
-            imgNew = JSON.stringify(imgNew);
+            var imgNameData = _imgNameData.concat(img);
+            var len = imgNameData.length;
+            var imgNew = JSON.stringify(imgNameData);
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;
@@ -459,7 +470,20 @@ function updateImg() {
                     layer.msg(ret.errmsg);
                     $('#showImgModel').modal('hide');
                     if (ret.errno == 0) {
-                        getItemList();
+                        _imgNameData = imgNameData;
+                        if (len > 0) {
+                            $("#imgFlag" + id).removeClass("glyphicon-remove");
+                            $("#imgFlag" + id).addClass("glyphicon-ok");
+                            $("#imgFlag" + id).css("color", "green");
+                            $("#imgBtn" + id).attr("onclick", "showImgModel({0},\'{1}\',\'{2}\')".format(tid, titem, escape(_imgNameData)));
+                        } else {
+                            $("#imgFlag" + id).removeClass("glyphicon-ok");
+                            $("#imgFlag" + id).addClass("glyphicon-remove");
+                            $("#imgFlag" + id).css("color", "red");
+                            $("#imgBtn" + id).attr("onclick", "showImgModel({0},\'{1}\',\'{2}\')".format(tid, titem, ''));
+                        }
+
+                        //getItemList();
                     }
                 });
         }

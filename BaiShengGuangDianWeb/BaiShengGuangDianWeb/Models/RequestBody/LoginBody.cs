@@ -9,5 +9,6 @@ namespace BaiShengGuangDianWeb.Models.RequestBody
     {
         public string Account;
         public string Password;
+        public string RememberMe;
     }
 }

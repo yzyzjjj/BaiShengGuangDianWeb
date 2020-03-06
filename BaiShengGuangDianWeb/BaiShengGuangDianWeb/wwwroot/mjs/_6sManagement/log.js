@@ -57,38 +57,44 @@
 
     $("#_6sGroupRankTime1").val(getDate());
     $("#_6sGroupRankTime1").datepicker('update').on('changeDate', function (ev) {
-        groupRank(false);
+        groupRank(false, false);
     });
 
     $("#_6sGroupRankTime2").val(getDate());
     $("#_6sGroupRankTime2").datepicker('update').on('changeDate', function (ev) {
-        groupRank(false);
+        groupRank(false, false);
     });
 
     $("#_6sGroupPersonRankTime1").val(getDate());
     $("#_6sGroupPersonRankTime1").datepicker('update').on('changeDate', function (ev) {
         var groupId = $("#_6sGroupGroupId").html();
         var group = $("#_6sGroupGroup").html();
-        groupPersonRank(groupId, group, false);
+        groupPersonRank(groupId, group, false, false);
     });
     $("#_6sGroupPersonRankTime2").val(getDate());
     $("#_6sGroupPersonRankTime2").datepicker('update').on('changeDate', function (ev) {
         var groupId = $("#_6sGroupGroupId").html();
         var group = $("#_6sGroupGroup").html();
-        groupPersonRank(groupId, group, false);
+        groupPersonRank(groupId, group, false, false);
     });
 
     $("#_6sGroupPersonItemRankTime1").val(getDate());
     $("#_6sGroupPersonItemRankTime1").datepicker('update').on('changeDate', function (ev) {
         var groupId = $("#_6sGroupGroupId").html();
         var person = $("#_6sGroupPersonId").html();
-        groupPersonItemRank(groupId, person, false);
+        groupPersonItemRank(groupId, person, false, false);
     });
     $("#_6sGroupPersonItemRankTime2").val(getDate());
     $("#_6sGroupPersonItemRankTime2").datepicker('update').on('changeDate', function (ev) {
         var groupId = $("#_6sGroupGroupId").html();
         var person = $("#_6sGroupPersonId").html();
-        groupPersonItemRank(groupId, person, false);
+        groupPersonItemRank(groupId, person, false, false);
+    });
+
+    $('#imgOldList').on('click', '.delImg', function () {
+        $(this).parents('.imgOption').remove();
+        var e = $(this).val();
+        _imgNameData.splice(_imgNameData.indexOf(e), 1);
     });
 }
 
@@ -367,10 +373,10 @@ function initItemList() {
                 `<textarea class="chose2 hidden form-control" id="itemDesc${xh}" old="${data.Desc}" maxlength = "500" style="resize: vertical;width:100%;margin:auto"></textarea>`;
         }
         var lookImg = function (data) {
-            var op = '<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>' +
-                '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({2},\'{3}\',\'{4}\', {5})">查看</button>';
-            return data.ImageList.length ? op.format('ok', 'green', data.Id, escape(data.Item), escape(data.ImageList), data.ImageCheck)
-                : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList), data.ImageCheck);
+            var op = '<span id="imgFlag{2}" class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>' +
+                '<button id="imgBtn{2}" type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({2},\'{3}\',\'{4}\')">查看</button>';
+            return data.ImageList.length ? op.format('ok', 'green', data.Id, escape(data.Item), escape(data.ImageList))
+                : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList));
         }
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
         var titleColumns = [3, 7, 10];
@@ -411,7 +417,7 @@ function initItemList() {
                 "destroy": true,
                 "paging": true,
                 "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": items,
                 "bAutoWidth": false,
                 "aaSorting": [[1, "asc"]],
@@ -546,12 +552,14 @@ function report() {
 
 var _imgNameData = null;
 var _imgUpload = null;
+var tid, titem, timg;
 //图片详情模态框
-function showImgModel(id, item, img, imageCheck) {
+function showImgModel(id, item, img) {
+    tid = id;
+    titem = item;
+    timg = img;
     $('#showImgModel .new').addClass("hidden");
-    if (!imageCheck) {
-        $('#showImgModel .new').removeClass("hidden");
-    }
+    $('#showImgModel .new').removeClass("hidden");
     if (_imgUpload == null) {
         _imgUpload = initFileInputMultiple("addImg", fileEnum._6s);
     }
@@ -579,14 +587,15 @@ function showImgModel(id, item, img, imageCheck) {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
-                    '<div class="thumbnail">' +
-                    '<img src={0} style="height:200px" onclick="showBigImg(\'{0}\')">' +
-                    (!imageCheck ? '<div class="caption text-center">' +
-                        '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
-                        '</div>' : "") +
-                    '</div>' +
-                    '</div>';
+                var imgOp =
+                    `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                        <div class="thumbnail">
+                        <img src={0} style="height:200px" onclick="showBigImg(\'{0}\')">
+                        <div class="caption text-center">
+                            <button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>
+                        </div>
+                        </div>
+                    </div>`;
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
                     imgOps += imgOp.format(ret.data[i].path, img[i]);
@@ -615,8 +624,9 @@ function updateImg() {
             for (var key in fileRet.data) {
                 img.push(fileRet.data[key].newName);
             }
-            var imgNew = _imgNameData.concat(img);
-            imgNew = JSON.stringify(imgNew);
+            var imgNameData = _imgNameData.concat(img);
+            var len = imgNameData.length;
+            var imgNew = JSON.stringify(imgNameData);
             var id = $('#checkId').text();
             var data = {}
             data.opType = opType;
@@ -632,7 +642,18 @@ function updateImg() {
                     layer.msg(ret.errmsg);
                     $('#showImgModel').modal('hide');
                     if (ret.errno == 0) {
-                        getItemList();
+                        _imgNameData = imgNameData;
+                        if (len > 0) {
+                            $("#imgFlag" + id).removeClass("glyphicon-remove");
+                            $("#imgFlag" + id).addClass("glyphicon-ok");
+                            $("#imgFlag" + id).css("color", "green");
+                            $("#imgBtn" + id).attr("onclick", "showImgModel({0},\'{1}\',\'{2}\')".format(tid, titem, escape(_imgNameData)));
+                        } else {
+                            $("#imgFlag" + id).removeClass("glyphicon-ok");
+                            $("#imgFlag" + id).addClass("glyphicon-remove");
+                            $("#imgFlag" + id).css("color", "red");
+                            $("#imgBtn" + id).attr("onclick", "showImgModel({0},\'{1}\',\'{2}\')".format(tid, titem, ''));
+                        }
                     }
                 });
         }
@@ -643,9 +664,13 @@ function updateImg() {
     showConfirm("操作", doSth);
 }
 
-function groupRank(show = true) {
-    $("#_6sGroupRankTime1").val($("#_6sItemCheckTime1").val());
-    $("#_6sGroupRankTime2").val($("#_6sItemCheckTime2").val());
+function groupRank(show = true, time = true) {
+    if (time) {
+        $("#_6sGroupRankTime1").val($("#_6sItemCheckTime1").val());
+        $("#_6sGroupRankTime1").datepicker('update');
+        $("#_6sGroupRankTime2").val($("#_6sItemCheckTime2").val());
+        $("#_6sGroupRankTime2").datepicker('update');
+    }
     $("#_6sGroupRankList").empty();
     var opType = 930;
     if (!checkPermission(opType)) {
@@ -682,7 +707,7 @@ function groupRank(show = true) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "bAutoWidth": false,
                     "aaSorting": [[0, "asc"]],
@@ -703,9 +728,13 @@ function groupRank(show = true) {
     }
 }
 
-function groupPersonRank(groupId, group, show = true) {
-    $("#_6sGroupPersonRankTime1").val($("#_6sGroupRankTime1").val());
-    $("#_6sGroupPersonRankTime2").val($("#_6sGroupRankTime2").val());
+function groupPersonRank(groupId, group, show = true, time = true) {
+    if (time) {
+        $("#_6sGroupPersonRankTime1").val($("#_6sGroupRankTime1").val());
+        $("#_6sGroupPersonRankTime1").datepicker('update');
+        $("#_6sGroupPersonRankTime2").val($("#_6sGroupRankTime2").val());
+        $("#_6sGroupPersonRankTime2").datepicker('update');
+    }
     $("#_6sGroupGroup").html(group);
     $("#_6sGroupGroupId").html(groupId);
     $("#_6sGroupPersonRankList").empty();
@@ -746,7 +775,7 @@ function groupPersonRank(groupId, group, show = true) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "bAutoWidth": false,
                     "aaSorting": [[0, "asc"]],
@@ -767,9 +796,13 @@ function groupPersonRank(groupId, group, show = true) {
     }
 }
 
-function groupPersonItemRank(groupId, person, show = true) {
-    $("#_6sGroupPersonItemRankTime1").val($("#_6sGroupPersonRankTime1").val());
-    $("#_6sGroupPersonItemRankTime2").val($("#_6sGroupPersonRankTime2").val());
+function groupPersonItemRank(groupId, person, show = true, time = true) {
+    if (time) {
+        $("#_6sGroupPersonItemRankTime1").val($("#_6sGroupPersonRankTime1").val());
+        $("#_6sGroupPersonItemRankTime1").datepicker('update');
+        $("#_6sGroupPersonItemRankTime2").val($("#_6sGroupPersonRankTime2").val());
+        $("#_6sGroupPersonItemRankTime2").datepicker('update');
+    }
     $("#_6sGroupPersonId").html(person);
     $("#_6sGroupPersonItemList").empty();
     var opType = 920;
@@ -867,7 +900,7 @@ function groupPersonItemRank(groupId, person, show = true) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "bAutoWidth": false,
                     "aaSorting": [[0, "asc"]],

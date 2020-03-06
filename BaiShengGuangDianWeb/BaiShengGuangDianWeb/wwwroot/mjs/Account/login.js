@@ -7,6 +7,7 @@
     $("#loginBtn").click(function () {
         var account = $("#account").val();
         var password = $("#password").val();
+        var rememberMe = $("#rememberMe").is(':checked');
 
         if (isStrEmptyOrUndefined(account)) {
             showTip($("#accountTip"), "账号不能为空");
@@ -17,13 +18,15 @@
             return;
         }
 
+        var p = GetCookie("p");
         //var pwdMd5 = password;
-        var pwdMd5 = window.md5(password);
+        var pwdMd5 = p != password  ? window.md5(password) : password;
         //var pwdMd5 = window.md5(window.md5(password));
 
         var data = {}
         data.account = account;
         data.password = pwdMd5;
+        data.rememberMe = rememberMe;
 
         ajaxPost("/Account/Login", data,
             function (ret) {
@@ -62,6 +65,14 @@
         $("#account").val(acc);
         $("#password").val(pwd);
         $("#loginBtn").click();
+    } else {
+        var n = GetCookie("n");
+        var p = GetCookie("p");
+        if (!isStrEmptyOrUndefined(n) && !isStrEmptyOrUndefined(p)) {
+            $("#account").attr("value",n);
+            $("#password").attr("value", p);
+            $("#rememberMe").iCheck('check');
+        }
     }
     $(document).keydown(function (event) {
         if (event.keyCode === 13) {
