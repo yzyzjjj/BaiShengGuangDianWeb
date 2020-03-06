@@ -188,7 +188,8 @@ function getDeviceList() {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        hard: true
+        hard: true,
+        work: true
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -209,9 +210,8 @@ function getDeviceList() {
                     return '<span class="text-info">' + state + '</span>';
                 return '<span class="text-red">' + state + '</span>';
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (data, type, row, meta) {
+                return meta.row + 1;
             }
             var tdWidth = function () {
                 $("#deviceList th").css("paddingRight", "22px").css("paddingLeft", 0);

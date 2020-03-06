@@ -8,6 +8,7 @@ using ModelBase.Base.HttpServer;
 using ModelBase.Base.Utils;
 using ModelBase.Models.Result;
 using ServiceStack;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +30,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             var loginBody = new LoginBody
             {
                 Account = param.GetValue("account"),
-                Password = param.GetValue("password")
+                Password = param.GetValue("password"),
+                RememberMe = param.GetValue("rememberMe")
             };
             var accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
             if (!special)
@@ -107,6 +109,17 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 }
             }
 
+            if (bool.TryParse(loginBody.RememberMe, out var rm) && rm)
+            {
+                var exp = 3600 * 24 * 7;
+                CookieHelper.SetCookie("n", loginBody.Account, Response, exp);
+                CookieHelper.SetCookie("p", loginBody.Password, Response, exp);
+            }
+            else
+            {
+                CookieHelper.DelCookie("n", Response);
+                CookieHelper.DelCookie("p", Response);
+            }
             var token = TokenHelper.CreateJwtToken(accountInfo);
             CookieHelper.SetCookie("token", token, Response);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");

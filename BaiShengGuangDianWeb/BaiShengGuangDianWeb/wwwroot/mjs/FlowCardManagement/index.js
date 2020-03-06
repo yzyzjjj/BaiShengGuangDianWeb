@@ -320,6 +320,9 @@ function selectPlan() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -345,6 +348,9 @@ function selectRaw() {
     }
     var data = {}
     data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1396,22 +1402,19 @@ function getProductionProcessList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var checkPermission218 = checkPermission(218);
+            var checkPermission221 = checkPermission(221);
+            var changeBtnFormat = '<button type="button" class="btn btn-primary" onclick="showProductionProcessModel({0})">详情</button>';
+            var delBtnFormat = '<button type="button" class="btn btn-danger" onclick="deleteProductionProcess({0}, \'{1}\')">删除</button>';
             var op = function (data, type, row) {
-                var html = "{0}{1}";
-                var changeBtn = '<button type="button" class="btn btn-primary" onclick="showProductionProcessModel({0})">详情</button>'.format(data.Id);
-                var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteProductionProcess({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ProductionProcessName));
-
-                html = html.format(
-                    checkPermission(218) ? changeBtn : "",
-                    checkPermission(221) ? delBtn : "");
-                return html;
+                var changeBtn = changeBtnFormat.format(data.Id);
+                var delBtn = delBtnFormat.format(data.Id, escape(data.ProductionProcessName));
+                return (checkPermission218 ? changeBtn : "") + (checkPermission221 ? delBtn : "");
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (data, type, row, meta) {
+                return meta.row + 1;
             }
-            var columns = checkPermission(218) || checkPermission(221)
+            var columns = checkPermission218 || checkPermission221
                 ? [
                     { "data": null, "title": "操作", "render": op },
                     { "data": null, "title": "序号", "render": order },
@@ -1437,8 +1440,8 @@ function getProductionProcessList() {
                     { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
                     { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
                 ];
-            var aaSorting = checkPermission(218) || checkPermission(221) ? [[1, "asc"]] : [[0, "asc"]];
-            var defs = checkPermission(218) || checkPermission(221)
+            var aaSorting = checkPermission218 || checkPermission221 ? [[1, "asc"]] : [[0, "asc"]];
+            var defs = checkPermission218 || checkPermission221
                 ? [
                     { "orderable": false, "targets": 0 }
                 ]

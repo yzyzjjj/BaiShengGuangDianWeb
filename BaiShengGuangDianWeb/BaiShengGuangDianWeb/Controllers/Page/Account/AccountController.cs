@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Controllers.Page.Account
 {
