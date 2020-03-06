@@ -138,7 +138,7 @@ function addUpPlanTable(planId, isUp) {
             var flag = -1;
             var trInfo = '<tr style="color:red">' +
                 '<td class="num" style="font-weight:bold"></td>' +
-                '<td>{5}</td>' +
+                '<td class="code">{5}</td>' +
                 '<td>{0}</td>' +
                 '<td>{1}</td>' +
                 '<td>{2}</td>' +
@@ -146,8 +146,8 @@ function addUpPlanTable(planId, isUp) {
                 '<td>{4}</td>' +
                 '<td><button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button></td>' +
                 '<td>{7}</td>' +
-                '<td>{10}</td>' +
-                '<td>{11}</td>' +
+                '<td class="plannedConsumption">{10}</td>' +
+                '<td class="actualConsumption">{11}</td>' +
                 '<td><button type="button" class="btn btn-danger btn-sm delPlanTr" style="margin-left:5px"><i class="fa fa-minus"></i></button></td>' +
                 '</tr>';
             for (i = 0; i < len; i++) {
@@ -160,7 +160,7 @@ function addUpPlanTable(planId, isUp) {
                     $('#addPlanBody').find('.plannedConsumption').eq(flag).val(d.PlannedConsumption);
                     $('#addPlanBody').find('.actualConsumption').eq(flag).text(d.ActualConsumption);
                     if (d.ActualConsumption != 0 && isUp) {
-                        $('#addPlanBody').find('.delPlanTr').addClass('hidden');
+                        $('#addPlanBody').find('.delPlanTr').eq(flag).addClass('hidden');
                     }
                     var tr = $('#addPlanBody').find('tr').eq(flag);
                     setTableSelect(tr);
@@ -181,6 +181,7 @@ function addUpPlanTable(planId, isUp) {
                     }
                 }
                 $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id);
+                $('#addPlanBody').find('.num').eq(flag).attr('bill', d.BillId);
             }
             getPriceSum();
             setTableTrCount($("#addPlanBody"), _planTrCount, isUp);
@@ -195,6 +196,7 @@ function setTableTrCount(el, count, isUp) {
         el.find('.num').eq(i).text(i + 1);
     }
     $(' #addPlanBody .ms2').select2();
+    isUp = $('#addPlanSelect').is(':hidden');
     isUp ? $(' #addPlanTable .actualConsumption').removeClass('hidden') : $(' #addPlanTable .actualConsumption').addClass('hidden');
 }
 
@@ -900,14 +902,11 @@ function productDetailModal(category, name, supplier, specification, site, code,
                 var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
                     '<img src={0} style="height:200px">' +
-                    '<div class="caption text-center">' +
-                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
-                    '</div>' +
                     '</div>' +
                     '</div>';
                 var imgOps = "";
                 for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path, img[i]);
+                    imgOps += imgOp.format(ret.data[i].path);
                 }
                 $("#productImg").append(imgOps);
             });
@@ -946,15 +945,22 @@ function updatePlan() {
     var i = 0, len = trs.length;
     for (; i < len; i++) {
         var tr = trs.eq(i);
-        var codeId = tr.find('.code').val();
-        if (isStrEmptyOrUndefined(codeId)) {
-            layer.msg('请选择货品编号');
-            return;
-        }
-        var plannedConsumption = tr.find('.plannedConsumption').val();
-        if (plannedConsumption == 0) {
-            layer.msg('计划用量不能为零');
-            return;
+        var codeId, plannedConsumption;
+        var billId = tr.find('.num').attr('bill');
+        if (_codeData[billId]) {
+            codeId = tr.find('.code').val();
+            if (isStrEmptyOrUndefined(codeId)) {
+                layer.msg('请选择货品编号');
+                return;
+            }
+            plannedConsumption = tr.find('.plannedConsumption').val();
+            if (plannedConsumption == 0) {
+                layer.msg('计划用量不能为零');
+                return;
+            }
+        } else {
+            codeId = billId;
+            plannedConsumption = tr.find('.plannedConsumption').text();
         }
         var billData = {
             BillId: codeId,

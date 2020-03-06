@@ -485,57 +485,15 @@
                         </div>
                         <div class="form-group">
                             <div class="form-group" style="display: flex;justify-content: space-between">
-                                <button type="button" class="btn btn-info btn-sm" onclick="getQrList()">生成</button>
-                                <button type="button" class="btn btn-primary btn-sm" onclick="printCode('print')">打印</button>
+                                <button type="button" class="btn btn-success btn-sm" onclick="getQrList()">
+                                    <span class="glyphicon glyphicon-qrcode"></span>&nbsp;<span>生成</span>
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="printCode('qrCodeList', 'iframe')">
+                                    <span class="glyphicon glyphicon-print"></span>&nbsp;<span>打印</span>
+                                </button>
                             </div>
-                            <div id="print">
-                                <div id="qrCodeList" style="display: flex;flex-wrap:wrap">
-                                    <div style="width: 200px; height: 150px; border: 1px solid; display: flex">
-                                        <div style="width: 50%; height: 100%; background: red"></div>
-                                        <div style="width: 50%; height: 100%; text-align: center; display: flex; flex-direction: column;justify-content: center">
-                                            <div>CSBCS001</div>
-                                            <div>超声波</div>
-                                            <div>超声波电源</div>
-                                            <div>先宁</div>
-                                            <div>40k</div>
-                                            <div>货架1</div>
-                                        </div>
-                                    </div>
-                                    <div style="width: 200px; height: 150px; border: 1px solid;display: flex">
-                                        <div style="width: 50%; height: 100%; background: red"></div>
-                                        <div style="width: 50%; height: 100%; text-align: center; display: flex; flex-direction: column;justify-content: center">
-                                            <div>CSBCS001</div>
-                                            <div>超声波</div>
-                                            <div>超声波电源</div>
-                                            <div>先宁</div>
-                                            <div>40k</div>
-                                            <div>货架1</div>
-                                        </div>
-                                    </div>
-                                    <div style="width: 200px; height: 150px; border: 1px solid;display: flex">
-                                        <div style="width: 50%; height: 100%; background: red"></div>
-                                        <div style="width: 50%; height: 100%; text-align: center; display: flex; flex-direction: column;justify-content: center">
-                                            <div>CSBCS001</div>
-                                            <div>超声波</div>
-                                            <div>超声波电源</div>
-                                            <div>先宁</div>
-                                            <div>40k</div>
-                                            <div>货架1</div>
-                                        </div>
-                                    </div>
-                                    <div style="width: 200px; height: 150px; border: 1px solid;display: flex">
-                                        <div style="width: 50%; height: 100%; background: red"></div>
-                                        <div style="width: 50%; height: 100%; text-align: center; display: flex; flex-direction: column;justify-content: center">
-                                            <div>CSBCS001</div>
-                                            <div>超声波</div>
-                                            <div>超声波电源</div>
-                                            <div>先宁</div>
-                                            <div>40k</div>
-                                            <div>货架1</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div id="qrCodeList" style="display: flex; flex-wrap: wrap"></div>
+                            <iframe id="iframe" name="iframe" class="hidden"></iframe>
                         </div>
                     </div>
                     <div class="modal-footer">

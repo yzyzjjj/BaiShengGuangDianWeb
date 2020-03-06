@@ -5,71 +5,66 @@
         categorySelect(resolve);
     });
     var nameFunc = new Promise(function (resolve, reject) {
-        nameSelect(resolve, true);
+        nameSelect(resolve, true, 'Select');
     });
     var supplierFunc = new Promise(function (resolve, reject) {
-        supplierSelect(resolve, true);
+        supplierSelect(resolve, true, 'Select');
     });
     var specificationFunc = new Promise(function (resolve, reject) {
-        specificationSelect(resolve, true);
+        specificationSelect(resolve, true, 'Select');
     });
     var siteFunc = new Promise(function (resolve, reject) {
-        siteSelect(resolve, true);
+        siteSelect(resolve);
     });
     Promise.all([categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
         .then((result) => {
-            //console.log('准备工作完毕');
-            //console.log(result);
-            getMaterialList();
+            getMaterialList('Select');
         });
 
     $('#categorySelect').on('select2:select', function () {
         var nameFunc = new Promise(function (resolve, reject) {
-            nameSelect(resolve);
+            nameSelect(resolve, false, 'Select');
         });
         var supplierFunc = new Promise(function (resolve, reject) {
-            supplierSelect(resolve);
+            supplierSelect(resolve, false, 'Select');
         });
         var specificationFunc = new Promise(function (resolve, reject) {
-            specificationSelect(resolve);
+            specificationSelect(resolve, false, 'Select');
         });
         Promise.all([nameFunc, supplierFunc, specificationFunc])
             .then((result) => {
-                //console.log('准备工作完毕');
-                //console.log(result);
-                getMaterialList();
+                getMaterialList('Select');
             });
     });
     $('#nameSelect').on('select2:select', function () {
         var supplierFunc = new Promise(function (resolve, reject) {
-            supplierSelect(resolve);
+            supplierSelect(resolve, false, 'Select');
         });
         var specificationFunc = new Promise(function (resolve, reject) {
-            specificationSelect(resolve);
+            specificationSelect(resolve, false, 'Select');
         });
         Promise.all([supplierFunc, specificationFunc])
             .then((result) => {
-                //console.log('准备工作完毕');
-                //console.log(result);
-                getMaterialList();
+                getMaterialList('Select');
+                qrSiteSet('Select');
             });
     });
     $('#supplierSelect').on('select2:select', function () {
         var specificationFunc = new Promise(function (resolve, reject) {
-            specificationSelect(resolve);
+            specificationSelect(resolve, false, 'Select');
         });
         Promise.all([specificationFunc])
             .then((result) => {
-                //console.log('准备工作完毕');
-                //console.log(result);
-                getMaterialList();
+                getMaterialList('Select');
+                qrSiteSet('Select');
             });
     });
     $('#specificationSelect').on('select2:select', function () {
-        getMaterialList();
+        getMaterialList('Select');
+        qrSiteSet('Select');
     });
     $('#siteSelect').on('select2:select', function () {
-        getMaterialList();
+        getMaterialList('Select');
     });
 
     $('#logBillSelect').on('select2:select', function () {
@@ -191,10 +186,58 @@
                 $('#logConsumePrice').html(d.Price);
             }
         }
-
         getLogConsumeList(false);
     });
 
+    $('#categoryQr').on('select2:select', function () {
+        nameSelect(null, false, 'Qr');
+        supplierSelect(null, false, 'Qr');
+        specificationSelect(null, false, 'Qr');
+        qrSiteSet('Qr');
+    });
+    $('#nameQr').on('select2:select', function () {
+        supplierSelect(null, false, 'Qr');
+        specificationSelect(null, false, 'Qr');
+        qrSiteSet('Qr');
+    });
+    $('#supplierQr').on('select2:select', function () {
+        specificationSelect(null, false, 'Qr');
+        qrSiteSet('Qr');
+    });
+    $('#qrCodeList').on('click', '.delQrCode', function () {
+        $(this).parent().parent().remove();
+        var printBox = $('#qrCodeList .printBox');
+        printBox.prop('style', 'float:left');
+        var printBoxCount = printBox.length;
+        for (var i = 0; i < printBoxCount; i++) {
+            if (!((i + 1) % 24)) {
+                printBox.eq(i).prop('style', 'page-break-after:always');
+            }
+        }
+    });
+}
+
+var _qrCode = null;
+//位置设置
+function qrSiteSet(el) {
+    new Promise(function (resolve) {
+        getMaterialList(el, resolve);
+    }).then((result) => {
+        var siteData = {};
+        var option = '<option value = "{0}">{1}</option>';
+        var options = '<option value = "0">所有位置</option>';
+        var i, len = result.length;
+        for (i = 0; i < len; i++) {
+            var d = result[i];
+            var siteId = d.SiteId;
+            if (!siteData[siteId]) {
+                siteData[siteId] = 1;
+                options += option.format(siteId, d.Site);
+            }
+        }
+        $(`#site${el}`).empty();
+        $(`#site${el}`).append(options);
+    });
 }
 
 var _logConsumePlanBill = null;
@@ -228,7 +271,7 @@ function categorySelect(resolve) {
 }
 
 //名称选项
-function nameSelect(resolve, first = false) {
+function nameSelect(resolve, first = false, el) {
     var opType = 824;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -236,7 +279,7 @@ function nameSelect(resolve, first = false) {
     }
     var list = {};
     if (!first) {
-        var categoryId = $('#categorySelect').val();
+        var categoryId = $(`#category${el}`).val();
         if (isStrEmptyOrUndefined(categoryId)) {
             layer.msg('请选择货品类别');
             return;
@@ -254,7 +297,6 @@ function nameSelect(resolve, first = false) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#nameSelect').empty();
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
@@ -263,14 +305,15 @@ function nameSelect(resolve, first = false) {
             var d = list[i];
             options += option.format(d.Id, d.Name);
         }
-        $('#nameSelect').append(options);
+        $(`#name${el}`).empty();
+        $(`#name${el}`).append(options);
         if (resolve != null)
             resolve(options);
     });
 }
 
 //供应商选项
-function supplierSelect(resolve, first = false) {
+function supplierSelect(resolve, first = false, el) {
     var opType = 831;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -278,7 +321,7 @@ function supplierSelect(resolve, first = false) {
     }
     var list = {};
     if (!first) {
-        var categoryId = $('#categorySelect').val();
+        var categoryId = $(`#category${el}`).val();
         if (isStrEmptyOrUndefined(categoryId)) {
             layer.msg('请选择货品类别');
             return;
@@ -287,7 +330,7 @@ function supplierSelect(resolve, first = false) {
             list.categoryId = categoryId;
         }
 
-        var nameId = $('#nameSelect').val();
+        var nameId = $(`#name${el}`).val();
         if (isStrEmptyOrUndefined(nameId)) {
             layer.msg('请选择货品名称');
             return;
@@ -305,7 +348,6 @@ function supplierSelect(resolve, first = false) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#supplierSelect').empty();
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
@@ -314,14 +356,15 @@ function supplierSelect(resolve, first = false) {
             var d = list[i];
             options += option.format(d.Id, d.Supplier);
         }
-        $('#supplierSelect').append(options);
+        $(`#supplier${el}`).empty();
+        $(`#supplier${el}`).append(options);
         if (resolve != null)
             resolve(options);
     });
 }
 
 //规格选项
-function specificationSelect(resolve, first = false) {
+function specificationSelect(resolve, first = false, el) {
     var opType = 839;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -329,7 +372,7 @@ function specificationSelect(resolve, first = false) {
     }
     var list = {};
     if (!first) {
-        var categoryId = $('#categorySelect').val();
+        var categoryId = $(`#category${el}`).val();
         if (isStrEmptyOrUndefined(categoryId)) {
             layer.msg('请选择货品类别');
             return;
@@ -338,7 +381,7 @@ function specificationSelect(resolve, first = false) {
             list.categoryId = categoryId;
         }
 
-        var nameId = $('#nameSelect').val();
+        var nameId = $(`#name${el}`).val();
         if (isStrEmptyOrUndefined(nameId)) {
             layer.msg('请选择货品名称');
             return;
@@ -347,7 +390,7 @@ function specificationSelect(resolve, first = false) {
             list.nameId = nameId;
         }
 
-        var supplierId = $('#supplierSelect').val();
+        var supplierId = $(`#supplier${el}`).val();
         if (isStrEmptyOrUndefined(supplierId)) {
             layer.msg('请选择供应商名称');
             return;
@@ -364,7 +407,6 @@ function specificationSelect(resolve, first = false) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#specificationSelect').empty();
         var list = ret.datas;
         var i, len = list.length;
         var option = '<option value = "{0}">{1}</option>';
@@ -373,7 +415,8 @@ function specificationSelect(resolve, first = false) {
             var d = list[i];
             options += option.format(d.Id, d.Specification);
         }
-        $('#specificationSelect').append(options);
+        $(`#specification${el}`).empty();
+        $(`#specification${el}`).append(options);
         if (resolve != null)
             resolve(options);
     });
@@ -409,14 +452,14 @@ function siteSelect(resolve) {
 }
 
 //获取物料信息
-function getMaterialList() {
+function getMaterialList(el, resolve) {
     var opType = 800;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
         return;
     }
     var list = {};
-    var categoryId = $('#categorySelect').val();
+    var categoryId = $(`#category${el}`).val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg('请选择货品类别');
         return;
@@ -425,7 +468,7 @@ function getMaterialList() {
         list.categoryId = categoryId;
     }
 
-    var nameId = $('#nameSelect').val();
+    var nameId = $(`#name${el}`).val();
     if (isStrEmptyOrUndefined(nameId)) {
         layer.msg('请选择货品名称');
         return;
@@ -434,7 +477,7 @@ function getMaterialList() {
         list.nameId = nameId;
     }
 
-    var supplierId = $('#supplierSelect').val();
+    var supplierId = $(`#supplier${el}`).val();
     if (isStrEmptyOrUndefined(supplierId)) {
         layer.msg('请选择供应商名称');
         return;
@@ -443,7 +486,7 @@ function getMaterialList() {
         list.supplierId = supplierId;
     }
 
-    var specificationId = $('#specificationSelect').val();
+    var specificationId = $(`#specification${el}`).val();
     if (isStrEmptyOrUndefined(specificationId)) {
         layer.msg('请选择规格名称');
         return;
@@ -452,7 +495,7 @@ function getMaterialList() {
         list.specificationId = specificationId;
     }
 
-    var siteId = $('#siteSelect').val();
+    var siteId = $(`#site${el}`).val();
     if (isStrEmptyOrUndefined(siteId)) {
         layer.msg('请选择位置');
         return;
@@ -460,13 +503,16 @@ function getMaterialList() {
     if (siteId != 0) {
         list.siteId = siteId;
     }
-
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
+            return;
+        }
+        if (resolve != null && el == 'Qr') {
+            resolve(ret.datas);
             return;
         }
         _materialList = ret.datas;
@@ -1476,7 +1522,7 @@ function increase() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getMaterialList();
+                    getMaterialList('Select');
                 }
             });
     }
@@ -3073,7 +3119,7 @@ function consume() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getMaterialList();
+                    getMaterialList('Select');
                 }
             });
     }
@@ -3139,17 +3185,18 @@ function showDetailModel(id) {
 
 //生成二维码弹窗
 function createQrModal() {
+    $('#qrCodeList').empty();
     var categoryFunc = new Promise(function (resolve) {
         categorySelect(resolve);
     });
     var nameFunc = new Promise(function (resolve) {
-        nameSelect(resolve, true);
+        nameSelect(resolve, true, 'Qr');
     });
     var supplierFunc = new Promise(function (resolve) {
-        supplierSelect(resolve, true);
+        supplierSelect(resolve, true, 'Qr');
     });
     var specificationFunc = new Promise(function (resolve) {
-        specificationSelect(resolve, true);
+        specificationSelect(resolve, true, 'Qr');
     });
     var siteFunc = new Promise(function (resolve) {
         siteSelect(resolve, true);
@@ -3170,3 +3217,52 @@ function createQrModal() {
     $('#createQrModal').modal('show');
 }
 
+//生成二维码
+function getQrList() {
+    new Promise(function (resolve) {
+        getMaterialList('Qr', resolve);
+    }).then((result) => {
+        var option = '<div class="printBox" style={6}><div style="width: 230px; height: 115px; border: 1px solid; display: flex;position:relative">' +
+            '<div style="width: 50%; height: 100%">' +
+            '<div class="createQrCode" style="margin: 4px"></div>' +
+            '</div>' +
+            '<span class="glyphicon glyphicon-remove delQrCode" aria-hidden="true" style="position:absolute;right:3px;top:3px;font-size:20px;color:red;cursor:pointer"></span>' +
+            '<div style="width: 50%; height: 100%; text-align: center;display:flex;flex-direction:column;justify-content:center;font-size:12px">' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{0}</span>' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{1}</span>' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{2}</span>' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{3}</span>' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{4}</span>' +
+            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{5}</span>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        var i, len = result.length;
+        var options = '';
+        var codeData = [];
+        var flag = 0;
+        for (i = 0; i < len; i++) {
+            flag++;
+            if (flag == 24) {
+                flag = 0;
+            }
+            var d = result[i];
+            options += option.format(d.Code, d.Category, d.Name, d.Supplier, d.Specification, d.Site, flag ? 'float:left' : 'page-break-after:always');
+            codeData.push(`${d.BillId},${d.Code}`);
+        }
+        $('#qrCodeList').empty();
+        $('#qrCodeList').append(options);
+        for (i = 0; i < len; i++) {
+            new QRCode($('#qrCodeList .createQrCode')[i],
+                {
+                    text: codeData[i],
+                    width: 105,
+                    height: 105,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+        }
+        $('#qrCodeList .createQrCode').prop('title', '');
+    });
+}
