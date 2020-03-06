@@ -210,7 +210,7 @@
         printBox.prop('style', 'float:left');
         var printBoxCount = printBox.length;
         for (var i = 0; i < printBoxCount; i++) {
-            if (!((i + 1) % 12)) {
+            if (!((i + 1) % 24)) {
                 printBox.eq(i).prop('style', 'page-break-after:always');
             }
         }
@@ -3222,12 +3222,12 @@ function getQrList() {
     new Promise(function (resolve) {
         getMaterialList('Qr', resolve);
     }).then((result) => {
-        var option = '<div class="printBox" style={6}><div style="width: 340px; height: 170px; border: 1px solid; display: flex;position:relative">' +
+        var option = '<div class="printBox" style={6}><div style="width: 230px; height: 115px; border: 1px solid; display: flex;position:relative">' +
             '<div style="width: 50%; height: 100%">' +
             '<div class="createQrCode" style="margin: 4px"></div>' +
             '</div>' +
             '<span class="glyphicon glyphicon-remove delQrCode" aria-hidden="true" style="position:absolute;right:3px;top:3px;font-size:20px;color:red;cursor:pointer"></span>' +
-            '<div style="width: 50%; height: 100%; text-align: center;display:flex;flex-direction:column;justify-content:center">' +
+            '<div style="width: 50%; height: 100%; text-align: center;display:flex;flex-direction:column;justify-content:center;font-size:12px">' +
             '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{0}</span>' +
             '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{1}</span>' +
             '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{2}</span>' +
@@ -3243,7 +3243,7 @@ function getQrList() {
         var flag = 0;
         for (i = 0; i < len; i++) {
             flag++;
-            if (flag == 12) {
+            if (flag == 24) {
                 flag = 0;
             }
             var d = result[i];
@@ -3256,8 +3256,8 @@ function getQrList() {
             new QRCode($('#qrCodeList .createQrCode')[i],
                 {
                     text: codeData[i],
-                    width: 160,
-                    height: 160,
+                    width: 105,
+                    height: 105,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
