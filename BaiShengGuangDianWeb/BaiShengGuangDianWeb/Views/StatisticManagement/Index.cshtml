@@ -5,7 +5,12 @@
     ViewBag.Title = "加工记录";
     Layout = "_Layout";
 }
-<script src="~/mjs/StatisticManagement/Index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/StatisticManagement/Index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/StatisticManagement/Index.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">加工记录统计</h2>
     <div class="row">

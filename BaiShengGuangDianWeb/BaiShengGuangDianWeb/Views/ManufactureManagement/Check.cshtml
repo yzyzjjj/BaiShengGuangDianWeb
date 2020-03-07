@@ -1,5 +1,11 @@
 ﻿@model object
 
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/workSpace.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/workSpace.min.js"></script>
+</environment>
 <!DOCTYPE html>
 
 <html>
@@ -7,8 +13,8 @@
     <title>title</title>
 </head>
 <body>
-<div>
-      
-</div>
+    <div>
+
+    </div>
 </body>
 </html>

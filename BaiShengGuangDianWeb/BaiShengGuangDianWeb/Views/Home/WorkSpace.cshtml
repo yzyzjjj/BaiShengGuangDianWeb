@@ -4,7 +4,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/Home/workSpace.js"></script>
+<environment include="Development">
+    <script src="~/mjs/Home/workSpace.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Home/workSpace.min.js"></script>
+</environment>
 <section class="content ">
     <h2>
         工作台

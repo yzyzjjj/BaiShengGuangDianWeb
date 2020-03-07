@@ -4,7 +4,12 @@
     ViewBag.Title = "组织结构管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/AccountManagement/Index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/AccountManagement/Index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/AccountManagement/Index.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">组织结构</h2>
     <div class="row">

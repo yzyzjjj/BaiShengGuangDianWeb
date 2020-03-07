@@ -4,7 +4,12 @@
     ViewBag.Title = "场地库管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/DeviceManagement/Site.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceManagement/Site.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceManagement/Site.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">场地库管理</h2>
     <div class="box box-primary">

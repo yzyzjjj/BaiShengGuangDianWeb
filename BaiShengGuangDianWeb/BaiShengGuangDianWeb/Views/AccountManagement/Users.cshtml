@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/AccountManagement/users.js"></script>
+<environment include="Development">
+    <script src="~/mjs/AccountManagement/users.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/AccountManagement/users.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">用户管理</h2>
     <div class="box box-primary">

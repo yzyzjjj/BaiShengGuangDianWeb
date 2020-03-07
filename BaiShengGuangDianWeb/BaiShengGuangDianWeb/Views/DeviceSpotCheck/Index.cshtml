@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/DeviceSpotCheck/index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceSpotCheck/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceSpotCheck/index.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">设备点检</h2>
     <div class="box box-primary">

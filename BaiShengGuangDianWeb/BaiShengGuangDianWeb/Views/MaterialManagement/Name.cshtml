@@ -3,7 +3,12 @@
     ViewBag.Title = "货品名称管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/MaterialManagement/name.js"></script>
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/name.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/name.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">名称管理</h2>
     <div class="box box-primary">

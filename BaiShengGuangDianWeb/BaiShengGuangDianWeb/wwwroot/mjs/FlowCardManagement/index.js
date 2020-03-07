@@ -144,6 +144,7 @@ function showAddFlowCardModel() {
             menu: true
         });
         ajaxPost("/Relay/Post", data, function (ret) {
+            resolve('success');
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -158,7 +159,6 @@ function showAddFlowCardModel() {
             }
             $("#afProductionProcess").append(html);
 
-            resolve('success');
         }, 0);
     });
 
@@ -174,6 +174,7 @@ function showAddFlowCardModel() {
             menu: true
         });
         ajaxPost("/Relay/Post", data, function (ret) {
+            resolve('success');
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -187,7 +188,6 @@ function showAddFlowCardModel() {
                 html += option.format(opt.Id, opt.RawMateriaName);
             }
             $("#afRawMateria").append(html);
-            resolve('success');
         }, 0);
     });
 
@@ -233,14 +233,14 @@ function addFlowCard() {
         showTip($("#afFlowCardNumberTip"), "流程卡数不能为空");
         return;
     }
-    if (isStrEmptyOrUndefined(afSender)) {
-        showTip($("#afSenderTip"), "发片人不能为空");
-        return;
-    }
-    if (isStrEmptyOrUndefined(afInboundNum)) {
-        showTip($("#afInboundNumTip"), "入库号不能为空");
-        return;
-    }
+    //if (isStrEmptyOrUndefined(afSender)) {
+    //    showTip($("#afSenderTip"), "发片人不能为空");
+    //    return;
+    //}
+    //if (isStrEmptyOrUndefined(afInboundNum)) {
+    //    showTip($("#afInboundNumTip"), "入库号不能为空");
+    //    return;
+    //}
     var flowCard = parseInt(afStartFlowCard);
     var count = parseInt(afFlowCardNumber);
     var pData = new Array();
@@ -632,14 +632,14 @@ function updateFlowCard() {
         return;
     }
 
-    if (isStrEmptyOrUndefined(sender)) {
-        showTip($("#ufSenderTip"), "发片人不能为空");
-        return;
-    }
-    if (isStrEmptyOrUndefined(inboundNum)) {
-        showTip($("#ufInboundNumTip"), "入库号不能为空");
-        return;
-    }
+    //if (isStrEmptyOrUndefined(sender)) {
+    //    showTip($("#ufSenderTip"), "发片人不能为空");
+    //    return;
+    //}
+    //if (isStrEmptyOrUndefined(inboundNum)) {
+    //    showTip($("#ufInboundNumTip"), "入库号不能为空");
+    //    return;
+    //}
 
     var ufGGdata = new Array();
     var i;

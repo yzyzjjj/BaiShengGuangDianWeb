@@ -3,7 +3,12 @@
     ViewBag.Title = "点检计划设置";
     Layout = "_Layout";
 }
-<script src="~/mjs/DeviceSpotCheck/SpotCheckPlan.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceSpotCheck/SpotCheckPlan.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceSpotCheck/SpotCheckPlan.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">点检计划设置</h2>
     <div class="box box-primary">

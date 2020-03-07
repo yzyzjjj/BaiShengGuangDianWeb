@@ -3,9 +3,14 @@
     ViewBag.Title = "6s检查";
     //Layout = "_Layout";
 }
-<script src="~/mjs/_6sManagement/index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/_6sManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/_6sManagement/index.min.js"></script>
+</environment>
 <section class="content ">
-    <h2 class="text-center">6S检查</h2>
+    <h2 class="text-center">@ViewBag.Title</h2>
     <div class="box box-primary">
         <div class="box-header with-border">
             <div class="form-group form-inline">

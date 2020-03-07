@@ -3,7 +3,13 @@
     ViewBag.Title = "设备点检记录";
     Layout = "_Layout";
 }
-<script src="~/mjs/DeviceSpotCheck/SpotCheckLog.js"></script>
+
+<environment include="Development">
+    <script src="~/mjs/DeviceSpotCheck/SpotCheckLog.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceSpotCheck/SpotCheckLog.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center" id="pageTitle">点检记录查询</h2>
     <div class="nav-tabs-custom">
@@ -37,7 +43,7 @@
                             <label class="control-label textOverTop">计划：检验总数/已检验/不合格</label>
                             <div class="form-group" style="display: flex; flex-wrap: wrap" id="devicePlanDetail"></div>
                         </div>
-                        <hr/>
+                        <hr />
                         <div class="form-group">
                             <div class="form-group">
                                 <label class="control-label textOverTop" style="font-size: 18px">下次检查：</label>

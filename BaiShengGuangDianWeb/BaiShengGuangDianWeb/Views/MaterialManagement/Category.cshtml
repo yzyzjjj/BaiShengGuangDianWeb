@@ -3,7 +3,12 @@
     ViewBag.Title = "货品类别管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/MaterialManagement/category.js"></script>
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/category.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/category.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">类别管理</h2>
     <div class="box box-primary">

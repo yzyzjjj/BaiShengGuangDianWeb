@@ -3,7 +3,12 @@
     ViewBag.Title = "6s检查设置";
     //Layout = "_Layout";
 }
-<script src="~/mjs/_6sManagement/set.js"></script>
+<environment include="Development">
+    <script src="~/mjs/_6sManagement/set.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/_6sManagement/set.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">6s检查设置</h2>
     <div class="box box-primary">

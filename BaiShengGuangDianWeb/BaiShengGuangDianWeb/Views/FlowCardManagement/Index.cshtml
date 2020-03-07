@@ -4,11 +4,15 @@
     ViewBag.Title = "流程卡管理";
     Layout = "_Layout";
 }
-
-<script src="~/mjs/FlowCardManagement/index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/FlowCardManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/FlowCardManagement/index.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">
-        流程卡管理
+        @ViewBag.Title
     </h2>
     <div class="row">
         <div class="nav-tabs-custom">
@@ -209,12 +213,12 @@
                         <label class="adt label-danger" id="afFlowCardNumberTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afSender"><span class="text-red">* </span>发片人：</label>
+                        <label class="control-label" for="afSender">@*<span class="text-red">* </span>*@发片人：</label>
                         <input class="form-control" id="afSender" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger" id="afSenderTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="afInboundNum"><span class="text-red">* </span>入库号：</label>
+                        <label class="control-label" for="afInboundNum">@*<span class="text-red">* </span>*@入库号：</label>
                         <input class="form-control" id="afInboundNum" onfocusin="focusIn($(this))" maxlength="32">
                         <label class="adt label-danger" id="afInboundNumTip"></label>
                     </div>
@@ -269,12 +273,12 @@
                             <input class="form-control" id="ufFlowCardName" disabled="disabled" maxlength="20">
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufSender"><span class="text-red">* </span>发片人：</label>
+                            <label class="control-label" for="ufSender">@*<span class="text-red">* </span>*@发片人：</label>
                             <input class="form-control" id="ufSender" onfocusin="focusIn($(this))" maxlength="20">
                             <label class="adt label-danger" id="ufSenderTip"></label>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="ufInboundNum"><span class="text-red">* </span>入库号：</label>
+                            <label class="control-label" for="ufInboundNum">@*<span class="text-red">* </span>*@入库号：</label>
                             <input class="form-control" id="ufInboundNum" onfocusin="focusIn($(this))" maxlength="32">
                             <label class="adt label-danger" id="ufInboundNumTip"></label>
                         </div>
