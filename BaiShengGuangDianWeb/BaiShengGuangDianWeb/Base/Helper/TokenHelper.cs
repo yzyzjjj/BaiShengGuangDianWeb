@@ -42,7 +42,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 new Claim("role", accountInfo.RoleName),
                 new Claim("account", accountInfo.Account),
                 new Claim("email", accountInfo.EmailAddress),
-                new Claim("permissions", accountInfo.Permissions),
+                //new Claim("permissions", accountInfo.Permissions),
                 new Claim("prole", accountInfo.ProductionRole)
             };
             var credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
@@ -60,13 +60,13 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// 验证身份 验证签名的有效性,
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="needUpdate">是否更新</param>
+        /// <param name="needUpdate">是否更新 0  1  token  2  per  3 all</param>
         /// 例如：payLoad["aud"]?.ToString() == "roberAuddience";
         /// 例如：验证是否过期 等
         /// <returns></returns>
-        public static bool Validate(string token, out bool needUpdate)
+        public static bool Validate(string token, string per, out int needUpdate)
         {
-            needUpdate = false;
+            needUpdate = 0;
             var jwtArr = token.Split('.');
             var header = JsonConvert.DeserializeObject<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwtArr[0]));
             var payLoad = JsonConvert.DeserializeObject<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwtArr[1]));
@@ -82,29 +82,38 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var left = long.Parse(payLoad["exp"].ToString()) - DateTime.UtcNow.ToUnixTime();
             if (left > 0)
             {
-                needUpdate = left < 10 * 60;
                 try
                 {
                     AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
-                    //new Claim("name", accountInfo.Name),
-                    //new Claim("email", accountInfo.EmailAddress),
-                    //new Claim("permissions", accountInfo.Permissions),
-                    //new Claim("prole", accountInfo.ProductionRole)
-
+                    if (left < 10 * 60)
+                    {
+                        needUpdate += 1;
+                    }
+                    else
+                    {
+                        if (AccountHelper.CurrentUser.Name != payLoad["name"].ToString() ||
+                            AccountHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
+                            AccountHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
+                            AccountHelper.CurrentUser.Permissions != per ||
+                            AccountHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
+                        {
+                            needUpdate += 1;
+                        }
+                    }
                     if (AccountHelper.CurrentUser.Name != payLoad["name"].ToString() ||
                         AccountHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
                         AccountHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
-                        AccountHelper.CurrentUser.Permissions != payLoad["permissions"].ToString() ||
+                        AccountHelper.CurrentUser.Permissions != per ||
                         AccountHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
                     {
-                        needUpdate = true;
+                        needUpdate += 2;
                     }
 
                     return true;
                 }
                 catch (Exception)
                 {
-                    needUpdate = false;
+                    needUpdate = 3;
                 }
             }
             return false;

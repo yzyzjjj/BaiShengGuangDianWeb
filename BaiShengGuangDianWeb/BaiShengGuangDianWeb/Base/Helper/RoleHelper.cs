@@ -29,6 +29,17 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = !isAll ? "SELECT * FROM `roles` WHERE IsDeleted = 0 AND Id = @id;" : "SELECT * FROM `roles` WHERE Id = @id;";
             return ServerConfig.WebDb.Query<RoleInfo>(sql, new { id }).FirstOrDefault();
         }
+        /// <summary>
+        /// 根据ids获取角色信息
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="isAll"></param>
+        /// <returns></returns>
+        public static IEnumerable<RoleInfo> GetRoleInfos(IEnumerable<int> ids, bool isAll = false)
+        {
+            var sql = $"SELECT * FROM `roles` WHERE {(isAll ? "" : " IsDeleted = 0 AND")} Id IN @ids;";
+            return ServerConfig.WebDb.Query<RoleInfo>(sql, new { ids });
+        }
 
         /// <summary>
         /// 根据name获取角色信息

@@ -334,9 +334,6 @@ function report() {
 
     var list = new Array();
     var itemNames = new Array();
-    if (showItems == null) {
-        return;
-    }
     for (var i = 0; i < showItems.length; i++) {
         var itemCheck = $("#itemCheckTime" + i).attr("itemCheck");
         var itemId = $("#itemCheckTime" + i).attr("itemId");

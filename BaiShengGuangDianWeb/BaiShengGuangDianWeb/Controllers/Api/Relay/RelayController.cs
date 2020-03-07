@@ -51,7 +51,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
-            //url = "http://localhost:62101" + permission.Url;
+            url = "http://localhost:62101" + permission.Url;
             //设备升级
             if (opType == 108)
             {
@@ -109,7 +109,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
                     opData,
                 };
                 OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, opType, logParam.ToJSON());
-                if (opType != 100 || AccountHelper.CurrentUser.Role == 1)
+                if (opType != 100 || AccountHelper.CurrentUser.RoleList.Contains(1))
                 {
                     return JObject.Parse(result);
                 }

@@ -26,19 +26,28 @@ namespace BaiShengGuangDianWeb.Base.Filter
             }
 
             var token = CookieHelper.GetCookie("token", context.HttpContext.Request);
-            var needUpdate = false;
-            if (token.IsNullOrEmpty() || !TokenHelper.Validate(token, out needUpdate))
+            var per = CookieHelper.GetCookie("per", context.HttpContext.Request);
+            if (per.IsNullOrEmpty() || token.IsNullOrEmpty() || !TokenHelper.Validate(token, per, out var needUpdate))
             {
                 CookieHelper.DelCookie("token", context.HttpContext.Response);
+                CookieHelper.DelCookie("per", context.HttpContext.Response);
                 //未通过验证则跳转到无权限提示页
                 context.Result = new RedirectToActionResult("Login", "Account", null);
                 return;
             }
 
-            if (needUpdate)
+            if (needUpdate != 0)
             {
-                var newToken = TokenHelper.CreateJwtToken(AccountHelper.CurrentUser);
-                CookieHelper.SetCookie("token", newToken, context.HttpContext.Response);
+                switch (needUpdate)
+                {
+                    case 1:
+                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountHelper.CurrentUser), context.HttpContext.Response); break;
+                    case 2:
+                        CookieHelper.SetCookie("per", AccountHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
+                    case 3:
+                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountHelper.CurrentUser), context.HttpContext.Response);
+                        CookieHelper.SetCookie("per", AccountHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
+                }
             }
             base.OnActionExecuting(context);
         }

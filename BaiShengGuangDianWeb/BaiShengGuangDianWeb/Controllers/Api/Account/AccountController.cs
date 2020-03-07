@@ -65,7 +65,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                             Account = loginBody.Account,
                             Password = AccountHelper.GenAccountPwdByOne(loginBody.Account, loginBody.Password),
                             Name = loginBody.Account,
-                            Role = 4,
+                            Role = "4",
                             EmailType = "",
                             EmailAddress = "",
                             SelfPermissions = "",
@@ -109,6 +109,9 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 }
             }
 
+            var token = TokenHelper.CreateJwtToken(accountInfo);
+            CookieHelper.SetCookie("token", token, Response);
+            CookieHelper.SetCookie("per", accountInfo.PermissionsList.Join(), Response);
             if (bool.TryParse(loginBody.RememberMe, out var rm) && rm)
             {
                 var exp = 3600 * 24 * 7;
@@ -120,8 +123,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 CookieHelper.DelCookie("n", Response);
                 CookieHelper.DelCookie("p", Response);
             }
-            var token = TokenHelper.CreateJwtToken(accountInfo);
-            CookieHelper.SetCookie("token", token, Response);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
             var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
             var result = new DataResult();
@@ -139,6 +140,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             CookieHelper.DelCookie("token", Response);
+            CookieHelper.DelCookie("per", Response);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登出系统");
             return Result.GenError<Result>(Error.Success);
         }
@@ -183,19 +185,25 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             }
             var param = Request.GetRequestParams();
             var roleStr = param.GetValue("role");
-            if (!int.TryParse(roleStr, out var role))
-            {
-                return Result.GenError<DataResult>(Error.ParamError);
-            }
 
-            var roleInfo = RoleHelper.GetRoleInfo(role);
-            if (roleInfo == null)
+            var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
+            if (!roleList.Any())
             {
-                return Result.GenError<DataResult>(Error.RoleNotExist);
+                return Result.GenError<DataResult>(Error.RoleNotSelect);
+            }
+            var roleInfos = RoleHelper.GetRoleInfos(roleList);
+            IEnumerable<int> rolePermissionsList;
+            if (roleInfos == null || !roleInfos.Any())
+            {
+                rolePermissionsList = new List<int>();
+            }
+            else
+            {
+                rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
             }
 
             var result = new DataResult();
-            var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !roleInfo.PermissionsList.Contains(x.Id)).ToList();
+            var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !rolePermissionsList.Contains(x.Id)).ToList();
             result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;

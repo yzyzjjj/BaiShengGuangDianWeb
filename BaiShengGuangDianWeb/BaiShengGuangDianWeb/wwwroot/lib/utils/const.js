@@ -36,7 +36,7 @@ var PermissionTypes = [
     { name: "页面管理", isPage: true, id: -1 },
     { name: "接口管理", isPage: false, id: -2 }
 ];
-//type : 1 设置；2 系统管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检 9 计划管理 10 物料管理 11 6s管理
+//type : 1 设置；2 系统管理；3 设备管理；4 流程卡管理；5 工艺管理；6 维修管理 7 数据统计 8 设备点检 9 计划管理 10 物料管理 11 6s管理 12 生产管理
 var PermissionPageTypes = [
     { name: "工作台", icon: "fa-windows", noChild: true, id: -3 },
     { name: "维修管理", icon: "fa-wrench", noChild: true, type: 6, id: -4 },
@@ -45,11 +45,12 @@ var PermissionPageTypes = [
     { name: "设备点检", icon: "fa-calendar-check-o", type: 8, id: -7 },
     { name: "流程卡管理", icon: "fa-clone", noChild: true, type: 4, id: -8 },
     { name: "工艺管理", icon: "fa-edit", noChild: true, type: 5, id: -9 },
-    { name: "计划管理", icon: "fa-list-alt", noChild: true, type: 9, id: -10 },
-    { name: "物料管理", icon: "fa-dropbox", type: 10, id: -11 },
-    { name: "6s检查", icon: "fa-calendar-check-o", type: 11, id: -12 },
-    { name: "数据统计", icon: "fa-bar-chart", type: 7, id: -13 },
-    { name: "设置", icon: "fa-gear", type: 1, id: -14 }
+    { name: "生产管理", icon: " fa-object-group", type: 12, id: -10 },
+    { name: "计划管理", icon: "fa-list-alt", noChild: true, type: 9, id: -11 },
+    { name: "物料管理", icon: "fa-dropbox", type: 10, id: -12 },
+    { name: "6s检查", icon: "fa-calendar-check-o", type: 11, id: -13 },
+    { name: "数据统计", icon: "fa-bar-chart", type: 7, id: -14 },
+    { name: "设置", icon: "fa-gear", type: 1, id: -15 }
 ];
 
 var chatEnum = {

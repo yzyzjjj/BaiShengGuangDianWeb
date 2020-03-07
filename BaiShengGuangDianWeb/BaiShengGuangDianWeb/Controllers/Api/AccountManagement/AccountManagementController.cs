@@ -43,7 +43,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             else
             {
-                result.datas.Add(AccountHelper.GetAccountInfoAll(id));
+                result.datas.Add(AccountHelper.GetAccountInfo(id, true));
             }
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
@@ -79,12 +79,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 return Result.GenError<Result>(Error.ParamError);
             }
-
-            if (!int.TryParse(roleStr, out var role))
-            {
-                return Result.GenError<Result>(Error.ParamError);
-            }
-            var accountInfo = AccountHelper.GetAccountInfoAll(account);
+            var accountInfo = AccountHelper.GetAccountInfo(account, true);
             if (accountInfo != null)
             {
                 return Result.GenError<Result>(Error.AccountIsExist);
@@ -95,8 +90,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.NameIsExist);
             }
 
-            var roleInfo = RoleHelper.GetRoleInfo(role);
-            if (roleInfo == null)
+            var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
+            if (!roleList.Any())
+            {
+                return Result.GenError<Result>(Error.RoleNotSelect);
+            }
+            var roleInfos = RoleHelper.GetRoleInfos(roleList);
+            if (roleInfos == null || !roleInfos.Any() || roleInfos.Count() != roleList.Count())
             {
                 return Result.GenError<Result>(Error.RoleNotExist);
             }
@@ -105,9 +105,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 try
                 {
+                    var rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");
+                    permissions = permissionList.Distinct().Where(x => !rolePermissionsList.Contains(x)).Join(",");
                 }
                 catch (Exception)
                 {
@@ -126,7 +127,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
-            var logParam = $"账号:{account},名字:{name},角色:{roleInfo.Name},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
+            var logParam = $"账号:{account},名字:{name},角色:{roleInfos.SelectMany(x => x.Name).Join(",")},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
             if (!isProcessor.IsNullOrEmpty())
             {
                 try
@@ -211,7 +212,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 Account = account,
                 Password = AccountHelper.GenAccountPwdByOrignalPwd(account, password),
                 Name = name,
-                Role = role,
+                RoleList = roleList,
                 EmailType = emailType,
                 EmailAddress = email,
                 SelfPermissions = permissions ?? "",
@@ -255,11 +256,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }
-                accountInfo = AccountHelper.GetAccountInfoAll(id);
+                accountInfo = AccountHelper.GetAccountInfo(id, true);
             }
             else
             {
-                accountInfo = AccountHelper.GetAccountInfoAll(accountStr);
+                accountInfo = AccountHelper.GetAccountInfo(accountStr, true);
             }
             if (accountInfo == null)
             {
@@ -391,11 +392,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     return Result.GenError<Result>(Error.ParamError);
                 }
-                accountInfo = AccountHelper.GetAccountInfoAll(id);
+                accountInfo = AccountHelper.GetAccountInfo(id, true);
             }
             else
             {
-                accountInfo = AccountHelper.GetAccountInfoAll(accountStr);
+                accountInfo = AccountHelper.GetAccountInfo(accountStr, true);
             }
             if (accountInfo == null)
             {
@@ -448,23 +449,21 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             //Role
             var roleStr = param.GetValue("role");
-            if (!roleStr.IsNullOrEmpty())
+            var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
+            if (!roleList.Any())
             {
-                if (!int.TryParse(roleStr, out var role))
-                {
-                    return Result.GenError<Result>(Error.ParamError);
-                }
+                return Result.GenError<Result>(Error.RoleNotSelect);
+            }
 
-                if (accountInfo.Role != role)
+            if (!accountInfo.RoleList.SequenceEqual(roleList))
+            {
+                var roleInfos = RoleHelper.GetRoleInfos(roleList, true);
+                if (roleInfos == null || !roleInfos.Any() || roleInfos.Count() != roleList.Count())
                 {
-                    var roleInfo = RoleHelper.GetRoleInfo(role, true);
-                    if (roleInfo == null)
-                    {
-                        return Result.GenError<Result>(Error.RoleNotExist);
-                    }
-                    logParam = $",角色ID:{accountInfo.Role},角色名:{accountInfo.RoleName},新角色ID:{role},新角色名:{roleInfo.Name}";
-                    accountInfo.Role = role;
+                    return Result.GenError<Result>(Error.RoleNotExist);
                 }
+                logParam = $",角色ID:{accountInfo.Role},角色名:{accountInfo.RoleName},新角色ID:{roleInfos.Select(x => x.Id).Join(",")},新角色名:{roleInfos.Select(x => x.Name).Join(",")}";
+                accountInfo.RoleList = roleList;
             }
 
             //Permissions
@@ -473,10 +472,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 try
                 {
-                    var roleInfo = RoleHelper.GetRoleInfo(accountInfo.Role);
+                    var roleInfos = RoleHelper.GetRoleInfos(accountInfo.RoleList);
+                    var rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
                     permissionList.AddRange(PermissionHelper.GetDefault());
-                    permissions = permissionList.Distinct().Where(x => !roleInfo.PermissionsList.Contains(x)).Join(",");
+                    permissions = permissionList.Distinct().Where(x => !rolePermissionsList.Contains(x)).Join(",");
                     if (!permissions.IsNullOrEmpty() && accountInfo.Permissions != permissions)
                     {
                         accountInfo.SelfPermissions = permissions;
@@ -594,7 +594,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                                     {
 
                                     });
-
                                 break;
                             case 1:
                                 //上一次包含,本次不包含 = 删除
@@ -824,7 +823,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
 
             var result = new DataResult();
-            result.datas.AddRange(EmailHelper.GetTypes());;
+            result.datas.AddRange(EmailHelper.GetTypes()); ;
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }

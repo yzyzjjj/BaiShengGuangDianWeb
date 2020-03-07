@@ -1,4 +1,5 @@
-﻿using BaiShengGuangDianWeb.Base.Server;
+﻿using System;
+using BaiShengGuangDianWeb.Base.Server;
 using BaiShengGuangDianWeb.Models.Account;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 {
                     if (AccountHelper.CurrentUser.PermissionsList.Contains(permission.Id))
                     {
+                        Console.WriteLine(AccountHelper.CurrentUser.Id);
                         return true;
                     }
                 }

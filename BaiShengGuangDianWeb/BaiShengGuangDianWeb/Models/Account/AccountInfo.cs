@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using ServiceStack;
 using System.Collections.Generic;
 using System.Linq;
+using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Models.Account
 {
@@ -14,7 +16,18 @@ namespace BaiShengGuangDianWeb.Models.Account
         [JsonIgnore]
         public string Password { get; set; }
         public string Name { get; set; }
-        public int Role { get; set; }
+        public string Role { get; set; }
+        private IEnumerable<int> _roleList { get; set; }
+        public IEnumerable<int> RoleList
+        {
+            get => _roleList ?? (_roleList = !Role.IsNullOrEmpty() ? Role.Split(",").Select(int.Parse) : new List<int>());
+            set
+            {
+                _roleList = value;
+                Role = _roleList.Join(",");
+            }
+        }
+
         public string RoleName { get; set; }
         public string EmailType { get; set; }
         public string EmailAddress { get; set; }

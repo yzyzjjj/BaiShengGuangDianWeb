@@ -100,8 +100,8 @@ function getJwtInfo(token) {
 
     var result2 = Base64.decode(info);
     var obj = JSON.parse(result2);
-
-    obj.permissionsList = isStrEmptyOrUndefined(obj.permissions) ? new Array() : obj.permissions.split(",").map(Number);
+    var per = GetCookie("per");
+    obj.permissionsList = isStrEmptyOrUndefined(per) ? new Array() : per.split(",").map(Number);
     obj.proleList = isStrEmptyOrUndefined(obj.prole) ? new Array() : obj.prole.split(",").map(Number);
     // console.log( obj )
 

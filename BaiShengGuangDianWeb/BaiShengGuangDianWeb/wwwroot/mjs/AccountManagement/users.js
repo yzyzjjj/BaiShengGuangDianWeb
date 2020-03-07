@@ -10,7 +10,9 @@
     });
 
     $("#add_perDiv").click(function (e) {
-        getOtherPermission("add_per_body", $("#addRole").val(), null);
+        var addRole = $("#addRole").val();
+        addRole = addRole == null ? "" : addRole.join();
+        getOtherPermission("add_per_body", addRole, null);
     });
 
 
@@ -23,7 +25,9 @@
     });
 
     $("#update_perDiv").click(function (e) {
-        getOtherPermission("update_per_body", $("#updateRole").val(), permission);
+        var updateRole = $("#updateRole").val();
+        updateRole = updateRole == null ? "" : updateRole.join();
+        getOtherPermission("update_per_body", updateRole, permission);
     });
 
     $("#updatePassword").on("ifChanged", function (event) {
@@ -62,7 +66,7 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, {1}, \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>';
+                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>';
                 var delUsersFormat = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>';
 
                 var op = function (data, type, row) {
@@ -162,37 +166,40 @@ function showAddUserModal(type = 0) {
     //    $("#addUserModal").modal("show");
     //    return;
     //}
+
     $("#addRole").empty();
-    ajaxGet("/RoleManagement/List",
-        null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
+    var func1 = new Promise(function (resolve) {
+        ajaxGet("/RoleManagement/List",
+            null,
+            function (ret) {
+                resolve('success');
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
 
-            var datas = ret.datas.sort(roleRule);
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < datas.length; i++) {
-                var d = datas[i];
-                $("#addRole").append(option.format(d.id, d.name));
-            }
-            if (type != -1)
-                $("#addUserModal").modal("show");
-            getOtherPermission("add_per_body", $("#addRole").val(), null);
-        });
-
+                var datas = ret.datas.sort(roleRule);
+                var option = '<option value="{0}">{1}</option>';
+                var html = "";
+                for (var i = 0; i < datas.length; i++) {
+                    var d = datas[i];
+                    html += option.format(d.id, d.name);
+                }
+                $("#addRole").append(html);
+                getOtherPermission("add_per_body", "", null);
+            });
+    });
     var opType = 100;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    deviceId = new Array();
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post",
-        data,
-        function (ret) {
+    var func2 = new Promise(function (resolve) {
+        deviceId = new Array();
+        var data = {}
+        data.opType = opType;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            resolve('success');
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -296,6 +303,13 @@ function showAddUserModal(type = 0) {
                     }
                 });
         });
+    });
+
+    Promise.all([func1, func2])
+        .then((result) => {
+            if (type != -1)
+                $("#addUserModal").modal("show");
+        });
 }
 
 var emailTypeData = [];
@@ -313,10 +327,12 @@ function emailType() {
                 $("#addEmailType").before('<label class="control-label">邮件类型：</label>');
             }
             var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
+            var html = "";
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
-                $("#addEmailType").append(option.format(data.type, data.name));
+                html += option.format(data.type, data.name);
             }
+            $("#addEmailType").append(html);
             $("#addEmailType .icb_minimal").iCheck({
                 checkboxClass: 'icheckbox_minimal-blue',
                 radioClass: 'iradio_minimal',
@@ -340,6 +356,7 @@ function addUser() {
     var addEmailType = emailTypeData.join();
     var addPassword = $("#addPassword").val().trim();
     var addRole = $("#addRole").val();
+    addRole = addRole == null ? "" : addRole.join();
     var pRole = new Array();
     if ($("#addProcessor").is(":checked"))
         pRole.push(0);
@@ -387,6 +404,11 @@ function addUser() {
         layer.msg("选择邮件类型邮箱不能为空");
         return;
     }
+
+    if (isStrEmptyOrUndefined(addRole)) {
+        layer.msg("请选择角色");
+        return;
+    }
     var doSth = function () {
         $("#addUserModal").modal("hide");
         var data = {
@@ -416,6 +438,7 @@ var updateList = new Array();
 var permission = null;
 var tf1 = true;
 function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole, emailType) {
+    role = role.split(",");
     account = unescape(account);
     name = unescape(name);
     emailAddress = unescape(emailAddress);
@@ -440,69 +463,77 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
     $("#updateProcessor").iCheck(productionRoleList.indexOf("0") > -1 ? 'check' : 'uncheck');
     $("#updateSurveyor").iCheck(productionRoleList.indexOf("1") > -1 ? 'check' : 'uncheck');
 
-    ajaxGet("/AccountManagement/EmailType", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            $("#upEmailType").empty();
-            if (tf1) {
-                tf1 = false;
-                $("#upEmailType").before('<label class="control-label">邮件类型：</label>');
-            }
-            var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#upEmailType").append(option.format(data.type, data.name));
-            }
-            $("#upEmailType .icb_minimal").iCheck({
-                checkboxClass: 'icheckbox_minimal-blue',
-                radioClass: 'iradio_minimal',
-                increaseArea: '20%'
-            });
-            var emailTypeList = emailType.split(",");
-            var upCks = $("#upEmailType .icb_minimal");
-            for (var j = 0; j < upCks.length; j++) {
-                if (emailTypeList.indexOf(upCks[j].value) == -1) {
-                    $(upCks[j]).iCheck('uncheck');
-                } else {
-                    $(upCks[j]).iCheck('check');
+    var func1 = new Promise(function (resolve) {
+        ajaxGet("/AccountManagement/EmailType", null,
+            function (ret) {
+                resolve('success');
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
                 }
-            }
-        });
+                $("#upEmailType").empty();
+                if (tf1) {
+                    tf1 = false;
+                    $("#upEmailType").before('<label class="control-label">邮件类型：</label>');
+                }
+                var option = '<label class="control-label" style="margin-left:10px">{1}：</label><input type="checkbox" value="{0}" class="icb_minimal">';
+                var html = "";
+                for (var i = 0; i < ret.datas.length; i++) {
+                    var data = ret.datas[i];
+                    html += option.format(data.type, data.name);
+                }
+                $("#upEmailType").append(html);
+                $("#upEmailType .icb_minimal").iCheck({
+                    checkboxClass: 'icheckbox_minimal-blue',
+                    radioClass: 'iradio_minimal',
+                    increaseArea: '20%'
+                });
+                var emailTypeList = emailType.split(",");
+                var upCks = $("#upEmailType .icb_minimal");
+                for (var j = 0; j < upCks.length; j++) {
+                    if (emailTypeList.indexOf(upCks[j].value) == -1) {
+                        $(upCks[j]).iCheck('uncheck');
+                    } else {
+                        $(upCks[j]).iCheck('check');
+                    }
+                }
+            });
+    });
+
+
     $("#updateRole").empty();
-    ajaxGet("/RoleManagement/List",
-        null,
-        function (ret) {
+    var func2 = new Promise(function (resolve) {
+        ajaxGet("/RoleManagement/List", null, function (ret) {
+            resolve('success');
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var datas = ret.datas.sort(roleRule);
             var option = '<option value="{0}">{1}</option>';
+            var html = "";
             for (var i = 0; i < datas.length; i++) {
-                var d = datas[i];
-                $("#updateRole").append(option.format(d.id, d.name));
+                var data = datas[i];
+                html += option.format(data.id, data.name);
             }
+            $("#updateRole").append(html);
             $("#updateRole").val(role).trigger("update");
 
-            $("#updateUserModal").modal("show");
             getOtherPermission("update_per_body", $("#updateRole").val(), permissions);
         });
+    });
 
     var opType = 100;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
     }
-    deviceId = new Array();
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post",
-        data,
-        function (ret) {
+    var func3 = new Promise(function (resolve) {
+        deviceId = new Array();
+        var data = {}
+        data.opType = opType;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            resolve('success');
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -609,6 +640,12 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
                     }
                 });
         });
+    });
+
+    Promise.all([func1, func2, func3])
+        .then((result) => {
+            $("#updateUserModal").modal("show");
+        });
 }
 
 function updateUser() {
@@ -625,6 +662,7 @@ function updateUser() {
     }
     var updateEmailType = upEmailTypeData.join();
     var updateRole = $("#updateRole").val();
+    updateRole = updateRole == null ? "" : updateRole.join();
     var pRole = new Array();
     if ($("#updateProcessor").is(":checked"))
         pRole.push(0);
@@ -680,6 +718,10 @@ function updateUser() {
     }
     if (isStrEmptyOrUndefined(updateEmail) && !isStrEmptyOrUndefined(updateEmailType)) {
         layer.msg("选择邮件类型邮箱不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(addRole)) {
+        layer.msg("请选择角色");
         return;
     }
     var doSth = function () {
