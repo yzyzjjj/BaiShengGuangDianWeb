@@ -50,51 +50,17 @@
     $("#flowCardEmpty").click(function () {
         $("#flowCard").val("");
     });
-    $("#file").change(function () {
-        addCover();
-        if (loads == 0) {
-            $("#flowCard").val("");
-            $("#fcBody").addClass("hidden");
-            $("#isChangeDiv").addClass("hidden");
-            $("#processSteps").empty();
-            $("#info").empty();
-            $("#pData").empty();
-            $("#run").addClass("disabled");
-        } else {
-            $("#rpFlowCard").val("");
-            $("#gxList").empty();
-            $("#tableFlowCard").addClass("hidden");
-        }
-        fileImg = setInterval("fileUp()", 1000);
-    });
-    $(document).on("visibilitychange", function () {
-        var page = this.visibilityState;
-        if (page == "hidden" && (!$("#video").is(":hidden") || !$("#video1").is(":hidden"))) {
-            clearCanvas();
-            closeVideo.stop();
-            clearInterval(canImg);
-            videos = 0;
-            $("#video").addClass("hidden");
-            $("#video1").addClass("hidden");
-        }
-    });
-    if (!pcAndroid()) {
-        $("#scanning").addClass("hidden");
-        $("#scanning1").addClass("hidden");
-    } else {
-        $("#upload").addClass("hidden");
-        $("#upload1").addClass("hidden");
-    }
-    $("#inputReportModel").on("hidden.bs.modal",
-        function () {
-            clearCanvas();
-            if (videos % 2 != 0) {
-                closeVideo.stop();
-                clearInterval(canImg);
-                $("#video1").addClass("hidden");
-                videos = 0;
-            }
-        });
+    //$(document).on("visibilitychange", function () {
+    //    var page = this.visibilityState;
+    //    if (page == "hidden" && (!$("#video").is(":hidden") || !$("#video1").is(":hidden"))) {
+    //        clearCanvas();
+    //        closeVideo.stop();
+    //        clearInterval(canImg);
+    //        videos = 0;
+    //        $("#video").addClass("hidden");
+    //        $("#video1").addClass("hidden");
+    //    }
+    //});
     $("#opUl").on("click", "a", function () {
         $(this).css("backgroundColor", "#d3d3d3").parent().siblings().find("a").css("backgroundColor", "");
         $("#addCraftDate").val(getDate()).datepicker('update');
@@ -105,79 +71,40 @@
             $("#thick").addClass("hidden");
         }
     });
-}
-
-var loads;
-function upload(load) {
-    loads = load;
-    if (videos % 2 != 0) {
-        closeVideo.stop();
-    }
-    clearInterval(canImg);
-    if (load == 0) {
-        $("#video").addClass("hidden");
+    if (!pcAndroid()) {
+        $(".scanning").addClass("hidden");
     } else {
-        $("#video1").addClass("hidden");
+        $(".upload").addClass("hidden");
     }
-    var uploadImg = setInterval($("#file").click(), 1000);
-    clearInterval(uploadImg);
-    videos = 0;
-}
-
-var scans;
-function scanning(scan) {
-    videos++;
-    if (videos % 2 == 0) {
-        clearCanvas();
-        closeVideo.stop();
-        clearInterval(canImg);
-        if (scan == 0) {
-            scans = 0;
-            $("#video").addClass("hidden");
-            videos = 0;
-        } else {
-            scans = 1;
-            $("#video1").addClass("hidden");
-            videos = 0;
-        }
-        return;
-    }
-    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-        //调用用户媒体设备, 访问摄像头
-        getUserMedia({
-            video: {
-                width: 290,
-                height: 290,
-                facingMode: "environment"
+    $('.upload').on('click', function () {
+        $('#file').trigger('click');
+    });
+    $("#file").on('change', function () {
+        addCover();
+        new Promise(function (resolve) {
+            printImgUp(resolve, this);
+        }.bind(this)).then((result) => {
+            removeCover();
+            $(this).val("");
+            if (result) {
+                var f = result.split(",")[2];
+                $('#inputReportModel').is(':hidden') ? $("#flowCard").val(f) : $("#rpFlowCard").val(f);
             }
-        },
-            success,
-            error);
-    } else {
-        layer.msg('不支持访问用户媒体');
-    }
-    if (scan == 0) {
-        scans = 0;
-        $("#video").removeClass("hidden");
-        $("#flowCard").val("");
-        $("#fcBody").addClass("hidden");
-        $("#isChangeDiv").addClass("hidden");
-        $("#processSteps").empty();
-        $("#info").empty();
-        $("#pData").empty();
-        $("#run").addClass("disabled");
-    } else {
-        scans = 1;
-        $("#video1").removeClass("hidden");
-        $("#rpFlowCard").val("");
-        $("#gxList").empty();
-        $("#tableFlowCard").addClass("hidden");
-    }
-    canImg = setInterval("capture()", 500);
+        });
+    });
 }
 
-var videos = 0;
-var x = 0;
+//扫描二维码
+function scanning(el) {
+    new Promise(function (resolve) {
+        showPrintModal(resolve);
+    }).then((result) => {
+        if (result) {
+            $(`#${el}`).val(result.split(",")[2]);
+        }
+    });
+}
+
 var faultData = null;
 function getDeviceList() {
     var opType = 100;
@@ -851,13 +778,6 @@ function showUsuallyFaultDetailModel(id) {
 }
 
 function showInputReport() {
-    clearCanvas();
-    if (videos % 2 != 0) {
-        closeVideo.stop();
-        clearInterval(canImg);
-        $("#video").addClass("hidden");
-        videos = 0;
-    }
     var info = getCookieTokenInfo();
     clearRpFlowCard();
     $("#rpFlowCardTip").addClass("hidden");
@@ -1305,157 +1225,4 @@ function addCraft() {
             });
     }
     showConfirm("添加", doSth);
-}
-
-
-
-var canImg;
-var fileImg;
-//访问用户媒体设备的兼容方法
-function getUserMedia(constraints, success, error) {
-    if (navigator.mediaDevices.getUserMedia) {
-        //最新的标准API
-        navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.webkitGetUserMedia) {
-        //webkit核心浏览器
-        navigator.webkitGetUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.mozGetUserMedia) {
-        //firfox浏览器
-        navigator.mozGetUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.getUserMedia) {
-        //旧版API
-        navigator.getUserMedia(constraints).then(success).catch(error);
-    }
-};
-
-function capture() {
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    if (scans == 0) {
-        context.drawImage(video, 0, 0, 290, 290);
-    } else {
-        context.drawImage(video1, 0, 0, 290, 290);
-    }
-    //}
-    qrcode.decode(canvas.toDataURL('image/png'));
-    qrcode.callback = function (e) {
-        //结果回调
-        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
-            addCover();
-            if (scans == 0) {
-                $("#video").addClass("hidden");
-                $("#flowCard").val(e.split(",")[2]);
-                clearCanvas();
-            } else {
-                $("#video1").addClass("hidden");
-                $("#rpFlowCard").val(e.split(",")[2]);
-                clearCanvas();
-            }
-            clearInterval(canImg);
-            removeCover();
-            closeVideo.stop();
-            videos = 0;
-        }
-    }
-}
-
-var closeVideo;
-function success(stream) {
-    var video;
-    if (scans == 0) {
-        video = document.getElementById('video');
-    } else {
-        video = document.getElementById('video1');
-    }
-    //兼容webkit核心浏览器
-    //var CompatibleURL = window.URL || window.webkitURL;
-    //将视频流设置为video元素的源
-    //console.log(stream);
-    //video.src = CompatibleURL.createObjectURL(stream);
-    video.srcObject = stream;
-    video.play();
-    closeVideo = stream.getTracks()[0];
-}
-
-function error() {
-    if (scans == 0) {
-        $("#video").addClass("hidden");
-    } else {
-        $("#video1").addClass("hidden");
-    }
-    layer.msg("访问用户媒体设备失败");
-    clearInterval(canImg);
-    videos = 0;
-}
-
-//function file() {
-//    qrcode.decode(canvas.toDataURL('image/png'));
-//    qrcode.callback = function (e) {
-//        //结果回调
-//        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
-//            $("#video").addClass("hidden");
-//            $("#flowCard").val(e.split(",")[2]);
-//            clearInterval(fileImg);
-//            $("#file").val("");
-//            removeCover();
-//        } else {
-//            clearInterval(fileImg);
-//            layer.msg("请上传正确的二维码图片");
-//            $("#file").val("");
-//            $("#flowCard").val("");
-//            removeCover();
-//        }
-//    }
-//}
-
-function clearCanvas() {
-    var c = document.getElementById("canvas");
-    var cxt = c.getContext("2d");
-    cxt.clearRect(0, 0, c.width, c.height);
-}
-
-function getObjectURL(file) {
-    var url = null;
-    if (window.createObjectURL != undefined) {          // basic
-        url = window.createObjectURL(file);
-    } else if (window.URL != undefined) {               // mozilla(firefox)
-        url = window.URL.createObjectURL(file);
-    } else if (window.webkitURL != undefined) {         // webkit or chrome
-        url = window.webkitURL.createObjectURL(file);
-    }
-    return url;
-}
-
-//上传图片识别二维码
-function fileUp() {
-    var newFile = document.getElementById('file');
-    //   console.log(newfile[0]);
-    //console.log(getObjectURL(this.files[0]));
-    // newfile[0]是通过input file上传的二维码图片文件
-    qrcode.decode(getObjectURL(newFile.files[0]));
-    qrcode.callback = function (e) {
-        //结果回调
-        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
-            if (loads == 0) {
-                $("#video").addClass("hidden");
-                $("#flowCard").val(e.split(",")[2]);
-            } else {
-                $("#video1").addClass("hidden");
-                $("#rpFlowCard").val(e.split(",")[2]);
-            }
-            clearInterval(fileImg);
-            $("#file").val("");
-            removeCover();
-        } else {
-            clearInterval(fileImg);
-            layer.msg("请上传正确的二维码图片");
-            $("#file").val("");
-            if (loads == 0) {
-                $("#flowCard").val("");
-            } else {
-                $("#rpFlowCard").val("");
-            }
-            removeCover();
-        }
-    }
 }

@@ -24,7 +24,6 @@
                             <h3 class="box-title">流程卡</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-primary btn-sm" id="showAddFlowCardModel" onclick="showAddFlowCardModel()">添加流程卡</button>
-                                @*<button type="button" class="btn btn-primary btn-sm" onclick="getFlowCardList()">重新加载</button>*@
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
                         </div>
@@ -39,12 +38,14 @@
                             </div>
                             <div class="form-group form-inline">
                                 <div class="fcBody form-group">
-                                    <label class="control-label" for="flowCardId">流程卡号：</label>
-                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                        <input type="tel" id="flowCardId" autocomplete="off" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
-                                        <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
-                                        <button type="button" class="btn btn-primary" id="scanning">扫描</button>
-                                        <button type="button" class="btn btn-primary" id="upload" title="二维码图片" style="margin-left: 5px">上传</button>
+                                    <label class="control-label" for="flowCardId" style="vertical-align:middle">流程卡号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box;vertical-align:middle">
+                                        <div style="display: flex; align-items: center">
+                                            <span class="iconfont icon-saoyisao" id="scanning" style="font-size:30px;cursor:pointer"></span>
+                                            <span class="glyphicon glyphicon-upload" id="upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
+                                            <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
+                                            <input type="tel" id="flowCardId" autocomplete="off" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="fcBody form-group hidden">
@@ -65,10 +66,6 @@
                                     <label class="control-label hidden" id="fcBtn">所有内容：</label>
                                     <button type="button" class="btn btn-primary" onclick="getFlowCardList()" style="margin-left: 4px">查询</button>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <video id="video" class="hidden" style="width: 100%; height: 290px"></video>
-                                <canvas id="canvas" class="hidden" width="290" height="290"></canvas>
                             </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="flowCardList"></table>

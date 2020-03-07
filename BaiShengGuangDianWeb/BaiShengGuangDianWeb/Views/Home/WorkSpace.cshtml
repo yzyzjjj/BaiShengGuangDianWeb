@@ -18,17 +18,10 @@
                     <h3 class="box-title">生产加工</h3>
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-primary btn-sm" onclick="addCraftModal()">操作</button>
-                        <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
-                        <button type="button" class="btn btn-primary btn-sm" title="二维码图片" onclick="upload(0)" id="upload">上传</button>
-                        <button type="button" class="btn btn-primary btn-sm" id="scanning" onclick="scanning(0)">扫描</button>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
                 <div class="box-body">
-                    <div class="form-group">
-                        <video id="video" class="hidden" style="width: 100%;height:290px"></video>
-                        <canvas id="canvas" class="hidden" width="290" height="290"></canvas>
-                    </div>
                     <div class="form-group">
                         <label class="control-label" for="processCode">选择设备：</label>
                         <select class="ms2 form-control" style="width: 100%" id="processCode" onchange="focusIn($(this))"></select>
@@ -36,12 +29,13 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
-                        <div class="form-inline">
-                            <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                <input type="tel" class="form-control" id="flowCard" value="" autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="width: 140px">
-                                <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left: 3px">查询</button>
-                                <button type="button" id="flowCardEmpty" class="btn btn-success">清空</button>
-                            </div>
+                        <div style="display: flex; align-items: center">
+                            <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('flowCard')"></span>
+                            <span class="glyphicon glyphicon-upload upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
+                            <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
+                            <input type="tel" class="form-control" id="flowCard" value="" autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
+                            <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left: 3px">查询</button>
+                            <button type="button" id="flowCardEmpty" class="btn btn-success" style="margin-left: 3px">清空</button>
                         </div>
                     </div>
                     <div class="box box-primary">
@@ -118,28 +112,6 @@
             </div>
         </div>
     </div>
-    <!-- 模态框（Modal） -->
-    @*<div class="modal fade" tabindex="-1" id="dataModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                            &times;
-                        </button>
-                        <h4 class="modal-title">工艺数据</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped" id="processDataList"></table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    </div>
-                </div>
-            </div>
-        </div>*@
-
     <!-- 模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="faultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -245,19 +217,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="control-label">快捷操作：</label>
-                        <button type="button" class="btn btn-primary" id="scanning1" onclick="scanning(1)">扫描</button>
-                        <button type="button" class="btn btn-primary" title="二维码图片" onclick="upload(1)" id="upload1">上传</button>
-                    </div>
-                    <div class="form-group">
-                        <video id="video1" class="hidden" style="width: 100%;height:290px"></video>
-                    </div>
-                    <div class="form-group">
                         <label class="control-label">流程卡号：</label>
-                        <div class="form-inline">
-                            <input type="tel" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20">
-                            <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()">查询</button>
-                            <button type="button" class="btn btn-success" onclick="clearRpFlowCard()">清空</button><br>
+                        <div style="display: flex; align-items: center">
+                            <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('rpFlowCard')"></span>
+                            <span class="glyphicon glyphicon-upload upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
+                            <input type="tel" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
+                            <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()" style="margin-left: 3px">查询</button>
+                            <button type="button" class="btn btn-success" onclick="clearRpFlowCard()" style="margin-left: 3px">清空</button><br>
                             <label class="label-danger hidden" id="rpFlowCardTip"></label>
                         </div>
                     </div>

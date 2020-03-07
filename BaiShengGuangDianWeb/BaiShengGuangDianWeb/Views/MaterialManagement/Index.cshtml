@@ -23,34 +23,26 @@
         </div>
         <div class="box-body">
             <div class="form-group form-inline">
-                <div class="form-group">
-                    <label class="control-label" for="categorySelect">类别：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="categorySelect" style="width: 160px"></select>
+                <div style="display: flex">
+                    <div style="flex: 1">
+                        <label class="control-label" style="margin: 0;white-space:nowrap">类别：</label>
+                        <select class="ms2 form-control categorySelect" id="categorySelect" style="width:95%"></select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label" for="nameSelect">名称：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="nameSelect" style="width: 160px"></select>
+                    <div style="flex: 1">
+                        <label class="control-label" style="margin: 0;white-space:nowrap">名称：</label>
+                        <select class="ms2 form-control" id="nameSelect" style="width:95%"></select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label" for="nameSelect">供应商：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="supplierSelect" style="width: 160px"></select>
+                    <div style="flex: 1">
+                        <label class="control-label" style="margin: 0;white-space:nowrap">供应商：</label>
+                        <select class="ms2 form-control" id="supplierSelect" style="width:95%"></select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label" for="nameSelect">规格：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="specificationSelect" style="width: 160px"></select>
+                    <div style="flex: 1">
+                        <label class="control-label" style="margin: 0;white-space:nowrap">规格：</label>
+                        <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label" for="nameSelect">位置：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="siteSelect" style="width: 160px"></select>
+                    <div style="flex: 1">
+                        <label class="control-label" style="margin: 0;white-space:nowrap">位置：</label>
+                        <select class="ms2 form-control" id="siteSelect" style="width:95%"></select>
                     </div>
                 </div>
             </div>
@@ -137,36 +129,24 @@
                                                 <label class="control-label" for="consumePlanRemark">备注：</label>
                                                 <span class="control-label" id="consumePlanRemark"></span>
                                             </div>
-                                            <div class="form-group form-inline no-margin">
-                                                <div class="form-group col-md-2 no-margin" style="padding-left: 0;">
-                                                    <label class="control-label">清单：</label>
-                                                </div>
-                                                <div class="form-group col-md-10 no-margin">
-                                                    <div class="form-group form-inline no-margin pull-right" style="display:flex">
-                                                        <div class="form-group no-margin">
-                                                            <select class="form-control" id="consumePlanCondition1" onchange="showPlanBill(true)">
-                                                                <option value="Code">货品编号</option>
-                                                                <option value="Category">货品类别</option>
-                                                                <option value="Name">货品名称</option>
-                                                                <option value="Supplier">供应商</option>
-                                                                <option value="Specification">规格型号</option>
-                                                                <option value="Site">货品位置</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group no-margin">
-                                                            <select class="form-control" id="consumePlanCondition2" onchange="showPlanBill(true)">
-                                                                <option value="0">等于</option>
-                                                                <option value="1">不等于</option>
-                                                                <option value="2">包含</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-group no-margin">
-                                                            <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true)" maxlength="20">
-                                                        </div>
-                                                        <div class="form-group no-margin">
-                                                            <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumePlanListBtn" onclick="addConsumePlanList()"><i class="fa fa-plus"></i> 添加新项</button>
-                                                        </div>
-                                                    </div>
+                                            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center">
+                                                <label class="control-label textOverTop">清单：</label>
+                                                <div style="display: flex; justify-content: center;align-items:center">
+                                                    <select class="form-control" id="consumePlanCondition1" onchange="showPlanBill(true)" style="flex-basis: 140px">
+                                                        <option value="Code">货品编号</option>
+                                                        <option value="Category">货品类别</option>
+                                                        <option value="Name">货品名称</option>
+                                                        <option value="Supplier">供应商</option>
+                                                        <option value="Specification">规格型号</option>
+                                                        <option value="Site">货品位置</option>
+                                                    </select>
+                                                    <select class="form-control" id="consumePlanCondition2" onchange="showPlanBill(true)" style="flex-basis: 140px;margin-left:3px">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true)" maxlength="20" style="flex-basis: 140px;margin-left:3px">
+                                                    <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumePlanListBtn" onclick="addConsumePlanList()" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -174,22 +154,22 @@
                                             <table class="table table-hover table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <td>序号</td>
-                                                        <td class="text-blue">货品编号</td>
-                                                        <td class="text-info">货品类别</td>
-                                                        <td class="text-info">货品名称</td>
-                                                        <td class="text-info">供应商</td>
-                                                        <td class="text-info">规格型号</td>
-                                                        <td class="text-info">位置</td>
-                                                        <td>单位</td>
-                                                        <td>货品详情</td>
-                                                        <td>计划用量</td>
-                                                        <td>实际用量</td>
-                                                        <td class="text-red">剩余库存</td>
-                                                        <td>领用数量</td>
-                                                        <td>领用人</td>
-                                                        <td>日志</td>
-                                                        <td>删除</td>
+                                                        <th>序号</th>
+                                                        <th class="text-blue">货品编号</th>
+                                                        <th class="text-info">货品类别</th>
+                                                        <th class="text-info">货品名称</th>
+                                                        <th class="text-info">供应商</th>
+                                                        <th class="text-info">规格型号</th>
+                                                        <th class="text-info">位置</th>
+                                                        <th>单位</th>
+                                                        <th>货品详情</th>
+                                                        <th>计划用量</th>
+                                                        <th>实际用量</th>
+                                                        <th class="text-red">剩余库存</th>
+                                                        <th>领用数量</th>
+                                                        <th>领用人</th>
+                                                        <th>日志</th>
+                                                        <th>删除</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="consumePlanList"></tbody>
@@ -219,20 +199,20 @@
                                             <table class="table table-hover table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <td>序号</td>
-                                                        <td class="text-blue">货品编号</td>
-                                                        <td class="text-info">货品类别</td>
-                                                        <td class="text-info">货品名称</td>
-                                                        <td class="text-info">供应商</td>
-                                                        <td class="text-info">规格型号</td>
-                                                        <td class="text-info">位置</td>
-                                                        <td>单位</td>
-                                                        <td>货品详情</td>
-                                                        <td class="text-red">剩余库存</td>
-                                                        <td>领用数量</td>
-                                                        <td>领用人</td>
-                                                        <td>日志</td>
-                                                        <td>删除</td>
+                                                        <th>序号</th>
+                                                        <th class="text-blue">货品编号</th>
+                                                        <th class="text-info">货品类别</th>
+                                                        <th class="text-info">货品名称</th>
+                                                        <th class="text-info">供应商</th>
+                                                        <th class="text-info">规格型号</th>
+                                                        <th class="text-info">位置</th>
+                                                        <th>单位</th>
+                                                        <th>货品详情</th>
+                                                        <th class="text-red">剩余库存</th>
+                                                        <th>领用数量</th>
+                                                        <th>领用人</th>
+                                                        <th>日志</th>
+                                                        <th>删除</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="consumeOtherList"></tbody>

@@ -215,7 +215,7 @@
             }
         }
     });
-    $('#increaseList').on('click', '.scanPrint', function () {
+    $('#increaseList,#consumePlanList,#consumeOtherList').on('click', '.scanPrint', function () {
         new Promise(function (resolve) {
             showPrintModal(resolve);
         }).then((result) => {
@@ -1076,8 +1076,8 @@ function addIncreaseList() {
             <td><input class="form-control text-center" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10"></td>
             <td>
                <div style="display:flex;width:160px">
-               <input class="form-control text-center" id="inCg{0}" maxlength="64" />
-               <button class="btn btn-primary btn-sm pull-right" type="button" id="inDitto{0}" onclick="inDitto({0})" style="margin-left:3px">同上</button>
+                   <input class="form-control text-center" id="inCg{0}" maxlength="64" />
+                   <button class="btn btn-primary btn-sm pull-right" type="button" id="inDitto{0}" onclick="inDitto({0})" style="margin-left:3px">同上</button>
                </div>
             </td>
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delIncreaseList({0})"><i class="fa fa-minus"></i></button></td>
@@ -1863,9 +1863,11 @@ function showPlanBill(find = false) {
                     <td>
                         <input class="form-control text-center" type="tel" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
                     </td>
-                    <td class="form-inline">
-                        <input class="form-control text-center" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
-                        <button class="btn btn-primary btn-sm conPlanDitto" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" onclick="consumePlanDitto(${xh})">同上</button>
+                    <td>
+                        <div style="display:flex;width:150px">
+                            <input class="form-control text-center" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
+                            <button class="btn btn-primary btn-sm conPlanDitto" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
+                        </div>
                     </td>
                     <td>
                         <button type="button" class="btn btn-success btn-sm" onclick="showLogConsumeModel(${d.BillId}, 1, ${planId})">查看</button>
@@ -1933,7 +1935,10 @@ function addConsumePlanList() {
         var tr = `
         <tr id="conPlan${xh}" value="${xh}" xh="${consumePlanMaxV}" class="new">
             <td style="vertical-align: inherit;"><span class="control-label xh" id="conPlanXh${xh}">${consumePlanMaxV}</span></td>
-            <td><select class="ms2 form-control" id="conPlanBh${xh}"></select></td>
+            <td>
+                <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
+                <select class="ms2 form-control" id="conPlanBh${xh}"></select>
+            </td>
             <td><select class="ms2 form-control" id="conPlanLb${xh}"></select></td>
             <td><select class="ms2 form-control" id="conPlanMc${xh}"></select></td>
             <td><select class="ms2 form-control" id="conPlanGys${xh}"></select></td>
@@ -1952,9 +1957,11 @@ function addConsumePlanList() {
             <td>
                 <input class="form-control text-center" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
             </td>
-            <td class="form-inline">
-                <input class="form-control text-center" type="tel" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
-                <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" onclick="consumePlanDitto(${xh})">同上</button>
+            <td>
+                <div style="display:flex;width:150px">
+                    <input class="form-control text-center" type="tel" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
+                    <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
+                </div>
             </td>
             <td>
                 <button type="button" class="btn btn-success btn-sm" id="conPlanLog${xh}" onclick="showLogConsumeModel(2, 0)">查看</button>
@@ -1965,7 +1972,9 @@ function addConsumePlanList() {
         </tr>`;
 
         $("#consumePlanList").append(tr);
-
+        if (!pcAndroid()) {
+            $("#consumePlanList").find('.scanPrint').addClass('hidden');
+        }
         if (_materialList != null) {
             var option = '<option value="{0}">{1}</option>';
             ////货品编号
@@ -2572,7 +2581,10 @@ function addConsumeOtherList() {
     var tr = `
         <tr id="conOther${xh}" value="${xh}" xh="${consumeOtherMaxV}" class="new">
             <td style="vertical-align: inherit;"><span class="control-label xh" id="conOtherXh${xh}">${consumeOtherMaxV}</span></td>
-            <td><select class="ms2 form-control" id="conOtherBh${xh}"></select></td>
+            <td>
+                <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
+                <select class="ms2 form-control" id="conOtherBh${xh}"></select>
+            </td>
             <td><select class="ms2 form-control" id="conOtherLb${xh}"></select></td>
             <td><select class="ms2 form-control" id="conOtherMc${xh}"></select></td>
             <td><select class="ms2 form-control" id="conOtherGys${xh}"></select></td>
@@ -2589,9 +2601,11 @@ function addConsumeOtherList() {
             <td>
                 <input class="form-control text-center" id="consumeOtherConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumeOtherActual()" maxlength="10">
             </td>
-            <td class="form-inline">
-                <input class="form-control text-center" type="tel" id="consumeOtherLyr${xh}" maxlength="64" onchange="consumeOtherActual()" />
-                <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumeOtherDitto${xh}" onclick="consumeOtherDitto(${xh})">同上</button>
+            <td>
+                <div style="display:flex;width:150px">
+                    <input class="form-control text-center" type="tel" id="consumeOtherLyr${xh}" maxlength="64" onchange="consumeOtherActual()" />
+                    <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumeOtherDitto${xh}" style="margin-left:3px" onclick="consumeOtherDitto(${xh})">同上</button>
+                </div>
             </td>
             <td>
                 <button type="button" class="btn btn-success btn-sm" id="consumeOtherLog${xh}" onclick="showLogConsumeModel(2, 0)">查看</button>
@@ -2602,7 +2616,9 @@ function addConsumeOtherList() {
         </tr>`;
 
     $("#consumeOtherList").append(tr);
-
+    if (!pcAndroid()) {
+        $("#consumeOtherList").find('.scanPrint').addClass('hidden');
+    }
     if (_materialList != null) {
         var option = '<option value="{0}">{1}</option>';
         ////货品编号

@@ -21,60 +21,6 @@
     }
     selectPlan();
     selectRaw();
-    $("#scanning").click(function () {
-        videos++;
-        if (videos % 2 == 0) {
-            closeVideo.stop();
-            clearInterval(canImg);
-            $("#video").addClass("hidden");
-            return;
-        }
-        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-            //调用用户媒体设备, 访问摄像头
-            getUserMedia({
-                video: {
-                    width: 290,
-                    height: 290,
-                    facingMode: "environment"
-                }
-            },
-                success,
-                error);
-        } else {
-            layer.msg('不支持访问用户媒体');
-        }
-        $("#video").removeClass("hidden");
-        canImg = setInterval("capture()", 500);
-    });
-    $(document).on("visibilitychange", function () {
-        var page = this.visibilityState;
-        if (page == "hidden" && !$("#video").is(":hidden")) {
-            clearCanvas();
-            closeVideo.stop();
-            clearInterval(canImg);
-            videos = 0;
-            $("#video").addClass("hidden");
-        }
-    });
-    $("#upload").click(function () {
-        if (videos % 2 != 0) {
-            closeVideo.stop();
-        }
-        clearInterval(canImg);
-        $("#video").addClass("hidden");
-        var uploadImg = setInterval($("#file").click(), 1000);
-        clearInterval(uploadImg);
-        videos = 0;
-    });
-    $("#file").change(function () {
-        addCover();
-        fileImg = setInterval("fileUp()", 1000);
-    });
-    if (!pcAndroid()) {
-        $("#scanning").addClass("hidden");
-    } else {
-        $("#upload").addClass("hidden");
-    }
     $(".fcHead input,.fcHead span").css("verticalAlign", "middle");
     $(".jhHead input,.jhHead span").css("verticalAlign", "middle");
     $(".ylHead input,.ylHead span").css("verticalAlign", "middle");
@@ -94,12 +40,6 @@
             $(".fcBody").eq(e).addClass("hidden");
             if (e == 0) {
                 $("#flowCardId").val("");
-                if (!$("#video").is(":hidden")) {
-                    closeVideo.stop();
-                    clearInterval(canImg);
-                    $("#video").addClass("hidden");
-                    videos = 0;
-                }
             }
             if (e == 2) {
                 $("#selectPlanList").val($("#selectPlanList").find("option:first").val()).trigger("change");
@@ -151,11 +91,37 @@
             $("#ylBtn").addClass("hidden");
         }
     });
+    if (!pcAndroid()) {
+        $("#scanning").addClass("hidden");
+    } else {
+        $("#upload").addClass("hidden");
+    }
+    $('#scanning').on('click', function() {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                $('#flowCardId').val(result.split(",")[2]);
+            }
+        });
+    });
+    $('#upload').on('click', function () {
+        $('#file').trigger('click');
+    });
+    $("#file").on('change', function () {
+        addCover();
+        new Promise(function (resolve) {
+            printImgUp(resolve, this);
+        }.bind(this)).then((result) => {
+            removeCover();
+            $(this).val("");
+            if (result) {
+                $("#flowCardId").val(result.split(",")[2]);
+            }
+        });
+    });
 }
 
-var videos = 0;
-var canImg;
-var fileImg;
 //流程卡
 function showAddFlowCardModel() {
     hideClassTip("adt");
@@ -375,12 +341,6 @@ function getFlowCardList() {
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
         return;
-    }
-    if (!$("#video").is(":hidden")) {
-        closeVideo.stop();
-        clearInterval(canImg);
-        $("#video").addClass("hidden");
-        videos = 0;
     }
     var data = {}
     var list = {}
@@ -2317,98 +2277,4 @@ function addRawMateria() {
             });
     }
     showConfirm("添加", doSth);
-}
-
-//访问用户媒体设备的兼容方法
-function getUserMedia(constraints, success, error) {
-    if (navigator.mediaDevices.getUserMedia) {
-        //最新的标准API
-        navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.webkitGetUserMedia) {
-        //webkit核心浏览器
-        navigator.webkitGetUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.mozGetUserMedia) {
-        //firfox浏览器
-        navigator.mozGetUserMedia(constraints).then(success).catch(error);
-    } else if (navigator.getUserMedia) {
-        //旧版API
-        navigator.getUserMedia(constraints).then(success).catch(error);
-    }
-};
-
-function capture() {
-    var canvas = document.getElementById('canvas');
-    var context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, 290, 290);
-    qrcode.decode(canvas.toDataURL('image/png'));
-    qrcode.callback = function (e) {
-        //结果回调
-        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
-            addCover();
-            $("#video").addClass("hidden");
-            $("#flowCardId").val(e.split(",")[2]);
-            clearInterval(canImg);
-            removeCover();
-            clearCanvas();
-            closeVideo.stop();
-            videos = 0;
-        }
-    }
-}
-
-var closeVideo;
-function success(stream) {
-    var video = document.getElementById('video');
-    video.srcObject = stream;
-    video.play();
-    closeVideo = stream.getTracks()[0];
-}
-
-function error() {
-    $("#video").addClass("hidden");
-    layer.msg("访问用户媒体设备失败");
-    clearInterval(canImg);
-    videos = 0;
-}
-
-function clearCanvas() {
-    var c = document.getElementById("canvas");
-    var cxt = c.getContext("2d");
-    cxt.clearRect(0, 0, c.width, c.height);
-}
-
-function getObjectURL(file) {
-    var url = null;
-    if (window.createObjectURL != undefined) {          // basic
-        url = window.createObjectURL(file);
-    } else if (window.URL != undefined) {               // mozilla(firefox)
-        url = window.URL.createObjectURL(file);
-    } else if (window.webkitURL != undefined) {         // webkit or chrome
-        url = window.webkitURL.createObjectURL(file);
-    }
-    return url;
-}
-
-//上传图片识别二维码
-function fileUp() {
-    var newFile = document.getElementById('file');
-    //   console.log(newfile[0]);
-    //console.log(getObjectURL(this.files[0]));           // newfile[0]是通过input file上传的二维码图片文件
-    qrcode.decode(getObjectURL(newFile.files[0]));
-    qrcode.callback = function (e) {
-        //结果回调
-        if (e != "error decoding QR Code" && typeof (Number(e.split(",")[2])) == "number") {
-            $("#video").addClass("hidden");
-            $("#flowCardId").val(e.split(",")[2]);
-            clearInterval(fileImg);
-            $("#file").val("");
-            removeCover();
-        } else {
-            clearInterval(fileImg);
-            layer.msg("请上传正确的二维码图片");
-            $("#file").val("");
-            $("#flowCardId").val("");
-            removeCover();
-        }
-    }
 }

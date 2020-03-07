@@ -1323,11 +1323,17 @@ function showPrintModal(resolve) {
         `<div class="modal fade" id="${modalId}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                <div class="modal-content">
-                   <div class="modal-header hidden">
+                   <div class="modal-header">
                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                        <h4 class="modal-title"></h4>
                    </div>
-                   <div class="modal-body">
+                   <div class="modal-body" style="position:relative">
+                        <div class="qrcode-box" style="position:absolute;left:50%;transform:translateX(-50%);width:300px;height:300px">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
                         <video style="width: 100%;height:300px"></video>
                         <canvas class="hidden" width="300" height="300"></canvas>
                    </div>
@@ -1339,21 +1345,22 @@ function showPrintModal(resolve) {
         </div>`;
     var modal = $(html);
     $(".content").append(modal);
-    var closeVideo, canvasImg,qrCode;
+    var closeVideo, canvasImg, qrCode = null;
     var video = $('#_printModal video')[0];
     var canvas = $('#_printModal canvas')[0];
+    var context = canvas.getContext('2d');
     modal.on('hidden.bs.modal',
         function () {
-            resolve(qrCode);
             if (closeVideo) {
                 closeVideo.stop();
             }
             if (canvasImg) {
                 clearInterval(canvasImg);
             }
+            resolve(qrCode);
             modal.remove();
         });
-    var getUserMedia = function (constraints, success, error) {
+    var getUserMedia = (constraints, success, error) => {
         if (navigator.mediaDevices.getUserMedia) {
             //最新的标准API
             navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
@@ -1368,17 +1375,20 @@ function showPrintModal(resolve) {
             navigator.getUserMedia(constraints).then(success).catch(error);
         }
     }
-    var capture = function () {
-        var context = canvas.getContext('2d');
+    var capture = () => {
         context.drawImage(video, 0, 0, 300, 300);
         qrcode.decode(canvas.toDataURL('image/png'));
-        qrcode.callback = function (e) {
+        qrcode.callback = (e) => {
             //结果回调
             if (e != "error decoding QR Code") {
-                qrCode = e;
-                clearInterval(canvasImg);
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                modal.modal('hide');
+                if (/,/.test(e)) {
+                    qrCode = e;
+                    clearInterval(canvasImg);
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    modal.modal('hide');
+                } else {
+                    alert(e);
+                }
             }
         }
     }
@@ -1391,19 +1401,50 @@ function showPrintModal(resolve) {
                 //user前置摄像头
                 facingMode: { exact: "environment" }
             }
-        }, function (stream) {
+        }, (stream) => {
             modal.modal("show");
             video.srcObject = stream;
             video.play();
             closeVideo = stream.getTracks()[0];
             canvasImg = setInterval(capture, 500);
-        }, function () {
+        }, () => {
             modal.modal('hide');
             layer.msg("访问用户媒体设备失败");
         });
     } else {
         modal.modal('hide');
         layer.msg('不支持访问用户媒体');
+    }
+}
+
+function getObjectURL(file) {
+    var url = null;
+    if (window.createObjectURL != undefined) {          // basic
+        url = window.createObjectURL(file);
+    } else if (window.URL != undefined) {               // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+    } else if (window.webkitURL != undefined) {         // webkit or chrome
+        url = window.webkitURL.createObjectURL(file);
+    }
+    return url;
+}
+
+//上传图片识别二维码
+function printImgUp(resolve, fileId) {
+    qrcode.decode(getObjectURL(fileId.files[0]));
+    qrcode.callback = function (e) {
+        //结果回调
+        if (e != "error decoding QR Code") {
+            if (/,/.test(e)) {
+                resolve(e);
+            } else {
+                layer.msg('请上传集中控制相关的二维码图片');
+                resolve(null);
+            }
+        } else {
+            layer.msg('识别失败');
+            resolve(null);
+        }
     }
 }
 
