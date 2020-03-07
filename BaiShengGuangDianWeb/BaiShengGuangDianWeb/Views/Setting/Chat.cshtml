@@ -4,7 +4,12 @@
     ViewBag.Title = "chat";
     Layout = "_Layout";
 }
-<script src="~/mjs/Setting/chat.js"></script>
+<environment include="Development">
+    <script src="~/mjs/Setting/chat.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Setting/chat.min.js"></script>
+</environment>
 <section class="content">
     <h2>chat</h2>
     <button type="button" class="btn btn-primary" id="btnSend">发送</button>

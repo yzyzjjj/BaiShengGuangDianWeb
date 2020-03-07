@@ -9,16 +9,12 @@
   <ItemGroup>
     <Compile Remove="Views\Home\css\**" />
     <Compile Remove="wwwroot\mimages\**" />
-    <Compile Remove="wwwroot\mjs\新文件夹\**" />
     <Content Remove="Views\Home\css\**" />
     <Content Remove="wwwroot\mimages\**" />
-    <Content Remove="wwwroot\mjs\新文件夹\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
     <EmbeddedResource Remove="wwwroot\mimages\**" />
-    <EmbeddedResource Remove="wwwroot\mjs\新文件夹\**" />
     <None Remove="Views\Home\css\**" />
     <None Remove="wwwroot\mimages\**" />
-    <None Remove="wwwroot\mjs\新文件夹\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -96,6 +92,10 @@
     <Reference Include="ServiceStack.Text">
       <HintPath>..\packages\ServiceStack.Text.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\mjs\ManufactureManagement\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>

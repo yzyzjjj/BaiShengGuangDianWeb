@@ -3,7 +3,12 @@
     ViewBag.Title = "6s检查记录";
     //Layout = "_Layout";
 }
-<script src="~/mjs/_6sManagement/log.js"></script>
+<environment include="Development">
+    <script src="~/mjs/_6sManagement/log.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/_6sManagement/log.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">6s检查记录</h2>
     <div class="box box-primary">

@@ -4,12 +4,22 @@
     ViewBag.Title = "Api测试";
     Layout = "_Layout";
 }
+
+<environment include="Development">
+    <script src="~/mjs/Setting/deviceApiTest.js"></script>
+    <script src="~/mjs/Setting/flowCardApiTest.js"></script>
+    <script src="~/mjs/Setting/processApiTest.js"></script>
+    <script src="~/mjs/Setting/repairApiTest.js"></script>
+    <script src="~/mjs/Setting/UploadApiTest.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Setting/deviceApiTest.min.js"></script>
+    <script src="~/mminjs/Setting/flowCardApiTest.min.js"></script>
+    <script src="~/mminjs/Setting/processApiTest.min.js"></script>
+    <script src="~/mminjs/Setting/repairApiTest.min.js"></script>
+    <script src="~/mminjs/Setting/UploadApiTest.min.js"></script>
+</environment>
 <h2>Api测试</h2>
-<script src="~/mjs/Setting/deviceApiTest.js"></script>
-<script src="~/mjs/Setting/flowCardApiTest.js"></script>
-<script src="~/mjs/Setting/processApiTest.js"></script>
-<script src="~/mjs/Setting/repairApiTest.js"></script>
-<script src="~/mjs/Setting/UploadApiTest.js"></script>
 <section class="content">
     <ul class="nav nav-tabs">
         <li class="active"><a href="#div_image" data-toggle="tab">图片上传测试</a></li>

@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/DeviceManagement/deviceControl.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceManagement/deviceControl.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceManagement/deviceControl.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">设备控制</h2>
     <div class="row">

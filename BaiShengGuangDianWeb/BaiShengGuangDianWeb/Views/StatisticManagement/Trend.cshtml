@@ -5,6 +5,12 @@
     ViewBag.Title = "趋势图统计";
     Layout = "_Layout";
 }
+<environment include="Development">
+    <script src="~/mjs/StatisticManagement/trend.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/StatisticManagement/trend.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">趋势图统计</h2>
     <div class="row">
@@ -94,4 +100,3 @@
         </div>
     </div>
 </section>
-<script src="~/mjs/StatisticManagement/trend.js"></script>

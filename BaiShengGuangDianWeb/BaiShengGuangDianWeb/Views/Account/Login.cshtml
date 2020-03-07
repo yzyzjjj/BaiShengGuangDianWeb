@@ -1,4 +1,8 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Http
+@using ModelBase.Base.Utils
+@using ServiceStack
+@using Swashbuckle.AspNetCore.Swagger
+@{
     ViewBag.Title = "登录";
     Layout = null;
 }
@@ -24,18 +28,20 @@
             <p class="login-box-msg">登录</p>
             <form>
                 <div class="form-group has-feedback">
-                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" type="text" onfocusin="focusIn($(this), 'adt')" maxlength="32" />
+                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" type="text" onfocusin="focusIn($(this), 'adt')"
+                           maxlength="32" value="@ViewData["n"]" />
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
                     <p id="accountTip" style="color: red" class="adt"></p>
                 </div>
                 <div class="form-group has-feedback">
-                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')" maxlength="32" />
+                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')"
+                           maxlength="32" value="@ViewData["p"]" />
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                     <p id="passwordTip" style="color: red" class="adt"></p>
                 </div>
                 <div class="row">
                     <div class="col-xs-8">
-                        <input type="checkbox" id="rememberMe" class="icb_minimal">
+                        <input type="checkbox" id="rememberMe" class="icb_minimal" @((bool)@ViewData["r"] ? "checked='checked'" : "")>
                         <span class="text-info media-middle">记住我</span>
                     </div>
                     <div class="col-xs-4">
@@ -53,9 +59,17 @@
     @*<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>*@
     <script src="~/lib/utils/md5.min.js"></script>
     <script src="~/lib/utils/base64.min.js"></script>
-    <script src="~/lib/layer/layer.min.js"></script>
-    <script src="~/lib/utils/util.min.js"></script>
-    <script src="~/lib/utils/const.min.js"></script>
-    <script src="~/mjs/Account/login.min.js"></script>
+    <environment include="Development">
+        <script src="~/lib/layer/layer.js"></script>
+        <script src="~/lib/utils/util.js"></script>
+        <script src="~/lib/utils/const.js"></script>
+        <script src="~/mjs/Account/login.js"></script>
+    </environment>
+    <environment include="Staging,Production">
+        <script src="~/lib/layer/layer.min.js"></script>
+        <script src="~/lib/utils/util.min.js"></script>
+        <script src="~/lib/utils/const.min.js"></script>
+        <script src="~/mminjs/Account/login.min.js"></script>
+    </environment>
 </body>
 </html>

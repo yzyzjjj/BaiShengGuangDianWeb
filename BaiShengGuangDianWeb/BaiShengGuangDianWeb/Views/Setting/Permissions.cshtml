@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/Setting/permissions.js"></script>
+<environment include="Development">
+    <script src="~/mjs/Setting/permissions.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Setting/permissions.min.js"></script>
+</environment>
 <section class="content ">
     <h2>权限管理</h2>
     <div class="row">

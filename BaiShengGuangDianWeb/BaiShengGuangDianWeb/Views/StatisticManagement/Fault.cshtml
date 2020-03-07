@@ -4,7 +4,12 @@
     ViewBag.Title = "故障统计";
     Layout = "_Layout";
 }
-<script src="~/mjs/StatisticManagement/fault.js"></script>
+<environment include="Development">
+    <script src="~/mjs/StatisticManagement/fault.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/StatisticManagement/fault.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">故障统计</h2>
     <div class="row">
@@ -444,7 +449,7 @@
                                                 <input type="text" id="endDayTime" class="form_date form-control" style="width: 130px; cursor: pointer">
                                             </div>
                                         </div>
-                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <label class="control-label">请选择时间区间：</label>
                                         <div class="form-group form-inline no-margin" style="display: -webkit-inline-box">

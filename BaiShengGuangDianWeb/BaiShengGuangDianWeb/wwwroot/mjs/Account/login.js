@@ -66,13 +66,13 @@
         $("#password").val(pwd);
         $("#loginBtn").click();
     } else {
-        var n = GetCookie("n");
-        var p = GetCookie("p");
-        if (!isStrEmptyOrUndefined(n) && !isStrEmptyOrUndefined(p)) {
-            $("#account").attr("value",n);
-            $("#password").attr("value", p);
-            $("#rememberMe").iCheck('check');
-        }
+        //var n = GetCookie("n");
+        //var p = GetCookie("p");
+        //if (!isStrEmptyOrUndefined(n) && !isStrEmptyOrUndefined(p)) {
+        //    $("#account").attr("value",n);
+        //    $("#password").attr("value", p);
+        //    $("#rememberMe").iCheck('check');
+        //}
     }
     $(document).keydown(function (event) {
         if (event.keyCode === 13) {

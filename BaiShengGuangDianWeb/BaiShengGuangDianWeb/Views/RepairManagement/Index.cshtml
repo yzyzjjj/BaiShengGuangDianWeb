@@ -5,8 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/RepairManagement/index.js"></script>
-
+<environment include="Development">
+    <script src="~/mjs/RepairManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/RepairManagement/index.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">
         维修管理

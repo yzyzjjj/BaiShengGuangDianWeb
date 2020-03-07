@@ -4,7 +4,12 @@
     ViewBag.Title = "设备点检配置";
     Layout = "_Layout";
 }
-<script src="~/mjs/DeviceSpotCheck/DeviceSpotCheck.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceSpotCheck/DeviceSpotCheck.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceSpotCheck/DeviceSpotCheck.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center" id="pageTitle">设备点检相关</h2>
     <div class="nav-tabs-custom">

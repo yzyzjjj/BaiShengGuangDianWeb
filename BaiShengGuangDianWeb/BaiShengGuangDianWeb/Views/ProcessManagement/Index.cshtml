@@ -4,7 +4,12 @@
     ViewBag.Title = "工艺管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/ProcessManagement/index.js"></script>
+<environment include="Development">
+    <script src="~/mjs/ProcessManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ProcessManagement/index.min.js"></script>
+</environment>
 <section class="content ">
     <h2 class="text-center">工艺管理</h2>
     <div class="box box-primary">

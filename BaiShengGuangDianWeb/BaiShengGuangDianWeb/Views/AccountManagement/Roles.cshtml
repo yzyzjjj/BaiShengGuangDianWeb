@@ -4,8 +4,12 @@
     ViewBag.Title = "角色管理";
     Layout = "_Layout";
 }
-<script src="~/mjs/AccountManagement/roles.js"></script>
-
+<environment include="Development">
+    <script src="~/mjs/AccountManagement/roles.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/AccountManagement/roles.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">角色管理</h2>
     <div class="box box-primary">

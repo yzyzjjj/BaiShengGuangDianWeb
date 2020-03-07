@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/DeviceManagement/applicationLibrary.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceManagement/applicationLibrary.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceManagement/applicationLibrary.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">应用层库管理</h2>
     <div class="box box-primary">

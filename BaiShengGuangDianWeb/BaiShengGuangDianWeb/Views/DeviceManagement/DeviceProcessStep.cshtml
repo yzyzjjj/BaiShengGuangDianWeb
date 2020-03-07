@@ -5,7 +5,12 @@
     Layout = "_Layout";
 }
 
-<script src="~/mjs/DeviceManagement/deviceProcessStep.js"></script>
+<environment include="Development">
+    <script src="~/mjs/DeviceManagement/deviceProcessStep.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceManagement/deviceProcessStep.min.js"></script>
+</environment>
 <section class="content">
     <h2 class="text-center">工序名管理</h2>
     <div class="box box-primary">
