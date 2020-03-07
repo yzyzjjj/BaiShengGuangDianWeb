@@ -1,6 +1,7 @@
 ﻿using BaiShengGuangDianWeb.Base.Server;
 using BaiShengGuangDianWeb.Models.Account;
 using ModelBase.Base.Utils;
+using ServiceStack;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -59,7 +60,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions )) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Id = @accountId {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
         /// <summary>
         /// 根据accountId获取账号信息
@@ -71,7 +72,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Id = @accountId AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
         /// <summary>
         /// 根据账号获取账号信息
@@ -84,7 +85,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Account = @account {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
         /// <summary>
         /// 根据账号获取账号信息  包括已删除
@@ -96,7 +97,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Account = @account AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             var sql = "SELECT * FROM `accounts` WHERE Id IN @accountId AND IsDeleted = 0";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { accountId = accountIds });
-            return info;
+            return info.Where(x => !x.Account.IsNullOrEmpty());
         }
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Code = @code AND a.IsDeleted = 0 AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { code }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Name = @name {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { name }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
         /// <summary>
         /// 根据姓名获取账号信息
@@ -147,7 +148,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
                       $"WHERE a.Name = @name AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { name }).FirstOrDefault();
-            return info;
+            return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
         /// <summary>
         /// 获取所有账号信息
