@@ -291,3 +291,8 @@ select {
         bottom: -4px;
         border-width: 0 0 4px 4px;
     }
+
+.flexStyle {
+    display: flex;
+    align-items: center;
+}

@@ -50,17 +50,6 @@
     $("#flowCardEmpty").click(function () {
         $("#flowCard").val("");
     });
-    //$(document).on("visibilitychange", function () {
-    //    var page = this.visibilityState;
-    //    if (page == "hidden" && (!$("#video").is(":hidden") || !$("#video1").is(":hidden"))) {
-    //        clearCanvas();
-    //        closeVideo.stop();
-    //        clearInterval(canImg);
-    //        videos = 0;
-    //        $("#video").addClass("hidden");
-    //        $("#video1").addClass("hidden");
-    //    }
-    //});
     $("#opUl").on("click", "a", function () {
         $(this).css("backgroundColor", "#d3d3d3").parent().siblings().find("a").css("backgroundColor", "");
         $("#addCraftDate").val(getDate()).datepicker('update');

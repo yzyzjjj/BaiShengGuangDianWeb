@@ -1360,6 +1360,12 @@ function showPrintModal(resolve) {
             resolve(qrCode);
             modal.remove();
         });
+    $(document).on("visibilitychange", function () {
+        var page = this.visibilityState;
+        if (page == "hidden") {
+            modal.modal('hide');
+        }
+    });
     var getUserMedia = (constraints, success, error) => {
         if (navigator.mediaDevices.getUserMedia) {
             //最新的标准API

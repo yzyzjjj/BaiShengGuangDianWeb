@@ -1,14 +1,43 @@
 ﻿@model object
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+@{
+    ViewBag.Title = "任务工作台";
+}
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/TaskWorkSpace.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/TaskWorkSpace.min.js"></script>
+</environment>
+<section class="content ">
+    <h2 class="text-center">任务工作台</h2>
+    <div class="box box-primary">
+        <div class="box-body">
+            <div class="col-md-4" style="text-align: center">
+                <label style="font-size: 20px">任务绩效排行榜</label>
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="scoreList"></table>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group flexStyle">
+                    <div class="flexStyle" style="flex: 2; flex-wrap: wrap">
+                        <label class="control-label textOverTop">切换工作组：</label>
+                        <select class="ms2 form-control" id="" style="flex-basis: 150px"></select>
+                    </div>
+                    <div class="flexStyle" style="flex: 2; flex-wrap: wrap">
+                        <label class="control-label textOverTop">切换操作员：</label>
+                        <select class="ms2 form-control" id="" style="flex-basis: 150px"></select>
+                    </div>
+                    <div class="flexStyle" style="flex: 1; align-self: flex-end; margin: 2px; justify-content: flex-end">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="">刷新任务</button>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success" onclick="">任务开始</button>
+                    <button type="button" class="btn btn-success" onclick="">任务暂停</button>
+                    <button type="button" class="btn btn-success" onclick="">任务完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

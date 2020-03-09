@@ -98,7 +98,7 @@
     <Folder Include="wwwroot\mjs\ManufactureManagement\" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties bundleconfig-back_1json__JSONSchema="http://json.schemastore.org/band-manifest" appsettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
