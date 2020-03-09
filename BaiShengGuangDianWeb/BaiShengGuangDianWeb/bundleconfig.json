@@ -162,54 +162,6 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Check.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Check.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/CheckWorkSpace.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/CheckWorkSpace.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Management.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Management.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Plan.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Plan.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Processor.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Processor.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Statistic.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Statistic.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Task.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Task.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/TaskWorkSpace.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/TaskWorkSpace.js"
-    ]
-  },
-  {
     "outputFileName": "wwwroot/mminjs/MaterialManagement/category.min.js",
     "inputFiles": [
       "wwwroot/mjs/MaterialManagement/category.js"
@@ -333,6 +285,54 @@
     "outputFileName": "wwwroot/mminjs/_6sManagement/set.min.js",
     "inputFiles": [
       "wwwroot/mjs/_6sManagement/set.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Check.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Check.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/CheckWorkSpace.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/CheckWorkSpace.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Management.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Management.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Plan.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Plan.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Processor.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Processor.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Statistic.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Statistic.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Task.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/Task.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/TaskWorkSpace.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/TaskWorkSpace.js"
     ]
   }
 ]

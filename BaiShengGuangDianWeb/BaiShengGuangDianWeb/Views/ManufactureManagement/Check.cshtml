@@ -1,20 +1,88 @@
 ﻿@model object
-
+@{
+    ViewBag.Title = "检验配置";
+    //Layout = "_Layout";
+}
 <environment include="Development">
-    <script src="~/mjs/ManufactureManagement/workSpace.js"></script>
+    <script src="~/mjs/ManufactureManagement/Check.js"></script>
 </environment>
 <environment include="Staging,Production">
-    <script src="~/mminjs/ManufactureManagement/workSpace.min.js"></script>
+    <script src="~/mminjs/ManufactureManagement/Check.min.js"></script>
 </environment>
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-    <div>
-
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>生产管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="form-group form-inline">
+                <label class="control-label" for="CheckSelect">选择配置：</label>
+                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                    <select class="ms2 form-control" id="CheckSelect" style="width: 120px"></select>
+                </div>
+                <div class="form-group pull-right">
+                    <button type="button" class="btn btn-success" onclick="showCheckListModel()">配置管理</button>
+                    <button type="button" class="btn btn-primary" onclick="addOneCheckConfig()">新增</button>
+                    <button type="button" class="btn btn-danger" onclick="delCheckConfig()">删除</button>
+                    <button type="button" class="btn btn-primary" onclick="init(-1)">重置</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCheckConfig()">保存</button>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group" style="overflow-x: auto">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <td style="width:50px;">全选<input id="selectAll" type="checkbox" class="icb_minimal"></td>
+                            <td style="width:50px;">序号</td>
+                            <td>检验流程</td>
+                            <td style="width:100px;">检验方法</td>
+                        </tr>
+                    </thead>
+                    <tbody id="checkConfig"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+    <!-- 配置管理模态框 -->
+    <div class="modal fade" tabindex="-1" id="checkListModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">配置管理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="CheckListSelect">选择配置：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="CheckListSelect" style="width: 120px"></select>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="deleteCheckList()">删除</button>
+                    </div>
+                    <div class="form-group form-inline">
+                        <label class="control-label" for="CheckListName">新配置：</label>
+                        <input class="form-control" id="CheckListName" maxlength="40">
+                        <input type="checkbox" id="CopyCheckListChoose" class="icb_minimal">
+                        <label for="CopyCheckListChoose">复用</label>
+                        <button type="button" class="btn btn-primary" onclick="addCheckList()">新增</button>
+                        <button type="button" class="btn btn-primary" id="updateCheckListBtn" onclick="updateCheckList()">修改</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

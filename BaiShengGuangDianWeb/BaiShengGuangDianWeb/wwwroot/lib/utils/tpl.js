@@ -329,7 +329,6 @@ $(function () {
         radioClass: 'iradio_minimal',
         increaseArea: '20%' // optional
     });
-
     commonfunc();
     if (typeof (pageReady) != "undefined") {
         pageReady();

@@ -270,7 +270,7 @@ function initItemList() {
                 $("#itemOrder2" + v).val($("#itemOrder2" + v).attr("old"));
                 $("#itemName2" + v).val($("#itemName2" + v).attr("old"));
                 $("#itemStandard2" + v).val($("#itemStandard2" + v).attr("old"));
-                $("#itemReference2" + v).html($("#itemReference2" + v).attr("old"));
+                $("#itemReference2" + v).val($("#itemReference2" + v).attr("old"));
                 var td = $("#itemInterval21" + v).parents("div:first");
                 var interval = $(td).attr("interval");
                 var num = interval == 0 ? "" : (interval == 1 ? $(td).attr("day") : $(td).attr("week"));

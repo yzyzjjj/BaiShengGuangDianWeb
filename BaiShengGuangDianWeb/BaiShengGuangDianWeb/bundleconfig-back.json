@@ -1,5 +1,6 @@
 [
   //{
+  //https://blog.csdn.net/weixin_33701564/article/details/91859766
   //  // 要输出的捆绑文件名称。 可以包含中的相对路径bundleconfig.json文件。 必填
   //  "outputFileName": "wwwroot/build/xxx.xxx.com/min.css",
   //  // 要将捆绑在一起的文件的数组。 这些是配置文件的相对路径。 可选，* 空值会在空的输出文件。 组合支持模式。

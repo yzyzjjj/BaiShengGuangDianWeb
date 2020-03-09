@@ -74,6 +74,32 @@ function getDayAgo(daysAgo) {
     return year + "-" + month + "-" + day;
 }
 
+//获得当前星期 范围  1 <= weekDay <= 7
+function getNowWeekRange(weekDay = 0) {
+    return {
+        start: new Date(new Date().setDate(new Date().getDate() - (weekDay - 1))).format("yyyy-MM-dd"),
+        end: new Date(new Date().setDate(new Date().getDate() + (weekDay - 7))).format("yyyy-MM-dd")
+    };
+}
+
+//获得当前月份 范围  1 <= day <= 28
+function getNowMonthRange(day = 0) {
+    var nowTime = new Date();
+    var startDay;
+    var endDay;
+    if (day <= nowTime.getDate()) {
+        startDay = new Date(nowTime.getFullYear(), nowTime.getMonth(), day);
+        endDay = new Date(nowTime.getFullYear(), nowTime.getMonth() + 1, day - 1);
+    } else {
+        startDay = new Date(nowTime.getFullYear(), nowTime.getMonth() - 1, day);
+        endDay = new Date(nowTime.getFullYear(), nowTime.getMonth(), day - 1);
+    }
+    return {
+        start: startDay.format("yyyy-MM-dd"),
+        end: endDay.format("yyyy-MM-dd")
+    };
+}
+
 //获得当前月份
 function getNowMonth() {
     var nowTime = new Date();
