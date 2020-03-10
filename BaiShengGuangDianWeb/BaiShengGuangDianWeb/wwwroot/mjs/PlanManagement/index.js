@@ -182,8 +182,7 @@ function addUpPlanTable(planId, isUp) {
                             d.ActualConsumption));
                     }
                 }
-                $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id);
-                $('#addPlanBody').find('.num').eq(flag).attr('bill', d.BillId);
+                $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id).attr('bill', d.BillId);
             }
             getPriceSum();
             setTableTrCount($("#addPlanBody"), _planTrCount, isUp);
