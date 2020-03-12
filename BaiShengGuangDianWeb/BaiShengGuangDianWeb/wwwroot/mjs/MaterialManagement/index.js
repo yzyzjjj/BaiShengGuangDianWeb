@@ -225,6 +225,101 @@
             }
         });
     });
+    $('#increaseList').on('change','.source', function() {
+        var v = $(this).val();
+        var tr = $(this).parents('tr');
+        var codeEl = tr.find('.code');
+        if (v == '计划退回') {
+            $(this).next().removeClass('hidden');
+            var planId = tr.find('.planList').val();
+            new Promise(function(resolve) {
+                planSend(resolve, planId);
+            }).then(function(e) {
+                codeEl.empty();
+                codeEl.append(e);
+                codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
+                //placeholder
+            });
+        } else {
+            $(this).next().addClass('hidden');
+            var i, len = _materialList.length;
+            var option = '<option value = "{0}">{1}</option>';
+            var options = '';
+            for (i = 0; i < len; i++) {
+                var d = _materialList[i];
+                options += option.format(d.Id, d.Code);
+            }
+            codeEl.empty();
+            codeEl.append(options);
+            codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
+        }
+    });
+    $('#increaseList').on('change', '.planList', function () {
+        var planId = $(this).val();
+        var tr = $(this).parents('tr');
+        new Promise(function (resolve) {
+            planSend(resolve, planId);
+        }).then(function (e) {
+            var codeEl = tr.find('.code');
+            codeEl.empty();
+            codeEl.append(e);
+            codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
+        });
+    });
+    $('#increaseList').on('focusin', '.stockNum', function() {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val("");
+        }
+    });
+    $('#increaseList').on('focusout', '.stockNum', function () {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val("0");
+        }
+    });
+    $('#increaseAdd').on('click', function() {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                addIncreaseList();
+                var codeId = result.split(',')[0];
+                $('#increaseList tr:last').find('.code').val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
+    if (!pcAndroid()) {
+        $("#increaseAdd").addClass('hidden');
+    }
+}
+
+//计划退回选项
+function planSend(resolve,planId) {
+    var data = {}
+    data.opType = 700;
+    data.opData = JSON.stringify({
+        qId: planId,
+        first: true,
+        simple: false
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas[0].FirstBill;
+        var i, len = list.length;
+        var option = '<option value = "{0}" actual = "{2}">{1}</option>';
+        var options = '';
+        for (i = 0; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.BillId, d.Code, d.ActualConsumption);
+        }
+        if (!isStrEmptyOrUndefined(resolve)) {
+            resolve(options);
+        }
+    }, 0);
 }
 
 var _qrCode = null;
@@ -567,6 +662,7 @@ function getMaterialList(el, resolve) {
                     { "data": "Code", "title": "货品编号" },
                     { "data": "Category", "title": "类别" },
                     { "data": "Name", "title": "名称" },
+                    { "data": null, "title": "库存数量", "render": number },
                     { "data": "Supplier", "title": "供应商" },
                     { "data": "Specification", "title": "规格" },
                     { "data": "Site", "title": "位置" },
@@ -574,7 +670,6 @@ function getMaterialList(el, resolve) {
                     { "data": "Id", "title": "详情", "render": detail },
                     { "data": "Price", "title": "价格" },
                     { "data": "Stock", "title": "最低库存", "sClass": "text-blue" },
-                    { "data": null, "title": "库存数量", "render": number },
                     { "data": "InTime", "title": "上次入库", "render": inTime },
                     { "data": "OutTime", "title": "上次领用", "render": outTime },
                     { "data": "Remark", "title": "备注", "render": remark },
@@ -941,6 +1036,20 @@ function showIncreaseModel() {
     }
     resetIncreaseList();
 
+    var planListFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 700;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _consumePlan = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
     var materialListFunc = new Promise(function (resolve, reject) {
         var data = {}
         data.opType = 800;
@@ -1028,7 +1137,7 @@ function showIncreaseModel() {
         }, 0);
     });
 
-    Promise.all([materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+    Promise.all([planListFunc,materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
         .then((result) => {
             //console.log(result);
             $("#addIncreaseListBtn").removeAttr("disabled");
@@ -1052,16 +1161,20 @@ function addIncreaseList() {
     increaseMaxV++;
     var tr =
         (`<tr id="in{0}" value="{0}" xh="{1}">
-            <td style="vertical-align: inherit;"" id="inXh{0}">{1}</td>
+            <td style="vertical-align: inherit;" id="inXh{0}">{1}</td>
             <td>
-                <select class="form-control" id="inLy{0}" style="width:80px">
-                    <option>采购</option>
-                    <option>退回</option>
-                </select>
+                <div class="flexStyle" style="justify-content:center">
+                    <select class="form-control source" id="inLy{0}" style="width:110px">
+                        <option>采购</option>
+                        <option>退回</option>
+                        <option>计划退回</option>
+                    </select>
+                    <div class="hidden" style="width:110px"><select class="ms2 form-control planList"></select></div>
+                </div>
             </td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
-                <select class="ms2 form-control" id="inBh{0}"></select>
+                <select class="ms2 form-control code" id="inBh{0}"></select>
             </td>
             <td><select class="ms2 form-control" id="inLb{0}"></select></td>
             <td><select class="ms2 form-control" id="inMc{0}"></select></td>
@@ -1073,7 +1186,7 @@ function addIncreaseList() {
             <td style="vertical-align: inherit;"><label class="control-label" id="inJg{0}"></label></td>
             <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
-            <td><input class="form-control text-center" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10"></td>
+            <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>
             <td>
                <div style="display:flex;width:160px">
                    <input class="form-control text-center" id="inCg{0}" maxlength="64" />
@@ -1091,6 +1204,14 @@ function addIncreaseList() {
         var option = '<option value="{0}">{1}</option>';
         ////货品编号
         //var _materialList = [];
+        var ops = '';
+        var planListEl = $('#increaseList .planList').eq(increaseMaxV - 1);
+        for (var i = 0, len = _consumePlan.length; i < len; i++) {
+            var d = _consumePlan[i];
+            ops += option.format(d.Id, d.Plan);
+        }
+        planListEl.empty();
+        planListEl.append(ops);
         var selector = "#inBh" + xh;
         $(selector).empty();
         var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
@@ -1513,13 +1634,17 @@ function increase() {
                 layer.msg("采购/退回人不能为空");
                 return;
             }
-
-            bill.push({
-                BillId: inBh,
+            var list = {
                 Purpose: inLy,
-                Number: inRk,
-                RelatedPerson: inCg
-            });
+                RelatedPerson: inCg,
+                BillId: inBh,
+                Number: inRk
+            };
+            if (inLy == '计划退回') {
+                var planId = $("#inLy" + i).next().find('.planList').val();
+                list.PlanId = planId;
+            }
+            bill.push(list);
         }
     }
     if (bill.length <= 0) {
@@ -1527,17 +1652,16 @@ function increase() {
         return;
     }
     var doSth = function () {
-        $("#increaseModal").modal("hide");
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
             Bill: bill
         });
-
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    $("#increaseModal").modal("hide");
                     getMaterialList('Select');
                 }
             });
