@@ -48,7 +48,10 @@
                             <div class="form-group">
                                 <label class="control-label textOverTop" style="font-size: 18px">下次检查：</label>
                                 <br>
-                                <label class="control-label">点检项：</label>
+                                <div class="flexStyle" style="justify-content:space-between">
+                                    <label class="control-label">点检项：</label>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="getNextExamineList()">刷新</button>
+                                </div>
                             </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-striped" id="planCheckRecentList"></table>
@@ -86,7 +89,10 @@
                     <div class="box-body">
                         <div class="form-group" style="display: flex; justify-content: space-between;align-items: center">
                             <label class="control-label">点检记录：</label>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="updateDeviceCheck(0)">保存</button>
+                            <div>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="updateDeviceCheck(0)">保存</button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="detailPage(null, null, false)">刷新</button>
+                            </div>
                         </div>
                         <div class="table-responsive mailbox-messages">
                             <table class="table table-hover table-striped" id="checkLogList"></table>

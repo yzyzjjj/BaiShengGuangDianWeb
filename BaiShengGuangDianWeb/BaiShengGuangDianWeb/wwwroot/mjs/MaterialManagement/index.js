@@ -229,6 +229,7 @@
         var v = $(this).val();
         var tr = $(this).parents('tr');
         var codeEl = tr.find('.code');
+        var stockNumEl = tr.find('.stockNum');
         if (v == '计划退回') {
             $(this).next().removeClass('hidden');
             var planId = tr.find('.planList').val();
@@ -237,8 +238,10 @@
             }).then(function(e) {
                 codeEl.empty();
                 codeEl.append(e);
-                codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
-                //placeholder
+                var codeId = codeEl.val();
+                codeEl.val(codeId).trigger('change').trigger('select2:select');
+                var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
+                stockNumEl.prop('placeholder', `货品领用数量：${actual}`);
             });
         } else {
             $(this).next().addClass('hidden');
@@ -252,6 +255,7 @@
             codeEl.empty();
             codeEl.append(options);
             codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
+            stockNumEl.prop('placeholder', '');
         }
     });
     $('#increaseList').on('change', '.planList', function () {
@@ -263,7 +267,10 @@
             var codeEl = tr.find('.code');
             codeEl.empty();
             codeEl.append(e);
-            codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
+            var codeId = codeEl.val();
+            codeEl.val(codeId).trigger('change').trigger('select2:select');
+            var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
+            tr.find('.stockNum').prop('placeholder', `货品领用数量：${actual}`);
         });
     });
     $('#increaseList').on('focusin', '.stockNum', function() {
@@ -278,6 +285,19 @@
             $(this).val("0");
         }
     });
+    $('#increaseList').on('input', '.stockNum', function () {
+        var v = $(this).val();
+        var tr = $(this).parents('tr');
+        var codeEl = tr.find('.code');
+        var codeId = codeEl.val();
+        var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
+        if (!!actual && parseInt(v) > parseInt(actual)) {
+            layer.msg('入库数量大于货品领用数量');
+        }
+    });
+    if (!pcAndroid()) {
+        $(".icon-saoyisao").addClass('hidden');
+    }
     $('#increaseAdd').on('click', function() {
         new Promise(function (resolve) {
             showPrintModal(resolve);
@@ -289,9 +309,28 @@
             }
         });
     });
-    if (!pcAndroid()) {
-        $("#increaseAdd").addClass('hidden');
-    }
+    $('#planConsumeAdd').on('click', function () {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                addConsumePlanList();
+                var codeId = result.split(',')[0];
+                $('#consumePlanList tr:last').find('.code').val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
+    $('#otherConsumeAdd').on('click', function () {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                addConsumeOtherList();
+                var codeId = result.split(',')[0];
+                $('#consumeOtherList tr:last').find('.code').val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
 }
 
 //计划退回选项
@@ -798,6 +837,8 @@ function getLogList(show = false) {
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Time", "title": "时间" },
                         { "data": "Code", "title": "货品编号" },
+                        { "data": "Name", "title": "货品名称" },
+                        { "data": "Specification", "title": "规格型号" },
                         { "data": "Type", "title": "入/出", "render": dType },
                         { "data": null, "title": "数量", "render": number },
                         { "data": "Purpose", "title": "来源/用途" },
@@ -810,6 +851,8 @@ function getLogList(show = false) {
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Time", "title": "时间" },
                         { "data": "Code", "title": "货品编号" },
+                        { "data": "Name", "title": "货品名称" },
+                        { "data": "Specification", "title": "规格型号" },
                         { "data": null, "title": "数量", "render": number },
                         { "data": "Purpose", "title": "货品来源" },
                         { "data": "RelatedPerson", "title": "采购/退回人" },
@@ -822,6 +865,8 @@ function getLogList(show = false) {
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Time", "title": "时间" },
                         { "data": "Code", "title": "货品编号" },
+                        { "data": "Name", "title": "货品名称" },
+                        { "data": "Specification", "title": "规格型号" },
                         { "data": null, "title": "数量", "render": number },
                         { "data": "Purpose", "title": "货品用途" },
                         { "data": "RelatedPerson", "title": "领用人" },
@@ -947,7 +992,7 @@ function getLogConsumeList(show = false) {
         return;
     }
     var planId = $('#logConsumePlanSelect').val();
-    if (!$('#logConsumePlanSelectDiv').attr("hidden")) {
+    if (!$('#logConsumePlanSelectDiv').is(":hidden")) {
         if (isStrEmptyOrUndefined(planId)) {
             layer.msg('请选择计划号');
             return;
@@ -991,6 +1036,8 @@ function getLogConsumeList(show = false) {
                     { "data": "Time", "title": "时间" },
                     { "data": "Purpose", "title": "计划号" },
                     { "data": "Code", "title": "货品编号" },
+                    { "data": "Name", "title": "货品名称" },
+                    { "data": "Specification", "title": "规格型号" },
                     { "data": "Number", "title": "数量" },
                     { "data": "RelatedPerson", "title": "领用人" },
                     { "data": "Manager", "title": "物管员" }
@@ -1001,6 +1048,8 @@ function getLogConsumeList(show = false) {
                     { "data": "Time", "title": "时间" },
                     { "data": "Purpose", "title": "用途" },
                     { "data": "Code", "title": "货品编号" },
+                    { "data": "Name", "title": "货品名称" },
+                    { "data": "Specification", "title": "规格型号" },
                     { "data": "Number", "title": "数量" },
                     { "data": "RelatedPerson", "title": "领用人" },
                     { "data": "Manager", "title": "物管员" }
@@ -1283,6 +1332,11 @@ function addIncreaseList() {
                 }
             }
             $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            var codeId = $(this).val();
+            var actual = $(this).find(`option[value=${codeId}]`).attr('actual');
+            if (actual) {
+                $("#inRk" + increaseMax).prop('placeholder', `货品领用数量：${actual}`);
+            }
         });
 
         /////////////////添加option
@@ -1572,7 +1626,7 @@ function addIncreaseList() {
 
         $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
     }
-
+    $('#increaseTable').scrollTop($('#increaseTable')[0].scrollHeight);
     ditto();
 }
 
@@ -1613,9 +1667,14 @@ function increase() {
     var i;
     for (i = 1; i <= increaseMax; i++) {
         if ($("#inBh" + i).length > 0) {
+            var actualEl = $("#inRk" + i);
+            var tr = actualEl.parents('tr');
+            var codeEl = tr.find('.code');
+            var codeId = codeEl.val();
+            var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
             var inBh = $("#inBh" + i).val();
             var inLy = $("#inLy" + i).val();
-            var inRk = $("#inRk" + i).val();
+            var inRk = actualEl.val();
             var inCg = $("#inCg" + i).val();
 
             if (isStrEmptyOrUndefined(inBh)) {
@@ -1628,6 +1687,10 @@ function increase() {
             }
             if (parseInt(inRk) <= 0) {
                 layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} option:checked`).text() + ": 入库数量需大于0");
+                return;
+            }
+            if (!!actual && parseInt(inRk) > parseInt(actual)) {
+                layer.msg('入库数量大于货品领用数量');
                 return;
             }
             if (isStrEmptyOrUndefined(inCg)) {
@@ -1886,7 +1949,7 @@ function getPlanBill(post = false) {
 
 //领用显示计划使用物料
 function showPlanBill(find = false) {
-    var planId = $('#consumePlanSelect').val();
+    //var planId = $('#consumePlanSelect').val();
     if (find) {
         var con = $("#consumePlanCondition").val();
         var con1 = "", con2 = "0";
@@ -1917,7 +1980,7 @@ function showPlanBill(find = false) {
             }
             con2 = $("#consumePlanCondition2").val();
             var trs = $("#consumePlanList tr");
-            for (i = 0; i < trs.length; i++) {
+            for (var i = 0; i < trs.length; i++) {
                 var tr = trs[i];
                 var v = $(tr).attr("value");
                 var bh = "";
@@ -1958,54 +2021,54 @@ function showPlanBill(find = false) {
         }
         consumePlanDittoAuto();
     } else {
-        var data = _consumePlanBill;
-        $("#consumePlanList").empty();
-        if (data.length > 0) {
-            var trs = "";
-            for (var j = 0; j < data.length; j++) {
-                var xh = j + 1;
-                var d = data[j];
-                var tr = `
-                <tr id="conPlan${xh}" value="${xh}" xh="${xh}" billId="${d.BillId}">
-                    <td style="vertical-align: inherit;">${xh}</td>
-                    <td style="vertical-align: inherit;" id="conPlanBh${xh}" ${(d.Extra ? 'class="text-red"' : '')}>${d.Code}</td>
-                    <td style="vertical-align: inherit;" id="conPlanLb${xh}">${d.Category}</td>
-                    <td style="vertical-align: inherit;" id="conPlanMc${xh}">${d.Name}</td>
-                    <td style="vertical-align: inherit;" id="conPlanGys${xh}">${d.Supplier}</td>
-                    <td style="vertical-align: inherit;" id="conPlanGg${xh}">${d.Specification}</td>
-                    <td style="vertical-align: inherit;" id="conPlanWz${xh}">${d.Site}</td>
-                    <td style="vertical-align: inherit;">${d.Unit}</td>
-                    <td>
-                        <button type="button" class="btn btn-info btn-sm" id="conPlanDetail${xh}" onclick="showDetailModel(${d.BillId})">详情</button>
-                    </td>
-                    <td style="vertical-align: inherit;">${d.PlannedConsumption}</td>
-                    <td style="vertical-align: inherit;">${d.ActualConsumption}</td>
-                    <td style="vertical-align: inherit;" class="form-inline">
-                        <span id="conPlanNum${xh}">${d.Number}</span>
-                        <button type="button" class="btn btn-danger btn-xs pull-right" onclick="consumePlanUpdateNum(${d.BillId})"><i class="fa fa-refresh"></i></button>
-                    </td>
-                    <td>
-                        <input class="form-control text-center" type="tel" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
-                    </td>
-                    <td>
-                        <div style="display:flex;width:150px">
-                            <input class="form-control text-center" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
-                            <button class="btn btn-primary btn-sm conPlanDitto" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
-                        </div>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-success btn-sm" onclick="showLogConsumeModel(${d.BillId}, 1, ${planId})">查看</button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm hidden" id="delConsumePlanList${xh}" onclick="delConsumePlanList(${xh})"><i class="fa fa-minus"></i></button>
-                    </td>
-                </tr>`;
-                trs += tr;
-            }
-            $("#consumePlanList").append(trs);
-            consumePlanMax = _consumePlanBill.length;
-            consumePlanMaxV = _consumePlanBill.length;
-        }
+        //var data = _consumePlanBill;
+        //$("#consumePlanList").empty();
+        //if (data.length > 0) {
+        //    var trs = "";
+        //    for (var j = 0; j < data.length; j++) {
+        //        var xh = j + 1;
+        //        var d = data[j];
+        //        var tr = `
+        //        <tr id="conPlan${xh}" value="${xh}" xh="${xh}" billId="${d.BillId}">
+        //            <td style="vertical-align: inherit;">${xh}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanBh${xh}" ${(d.Extra ? 'class="text-red"' : '')}>${d.Code}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanLb${xh}">${d.Category}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanMc${xh}">${d.Name}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanGys${xh}">${d.Supplier}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanGg${xh}">${d.Specification}</td>
+        //            <td style="vertical-align: inherit;" id="conPlanWz${xh}">${d.Site}</td>
+        //            <td style="vertical-align: inherit;">${d.Unit}</td>
+        //            <td>
+        //                <button type="button" class="btn btn-info btn-sm" id="conPlanDetail${xh}" onclick="showDetailModel(${d.BillId})">详情</button>
+        //            </td>
+        //            <td style="vertical-align: inherit;">${d.PlannedConsumption}</td>
+        //            <td style="vertical-align: inherit;">${d.ActualConsumption}</td>
+        //            <td style="vertical-align: inherit;" class="form-inline">
+        //                <span id="conPlanNum${xh}">${d.Number}</span>
+        //                <button type="button" class="btn btn-danger btn-xs pull-right" onclick="consumePlanUpdateNum(${d.BillId})"><i class="fa fa-refresh"></i></button>
+        //            </td>
+        //            <td>
+        //                <input class="form-control text-center" type="tel" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
+        //            </td>
+        //            <td>
+        //                <div style="display:flex;width:150px">
+        //                    <input class="form-control text-center" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
+        //                    <button class="btn btn-primary btn-sm conPlanDitto" ${(j == 0 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
+        //                </div>
+        //            </td>
+        //            <td>
+        //                <button type="button" class="btn btn-success btn-sm" onclick="showLogConsumeModel(${d.BillId}, 1, ${planId})">查看</button>
+        //            </td>
+        //            <td>
+        //                <button type="button" class="btn btn-danger btn-sm hidden" id="delConsumePlanList${xh}" onclick="delConsumePlanList(${xh})"><i class="fa fa-minus"></i></button>
+        //            </td>
+        //        </tr>`;
+        //        trs += tr;
+        //    }
+        //    $("#consumePlanList").append(trs);
+        //    consumePlanMax = _consumePlanBill.length;
+        //    consumePlanMaxV = _consumePlanBill.length;
+        //}
     }
 }
 
@@ -2061,7 +2124,7 @@ function addConsumePlanList() {
             <td style="vertical-align: inherit;"><span class="control-label xh" id="conPlanXh${xh}">${consumePlanMaxV}</span></td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
-                <select class="ms2 form-control" id="conPlanBh${xh}"></select>
+                <select class="ms2 form-control code" id="conPlanBh${xh}"></select>
             </td>
             <td><select class="ms2 form-control" id="conPlanLb${xh}"></select></td>
             <td><select class="ms2 form-control" id="conPlanMc${xh}"></select></td>
@@ -2091,7 +2154,7 @@ function addConsumePlanList() {
                 <button type="button" class="btn btn-success btn-sm" id="conPlanLog${xh}" onclick="showLogConsumeModel(2, 0)">查看</button>
             </td>
             <td>
-                <button type="button" class="btn btn-danger btn-sm ${(xh == 1 ? " hidden" : "")}" id="delConsumePlanList${xh}" onclick="delConsumePlanList(${xh})"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-danger btn-sm" id="delConsumePlanList${xh}" onclick="delConsumePlanList(${xh})"><i class="fa fa-minus"></i></button>
             </td>
         </tr>`;
 
@@ -2196,6 +2259,13 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                if (_consumePlanBill.some((item) => item.BillId == id)) {
+                    $("#conPlanLog" + xh).removeClass('hidden');
+                } else {
+                    $("#conPlanLog" + xh).addClass('hidden');
+                }
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${id}, 1, ${planId})`);
             });
 
             /////////////////添加option
@@ -2535,8 +2605,9 @@ function addConsumePlanList() {
             $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
 
         }
-
+        $('#consumePlanTable').scrollTop($('#consumePlanTable')[0].scrollHeight);
         consumePlanDittoAuto();
+        consumePlanActual();
     }
 }
 
@@ -2707,7 +2778,7 @@ function addConsumeOtherList() {
             <td style="vertical-align: inherit;"><span class="control-label xh" id="conOtherXh${xh}">${consumeOtherMaxV}</span></td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
-                <select class="ms2 form-control" id="conOtherBh${xh}"></select>
+                <select class="ms2 form-control code" id="conOtherBh${xh}"></select>
             </td>
             <td><select class="ms2 form-control" id="conOtherLb${xh}"></select></td>
             <td><select class="ms2 form-control" id="conOtherMc${xh}"></select></td>
@@ -2817,6 +2888,7 @@ function addConsumeOtherList() {
                 }
             }
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${id}, 2)`);
         });
 
         /////////////////添加option
@@ -3101,7 +3173,8 @@ function addConsumeOtherList() {
         $("#consumeOtherUpdateNum" + xh).attr("onclick", `consumeOtherUpdateNum(${billId})`);
         $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
     }
-
+    $('#consumeOtherTable').scrollTop($('#consumeOtherTable')[0].scrollHeight);
+    consumeOtherActual();
     consumeOtherDittoAuto();
 }
 
@@ -3197,28 +3270,32 @@ function consumeShow() {
     }
     $("#consumePurpose").html(purpose);
     if (data.length <= 0) {
-        layer.msg("请选择货品");
+        layer.msg("请添加货品");
         return;
     }
 
     _consumeActualList = new Array();
     for (var i = 0; i < data.length; i++) {
         var d = data[i];
-        if (d.BillId > 0 && d.Number > 0) {
-            if (!d.Exist) {
-                layer.msg(`货品编号：${d.Code}不存在, 无法领用`);
-                return;
-            }
-
-            if (isStrEmptyOrUndefined(d.RelatedPerson)) {
-                layer.msg("请输入领用人");
+        if (parseInt(d.BillId) > 0) {
+            if (parseInt(d.Number) > 0) {
+                if (!d.Exist) {
+                    layer.msg(`货品编号：${d.Code}不存在, 无法领用`);
+                    return;
+                }
+                if (isStrEmptyOrUndefined(d.RelatedPerson)) {
+                    layer.msg("请输入领用人");
+                    return;
+                }
+            } else {
+                layer.msg("领用数量必须大于0");
                 return;
             }
             _consumeActualList.push(d);
         }
     }
     if (_consumeActualList.length <= 0) {
-        layer.msg("请选择货品");
+        layer.msg("请添加货品");
         return;
     }
 
@@ -3297,12 +3374,12 @@ function showDetailModel(id) {
         function (ret) {
             if (ret.errno == 0) {
                 var d = ret.datas[0];
-                $("#detailCode").val(d.Code);
-                $("#detailCategory").val(d.Category);
-                $("#detailName").val(d.Name);
-                $("#detailSupplier").val(d.Supplier);
-                $("#detailSpecification").val(d.Specification);
-                $("#detailSite").val(d.Site);
+                $("#detailCode").text(d.Code);
+                $("#detailCategory").text(d.Category);
+                $("#detailName").text(d.Name);
+                $("#detailSupplier").text(d.Supplier);
+                $("#detailSpecification").text(d.Specification);
+                $("#detailSite").text(d.Site);
                 if (d.ImageList.length > 0) {
                     data = {
                         type: fileEnum.Material,
@@ -3319,13 +3396,12 @@ function showDetailModel(id) {
                                 '<div class="thumbnail">' +
                                 '<img src={0} style="height:200px">' +
                                 '<div class="caption text-center">' +
-                                '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
                                 '</div>' +
                                 '</div>' +
                                 '</div>';
                             var imgOps = "";
                             for (var i = 0; i < ret.data.length; i++) {
-                                imgOps += imgOp.format(ret.data[i].path, d.ImageList[i]);
+                                imgOps += imgOp.format(ret.data[i].path);
                             }
                             $("#detailImgList").append(imgOps);
                             $('#showDetailModel').modal('show');

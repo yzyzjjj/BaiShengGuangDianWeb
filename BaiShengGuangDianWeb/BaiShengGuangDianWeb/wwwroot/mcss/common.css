@@ -296,3 +296,10 @@ select {
     display: flex;
     align-items: center;
 }
+
+.spanStyle {
+    color: blue;
+    text-decoration: underline;
+    font-size: 18px;
+    padding-right: 20px
+}

@@ -33,17 +33,17 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label">重置变量值：</label>
-                        <div class="form-horizontal" style="margin-left: 50px;margin-top: 10px">
-                            <div class="form-group">
-                                <label class="control-label" for="selectVarType">变量类型：</label>
-                                <select class="ms2 form-control" style="width: 200px" id="selectVarType"></select>
+                        <div class="form-group">
+                            <label class="control-label">重置变量值：</label>
+                        </div>
+                        <div class="form-horizontal">
+                            <div class="form-group flexStyle" style="justify-content:center">
+                                <label class="control-label textOverTop" for="selectVarType" style="width: 73px">变量类型：</label>
+                                <select class="ms2 form-control" style="flex-basis: 200px" id="selectVarType"></select>
                             </div>
-                            <div class="form-group form-inline">
-                                <label class="control-label" for="resetValue" style="width: 70px">重置值：</label>
-                                <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                    <input type="tel" class="form-control" autocomplete="off" id="resetValue" onchange="focusIn($(this))" style="width: 200px" oninput="value=value.replace(/[^\d\-]/g,'')" maxlength="5">
-                                </div>
+                            <div class="form-group flexStyle" style="justify-content:center">
+                                <label class="control-label textOverTop" for="resetValue" style="width: 73px">重置值：</label>
+                                <input type="tel" class="form-control" autocomplete="off" id="resetValue" onchange="focusIn($(this))" style="flex-basis: 200px" oninput="value=value.replace(/[^\d\-]/g,'')" maxlength="5">
                             </div>
                         </div>
                     </div>

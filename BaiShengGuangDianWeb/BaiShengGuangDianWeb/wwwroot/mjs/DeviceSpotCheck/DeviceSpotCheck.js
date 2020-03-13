@@ -325,6 +325,10 @@ function getSpotPlanCheckList(e, el) {
 function spotPlanCheckReload() {
     getSpotPlanCheckList(0, $("#spotPlanCheckList"));
 }
+//计划设置刷新
+function planItemReload() {
+    getSpotPlanCheckList(1, $("#spotPlanCheckListSet"));
+}
 
 //设置设备点检项
 function setDeviceCheck() {

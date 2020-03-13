@@ -36,7 +36,10 @@
         </div>
         <div class="box-body">
             <div class="form-group">
-                <label class="control-label">已添加点检项：</label>
+                <div class="form-group flexStyle" style="justify-content: space-between">
+                    <label class="control-label">已添加点检项：</label>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="getSpotCheckList()">刷新</button>
+                </div>
                 <div class="table-responsive mailbox-messages">
                     <table class="table table-hover table-striped" id="spotCheckList"></table>
                 </div>

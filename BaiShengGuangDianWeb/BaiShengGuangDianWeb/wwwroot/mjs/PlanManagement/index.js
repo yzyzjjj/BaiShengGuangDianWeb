@@ -62,6 +62,7 @@
         }
         var plan = $('#addPlanSelect').find(`[value=${planId}]`).text();
         var doSth = function () {
+            $('#addPlanBody').empty();
             addUpPlanTable(planId, false);
         }
         showConfirm(`复用生产计划：${plan}`, doSth);
@@ -174,17 +175,13 @@ function addUpPlanTable(planId, isUp) {
         $('#addRemark').val(data.Remark);
         var planData = data.FirstBill;
         var i, len = planData.length;
-        $('#addPlanTableBtn').removeClass('hidden');
-        $('#addPlanBody').empty();
-        $('#addPlanTable').addClass('hidden');
         _planTrCount = 0;
         if (len) {
             $('#addPlanTableBtn').addClass('hidden');
             $('#addPlanTable').removeClass('hidden');
-            var flag = -1;
             var trInfo = '<tr style="color:{12}">' +
-                '<td><input type="checkbox" class="icb_minimal isEnable isNo"></td>' +
-                '<td class="num" style="font-weight:bold"></td>' +
+                '<td><input type="checkbox" class="icb_minimal isEnable {14}"></td>' +
+                '<td class="num" style="font-weight:bold" list={15} bill={16}></td>' +
                 '<td class="code"><span class="textIn">{5}</span></td>' +
                 '<td class="category"><span class="textIn">{0}</span></td>' +
                 '<td class="name"><span class="textIn">{1}</span></td>' +
@@ -196,15 +193,16 @@ function addUpPlanTable(planId, isUp) {
                 '<td class="plannedConsumption"><span class="textIn">{10}</span></td>' +
                 '<td class="actualConsumption">{11}</td>' +
                 '<td>' +
-                '<button type="button" class="btn btn-danger btn-sm delPlanTr"><i class="fa fa-minus"></i></button>' +
-                '<button type="button" class="btn btn-success btn-sm addPlanTr isNo" style="margin-left:5px"><i class="fa fa-plus"></i></button></td>' +
+                '<button type="button" class="btn btn-danger btn-sm delPlanTr {13}"><i class="fa fa-minus"></i></button>' +
+                '<button type="button" class="btn btn-success btn-sm addPlanTr {14}" style="margin-left:5px"><i class="fa fa-plus"></i></button></td>' +
                 '</tr>';
+            var ops = '';
             for (i = 0; i < len; i++) {
                 var d = planData[i];
                 _planTrCount++;
-                flag++;
-                if (_codeData[d.BillId]) {
-                    $('#addPlanBody').append(trInfo.format(d.Category,
+                var tf = !!_codeData[d.BillId];
+                if (tf || isUp) {
+                    ops += trInfo.format(d.Category,
                         d.Name,
                         d.Supplier,
                         d.Specification,
@@ -216,34 +214,19 @@ function addUpPlanTable(planId, isUp) {
                         d.ImageList,
                         isUp ? d.PlannedConsumption : d.ActualConsumption,
                         d.ActualConsumption,
-                        'black'));
-                    if (d.ActualConsumption != 0 && isUp) {
-                        $('#addPlanBody').find('.delPlanTr').eq(flag).addClass('hidden');
-                    }
-                } else {
-                    if (isUp) {
-                        $('#addPlanBody').append(trInfo.format(d.Category,
-                            d.Name,
-                            d.Supplier,
-                            d.Specification,
-                            d.Site,
-                            d.Code,
-                            d.Stock,
-                            d.Price,
-                            d.Remark,
-                            d.ImageList,
-                            d.PlannedConsumption,
-                            d.ActualConsumption,
-                            'red'));
-                        $('#addPlanBody').find('.isNo').eq(flag).addClass('hidden');
-                    }
+                        tf ? 'black' : 'red',
+                        tf && isUp && d.ActualConsumption != 0 ? 'hidden' : '',
+                        tf ? '' : 'hidden',
+                        d.Id,
+                        d.BillId);
                 }
-                $('#addPlanBody').find('.num').eq(flag).attr('list', d.Id).attr('bill', d.BillId);
             }
+            $('#addPlanBody').append(ops);
             setTableStyle();
             getPriceSum();
             setTableTrCount($("#addPlanBody"), _planTrCount, isUp);
         }
+        $('#addPlanTableBtn').attr('disabled', false);
     });
 }
 
@@ -806,12 +789,12 @@ function addPlanModal() {
 
 //添加修改计划弹窗相同部分
 function addUpPlanClass(isUp, id) {
+    $('#addPlanBody').empty();
     _planTrCount = 0;
     $('#addRemark').val('');
     $('#planCost').text('0.00');
     $('#addPlanTableBtn').removeClass('hidden');
     $('#addPlanTable').addClass('hidden');
-    $('#addPlanBody').empty();
     new Promise(function (resolve, reject) {
         addPlanTr(resolve);
     }).then(function (e) {
@@ -994,6 +977,7 @@ function productDetailModal(category, name, supplier, specification, site, code,
 
 //修改计划弹窗
 function updatePlanModal(id) {
+    $('#addPlanTableBtn').attr('disabled', true);
     $('#addPlanModal .addPlan').addClass('hidden');
     $('#addPlanModal .updatePlan').removeClass('hidden');
     addUpPlanClass(true, id);
