@@ -321,7 +321,7 @@ function getSpotPlanCheckList(e, el) {
     });
 }
 
-//设备点检项重新加载
+//设备点检项刷新
 function spotPlanCheckReload() {
     getSpotPlanCheckList(0, $("#spotPlanCheckList"));
 }

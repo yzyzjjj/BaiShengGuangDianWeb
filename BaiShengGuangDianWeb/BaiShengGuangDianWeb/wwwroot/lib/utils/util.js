@@ -118,13 +118,13 @@ function getCookieTokenInfo() {
 
 //检查token是否过期之类
 function isTokenValid() {
-    var tkinfo = getCookieTokenInfo();
-    if (tkinfo == null) {
+    var tkInfo = getCookieTokenInfo();
+    if (tkInfo == null) {
         return false;
     }
 
     var timestamp = new Date().getTime() / 1000;
-    if (timestamp > tkinfo.exp) {
+    if (timestamp > tkInfo.exp) {
         return false;
     }
 
@@ -185,6 +185,9 @@ function ajaxPost(url, data, func, tf) {
 
 //ajax 包装 data 必须是张表，或者null,带token
 function ajaxGet(url, data, func) {
+    //if (tf != 0) {
+    //    addCover();
+    //}
     if (data == null) {
         data = {}
     }

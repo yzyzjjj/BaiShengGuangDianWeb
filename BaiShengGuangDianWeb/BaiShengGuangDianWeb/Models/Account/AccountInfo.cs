@@ -29,6 +29,7 @@ namespace BaiShengGuangDianWeb.Models.Account
         }
 
         public string RoleName { get; set; }
+        public string Phone { get; set; }
         public string EmailType { get; set; }
         public string EmailAddress { get; set; }
         public bool IsDeleted { get; set; }

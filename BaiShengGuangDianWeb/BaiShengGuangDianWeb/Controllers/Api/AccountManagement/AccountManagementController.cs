@@ -70,6 +70,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var password = param.GetValue("password");
             var name = param.GetValue("name");
             var email = param.GetValue("email");
+            var phone = param.GetValue("phone");
             var roleStr = param.GetValue("role");
             var permissions = param.GetValue("permissions");
             var isProcessor = param.GetValue("isProcessor");
@@ -101,6 +102,12 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 return Result.GenError<Result>(Error.RoleNotExist);
             }
 
+            phone = phone.IsNullOrEmpty() ? "" : phone;
+            if (!phone.IsNullOrEmpty() && !phone.IsPhone())
+            {
+                return Result.GenError<Result>(Error.PhoneError);
+            }
+
             if (!permissions.IsNullOrEmpty())
             {
                 try
@@ -127,7 +134,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
-            var logParam = $"账号:{account},名字:{name},角色:{roleInfos.SelectMany(x => x.Name).Join(",")},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
+            var logParam = $"账号:{account},名字:{name},角色:{roleInfos.SelectMany(x => x.Name).Join(",")},手机号:{phone},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
             if (!isProcessor.IsNullOrEmpty())
             {
                 try
@@ -210,9 +217,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var info = new AccountInfo
             {
                 Account = account,
-                Password = AccountHelper.GenAccountPwdByOrignalPwd(account, password),
+                Password = AccountHelper.GenAccountPwdByOriginalPwd(account, password),
                 Name = name,
                 RoleList = roleList,
+                Phone = phone,
                 EmailType = emailType,
                 EmailAddress = email,
                 SelfPermissions = permissions ?? "",
@@ -422,7 +430,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var password = param.GetValue("password");
             if (!password.IsNullOrEmpty())
             {
-                var pwd = AccountHelper.GenAccountPwdByOrignalPwd(accountInfo.Account, password);
+                var pwd = AccountHelper.GenAccountPwdByOriginalPwd(accountInfo.Account, password);
                 if (accountInfo.Password != pwd)
                 {
                     logParam = $",密码:{accountInfo.Password},新密码明文/密文:{password}/{pwd}";
@@ -430,8 +438,23 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
+            //Phone
+            var phone = param.GetValue("phone");
+            phone = phone.IsNullOrEmpty() ? "" : phone;
+            if (accountInfo.Phone != phone)
+            {
+                if (!phone.IsNullOrEmpty() && !phone.IsPhone())
+                {
+                    return Result.GenError<Result>(Error.PhoneError);
+                }
+                logParam = $",邮箱:{accountInfo.Phone},新邮箱:{phone}";
+                accountInfo.Phone = phone;
+            }
+
+
             //EmailAddress
             var email = param.GetValue("email");
+            email = email.IsNullOrEmpty() ? "" : email;
             if (accountInfo.EmailAddress != email)
             {
                 logParam = $",邮箱:{accountInfo.EmailAddress},新邮箱:{email}";
@@ -440,6 +463,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             //EmailAddress
             var emailType = param.GetValue("emailType");
+            emailType = emailType.IsNullOrEmpty() ? "" : emailType;
             if (accountInfo.EmailType != emailType)
             {
                 logParam = $",邮件类型:{accountInfo.EmailType},新邮件类型:{emailType}";
@@ -449,6 +473,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             //Role
             var roleStr = param.GetValue("role");
+            roleStr = roleStr.IsNullOrEmpty() ? "" : roleStr;
             var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
             if (!roleList.Any())
             {

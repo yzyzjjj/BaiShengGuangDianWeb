@@ -47,6 +47,7 @@
 }
 
 function getUsersList() {
+    $("#userTable").empty();
     var getUsersListFunc = new Promise(function (resolve) {
         ajaxGet("/AccountManagement/List", null,
             function (ret) {
@@ -66,11 +67,11 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\')">修改</a></li>';
+                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\',\'{9}\')">修改</a></li>';
                 var delUsersFormat = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>';
 
                 var op = function (data, type, row) {
-                    var upUsers = upUsersFormat.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType))
+                    var upUsers = upUsersFormat.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.phone), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType))
                     var delUsers = delUsersFormat.format(data.id, escape(data.account));
                     return (!checkPermission76 && !checkPermission75) || data.isDeleted ? "" : htmlFormat.format(checkPermission76 ? upUsers : "", checkPermission75 ? delUsers : "");
                 }
@@ -86,6 +87,7 @@ function getUsersList() {
                         { "data": "account", "title": "用户名" },
                         { "data": "name", "title": "姓名" },
                         { "data": "roleName", "title": "角色" },
+                        { "data": "phone", "title": "手机号" },
                         { "data": "emailAddress", "title": "邮箱" },
                         { "data": null, "title": "删除", "render": del }
                     ];
@@ -352,6 +354,7 @@ function emailType() {
 function addUser() {
     var addAccount = $("#addAccount").val().trim();
     var addName = $("#addName").val().trim();
+    var addPhone = $("#addPhone").val().trim();
     var addEmail = $("#addEmail").val().trim();
     var addEmailType = emailTypeData.join();
     var addPassword = $("#addPassword").val().trim();
@@ -392,6 +395,10 @@ function addUser() {
         layer.msg("姓名不能为空");
         return;
     }
+    if (!isStrEmptyOrUndefined(addPhone) && !isPhone(addPhone)) {
+        layer.msg("手机号错误");
+        return;
+    }
     if (!isEmail(addEmail) && !isStrEmptyOrUndefined(addEmail)) {
         showTip("addEmailTip", "邮箱格式不正确，请输入：登录名@主机名.域名的格式");
         return;
@@ -415,6 +422,7 @@ function addUser() {
             account: addAccount,
             password: addPassword,
             name: addName,
+            phone: addPhone,
             email: addEmail,
             emailType: addEmailType,
             role: addRole,
@@ -437,10 +445,11 @@ function addUser() {
 var updateList = new Array();
 var permission = null;
 var tf1 = true;
-function showUpdateUserModal(id, role, account, name, emailAddress, permissions, deviceIds, productionRole, emailType) {
+function showUpdateUserModal(id, role, account, name, phone, emailAddress, permissions, deviceIds, productionRole, emailType) {
     role = role.split(",");
     account = unescape(account);
     name = unescape(name);
+    phone = unescape(phone);
     emailAddress = unescape(emailAddress);
     permissions = unescape(permissions);
     deviceIds = unescape(deviceIds);
@@ -454,6 +463,7 @@ function showUpdateUserModal(id, role, account, name, emailAddress, permissions,
     $("#updateId").html(id);
     $("#updateAccount").val(account);
     $("#updateName").val(name);
+    $("#updatePhone").val(phone);
     $("#updateEmail").val(emailAddress);
     $("#updatePassword").iCheck('uncheck');
     $("#updateNewPassword").val("");
@@ -652,6 +662,7 @@ function updateUser() {
     var id = parseInt($("#updateId").html());
     var updateName = $("#updateName").val();
     var updateEmail = $("#updateEmail").val();
+    var updatePhone = $("#updatePhone").val();
     var upEmailTypeData = [];
     var cks = $("#upEmailType .icb_minimal");
     for (var j = 0; j < cks.length; j++) {
@@ -694,9 +705,14 @@ function updateUser() {
         return;
     }
 
+    if (!isStrEmptyOrUndefined(updatePhone) && !isPhone(updatePhone)) {
+        layer.msg("手机号错误");
+        return;
+    }
     var data = {
         id: id,
         name: updateName,
+        phone: updatePhone,
         email: updateEmail,
         emailType: updateEmailType,
         role: updateRole,

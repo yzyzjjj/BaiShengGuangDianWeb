@@ -382,38 +382,30 @@ function initItemList() {
         var titleColumns = [3, 7, 10];
         $("#itemList")
             .DataTable({
-                dom: 'B<"clear">lfrtip',
-                buttons: {
-                    dom: {
-                        container: {
-                            tag: 'div',
-                            className: 'pull-right'
-                        }
-                    },
-                    buttons: [
-                        {
-                            extend: 'excel',
-                            text: '导出Excel',
-                            className: 'btn-primary btn-sm', //按钮的class样式
-                            exportOptions: {
-                                columns: excelColumns,
-                                format: {
-                                    // format有三个子标签，header，body和foot
-                                    body: function (data, row, column, node) {
-                                        //操作需要导出excel的数据格式                        
-                                        if (titleColumns.indexOf(column) > -1) {
-                                            var a = $(node).find("span").attr("title");
-                                            if (a != null) {
-                                                return "\u200C" + unescape(a);
-                                            }
+                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '导出Excel',
+                        className: 'btn-primary btn-sm', //按钮的class样式
+                        exportOptions: {
+                            columns: excelColumns,
+                            format: {
+                                // format有三个子标签，header，body和foot
+                                body: function (data, row, column, node) {
+                                    //操作需要导出excel的数据格式                        
+                                    if (titleColumns.indexOf(column) > -1) {
+                                        var a = $(node).find("span").attr("title");
+                                        if (a != null) {
+                                            return "\u200C" + unescape(a);
                                         }
-                                        return "\u200C" + node.textContent;
                                     }
+                                    return "\u200C" + node.textContent;
                                 }
                             }
                         }
-                    ]
-                },
+                    }
+                ],
                 "destroy": true,
                 "paging": true,
                 "searching": true,

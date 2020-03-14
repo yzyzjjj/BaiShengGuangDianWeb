@@ -21,8 +21,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static string GenAccountPwd(string account, string pwd)
         {
-            var pwdstr = pwd + account + ServerConfig.PasswordKey;
-            return MD5Util.GetMd5Hash(pwdstr);
+            var pwdStr = pwd + account + ServerConfig.PasswordKey;
+            return MD5Util.GetMd5Hash(pwdStr);
         }
         /// <summary>
         /// 账号创建密码规则 一次MD5
@@ -40,11 +40,11 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// 使用原始密码生成数据库密码
         /// </summary>
         /// <param name="account"></param>
-        /// <param name="orignalPwd">原始密码</param>
+        /// <param name="originalPwd">原始密码</param>
         /// <returns></returns>
-        public static string GenAccountPwdByOrignalPwd(string account, string orignalPwd)
+        public static string GenAccountPwdByOriginalPwd(string account, string originalPwd)
         {
-            var pwd = MD5Util.GetMd5Hash(MD5Util.GetMd5Hash(orignalPwd));
+            var pwd = MD5Util.GetMd5Hash(MD5Util.GetMd5Hash(originalPwd));
             var pwdStr = pwd + account + ServerConfig.PasswordKey;
             return MD5Util.GetMd5Hash(pwdStr);
         }
@@ -179,8 +179,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void AddAccountInfo(AccountInfo info)
         {
-            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `EmailType`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`, `Default`, `ProductionRole`, `MaxProductionRole`) " +
-                      "VALUES (@Account, @Password, @Name, @Role, @EmailType, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds, @Default, @ProductionRole, @MaxProductionRole);";
+            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `Phone`, `EmailType`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`, `Default`, `ProductionRole`, `MaxProductionRole`) " +
+                      "VALUES (@Account, @Password, @Name, @Role, @Phone, @EmailType, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds, @Default, @ProductionRole, @MaxProductionRole);";
             ServerConfig.WebDb.Execute(sql, info);
         }
 
@@ -202,7 +202,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void UpdateAccountInfo(AccountInfo info)
         {
-            var sql = "UPDATE accounts SET `Account` = @Account, `Password` = @Password, `Name` = @Name, `Role` = @Role, `EmailType` = @EmailType, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, " +
+            var sql = "UPDATE accounts SET `Account` = @Account, `Password` = @Password, `Name` = @Name, `Role` = @Role, `Phone` = @Phone, `EmailType` = @EmailType, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, " +
                       "`SelfPermissions` = @SelfPermissions, `DeviceIds` = @DeviceIds, `Default` = @Default, `ProductionRole` = @ProductionRole, `MaxProductionRole` = @MaxProductionRole WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, info);
         }

@@ -17,8 +17,8 @@
         <div class="box-header">
             <h3 class="box-title">用户列表</h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-primary" id="showAddUserModal" onclick="showAddUserModal()">添加用户</button>
-                <button type="button" class="btn btn-primary" onclick="getUsersList()">重新加载</button>
+                <button type="button" class="btn btn-primary" id="showAddUserModal" onclick="showAddUserModal()">添加</button>
+                <button type="button" class="btn btn-primary" onclick="getUsersList()">刷新</button>
             </div>
         </div>
         <div class="box-body">
@@ -56,6 +56,10 @@
                                         <div class="form-group">
                                             <label class="control-label">姓名：</label>
                                             <input class="dd form-control" id="addName" maxlength="20">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label" for="addPhone">手机号：</label>
+                                            <input class="form-control" type="tel" id="addPhone" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11">
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label" for="addEmail">邮箱：</label>
@@ -138,6 +142,10 @@
                                         <div class="form-group">
                                             <label class="control-label">姓名：</label>
                                             <input class="ud form-control" id="updateName" maxlength="20">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label" for="updatePhone">手机号：</label>
+                                            <input class="form-control" type="tel" id="updatePhone" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11">
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label" for="updateEmail">邮箱：</label>
