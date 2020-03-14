@@ -892,7 +892,26 @@ function planDetailModalData(id) {
             var op = `<span style="color:{0}">${actual}</span>`;
             return op.format(actual === 0 ? 'black' : actual > planed ? 'red' : 'green');
         }
+        var excelColumns = [0, 1, 2, 3, 4, 5, 6, 8, 9];
         $("#planDetailList").DataTable({
+            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '导出Excel',
+                    className: 'btn-primary btn-sm', //按钮的class样式
+                    exportOptions: {
+                        columns: excelColumns,
+                        format: {
+                            // format有三个子标签，header，body和foot
+                            body: function (data, row, column, node) {
+                                //操作需要导出excel的数据格式                        
+                                return "\u200C" + node.textContent;
+                            }
+                        }
+                    }
+                }
+            ],
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -908,6 +927,7 @@ function planDetailModalData(id) {
                 { "data": "Name", "title": "货品名称" },
                 { "data": "Supplier", "title": "供应商" },
                 { "data": "Specification", "title": "规格型号" },
+                { "data": "Price", "title": "价格" },
                 { "data": null, "title": "货品详情", "render": detailBtn },
                 { "data": "PlannedConsumption", "title": "计划用量" },
                 { "data": null, "title": "实际用量", "render": actualConsumption }
