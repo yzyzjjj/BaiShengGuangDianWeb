@@ -20,7 +20,7 @@
                 </button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showIncreaseModel()">入库</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showConsumeModel()">领用</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="">冲正</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showReversalModel()">冲正</button>
                 <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(1)">入库日志</button>
                 <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(2)">领用日志</button>
                 <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(0)">操作日志</button>
@@ -70,7 +70,7 @@
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-default btn-sm" onclick="resetIncreaseList()"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
-                    <div class="form-group" id="increaseTable" style="overflow: auto;max-height:500px">
+                    <div class="form-group maxHeight" id="increaseTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
@@ -138,10 +138,10 @@
                                                 <label class="control-label" for="consumePlanRemark">备注：</label>
                                                 <span class="control-label" id="consumePlanRemark"></span>
                                             </div>
-                                            <div style="display: flex; justify-content: space-between; align-items: center">
+                                            <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space: nowrap">清单：</label>
                                                 <div style="display: flex; justify-content: center;align-items:center">
-                                                    <select class="form-control" id="consumePlanCondition1" onchange="showPlanBill(true)" style="flex-basis: 140px">
+                                                    <select class="form-control" id="consumePlanCondition1" onchange="showPlanBill(true,'Plan')" style="flex-basis: 140px">
                                                         <option value="Code">货品编号</option>
                                                         <option value="Category">货品类别</option>
                                                         <option value="Name">货品名称</option>
@@ -149,15 +149,15 @@
                                                         <option value="Specification">规格型号</option>
                                                         <option value="Site">货品位置</option>
                                                     </select>
-                                                    <select class="form-control" id="consumePlanCondition2" onchange="showPlanBill(true)" style="flex-basis: 140px;margin-left:3px">
+                                                    <select class="form-control" id="consumePlanCondition2" onchange="showPlanBill(true,'Plan')" style="flex-basis: 140px;margin-left:3px">
                                                         <option value="0">等于</option>
                                                         <option value="1">不等于</option>
                                                         <option value="2">包含</option>
                                                     </select>
-                                                    <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true)" maxlength="20" style="flex-basis: 140px;margin-left:3px">
+                                                    <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true,'Plan')" maxlength="20" style="flex-basis: 140px;margin-left:3px">
                                                 </div>
                                             </div>
-                                            <div class="form-group" id="consumePlanTable" style="overflow: auto;max-height:500px">
+                                            <div class="form-group maxHeight" id="consumePlanTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
                                                         <tr>
@@ -196,10 +196,26 @@
                                                 <label class="control-label" for="consumeOther" style="white-space:nowrap">用途：</label>
                                                 <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" onchange="consumeOtherActual()" style="flex-basis:180px">
                                             </div>
-                                            <div style="display: flex; justify-content: space-between;align-items:center">
+                                            <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space:nowrap">清单：</label>
+                                                <div class="flexStyle" style="justify-content: center">
+                                                    <select class="form-control" id="consumeOtherCondition1" onchange="showPlanBill(true,'Other')" style="flex-basis: 140px">
+                                                        <option value="Code">货品编号</option>
+                                                        <option value="Category">货品类别</option>
+                                                        <option value="Name">货品名称</option>
+                                                        <option value="Supplier">供应商</option>
+                                                        <option value="Specification">规格型号</option>
+                                                        <option value="Site">货品位置</option>
+                                                    </select>
+                                                    <select class="form-control" id="consumeOtherCondition2" onchange="showPlanBill(true,'Other')" style="flex-basis: 140px;margin-left:3px">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input class="form-control" id="consumeOtherCondition" oninput="showPlanBill(true,'Other')" maxlength="20" style="flex-basis: 140px;margin-left:3px">
+                                                </div>
                                             </div>
-                                            <div class="form-group" id="consumeOtherTable" style="overflow: auto;max-height:500px">
+                                            <div class="form-group maxHeight" id="consumeOtherTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
                                                         <tr>
@@ -268,51 +284,6 @@
         </div>
     </div>
 
-    <!-- 日志模态框 -->
-    <div class="modal fade" tabindex="-1" id="logModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title"></h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="control-label" for="logStartDate">时间范围：</label>
-                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <input type="text" id="logStartDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
-                            <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
-                            <input type="text" id="logEndDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label" for="logBillSelect">货品编号：</label>
-                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <select class="ms2 form-control" id="logBillSelect" style="width: 160px"></select>
-                        </div>
-                    </div>
-                    <div class="form-group hidden" id="billInfo">
-                        <div class="flexStyle" style="flex-wrap:wrap">
-                            <label class="control-label" for="logCategory">货品类别：<span class="spanStyle" id="logCategory"></span></label>
-                            <label class="control-label" for="logName">货品名称：<span class="spanStyle" id="logName"></span></label>
-                            <label class="control-label" for="logSupplier">供应商：<span class="spanStyle" id="logSupplier"></span></label>
-                            <label class="control-label" for="logSpecification">规格型号：<span class="spanStyle" id="logSpecification"></span></label>
-                            <label class="control-label" for="logPrice">货品价格：<span class="spanStyle" id="logPrice"></span></label>
-                        </div>
-                    </div>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="logList"></table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 计划日志模态框 -->
     <div class="modal fade" tabindex="-1" id="logConsumeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -364,40 +335,6 @@
         </div>
     </div>
 
-    <!-- 详情模态框 -->
-    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">详情</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-body box">
-                        <div class="flexStyle" style="flex-wrap: wrap">
-                            <label class="control-label" style="white-space: nowrap">编号：<span class="spanStyle" id="detailCode"></span></label>
-                            <label class="control-label" style="white-space: nowrap">类别：<span class="spanStyle" id="detailCategory"></span></label>
-                            <label class="control-label" style="white-space: nowrap">名称：<span class="spanStyle" id="detailName"></span></label>
-                            <label class="control-label" style="white-space: nowrap">供应商：<span class="spanStyle" id="detailSupplier"></span></label>
-                            <label class="control-label" style="white-space: nowrap">规格：<span class="spanStyle" id="detailSpecification"></span></label>
-                            <label class="control-label" style="white-space: nowrap">位置：<span class="spanStyle" id="detailSite"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" style="white-space: nowrap">图片：</label>
-                            <div class="form-group">
-                                <div class="row" id="detailImgList"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- 生成二维码弹窗 -->
     <div class="modal fade" tabindex="-1" id="createQrModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -448,6 +385,153 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 冲正模态框 -->
+    <div class="modal fade" tabindex="-1" id="reversalModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">冲正</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="justify-content:space-between">
+                        <label class="control-label" style="white-space: nowrap">清单：</label>
+                        <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                    </div>
+                    <div class="form-group maxHeight" id="reversalTable" style="overflow: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>货品编号</th>
+                                    <th>类别</th>
+                                    <th>名称</th>
+                                    <th>供应商</th>
+                                    <th>规格</th>
+                                    <th>位置</th>
+                                    <th class="text-red">剩余库存</th>
+                                    <th>库存修改</th>
+                                    <th>备注</th>
+                                    <th>货品详情</th>
+                                    <th>日志</th>
+                                    <th>删除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reversalList"></tbody>
+                        </table>
+                    </div>
+                    <div class="flexStyle" style="justify-content: center">
+                        <span class="iconfont icon-saoyisao" id="reversalAdd" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addReversalListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="reversalConModal()">确认</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 冲正确认模态框 -->
+    <div class="modal fade" tabindex="-1" id="reversalConModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">冲正确认</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="reversalConList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="reversalCon()">冲正</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="flexStyle" style="flex-wrap: wrap">
+                            <label class="control-label" style="white-space: nowrap">编号：<span class="spanStyle" id="detailCode"></span></label>
+                            <label class="control-label" style="white-space: nowrap">类别：<span class="spanStyle" id="detailCategory"></span></label>
+                            <label class="control-label" style="white-space: nowrap">名称：<span class="spanStyle" id="detailName"></span></label>
+                            <label class="control-label" style="white-space: nowrap">供应商：<span class="spanStyle" id="detailSupplier"></span></label>
+                            <label class="control-label" style="white-space: nowrap">规格：<span class="spanStyle" id="detailSpecification"></span></label>
+                            <label class="control-label" style="white-space: nowrap">位置：<span class="spanStyle" id="detailSite"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" style="white-space: nowrap">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="detailImgList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志模态框 -->
+    <div class="modal fade" tabindex="-1" id="logModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="logStartDate">时间范围：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <input type="text" id="logStartDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                            <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                            <input type="text" id="logEndDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="logBillSelect">货品编号：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="logBillSelect" style="width: 160px"></select>
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="billInfo">
+                        <div class="flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label" for="logCategory">货品类别：<span class="spanStyle" id="logCategory"></span></label>
+                            <label class="control-label" for="logName">货品名称：<span class="spanStyle" id="logName"></span></label>
+                            <label class="control-label" for="logSupplier">供应商：<span class="spanStyle" id="logSupplier"></span></label>
+                            <label class="control-label" for="logSpecification">规格型号：<span class="spanStyle" id="logSpecification"></span></label>
+                            <label class="control-label" for="logPrice">货品价格：<span class="spanStyle" id="logPrice"></span></label>
+                        </div>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="logList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

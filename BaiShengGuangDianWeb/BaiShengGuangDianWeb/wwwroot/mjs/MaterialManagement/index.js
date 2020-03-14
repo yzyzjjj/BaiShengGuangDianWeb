@@ -128,8 +128,6 @@
         consumePlanActual();
     });
 
-
-
     $("#logConsumeStartDate").val(getDate());
     $("#logConsumeEndDate").val(getDate());
     $("#logConsumeStartDate").datepicker('update').on('changeDate', function (ev) {
@@ -225,7 +223,7 @@
             }
         });
     });
-    $('#increaseList').on('change','.source', function() {
+    $('#increaseList').on('change', '.source', function () {
         var v = $(this).val();
         var tr = $(this).parents('tr');
         var codeEl = tr.find('.code');
@@ -233,9 +231,9 @@
         if (v == '计划退回') {
             $(this).next().removeClass('hidden');
             var planId = tr.find('.planList').val();
-            new Promise(function(resolve) {
+            new Promise(function (resolve) {
                 planSend(resolve, planId);
-            }).then(function(e) {
+            }).then(function (e) {
                 codeEl.empty();
                 codeEl.append(e);
                 var codeId = codeEl.val();
@@ -273,7 +271,7 @@
             tr.find('.stockNum').prop('placeholder', `货品领用数量：${actual}`);
         });
     });
-    $('#increaseList').on('focusin', '.stockNum', function() {
+    $('#increaseList').on('focusin', '.stockNum', function () {
         var v = $(this).val();
         if (v == 0) {
             $(this).val("");
@@ -298,7 +296,7 @@
     if (!pcAndroid()) {
         $(".icon-saoyisao").addClass('hidden');
     }
-    $('#increaseAdd').on('click', function() {
+    $('#increaseAdd').on('click', function () {
         new Promise(function (resolve) {
             showPrintModal(resolve);
         }).then((result) => {
@@ -331,10 +329,316 @@
             }
         });
     });
+    $('#addReversalListBtn').on('click', function () {
+        $('#reversalList').append(_reversalTr);
+        $('#reversalList tr:last .ms2').select2();
+        setReversalList();
+        var codeEl = $('#reversalList tr:last .code');
+        var codeId = codeEl.val();
+        codeEl.val(codeId).trigger('select2:select');
+        $('#reversalTable').scrollTop($('#reversalTable')[0].scrollHeight);
+        if (!pcAndroid()) {
+            $("#reversalList").find('.scanPrint').addClass('hidden');
+        }
+    });
+    $('#reversalList').on('click', '.delPlanTr', function () {
+        var tr = $(this).parents('tr');
+        tr.remove();
+        setReversalList();
+    });
+
+    var categoryId, nameId, supplierId, specificationId, siteId;
+    $('#reversalList').on('select2:select', '.code', function () {
+        categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+        var id = $(this).val();
+        var tr = $(this).parents('tr');
+        tr.find('.number').text('0');
+        var i,d, len = _materialList.length;
+        for (i = 0; i < len; i++) {
+            d = _materialList[i];
+            if (id == d.Id) {
+                categoryId = d.CategoryId;
+                nameId = d.NameId;
+                supplierId = d.SupplierId;
+                specificationId = d.SpecificationId;
+                siteId = d.SiteId;
+                tr.find('.number').text(d.Number);
+                tr.find('.category').val(categoryId).trigger("change");
+                ////货品名称
+                updateConsumeSelect(tr.find('.name')[0], nameId, _consumeName, "Name", "CategoryId", categoryId);
+                ////供应商
+                updateConsumeSelect(tr.find('.supplier')[0], supplierId, _consumeSupplier, "Supplier", "NameId", nameId);
+                ////规格型号
+                updateConsumeSelect(tr.find('.specification')[0], specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
+                var consumeSiteArray = new Array();
+                for (i = 0; i < _materialList.length; i++) {
+                    d = _materialList[i];
+                    if (d.SpecificationId == specificationId) {
+                        if (_consumeSiteDict[d.SiteId])
+                            consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+                    }
+                }
+                if (consumeSiteArray.length > 0)
+                    siteId = consumeSiteArray[0].Id;
+                updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('select2:select', '.category', function () {
+        categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+        categoryId = $(this).val();
+        var tr = $(this).parents('tr');
+        siteId = tr.find('.site').val();
+        tr.find('.number').text('0');
+        ////货品名称
+        var i,d;
+        for (i = 0; i < _consumeName.length; i++) {
+            d = _consumeName[i];
+            if (d.CategoryId == categoryId) {
+                nameId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.name')[0], nameId, _consumeName, "Name", "CategoryId", categoryId);
+        ////供应商
+        for (i = 0; i < _consumeSupplier.length; i++) {
+            d = _consumeSupplier[i];
+            if (d.NameId == nameId) {
+                supplierId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.supplier')[0], supplierId, _consumeSupplier, "Supplier", "NameId", nameId);
+        ////规格型号
+        for (i = 0; i < _consumeSpecification.length; i++) {
+            d = _consumeSpecification[i];
+            if (d.SupplierId == supplierId) {
+                specificationId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.specification')[0], specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
+        var consumeSiteArray = new Array();
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId) {
+                if (_consumeSiteDict[d.SiteId])
+                    consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+            }
+        }
+        if (consumeSiteArray.length > 0)
+            siteId = consumeSiteArray[0].Id;
+        updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
+
+        tr.find('.code').val(0).trigger("change");
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                tr.find('.code').val(d.BillId).trigger("change");
+                tr.find('.number').text(d.Number);
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('select2:select', '.name', function () {
+        nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+        nameId = $(this).val();
+        var tr = $(this).parents('tr');
+        siteId = tr.find('.site').val();
+        tr.find('.number').text('0');
+        //供应商
+        var i, d;
+        for (i = 0; i < _consumeSupplier.length; i++) {
+            d = _consumeSupplier[i];
+            if (d.NameId == nameId) {
+                supplierId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.supplier')[0], supplierId, _consumeSupplier, "Supplier", "NameId", nameId);
+        ////规格型号
+        for (i = 0; i < _consumeSpecification.length; i++) {
+            d = _consumeSpecification[i];
+            if (d.SupplierId == supplierId) {
+                specificationId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.specification')[0], specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
+        var consumeSiteArray = new Array();
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId) {
+                if (_consumeSiteDict[d.SiteId])
+                    consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+            }
+        }
+        if (consumeSiteArray.length > 0)
+            siteId = consumeSiteArray[0].Id;
+        updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
+        tr.find('.code').val(0).trigger("change");
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                tr.find('.code').val(d.BillId).trigger("change");
+                tr.find('.number').text(d.Number);
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('select2:select', '.supplier', function () {
+        supplierId = 0, specificationId = 0, siteId = 0;
+        supplierId = $(this).val();
+        var tr = $(this).parents('tr');
+        siteId = tr.find('.site').val();
+        tr.find('.number').text('0');
+        ////规格型号
+        var i, d;
+        for (i = 0; i < _consumeSpecification.length; i++) {
+            d = _consumeSpecification[i];
+            if (d.SupplierId == supplierId) {
+                specificationId = d.Id;
+                break;
+            }
+        }
+        updateConsumeSelect(tr.find('.specification')[0], specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
+        var consumeSiteArray = new Array();
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId) {
+                if (_consumeSiteDict[d.SiteId])
+                    consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+            }
+        }
+        if (consumeSiteArray.length > 0)
+            siteId = consumeSiteArray[0].Id;
+        updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
+        tr.find('.code').val(0).trigger("change");
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                tr.find('.code').val(d.BillId).trigger("change");
+                tr.find('.number').text(d.Number);
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('select2:select', '.specification', function () {
+        specificationId = 0, siteId = 0;
+        specificationId = $(this).val();
+        var tr = $(this).parents('tr');
+        tr.find('.number').text('0');
+        var i, d;
+        var consumeSiteArray = new Array();
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId) {
+                if (_consumeSiteDict[d.SiteId])
+                    consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+            }
+        }
+        if (consumeSiteArray.length > 0)
+            siteId = consumeSiteArray[0].Id;
+        updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
+        tr.find('.code').val(0).trigger("change");
+        for (i = 0; i < _materialList.length; i++) {
+            d = _materialList[i];
+            if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                tr.find('.code').val(d.BillId).trigger("change");
+                tr.find('.number').text(d.Number);
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('select2:select', '.site', function () {
+        specificationId = 0, siteId = 0;
+        siteId = $(this).val();
+        var tr = $(this).parents('tr');
+        specificationId = tr.find('.specification').val();
+        tr.find('.number').text('0');
+        tr.find('.code').val(0).trigger("change");
+        for (var i = 0; i < _materialList.length; i++) {
+            var d = _materialList[i];
+            if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                tr.find('.code').val(d.BillId).trigger("change");
+                tr.find('.number').text(d.Number);
+                break;
+            }
+        }
+    });
+    $('#reversalList').on('change', '.code', function() {
+        var v = $(this).val();
+        if (v != null) {
+            var tr = $(this).parents('tr');
+            tr.find('.codeModal').attr('onclick', `showDetailModel(${v})`);
+            tr.find('.codeLogModal').attr('onclick', `showLogModel(3,${v})`);
+        }
+    });
+    $('#reversalList').on('click', '.loadNumber', function() {
+        var tr = $(this).parents('tr');
+        var codeId = tr.find('.code').val();
+        var numberEl = tr.find('.number');
+        var data = {}
+        data.opType = 800;
+        data.opData = JSON.stringify({
+            qId: codeId
+        });
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            numberEl.text(ret.datas[0].Number);
+        });
+    });
+    $('#reversalList').on('focusin', '.upNumber', function () {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val("");
+        }
+    });
+    $('#reversalList').on('focusout', '.upNumber', function () {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val("0");
+        }
+    });
+    $('#reversalAdd').on('click', function() {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                $('#addReversalListBtn').trigger('click');
+                var codeId = result.split(',')[0];
+                $('#reversalList tr:last').find('.code').val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
+    $('#reversalList').on('click', '.scanPrint', function () {
+        new Promise(function (resolve) {
+            showPrintModal(resolve);
+        }).then((result) => {
+            if (result) {
+                var codeId = result.split(',')[0];
+                $(this).next().find('.code').val(codeId).trigger('change').trigger('select2:select');
+            }
+        });
+    });
+    $('.maxHeight').css('maxHeight', innerHeight * 0.7);
+}
+//冲正相关
+function setReversalList() {
+    var trEl = $('#reversalList tr');
+    var i = 0, len = trEl.length;
+    for (; i < len; i++) {
+        var d = trEl.eq(i);
+        d.find('.num').text(i + 1);
+    }
 }
 
 //计划退回选项
-function planSend(resolve,planId) {
+function planSend(resolve, planId) {
     var data = {}
     data.opType = 700;
     data.opData = JSON.stringify({
@@ -745,6 +1049,9 @@ function showLogModel(type = 0, id = 0) {
         case 2:
             title = "领用日志";
             break;
+        case 3:
+            title = "冲正日志";
+            break;
     }
     $("#logModal").find("h4").html(title);
     $('#billInfo').addClass('hidden');
@@ -823,13 +1130,15 @@ function getLogList(show = false) {
             }
             var dType = function (data, type, row) {
                 //状态 1 入库; 2 出库;
-                return data == 1 ? `<span class="text-success">入库</span>` : `<span class="text-danger">领用</span>`;
+                return data == 1 ? '<span class="text-success">入库</span>' : '<span class="text-danger">领用</span>';
             }
             var number = function (data, type, row) {
                 //状态 1 入库; 2 出库;
                 return data.Type == 1 ? `<span class="text-success">${data.Number}</span>` : `<span class="text-danger">${data.Number}</span>`;
             }
-
+            var update = function (data) {
+                return data.Number > data.OldNumber ? `<span class="text-success">${data.Number}</span>` : `<span class="text-danger">${data.Number}</span>`;
+            }
             var columns = null;
             switch (_type) {
                 case 0:
@@ -874,13 +1183,27 @@ function getLogList(show = false) {
                         { "data": null, "title": "Id", "bVisible": false }
                     ];
                     break;
+                case 3:
+                    columns = [
+                        { "data": null, "title": "序号", "render": order },
+                        { "data": "Time", "title": "时间" },
+                        { "data": "Code", "title": "货品编号" },
+                        { "data": "Name", "title": "货品名称" },
+                        { "data": "Specification", "title": "规格型号" },
+                        { "data": "OldNumber", "title": "修改前" },
+                        { "data": null, "title": "修改后", "render": update },
+                        { "data": "Purpose", "title": "备注" },
+                        { "data": "Manager", "title": "物管员" },
+                        { "data": null, "title": "Id", "bVisible": false }
+                    ];
+                    break;
             }
             $("#logList")
                 .DataTable({
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
@@ -1186,7 +1509,7 @@ function showIncreaseModel() {
         }, 0);
     });
 
-    Promise.all([planListFunc,materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+    Promise.all([planListFunc, materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
         .then((result) => {
             //console.log(result);
             $("#addIncreaseListBtn").removeAttr("disabled");
@@ -1948,38 +2271,38 @@ function getPlanBill(post = false) {
 }
 
 //领用显示计划使用物料
-function showPlanBill(find = false) {
+function showPlanBill(find = false, el) {
     //var planId = $('#consumePlanSelect').val();
     if (find) {
-        var con = $("#consumePlanCondition").val();
+        var con = $(`#consume${el}Condition`).val();
         var con1 = "", con2 = "0";
         if (!isStrEmptyOrUndefined(con)) {
-            con1 = $("#consumePlanCondition1").val();
+            con1 = $(`#consume${el}Condition1`).val();
             var id = "";
             switch (con1) {
                 case "Code":
-                    id = "conPlanBh";
+                    id = `con${el}Bh`;
                     break;
                 case "Category":
-                    id = "conPlanLb";
+                    id = `con${el}Lb`;
                     break;
                 case "Name":
-                    id = "conPlanMc";
+                    id = `con${el}Mc`;
                     break;
                 case "Supplier":
-                    id = "conPlanGys";
+                    id = `con${el}Gys`;
                     break;
                 case "Specification":
-                    id = "conPlanGg";
+                    id = `con${el}Gg`;
                     break;
                 case "Site":
-                    id = "conPlanWz";
+                    id = `con${el}Wz`;
                     break;
                 default:
                     return;
             }
-            con2 = $("#consumePlanCondition2").val();
-            var trs = $("#consumePlanList tr");
+            con2 = $(`#consume${el}Condition2`).val();
+            var trs = $(`#consume${el}List tr`);
             for (var i = 0; i < trs.length; i++) {
                 var tr = trs[i];
                 var v = $(tr).attr("value");
@@ -2017,9 +2340,9 @@ function showPlanBill(find = false) {
                 }
             }
         } else {
-            $("#consumePlanList tr").removeClass("hidden");
+            $(`#consume${el}List tr`).removeClass("hidden");
         }
-        consumePlanDittoAuto();
+        el == 'Plan' ? consumePlanDittoAuto() : consumeOtherDittoAuto();
     } else {
         //var data = _consumePlanBill;
         //$("#consumePlanList").empty();
@@ -2147,7 +2470,7 @@ function addConsumePlanList() {
             <td>
                 <div style="display:flex;width:150px">
                     <input class="form-control text-center" type="tel" id="conPlanLyr${xh}" maxlength="64" onchange="consumePlanActual()" />
-                    <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
+                    <button class="btn btn-primary btn-sm conPlanDitto" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumePlanDitto${xh}" style="margin-left:3px" onclick="consumePlanDitto(${xh})">同上</button>
                 </div>
             </td>
             <td>
@@ -2353,6 +2676,8 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
             });
 
             ////货品名称
@@ -2429,6 +2754,8 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
             });
 
             ////供应商
@@ -2492,6 +2819,8 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
             });
 
             ////规格型号
@@ -2544,6 +2873,8 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
             });
 
             ////位置
@@ -2592,6 +2923,8 @@ function addConsumePlanList() {
                 }
                 consumePlanActual();
                 $("#conPlanDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                var planId = $('#consumePlanSelect').val();
+                $("#conPlanLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 1, ${planId})`);
             });
 
             $("#conPlan" + xh).find(".ms2").css("width", "100%");
@@ -2650,10 +2983,8 @@ function delConsumePlanList(id) {
 
 //隐藏领用同上
 function consumePlanDittoAuto() {
-    $("#consumePlanList").find(`.conPlanDitto`).css("opacity", "100");
-    $("#consumePlanList").find(`.conPlanDitto`).removeAttr("disable", "disable");
-    $("#consumePlanList tr").not(".hidden").first().find(`.conPlanDitto`).css("opacity", "0");
-    $("#consumePlanList tr").not(".hidden").first().find(`.conPlanDitto`).attr("disable", "disable");
+    $("#consumePlanList").find('.conPlanDitto').css("visibility", "visible");
+    $("#consumePlanList tr").not(".hidden").first().find('.conPlanDitto').css("visibility", "hidden");
 }
 
 //点击领用同上按钮
@@ -2799,7 +3130,7 @@ function addConsumeOtherList() {
             <td>
                 <div style="display:flex;width:150px">
                     <input class="form-control text-center" type="tel" id="consumeOtherLyr${xh}" maxlength="64" onchange="consumeOtherActual()" />
-                    <button class="btn btn-primary btn-sm" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumeOtherDitto${xh}" style="margin-left:3px" onclick="consumeOtherDitto(${xh})">同上</button>
+                    <button class="btn btn-primary btn-sm conOtherDitto" ${(xh == 1 ? 'style="opacity: 0;"' : '')} type="button" id="consumeOtherDitto${xh}" style="margin-left:3px" onclick="consumeOtherDitto(${xh})">同上</button>
                 </div>
             </td>
             <td>
@@ -2966,6 +3297,7 @@ function addConsumeOtherList() {
             }
             consumeOtherActual();
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
         });
 
         ////货品名称
@@ -3030,6 +3362,7 @@ function addConsumeOtherList() {
             }
             consumeOtherActual();
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
         });
 
         ////供应商
@@ -3082,6 +3415,7 @@ function addConsumeOtherList() {
             }
             consumeOtherActual();
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
         });
 
         ////规格型号
@@ -3122,6 +3456,7 @@ function addConsumeOtherList() {
             }
             consumeOtherActual();
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
         });
 
         ////位置
@@ -3162,6 +3497,7 @@ function addConsumeOtherList() {
             }
             consumeOtherActual();
             $("#conOtherDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+            $("#consumeOtherLog" + xh).attr("onclick", `showLogConsumeModel(${billId}, 2)`);
         });
 
         $("#conOther" + xh).find(".ms2").css("width", "100%");
@@ -3195,8 +3531,8 @@ function delConsumeOtherList(id) {
 
 //隐藏领用同上
 function consumeOtherDittoAuto() {
-    var v = $("#consumeOtherList").find(`tr[xh=1]:first`).attr("value");
-    $("#consumeOtherDitto" + v).css("opacity", "0");
+    $("#consumeOtherList").find('.conOtherDitto').css("visibility", "visible");
+    $("#consumeOtherList tr").not(".hidden").first().find('.conOtherDitto').css("visibility", "hidden");
 }
 
 //点击领用同上按钮
@@ -3380,6 +3716,7 @@ function showDetailModel(id) {
                 $("#detailSupplier").text(d.Supplier);
                 $("#detailSpecification").text(d.Specification);
                 $("#detailSite").text(d.Site);
+                $("#detailImgList").empty();
                 if (d.ImageList.length > 0) {
                     data = {
                         type: fileEnum.Material,
@@ -3497,4 +3834,253 @@ function getQrList() {
         }
         $('#qrCodeList .createQrCode').prop('title', '');
     });
+}
+
+var _reversalTr = null;
+//冲正弹窗
+function showReversalModel() {
+    var opType = 804;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    $("#reversalList").empty();
+    var materialListFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 800;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _materialList = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var categoryFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 816;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _consumeCategory = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var nameFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 824;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _consumeName = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var supplierFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 831;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _consumeSupplier = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var specificationFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 839;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            _consumeSpecification = ret.datas;
+            resolve('success');
+        }, 0);
+    });
+
+    var siteFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 847;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _consumeSite = ret.datas;
+            _consumeSiteDict = new Array();
+            for (var i = 0; i < _consumeSite.length; i++) {
+                _consumeSiteDict[_consumeSite[i].Id] = _consumeSite[i];
+            }
+            resolve('success');
+        }, 0);
+    });
+
+    Promise.all([materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+        .then((result) => {
+            $("#addReversalListBtn").removeAttr("disabled");
+            var tr = '<tr>' +
+                '<td class="num" style="font-weight:bold"></td>' +
+                '<td>' +
+                '<div class="flexStyle"><span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>' +
+                '<div style="width:120px;margin:auto"><select class="ms2 form-control code">{0}</select></div></div>' +
+                '</td>' +
+                '<td><div style="width:120px;margin:auto"><select class="ms2 form-control category">{1}</select></div></td>' +
+                '<td><div style="width:120px;margin:auto"><select class="ms2 form-control name">{2}</select></div></td>' +
+                '<td><div style="width:120px;margin:auto"><select class="ms2 form-control supplier">{3}</select></div></td>' +
+                '<td><div style="width:120px;margin:auto"><select class="ms2 form-control specification">{4}</select></div></td>' +
+                '<td><div style="width:120px;margin:auto"><select class="ms2 form-control site">{5}</select></div></td>' +
+                '<td><div class="flexStyle" style="justify-content:center">' +
+                '<span class="number" style="padding-right:3px">{6}</span><button type="button" class="btn btn-danger btn-xs loadNumber"> <i class="fa fa-refresh"></i></button >' +
+                '</div></td>' +
+                '<td><input type="text" class="form-control text-center upNumber" maxlength="10" style="width:120px;margin:auto" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+                '<td class="no-padding"><textarea class="form-control remark" maxlength="500" style="resize: vertical;width:150px;margin:auto"></textarea></td>' +
+                '<td><button type="button" class="btn btn-info btn-sm codeModal" onclick="showDetailModel({7})">详情</button></td>' +
+                '<td><button type="button" class="btn btn-success btn-sm codeLogModal" onclick="showLogModel(3,{7})">查看</button></td>' +
+                '<td><button type="button" class="btn btn-danger btn-sm delPlanTr"><i class="fa fa-minus"></i></button></td>' +
+                '</tr>';
+            var codeOp = '', categoryOp = '', nameOp = '', supplierOp = '', specificationOp = '', siteOp = '';
+            var op = '<option value = "{0}">{1}</option>';
+            var i, d, len = _materialList.length;
+            var firstCode = _materialList[0];
+            for (i = 0; i < len; i++) {
+                d = _materialList[i];
+                codeOp += op.format(d.Id, d.Code);
+                if (d.SpecificationId == firstCode.SpecificationId) {
+                    var siteData = _consumeSiteDict[d.SiteId];
+                    if (siteData) {
+                        siteOp += op.format(siteData.Id, siteData.Site);
+                    }
+                }
+            }
+            len = _consumeCategory.length;
+            for (i = 0; i < len; i++) {
+                d = _consumeCategory[i];
+                categoryOp += op.format(d.Id, d.Category);
+            }
+            len = _consumeName.length;
+            for (i = 0; i < len; i++) {
+                d = _consumeName[i];
+                if (d.CategoryId == firstCode.CategoryId) {
+                    nameOp += op.format(d.Id, d.Name);
+                }
+            }
+            len = _consumeSupplier.length;
+            for (i = 0; i < len; i++) {
+                d = _consumeSupplier[i];
+                if (d.NameId == firstCode.NameId) {
+                    supplierOp += op.format(d.Id, d.Supplier);
+                }
+            }
+            len = _consumeSpecification.length;
+            for (i = 0; i < len; i++) {
+                d = _consumeSpecification[i];
+                if (d.SupplierId == firstCode.SupplierId) {
+                    specificationOp += op.format(d.Id, d.Specification);
+                }
+            }
+            _reversalTr = tr.format(codeOp, categoryOp, nameOp, supplierOp, specificationOp, siteOp, firstCode.Number, firstCode.Id);
+        });
+    $('#reversalModal').modal('show');
+}
+
+//冲正确认弹窗
+function reversalConModal() {
+    var trs = $('#reversalList tr');
+    var i, len = trs.length;
+    if (!len) {
+        layer.msg('请添加货品');
+        return;
+    }
+    var reversalConList = [];
+    _reversalConList = [];
+    for (i = 0; i < len; i++) {
+        var tr = trs.eq(i);
+        var code = tr.find('.code option:checked').text();
+        var codeId = tr.find('.code').val();
+        if (isStrEmptyOrUndefined(codeId)) {
+            layer.msg('请选择货品编号');
+            return;
+        }
+        var category = tr.find('.category option:checked').text();
+        var name = tr.find('.name option:checked').text();
+        var supplier = tr.find('.supplier option:checked').text();
+        var specification = tr.find('.specification option:checked').text();
+        var site = tr.find('.site option:checked').text();
+        var number = tr.find('.upNumber').val();
+        var remark = tr.find('.remark').val();
+        reversalConList.push({ code, category, name, supplier, specification, site, number, remark });
+        _reversalConList.push({
+            BillId: codeId,
+            Number: number,
+            Remark: remark
+        });
+    }
+    var o = 0;
+    var order = function () {
+        return ++o;
+    }
+    var columns = [
+        { "data": null, "title": "序号", "render": order },
+        { "data": "code", "title": "货品编号" },
+        { "data": "category", "title": "货品类别" },
+        { "data": "name", "title": "货品名称" },
+        { "data": "supplier", "title": "供应商" },
+        { "data": "specification", "title": "规格型号" },
+        { "data": "site", "title": "位置" },
+        { "data": "number", "title": "库存修改" },
+        { "data": "remark", "title": "备注" }
+    ];
+
+    $("#reversalConList")
+        .DataTable({
+            "destroy": true,
+            "paging": true,
+            "searching": true,
+            "language": oLanguage,
+            "data": reversalConList,
+            "aaSorting": [[0, "asc"]],
+            "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
+            "iDisplayLength": 40, //默认显示的记录数
+            "columns": columns
+        });
+    $('#reversalConModal').modal('show');
+}
+
+var _reversalConList = null;
+//冲正
+function reversalCon() {
+    var opType = 804;
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        var opData = {
+            Bill: _reversalConList
+        };
+        data.opData = JSON.stringify(opData);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    $("#reversalConModal").modal("hide");
+                    $("#reversalModal").modal("hide");
+                    getMaterialList('Select');
+                }
+            });
+    }
+    showConfirm("冲正", doSth);
 }

@@ -63,27 +63,28 @@
     //定时器
     window.onload = function () {
         (function ($) {
-            funObj = {
-                timeUserFun: 'timeUserFun',
+            var testUser;
+            var funObj = {
+                timeUserFun: 'timeUserFun'
             }
-            $[funObj.timeUserFun] = function (time) {
+            $[funObj.timeUserFun] = function(time) {
                 var userTime = time * 60;
                 var objTime = {
                     init: 0,
-                    time: function () {
+                    time: function() {
                         objTime.init += 1;
                         if (objTime.init == userTime) {
                             getFaultDeviceList(); // 用户未操作任何事件,刷新故障设备列表
                             objTime.init = 0;
                         }
                     },
-                    eventFun: function () {
+                    eventFun: function() {
                         clearInterval(testUser);
                         objTime.init = 0;
                         testUser = setInterval(objTime.time, 1000);
                     }
                 }
-                var testUser = setInterval(objTime.time, 1000);
+                testUser = setInterval(objTime.time, 1000);
                 //添加事件语柄
                 var body = document.querySelector('html');
                 body.addEventListener("click", objTime.eventFun);
@@ -91,7 +92,7 @@
                 body.addEventListener("mousemove", objTime.eventFun);
                 body.addEventListener("mousewheel", objTime.eventFun);
             }
-        })(window)
+        })(window);
         //   直接调用 参数代表分钟数,可以有一位小数;
         timeUserFun(1);
     }
