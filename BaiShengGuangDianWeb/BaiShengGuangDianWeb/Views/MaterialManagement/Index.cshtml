@@ -63,14 +63,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">入库</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">入库</h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-default btn-sm" onclick="resetIncreaseList()"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
-                    <div class="form-group" style="overflow-x: auto">
+                    <div class="form-group" id="increaseTable" style="overflow: auto;max-height:500px">
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
@@ -94,18 +94,14 @@
                             <tbody id="increaseList"></tbody>
                         </table>
                     </div>
+                    <div class="flexStyle" style="justify-content: center">
+                        <span class="iconfont icon-saoyisao" id="increaseAdd" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addIncreaseListBtn" onclick="addIncreaseList()"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="flexStyle" style="justify-content:space-between">
-                        <div>
-                            <span class="iconfont icon-saoyisao" id="increaseAdd" style="font-size: 30px; cursor: pointer; vertical-align: middle"></span>
-                            <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addIncreaseListBtn" onclick="addIncreaseList()"><i class="fa fa-plus"></i> 添加新项</button>
-                        </div>
-                        <div>
-                            <button type="button" class="btn btn-primary" onclick="increase()">入库</button>
-                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                        </div>
-                    </div>
+                    <button type="button" class="btn btn-primary" onclick="increase()">入库</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
@@ -159,34 +155,37 @@
                                                         <option value="2">包含</option>
                                                     </select>
                                                     <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true)" maxlength="20" style="flex-basis: 140px;margin-left:3px">
-                                                    <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumePlanListBtn" onclick="addConsumePlanList()" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group" style="overflow-x: auto">
-                                            <table class="table table-hover table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>序号</th>
-                                                        <th class="text-blue">货品编号</th>
-                                                        <th class="text-info">货品类别</th>
-                                                        <th class="text-info">货品名称</th>
-                                                        <th class="text-info">供应商</th>
-                                                        <th class="text-info">规格型号</th>
-                                                        <th class="text-info">位置</th>
-                                                        <th>单位</th>
-                                                        <th>货品详情</th>
-                                                        <th>计划用量</th>
-                                                        <th>实际用量</th>
-                                                        <th class="text-red">剩余库存</th>
-                                                        <th>领用数量</th>
-                                                        <th>领用人</th>
-                                                        <th>日志</th>
-                                                        <th>删除</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="consumePlanList"></tbody>
-                                            </table>
+                                            <div class="form-group" id="consumePlanTable" style="overflow: auto;max-height:500px">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>序号</th>
+                                                            <th class="text-blue">货品编号</th>
+                                                            <th class="text-info">货品类别</th>
+                                                            <th class="text-info">货品名称</th>
+                                                            <th class="text-info">供应商</th>
+                                                            <th class="text-info">规格型号</th>
+                                                            <th class="text-info">位置</th>
+                                                            <th>单位</th>
+                                                            <th>货品详情</th>
+                                                            <th>计划用量</th>
+                                                            <th>实际用量</th>
+                                                            <th class="text-red">剩余库存</th>
+                                                            <th>领用数量</th>
+                                                            <th>领用人</th>
+                                                            <th>日志</th>
+                                                            <th>删除</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="consumePlanList"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: center">
+                                                <span class="iconfont icon-saoyisao" id="planConsumeAdd" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumePlanListBtn" onclick="addConsumePlanList()" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -199,31 +198,34 @@
                                             </div>
                                             <div style="display: flex; justify-content: space-between;align-items:center">
                                                 <label class="control-label" style="white-space:nowrap">清单：</label>
+                                            </div>
+                                            <div class="form-group" id="consumeOtherTable" style="overflow: auto;max-height:500px">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>序号</th>
+                                                            <th class="text-blue">货品编号</th>
+                                                            <th class="text-info">货品类别</th>
+                                                            <th class="text-info">货品名称</th>
+                                                            <th class="text-info">供应商</th>
+                                                            <th class="text-info">规格型号</th>
+                                                            <th class="text-info">位置</th>
+                                                            <th>单位</th>
+                                                            <th>货品详情</th>
+                                                            <th class="text-red">剩余库存</th>
+                                                            <th>领用数量</th>
+                                                            <th>领用人</th>
+                                                            <th>日志</th>
+                                                            <th>删除</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="consumeOtherList"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: center">
+                                                <span class="iconfont icon-saoyisao" id="otherConsumeAdd" style="font-size: 30px; cursor: pointer"></span>
                                                 <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumeOtherListBtn" onclick="addConsumeOtherList()"><i class="fa fa-plus"></i> 添加新项</button>
                                             </div>
-                                        </div>
-                                        <div class="form-group" style="overflow-x: auto">
-                                            <table class="table table-hover table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>序号</th>
-                                                        <th class="text-blue">货品编号</th>
-                                                        <th class="text-info">货品类别</th>
-                                                        <th class="text-info">货品名称</th>
-                                                        <th class="text-info">供应商</th>
-                                                        <th class="text-info">规格型号</th>
-                                                        <th class="text-info">位置</th>
-                                                        <th>单位</th>
-                                                        <th>货品详情</th>
-                                                        <th class="text-red">剩余库存</th>
-                                                        <th>领用数量</th>
-                                                        <th>领用人</th>
-                                                        <th>日志</th>
-                                                        <th>删除</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="consumeOtherList"></tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -292,25 +294,12 @@
                         </div>
                     </div>
                     <div class="form-group hidden" id="billInfo">
-                        <div class="form-group">
-                            <label class="control-label" for="logCategory">货品类别：</label>
-                            <label class="control-label" id="logCategory"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logName">货品名称：</label>
-                            <label class="control-label" id="logName"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logSupplier">供应商：</label>
-                            <label class="control-label" id="logSupplier"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logSpecification">规格型号：</label>
-                            <label class="control-label" id="logSpecification"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logPrice">货品价格：</label>
-                            <label class="control-label" id="logPrice"></label>
+                        <div class="flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label" for="logCategory">货品类别：<span class="spanStyle" id="logCategory"></span></label>
+                            <label class="control-label" for="logName">货品名称：<span class="spanStyle" id="logName"></span></label>
+                            <label class="control-label" for="logSupplier">供应商：<span class="spanStyle" id="logSupplier"></span></label>
+                            <label class="control-label" for="logSpecification">规格型号：<span class="spanStyle" id="logSpecification"></span></label>
+                            <label class="control-label" for="logPrice">货品价格：<span class="spanStyle" id="logPrice"></span></label>
                         </div>
                     </div>
                     <div class="table-responsive mailbox-messages">
@@ -356,25 +345,12 @@
                         </div>
                     </div>
                     <div class="form-group hidden" id="billInfoConsume">
-                        <div class="form-group">
-                            <label class="control-label" for="logConsumeCategory">货品类别：</label>
-                            <label class="control-label" id="logConsumeCategory"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logConsumeName">货品名称：</label>
-                            <label class="control-label" id="logConsumeName"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logConsumeSupplier">供应商：</label>
-                            <label class="control-label" id="logConsumeSupplier"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logConsumeSpecification">规格型号：</label>
-                            <label class="control-label" id="logConsumeSpecification"></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label" for="logConsumePrice">货品价格：</label>
-                            <label class="control-label" id="logConsumePrice"></label>
+                        <div class="flexStyle" style="flex-wrap: wrap">
+                            <label class="control-label" for="logConsumeCategory">货品类别：<span class="spanStyle" id="logConsumeCategory"></span></label>
+                            <label class="control-label" for="logConsumeName">货品名称：<span class="spanStyle" id="logConsumeName"></span></label>
+                            <label class="control-label" for="logConsumeSupplier">供应商：<span class="spanStyle" id="logConsumeSupplier"></span></label>
+                            <label class="control-label" for="logConsumeSpecification">规格型号：<span class="spanStyle" id="logConsumeSpecification"></span></label>
+                            <label class="control-label" for="logConsumePrice">货品价格：<span class="spanStyle" id="logConsumePrice"></span></label>
                         </div>
                     </div>
                     <div class="table-responsive mailbox-messages">
@@ -400,29 +376,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="modal-body box">
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">编号：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailCode">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">类别：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailCategory">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">名称：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailName">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">供应商：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 206px" id="detailSupplier">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">规格：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailSpecification">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center">
-                            <label class="control-label" style="white-space: nowrap">位置：</label>
-                            <input type="text" class="form-control" readonly style="flex-basis: 220px" id="detailSite">
+                        <div class="flexStyle" style="flex-wrap: wrap">
+                            <label class="control-label" style="white-space: nowrap">编号：<span class="spanStyle" id="detailCode"></span></label>
+                            <label class="control-label" style="white-space: nowrap">类别：<span class="spanStyle" id="detailCategory"></span></label>
+                            <label class="control-label" style="white-space: nowrap">名称：<span class="spanStyle" id="detailName"></span></label>
+                            <label class="control-label" style="white-space: nowrap">供应商：<span class="spanStyle" id="detailSupplier"></span></label>
+                            <label class="control-label" style="white-space: nowrap">规格：<span class="spanStyle" id="detailSpecification"></span></label>
+                            <label class="control-label" style="white-space: nowrap">位置：<span class="spanStyle" id="detailSite"></span></label>
                         </div>
                         <div class="form-group">
                             <label class="control-label" style="white-space: nowrap">图片：</label>

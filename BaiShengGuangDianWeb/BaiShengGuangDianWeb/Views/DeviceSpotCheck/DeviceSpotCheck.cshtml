@@ -71,7 +71,10 @@
                         <div class="form-group">
                             <div class="form-group" style="display: flex; justify-content: space-between;align-items: center">
                                 <label class="control-label">点检项：</label>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="delDevicePlanModal()">删除设备计划</button>
+                                <div>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="delDevicePlanModal()">删除设备计划</button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="planItemReload()">刷新</button>
+                                </div>
                             </div>
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="spotPlanCheckListSet"></table>
