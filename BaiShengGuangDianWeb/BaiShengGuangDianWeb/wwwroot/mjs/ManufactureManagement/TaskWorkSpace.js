@@ -18,6 +18,7 @@ function getScoreList() {
         }
         $("#scoreList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
