@@ -1538,3 +1538,20 @@ function printCode(contentId, iframe, hiddenId) {
         }
     }
 }
+
+//所选时间比较
+function comTimeDay(startTime, endTime) {
+    if (exceedTime(startTime)) {
+        layer.msg("开始时间不能大于当前时间");
+        return true;
+    }
+    if (exceedTime(endTime)) {
+        layer.msg("结束时间不能大于当前时间");
+        return true;
+    }
+    if (compareDate(startTime, endTime)) {
+        layer.msg("开始时间不能大于结束时间");
+        return true;
+    }
+    return false;
+}

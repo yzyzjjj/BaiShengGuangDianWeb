@@ -24,9 +24,11 @@
             tr.find('.minute').val(data.EstimatedMin);
             tr.find('.score').val(data.Score);
             tr.find('.desc').val(data.Desc);
-            tr.find('.relation').val(data.Relation);
+            tr.find('.relation').val(tr.find('.relationText').text());
+            _taskItemId.push(v);
         } else {
             tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+            _taskItemId.splice(_taskItemId.indexOf(v), 1);
         }
     });
     $('#configItem').on('select2:select', '.group', function () {
@@ -40,10 +42,10 @@
         var tr = $(this).parents('tr');
         parseInt(module) ? tr.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : tr.find('.taskNameSelect').parent().addClass('hidden').siblings().removeClass('hidden');
     });
-    $('#selectConfig').on('select2:select', function() {
+    $('#selectConfig').on('select2:select', function () {
         getTaskConfigItem();
     });
-    $('#configItem').on('input', '.minute', function() {
+    $('#configItem').on('input', '.minute', function () {
         var v = $(this).val();
         if (parseInt(v) > 59) {
             $(this).val(59);
@@ -62,19 +64,67 @@
         }
     });
     $('#configItem').on('click', '.moveUp', function () {
+        _isUpMove = false;
         var tr = $(this).parents('tr');
-        var trId = tr.find('.isEnable').val();
-        var trData = _taskItem[trId];
-        //var trOrder = trData.Order;
+        var relationEl = tr.find('.relation');
+        var isHidden = relationEl.is(':hidden');
+        var trOrder = isHidden ? tr.find('.relationText').text() : relationEl.val();
+        trOrder = parseInt(trOrder);
+        var trNum = tr.find('.num').text();
+        trNum = parseInt(trNum);
+        if (trOrder + 1 == trNum) {
+            layer.msg('不能上移到关联任务前');
+            return;
+        }
+        var trs = tr.nextAll();
+        for (var i = 0, len = trs.length; i < len; i++) {
+            var trEl = trs.eq(i);
+            var spanEl = trEl.find('.relationText');
+            var inputEl = trEl.find('.relation');
+            var upTrNum = trNum - 1;
+            switch (parseInt(spanEl.text())) {
+                case trNum:
+                    spanEl.text(upTrNum);
+                    break;
+                case upTrNum:
+                    spanEl.text(trNum);
+                    break;
+            }
+            switch (parseInt(inputEl.val())) {
+                case trNum:
+                    inputEl.val(upTrNum);
+                    break;
+                case upTrNum:
+                    inputEl.val(trNum);
+                    break;
+            }
+        }
         var upTr = tr.prev();
-        var upTrId = upTr.find('.isEnable').val();
-        var upTrData = _taskItem[upTrId];
-        //var upTrOrder = upTrData.Order;
-        tr.after(_taskTrData.format(upTrData.Id, upTrData.Processor, upTrData.Module, upTrData.Item, upTrData.EstimatedTime, upTrData.Score, upTrData.Desc, upTrData.Relation));
-        upTr.after(_taskTrData.format(trData.Id, trData.Processor, trData.Module, trData.Item, trData.EstimatedTime, trData.Score, trData.Desc, trData.Relation));
-        tr.remove();
-        upTr.remove();
+        upTr.before(tr);
         setTableStyle();
+    });
+    $('#configItem').on('input', '.relation', function () {
+        var v = $(this).val();
+        v = parseInt(v);
+        var tr = $(this).parents('tr');
+        var num = tr.find('.num').text();
+        num = parseInt(num) - 1;
+        if (v > num) {
+            $(this).val(num);
+        }
+    });
+    $('#configSelect').on('select2:select', function () {
+        $('#newConfig').val($(this).find("option:checked").text());
+    });
+    $("#configReuse").on("ifChanged", function (event) {
+        if ($(this).is(":checked")) {
+            $("#updateConfigBtn").attr("disabled", "disabled");
+        } else {
+            $("#updateConfigBtn").removeAttr("disabled");
+        }
+    });
+    $('#moduleSelect').on('select2:select', function () {
+        $('#newModule').val($(this).find("option:checked").text());
     });
 }
 
@@ -113,8 +163,9 @@ function getTaskConfig() {
             var d = list[i];
             options += option.format(d.Id, d.Task);
         }
-        $('#selectConfig').empty();
-        $('#selectConfig').append(options);
+        $('.selectConfig').empty();
+        $('.selectConfig').append(options);
+        $('#configSelect').val(0).trigger('change');
         taskTrData();
     });
 }
@@ -291,7 +342,7 @@ function taskTrData() {
             </td>
             <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
             <td class="no-padding"><span class="textOn">{6}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
-            <td><span class="textOn">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
+            <td><span class="textOn relationText">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
             </tr>`;
         _addTaskTr = `<tr>
@@ -327,6 +378,7 @@ function getTaskConfigItem() {
         layer.msg('没有权限');
         return;
     }
+    _taskItemId = [];
     var taskId = $('#selectConfig').val();
     if (isStrEmptyOrUndefined(taskId)) {
         return;
@@ -353,6 +405,7 @@ function getTaskConfigItem() {
     });
 }
 
+var _isUpMove = true;
 //保存任务配置
 function updateTask() {
     var opType = 1056;
@@ -369,8 +422,8 @@ function updateTask() {
     var i, len = $('#configItem tr').length;
     var isChecked = $('#configItem .isEnable').is(':checked');
     var isEnableBox = $('#configItem .isEnable').length;
-    if (!len || (isEnableBox == len && !isChecked)) {
-        layer.msg('请选择或添加需要保存的数据');
+    if (!len || (isEnableBox == len && !isChecked && _isUpMove)) {
+        layer.msg('请先修改数据');
         return;
     }
     for (i = 0; i < len; i++) {
@@ -427,10 +480,6 @@ function updateTask() {
             score = parseInt(score);
             desc = tr.find('.desc').val();
             relation = tr.find('.relation').val();
-            if (isStrEmptyOrUndefined(relation)) {
-                relation = 0;
-            }
-            relation = parseInt(relation);
         } else {
             var d = _taskItem[id];
             personId = d.Person;
@@ -442,8 +491,12 @@ function updateTask() {
             minute = d.EstimatedMin;
             score = d.Score;
             desc = d.Desc;
-            relation = d.Relation;
+            relation = tr.find('.relationText').text();
         }
+        if (isStrEmptyOrUndefined(relation)) {
+            relation = 0;
+        }
+        relation = parseInt(relation);
         list.push({
             TaskId: taskId,
             Order: i + 1,
@@ -479,5 +532,259 @@ var _addTaskTr = null;
 //新增任务行
 function addTask() {
     $('#configItem').append(_addTaskTr);
+    var lastEl = $('#configItem tr:last');
+    var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
+    parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle();
+}
+
+var _taskItemId = [];
+//删除任务配置
+function delTaskItem() {
+    var opType = 1057;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var len = _taskItemId.length;
+    if (!len) {
+        layer.msg('请选择需要删除的数据');
+        return;
+    }
+    var taskItemName = [];
+    for (var i = 0; i < len; i++) {
+        taskItemName.push(_taskItem[_taskItemId[i]].Item);
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            ids: _taskItemId
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskConfigItem();
+                }
+            });
+    }
+    showConfirm(`删除以下任务配置项:<pre style='color:red'>${taskItemName.join('<br>')}</pre>`, doSth);
+}
+
+//重置任务配置单
+function resetTask() {
+    getTaskConfigItem();
+}
+
+//配置管理弹窗
+function taskConfigModal() {
+    $('#configSelect').val(0).trigger('change');
+    $('#newConfig').val('');
+    $('#configReuse').iCheck("uncheck");
+    $('#taskConfigModal').modal('show');
+}
+
+//删除配置
+function delConfig() {
+    var opType = 1054;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var configId = $('#configSelect').val();
+    if (isStrEmptyOrUndefined(configId)) {
+        layer.msg('请选择配置');
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: configId
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskConfig();
+                }
+            });
+    }
+    showConfirm("删除配置：" + $("#configSelect option:selected").text(), doSth);
+}
+
+//新增配置
+function addConfig() {
+    var opType = 1053;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var newConfig = $("#newConfig").val();
+    if (isStrEmptyOrUndefined(newConfig)) {
+        layer.msg("新配置不能为空");
+        return;
+    }
+    var configId = $("#configSelect").val().trim();
+    var oldConfig = $("#configSelect option:selected").text();
+    var isChecked = $("#configReuse").is(":checked");
+    if (isChecked && isStrEmptyOrUndefined(configId)) {
+        layer.msg("请选择配置");
+        return;
+    }
+    if (newConfig == oldConfig) {
+        layer.msg("新配置已存在");
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            Task: newConfig,
+            CopyId: isChecked ? configId : 0
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskConfig();
+                    $('#newConfig').val('');
+                    $('#configReuse').iCheck("uncheck");
+                }
+            });
+    }
+    showConfirm("新增配置：" + newConfig, doSth);
+}
+
+//修改配置
+function updateConfig() {
+    var opType = 1052;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var newConfig = $("#newConfig").val().trim();
+    var oldConfig = $("#configSelect option:selected").text();
+    var configId = $("#configSelect").val();
+    if (isStrEmptyOrUndefined(configId)) {
+        layer.msg("请选择配置");
+        return;
+    }
+    if (isStrEmptyOrUndefined(newConfig)) {
+        layer.msg("新配置不能为空");
+        return;
+    }
+    if (newConfig == oldConfig) {
+        layer.msg("新配置已存在");
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            Id: configId,
+            Task: newConfig
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskConfig();
+                    $('#newConfig').val('');
+                    $('#configReuse').iCheck("uncheck");
+                }
+            });
+    }
+    showConfirm("修改配置：" + oldConfig, doSth);
+}
+
+//模块弹窗
+function taskModuleModal() {
+    $('#moduleSelect').empty();
+    new Promise(function (resolve) {
+        getModule(resolve);
+    }).then((e) => {
+        $('#moduleSelect').append(e);
+        $('#moduleSelect').val(0).trigger('change');
+    });
+    $('#newModule').val('');
+    $('#isCheckout').iCheck("uncheck");
+    $('#taskModuleModal').modal('show');
+}
+
+//删除模块
+function delModule() {
+    var opType = 1061;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var moduleId = $('#moduleSelect').val();
+    if (isStrEmptyOrUndefined(moduleId)) {
+        layer.msg('请选择模块');
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            id: moduleId
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    taskModuleModal();
+                    taskTrData();
+                }
+            });
+    }
+    showConfirm("删除模块：" + $("#moduleSelect option:selected").text(), doSth);
+}
+
+//新增修改模块
+function addUpModule(isUp) {
+    var opType = isUp ? 1059 : 1060;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var newModuleName = $('#newModule').val().trim();
+    var moduleId = $('#moduleSelect').val();
+    var olModuleName = $("#moduleSelect option:selected").text();
+    var isCheckout = $('#isCheckout').is(":checked");
+    if (isStrEmptyOrUndefined(newModuleName)) {
+        layer.msg("新模块不能为空");
+        return;
+    }
+    if (newModuleName == olModuleName) {
+        layer.msg("新模块已存在");
+        return;
+    }
+    if (isUp && isStrEmptyOrUndefined(moduleId)) {
+        layer.msg("请选择模块");
+        return;
+    }
+    var list = {
+        Module: newModuleName,
+        IsCheck: isCheckout
+    }
+    if (isUp) {
+        list.Id = moduleId
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    taskModuleModal();
+                    taskTrData();
+                }
+            });
+    }
+    showConfirm(`${isUp ? '修改' : '新增'}配置：${isUp ? olModuleName : newModuleName}`, doSth);
 }
