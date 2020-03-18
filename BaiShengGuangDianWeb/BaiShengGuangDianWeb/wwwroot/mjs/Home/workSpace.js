@@ -1219,7 +1219,6 @@ function showMaintainerModel() {
         return;
     }
     $("#maintainerList").empty();
-
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({ menu: true });
@@ -1241,6 +1240,8 @@ function showMaintainerModel() {
             }
             $("#maintainerList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rtip',
+                    "bAutoWidth": false,
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -1249,9 +1250,9 @@ function showMaintainerModel() {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
-                        { "data": "Id", "title": "序号", "render": order },
-                        { "data": "Name", "title": "维修工" },
-                        { "data": "Phone", "title": "手机号" },
+                        { "data": "Id", "title": "序号", "render": order, "sWidth": "80px" },
+                        { "data": "Name", "title": "姓名", "sWidth": "120px" },
+                        { "data": "Phone", "title": "手机号", "sWidth": "130px" },
                         { "data": "Remark", "title": "备注", "render": remark }
                     ]
                 });

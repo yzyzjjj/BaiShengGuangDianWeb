@@ -1784,13 +1784,13 @@ function addMaintainer() {
         if (isStrEmptyOrUndefined(acc)) {
             return;
         }
-        if (isStrEmptyOrUndefined(phone)) {
-            layer.msg("请输入手机号");
-            return;
-        } else if (!isPhone(phone)) {
-            layer.msg("手机号错误");
-            return;
-        }
+        //if (isStrEmptyOrUndefined(phone)) {
+        //    layer.msg("请输入手机号");
+        //    return;
+        //} else if (!isPhone(phone)) {
+        //    layer.msg("手机号错误");
+        //    return;
+        //}
 
         list.push({
             Name: name,
@@ -1841,13 +1841,13 @@ function updateMaintainer() {
     for (var key in choseMaintainer) {
         var maintainer = choseMaintainer[key];
         if (maintainers && maintainers[key] && (maintainers[key].Phone != maintainer.Phone || maintainers[key].Remark != maintainer.Remark)) {
-            if (isStrEmptyOrUndefined(maintainer.Phone)) {
-                layer.msg("请输入手机号");
-                return;
-            } else if (!isPhone(maintainer.Phone)) {
-                layer.msg("手机号错误");
-                return;
-            }
+            //if (isStrEmptyOrUndefined(maintainer.Phone)) {
+            //    layer.msg("请输入手机号");
+            //    return;
+            //} else if (!isPhone(maintainer.Phone)) {
+            //    layer.msg("手机号错误");
+            //    return;
+            //}
             maintainer.Account = maintainers[key].Account;
             maintainer.Name = maintainers[key].Name;
             list.push(maintainer);

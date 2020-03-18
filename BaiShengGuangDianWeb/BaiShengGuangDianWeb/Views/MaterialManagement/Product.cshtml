@@ -108,7 +108,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label"><span class="text-red">* </span>最低库存：</label>
                                 <div class="col-sm-10">
-                                    <input class="form-control" id="addStock" onfocusin="focusIn($(this))" maxlength="10" oninput="value=value.replace(/[^\d]/g,'')">
+                                    <input class="form-control" id="addStock" type="tel" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -120,7 +120,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">参考价格：</label>
                                 <div class="col-sm-10">
-                                    <input class="form-control" id="addPrice" onfocusin="focusIn($(this))" maxlength="10" oninput="value=value.replace(/[^\d]/g,'')">
+                                    <input class="form-control" id="addPrice" onkeyup="onInput(this, 8, 4)" onblur="onInputEnd(this)">
                                 </div>
                             </div>
                             <div class="form-group">

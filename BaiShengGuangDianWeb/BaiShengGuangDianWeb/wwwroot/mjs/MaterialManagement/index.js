@@ -4027,7 +4027,8 @@ function reversalConModal() {
         _reversalConList.push({
             BillId: codeId,
             Number: number,
-            Remark: remark
+            Remark: remark,
+            RelatedPerson: getCookieTokenInfo().name
         });
     }
     var o = 0;

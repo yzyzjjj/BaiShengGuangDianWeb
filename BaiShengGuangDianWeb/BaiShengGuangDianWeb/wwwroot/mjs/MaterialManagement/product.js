@@ -531,7 +531,7 @@ function getMaterialList() {
             return op.format(data.Id, escape(data.Code), escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.ImageList), escape(data.Site));
         }
         var price = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn price hidden" maxlength="10" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn price hidden" onkeyup="onInput(this, 8, 4)" onblur="onInputEnd(this)" style="width:80px" value=${data}>`;
         }
         var stock = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn stock hidden" maxlength="10" style="width:80px" value=${data}>`;
