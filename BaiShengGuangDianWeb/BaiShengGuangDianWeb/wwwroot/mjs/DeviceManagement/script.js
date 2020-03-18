@@ -102,7 +102,7 @@
                             "destroy": true,
                             "paging": true,
                             "searching": true,
-                            "language": { "url": "/content/datatables_language.json" },
+                            "language": oLanguage,
                             "data": jsonData,
                             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                             "iDisplayLength": 20, //默认显示的记录数  
@@ -225,7 +225,7 @@ function getScriptVersionAllList(type) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
@@ -519,7 +519,7 @@ function getScriptVersionDetailList() {
                 "info": false,
                 "searching": true,
                 "autoWidth": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数  
                 "data": data1,
@@ -546,7 +546,7 @@ function getScriptVersionDetailList() {
                 "info": false,
                 "searching": true,
                 "autoWidth": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": data2,
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数  
@@ -573,7 +573,7 @@ function getScriptVersionDetailList() {
                 "info": false,
                 "searching": true,
                 "autoWidth": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": data3,
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数  
@@ -919,7 +919,7 @@ function showUsuallyDictionary() {
                 "destroy": true,
                 "paging": true,
                 "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": usData,
                 "aLengthMenu": [35, 70, 105], //更改显示记录数选项  
                 "iDisplayLength": 35, //默认显示的记录数
@@ -1120,7 +1120,7 @@ function showUsuallyVariableTypeModel() {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [0, "asc"],
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  

@@ -29,7 +29,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     msg = JObject.Parse(info.Message.ToString());
                     var mailList = new List<string>();
                     var admin = msg["Admin"].ToObject<string>();
-                    var acc = AccountHelper.GetAccountInfoByName(admin);
+                    var acc = AccountHelper.GetAccountInfo(admin);
                     if (acc != null)
                     {
                         mailList.Add(acc.EmailAddress);

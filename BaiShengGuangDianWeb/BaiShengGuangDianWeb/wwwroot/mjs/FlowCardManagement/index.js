@@ -472,7 +472,7 @@ function getFlowCardList() {
                     //"deferRender": true,
                     "autoWidth": true,
                     //"paginationType": "full_numbers", 
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": aaSorting,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -964,7 +964,7 @@ function showChangeFlowCard(type, flowCardName) {
                     "bLengthChange": false,
                     "info": false,
                     "searching": false,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.processSteps.sort(processStepOrder),
                     "aaSorting": [[0, "asc"]],
                     "columns": [
@@ -1412,7 +1412,7 @@ function getProductionProcessList() {
                     "paging": true,
                     "searching": true,
                     "autoWidth": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": aaSorting,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -1998,7 +1998,7 @@ function getRawMateriaList() {
                     "paging": true,
                     "searching": true,
                     "autoWidth": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": aaSorting,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  

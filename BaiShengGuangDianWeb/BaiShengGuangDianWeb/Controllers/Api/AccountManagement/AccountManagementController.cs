@@ -142,69 +142,40 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
                     logParam += $",生产角色:{isProcessor}";
                     isProcessor = isProcessorList.Join(",");
+                    var opTypeList = new Dictionary<int, int>
+                    {
+                        {0, 251},
+                        {1, 257},
+                    };
                     foreach (var variable in isProcessorList)
                     {
-                        int opType;
-                        Permission permission;
-                        ManagementServer managementServer;
-                        string opData;
-                        string url;
-                        switch (variable)
+                        if (opTypeList.ContainsKey(variable))
                         {
-                            case 0:
-                                opType = 251;
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
-                                {
-                                    break;
-                                }
+                            var opType = opTypeList[variable];
+                            var permission = PermissionHelper.Get(opType);
+                            if (permission == null || permission.HostId == 0)
+                            {
+                                continue;
+                            }
 
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
+                            var managementServer = ManagementServerHelper.Get(permission.HostId);
+                            if (managementServer == null)
+                            {
+                                continue;
+                            }
 
-                                opData = new
+                            var opData = new
+                            {
+                                Account = account,
+                                SurveyorName = name,
+                                ProcessorName = name,
+                            }.ToJSON();
+                            var url = managementServer.Host + permission.Url;
+                            HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                (s, exception) =>
                                 {
-                                    ProcessorName = name,
-                                    Account = account,
-                                }.ToJSON();
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
-                                    {
 
-                                    });
-                                break;
-                            case 1:
-                                opType = 257;
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
-                                {
-                                    break;
-                                }
-
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
-
-                                opData = new
-                                {
-                                    SurveyorName = name,
-                                    Account = account
-                                }.ToJSON();
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
-                                    {
-
-                                    });
-                                break;
-                            default:
-                                break;
+                                });
                         }
                     }
                 }
@@ -287,6 +258,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             var logParam = $"账号:{accountInfo.Account},名字:{accountInfo.Name},角色:{accountInfo.RoleName}";
             AccountHelper.DeleteAccountInfo(accountInfo.Id);
+            int opType;
+            Permission permission;
             if (!accountInfo.ProductionRole.IsNullOrEmpty())
             {
                 var isProcessor = accountInfo.ProductionRole;
@@ -294,73 +267,68 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     var isProcessorList = isProcessor.Split(',').Select(int.Parse).ToList();
                     logParam += $",生产角色:{isProcessor}";
+                    var opTypeList = new Dictionary<int, int>
+                    {
+                        {0, 253},
+                        {1, 259},
+                    };
                     foreach (var variable in isProcessorList)
                     {
-                        int opType;
-                        Permission permission;
-                        ManagementServer managementServer;
-                        string opData;
-                        string url;
-                        switch (variable)
+                        if (opTypeList.ContainsKey(variable))
                         {
-                            case 0:
-                                opType = 253;
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
-                                {
-                                    break;
-                                }
+                            opType = opTypeList[variable];
+                            permission = PermissionHelper.Get(opType);
+                            if (permission == null || permission.HostId == 0)
+                            {
+                                continue;
+                            }
 
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
+                            var managementServer = ManagementServerHelper.Get(permission.HostId);
+                            if (managementServer == null)
+                            {
+                                continue;
+                            }
 
-                                opData = new
+                            var opData = new
+                            {
+                                accountInfo.Account,
+                            }.ToJSON();
+                            var url = managementServer.Host + permission.Url;
+                            HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                (s, exception) =>
                                 {
-                                    accountInfo.Account
-                                }.ToJSON();
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
-                                    {
 
-                                    });
-                                break;
-                            case 1:
-                                opType = 259;
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
-                                {
-                                    break;
-                                }
-
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
-
-                                opData = new
-                                {
-                                    accountInfo.Account
-                                }.ToJSON();
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
-                                    {
-
-                                    });
-                                break;
-                            default:
-                                break;
+                                });
                         }
                     }
                 }
                 catch (Exception)
                 {
                     return Result.GenError<Result>(Error.ParamError);
+                }
+            }
+
+            opType = 431;
+            permission = PermissionHelper.Get(opType);
+            if (permission != null && permission.HostId != 0)
+            {
+                var managementServer = ManagementServerHelper.Get(permission.HostId);
+                if (managementServer != null)
+                {
+                    var opData = new[]
+                    {
+                        new
+                        {
+                            accountInfo.Account,
+                            WebOp = 2
+                        }
+                    }.ToJSON();
+                    var url = managementServer.Host + permission.Url;
+                    HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                        (s, exception) =>
+                        {
+
+                        });
                 }
             }
 
@@ -521,6 +489,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
             //ProductionRole
             var isProcessor = param.GetValue("isProcessor");
+            int opType;
+            Permission permission;
             if (!isProcessor.IsNullOrEmpty() && accountInfo.ProductionRole != isProcessor)
             {
                 try
@@ -544,152 +514,85 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     all.AddRange(oldProductionRoleList);
                     all.AddRange(isProcessorList);
 
+                    var opTypeList = new Dictionary<int,   Tuple<int, int, int>>
+                    {
+                        {0, new Tuple<int,int,int>(253, 250, 251)},
+                        {1, new Tuple<int,int,int>(259, 256, 257)},
+                    };
+
                     foreach (var variable in all.Distinct())
                     {
-                        int opType;
-                        Permission permission;
-                        ManagementServer managementServer;
-                        string url;
-                        string opData;
-                        switch (variable)
+                        if (opTypeList.ContainsKey(variable))
                         {
-                            case 0:
-                                //上一次包含,本次不包含 = 删除
-                                if (oldProductionRoleList.Contains(variable) && !isProcessorList.Contains(variable))
+                            var op = opTypeList[variable];
+                            //上一次包含,本次不包含 = 删除
+                            string opData;
+                            if (oldProductionRoleList.Contains(variable) && !isProcessorList.Contains(variable))
+                            {
+                                //已存在 = 删除
+                                if (maxProductionRoleList.Contains(variable))
                                 {
-                                    //已存在 = 删除
-                                    if (maxProductionRoleList.Contains(variable))
+                                    opType = op.Item1;
+                                    opData = new
                                     {
-                                        opType = 253;
-                                        opData = new
-                                        {
-                                            id = accountInfo.Account
-                                        }.ToJSON();
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                                //上一次不包含,本次包含 = 添加
-                                else if (!oldProductionRoleList.Contains(variable) && isProcessorList.Contains(variable))
-                                {
-                                    //已存在 = 更新
-                                    if (maxProductionRoleList.Contains(variable))
-                                    {
-                                        opType = 250;
-                                        opData = new
-                                        {
-                                            id = accountInfo.Account,
-                                            MarkedDelete = false,
-                                            ProcessorName = accountInfo.Name,
-                                            accountInfo.Account
-                                        }.ToJSON();
-                                    }
-                                    //不存在 = 添加
-                                    else
-                                    {
-                                        opType = 251;
-                                        opData = new
-                                        {
-                                            ProcessorName = accountInfo.Name,
-                                            accountInfo.Account
-                                        }.ToJSON();
-                                    }
+                                        id = accountInfo.Account
+                                    }.ToJSON();
                                 }
                                 else
                                 {
                                     break;
                                 }
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
+                            }
+                            //上一次不包含,本次包含 = 添加
+                            else if (!oldProductionRoleList.Contains(variable) && isProcessorList.Contains(variable))
+                            {
+                                //已存在 = 更新
+                                if (maxProductionRoleList.Contains(variable))
                                 {
-                                    break;
+                                    opType = op.Item2;
+                                    opData = new
+                                    {
+                                        id = accountInfo.Account,
+                                        MarkedDelete = false,
+                                        ProcessorName = accountInfo.Name,
+                                        SurveyorName = accountInfo.Name,
+                                        accountInfo.Account
+                                    }.ToJSON();
                                 }
-
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
-
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
-                                    {
-
-                                    });
-                                break;
-                            case 1:
-                                //上一次包含,本次不包含 = 删除
-                                if (oldProductionRoleList.Contains(variable) && !isProcessorList.Contains(variable))
-                                {
-                                    //已存在 = 删除
-                                    if (maxProductionRoleList.Contains(variable))
-                                    {
-                                        opType = 259;
-                                        opData = new
-                                        {
-                                            id = accountInfo.Account
-                                        }.ToJSON();
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                                //上一次不包含,本次包含 = 添加
-                                else if (!oldProductionRoleList.Contains(variable) && isProcessorList.Contains(variable))
-                                {
-                                    //已存在 = 更新
-                                    if (maxProductionRoleList.Contains(variable))
-                                    {
-                                        opType = 256;
-                                        opData = new
-                                        {
-                                            id = accountInfo.Account,
-                                            MarkedDelete = false,
-                                            SurveyorName = accountInfo.Name,
-                                            accountInfo.Account
-                                        }.ToJSON();
-                                    }
-                                    //不存在 = 添加
-                                    else
-                                    {
-                                        opType = 257;
-                                        opData = new
-                                        {
-                                            SurveyorName = accountInfo.Name,
-                                            accountInfo.Account
-                                        }.ToJSON();
-                                    }
-                                }
+                                //不存在 = 添加
                                 else
                                 {
-                                    break;
-                                }
-                                permission = PermissionHelper.Get(opType);
-                                if (permission == null || permission.HostId == 0)
-                                {
-                                    break;
-                                }
-
-                                managementServer = ManagementServerHelper.Get(permission.HostId);
-                                if (managementServer == null)
-                                {
-                                    break;
-                                }
-
-                                url = managementServer.Host + permission.Url;
-                                HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
-                                    (s, exception) =>
+                                    opType = op.Item3;
+                                    opData = new
                                     {
+                                        ProcessorName = accountInfo.Name,
+                                        SurveyorName = accountInfo.Name,
+                                        accountInfo.Account
+                                    }.ToJSON();
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                            permission = PermissionHelper.Get(opType);
+                            if (permission == null || permission.HostId == 0)
+                            {
+                                continue;
+                            }
 
-                                    });
+                            var managementServer = ManagementServerHelper.Get(permission.HostId);
+                            if (managementServer == null)
+                            {
+                                continue;
+                            }
 
-                                break;
-                            default:
-                                break;
+                            var url = managementServer.Host + permission.Url;
+                            HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                                (s, exception) =>
+                                {
+
+                                });
                         }
                     }
 
@@ -722,8 +625,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
 
                 foreach (var variable in maxProductionRoleList)
                 {
-                    int opType;
-                    Permission permission;
                     ManagementServer managementServer;
                     string url;
                     string opData;
@@ -829,6 +730,31 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             }
             AccountHelper.UpdateAccountInfo(accountInfo);
 
+            opType = 431;
+            permission = PermissionHelper.Get(opType);
+            if (permission != null && permission.HostId != 0)
+            {
+                var managementServer = ManagementServerHelper.Get(permission.HostId);
+                if (managementServer != null)
+                {
+                    var opData = new[]
+                    {
+                        new
+                        {
+                            accountInfo.Name,
+                            accountInfo.Phone,
+                            accountInfo.Account,
+                            WebOp = 1
+                        }
+                    }.ToJSON();
+                    var url = managementServer.Host + permission.Url;
+                    HttpServer.ResultAsync(AccountHelper.CurrentUser.Account, url, permission.Verb, opData,
+                        (s, exception) =>
+                        {
+
+                        });
+                }
+            }
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value, logParam, accountInfo.Id);
             return Result.GenError<Result>(Error.Success);
         }

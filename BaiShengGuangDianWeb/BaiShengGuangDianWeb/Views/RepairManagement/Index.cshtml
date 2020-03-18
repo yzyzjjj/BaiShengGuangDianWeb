@@ -11,23 +11,28 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/RepairManagement/index.min.js"></script>
 </environment>
-<section class="content ">
-    <h2 class="text-center">
-        维修管理
-        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="getUsuallyFaultList()">常见故障解决</button>
-        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="getFaultTypeList()">故障类型</button>
-    </h2>
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin: 2px" id="getUsuallyFaultList" onclick="getUsuallyFaultList()">常见故障解决</button>
+        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin: 2px" id="getFaultTypeList" onclick="getFaultTypeList()">故障类型</button>
+        <button type="button" class="btn btn-warning pull-right btn-sm" style="margin: 2px" id="showMaintainerModel" onclick="showMaintainerModel()">维修工管理</button>
+    </h1>
+</section>
+<section class="content">
     <div class="row">
-        <div class="nav-tabs-custom">
+        <div class="nav-tabs-custom" id="tabs">
             <ul class="nav nav-tabs ui-sortable-handle">
-                <li class="active"><a href="#faultDevice" data-toggle="tab" aria-expanded="true">故障设备</a></li>
-                <li><a href="#delFaultDevice" data-toggle="tab" aria-expanded="false">已删除故障设备</a></li>
+                <li id="faultDeviceLi" class="hidden"><a href="#faultDevice" data-toggle="tab" aria-expanded="true">故障设备</a></li>
+                <li id="repairListLi" class="hidden" onclick="getRepairRecordList(true)"><a href="#repairList" data-toggle="tab" aria-expanded="false">维修记录</a></li>
+                <li id="delFaultDeviceLi" class="hidden"><a href="#delFaultDevice" data-toggle="tab" aria-expanded="false">已删除故障设备</a></li>
+                <li id="delRepairLi" class="hidden"><a href="#delRepair" data-toggle="tab" aria-expanded="false">已删除维修记录</a></li>
             </ul>
             <div class="tab-content no-padding">
-                <div class="tab-pane active in" id="faultDevice">
+                <div class="tab-pane fade in" id="faultDevice">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">故障设备</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-primary btn-sm" onclick="getFaultDeviceList()">刷新</button>
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -43,7 +48,7 @@
                 <div class="tab-pane fade in" id="delFaultDevice">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">已删除故障设备</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
@@ -85,18 +90,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs ui-sortable-handle">
-                <li class="active"><a href="#repairList" data-toggle="tab" aria-expanded="true">维修记录</a></li>
-                <li><a href="#delRepair" data-toggle="tab" aria-expanded="false">已删除维修记录</a></li>
-            </ul>
-            <div class="tab-content no-padding">
-                <div class="tab-pane active in" id="repairList">
+                <div id="repairList" class="tab-pane fade in">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">维修记录</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-primary btn-sm" id="rChange" onclick="rChange(0, 1)">添加纪录</button>
                                 <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">刷新</button>
@@ -110,10 +107,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade in" id="delRepair">
+                <div id="delRepair" class="tab-pane fade in">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">已删除维修记录</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
@@ -286,28 +283,6 @@
     </div>
 
     <!-- 模态框（Modal） -->
-    <div class="modal fade" tabindex="-1" id="usuallyFaultDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">解决方法</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <textarea class="form-control" disabled="disabled" id="usuallyFaultDetail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="addUsuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -325,9 +300,9 @@
                         <label class="adt label-danger hidden" id="addUsuallyFaultDescTip"></label>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="addSolverPlan">解决方法：</label>
-                        <textarea class="form-control" id="addSolverPlan" style="resize: vertical" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
-                        <label class="adt label-danger hidden" id="addSolverPlanTip"></label>
+                        <label class="control-label" for="addSolvePlan">解决方法：</label>
+                        <textarea class="form-control" id="addSolvePlan" style="resize: vertical" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
+                        <label class="adt label-danger hidden" id="addSolvePlanTip"></label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -358,9 +333,9 @@
                                 <label class="adt label-danger hidden" id="updateUsuallyFaultDescTip"></label>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="updateSolverPlan">解决方法：</label>
-                                <textarea class="form-control" id="updateSolverPlan" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
-                                <label class="adt label-danger hidden" id="updateSolverPlanTip"></label>
+                                <label class="control-label" for="updateSolvePlan">解决方法：</label>
+                                <textarea class="form-control" id="updateSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;" onfocusin="focusIn($(this))" maxlength="1000"></textarea>
+                                <label class="adt label-danger hidden" id="updateSolvePlanTip"></label>
                             </div>
                         </div>
                     </div>
@@ -484,6 +459,73 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="updateFaultType()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 维修工管理模态框 -->
+    <div class="modal fade" tabindex="-1" id="maintainerModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">维修工名单</h4>
+                </div>
+                <div class="modal-body no-padding-top">
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-primary btn-sm hidden" id="showAddMaintainerModelBtn" onclick="showAddMaintainerModel()">新增</button>
+                        <button type="button" class="btn btn-warning btn-sm hidden" id="updateMaintainerBtn" onclick="updateMaintainer()">修改</button>
+                        <button type="button" class="btn btn-danger btn-sm hidden" id="delMaintainerBtn" onclick="delMaintainer()">删除</button>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="maintainerList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择维修工模态框 -->
+    <div class="modal fade" tabindex="-1" id="addMaintainerModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">新维修工</h4>
+                </div>
+                <div class="modal-body no-padding-top">
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="initList()">重置</button>
+                    </div>
+                    <div class="form-group" id="addTable" style="overflow: auto;max-height:500px">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td style="width:100px;">序号</td>
+                                    <td style="width:200px;">姓名</td>
+                                    <td style="width:200px;">手机号</td>
+                                    <td>备注</td>
+                                    <td style="width:100px;">删除</td>
+                                </tr>
+                            </thead>
+                            <tbody id="addList"></tbody>
+                        </table>
+                    </div>
+                    <div class="form-group text-center">
+                        <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addOneBtn" onclick="addOne()"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" disabled="disabled" id="addMaintainerBtn" onclick="addMaintainer()">添加</button>
                 </div>
             </div>
         </div>

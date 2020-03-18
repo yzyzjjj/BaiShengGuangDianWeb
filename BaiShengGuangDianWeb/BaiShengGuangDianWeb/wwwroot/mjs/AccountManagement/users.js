@@ -223,7 +223,7 @@ function showAddUserModal(type = 0) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数 
@@ -565,7 +565,7 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  

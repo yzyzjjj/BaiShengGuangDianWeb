@@ -214,7 +214,7 @@ function getProcessList(type = 307) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[1, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -316,7 +316,7 @@ function showProcessDetailModel(id) {
                             .DataTable({
                                 "destroy": true,
                                 "bSort": false,
-                                "language": { "url": "/content/datatables_language.json" },
+                                "language": oLanguage,
                                 "data": ret.datas,
                                 "aaSorting": [[0, "asc"]],
                                 "columns": [
@@ -371,7 +371,7 @@ function showProcessDetailModel(id) {
                             .DataTable({
                                 "destroy": true,
                                 "bSort": true,
-                                "language": { "url": "/content/datatables_language.json" },
+                                "language": oLanguage,
                                 "data": ret.datas,
                                 "aaSorting": [[0, "asc"]],
                                 "columns": [
@@ -443,7 +443,7 @@ function showProcessDetailModel(id) {
                             .DataTable({
                                 "destroy": true,
                                 "bSort": true,
-                                "language": { "url": "/content/datatables_language.json" },
+                                "language": oLanguage,
                                 "data": ret.datas,
                                 "aaSorting": [[0, "asc"]],
                                 "columns": [
@@ -520,7 +520,7 @@ function showProcessDetailModel(id) {
                             .DataTable({
                                 "destroy": true,
                                 "bSort": true,
-                                "language": { "url": "/content/datatables_language.json" },
+                                "language": oLanguage,
                                 "data": ret.datas,
                                 "aaSorting": [[0, "asc"]],
                                 "columns": [

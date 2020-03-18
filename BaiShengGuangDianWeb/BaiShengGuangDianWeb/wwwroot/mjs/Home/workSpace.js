@@ -138,7 +138,7 @@ function getDeviceList() {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -159,6 +159,7 @@ function getDeviceList() {
                     "drawCallback": tdWidth
                 });
             $(".ms2").empty();
+            var html = "";
             var option = '<option value="{0}" id="{2}" index="{3}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -166,8 +167,9 @@ function getDeviceList() {
                 if (state == '待加工' || state == '加工中') {
                     $("#processCode,#addCraftCode").append(option.format(data.Id, data.Code, ''));
                 }
-                $("#faultCode").append(option.format(data.Code, data.Code, data.AdministratorUser, data.Id));
+                html += option.format(data.Code, data.Code, data.Administrator, data.Id);
             }
+            $("#faultCode").append(html);
         });
 }
 
@@ -699,6 +701,7 @@ function getUsuallyFaultList() {
         layer.msg("没有权限");
         return;
     }
+    $("#usuallyFaultList").empty();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data,
@@ -707,12 +710,18 @@ function getUsuallyFaultList() {
                 layer.msg(ret.errmsg);
                 return;
             }
+
+            var rSolvePlan = function (d, type, row, meta) {
+                var data = d.SolvePlan;
+                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+            }
+
             $("#usuallyFaultList")
                 .DataTable({
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -720,20 +729,7 @@ function getUsuallyFaultList() {
                     "columns": [
                         { "data": "Id", "title": "序号" },
                         { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                        { "data": "SolverPlan", "title": "解决方法" }
-                    ],
-                    "columnDefs": [
-                        {
-                            "targets": [2],
-                            "render": function (data, type, full, meta) {
-                                full.SolverPlan = full.SolverPlan ? full.SolverPlan : "";
-                                return full.SolverPlan.length > tdShowContentLength
-                                    ? full.SolverPlan.substr(0, tdShowContentLength) +
-                                    ' <a href = \"javascript:showUsuallyFaultDetailModel({0})\">. . .</a> '.format(
-                                        full.Id)
-                                    : full.SolverPlan;
-                            }
-                        }
+                        { "data": null, "title": "解决方案", "render": rSolvePlan, "orderable": false }
                     ]
                 });
             $("#usuallyFaultModel").modal("show");
@@ -759,7 +755,7 @@ function showUsuallyFaultDetailModel(id) {
                 return;
             }
             if (ret.datas.length > 0)
-                $("#usuallyFaultDetail").html(ret.datas[0].SolverPlan);
+                $("#usuallyFaultDetail").html(ret.datas[0].SolvePlan);
 
             $("#usuallyFaultDetailModel").modal("show");
 
@@ -874,12 +870,12 @@ function queryRpFlowCard() {
                 }
                 return '<span id="c4f{0}" oValue="{2}">{1}</span>'.format(o, data.SurveyorName, data.SurveyorId);
             }
-            //检验时间
-            var surveyTime = function (data, type, row) {
-                var html =
-                    '<input type="text" id="c51f{0}" class="form_date form-control" value="{2}" style="width:90px;background-color:white;">' +
+            var html =
+                '<input type="text" id="c51f{0}" class="form_date form-control" value="{2}" style="width:90px;background-color:white;">' +
                     '<input type="text" id="c52f{0}" class="form_time form-control" value="{3}" style="width:75px;background-color:white;">' +
                     '<span id="c5f{0}" oValue="{1}" class="hidden">{1}</span>';
+            //检验时间
+            var surveyTime = function (data, type, row) {
                 if (sIndex != data.ProcessStepOrder) {
                     if (data.SurveyTime == '0001-01-01 00:00:00' || data.SurveyTime == null) {
                         return '<span id="c5f{0}" oValue="{1}"></span>'.format(o, data.SurveyTime);
@@ -958,7 +954,7 @@ function queryRpFlowCard() {
                     "bLengthChange": false,
                     "info": false,
                     "searching": false,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": datas,
                     "aaSorting": [[0, "asc"]],
                     "columns": [
@@ -1214,4 +1210,51 @@ function addCraft() {
             });
     }
     showConfirm("添加", doSth);
+}
+
+function showMaintainerModel() {
+    var opType = 430;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    $("#maintainerList").empty();
+
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({ menu: true });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            var order = function (data, type, row, meta) {
+                return meta.row + 1;
+            }
+            var remark = function (data, type, row, meta) {
+                return data.length > tdShowLength
+                    ? `<span title = "${data}" onclick = "showAllContent('${escape(data)}')">${
+                    data.substring(0, tdShowLength)}...</span>`
+                    : `<span title = "${data}">${data}</span>`;
+            }
+            $("#maintainerList")
+                .DataTable({
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": oLanguage,
+                    "data": ret.datas,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数  
+                    "columns": [
+                        { "data": "Id", "title": "序号", "render": order },
+                        { "data": "Name", "title": "维修工" },
+                        { "data": "Phone", "title": "手机号" },
+                        { "data": "Remark", "title": "备注", "render": remark }
+                    ]
+                });
+            $("#maintainerModel").modal("show");
+        });
 }

@@ -10,12 +10,15 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/Home/workSpace.min.js"></script>
 </environment>
-<section class="content ">
-    <h2>
-        工作台
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+        <button type="button" class="btn btn-warning pull-right btn-sm" style="margin-left: 10px" onclick="showMaintainerModel()">维修工名单</button>
         <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
         <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showInputReport()">报表输入</button>
-    </h2>
+    </h1>
+</section>
+<section class="content ">
     <div class="row">
         <div class="col-md-5">
             <div class="box box-primary">
@@ -306,6 +309,28 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="addCraft()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 维修工名单模态框 -->
+    <div class="modal fade" tabindex="-1" id="maintainerModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">维修工名单</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="maintainerList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

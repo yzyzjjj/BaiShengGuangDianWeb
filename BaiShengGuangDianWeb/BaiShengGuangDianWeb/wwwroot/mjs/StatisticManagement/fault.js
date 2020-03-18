@@ -486,7 +486,7 @@ function getFaultChart() {
             //                        "deferRender": false,
             //                        "bLengthChange": false,
             //                        "searching": false,
-            //                        "language": { "url": "/content/datatables_language.json" },
+            //                        "language": oLanguage,
             //                        "data": appear[o][s].DeviceFaultTypes,
             //                        "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
             //                        "iDisplayLength": 5, //默认显示的记录数  
@@ -503,7 +503,7 @@ function getFaultChart() {
             //                        "deferRender": false,
             //                        "bLengthChange": false,
             //                        "searching": false,
-            //                        "language": { "url": "/content/datatables_language.json" },
+            //                        "language": oLanguage,
             //                        "data": appear[o][s].Operators,
             //                        "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
             //                        "iDisplayLength": 5, //默认显示的记录数  
@@ -568,7 +568,7 @@ function getFaultChart() {
             //                        "deferRender": false,
             //                        "bLengthChange": false,
             //                        "searching": false,
-            //                        "language": { "url": "/content/datatables_language.json" },
+            //                        "language": oLanguage,
             //                        "data": service[o][s].DeviceFaultTypes,
             //                        "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
             //                        "iDisplayLength": 5, //默认显示的记录数  
@@ -588,7 +588,7 @@ function getFaultChart() {
             //                        "deferRender": false,
             //                        "bLengthChange": false,
             //                        "searching": false,
-            //                        "language": { "url": "/content/datatables_language.json" },
+            //                        "language": oLanguage,
             //                        "data": service[o][s].Operators,
             //                        "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
             //                        "iDisplayLength": 5, //默认显示的记录数  
@@ -2631,7 +2631,7 @@ function timeAppChart() {
 //                "deferRender": false,
 //                "bLengthChange": false,
 //                "searching": false,
-//                "language": { "url": "/content/datatables_language.json" },
+//                "language": oLanguage,
 //                "data": appearData[i].DeviceFaultTypes,
 //                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
 //                "iDisplayLength": 5, //默认显示的记录数  
@@ -2648,7 +2648,7 @@ function timeAppChart() {
 //                "deferRender": false,
 //                "bLengthChange": false,
 //                "searching": false,
-//                "language": { "url": "/content/datatables_language.json" },
+//                "language": oLanguage,
 //                "data": appearData[i].Operators,
 //                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
 //                "iDisplayLength": 5, //默认显示的记录数  
@@ -2678,7 +2678,7 @@ function timeAppChart() {
 //                "deferRender": false,
 //                "bLengthChange": false,
 //                "searching": false,
-//                "language": { "url": "/content/datatables_language.json" },
+//                "language": oLanguage,
 //                "data": serviceData[i].DeviceFaultTypes,
 //                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
 //                "iDisplayLength": 5, //默认显示的记录数  
@@ -2698,7 +2698,7 @@ function timeAppChart() {
 //                "deferRender": false,
 //                "bLengthChange": false,
 //                "searching": false,
-//                "language": { "url": "/content/datatables_language.json" },
+//                "language": oLanguage,
 //                "data": serviceData[i].Operators,
 //                "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
 //                "iDisplayLength": 5, //默认显示的记录数  

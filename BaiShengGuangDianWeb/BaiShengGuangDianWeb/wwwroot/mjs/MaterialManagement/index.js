@@ -691,7 +691,7 @@ function getMaterialList(el, resolve) {
                 "destroy": true,
                 "paging": true,
                 "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": ret.datas,
                 "aaSorting": [[0, "asc"]],
                 "aLengthMenu": [50, 100, 150, 200], //更改显示记录数选项  
@@ -880,7 +880,7 @@ function getLogList(show = false) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
@@ -1061,7 +1061,7 @@ function getLogConsumeList(show = false) {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
@@ -3321,7 +3321,7 @@ function consumeShow() {
             "destroy": true,
             "paging": true,
             "searching": true,
-            "language": { "url": "/content/datatables_language.json" },
+            "language": oLanguage,
             "data": _consumeActualList,
             "aaSorting": [[0, "asc"]],
             "aLengthMenu": [40, 80, 120], //更改显示记录数选项  

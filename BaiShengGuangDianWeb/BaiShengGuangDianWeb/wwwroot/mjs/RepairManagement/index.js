@@ -1,10 +1,43 @@
-﻿function pageReady() {
-
+﻿var permissionList = [];
+var getRepairRecordListFlag = false;
+function pageReady() {
+    permissionList[100] = { uIds: [] };
+    permissionList[400] = { uIds: ["getUsuallyFaultList"] };
+    permissionList[402] = { uIds: [] };
+    permissionList[403] = { uIds: ["showAddUsuallyFaultModel"] };
+    permissionList[404] = { uIds: [] };
+    permissionList[405] = { uIds: [] };
+    permissionList[406] = { uIds: ["getFaultTypeList"] };
+    permissionList[408] = { uIds: ["updateFaultTypeModel"] };
+    permissionList[410] = { uIds: ["showAddFaultTypeModel"] };
+    permissionList[411] = { uIds: [] };
+    permissionList[412] = { uIds: ["repairListLi"] };
+    permissionList[414] = { uIds: [] };
+    permissionList[415] = { uIds: ["rChange"] };
+    permissionList[416] = { uIds: [] };
+    permissionList[417] = { uIds: ["faultDeviceLi"] };
+    permissionList[420] = { uIds: [] };
+    permissionList[423] = { uIds: [] };
+    permissionList[424] = { uIds: ["delFaultDeviceLi"] };
+    permissionList[425] = { uIds: ["delRepairLi"] };
+    permissionList[430] = { uIds: ["showMaintainerModel"] };
+    permissionList[431] = { uIds: ["updateMaintainerBtn"] };
+    permissionList[432] = { uIds: ["showAddMaintainerModelBtn"] };
+    permissionList[433] = { uIds: ["delMaintainerBtn"] };
+    permissionList = checkPermissionUi(permissionList);
+    var li = $("#tabs li:not(.hidden)").first();
+    if (li) {
+        li.addClass("active");
+        $(li.find("a").attr("href")).addClass("active");
+    }
     $(".ms2").select2();
     $("#singleFaultType").select2();
     getFaultDeviceList();
-    getRepairRecordList();
-    getFaultType();
+    //getRepairRecordList();
+    setTimeout(function () {
+        getRepairRecordList(true, 0);
+        getFaultType(0);
+    }, 3000);
     $(".icb_minimal").iCheck({
         checkboxClass: 'icheckbox_minimal-blue',
         increaseArea: '20%' // optional
@@ -51,15 +84,6 @@
         }
         $("#singleFaultDefaultDesc").val(desc);
     });
-    if (!checkPermission(410)) {
-        $("#showAddFaultTypeModel").addClass("hidden");
-    }
-    if (!checkPermission(415)) {
-        $("#rChange").addClass("hidden");
-    }
-    if (!checkPermission(403)) {
-        $("#showAddUsuallyFaultModel").addClass("hidden");
-    }
     //定时器
     window.onload = function () {
         (function ($) {
@@ -73,7 +97,7 @@
                     time: function () {
                         objTime.init += 1;
                         if (objTime.init == userTime) {
-                            getFaultDeviceList(); // 用户未操作任何事件,刷新故障设备列表
+                            getFaultDeviceList(0); // 用户未操作任何事件,刷新故障设备列表
                             objTime.init = 0;
                         }
                     },
@@ -116,7 +140,7 @@
     });
 }
 var faultData = null;
-function getFaultType() {
+function getFaultType(cover = 1) {
     var data = {};
     data.opType = 406;
     ajaxPost("/Relay/Post", data,
@@ -136,14 +160,14 @@ function getFaultType() {
                 $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
                 $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
             }
-        });
+        }, cover);
 }
 
 var fType = 0;
-function getFaultDeviceList() {
+function getFaultDeviceList(cover = 1) {
     var opType = 417;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
+    if (!permissionList[opType].have) {
+        //layer.msg("没有权限");
         return;
     }
     var data = {}
@@ -163,35 +187,31 @@ function getFaultDeviceList() {
                     return '<span class="text-warning"><span class="hidden">1</span>中</span>';
                 return '<span class="text-success"><span class="hidden">0</span>低</span>';
             }
+            var upDel = '<div class="btn-group">' +
+                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '        <span class="caret"></span>' +
+                '        <span class="sr-only">Toggle Dropdown</span>' +
+                '    </button>' +
+                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                '    </ul>' +
+                '</div>';
             var op = function (data, type, row) {
                 var html = "{0}{1}{2}{3}";
                 var sureBtn = '<button type="button" class="btn btn-danger" onclick="sChange({0}, 1)">确认故障</button>'.format(data.Id);
                 var repairingBtn = '<button type="button" class="btn btn-info" onclick="sChange({0}, 2)">开始维修</button>'.format(data.Id);
                 var repairedBtn = '<button type="button" class="btn btn-success" onclick="sChange({0}, 3)">维修完成</button>'.format(data.Id);
-                var upDel = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '        <span class="caret"></span>' +
-                    '        <span class="sr-only">Toggle Dropdown</span>' +
-                    '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                    '    </ul>' +
-                    '</div>';
                 var changeBtn = '<li><a onclick="sChange({0}, 0)">修改</a></li>'.format(data.Id);
                 var delBtn = '<li><a onclick="delChange({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.DeviceCode));
-                upDel = upDel.format(
-                    checkPermission(420) ? changeBtn : "",
-                    checkPermission(423) ? delBtn : "");
-                html = html.format(
-                    upDel,
-                    checkPermission(420) && data.State == 0 ? sureBtn : "",
-                    checkPermission(420) && data.State == 1 ? repairingBtn : "",
-                    checkPermission(420) && data.State == 2 ? repairedBtn : "");
-                return html;
+
+                return html.format(
+                    upDel.format(permissionList[420].have ? changeBtn : "", permissionList[423].have ? delBtn : ""),
+                    permissionList[420].have && data.State == 0 ? sureBtn : "",
+                    permissionList[420].have && data.State == 1 ? repairingBtn : "",
+                    permissionList[420].have && data.State == 2 ? repairedBtn : "");
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (data, type, row, meta) {
+                return meta.row + 1;
             }
             var rState = function (data, type, row) {
                 //状态 0 已报修 1 已确认 2 维修中
@@ -202,66 +222,41 @@ function getFaultDeviceList() {
                     return '<span class="text-warning"><span class="hidden">1</span>已确认</span>';
                 return '<span class="text-success"><span class="hidden">2</span>维修中</span>';
             }
-            var columns = checkPermission(420) || checkPermission(423)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": null, "title": "状态", "render": rState },
-                    { "data": null, "title": "优先级", "render": priority },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "FaultDescription", "title": "故障描述" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": null, "title": "状态", "render": rState },
-                    { "data": null, "title": "优先级", "render": priority },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "FaultDescription", "title": "故障描述" }
-                ];
-            var rModel = function (data, type, full, meta) {
-                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                return full.FaultDescription.length > tdShowContentLength
-                    ? full.FaultDescription.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                        .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
-                    : full.FaultDescription;
-            };
-            var defs = checkPermission(420) || checkPermission(423)
-                ? [
-                    { "orderable": false, "targets": 9 },
-                    {
-                        "targets": [8],
-                        "render": rModel
-                    },
-                    { "type": "html-percent", "targets": [2] }
-                ]
-                : [
-                    {
-                        "targets": [8],
-                        "render": rModel
-                    },
-                    { "type": "html-percent", "targets": [2] }
-                ];
+
+            var rDesc = function (d, type, row, meta) {
+                var data = d.FaultDescription;
+                var id = d.FaultTypeId;
+                return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+            }
+
+            var columns = [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "DeviceCode", "title": "机台号" },
+                { "data": "FaultTime", "title": "故障时间" },
+                { "data": null, "title": "优先级", "render": priority },
+                { "data": null, "title": "状态", "render": rState },
+                { "data": "Name", "title": "维修工" },
+                { "data": "Phone", "title": "联系方式" },
+                { "data": "Proposer", "title": "报修人" },
+                { "data": "FaultTypeName", "title": "故障类型" },
+                { "data": null, "title": "故障描述", "render": rDesc }
+            ];
+            if (permissionList[420].have || permissionList[423].have) {
+                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
+            }
+
             $("#faultDeviceList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rtip',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
 
             $("#singleFaultCode").empty();
@@ -270,7 +265,7 @@ function getFaultDeviceList() {
                 var data = ret.datas[i];
                 $("#singleFaultCode").append(option.format(data.Id, data.DeviceCode));
             }
-        });
+        }, cover);
 }
 
 function sChange(id, type) {
@@ -283,15 +278,15 @@ function sChange(id, type) {
 
     $("#rFaultCodeDiv").addClass("hidden");
     $("#singleFaultCode").removeClass("hidden");
-    var opType = 418;
-    if (!checkPermission(opType)) {
+    var opType = 417;
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: id
+        qId: id
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -359,7 +354,7 @@ function sChange(id, type) {
 function delChange(id, code) {
     code = unescape(code);
     var opType = 423;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -383,8 +378,8 @@ function delChange(id, code) {
 
 function getDelFaultDeviceList() {
     var opType = 424;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
+    if (!permissionList[opType].have) {
+        //layer.msg("没有权限");
         return;
     }
     var data = {}
@@ -414,13 +409,21 @@ function getDelFaultDeviceList() {
         var order = function (data, type, row) {
             return ++o;
         }
+
+        var rDesc = function (d, type, row, meta) {
+            var data = d.FaultDescription;
+            var id = d.FaultTypeId;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+        }
+
         $("#delFaultDeviceList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
                 "autoWidth": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": ret.datas,
                 "aaSorting": [[0, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
@@ -430,23 +433,11 @@ function getDelFaultDeviceList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "Name", "title": "维修工" },
+                    { "data": "Phone", "title": "联系方式" },
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "FaultDescription", "title": "故障描述" }
-                ],
-                "columnDefs": [
-                    {
-                        "targets": [6],
-                        "render": function (data, type, full, meta) {
-                            full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                            return full.FaultDescription.length > tdShowContentLength
-                                ? full.FaultDescription.substr(0, tdShowContentLength) +
-                                '<a href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                                    .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
-                                : full.FaultDescription;
-                        }
-                    },
-                    { "type": "html-percent", "targets": [2] }
+                    { "data": null, "title": "故障描述", "render": rDesc }
                 ]
             });
     });
@@ -480,7 +471,7 @@ function singleChange(type) {
     var data;
     if (type < 3) {
         opType = 420;
-        if (!checkPermission(opType)) {
+        if (!permissionList[opType].have) {
             layer.msg("没有权限");
             return;
         }
@@ -532,7 +523,7 @@ function singleChange(type) {
         }
         //删除
         opType = 420;
-        if (!checkPermission(opType)) {
+        if (!permissionList[opType].have) {
             layer.msg("没有权限");
             return;
         }
@@ -569,7 +560,7 @@ function singleChange(type) {
             });
 
         opType = 415;
-        if (!checkPermission(opType)) {
+        if (!permissionList[opType].have) {
             layer.msg("没有权限");
             return;
         }
@@ -613,10 +604,14 @@ function singleChange(type) {
     }
 }
 
-function getRepairRecordList() {
+function getRepairRecordList(f = false, cover = 1) {
+    if (f && getRepairRecordListFlag) {
+        return;
+    }
+    getRepairRecordListFlag = true;
     var opType = 412;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
+    if (!permissionList[opType].have) {
+        //layer.msg("没有权限");
         return;
     }
     var data = {}
@@ -632,130 +627,100 @@ function getRepairRecordList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
             }
+            var html = '<div class="btn-group">' +
+                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '        <span class="caret"></span>' +
+                '        <span class="sr-only">Toggle Dropdown</span>' +
+                '    </button>' +
+                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                '    </ul>' +
+                '</div>';
             var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '        <span class="caret"></span>' +
-                    '        <span class="sr-only">Toggle Dropdown</span>' +
-                    '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                    '    </ul>' +
-                    '</div>';
                 var changeBtn = '<li><a onclick="rChange({0}, 0)">修改</a></li>'.format(data.Id);
                 var deleteBtn = '<li><a onclick="deleteChange({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
-                html = html.format(
-                    checkPermission(414) ? changeBtn : "",
-                    checkPermission(416) ? deleteBtn : "");
-                return html;
+                return html.format(permissionList[414].have ? changeBtn : "", permissionList[416].have ? deleteBtn : "");
+            }
+            var rDesc = function (d, type, row, meta) {
+                var data = d.FaultDescription;
+                var id = d.FaultTypeId;
+                return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+            }
+            var rSolvePlan = function (d, type, row, meta) {
+                var data = d.SolvePlan;
+                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.substring(0, tdShowLength)}...</span>`;
             }
             var isAdd = function (data, type, row) {
                 return data == false ? '否' : '是';
             }
-            var columns = checkPermission(414) || checkPermission(416)
-                ? [
-                    { "data": "Id", "title": "序号", "render": order },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultSolver", "title": "解决人员" },
-                    { "data": "FaultDescription", "title": "故障描述" },
-                    { "data": "SolveTime", "title": "解决时间" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "SolvePlan", "title": "解决方案", "visible": false },
-                    { "data": "IsAdd", "title": "是否为添加记录", "render": isAdd },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": "Id", "title": "序号", "render": order },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultSolver", "title": "解决人员" },
-                    { "data": "FaultDescription", "title": "故障描述" },
-                    { "data": "SolveTime", "title": "解决时间" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "SolvePlan", "title": "解决方案", "visible": false },
-                    { "data": "IsAdd", "title": "是否为添加记录", "render": isAdd }
-                ];
-            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-            var rModel = function (data, type, full, meta) {
-                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                return full.FaultDescription.length > tdShowContentLength
-                    ? full.FaultDescription.substr(0, tdShowContentLength) +
-                    '<a tittle = \'{1}\'  href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                        .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
-                    : full.FaultDescription;
-            };
-            var defs = checkPermission(414) || checkPermission(416)
-                ? [
-                    { "orderable": false, "targets": 9 },
-                    { "targets": [5], "render": rModel },
-                    { "type": "html-percent", "targets": [1] }
-                ]
-                : [
-                    { "targets": [5], "render": rModel },
-                    { "type": "html-percent", "targets": [1] }
-                ];
+            var columns = [
+                { "data": "Id", "title": "序号", "render": order },
+                { "data": "DeviceCode", "title": "机台号" },
+                { "data": "FaultTime", "title": "故障时间" },
+                { "data": "Name", "title": "维修工" },
+                { "data": "Phone", "title": "联系方式" },
+                { "data": "Proposer", "title": "报修人" },
+                { "data": "FaultSolver", "title": "解决人员" },
+                { "data": null, "title": "故障描述", "render": rDesc },
+                { "data": "SolveTime", "title": "解决时间" },
+                { "data": "FaultTypeName", "title": "故障类型" },
+                { "data": null, "title": "解决方案", "render": rSolvePlan },
+                { "data": "IsAdd", "title": "维修工添加", "render": isAdd }
+            ];
+            if (permissionList[414].have || permissionList[416].have) {
+                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
+            }
+            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            var titleColumns = [5, 8];
             $("#repairRecordList")
                 .DataTable({
-                    dom: 'B<"clear">lfrtip',
-                    buttons: {
-                        dom: {
-                            container: {
-                                tag: 'div',
-                                className: 'pull-right'
-                            }
-                        },
-                        buttons: [
-                            {
-                                extend: 'excel',
-                                text: '导出Excel',
-                                className: 'btn-primary btn-sm', //按钮的class样式
-                                exportOptions: {
-                                    columns: excelColumns,
-                                    format: {
-                                        // format有三个子标签，header，body和foot
-                                        body: function (data, row, column, node) {
-                                            //操作需要导出excel的数据格式                        
-                                            if (column === 5) {
-                                                var a = $(node).find("a").attr("tittle");
-                                                if (a != null) {
-                                                    return "\u200C" + unescape(a);
-                                                }
+                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            text: '导出Excel',
+                            className: 'btn-primary btn-sm', //按钮的class样式
+                            exportOptions: {
+                                columns: excelColumns,
+                                format: {
+                                    // format有三个子标签，header，body和foot
+                                    body: function (data, row, column, node) {
+                                        //操作需要导出excel的数据格式                        
+                                        if (titleColumns.indexOf(column) > -1) {
+                                            var a = $(node).find("span").attr("title");
+                                            if (a != null) {
+                                                return "\u200C" + unescape(a);
                                             }
-                                            return "\u200C" + node.textContent;
                                         }
+                                        return "\u200C" + node.textContent;
                                     }
                                 }
                             }
-                        ]
-                    },
+                        }
+                    ],
                     //"pagingType": "input",
                     //"serverSide": true,
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     //"aaSorting": [[0, "desc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
-        });
+        }, cover);
 }
 
 function getDelRepairList() {
     var opType = 425;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
+    if (!permissionList[opType].have) {
+        //layer.msg("没有权限");
         return;
     }
     var data = {}
@@ -785,46 +750,49 @@ function getDelRepairList() {
         var order = function (data, type, row) {
             return ++o;
         }
+        var rDesc = function (d, type, row, meta) {
+            var data = d.FaultDescription;
+            var id = d.FaultTypeId;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+        }
+        var rSolvePlan = function (d, type, row, meta) {
+            var data = d.SolvePlan;
+            return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+        }
+        var isAdd = function (data, type, row) {
+            return data == false ? '否' : '是';
+        }
+        var columns = [
+            { "data": "Id", "title": "序号", "render": order },
+            { "data": "DeviceCode", "title": "机台号" },
+            { "data": "FaultTime", "title": "故障时间" },
+            { "data": "Name", "title": "维修工" },
+            { "data": "Phone", "title": "联系方式" },
+            { "data": "Proposer", "title": "报修人" },
+            { "data": "FaultSolver", "title": "解决人员" },
+            { "data": null, "title": "故障描述", "render": rDesc },
+            { "data": "SolveTime", "title": "解决时间" },
+            { "data": "FaultTypeName", "title": "故障类型" },
+            { "data": null, "title": "解决方案", "render": rSolvePlan },
+            { "data": "IsAdd", "title": "维修工添加", "render": isAdd }
+        ];
+
         $("#delRepairList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
                 "autoWidth": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": ret.datas,
                 "aaSorting": [[0, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
-                "columns": [
-                    { "data": "Id", "title": "序号", "render": order },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultSolver", "title": "解决人员" },
-                    { "data": "FaultDescription", "title": "故障描述" },
-                    { "data": "SolveTime", "title": "解决时间" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "SolvePlan", "title": "解决方案", "visible": false },
-                ],
-                "columnDefs": [
-                    {
-                        "targets": [5],
-                        "render": function (data, type, full, meta) {
-                            full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                            return full.FaultDescription.length > tdShowContentLength
-                                ? full.FaultDescription.substr(0, tdShowContentLength) +
-                                '<a tittle = \'{1}\'  href = \"javascript:showFaultTypeDetailModel({0}, \'{1}\')\">...</a> '
-                                    .format(full.FaultTypeId, escape(full.FaultDescription.trim()))
-                                : full.FaultDescription;
-                        }
-                    },
-                    { "type": "html-percent", "targets": [1] }
-                ]
+                "columns": columns
             });
     });
 }
-
 
 function rChange(id, type) {
     hideClassTip('adt');
@@ -837,15 +805,15 @@ function rChange(id, type) {
     var opType;
     var data;
     if (type == 0) {
-        opType = 413;
-        if (!checkPermission(opType)) {
+        opType = 412;
+        if (!permissionList[opType].have) {
             layer.msg("没有权限");
             return;
         }
         data = {};
         data.opType = opType;
         data.opData = JSON.stringify({
-            id: id
+            qId: id
         });
         ajaxPost("/Relay/Post",
             data,
@@ -896,7 +864,7 @@ function rChange(id, type) {
     } else {
         $("#singleUpdateId").html(0);
         opType = 100;
-        if (!checkPermission(opType)) {
+        if (!permissionList[opType].have) {
             layer.msg("没有权限");
             return;
         }
@@ -957,7 +925,7 @@ function rChange(id, type) {
 function deleteChange(id, faultTypeName) {
     faultTypeName = unescape(faultTypeName);
     var opType = 416;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1037,7 +1005,7 @@ function recordChange(type) {
 
     $("#singleFaultModel").modal("hide");
     var opType = type == 0 ? 414 : 415;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1086,10 +1054,11 @@ function recordChange(type) {
 
 function getUsuallyFaultList() {
     var opType = 400;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
+    $("#usuallyFaultList").empty();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data,
@@ -1098,109 +1067,60 @@ function getUsuallyFaultList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '   <span class="caret"></span>' +
-                    '   <span class="sr-only">Toggle Dropdown</span>' +
-                    '</button>' +
-                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                    '</ul>' +
-                    '</div>';
+            var html = '<div class="btn-group">' +
+                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '   <span class="caret"></span>' +
+                '   <span class="sr-only">Toggle Dropdown</span>' +
+                '</button>' +
+                '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                '</ul>' +
+                '</div>';
 
+            var op = function (data, type, row) {
                 var updateLi = '<li><a onclick="showUpdateUsuallyFaultModel({0})">修改</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteUsuallyFault({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.UsuallyFaultDesc));
-
-                html = html.format(
-                    checkPermission(402) ? updateLi : "",
-                    checkPermission(405) ? deleteLi : "");
-
-                return html;
+                return html.format(
+                    permissionList[402].have ? updateLi : "",
+                    permissionList[405].have ? deleteLi : "");
             }
-            var columns = checkPermission(402) || checkPermission(405)
-                ? [
-                    { "data": "Id", "title": "序号" },
-                    { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                    { "data": "SolverPlan", "title": "解决方法" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": "Id", "title": "序号" },
-                    { "data": "UsuallyFaultDesc", "title": "常见故障" },
-                    { "data": "SolverPlan", "title": "解决方法" }
-                ];
-            var rModel = function (data, type, full, meta) {
-                full.SolverPlan = full.SolverPlan ? full.SolverPlan : "";
-                return full.SolverPlan.length > tdShowContentLength
-                    ? full.SolverPlan.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showUsuallyFaultDetailModel({0})\">...</a> '
-                        .format(full.Id)
-                    : full.SolverPlan;
-            };
-            var defs = checkPermission(402) || checkPermission(405)
-                ? [
-                    { "orderable": false, "targets": 3 },
-                    {
-                        "targets": [2],
-                        "render": rModel
-                    }
-                ]
-                : [
+            var rSolvePlan = function (d, type, row, meta) {
+                var data = d.SolvePlan;
+                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+            }
 
-                    {
-                        "targets": [2],
-                        "render": rModel
-                    }
-                ];
+            var columns = [
+                { "data": "Id", "title": "序号" },
+                { "data": "UsuallyFaultDesc", "title": "常见故障" },
+                { "data": null, "title": "解决方案", "render": rSolvePlan }
+            ];
+
+            if (permissionList[402].have || permissionList[405].have) {
+                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
+            };
+
             $("#usuallyFaultList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rtip',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 10, //默认显示的记录数
                     "columns": columns,
-                    "bAutoWidth": true,
-                    "columnDefs": defs
+                    "bAutoWidth": true
                 });
             $("#usuallyFaultModel").modal("show");
-
-        });
-}
-
-function showUsuallyFaultDetailModel(id) {
-    var opType = 401;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    data.opData = JSON.stringify({
-        id: id
-    });
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            if (ret.datas.length > 0)
-                $("#usuallyFaultDetail").html(ret.datas[0].SolverPlan);
-
-            $("#usuallyFaultDetailModel").modal("show");
-
         });
 }
 
 function deleteUsuallyFault(id, usuallyFaultDesc) {
     usuallyFaultDesc = unescape(usuallyFaultDesc);
     var opType = 405;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1224,13 +1144,13 @@ function deleteUsuallyFault(id, usuallyFaultDesc) {
 function showAddUsuallyFaultModel() {
     hideClassTip('adt');
     $("#addUsuallyFaultDesc").val("");
-    $("#addSolverPlan").val("");
+    $("#addSolvePlan").val("");
     $("#addUsuallyFaultModel").modal("show");
 }
 
 function addUsuallyFault() {
     var opType = 403;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1241,9 +1161,9 @@ function addUsuallyFault() {
         showTip("addUsuallyFaultDescTip", "故障描述不能为空");
         add = false;
     }
-    var addSolverPlan = $("#addSolverPlan").val().trim();
-    if (isStrEmptyOrUndefined(addSolverPlan)) {
-        showTip("addSolverPlanTip", "解决方案不能为空");
+    var addSolvePlan = $("#addSolvePlan").val().trim();
+    if (isStrEmptyOrUndefined(addSolvePlan)) {
+        showTip("addSolvePlanTip", "解决方案不能为空");
         add = false;
     }
     if (!add)
@@ -1257,7 +1177,7 @@ function addUsuallyFault() {
             //故障类型描述
             UsuallyFaultDesc: addUsuallyFaultDesc,
             //故障类型解决方案
-            SolverPlan: addSolverPlan
+            SolvePlan: addSolvePlan
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1271,8 +1191,8 @@ function addUsuallyFault() {
 }
 
 function showUpdateUsuallyFaultModel(id) {
-    var opType = 401;
-    if (!checkPermission(opType)) {
+    var opType = 400;
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1280,7 +1200,7 @@ function showUpdateUsuallyFaultModel(id) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: id
+        qId: id
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -1290,16 +1210,16 @@ function showUpdateUsuallyFaultModel(id) {
             }
             if (ret.datas.length > 0) {
                 $("#updateUsuallyFaultDesc").val(ret.datas[0].UsuallyFaultDesc);
-                $("#updateSolverPlan").val(ret.datas[0].SolverPlan);
+                $("#updateSolvePlan").val(ret.datas[0].SolvePlan);
             }
             hideClassTip('adt');
             $("#updateUsuallyFaultModel").modal("show");
         });
 }
 
-function updateUsuallyFault() {
+function updateUsuallyFault(resolve = null) {
     var opType = 402;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1310,9 +1230,9 @@ function updateUsuallyFault() {
         showTip($("#updateUsuallyFaultDescTip"), "故障描述不能为空");
         update = false;
     }
-    var updateSolverPlan = $("#updateSolverPlan").val().trim();
-    if (isStrEmptyOrUndefined(updateSolverPlan)) {
-        showTip($("#updateSolverPlanTip"), "解决方案不能为空");
+    var updateSolvePlan = $("#updateSolvePlan").val().trim();
+    if (isStrEmptyOrUndefined(updateSolvePlan)) {
+        showTip($("#updateSolvePlanTip"), "解决方案不能为空");
         update = false;
     }
     if (!update)
@@ -1328,7 +1248,7 @@ function updateUsuallyFault() {
             //故障类型描述
             UsuallyFaultDesc: updateUsuallyFaultDesc,
             //故障类型解决方案
-            SolverPlan: updateSolverPlan
+            SolvePlan: updateSolvePlan
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1341,94 +1261,73 @@ function updateUsuallyFault() {
     showConfirm("修改", doSth);
 }
 
-function getFaultTypeList() {
+function getFaultTypeList(resolve = null) {
     var opType = 406;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
+    $("#faultTypeList").empty();
     var data = {}
     data.opType = opType;
     ajaxPost("/Relay/Post", data,
         function (ret) {
+            if (resolve != null) {
+                resolve('success');
+            }
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
             faultData = ret.datas;
+            var html = '<div class="btn-group">' +
+                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '   <span class="caret"></span>' +
+                '   <span class="sr-only">Toggle Dropdown</span>' +
+                '</button>' +
+                '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                '</ul>' +
+                '</div>';
 
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
             }
-            var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '   <span class="caret"></span>' +
-                    '   <span class="sr-only">Toggle Dropdown</span>' +
-                    '</button>' +
-                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                    '</ul>' +
-                    '</div>';
 
+            var rDesc = function (d, type, row, meta) {
+                var data = d.FaultDescription;
+                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '故障类型描述')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+            }
+            var op = function (data, type, row) {
                 var updateLi = '<li><a onclick="showUpdateFaultTypeModel({0})">修改</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
-
-                html = html.format(
-                    checkPermission(408) ? updateLi : "",
-                    checkPermission(411) ? deleteLi : "");
-
-                return html;
+                return html.format(permissionList[408].have ? updateLi : "", permissionList[411].have ? deleteLi : "");;
             }
-            var columns = checkPermission(408) || checkPermission(411)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "FaultDescription", "title": "故障类型描述" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": "FaultDescription", "title": "故障类型描述" }
-                ];
-            var rModel = function (data, type, full, meta) {
-                full.FaultDescription = full.FaultDescription ? full.FaultDescription : "";
-                return full.FaultDescription.length > tdShowContentLength
-                    ? full.FaultDescription.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showFaultTypeDetailModel({0})\">...</a> '
-                        .format(full.Id)
-                    : full.FaultDescription;
+
+            var columns = [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "Id", "title": "Id", "bVisible": false },
+                { "data": "FaultTypeName", "title": "故障类型" },
+                { "data": null, "title": "故障类型描述", "render": rDesc }
+            ];
+
+            if (permissionList[408].have || permissionList[411].have) {
+                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
             };
-            var defs = checkPermission(408) || checkPermission(411)
-                ? [
-                    { "orderable": false, "targets": 4 },
-                    {
-                        "targets": [3],
-                        "render": rModel
-                    }
-                ]
-                : [
-                    {
-                        "targets": [3],
-                        "render": rModel
-                    }
-                ];
+
             $("#faultTypeList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rtip',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 10, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
 
             $("#singleFaultType").empty();
@@ -1447,8 +1346,8 @@ function getFaultTypeList() {
 }
 
 function showFaultTypeDetailModel(id, desc = "") {
-    var opType = 407;
-    if (!checkPermission(opType)) {
+    var opType = 406;
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1462,7 +1361,8 @@ function showFaultTypeDetailModel(id, desc = "") {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: id
+        qId: id,
+        menu: true
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -1480,7 +1380,7 @@ function showFaultTypeDetailModel(id, desc = "") {
 function deleteFaultType(id, faultTypeDesc) {
     faultTypeDesc = unescape(faultTypeDesc);
     var opType = 411;
-    if (!checkPermission(opType)) {
+    if (!permissionList[411].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1510,7 +1410,7 @@ function showAddFaultTypeModel() {
 
 function addFaultType() {
     var opType = 410;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1548,8 +1448,8 @@ function addFaultType() {
 }
 
 function showUpdateFaultTypeModel(id) {
-    var opType = 407;
-    if (!checkPermission(opType)) {
+    var opType = 406;
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1576,7 +1476,7 @@ function showUpdateFaultTypeModel(id) {
 
 function updateFaultType() {
     var opType = 408;
-    if (!checkPermission(opType)) {
+    if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
@@ -1607,11 +1507,425 @@ function updateFaultType() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getFaultTypeList();
-                    getFaultDeviceList();
-                    getRepairRecordList();
+
+                    var func1 = new Promise(function (resolve, reject) {
+                        getFaultTypeList(resolve);
+                    });
+
+                    Promise.all([func1])
+                        .then((result) => {
+                            getFaultDeviceList(0);
+                            getRepairRecordList(false, 0);
+                        });
                 }
             });
     }
     showConfirm("修改", doSth);
+}
+
+var maintainers = null;
+function showMaintainerModel(cover = 1, show = true) {
+    var opType = 430;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    maintainers = [];
+    choseMaintainer = [];
+    $("#maintainerList").empty();
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
+
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            for (var i = 0; i < ret.datas.length; i++) {
+                var d = ret.datas[i];
+                maintainers[d.Id] = d;
+            }
+            var chose = function (data, type, row, meta) {
+                var xh = meta.row + 1;
+                return `<input type="checkbox" class="icb_minimal chose" value="${xh}" id="${data}">`;
+            }
+            var order = function (data, type, row, meta) {
+                return meta.row + 1;
+            }
+
+            var phone = function (data, type, row, meta) {
+                var xh = meta.row + 1;
+                return `<span class="chose1" id="userPhone1${xh}">${data}</span >
+                        <input class="chose2 hidden form-control text-center" old="${data}" id="userPhone2${xh}" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11" onchange="changeMaintainer(this, 'Phone')">`;
+            }
+            var rRemark = function (data, type, row, meta) {
+                var xh = meta.row + 1;
+                return `<span class="chose1" title="${data}" id ="userRemark1${xh}" onclick = "showAllContent('${escape(data)}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>
+                        <input class="chose2 hidden form-control" style="width: 100%;" old="${data}" id ="userRemark2${xh}" onchange="changeMaintainer(this, 'Remark')">`;
+            }
+
+            var columns = [
+                { "data": "Id", "title": "序号", "render": order, "sWidth": "80px" },
+                { "data": "Name", "title": "姓名", "sWidth": "120px" },
+                { "data": "Phone", "title": "手机号", "render": phone, "sWidth": "130px" },
+                { "data": "Remark", "title": "备注", "render": rRemark }
+            ];
+            if (permissionList[431].have || permissionList[433].have) {
+                columns.unshift({ "data": "Id", "title": "选择", "render": chose, "sWidth": "80px", "orderable": false });
+            }
+            var excelColumns = [0, 1, 2, 3, 4];
+            var titleColumns = [4];
+            $("#maintainerList")
+                .DataTable({
+                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            text: '导出Excel',
+                            className: 'btn-primary btn-sm', //按钮的class样式
+                            exportOptions: {
+                                columns: excelColumns,
+                                format: {
+                                    // format有三个子标签，header，body和foot
+                                    body: function (data, row, column, node) {
+                                        //操作需要导出excel的数据格式                        
+                                        if (titleColumns.indexOf(column) > -1) {
+                                            var a = $(node).find("span").attr("title");
+                                            if (a != null) {
+                                                return "\u200C" + unescape(a);
+                                            }
+                                        }
+                                        return "\u200C" + node.textContent;
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    //"pagingType": "input",
+                    //"serverSide": true,
+                    "bAutoWidth": false,
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": oLanguage,
+                    "data": ret.datas,
+                    "aaSorting": [[1, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": columns,
+                    "createdRow": function (row, data, index) {
+                    },
+                    "drawCallback": function (settings, json) {
+                        $(this).find('.icb_minimal').iCheck({
+                            labelHover: false,
+                            cursor: true,
+                            checkboxClass: 'icheckbox_minimal-blue',
+                            radioClass: 'iradio_minimal-blue',
+                            increaseArea: '20%'
+                        });
+
+                        $(this).find('.chose').on('ifChanged', function () {
+                            var tr = $(this).parents("tr:first");
+                            var v = $(this).attr("value");
+                            var id = $(this).attr("id");
+                            if ($(this).is(":checked")) {
+                                tr.find(".chose1").addClass("hidden");
+                                tr.find(".chose2").removeClass("hidden");
+                                $("#userPhone2" + v).val($("#userPhone2" + v).attr("old"));
+                                $("#userRemark2" + v).val($("#userRemark2" + v).attr("old"));
+                                choseMaintainer[id] = {
+                                    Id: id,
+                                    Phone: $("#userPhone2" + v).val(),
+                                    Remark: $("#userRemark2" + v).val()
+                                }
+                            } else {
+                                tr.find(".chose1").removeClass("hidden");
+                                tr.find(".chose2").addClass("hidden");
+                                choseMaintainer = removeArrayObj(choseMaintainer, id);
+                            }
+                        });
+                    }
+                });
+            if (show)
+                $('#maintainerModel').modal('show');
+        }, cover);
+}
+
+function changeMaintainer(ele, type) {
+    var tr = $(ele).parents("tr:first");
+    var v = $(tr).find(".chose").attr("value");
+    var id = $(tr).find(".chose").attr("id");
+    if ($("#" + id).is(":checked")) {
+        if (choseMaintainer[id]) {
+            choseMaintainer[id][type] = $(`#user${type}2${v}`).val();
+        } else {
+            choseMaintainer[id] = {
+                Id: id,
+                Phone: $("#userPhone2" + v).val(),
+                Remark: $("#userRemark2" + v).val()
+            }
+        }
+    }
+}
+
+var addMax = 0;
+var addMaxV = 0;
+//重置
+function initList() {
+    $("#addList").empty();
+    addMax = addMaxV = 0;
+}
+
+var choseMaintainer = null;
+var users = null;
+function showAddMaintainerModel(cover = 1) {
+    initList();
+    $("#addOneBtn").attr("disabled", "disabled");
+    $("#addMaintainerBtn").attr("disabled", "disabled");
+    ajaxGet("/AccountManagement/List", null,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+
+            $("#addOneBtn").removeAttr("disabled");
+            $("#addMaintainerBtn").removeAttr("disabled");
+            users = ret.datas;
+            $('#addMaintainerModel').modal('show');
+
+        }, cover);
+}
+
+//添加一行
+function addOne() {
+    //increaseList
+    addMax++;
+    addMaxV++;
+    var tr =
+        (`<tr id="add{0}" value="{0}" xh="{1}">
+            <td style="vertical-align: addherit;" id="addXh{0}">{1}</td>
+            <td><select class="ms2 form-control" id="addUser{0}"></select></td>
+            <td><input class="form-control" type="tel" id="addPhone{0}" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11"></td>
+            <td><input class="form-control" id="addRk{0}" maxlength="100"></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="delOne({0})"><i class="fa fa-minus"></i></button></td>
+        </tr>`).format(addMax, addMaxV);
+    $("#addList").append(tr);
+    var xh = addMax;
+    var selector = "#addUser" + xh;
+    $(selector).empty();
+    if (users && users.length > 0) {
+        var html = "";
+        for (var i = 0; i < users.length; i++) {
+            var user = users[i];
+            html += `<option value="${user.account}" title="${user.account}">${user.name}</option>`;
+        }
+        $(selector).append(html);
+        $("#addPhone" + xh).val(users[0].phone);
+        $(selector).on('select2:select', function () {
+            var acc = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+            $("#addPhone" + xh).val('');
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                if (acc == user.account) {
+                    $("#addPhone" + xh).val(user.phone);
+                    break;
+                }
+            }
+        });
+    }
+
+    selector = "#add" + xh;
+    $(selector).find(".ms2").css("width", "100%");
+    $(selector).find(".ms2").select2({
+        width: "120px"
+    });
+    $('#addTable').scrollTop($('#addTable')[0].scrollHeight);
+}
+
+//删除一行
+function delOne(id) {
+    $("#addList").find(`tr[value=${id}]:first`).remove();
+    addMaxV--;
+    var o = 1;
+    var child = $("#addList tr");
+    for (var i = 0; i < child.length; i++) {
+        $(child[i]).attr("xh", o);
+        var v = $(child[i]).attr("value");
+        $("#addXh" + v).html(o);
+        o++;
+    }
+}
+
+//添加
+function addMaintainer() {
+    var opType = 432;
+    var child = $("#addList tr");
+    var list = new Array();
+    for (var i = 0; i < child.length; i++) {
+        var v = $(child[i]).attr("value");
+        var xh = $(child[i]).attr("xh");
+        var name = $("#addUser" + v).find("option:checked").text();
+        var acc = $("#addUser" + v).find("option:checked").val();
+        var phone = $("#addPhone" + v).val();
+        var remark = $("#addRk" + v).val();
+
+        if (isStrEmptyOrUndefined(name)) {
+            layer.msg("请输入姓名");
+            return;
+        }
+        if (isStrEmptyOrUndefined(acc)) {
+            return;
+        }
+        if (isStrEmptyOrUndefined(phone)) {
+            layer.msg("请输入手机号");
+            return;
+        } else if (!isPhone(phone)) {
+            layer.msg("手机号错误");
+            return;
+        }
+
+        list.push({
+            Name: name,
+            Account: acc,
+            Phone: phone,
+            Remark: remark
+        });
+    }
+    if (list.length <= 0)
+        return;
+
+    var addMaintainerBtnTime = null;
+    var doSth = function () {
+        $("#addMaintainerBtn").attr("disabled", "disabled");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                if (addMaintainerBtnTime)
+                    clearTimeout(addMaintainerBtnTime);
+                $("#addMaintainerBtn").removeAttr("disabled");
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showMaintainerModel(0, false);
+                    $("#addMaintainerModel").modal("hide");
+                }
+            });
+        addMaintainerBtnTime = setTimeout(function () {
+            $("#addMaintainerBtn").removeAttr("disabled");
+        }, 5000);
+    }
+    showConfirm("添加", doSth);
+}
+
+//修改维修工信息
+function updateMaintainer() {
+    var opType = 431;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+
+    if (!choseMaintainer || choseMaintainer.length <= 0) {
+        return;
+    }
+    var list = [];
+    for (var key in choseMaintainer) {
+        var maintainer = choseMaintainer[key];
+        if (maintainers && maintainers[key] && (maintainers[key].Phone != maintainer.Phone || maintainers[key].Remark != maintainer.Remark)) {
+            if (isStrEmptyOrUndefined(maintainer.Phone)) {
+                layer.msg("请输入手机号");
+                return;
+            } else if (!isPhone(maintainer.Phone)) {
+                layer.msg("手机号错误");
+                return;
+            }
+            maintainer.Account = maintainers[key].Account;
+            maintainer.Name = maintainers[key].Name;
+            list.push(maintainer);
+        }
+    }
+    if (!list.length) {
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        var updateMaintainerTime = null;
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (updateMaintainerTime)
+                    clearTimeout(updateMaintainerTime);
+                $("#updateMaintainerBtn").removeAttr("disabled");
+                if (ret.errno == 0) {
+                    showMaintainerModel(0, false);
+                }
+            });
+        updateMaintainerTime = setTimeout(function () {
+            $("#delMaintainerBtn").removeAttr("disabled");
+        }, 5000);
+    }
+    showConfirm("保存", doSth);
+}
+
+//删除配置
+function delMaintainer() {
+    var opType = 433;
+    if (!permissionList[opType].have) {
+        layer.msg('没有权限');
+        return;
+    }
+
+    if (!choseMaintainer || choseMaintainer.length <= 0) {
+        return;
+    }
+
+    var names = [];
+    var delMaintainers = [];
+    if (choseMaintainer && choseMaintainer.length > 0) {
+        for (var key in choseMaintainer) {
+            if (maintainers && maintainers[key]) {
+                delMaintainers.push(key);
+            }
+        }
+        for (var i = 0; i < delMaintainers.length; i++) {
+            var key = delMaintainers[i];
+            if (maintainers && maintainers[key]) {
+                names.push(maintainers[key].Name);
+            }
+        }
+
+    }
+    var doSth = function () {
+        $("#delMaintainerBtn").attr("disabled", "disabled");
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            ids: delMaintainers
+        });
+        var delMaintainerBtnTime = null;
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (delMaintainerBtnTime)
+                    clearTimeout(delMaintainerBtnTime);
+                $("#delMaintainerBtn").removeAttr("disabled");
+                if (ret.errno == 0) {
+                    showMaintainerModel(0, false);
+                }
+            });
+        delMaintainerBtnTime = setTimeout(function () {
+            $("#delMaintainerBtn").removeAttr("disabled");
+        }, 5000);
+    }
+    showConfirm("删除维修工：" + names.join(","), doSth);
 }

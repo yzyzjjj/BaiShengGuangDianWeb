@@ -130,9 +130,10 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="addAdministratorUser">管理员用户：</label>
+                            <label class="col-sm-2 control-label" for="addAdministrator"><span class="text-red">* </span>设备管理员：</label>
                             <div class="col-sm-10">
-                                <input class="form-control" id="addAdministratorUser" maxlength="32">
+                                <select class="ads form-control" id="addAdministrator" onchange="focusIn($(this))"></select>
+                                <label class="adt label-danger hidden" id="addAdministratorTip"></label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -255,9 +256,10 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label" for="updateAdministratorUser">管理员用户：</label>
+                            <label class="col-sm-2 control-label" for="updateAdministrator"><span class="text-red">* </span>设备管理员：</label>
                             <div class="col-sm-10">
-                                <input class="form-control" id="updateAdministratorUser" maxlength="32">
+                                <select class="ads form-control" id="updateAdministrator" onchange="focusIn($(this))"></select>
+                                <label class="adt label-danger hidden" id="updateAdministratorTip"></label>
                             </div>
                         </div>
                         <div class="form-group">

@@ -311,7 +311,7 @@ function getSpotPlanCheckList(e, el) {
             "destroy": true,
             "paging": true,
             "searching": true,
-            "language": { "url": "/content/datatables_language.json" },
+            "language": oLanguage,
             "data": rData,
             "aaSorting": [[0, "asc"]],
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  

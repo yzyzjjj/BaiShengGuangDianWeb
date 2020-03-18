@@ -97,7 +97,7 @@ function selectChange(datas) {
         $("#detailHardware").val(firstData.HardwareName);
         $("#detailApplication").val(firstData.ApplicationName);
         $("#detailSite").val(firstData.SiteName + firstData.RegionDescription);
-        $("#detailAdministratorUser").val(firstData.AdministratorUser);
+        $("#detailAdministrator").val(firstData.Administrator);
         $("#detailRemark").val(firstData.Remark);
     }
     getStateList();

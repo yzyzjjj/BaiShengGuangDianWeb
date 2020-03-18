@@ -56,7 +56,7 @@ function getRoleList() {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 10, //默认显示的记录数  

@@ -287,7 +287,7 @@ function initItemList() {
                 "destroy": true,
                 "paging": true,
                 "searching": true,
-                "language": { "url": "/content/datatables_language.json" },
+                "language": oLanguage,
                 "data": showItems,
                 "bAutoWidth": false,
                 "aaSorting": [[0, "asc"]],

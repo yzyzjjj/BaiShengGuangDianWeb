@@ -145,6 +145,32 @@ function checkPermission(opType) {
     }
 }
 
+//根据权限判断是否显示相应功能
+function checkPermissionUi(pList) {
+    for (var key in pList) {
+        if (pList.hasOwnProperty(key) && isNumber(key)) {
+            var id = parseInt(key);
+            var p = pList[id];
+            p.have = checkPermission(id);
+            var uIdk;
+            if (!p.have) {
+                for (uIdk in p.uIds) {
+                    if (p.uIds.hasOwnProperty(uIdk)) {
+                        $(`#${p.uIds[uIdk]}`).addClass("hidden");
+                    }
+                }
+            } else {
+                for (uIdk in p.uIds) {
+                    if (p.uIds.hasOwnProperty(uIdk)) {
+                        $(`#${p.uIds[uIdk]}`).removeClass("hidden");
+                    }
+                }
+            }
+        }
+    }
+    return pList;
+}
+
 var isCover = false;
 //添加菊花效果
 function addCover() {

@@ -816,7 +816,7 @@ function getProcessDetail() {
                         "deferRender": false,
                         "bLengthChange": false,
                         "searching": false,
-                        "language": { "url": "/content/datatables_language.json" },
+                        "language": oLanguage,
                         "data": processData.ProcessLog,
                         "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
                         "iDisplayLength": 5, //默认显示的记录数  
@@ -923,7 +923,7 @@ function rateList(i, deviceId, startTime, endTime, plan) {
             "deferRender": false,
             "bLengthChange": false,
             "searching": false,
-            "language": { "url": "/content/datatables_language.json" },
+            "language": oLanguage,
             "data": rData,
             "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
             "iDisplayLength": 5, //默认显示的记录数  
@@ -1000,7 +1000,7 @@ function showProcessDetailModel(data) {
         "info": false,
         "searching": false,
         "bSort": false,
-        "language": { "url": "/content/datatables_language.json" },
+        "language": oLanguage,
         "data": rData,
         "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
         "iDisplayLength": 20, //默认显示的记录数  

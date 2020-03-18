@@ -51,7 +51,7 @@ function getPermissionsList() {
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    "language": { "url": "/content/datatables_language.json" },
+                    "language": oLanguage,
                     "data": ret.datas,
                     "aaSorting": aaSorting,
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
