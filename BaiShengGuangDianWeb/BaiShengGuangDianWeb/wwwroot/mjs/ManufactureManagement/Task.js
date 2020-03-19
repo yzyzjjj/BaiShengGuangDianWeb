@@ -126,6 +126,7 @@
     $('#moduleSelect').on('select2:select', function () {
         $('#newModule').val($(this).find("option:checked").text());
     });
+    $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
 
 //设置操作员选项
@@ -391,6 +392,7 @@ function getTaskConfigItem() {
             layer.msg(ret.errmsg);
             return;
         }
+        $('#configItem').empty();
         data = ret.datas;
         _taskItem = {};
         var ops = '';
@@ -399,7 +401,6 @@ function getTaskConfigItem() {
             _taskItem[d.Id] = d;
             ops += _taskTrData.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
         }
-        $('#configItem').empty();
         $('#configItem').append(ops);
         setTableStyle();
     });
@@ -536,6 +537,7 @@ function addTask() {
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle();
+    $('#configTable').scrollTop($('#configTable')[0].scrollHeight);
 }
 
 var _taskItemId = [];
@@ -621,12 +623,12 @@ function addConfig() {
         layer.msg('没有权限');
         return;
     }
-    var newConfig = $("#newConfig").val();
+    var newConfig = $("#newConfig").val().trim();
     if (isStrEmptyOrUndefined(newConfig)) {
         layer.msg("新配置不能为空");
         return;
     }
-    var configId = $("#configSelect").val().trim();
+    var configId = $("#configSelect").val();
     var oldConfig = $("#configSelect option:selected").text();
     var isChecked = $("#configReuse").is(":checked");
     if (isChecked && isStrEmptyOrUndefined(configId)) {

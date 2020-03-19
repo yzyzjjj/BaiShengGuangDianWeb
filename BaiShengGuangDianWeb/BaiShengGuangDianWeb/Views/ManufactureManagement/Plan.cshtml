@@ -46,36 +46,41 @@
         <div class="box-body">
             <div class="form-group">
                 <div class="table-responsive mailbox-messages">
-                    <table class="table table-striped" id="planConfigList"></table>
+                    <table class="table table-hover table-striped" id="planConfigList"></table>
                 </div>
             </div>
-            <div class="form-group hidden">
-                <div class="form-group flexStyle" style="justify-content:space-between">
-                    <label class="control-label" style="white-space: nowrap">计划号：<span class="spanStyle" id="planText">20200101WF</span></label>
-                    <div style="text-align: right">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="">新增</button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="">删除</button>
-                        <button type="button" class="btn btn-warning btn-sm" onclick="">重置</button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="">保存</button>
+            <div class="form-group hidden" id="planItem">
+                <hr>
+                <div class="form-group flexStyle" style="justify-content: space-between">
+                    <label class="control-label" style="white-space: nowrap">计划号：<span class="spanStyle" id="planText"></span></label>
+                    <div style="text-align: right" class="isIssue">
+                        <button type="button" class="btn btn-warning btn-sm" onclick="resetPlanItemList()">重置</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanTaskItem()">保存</button>
                     </div>
                 </div>
-                <div style="overflow-x: auto">
+                <div class="form-group maxHeight" id="planItemTable" style="overflow: auto">
                     <table class="table table-hover table-striped">
                         <thead>
                             <tr>
-                                <th>选择</th>
+                                <th class="isIssue">选择</th>
                                 <th>序号</th>
                                 <th>操作员</th>
                                 <th>模块名</th>
                                 <th>任务名</th>
                                 <th>预计用时</th>
                                 <th>绩效</th>
+                                <th>任务描述</th>
                                 <th>关联</th>
+                                <th class="isIssue">排序</th>
                                 <th>日志</th>
+                                <th class="isIssue">删除</th>
                             </tr>
                         </thead>
                         <tbody id="planItemList"></tbody>
                     </table>
+                </div>
+                <div class="text-center isIssue">
+                    <button type="button" class="btn btn-default btn-sm" onclick="addPlanTaskTr()"><i class="fa fa-plus"></i> 添加新项</button>
                 </div>
             </div>
         </div>
@@ -88,14 +93,14 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">配置管理</h4>
+                    <h4 class="modal-title">计划管理</h4>
                 </div>
                 <div class="modal-body">
                     <div class="modal-body box">
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">选择计划：</label>
-                            <select class="ms2 form-control selectConfig" id="planSelect" style="width: 180px"></select>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="delPlan()" style="margin-left: 3px">删除</button>
+                            <select class="ms2 form-control" id="planSelect" style="width: 180px"></select>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delPlanSelect()" style="margin-left: 3px">删除</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">新计划：</label>
@@ -104,32 +109,34 @@
                             <button type="button" class="btn btn-primary btn-sm" onclick="addPlan()" style="margin-left: 3px">新增</button>
                             <button type="button" class="btn btn-primary btn-sm" onclick="updatePlan()" style="margin-left: 3px" id="updatePlanBtn">修改</button>
                         </div>
-                        <div class="form-group hidden">
-                            <div class="form-group">
-                                <div style="text-align: right">
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="">新增</button>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="">删除</button>
-                                    <button type="button" class="btn btn-warning btn-sm" onclick="">重置</button>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="">保存</button>
-                                </div>
-                            </div>
-                            <div style="overflow-x: auto">
+                        <div class="form-group flexStyle">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">任务配置：</label>
+                            <select class="ms2 form-control" id="taskConfig" style="width: 180px"></select>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group maxHeight" id="addPlanTaskTable" style="overflow: auto">
                                 <table class="table table-hover table-striped">
                                     <thead>
                                         <tr>
+                                            <th class="isIssue">选择</th>
                                             <th>序号</th>
                                             <th>操作员</th>
                                             <th>模块名</th>
                                             <th>任务名</th>
                                             <th>预计用时</th>
                                             <th>绩效</th>
+                                            <th>任务描述</th>
                                             <th>关联</th>
-                                            <th>排序</th>
-                                            <th>选择</th>
+                                            <th class="isIssue">排序</th>
+                                            <th>日志</th>
+                                            <th class="isIssue">删除</th>
                                         </tr>
                                     </thead>
                                     <tbody id="addPlanTaskList"></tbody>
                                 </table>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-default btn-sm" onclick="addPlanTaskConTr()"><i class="fa fa-plus"></i> 添加新项</button>
                             </div>
                         </div>
                     </div>
