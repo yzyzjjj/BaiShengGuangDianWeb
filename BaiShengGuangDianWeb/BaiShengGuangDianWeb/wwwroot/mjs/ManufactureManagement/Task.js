@@ -143,6 +143,7 @@ function setProcessorSelect(groupId, el) {
     el.append(ops);
 }
 
+var _taskConfigName = null;
 //获取任务配置
 function getTaskConfig() {
     var opType = 1051;
@@ -160,8 +161,10 @@ function getTaskConfig() {
         var list = ret.datas;
         var option = '<option value = "{0}">{1}</option>';
         var options = '';
+        _taskConfigName = [];
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
+            _taskConfigName.push(d.Task);
             options += option.format(d.Id, d.Task);
         }
         $('.selectConfig').empty();
@@ -232,6 +235,8 @@ function getProcessor(resolve) {
         }
     });
 }
+
+var _moduleName = null;
 //获取模块名
 function getModule(resolve) {
     var opType = 1058;
@@ -252,8 +257,10 @@ function getModule(resolve) {
         var list = ret.datas;
         var option = '<option value = "{0}" isCheck = "{2}">{1}</option>';
         var options = '';
+        _moduleName = [];
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
+            _moduleName.push(d.Module);
             options += option.format(d.Id, d.Module, d.IsCheck);
         }
         if (resolve != null) {
@@ -629,13 +636,12 @@ function addConfig() {
         return;
     }
     var configId = $("#configSelect").val();
-    var oldConfig = $("#configSelect option:selected").text();
     var isChecked = $("#configReuse").is(":checked");
     if (isChecked && isStrEmptyOrUndefined(configId)) {
         layer.msg("请选择配置");
         return;
     }
-    if (newConfig == oldConfig) {
+    if (_taskConfigName.includes(newConfig)) {
         layer.msg("新配置已存在");
         return;
     }
@@ -677,7 +683,7 @@ function updateConfig() {
         layer.msg("新配置不能为空");
         return;
     }
-    if (newConfig == oldConfig) {
+    if (_taskConfigName.includes(newConfig)) {
         layer.msg("新配置已存在");
         return;
     }
@@ -756,16 +762,16 @@ function addUpModule(isUp) {
     var moduleId = $('#moduleSelect').val();
     var olModuleName = $("#moduleSelect option:selected").text();
     var isCheckout = $('#isCheckout').is(":checked");
+    if (isUp && isStrEmptyOrUndefined(moduleId)) {
+        layer.msg("请选择模块");
+        return;
+    }
     if (isStrEmptyOrUndefined(newModuleName)) {
         layer.msg("新模块不能为空");
         return;
     }
-    if (newModuleName == olModuleName) {
+    if (_moduleName.includes(newModuleName)) {
         layer.msg("新模块已存在");
-        return;
-    }
-    if (isUp && isStrEmptyOrUndefined(moduleId)) {
-        layer.msg("请选择模块");
         return;
     }
     var list = {
@@ -773,7 +779,7 @@ function addUpModule(isUp) {
         IsCheck: isCheckout
     }
     if (isUp) {
-        list.Id = moduleId
+        list.Id = moduleId;
     }
     var doSth = function () {
         var data = {}

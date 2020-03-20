@@ -32,28 +32,28 @@
             tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
         }
     });
-    $('#planConfigList,#planItemList').on('focus', '.toZero', function () {
+    $('#planConfigList,#planItemList,#addPlanTaskList,#planTime').on('focus', '.toZero', function () {
         var v = $(this).val();
         if (v == 0) {
             $(this).val('');
         }
     });
-    $('#planConfigList,#planItemList').on('blur', '.toZero', function () {
+    $('#planConfigList,#planItemList,#addPlanTaskList,#planTime').on('blur', '.toZero', function () {
         var v = $(this).val();
         if (isStrEmptyOrUndefined(v)) {
             $(this).val('0');
         }
     });
-    $('#planConfigList,#planItemList').on('input', '.minute', function () {
+    $('#planConfigList,#planItemList,#addPlanTaskList,#planTime').on('input', '.minute', function () {
         var v = $(this).val();
         if (parseInt(v) > 59) {
             $(this).val(59);
         }
     });
-    $('#planItemList').on('ifChanged', '.isEnable', function () {
+    $('#planItemList,#addPlanTaskList').on('ifChanged', '.isEnable', function () {
         var tr = $(this).parents('tr');
         var v = $(this).val();
-        var data = _planTaskItem[v];
+        var data = $('#showPlanModal').is(':hidden') ? _planTaskItem[v] : _reusePlanTaskItem[v];
         if ($(this).is(':checked')) {
             tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
             var groupId = data.GroupId;
@@ -78,19 +78,20 @@
             tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
         }
     });
-    $('#planItemList').on('select2:select', '.group', function () {
+    $('#planItemList,#addPlanTaskList').on('select2:select', '.group', function () {
         var v = $(this).val();
         var processorEl = $(this).parents('tr').find('.processor');
         setProcessorSelect(v, processorEl);
     });
-    $('#planItemList').on('select2:select', '.module', function () {
+    $('#planItemList,#addPlanTaskList').on('select2:select', '.module', function () {
         var v = $(this).val();
         var module = $(this).find(`option[value=${v}]`).attr('isCheck');
         var tr = $(this).parents('tr');
         parseInt(module) ? tr.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : tr.find('.taskNameSelect').parent().addClass('hidden').siblings().removeClass('hidden');
     });
-    $('#planItemList').on('click', '.moveUp', function () {
+    $('#planItemList,#addPlanTaskList').on('click', '.moveUp', function () {
         _isUpMove = false;
+        var bodyIdName = $(this).parents('tbody').prop('id');
         var tr = $(this).parents('tr');
         var relationEl = tr.find('.relation');
         var isHidden = relationEl.is(':hidden');
@@ -127,9 +128,9 @@
         }
         var upTr = tr.prev();
         upTr.before(tr);
-        setTableStyle('#planItemList');
+        setTableStyle(`#${bodyIdName}`);
     });
-    $('#planItemList').on('input', '.relation', function () {
+    $('#planItemList,#addPlanTaskList').on('input', '.relation', function () {
         var v = $(this).val();
         v = parseInt(v);
         var tr = $(this).parents('tr');
@@ -139,7 +140,8 @@
             $(this).val(num);
         }
     });
-    $('#planItemList').on('click', '.delPlanItem', function () {
+    $('#planItemList,#addPlanTaskList').on('click', '.delPlanItem', function () {
+        var bodyIdName = $(this).parents('tbody').prop('id');
         var tr = $(this).parents('tr');
         var trNum = tr.find('.num').text();
         var trs = tr.nextAll();
@@ -155,19 +157,136 @@
             }
         }
         tr.remove();
-        setTableStyle('#planItemList');
+        setTableStyle(`#${bodyIdName}`);
     });
-    $("#planReuse").on("ifChanged", function (event) {
+    $("#planReuse").on("ifChanged", function () {
         if ($(this).is(":checked")) {
+            var planId = $("#planSelect").val();
+            if (isStrEmptyOrUndefined(planId)) {
+                layer.msg("请选择计划复用");
+                return;
+            }
+            reusePlanTask(planId);
             $("#updatePlanBtn").attr("disabled", "disabled");
         } else {
             $("#updatePlanBtn").removeAttr("disabled");
         }
     });
     $('#planSelect').on('select2:select', function () {
+        var v = $(this).val();
+        if ($('#planReuse').is(':checked')) {
+            reusePlanTask(v);
+        }
         $('#newPlan').val($(this).find("option:checked").text());
+        $('#taskConfig').val($(this).find("option:checked").attr('taskid')).trigger('change');
+    });
+    $('#planConfigList').on('input', '.minute,.hour', function () {
+        var tr = $(this).parents('tr');
+        planEndTimeCount(tr);
+    });
+    $('#planConfigList').on('changeDate', '.sTime', function() {
+        var tr = $(this).parents('tr');
+        planEndTimeCount(tr);
+    });
+    $('#planTime .toZero').on('input', function() {
+        planEndTimeCount($('#planTime'));
+    });
+    $('#planStartTime').on('changeDate', function () {
+        planEndTimeCount($('#planTime'));
+    });
+    $('#addPlanTaskList').on('input', '.minute,.hour', function () {
+        getTotalTime();
+        planEndTimeCount($('#planTime'));
+    });
+    $('#addPlanTaskList').on('click','.delPlanItem', function() {
+        getTotalTime();
+        planEndTimeCount($('#planTime'));
     });
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
+}
+
+//添加计划计算总预计时间
+function getTotalTime() {
+    var trs = $('#addPlanTaskList tr');
+    var hours = 0, minutes = 0;
+    for (var i = 0, len = trs.length; i < len; i++) {
+        var tr = trs.eq(i);
+        var id = tr.find('.isEnable').val();
+        var hourEl = tr.find('.hour');
+        var hour = hourEl.is(':hidden') ? _reusePlanTaskItem[id].EstimatedHour : hourEl.val();
+        if (isStrEmptyOrUndefined(hour)) {
+            hour = 0;
+        }
+        hour = parseInt(hour);
+        hours += hour;
+        var minuteEl = tr.find('.minute');
+        var minute = minuteEl.is(':hidden') ? _reusePlanTaskItem[id].EstimatedMin : minuteEl.val();
+        if (isStrEmptyOrUndefined(minute)) {
+            minute = 0;
+        }
+        minute = parseInt(minute);
+        minutes += minute;
+    }
+    hours += Math.floor(minutes / 60);
+    minutes = minutes % 60;
+    $('#planHour').val(hours);
+    $('#planMinute').val(minutes);
+}
+
+//结束时间计算
+function planEndTimeCount(tr) {
+    var hour = tr.find('.hour').val();
+    if (isStrEmptyOrUndefined(hour)) {
+        hour = 0;
+    }
+    hour = parseInt(hour);
+    var minute = tr.find('.minute').val();
+    if (isStrEmptyOrUndefined(minute)) {
+        minute = 0;
+    }
+    minute = parseInt(minute);
+    var sTime = new Date(tr.find('.sTime').val());
+    var day = Math.ceil(hour / 8);
+    if (hour % 8 == 0 && minute != 0) {
+        day += 1;
+    }
+    var eTime = new Date(sTime.setDate(sTime.getDate() + day)).format("yyyy-MM-dd");
+    tr.find('.eTime').val(eTime).datepicker('update');
+}
+
+var _reusePlanTaskItem = null;
+//计划管理复用
+function reusePlanTask(planId) {
+    var opType = 1040;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    _isUpMove = true;
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        qId: planId
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var rData = ret.datas;
+        $('#addPlanTaskList').empty();
+        _reusePlanTaskItem = {};
+        var ops = '';
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            _reusePlanTaskItem[d.Id] = d;
+            ops += _planTaskTr.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation, d.PlanId);
+        }
+        $('#addPlanTaskList').append(ops);
+        setTableStyle('#addPlanTaskList');
+        getTotalTime();
+        planEndTimeCount($('#planTime'));
+    });
 }
 
 //设置操作员选项
@@ -642,30 +761,21 @@ function addPlanTaskTr() {
     $('#planItemTable').scrollTop($('#planItemTable')[0].scrollHeight);
 }
 
-var _isUpMove = true;
-//计划任务项保存
-function updatePlanTaskItem() {
-    var opType = 1042;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-    var planId = $('#planText').attr('planid');
-    var taskId = _planConfigData[planId].TaskId;
-    var list = {
-        Id: planId,
-        TaskId: taskId
-    };
-    list.Items = [];
-    var i, len = $('#planItemList tr').length;
-    var isChecked = $('#planItemList .isEnable').is(':checked');
-    var isEnableBox = $('#planItemList .isEnable').length;
-    if (!len || (isEnableBox == len && !isChecked && _isUpMove)) {
-        layer.msg('请先修改数据');
-        return;
+//计划详情update add数据
+function planTaskData(el, isUp) {
+    var list = [];
+    var i, len = $(`${el} tr`).length;
+    var isChecked = $(`${el} .isEnable`).is(':checked');
+    var isEnableBox = $(`${el} .isEnable`).length;
+    if (isUp) {
+        var planTaskTrs = Object.keys(_planTaskItem).length;
+        if ((!len && len == planTaskTrs) || (isEnableBox == len && !isChecked && _isUpMove && len == planTaskTrs)) {
+            layer.msg('请先修改数据');
+            return 1;
+        }
     }
     for (i = 0; i < len; i++) {
-        var tr = $('#planItemList tr').eq(i);
+        var tr = $(`${el} tr`).eq(i);
         var isEnableEl = tr.find('.isEnable');
         var id = isEnableEl.val();
         if (isStrEmptyOrUndefined(id)) {
@@ -677,19 +787,19 @@ function updatePlanTaskItem() {
             personId = tr.find('.processor').val();
             if (isStrEmptyOrUndefined(personId)) {
                 layer.msg(`序列${i + 1}：请选择操作员`);
-                return;
+                return 1;
             }
             moduleId = tr.find('.module').val();
             if (isStrEmptyOrUndefined(moduleId)) {
                 layer.msg(`序列${i + 1}：请选择模块名`);
-                return;
+                return 1;
             }
             isCheck = !!parseInt(tr.find('.module').find(`option[value=${moduleId}]`).attr('isCheck'));
             if (isCheck) {
                 checkId = tr.find('.taskNameSelect').val();
                 if (isStrEmptyOrUndefined(checkId)) {
                     layer.msg(`序列${i + 1}：请选择检验任务`);
-                    return;
+                    return 1;
                 }
                 item = tr.find(`.taskNameSelect option[value=${checkId}]`).text();
                 checkId = parseInt(checkId);
@@ -698,7 +808,7 @@ function updatePlanTaskItem() {
                 item = tr.find('.taskName').val();
                 if (isStrEmptyOrUndefined(item)) {
                     layer.msg(`序列${i + 1}：任务名不能为空`);
-                    return;
+                    return 1;
                 }
             }
             hour = tr.find('.hour').val();
@@ -719,7 +829,7 @@ function updatePlanTaskItem() {
             desc = tr.find('.desc').val();
             relation = tr.find('.relation').val();
         } else {
-            var d = _planTaskItem[id];
+            var d = isUp ? _planTaskItem[id] : _reusePlanTaskItem[id];
             personId = d.Person;
             moduleId = d.ModuleId;
             isCheck = d.IsCheck;
@@ -735,7 +845,7 @@ function updatePlanTaskItem() {
             relation = 0;
         }
         relation = parseInt(relation);
-        list.Items.push({
+        list.push({
             Order: i + 1,
             Person: personId,
             ModuleId: moduleId,
@@ -749,6 +859,31 @@ function updatePlanTaskItem() {
             Relation: relation,
             Id: id
         });
+    }
+    return list;
+}
+
+var _isUpMove = true;
+//计划任务项保存
+function updatePlanTaskItem() {
+    var opType = 1042;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var planId = $('#planText').attr('planid');
+    var taskId = _planConfigData[planId].TaskId;
+    var list = {
+        Id: planId,
+        TaskId: taskId
+    };
+    var items = planTaskData('#planItemList', true);
+    if (items === 1) {
+        return;
+    } else {
+        if (items.length) {
+            list.Items = items;
+        }
     }
     var doSth = function () {
         var data = {}
@@ -782,8 +917,49 @@ function setTableStyle(el) {
 }
 
 //计划日志弹窗
-function showLogModel() {
-
+function showLogModel(planId, itemId) {
+    var opType = 1088;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var list = { planId };
+    if (!isStrEmptyOrUndefined(itemId)) {
+        list.itemId = itemId;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify(list);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#planTaskLog').empty();
+        var rData = ret.datas;
+        var ops = '';
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            var items = d.Items.length;
+            var itemLi = '';
+            if (items) {
+                for (var j = 0; j < items; j++) {
+                    itemLi += `<li>${d.Items[j]}</li>`;
+                }
+            }
+            ops += `<div class="box box-solid noShadow collapsed-box" style="margin-bottom: 0;">
+            <div class="box-header no-padding">
+                <span><font style="font-weight:bold">${i + 1}</font>.${d.Log}</span>
+                <button type="button" style="padding:0;border:1px solid;width:18px;background:#E5E5E5" class="btn btn-box-tool ${(itemLi == '' ? 'hidden' : '')}" data-widget="collapse"><i class="on_i fa fa-plus"></i></button>
+            </div>
+            <div class="box-body no-padding">
+                <ul class="on_ul nav nav-pills nav-stacked mli" style="text-indent: 2em">${itemLi}</ul>
+            </div>
+        </div>`;
+        }
+        $('#planTaskLog').append(ops);
+        $('#showLogModal').modal('show');
+    });
 }
 
 var _planIdData = [];
@@ -823,13 +999,12 @@ function delPlanConfig() {
         data.opData = JSON.stringify({
             ids: _planIdData
         });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getPlanConfig();
-                }
-            });
+        ajaxPost("/Relay/Post", data, function (ret) {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getPlanConfig();
+            }
+        });
     }
     showConfirm(`删除以下计划:<pre style='color:red'>${planName.join('<br>')}</pre>`, doSth);
 }
@@ -853,9 +1028,9 @@ function updatePlanConfig() {
         var tr = trsData[i].nTr;
         var enableEl = $(tr).find('.isEnable');
         if (enableEl.is(':checked')) {
-            var stateStr = trsData[i]._aData.State;
-            if (stateStr != 1) {
-                layer.msg(`序号${i + 1}：${stateStr}的计划不能保存`);
+            var state = trsData[i]._aData.State;
+            if (state != 1) {
+                layer.msg(`序号${i + 1}：非待下发计划不能修改`);
                 return;
             }
             var id = enableEl.val();
@@ -917,6 +1092,7 @@ function updatePlanConfig() {
     showConfirm("保存", doSth);
 }
 
+var _planName = null;
 //获取计划选项
 function getPlanSelect() {
     var opType = 1039;
@@ -938,8 +1114,10 @@ function getPlanSelect() {
         var list = ret.datas;
         var option = '<option value = "{0}" taskid = "{2}" state="{3}">{1}</option>';
         var options = '';
+        _planName = [];
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
+            _planName.push(d.Plan);
             options += option.format(d.Id, d.Plan, d.TaskId, d.State);
         }
         $('#planSelect').append(options);
@@ -955,6 +1133,10 @@ function showPlanModal() {
     $('#taskConfig').val(0).trigger('change');
     $('#newPlan').val('');
     $('#planReuse').iCheck("uncheck");
+    $("#planStartTime").val(getDate()).datepicker('update');
+    $("#planEndTime").val(getDate()).datepicker('update');
+    $('#planHour').val(0);
+    $('#planMinute').val(0);
     $('#addPlanTaskList').empty();
     new Promise(function (resolve) {
         planTaskTr(resolve);
@@ -978,7 +1160,7 @@ function delPlanSelect() {
     }
     var state = planSelectEl.find('option:selected').attr('state');
     if (state != 1) {
-        layer.msg('非待下发状态的计划不能删除');
+        layer.msg('非待下发计划不能删除');
         return;
     }
     var doSth = function () {
@@ -1006,4 +1188,72 @@ function addPlanTaskConTr() {
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle('#addPlanTaskList');
     $('#addPlanTaskTable').scrollTop($('#addPlanTaskTable')[0].scrollHeight);
+}
+
+//新增修改计划
+function addUpPlan(isUp) {
+    var opType = isUp ? 1042 : 1043;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var newPlan = $("#newPlan").val().trim();
+    var planId = $("#planSelect").val();
+    var oldPlan = $("#planSelect option:selected").text();
+    if (isUp && isStrEmptyOrUndefined(planId)) {
+        layer.msg("请选择计划");
+        return;
+    }
+    if (isStrEmptyOrUndefined(newPlan)) {
+        layer.msg("新计划不能为空");
+        return;
+    }
+    if (_planName.includes(newPlan)) {
+        layer.msg("新计划已存在");
+        return;
+    }
+    var taskId = $('#taskConfig').val();
+    if (isStrEmptyOrUndefined(taskId)) {
+        layer.msg("请选择任务配置");
+        return;
+    }
+    var state = $("#planSelect option:selected").attr('state');
+    if (isUp && state != 1) {
+        layer.msg('非待下发计划不能修改');
+        return;
+    }
+    var list = {
+        Plan: newPlan,
+        TaskId: taskId
+    }
+    if (isUp) {
+        list.Id = planId;
+        list = [list];
+    } else {
+        var items = planTaskData('#addPlanTaskList', false);
+        if (items === 1) {
+            return;
+        } else {
+            if (items.length) {
+                list.Items = items;
+            }
+        }
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getPlanSelect();
+                    $('#newPlan').val('');
+                    $('#taskConfig').val(0).trigger('change');
+                    $('#planReuse').iCheck("uncheck");
+                    $('#addPlanTaskList').empty();
+                }
+            });
+    }
+    showConfirm(`${isUp ? '修改' : '添加'}计划：${isUp ? oldPlan : newPlan}`, doSth);
 }

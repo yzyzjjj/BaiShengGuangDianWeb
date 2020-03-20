@@ -106,12 +106,33 @@
                             <label class="control-label" style="white-space: nowrap;margin: 0">新计划：</label>
                             <input class="form-control" id="newPlan" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
                             <label class="flexStyle" style="margin: 0; padding-left: 5px;cursor:pointer"><input type="checkbox" id="planReuse" class="icb_minimal"><span class="textOverTop" style="margin-left: 5px">复用</span></label>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="addPlan()" style="margin-left: 3px">新增</button>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="updatePlan()" style="margin-left: 3px" id="updatePlanBtn">修改</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpPlan(0)" style="margin-left: 3px">新增</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpPlan(1)" style="margin-left: 3px" id="updatePlanBtn">修改</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">任务配置：</label>
                             <select class="ms2 form-control" id="taskConfig" style="width: 180px"></select>
+                        </div>
+                        <div class="form-group flexStyle" id="planTime">
+                            <div class="flexStyle" style="flex-basis: 700px">
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">开始时间：</label>
+                                    <input type="text" class="form_date form-control text-center sTime" style="flex-basis: 130px; cursor: pointer" id="planStartTime">
+                                </div>
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">结束时间：</label>
+                                    <input type="text" class="form_date form-control text-center eTime" style="flex-basis: 130px; cursor: pointer" id="planEndTime">
+                                </div>
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">预计用时：</label>
+                                    <div class="flexStyle" style="flex-basis:130px">
+                                        <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" id="planHour">
+                                        <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                        <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" id="planMinute">
+                                        <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group maxHeight" id="addPlanTaskTable" style="overflow: auto">
@@ -139,6 +160,27 @@
                                 <button type="button" class="btn btn-default btn-sm" onclick="addPlanTaskConTr()"><i class="fa fa-plus"></i> 添加新项</button>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志模态框 -->
+    <div class="modal fade" tabindex="-1" id="showLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">历史记录</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" id="planTaskLog" style="white-space: nowrap;overflow:auto"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
