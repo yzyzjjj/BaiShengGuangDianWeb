@@ -1,14 +1,54 @@
 ﻿@model object
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+@{
+    ViewBag.Title = "任务管理";
+}
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/Management.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/Management.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>生产管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="form-group col-md-4 col-md-push-8" style="text-align: right; padding: 0">
+                <button type="button" class="btn btn-success btn-sm" onclick="showPlanModal()">计划管理</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="delPlanConfig()">删除</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanConfig()">保存</button>
+            </div>
+            <div class="col-md-8 col-md-pull-4" style="padding:0">
+                <div class="flexStyle">
+                    <div class="flexStyle" style="flex: 3;flex-wrap: wrap">
+                        <label class="control-label" style="white-space: nowrap; margin: 0">选择状态：</label>
+                        <select class="ms2 form-control" id="selectState" style="width:80%"></select>
+                    </div>
+                    <div class="flexStyle" style="flex: 4;flex-wrap: wrap">
+                        <label class="control-label" style="white-space: nowrap; margin: 0">选择时间段：</label>
+                        <div class="flexStyle">
+                            <input type="text" class="form_date form-control selectTime text-center" id="startTime" style="cursor: pointer">
+                            <label class="control-label" style="margin: 5px">至</label>
+                            <input type="text" class="form_date form-control selectTime text-center" id="endTime" style="cursor: pointer">
+                            <button type="button" class="btn btn-primary" onclick="getPlanConfig()" style="margin-left:3px">查询</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group">
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="planConfigList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

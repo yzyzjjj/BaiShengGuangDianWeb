@@ -161,13 +161,13 @@
     });
     $("#planReuse").on("ifChanged", function () {
         if ($(this).is(":checked")) {
+            $("#updatePlanBtn").attr("disabled", "disabled");
             var planId = $("#planSelect").val();
             if (isStrEmptyOrUndefined(planId)) {
                 layer.msg("请选择计划复用");
                 return;
             }
             reusePlanTask(planId);
-            $("#updatePlanBtn").attr("disabled", "disabled");
         } else {
             $("#updatePlanBtn").removeAttr("disabled");
         }
@@ -977,8 +977,8 @@ function delPlanConfig() {
     }
     var trsData = _planConfigTab.context[0].aoData;
     var i;
-    len = trsData.length;
-    for (i = 0; i < len; i++) {
+    var trs = trsData.length;
+    for (i = 0; i < trs; i++) {
         var tr = trsData[i].nTr;
         var enableEl = $(tr).find('.isEnable');
         if (enableEl.is(':checked')) {
@@ -1217,6 +1217,27 @@ function addUpPlan(isUp) {
         layer.msg("请选择任务配置");
         return;
     }
+    var sTime = $('#planStartTime').val();
+    if (isStrEmptyOrUndefined(sTime)) {
+        layer.msg("请选择开始时间");
+        return;
+    }
+    var eTime = $('#planEndTime').val();
+    if (isStrEmptyOrUndefined(eTime)) {
+        layer.msg("请选择结束时间");
+        return;
+    }
+    if (comTimeDay(sTime, eTime)) {
+        return;
+    }
+    var hour = $('#planHour').val();
+    if (isStrEmptyOrUndefined(hour)) {
+        hour = 0;
+    }
+    var minute = $('#planMinute').val();
+    if (isStrEmptyOrUndefined(minute)) {
+        minute = 0;
+    }
     var state = $("#planSelect option:selected").attr('state');
     if (isUp && state != 1) {
         layer.msg('非待下发计划不能修改');
@@ -1224,7 +1245,11 @@ function addUpPlan(isUp) {
     }
     var list = {
         Plan: newPlan,
-        TaskId: taskId
+        TaskId: taskId,
+        PlannedStartTime: sTime,
+        PlannedEndTime: eTime,
+        EstimatedHour: hour,
+        EstimatedMin: minute
     }
     if (isUp) {
         list.Id = planId;

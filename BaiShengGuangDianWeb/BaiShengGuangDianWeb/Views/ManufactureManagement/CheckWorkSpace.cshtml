@@ -1,14 +1,150 @@
 ﻿@model object
+@{
+    ViewBag.Title = "检验工作台";
+}
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/CheckWorkSpace.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/CheckWorkSpace.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>生产管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-6" style="text-align: center;padding-bottom:10px">
+                    <button type="button" class="btn btn-info" onclick="">刷新任务</button>
+                    <button type="button" id="startBtn" class="btn btn-primary" onclick="">任务开始</button>
+                    <button type="button" id="pauseBtn" class="btn btn-warning" onclick="">任务暂停</button>
+                </div>
+                <div class="col-md-6" style="text-align: center;padding-bottom:10px">
+                    <button type="button" id="" class="btn btn-primary" onclick="">合格</button>
+                    <button type="button" id="" class="btn btn-primary" onclick="">返工</button>
+                    <button type="button" id="" class="btn btn-primary" onclick="">阻塞</button>
+                </div>
+            </div>
+            <div class="form-group" style="overflow-y: auto">
+                @*<div style="max-width: 600px;margin: auto">*@
+                <table class="table table-bordered table-responsive" style="margin: 0">
+                    <thead></thead>
+                    <tbody>
+                        <tr>
+                            <td class="mbold">检验单名称</td>
+                            <td id=""></td>
+                            <td class="mbold">所属计划号</td>
+                            <td id=""></td>
+                        </tr>
+                        <tr>
+                            <td class="mbold">任务名称</td>
+                            <td id=""></td>
+                            <td class="mbold">工序完成人</td>
+                            <td id=""></td>
+                        </tr>
+                        <tr>
+                            <td class="mbold">检验人</td>
+                            <td id=""></td>
+                            <td class="mbold">计划用时</td>
+                            <td id=""></td>
+                        </tr>
+                        <tr>
+                            <td class="mbold">开始时间</td>
+                            <td id=""></td>
+                            <td class="mbold">完成时间</td>
+                            <td id=""></td>
+                        </tr>
+                        <tr>
+                            <td class="mbold">绩效分</td>
+                            <td id=""></td>
+                            <td class="mbold">实际用时</td>
+                            <td id=""></td>
+                        </tr>
+                    </tbody>
+                </table>
+                @*</div>*@
+            </div>
+            <div class="form-group">
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id=""></table>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs ui-sortable-handle">
+                        <li class="active"><a href="#waitCheck" data-toggle="tab" aria-expanded="true">待检验</a></li>
+                        <li><a href="#passCheck" data-toggle="tab" aria-expanded="false">检验通过</a></li>
+                        <li><a href="#redoCheck" data-toggle="tab" aria-expanded="false">检验返工</a></li>
+                        <li><a href="#blockCheck" data-toggle="tab" aria-expanded="false">阻塞</a></li>
+                    </ul>
+                    <div class="tab-content no-padding">
+                        <div class="tab-pane active in" id="waitCheck">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="">更多</button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="waitCheckList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade in" id="passCheck">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="">更多</button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="passCheckList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade in" id="redoCheck">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="">更多</button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="redoCheckList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade in" id="blockCheck">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="">更多</button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="blockCheckList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+        </div>
+    </div>
+</section>
