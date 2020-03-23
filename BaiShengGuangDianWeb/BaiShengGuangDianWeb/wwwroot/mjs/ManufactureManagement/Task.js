@@ -126,6 +126,7 @@
     $('#moduleSelect').on('select2:select', function () {
         $('#newModule').val($(this).find("option:checked").text());
     });
+    $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
 
 //设置操作员选项
@@ -142,6 +143,7 @@ function setProcessorSelect(groupId, el) {
     el.append(ops);
 }
 
+var _taskConfigName = null;
 //获取任务配置
 function getTaskConfig() {
     var opType = 1051;
@@ -159,8 +161,10 @@ function getTaskConfig() {
         var list = ret.datas;
         var option = '<option value = "{0}">{1}</option>';
         var options = '';
+        _taskConfigName = [];
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
+            _taskConfigName.push(d.Task);
             options += option.format(d.Id, d.Task);
         }
         $('.selectConfig').empty();
@@ -231,6 +235,8 @@ function getProcessor(resolve) {
         }
     });
 }
+
+var _moduleName = null;
 //获取模块名
 function getModule(resolve) {
     var opType = 1058;
@@ -251,8 +257,10 @@ function getModule(resolve) {
         var list = ret.datas;
         var option = '<option value = "{0}" isCheck = "{2}">{1}</option>';
         var options = '';
+        _moduleName = [];
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
+            _moduleName.push(d.Module);
             options += option.format(d.Id, d.Module, d.IsCheck);
         }
         if (resolve != null) {
@@ -391,6 +399,7 @@ function getTaskConfigItem() {
             layer.msg(ret.errmsg);
             return;
         }
+        $('#configItem').empty();
         data = ret.datas;
         _taskItem = {};
         var ops = '';
@@ -399,7 +408,6 @@ function getTaskConfigItem() {
             _taskItem[d.Id] = d;
             ops += _taskTrData.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
         }
-        $('#configItem').empty();
         $('#configItem').append(ops);
         setTableStyle();
     });
@@ -536,6 +544,7 @@ function addTask() {
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle();
+    $('#configTable').scrollTop($('#configTable')[0].scrollHeight);
 }
 
 var _taskItemId = [];
@@ -621,19 +630,18 @@ function addConfig() {
         layer.msg('没有权限');
         return;
     }
-    var newConfig = $("#newConfig").val();
+    var newConfig = $("#newConfig").val().trim();
     if (isStrEmptyOrUndefined(newConfig)) {
         layer.msg("新配置不能为空");
         return;
     }
-    var configId = $("#configSelect").val().trim();
-    var oldConfig = $("#configSelect option:selected").text();
+    var configId = $("#configSelect").val();
     var isChecked = $("#configReuse").is(":checked");
     if (isChecked && isStrEmptyOrUndefined(configId)) {
         layer.msg("请选择配置");
         return;
     }
-    if (newConfig == oldConfig) {
+    if (_taskConfigName.includes(newConfig)) {
         layer.msg("新配置已存在");
         return;
     }
@@ -675,7 +683,7 @@ function updateConfig() {
         layer.msg("新配置不能为空");
         return;
     }
-    if (newConfig == oldConfig) {
+    if (_taskConfigName.includes(newConfig)) {
         layer.msg("新配置已存在");
         return;
     }
@@ -754,16 +762,16 @@ function addUpModule(isUp) {
     var moduleId = $('#moduleSelect').val();
     var olModuleName = $("#moduleSelect option:selected").text();
     var isCheckout = $('#isCheckout').is(":checked");
+    if (isUp && isStrEmptyOrUndefined(moduleId)) {
+        layer.msg("请选择模块");
+        return;
+    }
     if (isStrEmptyOrUndefined(newModuleName)) {
         layer.msg("新模块不能为空");
         return;
     }
-    if (newModuleName == olModuleName) {
+    if (_moduleName.includes(newModuleName)) {
         layer.msg("新模块已存在");
-        return;
-    }
-    if (isUp && isStrEmptyOrUndefined(moduleId)) {
-        layer.msg("请选择模块");
         return;
     }
     var list = {
@@ -771,7 +779,7 @@ function addUpModule(isUp) {
         IsCheck: isCheckout
     }
     if (isUp) {
-        list.Id = moduleId
+        list.Id = moduleId;
     }
     var doSth = function () {
         var data = {}

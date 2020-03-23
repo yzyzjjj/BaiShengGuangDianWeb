@@ -411,6 +411,11 @@ function setTableStyle(el) {
         checkboxClass: 'icheckbox_polaris',
         increaseArea: '20%'
     });
+    el.find('.radioSelect').iCheck({
+        handle: 'radio',
+        radioClass: 'iradio_minimal-blue',
+        increaseArea: '20%'
+    });
 }
 
 //默认一列点检项

@@ -20,24 +20,24 @@
 <section class="content">
     <div class="box box-primary">
         <div class="box-header with-border">
-            <div class="form-group col-md-4 col-md-push-8" style="text-align: right;padding:0">
-                <button type="button" class="btn btn-success btn-sm" onclick="">计划管理</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="">新增</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="">删除</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="">保存</button>
+            <div class="form-group col-md-4 col-md-push-8" style="text-align: right; padding: 0">
+                <button type="button" class="btn btn-success btn-sm" onclick="showPlanModal()">计划管理</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="delPlanConfig()">删除</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanConfig()">保存</button>
             </div>
             <div class="col-md-8 col-md-pull-4" style="padding:0">
                 <div class="flexStyle">
-                    <div class="flexStyle" style="flex: 3;flex-wrap: wrap">
+                    <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
                         <label class="control-label" style="white-space: nowrap; margin: 0">选择状态：</label>
-                        <select class="ms2 form-control" id="selectState" style="width:78%"></select>
+                        <select class="ms2 form-control" id="selectState" style="width: 80%"></select>
                     </div>
-                    <div class="flexStyle" style="flex: 4;flex-wrap: wrap">
-                        <label class="control-label" style="white-space: nowrap; margin: 0">选择时间段：</label>
-                        <div class="flexStyle">
-                            <input type="text" class="form_date form-control" id="startTime" style="cursor: pointer">
+                    <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
+                        <label class="control-label" style="white-space: nowrap; margin: 0">选择时间：</label>
+                        <div class="flexStyle" style="width: 80%">
+                            <input type="text" class="form_date form-control selectTime text-center" id="startTime" style="cursor: pointer;width: 120px">
                             <label class="control-label" style="margin: 5px">至</label>
-                            <input type="text" class="form_date form-control" id="endTime" style="cursor: pointer">
+                            <input type="text" class="form_date form-control selectTime text-center" id="endTime" style="cursor: pointer;width: 120px">
+                            <button type="button" class="btn btn-primary" onclick="getPlanConfig()" style="margin-left:3px">查询</button>
                         </div>
                     </div>
                 </div>
@@ -45,54 +45,146 @@
         </div>
         <div class="box-body">
             <div class="form-group">
-                <div style="overflow-x: auto">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th>选择</th>
-                                <th>序号</th>
-                                <th>计划号</th>
-                                <th>开始时间</th>
-                                <th>结束时间</th>
-                                <th>预计用时</th>
-                                <th>任务配置</th>
-                                <th>实施</th>
-                                <th>状态</th>
-                                <th>详情</th>
-                                <th>日志</th>
-                            </tr>
-                        </thead>
-                        <tbody id="planConfigList"></tbody>
-                    </table>
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="planConfigList"></table>
                 </div>
             </div>
-            <div class="form-group hidden">
-                <div class="form-group flexStyle" style="justify-content:space-between">
-                    <label class="control-label" style="white-space: nowrap">计划号：<span class="spanStyle" id="planText">20200101WF</span></label>
-                    <div style="text-align: right">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="">新增</button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="">删除</button>
-                        <button type="button" class="btn btn-warning btn-sm" onclick="">重置</button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="">保存</button>
+            <div class="form-group hidden" id="planItem">
+                <hr>
+                <div class="form-group flexStyle" style="justify-content: space-between">
+                    <label class="control-label" style="white-space: nowrap">计划号：<span class="spanStyle" id="planText"></span></label>
+                    <div style="text-align: right" class="isIssue">
+                        <button type="button" class="btn btn-warning btn-sm" onclick="resetPlanItemList()">重置</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanTaskItem()">保存</button>
                     </div>
                 </div>
-                <div style="overflow-x: auto">
+                <div class="form-group maxHeight" id="planItemTable" style="overflow: auto">
                     <table class="table table-hover table-striped">
                         <thead>
                             <tr>
-                                <th>选择</th>
+                                <th class="isIssue">选择</th>
                                 <th>序号</th>
                                 <th>操作员</th>
                                 <th>模块名</th>
                                 <th>任务名</th>
                                 <th>预计用时</th>
                                 <th>绩效</th>
+                                <th>任务描述</th>
                                 <th>关联</th>
+                                <th class="isIssue">排序</th>
                                 <th>日志</th>
+                                <th class="isIssue">删除</th>
                             </tr>
                         </thead>
                         <tbody id="planItemList"></tbody>
                     </table>
+                </div>
+                <div class="text-center isIssue">
+                    <button type="button" class="btn btn-default btn-sm" onclick="addPlanTaskTr()"><i class="fa fa-plus"></i> 添加新项</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 计划管理模态框 -->
+    <div class="modal fade" tabindex="-1" id="showPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">计划管理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group flexStyle">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">选择计划：</label>
+                            <select class="ms2 form-control" id="planSelect" style="width: 180px"></select>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delPlanSelect()" style="margin-left: 3px">删除</button>
+                        </div>
+                        <div class="form-group flexStyle">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">新计划：</label>
+                            <input class="form-control" id="newPlan" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
+                            <label class="flexStyle" style="margin: 0; padding-left: 5px;cursor:pointer"><input type="checkbox" id="planReuse" class="icb_minimal"><span class="textOverTop" style="margin-left: 5px">复用</span></label>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpPlan(0)" style="margin-left: 3px">新增</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpPlan(1)" style="margin-left: 3px" id="updatePlanBtn">修改</button>
+                        </div>
+                        <div class="form-group flexStyle">
+                            <label class="control-label" style="white-space: nowrap;margin: 0">任务配置：</label>
+                            <select class="ms2 form-control" id="taskConfig" style="width: 180px"></select>
+                        </div>
+                        <div class="form-group flexStyle" id="planTime">
+                            <div class="flexStyle" style="flex-basis: 700px">
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">开始时间：</label>
+                                    <input type="text" class="form_date form-control text-center sTime" style="flex-basis: 130px; cursor: pointer" id="planStartTime">
+                                </div>
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">结束时间：</label>
+                                    <input type="text" class="form_date form-control text-center eTime" style="flex-basis: 130px; cursor: pointer" id="planEndTime">
+                                </div>
+                                <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                    <label class="control-label" style="white-space: nowrap; margin: 0">预计用时：</label>
+                                    <div class="flexStyle" style="flex-basis:130px">
+                                        <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" id="planHour">
+                                        <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                        <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" id="planMinute">
+                                        <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group maxHeight" id="addPlanTaskTable" style="overflow: auto">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="isIssue">选择</th>
+                                            <th>序号</th>
+                                            <th>操作员</th>
+                                            <th>模块名</th>
+                                            <th>任务名</th>
+                                            <th>预计用时</th>
+                                            <th>绩效</th>
+                                            <th>任务描述</th>
+                                            <th>关联</th>
+                                            <th class="isIssue">排序</th>
+                                            <th>日志</th>
+                                            <th class="isIssue">删除</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="addPlanTaskList"></tbody>
+                                </table>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-default btn-sm" onclick="addPlanTaskConTr()"><i class="fa fa-plus"></i> 添加新项</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志模态框 -->
+    <div class="modal fade" tabindex="-1" id="showLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">历史记录</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" id="planTaskLog" style="white-space: nowrap;overflow:auto"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
                 </div>
             </div>
         </div>

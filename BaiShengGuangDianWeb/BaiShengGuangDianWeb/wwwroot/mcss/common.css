@@ -62,6 +62,9 @@ th, td {
 .no-padding-bottom {
     padding-bottom: 0;
 }
+.mbold {
+    font-weight: bold
+}
 
 
 
