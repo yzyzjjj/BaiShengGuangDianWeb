@@ -11,6 +11,8 @@ namespace BaiShengGuangDianWeb.Base.FileConfig
             {FileEnum.SpotCheck, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
             {FileEnum.Material, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
             {FileEnum._6s, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
+            {FileEnum.Manufacture, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
+            {FileEnum.FaultDevice, new List<string>{"bmp", "jpg", "jpeg", "png", "gif"}},
         };
 
         public static Dictionary<FileEnum, List<string>> GetFileExt()

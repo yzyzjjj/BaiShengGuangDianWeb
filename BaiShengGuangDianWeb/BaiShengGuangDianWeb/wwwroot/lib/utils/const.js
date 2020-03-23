@@ -75,6 +75,10 @@ var fileEnum = {
     Material: 4,
     // 6s图片
     _6s: 5,
+    // 生产管理检验
+    Manufacture,
+    // 故障上报
+    FaultDevice,
 }
 
 //文件Accept
@@ -111,3 +115,13 @@ fileCallBack[fileEnum.Material] = function () { };
 fileAccept[fileEnum._6s] = "image/*";
 fileExt[fileEnum._6s] = ["bmp", "jpg", "jpeg", "png", "gif"];
 fileCallBack[fileEnum._6s] = function () { };
+
+// 生产管理检验
+fileAccept[fileEnum.Manufacture] = "image/*";
+fileExt[fileEnum.Manufacture] = ["bmp", "jpg", "jpeg", "png", "gif"];
+fileCallBack[fileEnum.Manufacture] = function () { };
+
+// 故障上报
+fileAccept[fileEnum.FaultDevice] = "image/*";
+fileExt[fileEnum.FaultDevice] = ["bmp", "jpg", "jpeg", "png", "gif"];
+fileCallBack[fileEnum.FaultDevice] = function () { };

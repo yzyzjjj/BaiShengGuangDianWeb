@@ -1458,7 +1458,7 @@ function showUpdateFaultTypeModel(id) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        id: id
+        qId: id
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {

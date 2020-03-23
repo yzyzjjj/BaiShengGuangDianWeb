@@ -23,5 +23,13 @@
         /// 6s图片
         /// </summary>
         _6s,
+        /// <summary>
+        /// 生产管理检验
+        /// </summary>
+        Manufacture,
+        /// <summary>
+        /// 故障上报
+        /// </summary>
+        FaultDevice,
     }
 }
