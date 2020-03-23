@@ -76,9 +76,9 @@ var fileEnum = {
     // 6s图片
     _6s: 5,
     // 生产管理检验
-    Manufacture,
+    Manufacture: 6,
     // 故障上报
-    FaultDevice,
+    FaultDevice: 7,
 }
 
 //文件Accept
