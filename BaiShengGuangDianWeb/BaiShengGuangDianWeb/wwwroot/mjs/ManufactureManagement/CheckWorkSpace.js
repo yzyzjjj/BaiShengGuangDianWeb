@@ -318,7 +318,7 @@ function getCheckList(num, el) {
                 { "data": "Plan", "title": "所属计划号" },
                 { "data": "Score", "title": "任务绩效分" },
                 { "data": "Surveyor", "title": "任务完成人" },
-                { "data": "Id", "title": "详情", "render": detail }
+                { "data": "Id", "title": "任务流程", "render": detail }
             ]
         });
     });

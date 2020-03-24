@@ -1466,9 +1466,11 @@ function getObjectURL(file) {
 
 //上传图片识别二维码
 function printImgUp(resolve, fileId) {
-    qrcode.decode(getObjectURL(fileId.files[0]));
+    var file = getObjectURL(fileId.files[0]);
+    qrcode.decode(file);
     qrcode.callback = function (e) {
         //结果回调
+        URL.revokeObjectURL(file);
         if (e != "error decoding QR Code") {
             if (/,/.test(e)) {
                 resolve(e);
