@@ -1,5 +1,6 @@
 ﻿function pageReady() {
     $('.ms2').select2();
+    $('.table-bordered td').css('border', '1px solid');
     $("#startTime").val(getDate()).datepicker('update');
     $("#endTime").val(getDate()).datepicker('update');
     getPlan();
@@ -8,8 +9,75 @@
     $('#groupSelect').on('select2:select', function () {
         getProcessor();
     });
+    $('#updateTask').on('click', function () {
+        _isClick = !_isClick;
+        if (_isClick) {
+            $('#taskEstimatedTime .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            $('#taskScore .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            $('#taskEstimatedTime .hour').val(_taskDetailData.EstimatedHour);
+            $('#taskEstimatedTime .minute').val(_taskDetailData.EstimatedMin);
+            $('#taskScore .score').val(_taskDetailData.Score);
+            var v = $(this).val();
+            if (v == 3) {
+                $('#taskActualTime .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+                $('#taskActualScore .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+                $('#taskActualTime .hour').val(_taskDetailData.ActualHour);
+                $('#taskActualTime .minute').val(_taskDetailData.ActualMin);
+                $('#taskActualScore .score').val(_taskDetailData.ActualScore);
+            }
+        } else {
+            $('#taskDesc').val(_taskDetailData.Desc);
+            $('#taskDetailTable .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+        }
+        $('#taskDesc').prop('disabled', !_isClick);
+    });
+    $('#updateCheck').on('click', function () {
+        _isClick = !_isClick;
+        if (_isClick) {
+            $('#checkDetailTable .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            $('#checkEstimatedTime .hour').val(_taskDetailData.EstimatedHour);
+            $('#checkEstimatedTime .minute').val(_taskDetailData.EstimatedMin);
+            $('#checkScore .score').val(_taskDetailData.Score);
+            var v = $(this).val();
+            if (v == 3) {
+                $('#checkActualTime .hour').val(_taskDetailData.ActualHour);
+                $('#checkActualTime .minute').val(_taskDetailData.ActualMin);
+                $('#checkActualScore .score').val(_taskDetailData.ActualScore);
+                $('#checkResultDesc .checkResult').val(_taskDetailData.CheckResultDesc);
+            } else {
+                $('#checkActualTime .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+                $('#checkActualScore .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+                $('#checkResultDesc .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+            }
+        } else {
+            $('#checkDesc').val(_taskDetailData.Desc);
+            $('#checkDetailTable .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+        }
+        $('#checkDesc').prop('disabled', !_isClick);
+    });
+    $('.minute').on('input', function () {
+        var v = $(this).val();
+        if (parseInt(v) > 59) {
+            $(this).val(59);
+        }
+    });
+    $('.toZero').on('focus', function () {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val('');
+        }
+    });
+    $('.toZero').on('blur', function () {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val('0');
+        }
+    });
     $('#taskTable').css('maxHeight', innerHeight * 0.7);
 }
+
+//是否点击修改/取消
+var _isClick = false;
 
 //获取计划号
 function getPlan() {
@@ -231,7 +299,7 @@ function getTaskList() {
             var d = rData[i];
             state = d.State;
             var tr = `<tr>
-                    <td class="num">${i+1}</td>
+                    <td class="num">${i + 1}</td>
                     <td>${d.Processor}</td>
                     <td>${d.Plan}</td>
                     <td>${d.StateDesc}</td>
@@ -240,17 +308,17 @@ function getTaskList() {
                     <td>${d.TotalOrder}</td>
                     <td>${d.Order}</td>
                     <td>${d.Relation}</td>
-                    <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="">上移</button>' : ''}</td>
+                    <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask()">上移</button>' : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
                     <td>${d.ActualStartTime}</td>
                     <td>${d.ActualTime}</td>
                     <td>${d.ActualScore}</td>
-                    <td><button type="button" class="btn btn-info btn-sm" onclick="">详情</button></td>
+                    <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${d.Id})">详情</button></td>
                     <td>
                         <button type="button" class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm"><i class="fa fa-minus"></i></button>
-                        ${state == 3 ? '' : state == 4 ? '<button type="button" class="btn btn-primary btn-sm" onclick="">启动</button>' : '<button type="button" class="btn btn-warning btn-sm" onclick="">停止</button>' }
+                        <button type="button" class="btn btn-danger btn-sm" onclick="delTask(${d.Id},\'${d.Item}\')"><i class="fa fa-minus"></i></button>
+                        ${state == 3 ? '' : state == 4 ? '<button type="button" class="btn btn-primary btn-sm" onclick="taskStartStop(1,{0},\'{1}\')">启动</button>'.format(d.Id, d.Item) : '<button type="button" class="btn btn-warning btn-sm" onclick="taskStartStop(0,{0},\'{1}\')">停止</button>'.format(d.Id, d.Item)}
                     </td>
                 </tr>`;
             ops += tr;
@@ -258,4 +326,401 @@ function getTaskList() {
         $('#taskList').append(ops);
         $('#taskTable').removeClass('hidden');
     });
+}
+
+var _taskDetailData = null;
+var _taskDetailId = null;
+//详情查看
+function showDetailModal(tId) {
+    var opType = 1027;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({ tId });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        _isClick = false;
+        var d = ret.datas[0];
+        _taskDetailData = d;
+        _taskDetailId = tId;
+        if (d.IsCheck) {
+            $('#checkDesc').prop('disabled', true);
+            $('#checkDetailTable .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+            var state = d.State;
+            $('#updateCheck').val(state);
+            $('#checkName').text(d.Check);
+            $('#checkPlan').text(d.Plan);
+            $('#checkTaskName').text(d.Item);
+            $('#checkTaskProcessor').text(d.Processor);
+            $('#checkRedo').text(d.IsRedo ? '已返工' : '未返工');
+            $('#checkResultDesc .textOn').text(d.CheckResultDesc);
+            $('#checkProcessor').text(d.CheckProcessor);
+            $('#checkAssignor').text(d.Assignor);
+            $('#checkEstimatedTime .textOn').text(d.EstimatedTime);
+            $('#checkScore .textOn').text(d.Score);
+            $('#checkActualStartTime').text(d.ActualStartTime);
+            $('#checkActualEndTime').text(d.ActualEndTime);
+            $('#checkActualTime .textOn').text(d.ActualTime);
+            $('#checkActualScore .textOn').text(d.ActualScore);
+            $('#checkDesc').val(d.Desc);
+            var isEnable = function (data) {
+                return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
+            }
+            var order = function (a, b, c, d) {
+                return d.row + 1;
+            }
+            var desc = function (data) {
+                return `<span class="textOn">${data == null ? '' : data}</span><textarea class="form-control desc textIn hidden" style="resize: vertical;margin:auto;width:200px"></textarea>`;
+            }
+            var checkTime = function (data) {
+                return `<span class="textOn">${data == '0001-01-01 00:00:00' ? '' : data.slice(0, data.indexOf(" "))}</span><input type="text" class="form_date form-control text-center checkTime textIn hidden" style="width:120px;cursor: pointer">`;
+            }
+            var result = function (data) {
+                var res = data.Result;
+                var op = '<button type="button" class="btn btn-primary btn-{1} btn-sm result" onclick="updateCheckTask.call(this,{0},1)" disabled>通过</button>' +
+                    '<button type="button" class="btn btn-primary btn-{2} btn-sm result" onclick = "updateCheckTask.call(this,{0},2)" disabled>不通过</button>';
+                return op.format(data.Id, res == 1 ? 'success' : 'info', res == 2 ? 'danger' : 'info');
+            }
+            var img = function (data) {
+                return `<button type="button" class="btn btn-primary btn-sm" onclick="showImgModel(\'${data.ImageList}\')"}>查看</button>`;
+            }
+            var rData = d.Items;
+            var checkItems = {};
+            for (var i = 0, len = rData.length; i < len; i++) {
+                d = rData[i];
+                checkItems[d.Id] = d;
+            }
+            $('#checkDetailList').DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": oLanguage,
+                "data": rData,
+                "aaSorting": [[0, "asc"]],
+                "aLengthMenu": [10, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 10, //默认显示的记录数
+                "columns": [
+                    { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Item", "title": "检验流程" },
+                    { "data": "Method", "title": "检验方法" },
+                    { "data": "Desc", "title": "检验说明", "render": desc },
+                    { "data": "CheckTime", "title": "检验时间", "render": checkTime },
+                    { "data": null, "title": "检验结果", "render": result },
+                    { "data": null, "title": "图片", "render": img }
+                ],
+                "drawCallback": function (settings, json) {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    });
+                    if (state != 3) {
+                        $(this).find('.isEnable').iCheck('disable');
+                    }
+                    $(this).find('.form_date').attr("readonly", true).datepicker({
+                        language: 'zh-CN',
+                        format: 'yyyy-mm-dd',
+                        maxViewMode: 2,
+                        todayBtn: "linked",
+                        autoclose: true
+                    });
+                    $(this).find('.desc').parents('td').addClass('no-padding');
+                    $('#checkDetailList .isEnable').on('ifChanged', function () {
+                        var tr = $(this).parents('tr');
+                        var isChecked = $(this).is(':checked');
+                        if (isChecked) {
+                            var v = $(this).val();
+                            var item = checkItems[v];
+                            tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
+                            tr.find('.desc').val(item.Desc);
+                            var time = item.CheckTime;
+                            time = time == '0001-01-01 00:00:00' ? '' : time.slice(0, time.indexOf(' '));
+                            tr.find('.checkTime').val(time).datepicker('update');
+                        } else {
+                            tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
+                        }
+                        tr.find('.result').prop('disabled', !isChecked);
+                    });
+                }
+            });
+            $('#showCheckModal').modal('show');
+        } else {
+            $('#taskDesc').prop('disabled', true);
+            $('#taskDetailTable .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+            $('#updateTask').val(d.State);
+            $('#taskName').text(d.Item);
+            $('#taskPlan').text(d.Plan);
+            $('#taskProcessor').text(d.Processor);
+            $('#taskAssignor').text(d.Assignor);
+            $('#taskState').text(d.StateDesc);
+            $('#taskRedo').text(d.IsRedo ? '已返工' : '未返工');
+            $('#taskEstimatedTime .textOn').text(d.EstimatedTime);
+            $('#taskScore .textOn').text(d.Score);
+            $('#taskActualStartTime').text(d.ActualStartTime);
+            $('#taskActualEndTime').text(d.ActualEndTime);
+            $('#taskActualTime .textOn').text(d.ActualTime);
+            $('#taskActualScore .textOn').text(d.ActualScore);
+            $('#taskDesc').val(d.Desc);
+            $('#showTaskModal').modal('show');
+        }
+    });
+}
+
+//检验项通过不通过更新
+function updateCheckTask(id, result) {
+    var opType = 1028;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var tr = $(this).parents('tr');
+    var desc = tr.find('.desc').val();
+    var checkTime = tr.find('.checkTime').val();
+    checkTime = isStrEmptyOrUndefined(checkTime) ? getFullTime() : `${checkTime} 00:00:00`;
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        Id: _taskDetailId,
+        Items: [{
+            CheckTime: checkTime,
+            Desc: desc,
+            Result: result,
+            Id: id
+        }]
+    });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            showDetailModal(_taskDetailId);
+        }
+    });
+}
+
+//图片详情模态框
+function showImgModel(img) {
+    $('#imgOld').empty();
+    $("#imgOldList").empty();
+    if (isStrEmptyOrUndefined(img)) {
+        $('#imgOld').append('图片：<font style="color:red" size=5>无</font>');
+    } else {
+        $('#imgOld').append('图片：');
+        img = img.split(",");
+        var data = {
+            type: fileEnum.Manufacture,
+            files: JSON.stringify(img)
+        };
+        ajaxPost("/Upload/Path", data,
+            function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                var imgOps = "";
+                for (var i = 0; i < ret.data.length; i++) {
+                    imgOps += `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                    <div class="thumbnail">
+                    <img src=${ret.data[i].path} style="height:200px">
+                    </div>
+                    </div>`;
+                }
+                $("#imgOldList").append(imgOps);
+            });
+    }
+    $('#showImgModel').modal('show');
+}
+
+//任务详情保存修改
+function updateTaskDetail() {
+    var opType = 1028;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    if (!_isClick) {
+        layer.msg('请先修改数据');
+        return;
+    }
+    var desc = $('#taskDesc').val();
+    var estimatedHour = $('#taskEstimatedTime .hour').val();
+    if (isStrEmptyOrUndefined(estimatedHour)) {
+        estimatedHour = 0;
+    }
+    var estimatedMin = $('#taskEstimatedTime .minute').val();
+    if (isStrEmptyOrUndefined(estimatedMin)) {
+        estimatedMin = 0;
+    }
+    var score = $('#taskActualScore .score').val();
+    if (isStrEmptyOrUndefined(score)) {
+        score = 0;
+    }
+    var list = {
+        Id: _taskDetailId,
+        EstimatedHour: estimatedHour,
+        EstimatedMin: estimatedMin,
+        Score: score,
+        Desc: desc
+    }
+    var actualHour = $('#taskActualTime .hour').val();
+    if (isStrEmptyOrUndefined(actualHour)) {
+        actualHour = 0;
+    }
+    var actualMin = $('#taskActualTime .minute').val();
+    if (isStrEmptyOrUndefined(actualMin)) {
+        actualMin = 0;
+    }
+    var actualScore = $('#taskActualScore .score').val();
+    if (isStrEmptyOrUndefined(actualScore)) {
+        actualScore = 0;
+    }
+    var state = $('#updateCheck').val();
+    if (state == 3) {
+        list.ActualHour = actualHour;
+        list.ActualMin = actualMin;
+        list.ActualScore = actualScore;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showDetailModal(_taskDetailId);
+                }
+            });
+    }
+    showConfirm("保存", doSth);
+}
+
+//检验详情保存修改
+function updateCheckDetail() {
+    var opType = 1028;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    if (!_isClick) {
+        layer.msg('请先修改数据');
+        return;
+    }
+    var desc = $('#checkDesc').val();
+    var estimatedHour = $('#checkEstimatedTime .hour').val();
+    if (isStrEmptyOrUndefined(estimatedHour)) {
+        estimatedHour = 0;
+    }
+    var estimatedMin = $('#checkEstimatedTime .minute').val();
+    if (isStrEmptyOrUndefined(estimatedMin)) {
+        estimatedMin = 0;
+    }
+    var score = $('#checkScore .score').val();
+    if (isStrEmptyOrUndefined(score)) {
+        score = 0;
+    }
+    var list = {
+        Id: _taskDetailId,
+        EstimatedHour: estimatedHour,
+        EstimatedMin: estimatedMin,
+        Score: score,
+        Desc: desc
+    }
+    var actualHour = $('#checkActualTime .hour').val();
+    if (isStrEmptyOrUndefined(actualHour)) {
+        actualHour = 0;
+    }
+    var actualMin = $('#checkActualTime .minute').val();
+    if (isStrEmptyOrUndefined(actualMin)) {
+        actualMin = 0;
+    }
+    var actualScore = $('#checkActualScore .score').val();
+    if (isStrEmptyOrUndefined(actualScore)) {
+        actualScore = 0;
+    }
+    var checkResult = $('#checkResultDesc .checkResult').val();
+    if (isStrEmptyOrUndefined(checkResult)) {
+        layer.msg('请填写检验情况');
+        return;
+    }
+    var state = $('#updateTask').val();
+    if (state == 3) {
+        list.ActualHour = actualHour;
+        list.ActualMin = actualMin;
+        list.ActualScore = actualScore;
+        list.CheckResultDesc = checkResult;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    showDetailModal(_taskDetailId);
+                }
+            });
+    }
+    showConfirm("保存", doSth);
+}
+
+//任务启动停止
+function taskStartStop(isStart, tId, itemName) {
+    var opType = isStart ? 1032 : 1033;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({ tId });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskList();
+                }
+            });
+    }
+    showConfirm(`${isStart ? '启动' : '停止'}任务：${itemName}`, doSth);
+}
+
+//删除任务
+function delTask(tId, itemName) {
+    var opType = 1030;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({ tId });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskList();
+                }
+            });
+    }
+    showConfirm(`删除任务：${itemName}`, doSth);
+}
+
+//上移任务
+function upTask() {
+
+}
+
+//添加任务
+function addTask() {
+
 }

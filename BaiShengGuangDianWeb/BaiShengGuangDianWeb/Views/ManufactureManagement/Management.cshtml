@@ -109,4 +109,234 @@
             </div>
         </div>
     </div>
+    <!-- 任务查看模态框 -->
+    <div class="modal fade" tabindex="-1" id="showTaskModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">任务查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" style="overflow-y: auto">
+                            @*<div style="max-width: 600px;margin: auto">*@
+                            <table class="table table-bordered table-responsive" style="margin: 0" id="taskDetailTable">
+                                <thead></thead>
+                                <tbody>
+                                    <tr class="success">
+                                        <td class="mbold">任务名称</td>
+                                        <td id="taskName"></td>
+                                        <td class="mbold">所属计划号</td>
+                                        <td id="taskPlan"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">操作工</td>
+                                        <td id="taskProcessor"></td>
+                                        <td class="mbold">下发员</td>
+                                        <td id="taskAssignor"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">任务状态</td>
+                                        <td id="taskState"></td>
+                                        <td class="mbold">返工情况</td>
+                                        <td id="taskRedo"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">预计用时</td>
+                                        <td id="taskEstimatedTime">
+                                            <span class="textOn"></span>
+                                            <div class="flexStyle textIn hidden" style="justify-content: center; width: 135px;margin: auto">
+                                                <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                                <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                            </div>
+                                        </td>
+                                        <td class="mbold">绩效分</td>
+                                        <td id="taskScore">
+                                            <span class="textOn"></span>
+                                            <input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" style="width:80px;margin:auto">
+                                        </td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">实际开始</td>
+                                        <td id="taskActualStartTime"></td>
+                                        <td class="mbold">实际结束</td>
+                                        <td id="taskActualEndTime"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">实际用时</td>
+                                        <td id="taskActualTime">
+                                            <span class="textOn"></span>
+                                            <div class="flexStyle textIn hidden" style="justify-content: center; width: 135px;margin: auto">
+                                                <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                                <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                            </div>
+                                        </td>
+                                        <td class="mbold">实际绩效分</td>
+                                        <td id="taskActualScore">
+                                            <span class="textOn"></span>
+                                            <input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" style="width:80px;margin:auto">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @*</div>*@
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">任务内容描述：</label>
+                            <textarea class="form-control" id="taskDesc" disabled="disabled" style="resize: vertical; height: 100px; overflow-y: scroll"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-warning btn-sm" id="updateTask">修改/取消</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateTaskDetail()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 检验查看模态框 -->
+    <div class="modal fade" tabindex="-1" id="showCheckModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">检验查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" style="overflow-y: auto">
+                            @*<div style="max-width: 600px;margin: auto">*@
+                            <table class="table table-bordered table-responsive" style="margin: 0" id="checkDetailTable">
+                                <thead></thead>
+                                <tbody>
+                                    <tr class="success">
+                                        <td class="mbold">检验单名称</td>
+                                        <td id="checkName"></td>
+                                        <td class="mbold">所属计划号</td>
+                                        <td id="checkPlan"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">任务名称</td>
+                                        <td id="checkTaskName"></td>
+                                        <td class="mbold">任务操作工</td>
+                                        <td id="checkTaskProcessor"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">返工情况</td>
+                                        <td id="checkRedo"></td>
+                                        <td class="mbold">检验情况</td>
+                                        <td id="checkResultDesc">
+                                            <span class="textOn"></span>
+                                            <input type="text" class="form-control checkResult textIn hidden" maxlength="200">
+                                        </td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">检验人</td>
+                                        <td id="checkProcessor"></td>
+                                        <td class="mbold">下发员</td>
+                                        <td id="checkAssignor"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">预计用时</td>
+                                        <td id="checkEstimatedTime">
+                                            <span class="textOn"></span>
+                                            <div class="flexStyle textIn hidden" style="justify-content: center; width: 135px;margin: auto">
+                                                <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                                <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                            </div>
+                                        </td>
+                                        <td class="mbold">绩效分</td>
+                                        <td id="checkScore">
+                                            <span class="textOn"></span>
+                                            <input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" style="width:80px;margin:auto">
+                                        </td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">实际开始</td>
+                                        <td id="checkActualStartTime"></td>
+                                        <td class="mbold">实际结束</td>
+                                        <td id="checkActualEndTime"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">实际用时</td>
+                                        <td id="checkActualTime">
+                                            <span class="textOn"></span>
+                                            <div class="flexStyle textIn hidden" style="justify-content: center; width: 135px;margin: auto">
+                                                <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                                                <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')">
+                                                <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                                            </div>
+                                        </td>
+                                        <td class="mbold">实际绩效分</td>
+                                        <td id="checkActualScore">
+                                            <span class="textOn"></span>
+                                            <input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\d]/g,'')" style="width:80px;margin:auto">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @*</div>*@
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">任务内容描述：</label>
+                            <textarea class="form-control" id="checkDesc" disabled="disabled" style="resize: vertical; height: 100px; overflow-y: scroll"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="checkDetailList"></table>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-warning btn-sm" id="updateCheck">修改/取消</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateCheckDetail()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 图片查看页面模态框 -->
+    <div class="modal fade" tabindex="-1" id="showImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">图片查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group">
+                            <label class="control-label textOverTop" id="imgOld">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="imgOldList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>

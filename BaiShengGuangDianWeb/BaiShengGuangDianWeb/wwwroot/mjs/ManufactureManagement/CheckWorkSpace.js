@@ -93,7 +93,7 @@ function getCheckTask() {
                 { "data": "Desc", "title": "检验说明", "render": desc, "sClass": "no-padding" },
                 { "data": null, "title": "检验时间", "render": checkTime },
                 { "data": null, "title": "检验结果", "render": result },
-                { "data": null, "title": "拍照", "render": img }
+                { "data": null, "title": "图片", "render": img }
             ],
             "createdRow": function (row, data, index) {
                 var time = data.CheckTime;
@@ -151,10 +151,7 @@ function updateCheckTask(id, result) {
     var tr = $(this).parents('tr');
     var desc = tr.find('.desc').val();
     var checkTime = tr.find('.checkTime').val();
-    if (isStrEmptyOrUndefined(checkTime)) {
-        layer.msg('请选择检验时间');
-        return;
-    }
+    checkTime = isStrEmptyOrUndefined(checkTime) ? getFullTime() : `${checkTime} 00:00:00`;
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
