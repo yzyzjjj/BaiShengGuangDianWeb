@@ -339,7 +339,7 @@ function taskTrData() {
             <div class="flexStyle textIn hidden" style="width: 240px;margin:auto"><select class="ms2 form-control group">${results[0]}</select><select class="ms2 form-control processor">${results[1]}</select></div>
             </td>
             <td><span class="textOn">{2}</span><div class="textIn hidden" style="width: 120px;margin:auto"><select class="ms2 form-control module">${results[2]}</select></div></td>
-            <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div>${results[3]}</div></div></td>
+            <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="20"><div>${results[3]}</div></div></td>
             <td><span class="textOn">{4}</span>
             <div class="flexStyle textIn hidden" style="width:140px;margin:auto">
             <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')">
@@ -360,7 +360,7 @@ function taskTrData() {
             <div class="flexStyle" style="width: 240px;margin:auto"><select class="ms2 form-control group">${results[0]}</select><select class="ms2 form-control processor">${results[1]}</select></div>
             </td>
             <td><div style="width: 120px;margin:auto"><select class="ms2 form-control module">${results[2]}</select></div></td>
-            <td><div style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div class="hidden">${results[3]}</div></div></td>
+            <td><div style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="20"><div class="hidden">${results[3]}</div></div></td>
             <td>
             <div class="flexStyle" style="width:140px;margin:auto">
             <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">

@@ -73,7 +73,65 @@
             $(this).val('0');
         }
     });
+    $('#taskList').on('click', '.delAddTask', function () {
+        var tr = $(this).parents('tr');
+        setNumTotalOrder(tr, -1);
+        $('#taskList .addTask').prop('disabled', false);
+        tr.remove();
+    });
+    $('#taskList').on('input','.minute', function () {
+        var v = $(this).val();
+        if (parseInt(v) > 59) {
+            $(this).val(59);
+        }
+    });
+    $('#taskList').on('focus','.toZero', function () {
+        var v = $(this).val();
+        if (v == 0) {
+            $(this).val('');
+        }
+    });
+    $('#taskList').on('blur','.toZero', function () {
+        var v = $(this).val();
+        if (isStrEmptyOrUndefined(v)) {
+            $(this).val('0');
+        }
+    });
+    $('#taskList').on('select2:select', '.group', function () {
+        var v = $(this).val();
+        var processorEl = $(this).parents('tr').find('.processor');
+        setProcessorSelect(v, processorEl);
+    });
+    $('#taskList').on('select2:select', '.module', function () {
+        var module = $(this).find('option:selected').attr('isCheck');
+        var tr = $(this).parents('tr');
+        parseInt(module) ? tr.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : tr.find('.taskNameSelect').parent().addClass('hidden').siblings().removeClass('hidden');
+    });
+    $('#taskList').on('input', '.relation', function () {
+        var v = $(this).val();
+        v = parseInt(v);
+        var tr = $(this).parents('tr');
+        var num = tr.find('.order').text();
+        num = parseInt(num) - 1;
+        if (v > num) {
+            $(this).val(num);
+        }
+    });
     $('#taskTable').css('maxHeight', innerHeight * 0.7);
+}
+
+//设置操作员选项
+function setProcessorSelect(groupId, el) {
+    el.empty();
+    var op = '<option value = "{0}">{1}</option>';
+    var ops = '';
+    for (var i = 0, len = _processor.length; i < len; i++) {
+        var d = _processor[i];
+        if (groupId == d.GroupId) {
+            ops += op.format(d.ProcessorId, d.Processor);
+        }
+    }
+    el.append(ops);
 }
 
 //是否点击修改/取消
@@ -106,7 +164,7 @@ function getPlan() {
 }
 
 //获取分组
-function getGroup() {
+function getGroup(resolve) {
     var opType = 1077;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -122,28 +180,35 @@ function getGroup() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#groupSelect').empty();
         var list = ret.datas;
         var option = '<option value="{0}">{1}</option>';
-        var options = '<option value=0>所有分组</option>';
+        var options = '';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Group);
         }
-        $('#groupSelect').append(options);
-        getProcessor();
+        if (resolve == null) {
+            $('#groupSelect').empty();
+            $('#groupSelect').append('<option value=0>所有分组</option>');
+            $('#groupSelect').append(options);
+            getProcessor();
+        } else {
+            resolve(options);
+        }
+
     });
 }
 
+var _processor = null;
 //获取操作员
-function getProcessor() {
+function getProcessor(resolve) {
     var opType = 1081;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
         return;
     }
-    var groupId = $('#groupSelect').val();
-    if (isStrEmptyOrUndefined(groupId)) {
+    var groupId = resolve == null ? $('#groupSelect').val() : 0;
+    if (groupId == null) {
         return;
     }
     var data = {}
@@ -157,20 +222,25 @@ function getProcessor() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#processorSelect').empty();
-        var list = ret.datas;
-        var len = list.length;
+        _processor = ret.datas;
+        var len = _processor.length;
         if (!len) {
             return;
         }
         var option = '<option value="{0}">{1}</option>';
-        var options = '<option value=0>所有人</option>';
+        var options = '';
         for (var i = 0; i < len; i++) {
-            var d = list[i];
+            var d = _processor[i];
             options += option.format(d.ProcessorId, d.Processor);
         }
-        $('#processorSelect').append(options);
-    });
+        if (resolve == null) {
+            $('#processorSelect').empty();
+            $('#processorSelect').append('<option value=0>所有人</option>');
+            $('#processorSelect').append(options);
+        } else {
+            resolve(options);
+        }
+    }, 0);
 }
 
 //获取任务状态
@@ -247,6 +317,7 @@ function showLogModel() {
     });
 }
 
+var _taskData = null;
 //获取任务管理列表
 function getTaskList() {
     var opType = 1026;
@@ -254,6 +325,7 @@ function getTaskList() {
         layer.msg('没有权限');
         return;
     }
+    _taskData = {};
     var planId = $('#planSelect').val();
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg('请选择计划号');
@@ -298,6 +370,9 @@ function getTaskList() {
         for (i = 0; i < len; i++) {
             var d = rData[i];
             state = d.State;
+            var id = d.Id;
+            _taskData[id] = d;
+            var fromOrder = d.TotalOrder;
             var tr = `<tr>
                     <td class="num">${i + 1}</td>
                     <td>${d.Processor}</td>
@@ -305,20 +380,20 @@ function getTaskList() {
                     <td>${d.StateDesc}</td>
                     <td>${d.Module}</td>
                     <td>${d.Item}</td>
-                    <td>${d.TotalOrder}</td>
+                    <td class="totalOrder">${fromOrder}</td>
                     <td>${d.Order}</td>
                     <td>${d.Relation}</td>
-                    <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask()">上移</button>' : ''}</td>
+                    <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
                     <td>${d.ActualStartTime}</td>
                     <td>${d.ActualTime}</td>
                     <td>${d.ActualScore}</td>
-                    <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${d.Id})">详情</button></td>
+                    <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${id})">详情</button></td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="delTask(${d.Id},\'${d.Item}\')"><i class="fa fa-minus"></i></button>
-                        ${state == 3 ? '' : state == 4 ? '<button type="button" class="btn btn-primary btn-sm" onclick="taskStartStop(1,{0},\'{1}\')">启动</button>'.format(d.Id, d.Item) : '<button type="button" class="btn btn-warning btn-sm" onclick="taskStartStop(0,{0},\'{1}\')">停止</button>'.format(d.Id, d.Item)}
+                        <button type="button" class="btn btn-success btn-sm addTask" onclick="addTask.call(this,${id})"><i class="fa fa-plus"></i></button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="delTask(${id},\'${d.Item}\')"><i class="fa fa-minus"></i></button>
+                        ${state == 3 ? '' : state == 4 ? '<button type="button" class="btn btn-primary btn-sm" onclick="taskStartStop(1,{0},\'{1}\')">启动</button>'.format(id, d.Item) : '<button type="button" class="btn btn-warning btn-sm" onclick="taskStartStop(0,{0},\'{1}\')">停止</button>'.format(id, d.Item)}
                     </td>
                 </tr>`;
             ops += tr;
@@ -568,20 +643,20 @@ function updateTaskDetail() {
         Score: score,
         Desc: desc
     }
-    var actualHour = $('#taskActualTime .hour').val();
-    if (isStrEmptyOrUndefined(actualHour)) {
-        actualHour = 0;
-    }
-    var actualMin = $('#taskActualTime .minute').val();
-    if (isStrEmptyOrUndefined(actualMin)) {
-        actualMin = 0;
-    }
-    var actualScore = $('#taskActualScore .score').val();
-    if (isStrEmptyOrUndefined(actualScore)) {
-        actualScore = 0;
-    }
-    var state = $('#updateCheck').val();
+    var state = $('#updateTask').val();
     if (state == 3) {
+        var actualHour = $('#taskActualTime .hour').val();
+        if (isStrEmptyOrUndefined(actualHour)) {
+            actualHour = 0;
+        }
+        var actualMin = $('#taskActualTime .minute').val();
+        if (isStrEmptyOrUndefined(actualMin)) {
+            actualMin = 0;
+        }
+        var actualScore = $('#taskActualScore .score').val();
+        if (isStrEmptyOrUndefined(actualScore)) {
+            actualScore = 0;
+        }
         list.ActualHour = actualHour;
         list.ActualMin = actualMin;
         list.ActualScore = actualScore;
@@ -632,25 +707,25 @@ function updateCheckDetail() {
         Score: score,
         Desc: desc
     }
-    var actualHour = $('#checkActualTime .hour').val();
-    if (isStrEmptyOrUndefined(actualHour)) {
-        actualHour = 0;
-    }
-    var actualMin = $('#checkActualTime .minute').val();
-    if (isStrEmptyOrUndefined(actualMin)) {
-        actualMin = 0;
-    }
-    var actualScore = $('#checkActualScore .score').val();
-    if (isStrEmptyOrUndefined(actualScore)) {
-        actualScore = 0;
-    }
-    var checkResult = $('#checkResultDesc .checkResult').val();
-    if (isStrEmptyOrUndefined(checkResult)) {
-        layer.msg('请填写检验情况');
-        return;
-    }
-    var state = $('#updateTask').val();
+    var state = $('#updateCheck').val();
     if (state == 3) {
+        var actualHour = $('#checkActualTime .hour').val();
+        if (isStrEmptyOrUndefined(actualHour)) {
+            actualHour = 0;
+        }
+        var actualMin = $('#checkActualTime .minute').val();
+        if (isStrEmptyOrUndefined(actualMin)) {
+            actualMin = 0;
+        }
+        var actualScore = $('#checkActualScore .score').val();
+        if (isStrEmptyOrUndefined(actualScore)) {
+            actualScore = 0;
+        }
+        var checkResult = $('#checkResultDesc .checkResult').val();
+        if (isStrEmptyOrUndefined(checkResult)) {
+            layer.msg('请填写检验情况');
+            return;
+        }
         list.ActualHour = actualHour;
         list.ActualMin = actualMin;
         list.ActualScore = actualScore;
@@ -716,11 +791,261 @@ function delTask(tId, itemName) {
 }
 
 //上移任务
-function upTask() {
+function upTask(fromOrder, toOrder, fromId, toId) {
+    var opType = 1034;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var fromData = _taskData[fromId];
+    var toData = _taskData[toId];
+    if (fromData.Processor == toData.Processor && toData.State == 1) {
+        layer.msg('不能上移到该操作工进行中的任务之前');
+        return;
+    }
+    if (fromData.Plan == toData.Plan && fromData.Relation + 1 == toData.Order) {
+        layer.msg('不能上移到同计划下的关联任务之前');
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            FromOrder: fromOrder,
+            ToOrder: toOrder
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskList();
+                }
+            });
+    }
+    showConfirm(`上移任务：${fromData.Item}`, doSth);
+}
 
+//获取模块名
+function getModule(resolve) {
+    var opType = 1058;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas;
+        var option = '<option value = "{0}" isCheck = "{2}">{1}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Id, d.Module, d.IsCheck);
+        }
+        if (resolve != null) {
+            resolve(options);
+        }
+    }, 0);
+}
+
+//获取检验单
+function getTaskName(resolve) {
+    var opType = 1066;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        menu: true
+    });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas;
+        var option = '<option value = "{0}">{1}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Id, d.Check);
+        }
+        options = `<select class="ms2 form-control taskNameSelect">${options}</select>`;
+        if (resolve != null) {
+            resolve(options);
+        }
+    }, 0);
 }
 
 //添加任务
-function addTask() {
+function addTask(id) {
+    var groupSelect = new Promise(function (resolve) {
+        getGroup(resolve);
+    });
+    var processorSelect = new Promise(function (resolve) {
+        getProcessor(resolve);
+    });
+    var moduleSelect = new Promise(function (resolve) {
+        getModule(resolve);
+    });
+    var taskNameSelect = new Promise(function (resolve) {
+        getTaskName(resolve);
+    });
+    Promise.all([groupSelect, processorSelect, moduleSelect, taskNameSelect]).then((results) => {
+        var trData = _taskData[id];
+        var trEl = $(this).parents('tr');
+        var num = parseInt(trEl.find('.num').text());
+        var tr = `<tr>
+                <td class="num">${num + 1}</td>
+                <td>
+                    <div class="flexStyle" style="width: 240px;margin:auto">
+                        <select class="ms2 form-control group">${results[0]}</select>
+                        <select class="ms2 form-control processor">${results[1]}</select>
+                    </div>
+                </td>
+                <td>${trData.Plan}</td>
+                <td>等待中</td>
+                <td>
+                    <div style="width: 120px;margin:auto">
+                        <select class="ms2 form-control module">${results[2]}</select>
+                    </div>
+                </td>
+                <td>
+                    <div style="width: 120px;margin:auto">
+                        <input type="text" class="form-control text-center taskName" maxlength="20"><div class="taskNameTwo">${results[3]}</div>
+                    </div>
+                </td>
+                <td class="totalOrder">${trData.TotalOrder + 1}</td>
+                <td class="order">${trData.Order + 1}</td>
+                <td><input type="text" class="form-control text-center relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+                <td></td>
+                <td>
+                    <div class="flexStyle" style="width:140px;margin:auto">
+                        <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+                        <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                        <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+                        <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                    </div>
+                </td>
+                <td><input type="text" class="form-control text-center score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm delAddTask"><i class="fa fa-minus"></i></button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="updateAddTask.call(this,${trData.PlanId},${trData.TotalOrder})">保存</button>
+                </td>
+            </tr>`;
+        trEl.after(tr);
+        var addTr = trEl.next();
+        addTr.find('.ms2').select2();
+        var isCheck = parseInt(addTr.find('.module option:selected').attr('ischeck'));
+        addTr.find(isCheck ? '.taskName' : '.taskNameTwo').addClass('hidden');
+        setNumTotalOrder(addTr, 1);
+        $('#taskList .addTask').prop('disabled', true);
+    });
+}
 
+//序号 总顺序设置
+function setNumTotalOrder(tr, count) {
+    var trs = tr.nextAll();
+    for (var i = 0, len = trs.length; i < len; i++) {
+        var trNext = trs.eq(i);
+        var numEl = trNext.find('.num');
+        numEl.text(parseInt(numEl.text()) + count);
+        var totalOrder = trNext.find('.totalOrder');
+        totalOrder.text(parseInt(totalOrder.text()) + count);
+    }
+}
+
+//保存添加的任务项
+function updateAddTask(planId, totalOrder) {
+    var opType = 1029;
+    if (!checkPermission(opType)) {
+        layer.msg('没有权限');
+        return;
+    }
+    var tr = $(this).parents('tr');
+    var person = tr.find('.processor').val();
+    if (isStrEmptyOrUndefined(person)) {
+        layer.msg('请选择操作员');
+        return;
+    }
+    var moduleId = tr.find('.module').val();
+    if (isStrEmptyOrUndefined(moduleId)) {
+        layer.msg('请选择模块名');
+        return;
+    }
+    var isCheck = !!parseInt(tr.find('.module').find(`option[value=${moduleId}]`).attr('isCheck'));
+    var checkId, item;
+    if (isCheck) {
+        checkId = tr.find('.taskNameSelect').val();
+        if (isStrEmptyOrUndefined(checkId)) {
+            layer.msg('请选择检验任务');
+            return;
+        }
+        checkId = parseInt(checkId);
+        item = tr.find(`.taskNameSelect option[value=${checkId}]`).text();
+    } else {
+        checkId = 0;
+        item = tr.find('.taskName').val();
+        if (isStrEmptyOrUndefined(item)) {
+            layer.msg('任务名不能为空');
+            return;
+        }
+    }
+    var hour = tr.find('.hour').val();
+    if (isStrEmptyOrUndefined(hour)) {
+        hour = 0;
+    }
+    hour = parseInt(hour);
+    var minute = tr.find('.minute').val();
+    if (isStrEmptyOrUndefined(minute)) {
+        minute = 0;
+    }
+    minute = parseInt(minute);
+    var score = tr.find('.score').val();
+    if (isStrEmptyOrUndefined(score)) {
+        score = 0;
+    }
+    score = parseInt(score);
+    var relation = tr.find('.relation').val();
+    if (isStrEmptyOrUndefined(relation)) {
+        relation = 0;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            Person: person,
+            PlanId: planId,
+            ModuleId: moduleId,
+            IsCheck: isCheck,
+            CheckId: checkId,
+            Item: item,
+            TotalOrder: totalOrder,
+            EstimatedHour: hour,
+            EstimatedMin: minute,
+            Score: score,
+            Relation: relation
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getTaskList();
+                }
+            });
+    }
+    showConfirm("保存", doSth);
 }
