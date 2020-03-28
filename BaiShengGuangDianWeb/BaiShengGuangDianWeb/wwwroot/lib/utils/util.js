@@ -1553,17 +1553,12 @@ function printCode(contentId, iframe, hiddenId) {
         alert("请使用google或者360浏览器打印");
         return;
     } else {//其它浏览器使用lodop
-        //执行隐藏打印区域不需要打印的内容
-        if (!isStrEmptyOrUndefined(hiddenId)) {
-            document.getElementById(hiddenId).style.display = "none";
-        }
         var printData = document.getElementById(contentId).innerHTML;
-        document.getElementById(iframe).contentDocument.body.innerHTML = printData;
+        var iframeDom = document.getElementById(iframe).contentDocument;
+        iframeDom.body.innerHTML = printData;
+        //需要隐藏的内容
+        iframeDom.getElementById(hiddenId).style.display = 'none';
         window.frames[iframe].print();
-        //打印结束后，放开隐藏内容
-        if (!isStrEmptyOrUndefined(hiddenId)) {
-            document.getElementById(hiddenId).style.display = "block";
-        }
     }
 }
 

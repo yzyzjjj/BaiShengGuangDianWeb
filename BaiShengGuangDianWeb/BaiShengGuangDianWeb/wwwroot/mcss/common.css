@@ -238,6 +238,9 @@ select {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.text-nowrap {
+    white-space: nowrap;
+}
 
 .qrcode-box:after {
     -webkit-animation: rotateAnim linear 3.68s infinite;

@@ -1,5 +1,4 @@
-﻿
-function padLeft0(obj) {
+﻿function padLeft0(obj) {
     return obj.toString().replace(/^[0-9]{1}$/, "0" + obj);
 }
 
@@ -160,5 +159,16 @@ function exceedTime(date) {
         return new Date(date).getTime() > new Date(getDate()).getTime();
     } else {
         return new Date(getDate() + " " + date).getTime() > new Date(getFullTime()).getTime();
+    }
+}
+
+//获取当前月份范围
+function getMonthScope() {
+    var date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    return {
+        start: `${year}-${padLeft0(month)}-01`,
+        end: `${year}-${padLeft0(month)}-${new Date(year, month, 0).getDate()}`
     }
 }
