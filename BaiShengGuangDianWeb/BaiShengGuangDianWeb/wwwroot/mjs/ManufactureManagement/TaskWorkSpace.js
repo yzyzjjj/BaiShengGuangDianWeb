@@ -127,8 +127,9 @@ function getAccountTask() {
         var d = ret.datas[0];
         _taskData.TaskId = d.Id;
         d.IsRedo ? $('#redo').removeClass('hidden') : $('#redo').addClass('hidden');
-        $('#startBtn').prop('disabled', !(d.State == 0 || d.State == 2));
-        $('#pauseBtn,#finishBtn').prop('disabled', d.State != 1);
+        var state = d.State;
+        $('#startBtn').prop('disabled', !(state == 0 || state == 2));
+        $('.finish').prop('disabled', state != 1);
         $('#taskName').text(d.Item);
         $('#planName').text(d.Plan);
         $('#actualStartTime').text(d.ActualStartTime);
