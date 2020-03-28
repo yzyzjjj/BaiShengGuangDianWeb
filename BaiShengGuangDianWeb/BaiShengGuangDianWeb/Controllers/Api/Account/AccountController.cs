@@ -1,4 +1,5 @@
 ﻿using BaiShengGuangDianWeb.Base.Helper;
+using BaiShengGuangDianWeb.Base.Server;
 using BaiShengGuangDianWeb.Models.Account;
 using BaiShengGuangDianWeb.Models.RequestBody;
 using Microsoft.AspNetCore.Authorization;
@@ -60,12 +61,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                     });
                     if (res.Contains("0"))
                     {
+                        var role = ServerConfig.WebDb.Query<int>("SELECT Id FROM `roles` WHERE New = 1;");
                         var info = new AccountInfo
                         {
                             Account = loginBody.Account,
                             Password = AccountHelper.GenAccountPwdByOne(loginBody.Account, loginBody.Password),
                             Name = loginBody.Account,
-                            Role = "4",
+                            Role = role?.Join(",") ?? "",
                             EmailType = "",
                             EmailAddress = "",
                             SelfPermissions = "",
