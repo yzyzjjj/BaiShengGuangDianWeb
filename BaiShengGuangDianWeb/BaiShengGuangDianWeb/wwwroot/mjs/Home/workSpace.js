@@ -701,7 +701,7 @@ function reportFault() {
             var op = $("#faultCode").find(`option[value=${code}]`);
             var codeId = op.attr("index");
             list.DeviceId = codeId;
-            faults.push(list);
+            faults.push($.extend({}, list));
             var admin = op.attr("id");
             admins.push({
                 Code: code,
@@ -1366,7 +1366,7 @@ function getLogList() {
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({ startTime: '2019-5-01', endTime: '2019-8-20', state });
+    data.opData = JSON.stringify({ startTime, endTime, state});
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1425,7 +1425,7 @@ function getLogList() {
             }
             var detailBtn = function (d) {
                 var op = '<button type="button" class="btn btn-{0} btn-sm" onclick="showLogDetailModel({2},{3})"}>{1}</button>';
-                return d.Score > 0 ? op.format('success', '查看', d.Id, 1) : op.format('primary', '评价', d.Id, 0);
+                return d.State == 3 && d.Score == 0 ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
             }
             $("#logList")
                 .DataTable({
@@ -1445,7 +1445,7 @@ function getLogList() {
                         { "data": "Priority", "title": "优先级", "render": priority },
                         { "data": null, "title": "状态", "render": stateDesc },
                         { "data": "Score", "title": "评分", "sClass": "text-primary" },
-                        { "data": "Proposer", "title": "维修工" },
+                        { "data": "Maintainer", "title": "维修工" },
                         { "data": "Phone", "title": "联系方式" },
                         { "data": "Remark", "title": "维修备注", "render": remark },
                         { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
@@ -1465,7 +1465,9 @@ function showLogDetailModel(logId, isLook) {
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({ qId: logId });
+    data.opData = JSON.stringify({
+        qId: logId
+    });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -1490,7 +1492,7 @@ function showLogDetailModel(logId, isLook) {
         $('#faultTypeText').text(d.FaultTypeName);
         $('#faultTimeText').text(d.FaultTime);
         $('#faultTypeDesc').text(d.FaultDescription);
-        $('#faultSup').text(d);
+        $('#faultSup').text(d.Fault1);
         var priority = d.Priority;
         var str = '', color = '';
         switch (priority) {
@@ -1508,14 +1510,14 @@ function showLogDetailModel(logId, isLook) {
                 break;
         }
         $('#priorityText').text(str).css('color', color);
-        $('#solveProposerText').text(d);
-        $('#actualFaultTypeText').text(d);
+        $('#solveProposerText').text(d.Maintainer);
+        $('#actualFaultTypeText').text(d.FaultTypeName1);
         var estimatedTime = d.EstimatedTime;
         $('#estimatedTimeText').text(estimatedTime == '0001-01-01 00:00:00' ? '' : estimatedTime.slice(0, estimatedTime.indexOf(' ')));
         var solveTime = d.SolveTime;
         $('#solveTimeText').text(solveTime == '0001-01-01 00:00:00' ? '' : solveTime.slice(0, solveTime.indexOf(' ')));
         $('#remark').text(d.Remark);
-        $('#solvePlan').text(d);
+        $('#solvePlan').text(d.FaultSolver);
         $('#detailImgList').empty();
         if (d.ImageList > 0) {
             data = {
@@ -1565,9 +1567,10 @@ function updateComment() {
     data.opData = JSON.stringify({
         Id: id,
         Score: score,
-        Comment: comment
+        Comment: comment,
+        Account: getCookieTokenInfo().account
     });
-    ajaxPost("/Relay/Post", data, function(ret) {
+    ajaxPost("/Relay/Post", data, function (ret) {
         layer.msg(ret.errmsg);
         $('#showLogDetailModel').modal('hide');
         if (ret.errno == 0) {
