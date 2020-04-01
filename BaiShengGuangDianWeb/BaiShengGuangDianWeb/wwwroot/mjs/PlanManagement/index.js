@@ -73,7 +73,7 @@
             var codeEl = tr.find('.code');
             if (codeEl.children().length == 1) {
                 var html = '<div class="textOn" style="width:140px;margin:auto"><select class="ms2 form-control">{0}</select></div>';
-                var input = '<input type="text" class="form-control text-center textOn" maxlength="10" style="width:140px;margin:auto" value={0} oninput="value=value.replace(/[^\\d]/g,\'\')">';
+                var input = '<input type="text" class="form-control text-center textOn" value={0} onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto">';
                 codeEl.append(html.format(_codeOp));
                 tr.find('.category').append(html.format(_categoryOp));
                 tr.find('.name').append(html.format(_nameOp));
@@ -712,7 +712,7 @@ function addPlanTr(resolve) {
         '<td class="site"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{5}</select></div></td>' +
         '<td><button type="button" class="btn btn-info btn-sm pdModal">详情</button></td>' +
         '<td class="price">{6}</td>' +
-        '<td class="plannedConsumption"><span class="textIn hidden"></span><input type="text" class="form-control text-center" maxlength="10" style="width:140px;margin:auto" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+        '<td class="plannedConsumption"><span class="textIn hidden"></span><input type="text" class="form-control text-center" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>' +
         '<td class="actualConsumption"></td>' +
         '<td style="width:100px">' +
         '<button type="button" class="btn btn-danger btn-sm delPlanTr"><i class="fa fa-minus"></i></button>' +

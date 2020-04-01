@@ -289,7 +289,7 @@
         var codeEl = tr.find('.code');
         var codeId = codeEl.val();
         var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
-        if (!!actual && parseInt(v) > parseInt(actual)) {
+        if (!!actual && parseFloat(v) > parseFloat(actual)) {
             layer.msg('入库数量大于货品领用数量');
         }
     });
@@ -1558,7 +1558,7 @@ function addIncreaseList() {
             <td style="vertical-align: inherit;"><label class="control-label" id="inJg{0}"></label></td>
             <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
-            <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>
+            <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>
             <td>
                <div style="display:flex;width:160px">
                    <input class="form-control text-center" id="inCg{0}" maxlength="64" />
@@ -2008,11 +2008,11 @@ function increase() {
                 layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} option:checked`).text() + ": 入库数量不能为空");
                 return;
             }
-            if (parseInt(inRk) <= 0) {
+            if (parseFloat(inRk) <= 0) {
                 layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} option:checked`).text() + ": 入库数量需大于0");
                 return;
             }
-            if (!!actual && parseInt(inRk) > parseInt(actual)) {
+            if (!!actual && parseFloat(inRk) > parseFloat(actual)) {
                 layer.msg('入库数量大于货品领用数量');
                 return;
             }
@@ -2465,7 +2465,7 @@ function addConsumePlanList() {
                 <button type="button" class="btn btn-danger btn-xs pull-right" id="conPlanUpdateNum${xh}" onclick="consumePlanUpdateNum(0)"><i class="fa fa-refresh"></i></button>
             </td>
             <td>
-                <input class="form-control text-center" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
+                <input class="form-control text-center" id="conPlanConsume${xh}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" onchange="consumePlanActual()" maxlength="10">
             </td>
             <td>
                 <div style="display:flex;width:150px">
@@ -3125,7 +3125,7 @@ function addConsumeOtherList() {
                 <button type="button" class="btn btn-danger btn-xs pull-right" id="consumeOtherUpdateNum${xh}" onclick="consumeOtherUpdateNum(0)"><i class="fa fa-refresh"></i></button>
             </td>
             <td>
-                <input class="form-control text-center" id="consumeOtherConsume${xh}" value="0" onkeyup="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="consumeOtherActual()" maxlength="10">
+                <input class="form-control text-center" id="consumeOtherConsume${xh}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" onchange="consumeOtherActual()" maxlength="10">
             </td>
             <td>
                 <div style="display:flex;width:150px">
@@ -3614,7 +3614,7 @@ function consumeShow() {
     for (var i = 0; i < data.length; i++) {
         var d = data[i];
         if (parseInt(d.BillId) > 0) {
-            if (parseInt(d.Number) > 0) {
+            if (parseFloat(d.Number) > 0) {
                 if (!d.Exist) {
                     layer.msg(`货品编号：${d.Code}不存在, 无法领用`);
                     return;
@@ -3947,7 +3947,7 @@ function showReversalModel() {
                 '<td><div class="flexStyle" style="justify-content:center">' +
                 '<span class="number" style="padding-right:3px">{6}</span><button type="button" class="btn btn-danger btn-xs loadNumber"> <i class="fa fa-refresh"></i></button >' +
                 '</div></td>' +
-                '<td><input type="text" class="form-control text-center upNumber" maxlength="10" style="width:120px;margin:auto" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')"></td>' +
+                '<td><input type="text" class="form-control text-center upNumber" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10"></td>' +
                 '<td class="no-padding"><textarea class="form-control remark" maxlength="500" style="resize: vertical;width:150px;margin:auto"></textarea></td>' +
                 '<td><button type="button" class="btn btn-info btn-sm codeModal" onclick="showDetailModel({7})">详情</button></td>' +
                 '<td><button type="button" class="btn btn-success btn-sm codeLogModal" onclick="showLogModel(3,{7})">查看</button></td>' +
