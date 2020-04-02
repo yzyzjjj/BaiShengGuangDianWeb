@@ -24,18 +24,52 @@
         <div class="nav-tabs-custom" id="tabs">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li id="faultDeviceLi" class="hidden"><a href="#faultDevice" data-toggle="tab" aria-expanded="true">故障设备</a></li>
-                <li id="repairListLi" class="hidden" onclick="getRepairRecordList(true)"><a href="#repairList" data-toggle="tab" aria-expanded="false">维修记录</a></li>
+                <li id="repairListLi" class="hidden"><a href="#repairList" data-toggle="tab" aria-expanded="false">维修记录</a></li>
                 <li id="delFaultDeviceLi" class="hidden"><a href="#delFaultDevice" data-toggle="tab" aria-expanded="false">已删除故障设备</a></li>
                 <li id="delRepairLi" class="hidden"><a href="#delRepair" data-toggle="tab" aria-expanded="false">已删除维修记录</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane fade in" id="faultDevice">
                     <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools pull-right">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="getFaultDeviceList()">刷新</button>
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <div class="box-header with-border no-padding-bottom">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <div class="flexStyle" style="padding-bottom: 10px">
+                                    <label class="control-label text-nowrap">故障时间：</label>
+                                    <input type="text" class="form_date form-control text-center" id="faultSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <label class="control-label" style="margin: 5px">至</label>
+                                    <input type="text" class="form_date form-control text-center" id="faultETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                </div>
+                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="faultQuery">
+                                    <div class="flexStyle" style="flex-basis: 520px">
+                                        <div style="flex: 2">
+                                            <select class="ms2 form-control" id="faultDevicePro" style="width: 100%">
+                                                <option value="code">机台号</option>
+                                                <option value="faultType">故障类型</option>
+                                                <option value="priority">优先级</option>
+                                                <option value="state">状态</option>
+                                                <option value="maintainer">维修工</option>
+                                                <option value="solveTime">预计解决时间</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex: 1">
+                                            <select class="ms2 form-control" id="faultDeviceCond" style="width: 100%">
+                                                <option value="0">等于</option>
+                                                <option value="1">不等于</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control faultDeviceAttr" id="faultDeviceInput" placeholder="搜索" style="flex: 2">
+                                        <div class="faultDeviceAttr hidden" style="flex: 2" id="faultDeviceAttrSelect">
+                                            <select class="ms2 form-control" id="faultDeviceAttr" style="width: 100%"></select>
+                                        </div>
+                                        <div class="faultDeviceAttr flexStyle hidden" style="flex: 4" id="faultDeviceTime">
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="solveSTime" style="flex-basis: 140px; min-width: 100px">
+                                            <label class="control-label" style="margin: 5px">至</label>
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="solveETime" style="flex-basis: 140px; min-width: 100px">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" onclick="getFaultDeviceList()" style="margin-left: 2px">查询</button>
+                                    </div>
+                                    <button type="button" class="btn btn-danger hidden" onclick="delChange()" id="delChangeBtn" style="margin-left:2px">删除</button>
+                                </div>
                             </div>
                         </div>
                         <div class="box-body">
@@ -45,59 +79,51 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade in" id="delFaultDevice">
+                <div class="tab-pane fade in" id="repairList">
                     <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools pull-right">
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                            </div>
-                        </div>
-                        <div class="box-body">
-                            <div class="form-group form-inline">
-                                <label class="control-label">查询方式：</label>
-                                <div class="fHead" style="display: -webkit-inline-box">
-                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">时间范围查询</span></label>
+                        <div class="box-header with-border no-padding-bottom">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <div class="flexStyle" style="padding-bottom: 10px;">
+                                    <label class="control-label text-nowrap">解决时间：</label>
+                                    <input type="text" class="form_date form-control text-center" id="serviceLogSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <label class="control-label" style="margin: 5px">至</label>
+                                    <input type="text" class="form_date form-control text-center" id="serviceLogETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
                                 </div>
-                            </div>
-                            <div class="form-group form-inline">
-                                <div class="form-group form-inline" id="fTime">
-                                    <div class="form-group">
-                                        <label class="control-label" for="fStartDate">开始时间：</label>
-                                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                            <input type="text" id="fStartDate" class="form_date form-control" style="width: 130px;cursor:pointer">
-                                            <span>&nbsp;-&nbsp;</span>
-                                            <input type="text" id="fStartTime" class="form_time form-control" style="width: 100px;cursor:pointer">
+                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="serviceLogQuery">
+                                    <div class="flexStyle" style="flex-basis: 520px">
+                                        <div style="flex: 2">
+                                            <select class="ms2 form-control" id="serviceLogPro" style="width: 100%">
+                                                <option value="code">机台号</option>
+                                                <option value="faultTime">故障时间</option>
+                                                <option value="faultType">故障类型</option>
+                                                <option value="priority">优先级</option>
+                                                <option value="maintainer">维修工</option>
+                                                <option value="solveTime">预计解决时间</option>
+                                            </select>
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label" for="fEndDate">结束时间：</label>
-                                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                            <input type="text" id="fEndDate" class="form_date form-control" style="width: 130px;cursor:pointer">
-                                            <span>&nbsp;-&nbsp;</span>
-                                            <input type="text" id="fEndTime" class="form_time form-control" style="width: 100px;cursor:pointer">
+                                        <div style="flex: 1">
+                                            <select class="ms2 form-control" id="serviceLogCond" style="width: 100%">
+                                                <option value="0">等于</option>
+                                                <option value="1">不等于</option>
+                                            </select>
                                         </div>
+                                        <input type="text" class="form-control serviceAttr" id="serviceInput" placeholder="搜索" style="flex: 2">
+                                        <div class="serviceAttr hidden" style="flex: 2" id="serviceAttrSelect">
+                                            <select class="ms2 form-control" id="serviceAttr" style="width: 100%"></select>
+                                        </div>
+                                        <div class="serviceAttr flexStyle hidden" style="flex: 4" id="solveTime">
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="serSTime" style="flex-basis: 140px; min-width: 100px">
+                                            <label class="control-label" style="margin: 5px">至</label>
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="serETime" style="flex-basis: 140px; min-width: 100px">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" onclick="getServiceLogList()" style="margin-left: 2px">查询</button>
+                                    </div>
+                                    <div class="flexStyle" style="margin-left:2px">
+                                        <button type="button" class="btn btn-primary hidden" onclick="location.assign('/StatisticManagement/Fault')">统计</button>
+                                        <button type="button" class="btn btn-primary" onclick="showServiceLogModal()" id="addServiceLogBtn" style="margin-left:2px">添加</button>
+                                        <button type="button" class="btn btn-danger hidden" onclick="delServiceLog()" id="delServiceLogBtn" style="margin-left:2px">删除</button>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="control-label hidden" id="fBtn">所有内容：</label>
-                                    <button type="button" class="btn btn-primary" onclick="getDelFaultDeviceList()" style="margin-left: 4px">查询</button>
-                                </div>
-                            </div>
-                            <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="delFaultDeviceList"></table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="repairList" class="tab-pane fade in">
-                    <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools pull-right">
-                                <button type="button" class="btn btn-primary btn-sm" id="rChange" onclick="rChange(0, 1)">添加纪录</button>
-                                <button type="button" class="btn btn-primary btn-sm" onclick="getRepairRecordList()">刷新</button>
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                             </div>
                         </div>
                         <div class="box-body">
@@ -107,45 +133,100 @@
                         </div>
                     </div>
                 </div>
-                <div id="delRepair" class="tab-pane fade in">
+                <div id="delFaultDevice" class="tab-pane fade in">
                     <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"></h3>
-                            <div class="box-tools pull-right">
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <div class="box-header with-border no-padding-bottom">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <div class="flexStyle" style="padding-bottom: 10px">
+                                    <label class="control-label text-nowrap">故障时间：</label>
+                                    <input type="text" class="form_date form-control text-center" id="delFSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <label class="control-label" style="margin: 5px">至</label>
+                                    <input type="text" class="form_date form-control text-center" id="delFETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                </div>
+                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delFQuery">
+                                    <div class="flexStyle" style="flex-basis: 520px">
+                                        <div style="flex: 2">
+                                            <select class="ms2 form-control" id="delFPro" style="width: 100%">
+                                                <option value="code">机台号</option>
+                                                <option value="faultType">故障类型</option>
+                                                <option value="priority">优先级</option>
+                                                <option value="state">状态</option>
+                                                <option value="maintainer">维修工</option>
+                                                <option value="solveTime">预计解决时间</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex: 1">
+                                            <select class="ms2 form-control" id="delFCond" style="width: 100%">
+                                                <option value="0">等于</option>
+                                                <option value="1">不等于</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control delFAttr" id="delFInput" placeholder="搜索" style="flex: 2">
+                                        <div class="delFAttr hidden" style="flex: 2" id="delFAttrSelect">
+                                            <select class="ms2 form-control" id="delFAttr" style="width: 100%"></select>
+                                        </div>
+                                        <div class="delFAttr flexStyle hidden" style="flex: 4" id="delFTime">
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="delFSolveSTime" style="flex-basis: 140px; min-width: 100px">
+                                            <label class="control-label" style="margin: 5px">至</label>
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="delFSolveETime" style="flex-basis: 140px; min-width: 100px">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" onclick="getDelFaultDeviceList()" style="margin-left: 2px">查询</button>
+                                    </div>
+                                    <button type="button" class="btn btn-success hidden" onclick="delFRecover()" id="delFRecoverBtn" style="margin-left:2px">恢复</button>
+                                </div>
                             </div>
                         </div>
                         <div class="box-body">
-                            <div class="form-group form-inline">
-                                <label class="control-label">查询方式：</label>
-                                <div class="rHead" style="display: -webkit-inline-box">
-                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">时间范围查询</span></label>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="delFaultDeviceList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="delRepair" class="tab-pane fade in">
+                    <div class="box box-primary">
+                        <div class="box-header with-border no-padding-bottom">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <div class="flexStyle" style="padding-bottom: 10px;">
+                                    <label class="control-label text-nowrap">解决时间：</label>
+                                    <input type="text" class="form_date form-control text-center" id="delRepairSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <label class="control-label" style="margin: 5px">至</label>
+                                    <input type="text" class="form_date form-control text-center" id="delRepairETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                </div>
+                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delRepairQuery">
+                                    <div class="flexStyle" style="flex-basis: 520px">
+                                        <div style="flex: 2">
+                                            <select class="ms2 form-control" id="delRepairPro" style="width: 100%">
+                                                <option value="code">机台号</option>
+                                                <option value="faultTime">故障时间</option>
+                                                <option value="faultType">故障类型</option>
+                                                <option value="priority">优先级</option>
+                                                <option value="maintainer">维修工</option>
+                                                <option value="solveTime">预计解决时间</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex: 1">
+                                            <select class="ms2 form-control" id="delRepairCond" style="width: 100%">
+                                                <option value="0">等于</option>
+                                                <option value="1">不等于</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control delRepairAttr" id="delRepairInput" placeholder="搜索" style="flex: 2">
+                                        <div class="delRepairAttr hidden" style="flex: 2" id="delRepairAttrSelect">
+                                            <select class="ms2 form-control" id="delRepairAttr" style="width: 100%"></select>
+                                        </div>
+                                        <div class="delRepairAttr flexStyle hidden" style="flex: 4" id="delRepairTime">
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="delRepSTime" style="flex-basis: 140px; min-width: 100px">
+                                            <label class="control-label" style="margin: 5px">至</label>
+                                            <input type="text" class="form_date form-control text-center" autocomplete="off" id="delRepETime" style="flex-basis: 140px; min-width: 100px">
+                                        </div>
+                                        <button type="button" class="btn btn-primary" onclick="getDelServiceLogList()" style="margin-left: 2px">查询</button>
+                                    </div>
+                                    <button type="button" class="btn btn-success hidden" onclick="delRepairRecover()" id="delRepairRecoverBtn" style="margin-left:2px">恢复</button>
                                 </div>
                             </div>
-                            <div class="form-group form-inline">
-                                <div class="form-group form-inline" id="rTime">
-                                    <div class="form-group">
-                                        <label class="control-label" for="rStartDate">开始时间：</label>
-                                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                            <input type="text" id="rStartDate" class="form_date form-control" style="width: 130px;cursor:pointer">
-                                            <span>&nbsp;-&nbsp;</span>
-                                            <input type="text" id="rStartTime" class="form_time form-control" style="width: 100px;cursor:pointer">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label" for="rEndDate">结束时间：</label>
-                                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                            <input type="text" id="rEndDate" class="form_date form-control" style="width: 130px;cursor:pointer">
-                                            <span>&nbsp;-&nbsp;</span>
-                                            <input type="text" id="rEndTime" class="form_time form-control" style="width: 100px;cursor:pointer">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label hidden" id="rBtn">所有内容：</label>
-                                    <button type="button" class="btn btn-primary" onclick="getDelRepairList()" style="margin-left: 4px">查询</button>
-                                </div>
-                            </div>
+                        </div>
+                        <div class="box-body">
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="delRepairList"></table>
                             </div>
@@ -155,111 +236,139 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
-    <div class="modal fade" tabindex="-1" id="singleFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- 指派模态框 -->
+    <div class="modal fade" tabindex="-1" id="showDesignateModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">故障设备操作</h4>
-                    <label class="hidden" id="singleUpdateId"></label>
-                    <label class="hidden" id="singleUpdateState"></label>
-                    <label class="hidden" id="singleUpdateCodeId"></label>
+                    <h4 class="modal-title">指派</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group form-inline">
-                        <label class="control-label" for="singleFaultCode">机台号：</label>
-                        <input class="dd form-control" disabled="disabled" id="singleFaultCode">
-                        <div class="hidden" id="rFaultCodeDiv">
-                            <select class="form-control" style="width: 80%" id="rFaultCode" onchange="focusIn($(this))"></select>
+                    <div style="margin: auto;width:210px">
+                        <div class="form-group flexStyle" style="justify-content: flex-end">
+                            <label class="control-label text-nowrap">指派：</label>
+                            <div style="flex-basis: 150px">
+                                <select class="ms2 form-control" id="designateName" style="width:100%"></select>
+                            </div>
+                        </div>
+                        <div class="form-group flexStyle" style="justify-content: flex-end">
+                            <label class="control-label text-nowrap">优先级：</label>
+                            <div style="flex-basis: 150px">
+                                <select class="ms2 form-control" id="designatePro" style="width:100%">
+                                    <option value="0">低</option>
+                                    <option value="1">中</option>
+                                    <option value="2">高</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group" id="faultOtherDiv">
-                        <div class="form-group form-inline">
-                            <label class="control-label" for="faultOther">其他机台号：</label>
-                            <input type="text" class="form-control" id="faultOther" placeholder="请输入" maxlength="20">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="designate.call(this)" id="designateBtn">指派</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 添加修改维修记录模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showServiceLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="serviceLogTitle">添加维修记录</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">机台号：<span class="spanStyle isText" id="serLogCodeText"></span></label>
+                        <div class="noText" style="width:300px">
+                            <select class="ms2 form-control" style="width: 100%" id="serLogCode"></select>
                         </div>
                     </div>
-                    <div class="form-group form-inline">
-                        <label class="control-label" for="singleProposer">报修人：</label>
-                        <input class="dd form-control" disabled="disabled" id="singleProposer" maxlength="20">
-                        <label class="adt label-danger hidden" id="singleProposerTip"></label>
+                    <div class="form-group flexStyle noText" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">其他机台号：</label>
+                        <div class="flexStyle" style="width:300px">
+                            <select class="ms2 form-control" style="width: 50%" id="serLogWorkshop"></select>
+                            <input type="text" class="form-control" id="serLogCodeOther" placeholder="请输入" maxlength="20" style="width: 50%">
+                        </div>
                     </div>
-                    <div class="form-group form-inline">
-                        <label class="control-label" for="singleFaultDate">故障时间：</label>
-                        <span>
-                            <input type="text" id="singleFaultDate" disabled="disabled" class="dd form_date form-control" style="cursor: pointer">
-                        </span>
-                        <span>
-                            <input type="text" id="singleFaultTime" disabled="disabled" class="dd form_time form-control" style="cursor: pointer">
-                        </span>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">报修人：<span class="spanStyle isText" id="serLogProposerText"></span></label>
+                        <input class="form-control noText" id="serLogProposer" maxlength="20" style="flex-basis:140px">
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">故障时间：<span class="spanStyle isText" id="serLogFaultTimeText"></span></label>
+                        <div class="flexStyle noText" style="width: 240px">
+                            <input type="text" id="serLogFaultDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                            <input type="text" id="serLogFaultTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle isText" id="serLogFaultTypeText"></span></label>
+                        <div class="noText">
+                            <select class="ms2 form-control" style="width: 200px" id="serLogFaultType"></select>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="singleFaultType1">故障类型：</label>
-                        <select class="dd ms2 form-control" style="width: 88%" id="singleFaultType1"></select>
+                        <label class="control-label text-nowrap">故障描述：</label>
+                        <textarea class="form-control" id="serLogFaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="control-label" for="singleFaultDefaultDesc">故障类型描述：</label>
-                        <textarea class="form-control" id="singleFaultDefaultDesc" disabled="disabled" style="resize: vertical; height: 100px; overflow-y: scroll;" maxlength="1000"></textarea>
+                        <label class="control-label text-nowrap">补充：</label>
+                        <textarea class="form-control" id="serLogFaultSup" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label" for="singleFaultDesc">补充：</label>
-                        <textarea class="dd form-control" disabled="disabled" id="singleFaultDesc" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
-                    </div>
-                    <div class="form-group form-inline">
-                        <label class="control-label" for="singleFaultPriority">优先级：</label>
-                        <select class="dd form-control" id="singleFaultPriority" disabled="disabled">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">优先级：<span class="spanStyle isText" id="serLogPriorityText"></span></label>
+                        <select class="form-control noText" style="width: 100px" id="serLogPriority">
                             <option value="0">低</option>
                             <option value="1">中</option>
                             <option value="2">高</option>
                         </select>
                     </div>
-
-                    <div class="box hidden" id="solveDiv">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">指派人：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
+                        <div class="noText">
+                            <select class="ms2 form-control" style="width: 200px" id="serLogMaintainer"></select>
+                        </div>
+                    </div>
+                    <div class="box">
                         <div class="box-body">
-                            <div class="form-group form-inline">
-                                <label class="control-label" for="singleFaultSolver">解决人：</label>
-                                <input class="form-control" id="singleFaultSolver" maxlength="20">
-                                <label class="adt label-danger hidden" id="singleFaultSolverTip"></label>
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">解决人：</label>
+                                <input class="form-control" id="serLogFaultSolver" maxlength="20" style="flex-basis:140px">
                             </div>
-                            <div class="form-group form-inline">
-                                <label class="control-label" for="singleFaultDate">解决时间：</label>
-                                <span>
-                                    <input type="text" id="singleSolveDate" class="form_date form-control" style="cursor: pointer">
-                                </span>
-                                <span>
-                                    <input type="text" id="singleSolveTime" class="form_time form-control" style="cursor: pointer">
-                                </span>
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">解决时间：</label>
+                                <div class="flexStyle" style="width: 240px">
+                                    <input type="text" id="serLogSolveDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                                    <input type="text" id="serLogSolveTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                                </div>
                             </div>
-                            <div class="form-group form-inline">
-                                <label class="control-label" for="singleFaultType">故障类型：</label>
-                                <select class="form-control" id="singleFaultType" style="width: 88%"></select>
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">实际故障类型：</label>
+                                <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="singleSolvePlan">解决方案：</label>
-                                <textarea class="form-control" id="singleSolvePlan" style="resize: vertical; height: 200px; overflow-y: scroll;" maxlength="1000"></textarea>
+                                <label class="control-label text-nowrap">解决方案：</label>
+                                <textarea class="form-control" id="serLogSolvePlan" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary noText" onclick="addUpServiceLog(1)">添加</button>
+                    <button type="button" class="btn btn-primary isText" onclick="addUpServiceLog.call(this,0)" id="updateServiceLogBtn">修改</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(0)" id="singleChange">修改</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(1)" id="singleSure">确认故障</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(2)" id="singleRepairing">开始维修</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="singleChange(3)" id="singleRepaired">维修完成</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="recordChange(0)" id="recordChange">修改</button>
-                    <button type="button" class="db btn btn-primary hidden" onclick="recordChange(1)" id="recordAdd">添加</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 常见故障及解决方法模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="usuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -281,8 +390,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 添加常见故障及解决方法模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="addUsuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -312,8 +420,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 修改常见故障及解决方法模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="updateUsuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -347,8 +454,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 故障类型模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="faultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -370,8 +476,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 故障描述模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="faultTypeDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -383,11 +488,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
+                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="faultTypeNameDetail"></span></label>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label" for="faultTypeDetail">故障类型描述：</label>
                         <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
                     <div class="form-group hidden" id="faultTypeDetail1Div">
-                        <label class="control-label" for="faultTypeDetail1">补充：</label>
+                        <label class="control-label" for="faultTypeDetail1">故障补充：</label>
                         <textarea class="form-control" disabled="disabled" id="faultTypeDetail1" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
                 </div>
@@ -397,8 +505,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 添加故障类型模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="addFaultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -428,8 +535,7 @@
             </div>
         </div>
     </div>
-
-    <!-- 模态框（Modal） -->
+    <!-- 修改故障类型模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="updateFaultTypeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -463,7 +569,6 @@
             </div>
         </div>
     </div>
-
     <!-- 维修工管理模态框 -->
     <div class="modal fade" tabindex="-1" id="maintainerModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -490,7 +595,6 @@
             </div>
         </div>
     </div>
-
     <!-- 选择维修工模态框 -->
     <div class="modal fade" tabindex="-1" id="addMaintainerModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -526,6 +630,139 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" disabled="disabled" id="addMaintainerBtn" onclick="addMaintainer()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 故障详情模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showLogDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">机台号：<span class="spanStyle" id="logDevName"></span></label>
+                        <label class="control-label text-nowrap">报修人：<span class="spanStyle" id="logPerson"></span></label>
+                        <label class="control-label text-nowrap">故障时间：<span class="spanStyle" id="logFaultTime"></span></label>
+                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="logFaultType"></span></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">故障类型描述：</label>
+                        <textarea class="form-control" disabled="disabled" id="logFaultTypeDesc" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">故障补充：</label>
+                        <textarea class="form-control" disabled="disabled" id="logFaultSup" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">优先级：<span class="spanStyle" id="logPriority"></span></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 确认故障/开始维修模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showConfirmModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="confirmTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">预计解决时间：</label>
+                        <div class="flexStyle" style="width: 240px">
+                            <input type="text" id="confirmTime" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                            <input type="text" id="confirmHms" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">维修备注：</label>
+                        <textarea class="form-control" id="confirmDesc" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="db btn btn-danger" onclick="confirmFault.call(this,1)" id="confirmFaultBtn">确认故障</button>
+                    <button type="button" class="db btn btn-primary" onclick="confirmFault.call(this,2)" id="confirmStartBtn">开始维修</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 维修完成模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showServiceModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">维修完成</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">解决人：</label>
+                        <input type="text" class="form-control" id="servicePro" style="flex-basis: 140px; min-width: 100px">
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap: wrap">
+                        <label class="control-label text-nowrap">解决时间：</label>
+                        <div class="flexStyle" style="width: 240px">
+                            <input type="text" id="serviceTime" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                            <input type="text" id="serviceHms" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap: wrap">
+                        <label class="control-label text-nowrap">故障类型：</label>
+                        <select class="ms2 form-control" id="serviceFaultType" style="width: 150px"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">解决方案：</label>
+                        <textarea class="form-control" id="serviceDesc" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="service.call(this)" id="serviceBtn">维修完成</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 故障图片模态框 -->
+    <div class="modal fade" tabindex="-1" id="showFaultImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障图片</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group">
+                            <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="FaultImgName"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label text-nowrap">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="faultImgList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
                 </div>
             </div>
         </div>

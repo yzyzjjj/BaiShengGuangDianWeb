@@ -274,11 +274,6 @@ $(function () {
         if (e.keyCode == 13) {
             $(this).blur();
         };
-        $('.content').on("change", '.form_date', function () {
-            if (isStrEmptyOrUndefined($(this).val())) {
-                $(this).val(getDate());
-            }
-        });
     });
     $('.form_date').datepicker({
         language: 'zh-CN',

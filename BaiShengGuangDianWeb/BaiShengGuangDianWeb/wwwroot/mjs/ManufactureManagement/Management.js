@@ -43,7 +43,7 @@
                 $('#checkActualTime .hour').val(_taskDetailData.ActualHour);
                 $('#checkActualTime .minute').val(_taskDetailData.ActualMin);
                 $('#checkActualScore .score').val(_taskDetailData.ActualScore);
-                $('#checkResultDesc .checkResult').val(_taskDetailData.CheckResultDesc);
+                $('#checkResult').val(_taskDetailData.CheckResult);
             } else {
                 $('#checkActualTime .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
                 $('#checkActualScore .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
@@ -632,7 +632,7 @@ function updateTaskDetail() {
     if (isStrEmptyOrUndefined(estimatedMin)) {
         estimatedMin = 0;
     }
-    var score = $('#taskActualScore .score').val();
+    var score = $('#taskScore .score').val();
     if (isStrEmptyOrUndefined(score)) {
         score = 0;
     }
@@ -721,15 +721,15 @@ function updateCheckDetail() {
         if (isStrEmptyOrUndefined(actualScore)) {
             actualScore = 0;
         }
-        var checkResult = $('#checkResultDesc .checkResult').val();
+        var checkResult = $('#checkResult').val();
         if (isStrEmptyOrUndefined(checkResult)) {
-            layer.msg('请填写检验情况');
+            layer.msg('请选择检验情况');
             return;
         }
         list.ActualHour = actualHour;
         list.ActualMin = actualMin;
         list.ActualScore = actualScore;
-        list.CheckResultDesc = checkResult;
+        list.CheckResult = checkResult;
     }
     var doSth = function () {
         var data = {}
@@ -803,7 +803,7 @@ function upTask(fromOrder, toOrder, fromId, toId) {
         layer.msg('不能上移到该操作工进行中的任务之前');
         return;
     }
-    if (fromData.Plan == toData.Plan && fromData.Relation + 1 == toData.Order) {
+    if (fromData.Plan == toData.Plan && fromData.Relation == toData.Order) {
         layer.msg('不能上移到同计划下的关联任务之前');
         return;
     }

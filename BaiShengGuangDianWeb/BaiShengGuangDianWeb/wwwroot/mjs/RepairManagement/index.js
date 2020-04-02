@@ -1,5 +1,4 @@
 ﻿var permissionList = [];
-var getRepairRecordListFlag = false;
 function pageReady() {
     permissionList[100] = { uIds: [] };
     permissionList[400] = { uIds: ["getUsuallyFaultList"] };
@@ -13,7 +12,7 @@ function pageReady() {
     permissionList[411] = { uIds: [] };
     permissionList[412] = { uIds: ["repairListLi"] };
     permissionList[414] = { uIds: [] };
-    permissionList[415] = { uIds: ["rChange"] };
+    permissionList[415] = { uIds: ["addServiceLogBtn"] };
     permissionList[416] = { uIds: [] };
     permissionList[417] = { uIds: ["faultDeviceLi"] };
     permissionList[420] = { uIds: [] };
@@ -24,6 +23,8 @@ function pageReady() {
     permissionList[431] = { uIds: ["updateMaintainerBtn"] };
     permissionList[432] = { uIds: ["showAddMaintainerModelBtn"] };
     permissionList[433] = { uIds: ["delMaintainerBtn"] };
+    permissionList[445] = { uIds: [] };
+    permissionList[444] = { uIds: [] };
     permissionList = checkPermissionUi(permissionList);
     var li = $("#tabs li:not(.hidden)").first();
     if (li) {
@@ -31,255 +32,134 @@ function pageReady() {
         $(li.find("a").attr("href")).addClass("active");
     }
     $(".ms2").select2();
-    $("#singleFaultType").select2();
-    getFaultDeviceList();
-    //getRepairRecordList();
-    setTimeout(function () {
-        getRepairRecordList(true, 0);
-        getFaultType(0);
-    }, 3000);
-    $(".icb_minimal").iCheck({
-        checkboxClass: 'icheckbox_minimal-blue',
-        increaseArea: '20%' // optional
+    $("#serLogFaultType").on("select2:select", function () {
+        var v = $(this).val();
+        $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
     });
-    $("#fStartDate").val(getDate()).datepicker('update');
-    $("#fEndDate").val(getDate()).datepicker('update');
-    $("#rStartDate").val(getDate()).datepicker('update');
-    $("#rEndDate").val(getDate()).datepicker('update');
-    $(".fHead input,.fHead span").css("verticalAlign", "middle");
-    $(".rHead input,.rHead span").css("verticalAlign", "middle");
-    $(".fHead label").on("ifChanged", function () {
-        if (!$(".fHead .icb_minimal").is(":checked")) {
-            $("#fBtn").removeClass("hidden");
-            $("#fTime").addClass("hidden");
-        } else {
-            $("#fBtn").addClass("hidden");
-            $("#fTime").removeClass("hidden");
-            $("#fStartDate").val(getDate()).datepicker('update');
-            $("#fStartTime").val(getTime()).timepicker("setTime", getTime());
-            $("#fEndDate").val(getDate()).datepicker('update');
-            $("#fEndTime").val(getTime()).timepicker("setTime", getTime());
-        }
-    });
-    $(".rHead label").on("ifChanged", function () {
-        if (!$(".rHead .icb_minimal").is(":checked")) {
-            $("#rBtn").removeClass("hidden");
-            $("#rTime").addClass("hidden");
-        } else {
-            $("#rBtn").addClass("hidden");
-            $("#rTime").removeClass("hidden");
-            $("#rStartDate").val(getDate()).datepicker('update');
-            $("#rStartTime").val(getTime()).timepicker("setTime", getTime());
-            $("#rEndDate").val(getDate()).datepicker('update');
-            $("#rEndTime").val(getTime()).timepicker("setTime", getTime());
-        }
-    });
-    $("#singleFaultType1").on("select2:select", function (e) {
-        var desc = "";
-        for (var i = 0; i < faultData.length; i++) {
-            if (faultData[i].Id == $("#singleFaultType1").val()) {
-                desc = faultData[i].FaultDescription;
+    getWorkerSelect();
+    getFaultTypeSelect();
+    var nowMonth = getMonthScope();
+    $("#faultSTime,#serviceLogSTime,#delFSTime,#delRepairSTime").val(nowMonth.start).datepicker('update');
+    $("#faultETime,#serviceLogETime,#delFETime,#delRepairETime").val(nowMonth.end).datepicker('update');
+    $('#faultDevicePro').on('select2:select', function () {
+        var v = $(this).val();
+        var parentEl = '#faultQuery';
+        var attrEl = 'faultDeviceAttr';
+        var selectEl = '#faultDeviceAttrSelect';
+        switch (v) {
+            case 'code':
+                setFaultDeviceGet(parentEl, attrEl, '#faultDeviceInput');
                 break;
-            }
+            case 'faultType':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _faultType);
+                break;
+            case 'priority':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
+                break;
+            case 'state':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
+                break;
+            case 'maintainer':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                break;
+            case 'solveTime':
+                $('#solveSTime,#solveETime').removeAttr("readonly");
+                setFaultDeviceGet(parentEl, attrEl, '#faultDeviceTime');
+                break;
         }
-        $("#singleFaultDefaultDesc").val(desc);
     });
-    //定时器
-    window.onload = function () {
-        (function ($) {
-            var testUser;
-            var funObj = {
-                timeUserFun: 'timeUserFun'
-            }
-            $[funObj.timeUserFun] = function(time) {
-                var userTime = time * 60;
-                var objTime = {
-                    init: 0,
-                    time: function() {
-                        objTime.init += 1;
-                        if (objTime.init == userTime) {
-                            getFaultDeviceList(0); // 用户未操作任何事件,刷新故障设备列表
-                            objTime.init = 0;
-                        }
-                    },
-                    eventFun: function() {
-                        clearInterval(testUser);
-                        objTime.init = 0;
-                        testUser = setInterval(objTime.time, 1000);
-                    }
-                }
-                testUser = setInterval(objTime.time, 1000);
-                //添加事件语柄
-                var body = document.querySelector('html');
-                body.addEventListener("click", objTime.eventFun);
-                body.addEventListener("keydown", objTime.eventFun);
-                body.addEventListener("mousemove", objTime.eventFun);
-                body.addEventListener("mousewheel", objTime.eventFun);
-            }
-        })(window);
-        //   直接调用 参数代表分钟数,可以有一位小数;
-        timeUserFun(1);
-    }
-    var focus = null;
-    var currentTop = 0;
-    var time, date;
-    $("#singleFaultModel").on("scroll", function () {
-        if (focus != document.activeElement) {
-            focus = document.activeElement;
-            currentTop = $(focus).offset().top;
-            if ($(".bootstrap-timepicker-widget").length > 0) {
-                time = $(".bootstrap-timepicker-widget").offset().top;
-            }
-            if ($(".datepicker").length > 0) {
-                date = $(".datepicker").offset().top;
-            }
+    $('#serviceLogPro').on('select2:select', function () {
+        var v = $(this).val();
+        var parentEl = '#serviceLogQuery';
+        var attrEl = 'serviceAttr';
+        var selectEl = '#serviceAttrSelect';
+        switch (v) {
+            case 'code':
+                setFaultDeviceGet(parentEl, attrEl, '#serviceInput');
+                break;
+            case 'faultType':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _faultType);
+                break;
+            case 'priority':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
+                break;
+            case 'maintainer':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                break;
+            default:
+                $('#serSTime,#serETime').removeAttr("readonly");
+                setFaultDeviceGet(parentEl, attrEl, '#solveTime');
         }
-        var nowTop = $(focus).offset().top;
-        var top = nowTop - currentTop;
-        $(".bootstrap-timepicker-widget").css("top", (time + top) + "px");
-        $(".datepicker").css("top", (date + top) + "px");
+    });
+    $('#delFPro').on('select2:select', function () {
+        var v = $(this).val();
+        var parentEl = '#delFQuery';
+        var attrEl = 'delFAttr';
+        var selectEl = '#delFAttrSelect';
+        switch (v) {
+            case 'code':
+                setFaultDeviceGet(parentEl, attrEl, '#delFInput');
+                break;
+            case 'faultType':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _faultType);
+                break;
+            case 'priority':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
+                break;
+            case 'state':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
+                break;
+            case 'maintainer':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                break;
+            case 'solveTime':
+                $('#delFSolveSTime,#delFSolveETime').removeAttr("readonly");
+                setFaultDeviceGet(parentEl, attrEl, '#delFTime');
+                break;
+        }
+    });
+    $('#delRepairPro').on('select2:select', function () {
+        var v = $(this).val();
+        var parentEl = '#delRepairQuery';
+        var attrEl = 'delRepairAttr';
+        var selectEl = '#delRepairAttrSelect';
+        switch (v) {
+            case 'code':
+                setFaultDeviceGet(parentEl, attrEl, '#delRepairInput');
+                break;
+            case 'faultType':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _faultType);
+                break;
+            case 'priority':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
+                break;
+            case 'maintainer':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                break;
+            default:
+                $('#delRepSTime,#delRepETime').removeAttr("readonly");
+                setFaultDeviceGet(parentEl, attrEl, '#delRepairTime');
+        }
     });
 }
-var faultData = null;
-function getFaultType(cover = 1) {
-    var data = {};
-    data.opType = 406;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            faultData = ret.datas;
-            $("#singleFaultType").empty();
-            $("#singleFaultType1").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (i == 0)
-                    fType = data.Id;
-                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
-                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
-            }
-        }, cover);
-}
 
-var fType = 0;
-function getFaultDeviceList(cover = 1) {
-    var opType = 417;
-    if (!permissionList[opType].have) {
-        //layer.msg("没有权限");
-        return;
+//查询条件
+function setFaultDeviceGet(parentEl, attrEl, el, ops) {
+    $(`${parentEl} .${attrEl}`).addClass('hidden');
+    $(el).removeClass('hidden');
+    if (ops) {
+        $(`#${attrEl}`).empty();
+        $(`#${attrEl}`).append(`<option value="-1">所有</option>${ops}`);
     }
-    var data = {}
-    data.opType = opType;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            var priority = function (data, type, row) {
-                var state = data.Priority;
-                if (state == 2)
-                    return '<span class="text-red"><span class="hidden">2</span>高</span>';
-                if (state == 1)
-                    return '<span class="text-warning"><span class="hidden">1</span>中</span>';
-                return '<span class="text-success"><span class="hidden">0</span>低</span>';
-            }
-            var upDel = '<div class="btn-group">' +
-                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                '        <span class="caret"></span>' +
-                '        <span class="sr-only">Toggle Dropdown</span>' +
-                '    </button>' +
-                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                '    </ul>' +
-                '</div>';
-            var op = function (data, type, row) {
-                var html = "{0}{1}{2}{3}";
-                var sureBtn = '<button type="button" class="btn btn-danger" onclick="sChange({0}, 1)">确认故障</button>'.format(data.Id);
-                var repairingBtn = '<button type="button" class="btn btn-info" onclick="sChange({0}, 2)">开始维修</button>'.format(data.Id);
-                var repairedBtn = '<button type="button" class="btn btn-success" onclick="sChange({0}, 3)">维修完成</button>'.format(data.Id);
-                var changeBtn = '<li><a onclick="sChange({0}, 0)">修改</a></li>'.format(data.Id);
-                var delBtn = '<li><a onclick="delChange({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.DeviceCode));
-
-                return html.format(
-                    upDel.format(permissionList[420].have ? changeBtn : "", permissionList[423].have ? delBtn : ""),
-                    permissionList[420].have && data.State == 0 ? sureBtn : "",
-                    permissionList[420].have && data.State == 1 ? repairingBtn : "",
-                    permissionList[420].have && data.State == 2 ? repairedBtn : "");
-            }
-            var order = function (data, type, row, meta) {
-                return meta.row + 1;
-            }
-            var rState = function (data, type, row) {
-                //状态 0 已报修 1 已确认 2 维修中
-                var state = data.State;
-                if (state == 0)
-                    return '<span class="text-red"><span class="hidden">0</span>未确认</span>';
-                if (state == 1)
-                    return '<span class="text-warning"><span class="hidden">1</span>已确认</span>';
-                return '<span class="text-success"><span class="hidden">2</span>维修中</span>';
-            }
-
-            var rDesc = function (d, type, row, meta) {
-                var data = d.FaultDescription;
-                var id = d.FaultTypeId;
-                return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-            }
-
-            var columns = [
-                { "data": null, "title": "序号", "render": order },
-                { "data": "DeviceCode", "title": "机台号" },
-                { "data": "FaultTime", "title": "故障时间" },
-                { "data": null, "title": "优先级", "render": priority },
-                { "data": null, "title": "状态", "render": rState },
-                { "data": "Name", "title": "维修工" },
-                { "data": "Phone", "title": "联系方式" },
-                { "data": "Proposer", "title": "报修人" },
-                { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障描述", "render": rDesc }
-            ];
-            if (permissionList[420].have || permissionList[423].have) {
-                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
-            }
-
-            $("#faultDeviceList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rtip',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aaSorting": [[0, "asc"]],
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns
-                });
-
-            $("#singleFaultCode").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#singleFaultCode").append(option.format(data.Id, data.DeviceCode));
-            }
-        }, cover);
 }
 
-function sChange(id, type) {
-    hideClassTip('adt');
-    $(".dd").attr("disabled", "disabled");
-    $(".db").addClass("hidden");
-    $("#solveDiv").addClass("hidden");
-    $("#faultOtherDiv").addClass("hidden");
-    $("#singleFaultType").val(fType).trigger("change");
+//优先级
+var _priority = '<option value="0">低</option><option value="1">中</option><option value="2">高</option>';
 
-    $("#rFaultCodeDiv").addClass("hidden");
-    $("#singleFaultCode").removeClass("hidden");
-    var opType = 417;
+var _worker = null;
+//维修工选项
+function getWorkerSelect() {
+    var opType = 430;
     if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
@@ -287,84 +167,437 @@ function sChange(id, type) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        qId: id
+        menu: true
     });
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            var data;
-            if (ret.datas.length > 0) {
-                data = ret.datas[0];
-                $("#singleUpdateId").html(id);
-                $("#singleUpdateState").html(data.State);
-                $("#singleUpdateCodeId").html(data.DeviceId);
-                $("#singleFaultCode").val(data.DeviceCode);
-                $("#singleProposer").val(data.Proposer);
-                $("#singleFaultType1").val(data.FaultTypeId).trigger("change");
-                var d = data.FaultTime.split(' ');
-                $("#singleFaultDate").val(d[0]);
-                $("#singleFaultTime").val(d[1]);
-
-                var desc = "";
-                for (var i = 0; i < faultData.length; i++) {
-                    if (faultData[i].Id == $("#singleFaultType1").val()) {
-                        desc = faultData[i].FaultDescription;
-                        break;
-                    }
-                }
-                $("#singleFaultDefaultDesc").val(desc);
-
-                $("#singleFaultDesc").val(data.FaultDescription);
-                $("#singleFaultPriority").val(data.Priority);
-                if (type == 0) {
-                    $("#singleFaultPriority").removeAttr("disabled");
-                    $("#singleChange").removeClass("hidden");
-                }
-                //确认故障
-                if (type == 1) {
-                    $("#singleSure").removeClass("hidden");
-                }
-                //维修中
-                if (type == 2) {
-                    $("#singleRepairing").removeClass("hidden");
-                }
-                //维修完成
-                if (type == 3) {
-                    $("#solveDiv").removeClass("hidden");
-                    $("#singleRepaired").removeClass("hidden");
-                    $("#singleFaultType").val(data.FaultTypeId).trigger("change");
-                }
-            }
-            //维修完成
-            if (type == 3) {
-                $("#singleSolveDate").val(getDate());
-                $("#singleSolveDate").datepicker('update');
-
-                $("#singleSolveTime").val(getTime());
-                var info = getCookieTokenInfo();
-                $("#singleFaultSolver").val(info.name);
-                $("#singleSolvePlan").val("");
-            }
-            $("#singleFaultModel").modal("show");
-        });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#designateName').empty();
+        var list = ret.datas;
+        var op = '<option value="{0}">{1}</option>';
+        _worker = '<option value="0">未指派</option>';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            _worker += op.format(d.Account, d.Name);
+        }
+        $('#designateName').append(_worker);
+    }, 0);
 }
 
-function delChange(id, code) {
-    code = unescape(code);
+var _faultType = null;
+var _faultTypeData = null;
+//故障类型选项
+function getFaultTypeSelect() {
+    var opType = 406;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#serviceFaultType').empty();
+        var list = ret.datas;
+        var op = '<option value="{0}">{1}</option>';
+        _faultType = '';
+        _faultTypeData = {};
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            _faultTypeData[d.Id] = d;
+            _faultType += op.format(d.Id, d.FaultTypeName);
+        }
+        $('#serviceFaultType').append(_faultType);
+    }, 0);
+}
+
+var _faultDevData = null;
+//故障设备查询
+function getFaultDeviceList() {
+    var opType = 417;
+    if (!permissionList[opType].have) {
+        return;
+    }
+    _faultDevData = {};
+    _faultDevData.Id = [];
+    _faultDevData.Name = [];
+    var startTime = $('#faultSTime').val();
+    var endTime = $('#faultETime').val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        layer.msg('请选择故障时间');
+        return;
+    }
+    if (comTimeDay(startTime, endTime)) {
+        return;
+    }
+    startTime = `${startTime} 00:00:00`;
+    endTime = `${endTime} 23:59:59`;
+    var condition = $('#faultDeviceCond').val();
+    var list = { startTime, endTime, condition }
+    var faultDevicePro = $('#faultDevicePro').val();
+    var faultDeviceAttr;
+    switch (faultDevicePro) {
+        case 'code':
+            faultDeviceAttr = $('#faultDeviceInput').val().trim();
+            list[faultDevicePro] = faultDeviceAttr;
+            break;
+        case 'solveTime':
+            list.eStartTime = $('#solveSTime').val();
+            list.eEndTime = $('#solveETime').val();
+            break;
+        default:
+            faultDeviceAttr = $('#faultDeviceAttr').val();
+            list[faultDevicePro] = faultDeviceAttr;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify(list);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        //指派
+        var per445 = permissionList[445].have;
+        //删除
+        var per423 = permissionList[423].have;
+        //维修
+        var per420 = permissionList[420].have;
+        per423 ? $('#delChangeBtn').removeClass('hidden') : $('#delChangeBtn').addClass('hidden');
+        var isEnable = function (d) {
+            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${d.DeviceCode}>`;
+        }
+        var order = function (a, b, c, d) {
+            return d.row + 1;
+        }
+        var rState = function (data, type, row) {
+            var state = data.State;
+            if (state == 0)
+                return '<span class="text-red">未确认</span>';
+            if (state == 1)
+                return '<span class="text-warning">已确认</span>';
+            return '<span class="text-success">维修中</span>';
+        }
+        var priority = function (data, type, row) {
+            var state = data.Priority;
+            if (state == 2)
+                return '<span class="text-red">高</span>';
+            if (state == 1)
+                return '<span class="text-warning">中</span>';
+            return '<span>低</span>';
+        }
+        var serviceName = function (d) {
+            var name = d.Name == '' ? '未指派' : d.Name;
+            return per445 ? `<a href="javascript:showDesignateModal(${d.Id},${d.Priority},\'${d.Maintainer ? d.Maintainer : 0}\')" style="padding:3px" class="designate"><i class="glyphicon glyphicon-hand-right"></i><span class="text-black">${name}</span></a>` : name;
+        }
+        var service = function (data) {
+            var state = data.State;
+            var btn = '<button type="button" class="btn btn-{0} btn-xs" onclick="{1}">{2}</button>';
+            var attr = '', text = '', click = '';
+            switch (state) {
+                case 0:
+                    attr = 'danger';
+                    text = '确认故障';
+                    click = `showConfirmModel(${data.Id}, 0,\'${data.EstimatedTime}\',\'${data.Remark}\')`;
+                    break;
+                case 1:
+                    attr = 'info';
+                    text = '开始维修';
+                    click = `showConfirmModel(${data.Id}, 1,\'${data.EstimatedTime}\',\'${data.Remark}\')`;
+                    break;
+                case 2:
+                    attr = 'success';
+                    text = '维修完成';
+                    click = `showServiceModel(${data.Id},\'${data.Name}\',\'${data.EstimatedTime}\',${data.FaultTypeId},\'${data.Remark}\')`;
+                    break;
+            }
+            return btn.format(attr, click, text);
+        }
+        var estimatedTime = function (data) {
+            return data == '0001-01-01 00:00:00' ? '' : data;
+        }
+        var remark = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        }
+        var rDesc = function (d) {
+            var data = d.FaultDescription;
+            var id = d.FaultTypeId;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+        }
+        var detailBtn = function (d) {
+            return `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority})">查看</button>`;
+        }
+        $("#faultDeviceList")
+            .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": oLanguage,
+                "data": ret.datas,
+                "aaSorting": [[per423 ? 1 : 0, "asc"]],
+                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 20, //默认显示的记录数
+                "columns": [
+                    { "data": null, "title": "", "render": isEnable, "visible": per423, "orderable": !per423 },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": null, "title": "状态", "render": rState },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": null, "title": "维修", "render": service, "visible": per420 },
+                    { "data": null, "title": "指派给", "render": serviceName },
+                    { "data": "Phone", "title": "联系方式" },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": null, "title": "故障描述", "render": rDesc },
+                    { "data": null, "title": "故障详情", "render": detailBtn }
+                ],
+                "drawCallback": function (settings, json) {
+                    if (per423) {
+                        $(this).find('.isEnable').iCheck({
+                            handle: 'checkbox',
+                            checkboxClass: 'icheckbox_minimal-blue',
+                            increaseArea: '20%'
+                        }).on('ifChanged', function () {
+                            var v = $(this).val();
+                            var name = $(this).attr('fName');
+                            if ($(this).is(':checked')) {
+                                _faultDevData.Id.push(v);
+                                _faultDevData.Name.push(name);
+                            } else {
+                                _faultDevData.Id.splice(_faultDevData.Id.indexOf(v), 1);
+                                _faultDevData.Name.splice(_faultDevData.Name.indexOf(name), 1);
+                            }
+                        });
+                    }
+                }
+            });
+    });
+}
+
+//确认故障/开始维修弹窗
+function showConfirmModel(id, state, time, remark) {
+    $('#confirmTitle').text(state ? '开始维修' : '确认故障');
+    if (state) {
+        $('#confirmTitle').text('开始维修');
+        $('#confirmFaultBtn').addClass('hidden');
+        $('#confirmStartBtn').val(id);
+    } else {
+        $('#confirmTitle').text('确认故障');
+        $('#confirmFaultBtn').removeClass('hidden');
+        $('#confirmFaultBtn,#confirmStartBtn').val(id);
+    }
+    time = time == '0001-01-01 00:00:00' ? getDate() : time.slice(0, time.indexOf(' '));
+    $('#confirmTime').val(time).datepicker('update');
+    $("#confirmHms").timepicker('setTime', getTime());
+    $('#confirmDesc').val(remark);
+    $('#showConfirmModel').modal('show');
+}
+
+//确认故障/开始维修
+function confirmFault(state) {
+    var opType = 444;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    var id = $(this).val();
+    var confirmTime = $('#confirmTime').val();
+    var confirmHms = $('#confirmHms').val();
+    if (isStrEmptyOrUndefined(confirmTime) || isStrEmptyOrUndefined(confirmHms)) {
+        layer.msg("请选择预计解决时间");
+        return;
+    }
+    var time = `${confirmTime} ${confirmHms}`;
+    var remark = $('#confirmDesc').val();
+    var data = {};
+    data.opType = opType;
+    data.opData = JSON.stringify([{
+        Id: id,
+        EstimatedTime: time,
+        Remark: remark,
+        State: state
+    }]);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            $('#showConfirmModel').modal('hide');
+            getFaultDeviceList();
+        }
+    });
+}
+
+//维修完成弹窗
+function showServiceModel(id, name, time, faultTypeId, remark) {
+    $('#serviceBtn').val(id);
+    $('#servicePro').val(name);
+    time = time == '0001-01-01 00:00:00' ? getDate() : time.slice(0, time.indexOf(' '));
+    $('#serviceTime').val(time).datepicker('update');
+    $("#serviceHms").timepicker('setTime', getTime());
+    $('#serviceFaultType').val(faultTypeId).trigger('change');
+    $('#serviceDesc').val(remark);
+    $('#showServiceModel').modal('show');
+}
+
+//维修完成
+function service() {
+    var opType = 444;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    var id = $(this).val();
+    var maintainer = $('#servicePro').val();
+    if (isStrEmptyOrUndefined(maintainer)) {
+        layer.msg("请输入解决人");
+        return;
+    }
+    var serviceTime = $('#serviceTime').val();
+    var serviceHms = $('#serviceHms').val();
+    if (isStrEmptyOrUndefined(serviceTime) || isStrEmptyOrUndefined(serviceHms)) {
+        layer.msg("请选择解决时间");
+        return;
+    }
+    var time = `${serviceTime} ${serviceHms}`;
+    var faultTypeId = $('#serviceFaultType').val();
+    if (isStrEmptyOrUndefined(faultTypeId)) {
+        layer.msg("请选择故障类型");
+        return;
+    }
+    var remark = $('#serviceDesc').val();
+    var data = {};
+    data.opType = opType;
+    data.opData = JSON.stringify([{
+        FaultSolver: maintainer,
+        SolveTime: time,
+        SolvePlan: remark,
+        FaultTypeId1: faultTypeId,
+        State: 3,
+        Id: id
+    }]);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            $('#showServiceModel').modal('hide');
+            getFaultDeviceList();
+        }
+    });
+}
+
+//指派弹窗
+function showDesignateModal(id, priority, name) {
+    $('#designateBtn').val(id);
+    $('#designateName').val(name).trigger('change');
+    $('#designatePro').val(priority).trigger('change');
+    $('#showDesignateModal').modal('show');
+}
+
+//指派
+function designate() {
+    var opType = 445;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    var name = $('#designateName').val();
+    if (isStrEmptyOrUndefined(name)) {
+        layer.msg("请选择指派人");
+        return;
+    }
+    var priority = $('#designatePro').val();
+    if (isStrEmptyOrUndefined(priority)) {
+        layer.msg("请选择优先级");
+        return;
+    }
+    var id = $(this).val();
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify([{
+            Id: parseInt(id),
+            Maintainer: name,
+            Priority: parseInt(priority)
+        }]);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    $('#showDesignateModal').modal('hide');
+                    getFaultDeviceList();
+                }
+            });
+    }
+    showConfirm(`指派给：${$('#designateName option:selected').text()}`, doSth);
+}
+
+//故障详情弹窗
+function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescription, priority) {
+    var opType = 406;
+    if (!permissionList[opType].have) {
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({
+        qId: id,
+        menu: true
+    });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var d = ret.datas[0];
+        $('#logDevName').text(deviceCode);
+        $('#logPerson').text(proposer);
+        $('#logFaultTime').text(faultTime);
+        $('#logFaultType').text(d.FaultTypeName);
+        $('#logFaultTypeDesc').val(d.FaultDescription);
+        $('#logFaultSup').val(faultDescription);
+        var str = '', color = '';
+        switch (priority) {
+            case 0:
+                str = '低';
+                color = 'black';
+                break;
+            case 1:
+                str = '中';
+                color = '#CC6600';
+                break;
+            case 2:
+                str = '高';
+                color = 'red';
+                break;
+        }
+        $('#logPriority').text(str).css('color', color);
+        $('#showLogDetailModel').modal('show');
+    });
+}
+
+//删除故障设备
+function delChange() {
     var opType = 423;
     if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
     }
-
+    if (!_faultDevData.Id.length) {
+        layer.msg("请选择需要删除的数据");
+        return;
+    }
     var doSth = function () {
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify({
-            id: id
+            ids: _faultDevData.Id
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -374,49 +607,569 @@ function delChange(id, code) {
                 }
             });
     }
-    showConfirm("删除故障设备：" + code, doSth);
+    showConfirm(`删除以下故障设备：<pre style='color:red'>${_faultDevData.Name.join('<br>')}</pre>`, doSth);
 }
 
-function getDelFaultDeviceList() {
-    var opType = 424;
+var _serviceLogData = null;
+//获取维修记录
+function getServiceLogList() {
+    var opType = 412;
     if (!permissionList[opType].have) {
-        //layer.msg("没有权限");
         return;
+    }
+    _serviceLogData = {};
+    _serviceLogData.Id = [];
+    _serviceLogData.Name = [];
+    var startTime = $('#serviceLogSTime').val();
+    var endTime = $('#serviceLogETime').val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        layer.msg('请选择解决时间');
+        return;
+    }
+    if (comTimeDay(startTime, endTime)) {
+        return;
+    }
+    startTime = `${startTime} 00:00:00`;
+    endTime = `${endTime} 23:59:59`;
+    var condition = $('#serviceLogCond').val();
+    var list = { startTime, endTime, condition }
+    var serviceLogPro = $('#serviceLogPro').val();
+    var serviceAttr;
+    switch (serviceLogPro) {
+        case 'code':
+            serviceAttr = $('#serviceInput').val().trim();
+            list[serviceLogPro] = serviceAttr;
+            break;
+        case 'faultTime':
+            list.fStartTime = $('#serSTime').val();
+            list.fEndTime = $('#serETime').val();
+            break;
+        case 'solveTime':
+            list.eStartTime = $('#serSTime').val();
+            list.eEndTime = $('#serETime').val();
+            break;
+        default:
+            serviceAttr = $('#serviceAttr').val();
+            list[serviceLogPro] = serviceAttr;
     }
     var data = {}
     data.opType = opType;
-    if ($(".fHead .icb_minimal").is(":checked")) {
-        var startTime = $("#fStartDate").val() + " " + $("#fStartTime").val();
-        var endTime = $("#fEndDate").val() + " " + $("#fEndTime").val();
-        if (exceedTime(startTime) || exceedTime(endTime)) {
-            layer.msg("所选时间不能大于当前时间");
-            return;
-        }
-        if (compareDate(startTime, endTime)) {
-            layer.msg("结束时间不能小于开始时间");
-            return;
-        }
-        data.opData = JSON.stringify({
-            StartTime: startTime,
-            EndTime: endTime
-        });
-    }
+    data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        var o = 0;
-        var order = function (data, type, row) {
-            return ++o;
+        //修改
+        var per414 = permissionList[414].have;
+        //删除
+        var per416 = permissionList[416].have;
+        per416 ? $('#delServiceLogBtn').removeClass('hidden') : $('#delServiceLogBtn').addClass('hidden');
+        var isEnable = function (d) {
+            var text = `机台号-${d.DeviceCode}：${d.FaultTypeName}`;
+            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${text}>`;
         }
-
+        var order = function (a, b, c, d) {
+            return d.row + 1;
+        }
+        var priority = function (data, type, row) {
+            var state = data.Priority;
+            if (state == 2)
+                return '<span class="text-red"><span class="hidden">2</span>高</span>';
+            if (state == 1)
+                return '<span class="text-warning"><span class="hidden">1</span>中</span>';
+            return '<span><span class="hidden">0</span>低</span>';
+        }
+        var comment = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '评价')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        }
+        var estimatedTime = function (data) {
+            return data == '0001-01-01 00:00:00' ? '' : data;
+        }
+        var remark = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        }
         var rDesc = function (d, type, row, meta) {
             var data = d.FaultDescription;
             var id = d.FaultTypeId;
             return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
         }
+        var imgBtn = function (d) {
+            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
+        }
+        var upServiceLog = function (d) {
+            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d})">修改</button>`;
+        }
+        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+        var titleColumns = [6, 9];
+        $("#repairRecordList")
+            .DataTable({
+                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '导出Excel',
+                        className: 'btn-primary btn-sm', //按钮的class样式
+                        exportOptions: {
+                            columns: excelColumns,
+                            format: {
+                                // format有三个子标签，header，body和foot
+                                body: function (data, row, column, node) {
+                                    //操作需要导出excel的数据格式                        
+                                    if (titleColumns.indexOf(column) > -1) {
+                                        var a = $(node).find("span").attr("title");
+                                        if (a != null) {
+                                            return "\u200C" + unescape(a);
+                                        }
+                                    }
+                                    return "\u200C" + node.textContent;
+                                }
+                            }
+                        }
+                    }
+                ],
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": oLanguage,
+                "data": ret.datas,
+                "aaSorting": [[per416 ? 1 : 0, "asc"]],
+                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 20, //默认显示的记录数
+                "columns": [
+                    { "data": null, "title": "", "render": isEnable, "visible": per416, "orderable": !per416 },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary" },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": "Score", "title": "评分", "sClass": "text-primary" },
+                    { "data": "Comment", "title": "评价", "sClass": "text-primary", "render": comment },
+                    { "data": "FaultSolver", "title": "解决人" },
+                    { "data": "Name", "title": "指派给" },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": null, "title": "故障描述", "render": rDesc },
+                    { "data": null, "title": "故障图片", "render": imgBtn },
+                    { "data": "Id", "title": "修改", "render": upServiceLog, "visible": per414 }
+                ],
+                "drawCallback": function (settings, json) {
+                    if (per416) {
+                        $(this).find('.isEnable').iCheck({
+                            handle: 'checkbox',
+                            checkboxClass: 'icheckbox_minimal-blue',
+                            increaseArea: '20%'
+                        }).on('ifChanged', function () {
+                            var v = $(this).val();
+                            var name = $(this).attr('fName');
+                            if ($(this).is(':checked')) {
+                                _serviceLogData.Id.push(v);
+                                _serviceLogData.Name.push(name);
+                            } else {
+                                _serviceLogData.Id.splice(_serviceLogData.Id.indexOf(v), 1);
+                                _serviceLogData.Name.splice(_serviceLogData.Name.indexOf(name), 1);
+                            }
+                        });
+                    }
+                }
+            });
+    });
+}
 
+//故障图片查看
+function showImgModel(id, faultType, img) {
+    $('#FaultImgName').text(faultType);
+    if (!isStrEmptyOrUndefined(img)) {
+        img = img.split(",");
+        var data = {
+            type: fileEnum.FaultDevice,
+            files: JSON.stringify(img)
+        };
+        ajaxPost("/Upload/Path", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var imgOps = "";
+            for (var i = 0; i < ret.data.length; i++) {
+                imgOps += `<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                <div class="thumbnail">
+                <img src=${ret.data[i].path} style="height:200px">
+                </div>
+                </div>`;
+            }
+            $("#faultImgList").append(imgOps);
+        });
+    }
+    $("#showFaultImgModel").modal('show');
+}
+
+//删除维修记录
+function delServiceLog() {
+    var opType = 416;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    if (!_serviceLogData.Id.length) {
+        layer.msg("请选择需要删除的数据");
+        return;
+    }
+    var doSth = function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({
+            ids: _serviceLogData.Id
+        });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getServiceLogList();
+                }
+            });
+    }
+    showConfirm(`删除以下维修记录：<pre style='color:red'>${_serviceLogData.Name.join('<br>')}</pre>`, doSth);
+}
+
+//获取机台号
+function getDeviceCode(resolve) {
+    var opType = 100;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas;
+        var op = '<option value="{0}">{1}</option>';
+        var ops = '';
+        for (var i = 0; i < list.length; i++) {
+            var d = list[i];
+            ops += op.format(d.Id, d.Code);
+        }
+        if (resolve != null) {
+            resolve(ops);
+        }
+    }, 0);
+}
+
+//获取车间
+function getWorkShop(resolve) {
+    var opType = 162;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas;
+        var op = '<option value = "{0}">{0}</option>';
+        var ops = '';
+        for (var i = 0; i < list.length; i++) {
+            var d = list[i];
+            ops += op.format(d.SiteName);
+        }
+        if (resolve != null) {
+            resolve(ops);
+        }
+    }, 0);
+}
+
+//添加维修记录弹窗
+function showServiceLogModal(id) {
+    var opType = id ? 412 : 415;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    $('#serLogFaultSup').prop('disabled', !!id);
+    $('#serviceLogTitle').text(id ? '修改维修记录' : '添加维修记录');
+    if (id) {
+        $('#updateServiceLogBtn').val(id);
+        $('#showServiceLogModal .isText').removeClass('hidden');
+        $('#showServiceLogModal .noText').addClass('hidden');
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify({ qId: id });
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var d = ret.datas[0];
+            $('#serLogCodeText').text(d.DeviceCode);
+            $('#serLogProposerText').text(d.Proposer);
+            $('#serLogFaultTimeText').text(d.FaultTime);
+            $('#serLogFaultTypeText').text(d.FaultTypeName);
+            $("#serLogFaultDesc").val(_faultTypeData[d.FaultTypeId].FaultDescription);
+            $("#serLogFaultSup").val(d.FaultDescription);
+            var priority = d.Priority;
+            var str = '', color = '';
+            switch (priority) {
+                case 0:
+                    str = '低';
+                    color = 'black';
+                    break;
+                case 1:
+                    str = '中';
+                    color = '#CC6600';
+                    break;
+                case 2:
+                    str = '高';
+                    color = 'red';
+                    break;
+            }
+            $('#serLogPriorityText').text(str).css('color', color);
+            $('#serLogMaintainerText').text(d.Name);
+            $('#serLogFaultSolver').val(d.FaultSolver);
+            var estimatedTime = d.EstimatedTime;
+            if (estimatedTime == '0001-01-01 00:00:00') {
+                $('#serLogSolveDate').val(getDate()).datepicker('update');
+                $("#serLogSolveTime").timepicker('setTime', getTime());
+            } else {
+                $('#serLogSolveDate').val(estimatedTime.split(' ')[0]).datepicker('update');
+                $("#serLogSolveTime").timepicker('setTime', estimatedTime.split(' ')[1]);
+            }
+            $("#serLogFaultType1").empty();
+            $("#serLogFaultType1").append(_faultType);
+            $("#serLogFaultType1").val(d.FaultTypeId1).trigger('change');
+            $("#serLogSolvePlan").val(d.SolvePlan);
+        });
+    } else {
+        $('#showServiceLogModal .isText').addClass('hidden');
+        $('#showServiceLogModal .noText').removeClass('hidden');
+        $('#serLogCodeOther,#serLogFaultSup,#serLogSolvePlan').val('');
+        $('#serLogPriority').val(0);
+        $('#serLogProposer,#serLogFaultSolver').val(getCookieTokenInfo().name);
+        $('#serLogFaultDate,#serLogSolveDate').val(getDate()).datepicker('update');
+        $("#serLogFaultTime,#serLogSolveTime").timepicker('setTime', getTime());
+        $("#serLogFaultType,#serLogFaultType1,#serLogMaintainer").empty();
+        $("#serLogFaultType,#serLogFaultType1").append(_faultType);
+        $("#serLogMaintainer").append(_worker);
+        var v = $('#serLogFaultType').val();
+        $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
+        var deviceCode = new Promise(resolve => getDeviceCode(resolve));
+        var workShop = new Promise(resolve => getWorkShop(resolve));
+        Promise.all([deviceCode, workShop]).then(e => {
+            $("#serLogCode,#serLogWorkshop").empty();
+            $("#serLogCode").append(e[0]);
+            $("#serLogCode").val(0).trigger('change');
+            $("#serLogCode").select2({
+                allowClear: true,
+                placeholder: "请选择"
+            });
+            $("#serLogWorkshop").append(e[1]);
+        });
+    }
+    $('#showServiceLogModal').modal('show');
+}
+
+//添加修改维修记录
+function addUpServiceLog(isAdd) {
+    var opType = isAdd ? 415 : 414;
+    if (!permissionList[opType].have) {
+        layer.msg("没有权限");
+        return;
+    }
+    var list = {};
+    if (isAdd) {
+        var serLogCode = $('#serLogCode').val();
+        var serLogWorkshop = $('#serLogWorkshop').val();
+        var serLogCodeOther = $('#serLogCodeOther').val().trim();
+        var isCode = isStrEmptyOrUndefined(serLogCode);
+        var isOther = isStrEmptyOrUndefined(serLogCodeOther);
+        if (isCode && isOther) {
+            layer.msg('请选择或输入一台机台号');
+            return;
+        }
+        if (!isCode && !isOther) {
+            layer.msg('只能选择或输入一台机台号');
+            return;
+        }
+        if (!isOther) {
+            serLogCodeOther = `${serLogWorkshop}-${serLogCodeOther}`;
+            serLogCode = 0;
+        }
+        var serLogProposer = $('#serLogProposer').val().trim();
+        if (isStrEmptyOrUndefined(serLogProposer)) {
+            layer.msg('报修人不能为空');
+            return;
+        }
+        var serLogFaultDate = $('#serLogFaultDate').val();
+        var serLogFaultTime = $('#serLogFaultTime').val();
+        if (isStrEmptyOrUndefined(serLogFaultDate) || isStrEmptyOrUndefined(serLogFaultTime)) {
+            layer.msg('请选择故障时间');
+            return;
+        }
+        var faultTime = `${serLogFaultDate} ${serLogFaultTime}`;
+        var serLogFaultType = $('#serLogFaultType').val();
+        if (isStrEmptyOrUndefined(serLogFaultType)) {
+            layer.msg('请选择故障类型');
+            return;
+        }
+        var serLogFaultSup = $('#serLogFaultSup').val().trim();
+        var serLogPriority = $('#serLogPriority').val();
+        if (isStrEmptyOrUndefined(serLogPriority)) {
+            layer.msg('请选择优先级');
+            return;
+        }
+        var serLogMaintainer = $('#serLogMaintainer').val();
+        if (serLogMaintainer == 0) {
+            serLogMaintainer = '';
+        }
+        list = {
+            DeviceId: serLogCode,
+            DeviceCode: serLogCodeOther,
+            Proposer: serLogProposer,
+            FaultTime: faultTime,
+            FaultTypeId: serLogFaultType,
+            FaultDescription: serLogFaultSup,
+            Priority: serLogPriority,
+            Maintainer: serLogMaintainer
+        }
+    } else {
+        list.Id = $(this).val();
+    }
+    var serLogFaultSolver = $('#serLogFaultSolver').val().trim();
+    if (isStrEmptyOrUndefined(serLogFaultSolver)) {
+        layer.msg('解决人不能为空');
+        return;
+    }
+    var serLogSolveDate = $('#serLogSolveDate').val();
+    var serLogSolveTime = $('#serLogSolveTime').val();
+    if (isStrEmptyOrUndefined(serLogSolveDate) || isStrEmptyOrUndefined(serLogSolveTime)) {
+        layer.msg('请选择解决时间');
+        return;
+    }
+    var solveTime = `${serLogSolveDate} ${serLogSolveTime}`;
+    var serLogFaultType1 = $('#serLogFaultType1').val();
+    if (isStrEmptyOrUndefined(serLogFaultType1)) {
+        layer.msg('请选择实际故障类型');
+        return;
+    }
+    var serLogSolvePlan = $('#serLogSolvePlan').val().trim();
+    var listAll = $.extend(list, {
+        FaultSolver: serLogFaultSolver,
+        SolveTime: solveTime,
+        FaultTypeId1: serLogFaultType1,
+        SolvePlan: serLogSolvePlan
+    });
+    var data = {};
+    data.opType = opType;
+    data.opData = JSON.stringify(listAll);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            $('#showServiceLogModal').modal('hide');
+            if (!$('#repairRecordList').is(':empty')) {
+                getServiceLogList();
+            }
+        }
+    });
+}
+
+var _delFaultDevData = null;
+//获取已删除故障设备
+function getDelFaultDeviceList() {
+    var opType = 424;
+    if (!permissionList[opType].have) {
+        return;
+    }
+    _delFaultDevData = {};
+    _delFaultDevData.Id = [];
+    _delFaultDevData.Name = [];
+    var startTime = $('#delFSTime').val();
+    var endTime = $('#delFETime').val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        layer.msg('请选择故障时间');
+        return;
+    }
+    if (comTimeDay(startTime, endTime)) {
+        return;
+    }
+    startTime = `${startTime} 00:00:00`;
+    endTime = `${endTime} 23:59:59`;
+    var condition = $('#delFCond').val();
+    var list = { startTime, endTime, condition }
+    var delFPro = $('#delFPro').val();
+    var delFAttr;
+    switch (delFPro) {
+        case 'code':
+            delFAttr = $('#delFInput').val().trim();
+            list[delFPro] = delFAttr;
+            break;
+        case 'solveTime':
+            list.eStartTime = $('#delFSolveSTime').val();
+            list.eEndTime = $('#delFSolveETime').val();
+            break;
+        default:
+            delFAttr = $('#delFAttr').val();
+            list[delFPro] = delFAttr;
+    }
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify(list);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var isEnable = function (d) {
+            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${d.DeviceCode}>`;
+        }
+        var order = function (a, b, c, d) {
+            return d.row + 1;
+        }
+        var priority = function (data, type, row) {
+            var state = data.Priority;
+            if (state == 2)
+                return '<span class="text-red">高</span>';
+            if (state == 1)
+                return '<span class="text-warning">中</span>';
+            return '<span>低</span>';
+        }
+        var rState = function (data, type, row) {
+            var state = data.State;
+            if (state == 0)
+                return '<span class="text-red">未确认</span>';
+            if (state == 1)
+                return '<span class="text-warning">已确认</span>';
+            return '<span class="text-success">维修中</span>';
+        }
+        var serviceName = function (d) {
+            return d == '' ? '未指派' : d;
+        }
+        var remark = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        }
+        var estimatedTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d;
+        }
+        var rDesc = function (d, type, row, meta) {
+            var data = d.FaultDescription;
+            var id = d.FaultTypeId;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+        }
+        var imgBtn = function (d) {
+            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
+        }
         $("#delFaultDeviceList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rtip',
@@ -426,633 +1179,180 @@ function getDelFaultDeviceList() {
                 "autoWidth": true,
                 "language": oLanguage,
                 "data": ret.datas,
-                "aaSorting": [[0, "asc"]],
+                "aaSorting": [[1, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
+                    { "data": null, "title": "", "render": isEnable, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "Name", "title": "维修工" },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": null, "title": "状态", "render": rState },
+                    { "data": "Name", "title": "指派给", "render": serviceName },
                     { "data": "Phone", "title": "联系方式" },
-                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": rDesc }
-                ]
+                    { "data": null, "title": "故障描述", "render": rDesc },
+                    { "data": null, "title": "故障图片", "render": imgBtn }
+                ],
+                "drawCallback": function (settings, json) {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    }).on('ifChanged', function () {
+                        var v = $(this).val();
+                        var name = $(this).attr('fName');
+                        if ($(this).is(':checked')) {
+                            _delFaultDevData.Id.push(v);
+                            _delFaultDevData.Name.push(name);
+                        } else {
+                            _delFaultDevData.Id.splice(_delFaultDevData.Id.indexOf(v), 1);
+                            _delFaultDevData.Name.splice(_delFaultDevData.Name.indexOf(name), 1);
+                        }
+                    });
+                }
             });
     });
 }
 
-function singleChange(type) {
-    var id = parseInt($("#singleUpdateId").html());
-    var state = parseInt($("#singleUpdateState").html());
-    var codeId = parseInt($("#singleUpdateCodeId").html());
-
-    var code = $("#singleFaultCode").val();
-    //机台号
-    if (isStrEmptyOrUndefined(code)) {
-        return;
-    }
-
-    var proposer = $("#singleProposer").val().trim();
-    //报修人
-    if (isStrEmptyOrUndefined(proposer)) {
-        return;
-    }
-    var faultDate = $("#singleFaultDate").val();
-    var faultTime = $("#singleFaultTime").val();
-    var time = "{0} {1}".format(faultDate, faultTime);
-
-    var faultDesc = $("#singleFaultDesc").val().trim();
-    var priority = $("#singleFaultPriority").val().trim();
-
-
-    var opType;
-    var data;
-    if (type < 3) {
-        opType = 420;
-        if (!permissionList[opType].have) {
-            layer.msg("没有权限");
-            return;
-        }
-        data = {};
-        data.opType = opType;
-        data.opData = JSON.stringify([
-            {
-                //(自增Id)
-                id: id,
-                //机台号
-                DeviceCode: code,
-                //机台号Id
-                DeviceId: codeId,
-                //故障时间
-                FaultTime: time,
-                //报修人
-                Proposer: proposer,
-                //故障描述
-                FaultDescription: faultDesc,
-                //优先级
-                Priority: priority,
-                //状态
-                State: type == 0 ? state : type
-            }
-        ]);
-        $("#singleFaultModel").modal("hide");
-        ajaxPost("/Relay/Post",
-            data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getFaultDeviceList();
-                }
-            });
-    } else {
-        var singleFaultSolver = $("#singleFaultSolver").val();
-        var singleSolvePlan = $("#singleSolvePlan").val();
-
-        var singleSolveDate = $("#singleSolveDate").val();
-        var singleSolveTime = $("#singleSolveTime").val();
-        var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
-
-        var singleFaultType = $("#singleFaultType").val();
-        var singleFaultType1 = $("#singleFaultType1").val();
-
-        if (compareDate(time, solveTime)) {
-            layer.msg("解决时间不能小于故障时间");
-            return;
-        }
-        //删除
-        opType = 420;
-        if (!permissionList[opType].have) {
-            layer.msg("没有权限");
-            return;
-        }
-        data = {};
-        data.opType = opType;
-        data.opData = JSON.stringify([{
-            //(自增Id)
-            id: id,
-            //机台号
-            DeviceCode: code,
-            //机台号Id
-            DeviceId: codeId,
-            //故障时间
-            FaultTime: time,
-            //报修人
-            Proposer: proposer,
-            //故障描述
-            FaultDescription: faultDesc,
-            //优先级
-            Priority: priority,
-            //状态
-            State: state,
-            FaultLogId: id,
-            MarkedDelete: true
-        }]);
-        $("#singleFaultModel").modal("hide");
-        ajaxPost("/Relay/Post",
-            data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getFaultDeviceList();
-                }
-            });
-
-        opType = 415;
-        if (!permissionList[opType].have) {
-            layer.msg("没有权限");
-            return;
-        }
-        data = {};
-        data.opType = opType;
-        data.opData = JSON.stringify(
-            {
-                //机台号
-                DeviceCode: code,
-                //机台号Id
-                DeviceId: codeId,
-                //故障时间
-                FaultTime: time,
-                //报修人
-                Proposer: proposer,
-                //故障描述
-                FaultDescription: faultDesc,
-                //优先级
-                Priority: priority,
-                //故障解决者
-                FaultSolver: singleFaultSolver,
-                //故障解决时间
-                SolveTime: solveTime,
-                //故障解决方案
-                SolvePlan: singleSolvePlan,
-                //故障类型表Id
-                FaultTypeId: singleFaultType,
-                //故障类型表Id
-                FaultTypeId1: singleFaultType1,
-                //故障记录Id
-                FaultLogId: id
-            });
-        ajaxPost("/Relay/Post",
-            data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getRepairRecordList();
-                }
-            });
-    }
-}
-
-function getRepairRecordList(f = false, cover = 1) {
-    if (f && getRepairRecordListFlag) {
-        return;
-    }
-    getRepairRecordListFlag = true;
-    var opType = 412;
-    if (!permissionList[opType].have) {
-        //layer.msg("没有权限");
-        return;
-    }
-    var data = {}
-    data.opType = opType;
-    //data.opData = JSON.stringify({
-    //    id: 1,
-    //    startTime: '2019-05-09 10:23:36',
-    //    endTime: '2019-05-09 10:23:36',
-    //});
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-            var html = '<div class="btn-group">' +
-                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                '        <span class="caret"></span>' +
-                '        <span class="sr-only">Toggle Dropdown</span>' +
-                '    </button>' +
-                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                '    </ul>' +
-                '</div>';
-            var op = function (data, type, row) {
-                var changeBtn = '<li><a onclick="rChange({0}, 0)">修改</a></li>'.format(data.Id);
-                var deleteBtn = '<li><a onclick="deleteChange({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
-                return html.format(permissionList[414].have ? changeBtn : "", permissionList[416].have ? deleteBtn : "");
-            }
-            var rDesc = function (d, type, row, meta) {
-                var data = d.FaultDescription;
-                var id = d.FaultTypeId;
-                return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-            }
-            var rSolvePlan = function (d, type, row, meta) {
-                var data = d.SolvePlan;
-                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.substring(0, tdShowLength)}...</span>`;
-            }
-            var isAdd = function (data, type, row) {
-                return data == false ? '否' : '是';
-            }
-            var columns = [
-                { "data": "Id", "title": "序号", "render": order },
-                { "data": "DeviceCode", "title": "机台号" },
-                { "data": "FaultTime", "title": "故障时间" },
-                { "data": "Name", "title": "维修工" },
-                { "data": "Phone", "title": "联系方式" },
-                { "data": "Proposer", "title": "报修人" },
-                { "data": "FaultSolver", "title": "解决人员" },
-                { "data": null, "title": "故障描述", "render": rDesc },
-                { "data": "SolveTime", "title": "解决时间" },
-                { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "解决方案", "render": rSolvePlan },
-                { "data": "IsAdd", "title": "维修工添加", "render": isAdd }
-            ];
-            if (permissionList[414].have || permissionList[416].have) {
-                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
-            }
-            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-            var titleColumns = [5, 8];
-            $("#repairRecordList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
-                    buttons: [
-                        {
-                            extend: 'excel',
-                            text: '导出Excel',
-                            className: 'btn-primary btn-sm', //按钮的class样式
-                            exportOptions: {
-                                columns: excelColumns,
-                                format: {
-                                    // format有三个子标签，header，body和foot
-                                    body: function (data, row, column, node) {
-                                        //操作需要导出excel的数据格式                        
-                                        if (titleColumns.indexOf(column) > -1) {
-                                            var a = $(node).find("span").attr("title");
-                                            if (a != null) {
-                                                return "\u200C" + unescape(a);
-                                            }
-                                        }
-                                        return "\u200C" + node.textContent;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    //"pagingType": "input",
-                    //"serverSide": true,
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    //"aaSorting": [[0, "desc"]],
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns
-                });
-        }, cover);
-}
-
-function getDelRepairList() {
+var _delServiceLogData = null;
+//获取已删除维修记录
+function getDelServiceLogList() {
     var opType = 425;
     if (!permissionList[opType].have) {
-        //layer.msg("没有权限");
         return;
+    }
+    _delServiceLogData = {};
+    _delServiceLogData.Id = [];
+    _delServiceLogData.Name = [];
+    var startTime = $('#delRepairSTime').val();
+    var endTime = $('#delRepairETime').val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        layer.msg('请选择解决时间');
+        return;
+    }
+    if (comTimeDay(startTime, endTime)) {
+        return;
+    }
+    startTime = `${startTime} 00:00:00`;
+    endTime = `${endTime} 23:59:59`;
+    var condition = $('#delRepairCond').val();
+    var list = { startTime, endTime, condition }
+    var delRepairPro = $('#delRepairPro').val();
+    var delRepairAttr;
+    switch (delRepairPro) {
+        case 'code':
+            delRepairAttr = $('#delRepairInput').val().trim();
+            list[delRepairPro] = delRepairAttr;
+            break;
+        case 'faultTime':
+            list.fStartTime = $('#delRepSTime').val();
+            list.fEndTime = $('#delRepETime').val();
+            break;
+        case 'solveTime':
+            list.eStartTime = $('#delRepSTime').val();
+            list.eEndTime = $('#delRepETime').val();
+            break;
+        default:
+            delRepairAttr = $('#delRepairAttr').val();
+            list[delRepairPro] = delRepairAttr;
     }
     var data = {}
     data.opType = opType;
-    if ($(".rHead .icb_minimal").is(":checked")) {
-        var startTime = $("#rStartDate").val() + " " + $("#rStartTime").val();
-        var endTime = $("#rEndDate").val() + " " + $("#rEndTime").val();
-        if (exceedTime(startTime) || exceedTime(endTime)) {
-            layer.msg("所选时间不能大于当前时间");
-            return;
-        }
-        if (compareDate(startTime, endTime)) {
-            layer.msg("结束时间不能小于开始时间");
-            return;
-        }
-        data.opData = JSON.stringify({
-            StartTime: startTime,
-            EndTime: endTime
-        });
-    }
+    data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        var o = 0;
-        var order = function (data, type, row) {
-            return ++o;
+        var isEnable = function (d) {
+            var text = `机台号-${d.DeviceCode}：${d.FaultTypeName}`;
+            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${text}>`;
+        }
+        var order = function (a, b, c, d) {
+            return d.row + 1;
+        }
+        var priority = function (data, type, row) {
+            var state = data.Priority;
+            if (state == 2)
+                return '<span class="text-red"><span class="hidden">2</span>高</span>';
+            if (state == 1)
+                return '<span class="text-warning"><span class="hidden">1</span>中</span>';
+            return '<span><span class="hidden">0</span>低</span>';
+        }
+        var comment = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '评价')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        }
+        var estimatedTime = function (data) {
+            return data == '0001-01-01 00:00:00' ? '' : data;
+        }
+        var remark = function (d) {
+            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
         }
         var rDesc = function (d, type, row, meta) {
             var data = d.FaultDescription;
             var id = d.FaultTypeId;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
         }
-        var rSolvePlan = function (d, type, row, meta) {
-            var data = d.SolvePlan;
-            return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '解决方案')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
+        var imgBtn = function (d) {
+            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
         }
-        var isAdd = function (data, type, row) {
-            return data == false ? '否' : '是';
-        }
-        var columns = [
-            { "data": "Id", "title": "序号", "render": order },
-            { "data": "DeviceCode", "title": "机台号" },
-            { "data": "FaultTime", "title": "故障时间" },
-            { "data": "Name", "title": "维修工" },
-            { "data": "Phone", "title": "联系方式" },
-            { "data": "Proposer", "title": "报修人" },
-            { "data": "FaultSolver", "title": "解决人员" },
-            { "data": null, "title": "故障描述", "render": rDesc },
-            { "data": "SolveTime", "title": "解决时间" },
-            { "data": "FaultTypeName", "title": "故障类型" },
-            { "data": null, "title": "解决方案", "render": rSolvePlan },
-            { "data": "IsAdd", "title": "维修工添加", "render": isAdd }
-        ];
-
         $("#delRepairList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rtip',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
-                "autoWidth": true,
                 "language": oLanguage,
                 "data": ret.datas,
-                "aaSorting": [[0, "asc"]],
+                "aaSorting": [[1, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
-                "columns": columns
+                "columns": [
+                    { "data": null, "title": "", "render": isEnable, "orderable": false },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "DeviceCode", "title": "机台号" },
+                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary" },
+                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": "Score", "title": "评分", "sClass": "text-primary" },
+                    { "data": "Comment", "title": "评价", "sClass": "text-primary", "render": comment },
+                    { "data": "FaultSolver", "title": "解决人" },
+                    { "data": "Name", "title": "指派给" },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "Proposer", "title": "报修人" },
+                    { "data": "FaultTypeName", "title": "故障类型" },
+                    { "data": null, "title": "故障描述", "render": rDesc },
+                    { "data": null, "title": "故障图片", "render": imgBtn }
+                ],
+                "drawCallback": function (settings, json) {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    }).on('ifChanged', function () {
+                        var v = $(this).val();
+                        var name = $(this).attr('fName');
+                        if ($(this).is(':checked')) {
+                            _delServiceLogData.Id.push(v);
+                            _delServiceLogData.Name.push(name);
+                        } else {
+                            _delServiceLogData.Id.splice(_delServiceLogData.Id.indexOf(v), 1);
+                            _delServiceLogData.Name.splice(_delServiceLogData.Name.indexOf(name), 1);
+                        }
+                    });
+                }
             });
     });
 }
 
-function rChange(id, type) {
-    hideClassTip('adt');
-    $(".db").addClass("hidden");
-    $(".dd").attr("disabled", "disabled");
-    $("#rFaultCodeDiv").addClass("hidden");
-    $("#faultOtherDiv").addClass("hidden");
-    $("#singleFaultType").val(fType).trigger("change");
-
-    var opType;
-    var data;
-    if (type == 0) {
-        opType = 412;
-        if (!permissionList[opType].have) {
-            layer.msg("没有权限");
-            return;
-        }
-        data = {};
-        data.opType = opType;
-        data.opData = JSON.stringify({
-            qId: id
-        });
-        ajaxPost("/Relay/Post",
-            data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                var data;
-                if (ret.datas.length > 0) {
-                    data = ret.datas[0];
-
-                    $("#rFaultCodeDiv").addClass("hidden");
-                    $("#faultOtherDiv").addClass("hidden");
-                    $("#singleFaultCode").removeClass("hidden");
-                    $("#singleUpdateId").html(id);
-                    $("#singleUpdateState").html(data.State);
-                    $("#singleFaultCode").val(data.DeviceCode);
-                    $("#singleProposer").val(data.Proposer);
-                    $("#singleFaultType1").val(data.FaultTypeId1).trigger("change");
-                    var d = data.FaultTime.split(' ');
-                    $("#singleFaultDate").val(d[0]);
-                    $("#singleFaultTime").val(d[1]);
-                    var desc = "";
-                    for (var i = 0; i < faultData.length; i++) {
-                        if (faultData[i].Id == $("#singleFaultType1").val()) {
-                            desc = faultData[i].FaultDescription;
-                            break;
-                        }
-                    }
-                    $("#singleFaultDefaultDesc").val(desc);
-                    $("#singleFaultDesc").val(data.FaultDescription.trim());
-                    $("#singleFaultPriority").val(data.Priority);
-
-                    $("#singleFaultSolver").val(data.FaultSolver);
-                    var d = data.SolveTime.split(' ');
-                    $("#singleSolveDate").val(d[0]).datepicker('update');
-                    $("#singleSolveTime").val(d[1]).timepicker('setTime', d[1]);
-                    $("#singleSolvePlan").val(data.SolvePlan.trim());
-
-                    $("#singleFaultType").val(data.FaultTypeId).trigger("change");
-                    $("#solveDiv").removeClass("hidden");
-                    $("#recordChange").removeClass("hidden");
-                }
-
-                $("#singleFaultModel").modal("show");
-            });
-    } else {
-        $("#singleUpdateId").html(0);
-        opType = 100;
-        if (!permissionList[opType].have) {
-            layer.msg("没有权限");
-            return;
-        }
-        data = {}
-        data.opType = opType;
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                $("#faultOtherDiv").removeClass("hidden");
-                $("#singleSolveDate").val(getDate()).datepicker('update');
-                $("#singleSolveTime").val(getTime()).timepicker('setTime', getTime());
-                var info = getCookieTokenInfo();
-                if (id == 0)
-                    $("#singleFaultSolver").val(info.name);
-
-                $("#singleFaultCode").addClass("hidden");
-                $("#rFaultCodeDiv").removeClass("hidden");
-                $("#singleProposer").val(info.name);
-                $("#singleFaultType1").val(fType).trigger("change");
-                $("#singleFaultDesc").val("");
-                $("#singleSolvePlan").val("");
-                $("#singleFaultPriority").val("0");
-                $("#faultOther").val("");
-                var desc = "";
-                for (var i = 0; i < faultData.length; i++) {
-                    if (faultData[i].Id == $("#singleFaultType1").val()) {
-                        desc = faultData[i].FaultDescription;
-                        break;
-                    }
-                }
-                $("#singleFaultDefaultDesc").val(desc);
-                $("#singleFaultDate").val(getDate()).datepicker('update');
-                $("#singleFaultTime").val(getTime()).timepicker('setTime', getTime());
-                $(".dd").removeAttr("disabled");
-                $("#solveDiv").removeClass("hidden");
-
-                $("#rFaultCode").empty();
-                $("#rFaultCode").select2({
-                    allowClear: true,
-                    placeholder: "请选择"
-                });
-                var option = '<option value="{0}" id="{2}">{1}</option>';
-                $("#rFaultCode").append('<option></option>');
-                for (var i = 0; i < ret.datas.length; i++) {
-                    var data = ret.datas[i];
-                    $("#rFaultCode").append(option.format(data.Code, data.Code, data.Id));
-                }
-                $("#recordAdd").removeClass("hidden");
-                $("#singleFaultModel").modal("show");
-
-            });
-    }
-}
-
-function deleteChange(id, faultTypeName) {
-    faultTypeName = unescape(faultTypeName);
-    var opType = 416;
-    if (!permissionList[opType].have) {
-        layer.msg("没有权限");
-        return;
-    }
-
-    var doSth = function () {
-        var data = {}
-        data.opType = opType;
-        data.opData = JSON.stringify({
-            id: id
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getRepairRecordList();
-                }
-            });
-    }
-    showConfirm("删除维修记录：" + faultTypeName, doSth);
-}
-
-function recordChange(type) {
-    var id = parseInt($("#singleUpdateId").html());
-    //机台号
-    var code;
-    var rFaultCode = $("#rFaultCode").val();
-    var faultOther = $("#faultOther").val().trim();
-    if (type != 0) {
-        if (isStrEmptyOrUndefined(rFaultCode) && isStrEmptyOrUndefined(faultOther)) {
-            layer.msg('请选择或输入一台机台号');
-            return;
-        }
-        if (!isStrEmptyOrUndefined(rFaultCode) && !isStrEmptyOrUndefined(faultOther)) {
-            layer.msg('只能选择或输入一台机台号');
-            return;
-        }
-        if (isStrEmptyOrUndefined(rFaultCode) && !isStrEmptyOrUndefined(faultOther)) {
-            code = faultOther;
-        }
-        if (!isStrEmptyOrUndefined(rFaultCode) && isStrEmptyOrUndefined(faultOther)) {
-            code = rFaultCode;
-        }
-    } else {
-        code = $("#singleFaultCode").val();
-    }
-    var codeId = $("#rFaultCode").find("[value='" + code + "']").attr("id");
-    codeId = isStrEmptyOrUndefined(codeId) || isStrEmptyOrUndefined(rFaultCode) ? 0 : parseInt(codeId);
-    var proposer = $("#singleProposer").val().trim();
-    //报修人
-    if (isStrEmptyOrUndefined(proposer)) {
-        if (type != 0)
-            showTip($("#singleProposerTip"), "报修人不能为空");
-        return;
-    }
-    var faultDate = $("#singleFaultDate").val();
-    var faultTime = $("#singleFaultTime").val();
-    var time = "{0} {1}".format(faultDate, faultTime);
-    if (exceedTime(time)) {
-        layer.msg("故障时间不能大于当前时间");
-        return;
-    }
-    var faultDesc = $("#singleFaultDesc").val().trim();
-    var priority = $("#singleFaultPriority").val();
-
-    var singleFaultSolver = $("#singleFaultSolver").val();
-    var singleSolvePlan = $("#singleSolvePlan").val().trim();
-
-    var singleSolveDate = $("#singleSolveDate").val();
-    var singleSolveTime = $("#singleSolveTime").val();
-    var solveTime = "{0} {1}".format(singleSolveDate, singleSolveTime);
-    if (exceedTime(solveTime)) {
-        layer.msg("解决时间不能大于当前时间");
-        return;
-    }
-    var singleFaultType1 = $("#singleFaultType1").val();
-    var singleFaultType = $("#singleFaultType").val();
-
-    $("#singleFaultModel").modal("hide");
-    var opType = type == 0 ? 414 : 415;
-    if (!permissionList[opType].have) {
-        layer.msg("没有权限");
-        return;
-    }
-    var data = {};
-    data.opType = opType;
-    var record = {
-        //机台号
-        DeviceCode: code,
-        //故障时间
-        FaultTime: time,
-        //报修人
-        Proposer: proposer,
-        //故障描述
-        FaultDescription: faultDesc,
-        //优先级
-        Priority: priority,
-        //故障解决者
-        FaultSolver: singleFaultSolver,
-        //故障解决时间
-        SolveTime: solveTime,
-        //故障解决方案
-        SolvePlan: singleSolvePlan,
-        //故障类型表Id
-        FaultTypeId: singleFaultType,
-        //故障类型Id
-        FaultTypeId1: singleFaultType1,
-        //故障记录Id
-        FaultLogId: id,
-        //设备Id
-        DeviceId: codeId,
-        //添加维修记录
-        IsAdd: true
-    }
-    if (type == 0)
-        record.id = id;
-    data.opData = JSON.stringify(record);
-    ajaxPost("/Relay/Post",
-        data,
-        function (ret) {
-            layer.msg(ret.errmsg);
-            if (ret.errno == 0) {
-                getRepairRecordList();
-            }
-        });
-}
-
+//获取常见故障
 function getUsuallyFaultList() {
     var opType = 400;
     if (!permissionList[opType].have) {
@@ -1118,6 +1418,7 @@ function getUsuallyFaultList() {
         });
 }
 
+//删除常见故障
 function deleteUsuallyFault(id, usuallyFaultDesc) {
     usuallyFaultDesc = unescape(usuallyFaultDesc);
     var opType = 405;
@@ -1142,6 +1443,7 @@ function deleteUsuallyFault(id, usuallyFaultDesc) {
     showConfirm("删除常见故障：" + usuallyFaultDesc, doSth);
 }
 
+//添加常见故障弹窗
 function showAddUsuallyFaultModel() {
     hideClassTip('adt');
     $("#addUsuallyFaultDesc").val("");
@@ -1149,6 +1451,7 @@ function showAddUsuallyFaultModel() {
     $("#addUsuallyFaultModel").modal("show");
 }
 
+//添加常见故障
 function addUsuallyFault() {
     var opType = 403;
     if (!permissionList[opType].have) {
@@ -1191,6 +1494,7 @@ function addUsuallyFault() {
     showConfirm("添加", doSth);
 }
 
+//修改常见故障弹窗
 function showUpdateUsuallyFaultModel(id) {
     var opType = 400;
     if (!permissionList[opType].have) {
@@ -1218,7 +1522,8 @@ function showUpdateUsuallyFaultModel(id) {
         });
 }
 
-function updateUsuallyFault(resolve = null) {
+//修改常见故障
+function updateUsuallyFault() {
     var opType = 402;
     if (!permissionList[opType].have) {
         layer.msg("没有权限");
@@ -1262,7 +1567,8 @@ function updateUsuallyFault(resolve = null) {
     showConfirm("修改", doSth);
 }
 
-function getFaultTypeList(resolve = null) {
+//获取故障类型
+function getFaultTypeList() {
     var opType = 406;
     if (!permissionList[opType].have) {
         layer.msg("没有权限");
@@ -1273,14 +1579,10 @@ function getFaultTypeList(resolve = null) {
     data.opType = opType;
     ajaxPost("/Relay/Post", data,
         function (ret) {
-            if (resolve != null) {
-                resolve('success');
-            }
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            faultData = ret.datas;
             var html = '<div class="btn-group">' +
                 '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                 '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
@@ -1330,22 +1632,11 @@ function getFaultTypeList(resolve = null) {
                     "iDisplayLength": 10, //默认显示的记录数
                     "columns": columns
                 });
-
-            $("#singleFaultType").empty();
-            $("#singleFaultType1").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (i == 0)
-                    fType = data.Id;
-                $("#singleFaultType").append(option.format(data.Id, data.FaultTypeName));
-                $("#singleFaultType1").append(option.format(data.Id, data.FaultTypeName));
-            }
-
             $("#faultTypeModel").modal("show");
         });
 }
 
+//故障类型详情弹窗
 function showFaultTypeDetailModel(id, desc = "") {
     var opType = 406;
     if (!permissionList[opType].have) {
@@ -1371,13 +1662,16 @@ function showFaultTypeDetailModel(id, desc = "") {
                 layer.msg(ret.errmsg);
                 return;
             }
-            if (ret.datas.length > 0)
-                $("#faultTypeDetail").html(ret.datas[0].FaultDescription);
-
+            var d = ret.datas[0];
+            if (ret.datas.length > 0) {
+                $("#faultTypeNameDetail").html(d.FaultTypeName);
+                $("#faultTypeDetail").html(d.FaultDescription);
+            }
             $("#faultTypeDetailModel").modal("show");
         });
 }
 
+//删除故障类型
 function deleteFaultType(id, faultTypeDesc) {
     faultTypeDesc = unescape(faultTypeDesc);
     var opType = 411;
@@ -1402,6 +1696,7 @@ function deleteFaultType(id, faultTypeDesc) {
     showConfirm("删除故障类型：" + faultTypeDesc, doSth);
 }
 
+//添加故障类型弹窗
 function showAddFaultTypeModel() {
     hideClassTip('adt');
     $("#addFaultTypeName").val("");
@@ -1409,6 +1704,7 @@ function showAddFaultTypeModel() {
     $("#addFaultTypeModel").modal("show");
 }
 
+//添加故障类型
 function addFaultType() {
     var opType = 410;
     if (!permissionList[opType].have) {
@@ -1448,6 +1744,7 @@ function addFaultType() {
     showConfirm("添加", doSth);
 }
 
+//修改故障类型弹窗
 function showUpdateFaultTypeModel(id) {
     var opType = 406;
     if (!permissionList[opType].have) {
@@ -1475,6 +1772,7 @@ function showUpdateFaultTypeModel(id) {
         });
 }
 
+//修改故障类型
 function updateFaultType() {
     var opType = 408;
     if (!permissionList[opType].have) {
@@ -1508,22 +1806,14 @@ function updateFaultType() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-
-                    var func1 = new Promise(function (resolve, reject) {
-                        getFaultTypeList(resolve);
-                    });
-
-                    Promise.all([func1])
-                        .then((result) => {
-                            getFaultDeviceList(0);
-                            getRepairRecordList(false, 0);
-                        });
+                    getFaultTypeSelect();
                 }
             });
     }
     showConfirm("修改", doSth);
 }
 
+//获取维修工
 var maintainers = null;
 function showMaintainerModel(cover = 1, show = true) {
     var opType = 430;
