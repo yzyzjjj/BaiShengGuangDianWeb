@@ -176,8 +176,8 @@ function getWorkerSelect() {
         }
         $('#designateName').empty();
         var list = ret.datas;
-        var op = '<option value="{0}">{1}</option>';
-        _worker = '<option value="0">未指派</option>';
+        var op = '<option value="{0}" wname="{1}">{1}</option>';
+        _worker = '<option value="0" wname="0">未指派</option>';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             _worker += op.format(d.Account, d.Name);
@@ -318,8 +318,8 @@ function getFaultDeviceList() {
             }
             return btn.format(attr, click, text);
         }
-        var estimatedTime = function (data) {
-            return data == '0001-01-01 00:00:00' ? '' : data;
+        var estimatedTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -347,7 +347,7 @@ function getFaultDeviceList() {
                     { "data": null, "title": "", "render": isEnable, "visible": per423, "orderable": !per423 },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
                     { "data": null, "title": "状态", "render": rState },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": null, "title": "维修", "render": service, "visible": per420 },
@@ -680,11 +680,11 @@ function getServiceLogList() {
                 return '<span class="text-warning"><span class="hidden">1</span>中</span>';
             return '<span><span class="hidden">0</span>低</span>';
         }
-        var comment = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '评价')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        var estimatedTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
         }
-        var estimatedTime = function (data) {
-            return data == '0001-01-01 00:00:00' ? '' : data;
+        var solveTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -742,11 +742,11 @@ function getServiceLogList() {
                     { "data": null, "title": "", "render": isEnable, "visible": per416, "orderable": !per416 },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary" },
+                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": solveTime },
+                    { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": "Score", "title": "评分", "sClass": "text-primary" },
-                    { "data": "Comment", "title": "评价", "sClass": "text-primary", "render": comment },
                     { "data": "FaultSolver", "title": "解决人" },
                     { "data": "Name", "title": "指派给" },
                     { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
@@ -890,7 +890,7 @@ function getWorkShop(resolve) {
     }, 0);
 }
 
-//添加维修记录弹窗
+//添加修改维修记录弹窗
 function showServiceLogModal(id) {
     var opType = id ? 412 : 415;
     if (!permissionList[opType].have) {
@@ -935,8 +935,11 @@ function showServiceLogModal(id) {
                     break;
             }
             $('#serLogPriorityText').text(str).css('color', color);
-            $('#serLogMaintainerText').text(d.Name);
-            $('#serLogFaultSolver').val(d.FaultSolver);
+            $('#serLogMaintainerText').text(d.Name == '' ? '未指派' : d.Name);
+            $("#serLogFaultSolver").empty();
+            $("#serLogFaultSolver").append(_worker);
+            var faultSolver = $(`#serLogFaultSolver option[wname=${d.FaultSolver}]`).val();
+            $('#serLogFaultSolver').val(faultSolver).trigger('change');
             var estimatedTime = d.EstimatedTime;
             if (estimatedTime == '0001-01-01 00:00:00') {
                 $('#serLogSolveDate').val(getDate()).datepicker('update');
@@ -955,12 +958,12 @@ function showServiceLogModal(id) {
         $('#showServiceLogModal .noText').removeClass('hidden');
         $('#serLogCodeOther,#serLogFaultSup,#serLogSolvePlan').val('');
         $('#serLogPriority').val(0);
-        $('#serLogProposer,#serLogFaultSolver').val(getCookieTokenInfo().name);
+        $('#serLogProposer').val(getCookieTokenInfo().name);
         $('#serLogFaultDate,#serLogSolveDate').val(getDate()).datepicker('update');
         $("#serLogFaultTime,#serLogSolveTime").timepicker('setTime', getTime());
         $("#serLogFaultType,#serLogFaultType1,#serLogMaintainer").empty();
         $("#serLogFaultType,#serLogFaultType1").append(_faultType);
-        $("#serLogMaintainer").append(_worker);
+        $("#serLogMaintainer,#serLogFaultSolver").append(_worker);
         var v = $('#serLogFaultType').val();
         $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
         var deviceCode = new Promise(resolve => getDeviceCode(resolve));
@@ -1045,10 +1048,13 @@ function addUpServiceLog(isAdd) {
     } else {
         list.Id = $(this).val();
     }
-    var serLogFaultSolver = $('#serLogFaultSolver').val().trim();
+    var serLogFaultSolver = $('#serLogFaultSolver option:selected').attr('wname');
     if (isStrEmptyOrUndefined(serLogFaultSolver)) {
-        layer.msg('解决人不能为空');
+        layer.msg('请选择解决人');
         return;
+    }
+    if (serLogFaultSolver == 0) {
+        serLogFaultSolver = '未指派';
     }
     var serLogSolveDate = $('#serLogSolveDate').val();
     var serLogSolveTime = $('#serLogSolveTime').val();
@@ -1071,7 +1077,7 @@ function addUpServiceLog(isAdd) {
     });
     var data = {};
     data.opType = opType;
-    data.opData = JSON.stringify(listAll);
+    data.opData = JSON.stringify(isAdd ? listAll : [listAll]);
     ajaxPost("/Relay/Post", data, function (ret) {
         layer.msg(ret.errmsg);
         if (ret.errno == 0) {
@@ -1158,7 +1164,7 @@ function getDelFaultDeviceList() {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
         }
         var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d;
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
         }
         var rDesc = function (d, type, row, meta) {
             var data = d.FaultDescription;
@@ -1183,10 +1189,10 @@ function getDelFaultDeviceList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false },
+                    { "data": null, "title": "", "render": isEnable, "orderable": false,"visible":false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
+                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": null, "title": "状态", "render": rState },
                     { "data": "Name", "title": "指派给", "render": serviceName },
@@ -1283,11 +1289,11 @@ function getDelServiceLogList() {
                 return '<span class="text-warning"><span class="hidden">1</span>中</span>';
             return '<span><span class="hidden">0</span>低</span>';
         }
-        var comment = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '评价')">${d.substring(0, tdShowLength) + "..."}</span>`;
+        var estimatedTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
         }
-        var estimatedTime = function (data) {
-            return data == '0001-01-01 00:00:00' ? '' : data;
+        var solveTime = function (d) {
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -1314,14 +1320,14 @@ function getDelServiceLogList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false },
+                    { "data": null, "title": "", "render": isEnable, "orderable": false,"visible":false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间" },
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary" },
+                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime},
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": solveTime },
+                    { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": "Score", "title": "评分", "sClass": "text-primary" },
-                    { "data": "Comment", "title": "评价", "sClass": "text-primary", "render": comment },
                     { "data": "FaultSolver", "title": "解决人" },
                     { "data": "Name", "title": "指派给" },
                     { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
