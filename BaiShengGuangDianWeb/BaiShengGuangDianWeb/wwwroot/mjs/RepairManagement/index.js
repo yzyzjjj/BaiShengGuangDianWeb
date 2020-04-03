@@ -930,13 +930,14 @@ function showServiceLogModal(id,isDel) {
             var solveTime = d.SolveTime;
             $("#serLogFaultType1").empty();
             $("#serLogFaultType1").append(_faultType);
-            if (isDel || !permissionList[414].have) {
+            if (isDel) {
                 $('#upServiceLogBox .isText').removeClass('hidden');
                 $('#upServiceLogBox .noText').addClass('hidden');
                 $('#serLogFaultSolverText').text(d.FaultSolver);
                 $('#serLogSolveTimeText').text(solveTime == '0001-01-01 00:00:00' ? '' : solveTime.slice(0, solveTime.lastIndexOf(':')));
                 var faultType1 = $(`#serLogFaultType1 option[value=${d.FaultTypeId1}]`).text();
                 $('#serLogFaultType1Text').text(faultType1);
+                $("#serLogSolvePlan").prop('disabled', true);
                 $('#updateServiceLogBtn').addClass('hidden');
             } else {
                 $('#upServiceLogBox .isText').addClass('hidden');
@@ -953,14 +954,21 @@ function showServiceLogModal(id,isDel) {
                     $("#serLogSolveTime").timepicker('setTime', solveTime.split(' ')[1]);
                 }
                 $("#serLogFaultType1").val(d.FaultTypeId1).trigger('change');
-                $("#serLogSolvePlan").val(d.SolvePlan);
-                $('#updateServiceLogBtn').removeClass('hidden');
-                $('#updateServiceLogBtn').val(id);
+                if (permissionList[414].have) {
+                    $('#updateServiceLogBtn').removeClass('hidden');
+                    $('#updateServiceLogBtn').val(id);
+                    $("#serLogSolvePlan").prop('disabled', false);
+                } else {
+                    $('#updateServiceLogBtn').addClass('hidden');
+                    $("#serLogSolvePlan").prop('disabled', true);
+                }
             }
+            $("#serLogSolvePlan").val(d.SolvePlan);
         });
     } else {
         $('#showServiceLogModal .isText').addClass('hidden');
         $('#showServiceLogModal .noText').removeClass('hidden');
+        $("#serLogSolvePlan").prop('disabled', false);
         $('#serLogCodeOther,#serLogFaultSup,#serLogSolvePlan').val('');
         $('#serLogPriority').val(0);
         $('#serLogProposer').val(getCookieTokenInfo().name);
