@@ -336,22 +336,26 @@
                             <select class="ms2 form-control" style="width: 200px" id="serLogMaintainer"></select>
                         </div>
                     </div>
-                    <div class="box">
+                    <div class="box" id="upServiceLogBox">
                         <div class="box-body">
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">解决人：</label>
-                                <select class="ms2 form-control" style="width: 200px" id="serLogFaultSolver"></select>
+                                <label class="control-label text-nowrap">解决人：<span class="spanStyle isText" id="serLogFaultSolverText"></span></label>
+                                <div class="noText">
+                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultSolver"></select>
+                                </div>
                             </div>
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">解决时间：</label>
-                                <div class="flexStyle" style="width: 240px">
+                                <label class="control-label text-nowrap">解决时间：<span class="spanStyle isText" id="serLogSolveTimeText"></span></label>
+                                <div class="flexStyle noText" style="width: 240px">
                                     <input type="text" id="serLogSolveDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
                                     <input type="text" id="serLogSolveTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
                                 </div>
                             </div>
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">实际故障类型：</label>
-                                <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
+                                <label class="control-label text-nowrap">实际故障类型：<span class="spanStyle isText" id="serLogFaultType1Text"></span></label>
+                                <div class="noText">
+                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label text-nowrap">解决方案：</label>
@@ -713,7 +717,7 @@
                 <div class="modal-body">
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap">解决人：</label>
-                        <input type="text" class="form-control" id="servicePro" style="flex-basis: 140px; min-width: 100px">
+                        <select class="ms2 form-control" id="servicePro" style="width: 150px"></select>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap: wrap">
                         <label class="control-label text-nowrap">解决时间：</label>

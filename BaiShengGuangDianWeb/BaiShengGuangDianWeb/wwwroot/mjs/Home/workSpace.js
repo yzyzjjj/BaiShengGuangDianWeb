@@ -1417,11 +1417,8 @@ function getLogList() {
             var remark = function (d) {
                 return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
             }
-            var estimatedTime = function (d) {
-                return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
-            }
             var solveTime = function (d) {
-                return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
+                return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
             }
             var detailBtn = function (d) {
                 var op = '<button type="button" class="btn btn-{0} btn-sm" onclick="showLogDetailModel({2},{3})"}>{1}</button>';
@@ -1441,14 +1438,14 @@ function getLogList() {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "DeviceCode", "title": "机台号" },
-                        { "data": "FaultTime", "title": "故障时间" },
+                        { "data": "FaultTime", "title": "故障时间", "render": solveTime},
                         { "data": "Priority", "title": "优先级", "render": priority },
                         { "data": null, "title": "状态", "render": stateDesc },
                         { "data": "Score", "title": "评分", "sClass": "text-primary" },
                         { "data": "Maintainer", "title": "维修工" },
                         { "data": "Phone", "title": "联系方式" },
                         { "data": "Remark", "title": "维修备注", "render": remark },
-                        { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                        { "data": "EstimatedTime", "title": "预计解决时间", "render": solveTime },
                         { "data": "SolveTime", "title": "解决时间", "render": solveTime },
                         { "data": null, "title": "详情", "render": detailBtn }
                     ]
@@ -1490,7 +1487,7 @@ function showLogDetailModel(logId, isLook) {
         $('#deviceText').text(d.DeviceCode);
         $('#proposerText').text(d.Proposer);
         $('#faultTypeText').text(d.FaultTypeName);
-        $('#faultTimeText').text(d.FaultTime);
+        $('#faultTimeText').text(d.FaultTime.slice(0, d.FaultTime.lastIndexOf(':')));
         $('#faultTypeDesc').text(d.FaultDescription);
         $('#faultSup').text(d.Fault1);
         var priority = d.Priority;
@@ -1510,14 +1507,16 @@ function showLogDetailModel(logId, isLook) {
                 break;
         }
         $('#priorityText').text(str).css('color', color);
-        $('#solveProposerText').text(d.Maintainer);
+        $('#solveProposerText').text(d.FaultSolver);
         $('#actualFaultTypeText').text(d.FaultTypeName1);
         var estimatedTime = d.EstimatedTime;
-        $('#estimatedTimeText').text(estimatedTime == '0001-01-01 00:00:00' ? '' : estimatedTime.slice(0, estimatedTime.indexOf(' ')));
+        $('#estimatedTimeText').text(estimatedTime == '0001-01-01 00:00:00' ? '' : estimatedTime.slice(0, estimatedTime.lastIndexOf(':')));
         var solveTime = d.SolveTime;
-        $('#solveTimeText').text(solveTime == '0001-01-01 00:00:00' ? '' : solveTime.slice(0, solveTime.indexOf(' ')));
+        $('#solveTimeText').text(solveTime == '0001-01-01 00:00:00' ? '' : solveTime.slice(0, solveTime.lastIndexOf(':')));
+        $('#costTimeText').text(d.CostTime);
+        $('#fault2').val(d.Fault2);
         $('#remark').text(d.Remark);
-        $('#solvePlan').text(d.FaultSolver);
+        $('#solvePlan').text(d.SolvePlan);
         $('#detailImgList').empty();
         if (d.ImageList > 0) {
             data = {

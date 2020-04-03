@@ -379,11 +379,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group flexStyle">
-                        <label class="control-label" style="white-space: nowrap">评分：<span class="spanStyle" id="scoreText"></span></label>
+                        <label class="control-label" style="white-space: nowrap"><span class="spanTitle">评分：</span><span id="scoreText"></span></label>
                         <input type="tel" class="form-control lookFalse" id="scoreInput" placeholder="请输入评分" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="width: 140px">
                     </div>
                     <div class="form-group">
-                        <label class="control-label">评价：</label>
+                        <label class="control-label spanTitle">评价：</label>
                         <textarea class="form-control" id="comment" style="resize: vertical; overflow-y: scroll"></textarea>
                     </div>
                     <div class="text-right">
@@ -391,10 +391,10 @@
                     </div>
                     <div class="form-group">
                         <div class="flexStyle" style="flex-wrap: wrap">
-                            <label class="control-label text-nowrap">机台号：<span class="spanStyle" id="deviceText"></span></label>
-                            <label class="control-label text-nowrap">报修人：<span class="spanStyle" id="proposerText"></span></label>
-                            <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="faultTypeText"></span></label>
-                            <label class="control-label text-nowrap">故障时间：<span class="spanStyle" id="faultTimeText"></span></label>
+                            <label class="control-label text-nowrap">机台号：<span class="span-paddright" id="deviceText"></span></label>
+                            <label class="control-label text-nowrap">报修人：<span class="span-paddright" id="proposerText"></span></label>
+                            <label class="control-label text-nowrap">故障类型：<span class="span-paddright" id="faultTypeText"></span></label>
+                            <label class="control-label text-nowrap">故障时间：<span class="span-paddright" id="faultTimeText"></span></label>
                         </div>
                     </div>
                     <div class="form-group">
@@ -407,19 +407,24 @@
                     </div>
                     <div class="form-group">
                         <div class="flexStyle" style="flex-wrap: wrap">
-                            <label class="control-label text-nowrap">优先级：<span class="spanStyle" id="priorityText"></span></label>
-                            <label class="control-label text-nowrap">解决人：<span class="spanStyle" id="solveProposerText"></span></label>
-                            <label class="control-label text-nowrap">实际故障类型：<span class="spanStyle" id="actualFaultTypeText"></span></label>
-                            <label class="control-label text-nowrap">预计解决时间：<span class="spanStyle" id="estimatedTimeText"></span></label>
-                            <label class="control-label text-nowrap">解决时间：<span class="spanStyle" id="solveTimeText"></span></label>
+                            <label class="control-label text-nowrap">优先级：<span class="span-paddright" id="priorityText"></span></label>
+                            <label class="control-label text-nowrap"><span class="spanTitle">解决人：</span><span class="span-paddright" id="solveProposerText"></span></label>
+                            <label class="control-label text-nowrap"><span class="spanTitle">预计解决时间：</span><span class="span-paddright" id="estimatedTimeText"></span></label>
+                            <label class="control-label text-nowrap"><span class="spanTitle">实际故障类型：</span><span class="span-paddright" id="actualFaultTypeText"></span></label>
+                            <label class="control-label text-nowrap"><span class="spanTitle">解决时间：</span><span class="span-paddright" id="solveTimeText"></span></label>
+                            <label class="control-label text-nowrap"><span class="spanTitle">用时：</span><span class="span-paddright" id="costTimeText"></span></label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label">维修备注：</label>
+                        <label class="control-label spanTitle">实际故障类型描述：</label>
+                        <textarea class="form-control" id="fault2" disabled="disabled" style="resize: vertical; overflow-y: scroll"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label spanTitle">维修备注：</label>
                         <textarea class="form-control" id="remark" disabled="disabled" style="resize: vertical; overflow-y: scroll"></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="control-label">解决方案：</label>
+                        <label class="control-label spanTitle">解决方案：</label>
                         <textarea class="form-control" id="solvePlan" disabled="disabled" style="resize: vertical; overflow-y: scroll"></textarea>
                     </div>
                     <div class="form-group">

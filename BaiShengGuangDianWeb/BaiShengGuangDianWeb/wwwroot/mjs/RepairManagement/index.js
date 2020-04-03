@@ -174,7 +174,7 @@ function getWorkerSelect() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#designateName').empty();
+        $('#designateName,#servicePro').empty();
         var list = ret.datas;
         var op = '<option value="{0}" wname="{1}">{1}</option>';
         _worker = '<option value="0" wname="0">未指派</option>';
@@ -182,7 +182,7 @@ function getWorkerSelect() {
             var d = list[i];
             _worker += op.format(d.Account, d.Name);
         }
-        $('#designateName').append(_worker);
+        $('#designateName,#servicePro').append(_worker);
     }, 0);
 }
 
@@ -313,13 +313,13 @@ function getFaultDeviceList() {
                 case 2:
                     attr = 'success';
                     text = '维修完成';
-                    click = `showServiceModel(${data.Id},\'${data.Name}\',\'${data.EstimatedTime}\',${data.FaultTypeId},\'${data.Remark}\')`;
+                    click = `showServiceModel(${data.Id},\'${data.Maintainer}\',\'${data.EstimatedTime}\',${data.FaultTypeId})`;
                     break;
             }
             return btn.format(attr, click, text);
         }
         var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -436,14 +436,13 @@ function confirmFault(state) {
 }
 
 //维修完成弹窗
-function showServiceModel(id, name, time, faultTypeId, remark) {
+function showServiceModel(id, maintainer, time, faultTypeId) {
     $('#serviceBtn').val(id);
-    $('#servicePro').val(name);
+    $('#servicePro').val(maintainer).trigger('change');
     time = time == '0001-01-01 00:00:00' ? getDate() : time.slice(0, time.indexOf(' '));
     $('#serviceTime').val(time).datepicker('update');
     $("#serviceHms").timepicker('setTime', getTime());
     $('#serviceFaultType').val(faultTypeId).trigger('change');
-    $('#serviceDesc').val(remark);
     $('#showServiceModel').modal('show');
 }
 
@@ -455,9 +454,9 @@ function service() {
         return;
     }
     var id = $(this).val();
-    var maintainer = $('#servicePro').val();
+    var maintainer = $('#servicePro option:selected').attr('wname');
     if (isStrEmptyOrUndefined(maintainer)) {
-        layer.msg("请输入解决人");
+        layer.msg("请选择解决人");
         return;
     }
     var serviceTime = $('#serviceTime').val();
@@ -472,13 +471,13 @@ function service() {
         layer.msg("请选择故障类型");
         return;
     }
-    var remark = $('#serviceDesc').val();
+    var solvePlan = $('#serviceDesc').val();
     var data = {};
     data.opType = opType;
     data.opData = JSON.stringify([{
         FaultSolver: maintainer,
         SolveTime: time,
-        SolvePlan: remark,
+        SolvePlan: solvePlan,
         FaultTypeId1: faultTypeId,
         State: 3,
         Id: id
@@ -518,24 +517,21 @@ function designate() {
         return;
     }
     var id = $(this).val();
-    var doSth = function () {
-        var data = {}
-        data.opType = opType;
-        data.opData = JSON.stringify([{
-            Id: parseInt(id),
-            Maintainer: name,
-            Priority: parseInt(priority)
-        }]);
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    $('#showDesignateModal').modal('hide');
-                    getFaultDeviceList();
-                }
-            });
-    }
-    showConfirm(`指派给：${$('#designateName option:selected').text()}`, doSth);
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify([{
+        Id: parseInt(id),
+        Maintainer: name,
+        Priority: parseInt(priority)
+    }]);
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                $('#showDesignateModal').modal('hide');
+                getFaultDeviceList();
+            }
+        });
 }
 
 //故障详情弹窗
@@ -660,8 +656,6 @@ function getServiceLogList() {
             layer.msg(ret.errmsg);
             return;
         }
-        //修改
-        var per414 = permissionList[414].have;
         //删除
         var per416 = permissionList[416].have;
         per416 ? $('#delServiceLogBtn').removeClass('hidden') : $('#delServiceLogBtn').addClass('hidden');
@@ -681,10 +675,7 @@ function getServiceLogList() {
             return '<span><span class="hidden">0</span>低</span>';
         }
         var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
-        }
-        var solveTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -700,7 +691,7 @@ function getServiceLogList() {
             return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
         }
         var upServiceLog = function (d) {
-            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d})">修改</button>`;
+            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d},0)">查看</button>`;
         }
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
         var titleColumns = [6, 9];
@@ -743,7 +734,7 @@ function getServiceLogList() {
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": solveTime },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
                     { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": "Score", "title": "评分", "sClass": "text-primary" },
@@ -755,7 +746,7 @@ function getServiceLogList() {
                     { "data": "FaultTypeName", "title": "故障类型" },
                     { "data": null, "title": "故障描述", "render": rDesc },
                     { "data": null, "title": "故障图片", "render": imgBtn },
-                    { "data": "Id", "title": "修改", "render": upServiceLog, "visible": per414 }
+                    { "data": "Id", "title": "详情", "render": upServiceLog }
                 ],
                 "drawCallback": function (settings, json) {
                     if (per416) {
@@ -783,6 +774,7 @@ function getServiceLogList() {
 //故障图片查看
 function showImgModel(id, faultType, img) {
     $('#FaultImgName').text(faultType);
+    $("#faultImgList").empty();
     if (!isStrEmptyOrUndefined(img)) {
         img = img.split(",");
         var data = {
@@ -891,8 +883,8 @@ function getWorkShop(resolve) {
 }
 
 //添加修改维修记录弹窗
-function showServiceLogModal(id) {
-    var opType = id ? 412 : 415;
+function showServiceLogModal(id,isDel) {
+    var opType = id ? isDel ? 425 : 412 : 415;
     if (!permissionList[opType].have) {
         layer.msg("没有权限");
         return;
@@ -900,7 +892,6 @@ function showServiceLogModal(id) {
     $('#serLogFaultSup').prop('disabled', !!id);
     $('#serviceLogTitle').text(id ? '修改维修记录' : '添加维修记录');
     if (id) {
-        $('#updateServiceLogBtn').val(id);
         $('#showServiceLogModal .isText').removeClass('hidden');
         $('#showServiceLogModal .noText').addClass('hidden');
         var data = {}
@@ -936,22 +927,36 @@ function showServiceLogModal(id) {
             }
             $('#serLogPriorityText').text(str).css('color', color);
             $('#serLogMaintainerText').text(d.Name == '' ? '未指派' : d.Name);
-            $("#serLogFaultSolver").empty();
-            $("#serLogFaultSolver").append(_worker);
-            var faultSolver = $(`#serLogFaultSolver option[wname=${d.FaultSolver}]`).val();
-            $('#serLogFaultSolver').val(faultSolver).trigger('change');
-            var estimatedTime = d.EstimatedTime;
-            if (estimatedTime == '0001-01-01 00:00:00') {
-                $('#serLogSolveDate').val(getDate()).datepicker('update');
-                $("#serLogSolveTime").timepicker('setTime', getTime());
-            } else {
-                $('#serLogSolveDate').val(estimatedTime.split(' ')[0]).datepicker('update');
-                $("#serLogSolveTime").timepicker('setTime', estimatedTime.split(' ')[1]);
-            }
+            var solveTime = d.SolveTime;
             $("#serLogFaultType1").empty();
             $("#serLogFaultType1").append(_faultType);
-            $("#serLogFaultType1").val(d.FaultTypeId1).trigger('change');
-            $("#serLogSolvePlan").val(d.SolvePlan);
+            if (isDel || !permissionList[414].have) {
+                $('#upServiceLogBox .isText').removeClass('hidden');
+                $('#upServiceLogBox .noText').addClass('hidden');
+                $('#serLogFaultSolverText').text(d.FaultSolver);
+                $('#serLogSolveTimeText').text(solveTime == '0001-01-01 00:00:00' ? '' : solveTime.slice(0, solveTime.lastIndexOf(':')));
+                var faultType1 = $(`#serLogFaultType1 option[value=${d.FaultTypeId1}]`).text();
+                $('#serLogFaultType1Text').text(faultType1);
+                $('#updateServiceLogBtn').addClass('hidden');
+            } else {
+                $('#upServiceLogBox .isText').addClass('hidden');
+                $('#upServiceLogBox .noText').removeClass('hidden');
+                $("#serLogFaultSolver").empty();
+                $("#serLogFaultSolver").append(_worker);
+                var faultSolver = $(`#serLogFaultSolver option[wname=${d.FaultSolver}]`).val();
+                $('#serLogFaultSolver').val(faultSolver).trigger('change');
+                if (solveTime == '0001-01-01 00:00:00') {
+                    $('#serLogSolveDate').val(getDate()).datepicker('update');
+                    $("#serLogSolveTime").timepicker('setTime', getTime());
+                } else {
+                    $('#serLogSolveDate').val(solveTime.split(' ')[0]).datepicker('update');
+                    $("#serLogSolveTime").timepicker('setTime', solveTime.split(' ')[1]);
+                }
+                $("#serLogFaultType1").val(d.FaultTypeId1).trigger('change');
+                $("#serLogSolvePlan").val(d.SolvePlan);
+                $('#updateServiceLogBtn').removeClass('hidden');
+                $('#updateServiceLogBtn').val(id);
+            }
         });
     } else {
         $('#showServiceLogModal .isText').addClass('hidden');
@@ -1164,7 +1169,7 @@ function getDelFaultDeviceList() {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
         }
         var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
         }
         var rDesc = function (d, type, row, meta) {
             var data = d.FaultDescription;
@@ -1189,7 +1194,7 @@ function getDelFaultDeviceList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false,"visible":false },
+                    { "data": null, "title": "", "render": isEnable, "orderable": false, "visible": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
                     { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
@@ -1290,10 +1295,7 @@ function getDelServiceLogList() {
             return '<span><span class="hidden">0</span>低</span>';
         }
         var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0,d.lastIndexOf(':'));
-        }
-        var solveTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.indexOf(' '));
+            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
         }
         var remark = function (d) {
             return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
@@ -1308,6 +1310,9 @@ function getDelServiceLogList() {
                       <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
             return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
         }
+        var upServiceLog = function (d) {
+            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d},1)">查看</button>`;
+        }
         $("#delRepairList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rtip',
@@ -1320,11 +1325,11 @@ function getDelServiceLogList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false,"visible":false },
+                    { "data": null, "title": "", "render": isEnable, "orderable": false, "visible": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime},
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": solveTime },
+                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
                     { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                     { "data": null, "title": "优先级", "render": priority },
                     { "data": "Score", "title": "评分", "sClass": "text-primary" },
@@ -1335,7 +1340,8 @@ function getDelServiceLogList() {
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultTypeName", "title": "故障类型" },
                     { "data": null, "title": "故障描述", "render": rDesc },
-                    { "data": null, "title": "故障图片", "render": imgBtn }
+                    { "data": null, "title": "故障图片", "render": imgBtn },
+                    { "data": "Id", "title": "详情", "render": upServiceLog }
                 ],
                 "drawCallback": function (settings, json) {
                     $(this).find('.isEnable').iCheck({

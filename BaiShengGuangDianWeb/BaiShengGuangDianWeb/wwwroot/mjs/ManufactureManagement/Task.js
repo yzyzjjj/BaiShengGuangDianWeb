@@ -342,15 +342,15 @@ function taskTrData() {
             <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="20"><div>${results[3]}</div></div></td>
             <td><span class="textOn">{4}</span>
             <div class="flexStyle textIn hidden" style="width:140px;margin:auto">
-            <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')">
+            <input type="text" class="form-control text-center hour toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)">
             <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-            <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')">
+            <input type="text" class="form-control text-center minute toZero" maxlength="3" onkeyup="onInput(this, 2, 0)" onblur="onInputEnd(this)">
             <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
             </div>
             </td>
-            <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
+            <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
             <td class="no-padding"><span class="textOn">{6}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
-            <td><span class="textOn relationText">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
+            <td><span class="textOn relationText">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
             </tr>`;
         _addTaskTr = `<tr>
@@ -363,15 +363,15 @@ function taskTrData() {
             <td><div style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="20"><div class="hidden">${results[3]}</div></div></td>
             <td>
             <div class="flexStyle" style="width:140px;margin:auto">
-            <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+            <input type="text" class="form-control text-center hour toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" value="0">
             <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-            <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+            <input type="text" class="form-control text-center minute toZero" maxlength="3" onkeyup="onInput(this, 2, 0)" onblur="onInputEnd(this)" value="0">
             <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
             </div>
             </td>
-            <td><input type="text" class="form-control text-center score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+            <td><input type="text" class="form-control text-center score toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
             <td class="no-padding"><textarea class="form-control desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
-            <td><input type="text" class="form-control text-center relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+            <td><input type="text" class="form-control text-center relation toZero" maxlength="10" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
             </tr>`;
         getTaskConfigItem();
