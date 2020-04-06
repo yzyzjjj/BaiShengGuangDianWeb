@@ -1373,6 +1373,7 @@ function getLogList() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var account = getCookieTokenInfo().account;
             var order = function (a, b, c, d) {
                 return d.row + 1;
             }
@@ -1422,7 +1423,7 @@ function getLogList() {
             }
             var detailBtn = function (d) {
                 var op = '<button type="button" class="btn btn-{0} btn-sm" onclick="showLogDetailModel({2},{3})"}>{1}</button>';
-                return d.State == 3 && d.Score == 0 ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
+                return d.State == 3 && d.Score == 0 && d.Account == account ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
             }
             $("#logList")
                 .DataTable({

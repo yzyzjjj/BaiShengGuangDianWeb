@@ -42,7 +42,7 @@
                                 <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="faultQuery">
                                     <div class="flexStyle" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="ms2 form-control" id="faultDevicePro" style="width: 100%">
+                                            <select class="form-control" id="faultDevicePro" style="width: 100%">
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
@@ -51,15 +51,13 @@
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
                                         </div>
-                                        <div style="flex: 1">
-                                            <select class="ms2 form-control" id="faultDeviceCond" style="width: 100%">
-                                                <option value="0">等于</option>
-                                                <option value="1">不等于</option>
-                                            </select>
-                                        </div>
+                                        <select class="form-control" id="faultDeviceCond" style="width: 90px">
+                                            <option value="0">等于</option>
+                                            <option value="1">不等于</option>
+                                        </select>
                                         <input type="text" class="form-control faultDeviceAttr" id="faultDeviceInput" placeholder="搜索" style="flex: 2">
                                         <div class="faultDeviceAttr hidden" style="flex: 2" id="faultDeviceAttrSelect">
-                                            <select class="ms2 form-control" id="faultDeviceAttr" style="width: 100%"></select>
+                                            <select class="form-control" id="faultDeviceAttr" style="width: 100%"></select>
                                         </div>
                                         <div class="faultDeviceAttr flexStyle hidden" style="flex: 4" id="faultDeviceTime">
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="solveSTime" style="flex-basis: 140px; min-width: 100px">
@@ -68,7 +66,10 @@
                                         </div>
                                         <button type="button" class="btn btn-primary" onclick="getFaultDeviceList()" style="margin-left: 2px">查询</button>
                                     </div>
-                                    <button type="button" class="btn btn-danger hidden" onclick="delChange()" id="delChangeBtn" style="margin-left:2px">删除</button>
+                                    <div class="flexStyle" style="margin-left: 2px">
+                                        <button type="button" class="btn btn-primary hidden" onclick="showBatchAssignModal()" id="showBatchAssignModalBtn" style="margin-left:2px">批量指派</button>
+                                        <button type="button" class="btn btn-danger hidden" onclick="delChange()" id="delChangeBtn" style="margin-left: 2px">删除</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +93,7 @@
                                 <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="serviceLogQuery">
                                     <div class="flexStyle" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="ms2 form-control" id="serviceLogPro" style="width: 100%">
+                                            <select class="form-control" id="serviceLogPro" style="width: 100%">
                                                 <option value="code">机台号</option>
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
@@ -101,15 +102,13 @@
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
                                         </div>
-                                        <div style="flex: 1">
-                                            <select class="ms2 form-control" id="serviceLogCond" style="width: 100%">
-                                                <option value="0">等于</option>
-                                                <option value="1">不等于</option>
-                                            </select>
-                                        </div>
+                                        <select class="form-control" id="serviceLogCond" style="width: 90px">
+                                            <option value="0">等于</option>
+                                            <option value="1">不等于</option>
+                                        </select>
                                         <input type="text" class="form-control serviceAttr" id="serviceInput" placeholder="搜索" style="flex: 2">
                                         <div class="serviceAttr hidden" style="flex: 2" id="serviceAttrSelect">
-                                            <select class="ms2 form-control" id="serviceAttr" style="width: 100%"></select>
+                                            <select class="form-control" id="serviceAttr" style="width: 100%"></select>
                                         </div>
                                         <div class="serviceAttr flexStyle hidden" style="flex: 4" id="solveTime">
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="serSTime" style="flex-basis: 140px; min-width: 100px">
@@ -146,7 +145,7 @@
                                 <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delFQuery">
                                     <div class="flexStyle" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="ms2 form-control" id="delFPro" style="width: 100%">
+                                            <select class="form-control" id="delFPro" style="width: 100%">
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
@@ -155,15 +154,13 @@
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
                                         </div>
-                                        <div style="flex: 1">
-                                            <select class="ms2 form-control" id="delFCond" style="width: 100%">
-                                                <option value="0">等于</option>
-                                                <option value="1">不等于</option>
-                                            </select>
-                                        </div>
+                                        <select class="form-control" id="delFCond" style="width: 90px">
+                                            <option value="0">等于</option>
+                                            <option value="1">不等于</option>
+                                        </select>
                                         <input type="text" class="form-control delFAttr" id="delFInput" placeholder="搜索" style="flex: 2">
                                         <div class="delFAttr hidden" style="flex: 2" id="delFAttrSelect">
-                                            <select class="ms2 form-control" id="delFAttr" style="width: 100%"></select>
+                                            <select class="form-control" id="delFAttr" style="width: 100%"></select>
                                         </div>
                                         <div class="delFAttr flexStyle hidden" style="flex: 4" id="delFTime">
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="delFSolveSTime" style="flex-basis: 140px; min-width: 100px">
@@ -196,7 +193,7 @@
                                 <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delRepairQuery">
                                     <div class="flexStyle" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="ms2 form-control" id="delRepairPro" style="width: 100%">
+                                            <select class="form-control" id="delRepairPro" style="width: 100%">
                                                 <option value="code">机台号</option>
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
@@ -205,15 +202,13 @@
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
                                         </div>
-                                        <div style="flex: 1">
-                                            <select class="ms2 form-control" id="delRepairCond" style="width: 100%">
-                                                <option value="0">等于</option>
-                                                <option value="1">不等于</option>
-                                            </select>
-                                        </div>
+                                        <select class="form-control" id="delRepairCond" style="width: 90px">
+                                            <option value="0">等于</option>
+                                            <option value="1">不等于</option>
+                                        </select>
                                         <input type="text" class="form-control delRepairAttr" id="delRepairInput" placeholder="搜索" style="flex: 2">
                                         <div class="delRepairAttr hidden" style="flex: 2" id="delRepairAttrSelect">
-                                            <select class="ms2 form-control" id="delRepairAttr" style="width: 100%"></select>
+                                            <select class="form-control" id="delRepairAttr" style="width: 100%"></select>
                                         </div>
                                         <div class="delRepairAttr flexStyle hidden" style="flex: 4" id="delRepairTime">
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="delRepSTime" style="flex-basis: 140px; min-width: 100px">
@@ -268,6 +263,30 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="designate.call(this)" id="designateBtn">指派</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 批量指派模态框 -->
+    <div class="modal fade" tabindex="-1" id="showBatchAssignModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">批量指派</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="batchAssignList"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="batchAssign()">指派</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
