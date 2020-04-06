@@ -1557,7 +1557,9 @@ function printCode(contentId, iframe, hiddenId) {
         var iframeDom = document.getElementById(iframe).contentDocument;
         iframeDom.body.innerHTML = printData;
         //需要隐藏的内容
-        iframeDom.getElementById(hiddenId).style.display = 'none';
+        if (hiddenId) {
+            iframeDom.getElementById(hiddenId).style.display = 'none';
+        }
         window.frames[iframe].print();
     }
 }

@@ -114,23 +114,17 @@
     });
     $('#addPlanBody').on('click', '.pdModal', function () {
         var tr = $(this).parents('tr');
-        var category = tr.find('.category').val();
-        category = tr.find('.category').find(`option[value=${category}]`).text();
-        var name = tr.find('.name').val();
-        name = tr.find('.name').find(`option[value=${name}]`).text();
-        var supplier = tr.find('.supplier').val();
-        supplier = tr.find('.supplier').find(`option[value=${supplier}]`).text();
-        var specification = tr.find('.specification').val();
-        specification = tr.find('.specification').find(`option[value=${specification}]`).text();
-        var site = tr.find('.site').val();
-        site = tr.find('.site').find(`option[value=${site}]`).text();
-        var codeSelect = tr.find('.code');
-        var code = codeSelect.val();
-        var stock = codeSelect.find(`option[value=${code}]`).attr('stock');
+        var category = tr.find('.category option:selected').text();
+        var name = tr.find('.name option:selected').text();
+        var supplier = tr.find('.supplier option:selected').text();
+        var specification = tr.find('.specification option:selected').text();
+        var site = tr.find('.site option:selected').text();
+        var codeSelect = tr.find('.code option:selected');
+        var code = codeSelect.text();
+        var stock = codeSelect.attr('stock');
         var price = tr.find('.price').text();
-        var remark = codeSelect.find(`option[value=${code}]`).attr('remark');
-        var img = codeSelect.find(`option[value=${code}]`).attr('img');
-        code = codeSelect.find(`option[value=${code}]`).text();
+        var remark = codeSelect.attr('remark');
+        var img = codeSelect.attr('img');
         productDetailModal(escape(category), escape(name), supplier, specification, site, code, stock, price, remark, img);
     });
     $('#updatePlanSelect').on('select2:select', function () {
