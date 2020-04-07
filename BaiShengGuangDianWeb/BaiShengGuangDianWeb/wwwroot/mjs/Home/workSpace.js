@@ -84,6 +84,13 @@
     $("#stateSelect").on('change', function (e) {
         getLogList();
     });
+    $("#workshop").on("select2:select", function (e) {
+        setWorkSiteSelect();
+    });
+    $("#devSite").select2({
+        allowClear: true,
+        placeholder: "请选择(可不选)"
+    });
 }
 
 //扫描二维码
@@ -603,7 +610,52 @@ function getWorkShop() {
             ops += op.format(d.SiteName);
         }
         $("#workshop").append(ops);
+        getSite();
     });
+}
+
+var _siteData = null;
+//获取场地
+function getSite() {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        _siteData = {};
+        var rData = ret.datas;
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            _siteData[d.SiteName]
+                ? _siteData[d.SiteName].push(d.RegionDescription)
+                : _siteData[d.SiteName] = [d.RegionDescription];
+        }
+        setWorkSiteSelect();
+    });
+}
+
+//车间对应场地
+function setWorkSiteSelect() {
+    $('#devSite').empty();
+    var workshop = $("#workshop").val();
+    if (isStrEmptyOrUndefined(workshop)) {
+        return;
+    }
+    var sData = _siteData[workshop];
+    var ops = '';
+    for (var i = 0, len = sData.length; i < len; i++) {
+        var d = sData[i];
+        ops += `<option value=${d}>${d}</option>`;
+    }
+    $('#devSite').append(ops);
+    $("#devSite").val(0).trigger('change');
 }
 
 var _updateFirmwareUpload = null;
@@ -635,7 +687,7 @@ function reportFault() {
     var faultCode = $("#faultCode").val();
     var faultOther = $("#faultOther").val().trim();
     if (isStrEmptyOrUndefined(faultCode) && isStrEmptyOrUndefined(faultOther)) {
-        layer.msg('请选择或输入机台号');
+        layer.msg('请选择或输入设备');
         return;
     }
     var i, len;
@@ -654,7 +706,8 @@ function reportFault() {
             layer.msg('请选择车间');
             return;
         } else {
-            faultOther = `${workshop}-${faultOther}`;
+            var site = $('#devSite').val();
+            faultOther = `${workshop}-${site ? site + '-' : ''}${faultOther}`;
         }
     }
     //报修人
@@ -1366,7 +1419,7 @@ function getLogList() {
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({ startTime, endTime, state});
+    data.opData = JSON.stringify({ startTime, endTime, state });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1439,7 +1492,7 @@ function getLogList() {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "DeviceCode", "title": "机台号" },
-                        { "data": "FaultTime", "title": "故障时间", "render": solveTime},
+                        { "data": "FaultTime", "title": "故障时间", "render": solveTime },
                         { "data": "Priority", "title": "优先级", "render": priority },
                         { "data": null, "title": "状态", "render": stateDesc },
                         { "data": "Score", "title": "评分", "sClass": "text-primary" },

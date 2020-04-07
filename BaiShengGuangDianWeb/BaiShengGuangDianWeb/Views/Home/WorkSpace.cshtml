@@ -15,7 +15,7 @@
         @ViewBag.Title
         <button type="button" class="btn btn-warning pull-right btn-sm" style="margin-left: 10px" onclick="showMaintainerModel()">维修工名单</button>
         <button type="button" class="btn btn-success pull-right btn-sm" style="margin-left: 10px" onclick="showLogModel()">报修记录</button>
-        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
+        <button type="button" class="btn btn-danger pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
         <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showInputReport()">报表输入</button>
     </h1>
 </section>
@@ -132,15 +132,18 @@
                     <h4 class="modal-title">故障报修</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group flexStyle">
-                        <label class="control-label text-nowrap" for="faultCode"><span class="text-blue">* </span>机台号：</label>
-                        <select class="ms2 form-control" style="width: 100%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
+                    <div class="form-group flexStyle" style="flex-wrap: wrap">
+                        <label class="control-label text-nowrap" for="faultCode"><span class="text-blue">* </span>蓝玻璃研磨/抛光机机台号：</label>
+                        <div style="flex: 1;min-width: 350px">
+                            <select class="ms2 form-control" style="width: 100%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
+                        </div>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap" for="faultOther"><span class="text-blue">* </span>其他机台号：</label>
-                        <div class="flexStyle" style="width:300px">
-                            <select class="ms2 form-control" style="width: 50%" id="workshop"></select>
-                            <input type="text" class="form-control" id="faultOther" placeholder="请输入" maxlength="20" style="width: 50%">
+                        <label class="control-label text-nowrap" for="faultOther"><span class="text-blue">* </span>其他设备：</label>
+                        <div class="flexStyle" style="flex-basis: 500px">
+                            <select class="ms2 form-control" style="width: 30%" id="workshop"></select>
+                            <select class="form-control" style="width: 30%" id="devSite"></select>
+                            <input type="text" class="form-control" id="faultOther" placeholder="请输入" maxlength="20" style="width: 40%">
                         </div>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
