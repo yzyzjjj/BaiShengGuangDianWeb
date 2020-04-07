@@ -115,10 +115,10 @@
                                             <label class="control-label" style="margin: 5px">至</label>
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="serETime" style="flex-basis: 140px; min-width: 100px">
                                         </div>
-                                        <button type="button" class="btn btn-primary" onclick="getServiceLogList()" style="margin-left: 2px">查询</button>
+                                        <button type="button" class="btn btn-primary" onclick="getServiceLogList(1)" style="margin-left: 2px">查询</button>
                                     </div>
                                     <div class="flexStyle" style="margin-left:2px">
-                                        <button type="button" class="btn btn-primary hidden" onclick="location.assign('/StatisticManagement/Fault')">统计</button>
+                                        <button type="button" class="btn btn-primary" onclick="showStatisticsModel()">统计</button>
                                         <button type="button" class="btn btn-primary" onclick="showServiceLogModal()" id="addServiceLogBtn" style="margin-left:2px">添加</button>
                                         <button type="button" class="btn btn-danger hidden" onclick="delServiceLog()" id="delServiceLogBtn" style="margin-left:2px">删除</button>
                                     </div>
@@ -292,105 +292,6 @@
             </div>
         </div>
     </div>
-    <!-- 添加修改维修记录模态框（Modal） -->
-    <div class="modal fade" tabindex="-1" id="showServiceLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title" id="serviceLogTitle">添加维修记录</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">机台号：<span class="spanStyle isText" id="serLogCodeText"></span></label>
-                        <div class="noText" style="width:300px">
-                            <select class="ms2 form-control" style="width: 100%" id="serLogCode"></select>
-                        </div>
-                    </div>
-                    <div class="form-group flexStyle noText" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">其他机台号：</label>
-                        <div class="flexStyle" style="width:300px">
-                            <select class="ms2 form-control" style="width: 50%" id="serLogWorkshop"></select>
-                            <input type="text" class="form-control" id="serLogCodeOther" placeholder="请输入" maxlength="20" style="width: 50%">
-                        </div>
-                    </div>
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">报修人：<span class="spanStyle isText" id="serLogProposerText"></span></label>
-                        <input class="form-control noText" id="serLogProposer" maxlength="20" style="flex-basis:140px">
-                    </div>
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">故障时间：<span class="spanStyle isText" id="serLogFaultTimeText"></span></label>
-                        <div class="flexStyle noText" style="width: 240px">
-                            <input type="text" id="serLogFaultDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
-                            <input type="text" id="serLogFaultTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
-                        </div>
-                    </div>
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle isText" id="serLogFaultTypeText"></span></label>
-                        <div class="noText">
-                            <select class="ms2 form-control" style="width: 200px" id="serLogFaultType"></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label text-nowrap">故障描述：</label>
-                        <textarea class="form-control" id="serLogFaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label text-nowrap">补充：</label>
-                        <textarea class="form-control" id="serLogFaultSup" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
-                    </div>
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">优先级：<span class="spanStyle isText" id="serLogPriorityText"></span></label>
-                        <select class="form-control noText" style="width: 100px" id="serLogPriority">
-                            <option value="0">低</option>
-                            <option value="1">中</option>
-                            <option value="2">高</option>
-                        </select>
-                    </div>
-                    <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">指派人：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
-                        <div class="noText">
-                            <select class="ms2 form-control" style="width: 200px" id="serLogMaintainer"></select>
-                        </div>
-                    </div>
-                    <div class="box" id="upServiceLogBox">
-                        <div class="box-body">
-                            <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">解决人：<span class="spanStyle isText" id="serLogFaultSolverText"></span></label>
-                                <div class="noText">
-                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultSolver"></select>
-                                </div>
-                            </div>
-                            <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">解决时间：<span class="spanStyle isText" id="serLogSolveTimeText"></span></label>
-                                <div class="flexStyle noText" style="width: 240px">
-                                    <input type="text" id="serLogSolveDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
-                                    <input type="text" id="serLogSolveTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
-                                </div>
-                            </div>
-                            <div class="form-group flexStyle" style="flex-wrap:wrap">
-                                <label class="control-label text-nowrap">实际故障类型：<span class="spanStyle isText" id="serLogFaultType1Text"></span></label>
-                                <div class="noText">
-                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label text-nowrap">解决方案：</label>
-                                <textarea class="form-control" id="serLogSolvePlan" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary noText" onclick="addUpServiceLog(1)">添加</button>
-                    <button type="button" class="btn btn-primary isText" onclick="addUpServiceLog.call(this,0)" id="updateServiceLogBtn">修改</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- 常见故障及解决方法模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="usuallyFaultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -491,35 +392,6 @@
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
                         <table class="table table-hover table-striped" id="faultTypeList" style="padding-right: 10px;"></table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- 故障描述模态框（Modal） -->
-    <div class="modal fade" tabindex="-1" id="faultTypeDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">故障描述</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="faultTypeNameDetail"></span></label>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label" for="faultTypeDetail">故障类型描述：</label>
-                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
-                    </div>
-                    <div class="form-group hidden" id="faultTypeDetail1Div">
-                        <label class="control-label" for="faultTypeDetail1">故障补充：</label>
-                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail1" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -761,6 +633,160 @@
             </div>
         </div>
     </div>
+    <!-- 统计模态框 -->
+    <div class="modal fade" tabindex="-1" id="showStatisticsModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">统计</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group flexStyle" style="flex-wrap: wrap">
+                            <label class="control-label text-nowrap">解决时间：</label>
+                            <div class="flexStyle">
+                                <input type="text" class="form_date form-control text-center" id="statSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                <label class="control-label" style="margin: 5px">至</label>
+                                <input type="text" class="form_date form-control text-center" id="statETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                <button type="button" class="btn btn-primary" onclick="getStatisticsList()" style="margin-left: 3px">查询</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="statisticsList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 统计详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showStatisticsDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title text-red text-bold">总分：<span id="score"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="statisticsDetailList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 添加修改维修记录模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showServiceLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="serviceLogTitle">添加维修记录</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">机台号：<span class="spanStyle isText" id="serLogCodeText"></span></label>
+                        <div class="noText" style="width:300px">
+                            <select class="ms2 form-control" style="width: 100%" id="serLogCode"></select>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle noText" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">其他机台号：</label>
+                        <div class="flexStyle" style="width:300px">
+                            <select class="ms2 form-control" style="width: 50%" id="serLogWorkshop"></select>
+                            <input type="text" class="form-control" id="serLogCodeOther" placeholder="请输入" maxlength="20" style="width: 50%">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">报修人：<span class="spanStyle isText" id="serLogProposerText"></span></label>
+                        <input class="form-control noText" id="serLogProposer" maxlength="20" style="flex-basis:140px">
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">故障时间：<span class="spanStyle isText" id="serLogFaultTimeText"></span></label>
+                        <div class="flexStyle noText" style="width: 240px">
+                            <input type="text" id="serLogFaultDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                            <input type="text" id="serLogFaultTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle isText" id="serLogFaultTypeText"></span></label>
+                        <div class="noText">
+                            <select class="ms2 form-control" style="width: 200px" id="serLogFaultType"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">故障描述：</label>
+                        <textarea class="form-control" id="serLogFaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">补充：</label>
+                        <textarea class="form-control" id="serLogFaultSup" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">优先级：<span class="spanStyle isText" id="serLogPriorityText"></span></label>
+                        <select class="form-control noText" style="width: 100px" id="serLogPriority">
+                            <option value="0">低</option>
+                            <option value="1">中</option>
+                            <option value="2">高</option>
+                        </select>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">指派人：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
+                        <div class="noText">
+                            <select class="ms2 form-control" style="width: 200px" id="serLogMaintainer"></select>
+                        </div>
+                    </div>
+                    <div class="box" id="upServiceLogBox">
+                        <div class="box-body">
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">解决人：<span class="spanStyle isText" id="serLogFaultSolverText"></span></label>
+                                <div class="noText">
+                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultSolver"></select>
+                                </div>
+                            </div>
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">解决时间：<span class="spanStyle isText" id="serLogSolveTimeText"></span></label>
+                                <div class="flexStyle noText" style="width: 240px">
+                                    <input type="text" id="serLogSolveDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                                    <input type="text" id="serLogSolveTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                                </div>
+                            </div>
+                            <div class="form-group flexStyle" style="flex-wrap:wrap">
+                                <label class="control-label text-nowrap">实际故障类型：<span class="spanStyle isText" id="serLogFaultType1Text"></span></label>
+                                <div class="noText">
+                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label text-nowrap">解决方案：</label>
+                                <textarea class="form-control" id="serLogSolvePlan" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary noText" onclick="addUpServiceLog(1)">添加</button>
+                    <button type="button" class="btn btn-primary isText" onclick="addUpServiceLog.call(this,0)" id="updateServiceLogBtn">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- 故障图片模态框 -->
     <div class="modal fade" tabindex="-1" id="showFaultImgModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -790,33 +816,31 @@
             </div>
         </div>
     </div>
-    <!-- 统计模态框 -->
-    <div class="modal fade" tabindex="-1" id="showStatisticsModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <!-- 故障描述模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="faultTypeDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">统计</h4>
+                    <h4 class="modal-title">故障描述</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="modal-body box">
-                        <div class="form-group flexStyle">
-                            <label class="control-label text-nowrap">解决时间：</label>
-                            <input type="text" class="form_date form-control text-center" id="faultSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                            <label class="control-label" style="margin: 5px">至</label>
-                            <input type="text" class="form_date form-control text-center" id="faultETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                        </div>
-                        <div class="form-group">
-                            <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="statisticsList"></table>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">故障类型：<span class="spanStyle" id="faultTypeNameDetail"></span></label>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <div class="form-group">
+                        <label class="control-label" for="faultTypeDetail">故障类型描述：</label>
+                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
                     </div>
+                    <div class="form-group hidden" id="faultTypeDetail1Div">
+                        <label class="control-label" for="faultTypeDetail1">故障补充：</label>
+                        <textarea class="form-control" disabled="disabled" id="faultTypeDetail1" style="resize: vertical; height: 100px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

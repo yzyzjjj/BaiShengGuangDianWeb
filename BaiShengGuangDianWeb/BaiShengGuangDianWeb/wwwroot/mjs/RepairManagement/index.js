@@ -26,6 +26,7 @@ function pageReady() {
     permissionList[444] = { uIds: [] };
     permissionList[445] = { uIds: [] };
     permissionList[446] = { uIds: [] };
+    permissionList[447] = { uIds: [] };
     permissionList = checkPermissionUi(permissionList);
     var li = $("#tabs li:not(.hidden)").first();
     if (li) {
@@ -40,8 +41,8 @@ function pageReady() {
     getWorkerSelect();
     getFaultTypeSelect();
     var nowMonth = getMonthScope();
-    $("#faultSTime,#serviceLogSTime,#delFSTime,#delRepairSTime").val(nowMonth.start).datepicker('update');
-    $("#faultETime,#serviceLogETime,#delFETime,#delRepairETime").val(nowMonth.end).datepicker('update');
+    $("#faultSTime,#serviceLogSTime,#delFSTime,#delRepairSTime,#statSTime").val(nowMonth.start).datepicker('update');
+    $("#faultETime,#serviceLogETime,#delFETime,#delRepairETime,#statETime").val(nowMonth.end).datepicker('update');
     $('#faultDevicePro').on('change', function () {
         var v = $(this).val();
         var parentEl = '#faultQuery';
@@ -142,6 +143,8 @@ function pageReady() {
                 setFaultDeviceGet(parentEl, attrEl, '#delRepairTime');
         }
     });
+    getFaultDeviceList();
+    setTimeout(() => getServiceLogList(0), 2000);
 }
 
 //查询条件
@@ -736,62 +739,74 @@ function delChange() {
 }
 
 var _serviceLogData = null;
+var _statisticsParData = null;
 //获取维修记录
-function getServiceLogList() {
+function getServiceLogList(isLoad, name, sTime, eTime, score) {
     var opType = 412;
     if (!permissionList[opType].have) {
         return;
     }
-    _serviceLogData = {};
-    _serviceLogData.Id = [];
-    _serviceLogData.Name = [];
-    var startTime = $('#serviceLogSTime').val();
-    var endTime = $('#serviceLogETime').val();
-    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
-        layer.msg('请选择解决时间');
-        return;
-    }
-    if (comTimeDay(startTime, endTime)) {
-        return;
-    }
-    startTime = `${startTime} 00:00:00`;
-    endTime = `${endTime} 23:59:59`;
-    var condition = $('#serviceLogCond').val();
-    var list = { startTime, endTime, condition }
-    var serviceLogPro = $('#serviceLogPro').val();
-    var serviceAttr;
-    switch (serviceLogPro) {
-        case 'code':
-            serviceAttr = $('#serviceInput').val().trim();
-            if (!isStrEmptyOrUndefined(serviceAttr)) {
-                list[serviceLogPro] = serviceAttr;
-            }
-            break;
-        case 'faultTime':
-            var serSTime = $('#serSTime').val();
-            if (!isStrEmptyOrUndefined(serSTime)) {
-                list.fStartTime = serSTime;
-            }
-            var serETime = $('#serETime').val();
-            if (!isStrEmptyOrUndefined(serETime)) {
-                list.fEndTime = serETime;
-            }
-            break;
-        case 'solveTime':
-            var serSTime1 = $('#serSTime').val();
-            if (!isStrEmptyOrUndefined(serSTime1)) {
-                list.eStartTime = serSTime1;
-            }
-            var serETime1 = $('#serETime').val();
-            if (!isStrEmptyOrUndefined(serETime1)) {
-                list.eEndTime = serETime1;
-            }
-            break;
-        default:
-            serviceAttr = $('#serviceAttr').val();
-            if (!isStrEmptyOrUndefined(serviceAttr)) {
-                list[serviceLogPro] = serviceAttr;
-            }
+    var list = null;
+    if (name) {
+        list = {
+            startTime: sTime,
+            endTime: eTime,
+            condition: 0,
+            maintainer: name
+        }
+        _statisticsParData = { name, sTime, eTime, score };
+    } else {
+        _serviceLogData = {};
+        _serviceLogData.Id = [];
+        _serviceLogData.Name = [];
+        var startTime = $('#serviceLogSTime').val();
+        var endTime = $('#serviceLogETime').val();
+        if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+            layer.msg('请选择解决时间');
+            return;
+        }
+        if (comTimeDay(startTime, endTime)) {
+            return;
+        }
+        startTime = `${startTime} 00:00:00`;
+        endTime = `${endTime} 23:59:59`;
+        var condition = $('#serviceLogCond').val();
+        list = { startTime, endTime, condition }
+        var serviceLogPro = $('#serviceLogPro').val();
+        var serviceAttr;
+        switch (serviceLogPro) {
+            case 'code':
+                serviceAttr = $('#serviceInput').val().trim();
+                if (!isStrEmptyOrUndefined(serviceAttr)) {
+                    list[serviceLogPro] = serviceAttr;
+                }
+                break;
+            case 'faultTime':
+                var serSTime = $('#serSTime').val();
+                if (!isStrEmptyOrUndefined(serSTime)) {
+                    list.fStartTime = serSTime;
+                }
+                var serETime = $('#serETime').val();
+                if (!isStrEmptyOrUndefined(serETime)) {
+                    list.fEndTime = serETime;
+                }
+                break;
+            case 'solveTime':
+                var serSTime1 = $('#serSTime').val();
+                if (!isStrEmptyOrUndefined(serSTime1)) {
+                    list.eStartTime = serSTime1;
+                }
+                var serETime1 = $('#serETime').val();
+                if (!isStrEmptyOrUndefined(serETime1)) {
+                    list.eEndTime = serETime1;
+                }
+                break;
+            default:
+                serviceAttr = $('#serviceAttr').val();
+                if (!isStrEmptyOrUndefined(serviceAttr)) {
+                    list[serviceLogPro] = serviceAttr;
+                }
+        }
     }
     var data = {}
     data.opType = opType;
@@ -840,78 +855,140 @@ function getServiceLogList() {
         }
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
         var titleColumns = [6, 9];
-        $("#repairRecordList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: '导出Excel',
-                        className: 'btn-primary btn-sm', //按钮的class样式
-                        exportOptions: {
-                            columns: excelColumns,
-                            format: {
-                                // format有三个子标签，header，body和foot
-                                body: function (data, row, column, node) {
-                                    //操作需要导出excel的数据格式                        
-                                    if (titleColumns.indexOf(column) > -1) {
-                                        var a = $(node).find("span").attr("title");
-                                        if (a != null) {
-                                            return "\u200C" + unescape(a);
-                                        }
+        var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
+        el.DataTable({
+            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '导出Excel',
+                    className: 'btn-primary btn-sm', //按钮的class样式
+                    exportOptions: {
+                        columns: excelColumns,
+                        format: {
+                            // format有三个子标签，header，body和foot
+                            body: function (data, row, column, node) {
+                                //操作需要导出excel的数据格式                        
+                                if (titleColumns.indexOf(column) > -1) {
+                                    var a = $(node).find("span").attr("title");
+                                    if (a != null) {
+                                        return "\u200C" + unescape(a);
                                     }
-                                    return "\u200C" + node.textContent;
                                 }
+                                return "\u200C" + node.textContent;
                             }
                         }
                     }
-                ],
+                }
+            ],
+            "destroy": true,
+            "paging": true,
+            "searching": true,
+            "language": oLanguage,
+            "data": ret.datas,
+            "aaSorting": [[per416 && !name ? 1 : 0, "asc"]],
+            "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+            "iDisplayLength": 20, //默认显示的记录数
+            "columns": [
+                { "data": null, "title": "", "render": isEnable, "visible": per416 && !name, "orderable": !per416 && name },
+                { "data": null, "title": "序号", "render": order },
+                { "data": "DeviceCode", "title": "机台号" },
+                { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
+                { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
+                { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
+                { "data": null, "title": "优先级", "render": priority },
+                { "data": "Score", "title": "评分", "sClass": "text-primary" },
+                { "data": "FaultSolver", "title": "解决人" },
+                { "data": "Name", "title": "指派给" },
+                { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                { "data": "Remark", "title": "维修备注", "render": remark },
+                { "data": "Proposer", "title": "报修人" },
+                { "data": "FaultTypeName", "title": "故障类型" },
+                { "data": null, "title": "故障描述", "render": rDesc },
+                { "data": null, "title": "故障图片", "render": imgBtn },
+                { "data": "Id", "title": "详情", "render": upServiceLog }
+            ],
+            "drawCallback": function (settings, json) {
+                if (per416 && !name) {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    }).on('ifChanged', function () {
+                        var v = $(this).val();
+                        var name = $(this).attr('fName');
+                        if ($(this).is(':checked')) {
+                            _serviceLogData.Id.push(v);
+                            _serviceLogData.Name.push(name);
+                        } else {
+                            _serviceLogData.Id.splice(_serviceLogData.Id.indexOf(v), 1);
+                            _serviceLogData.Name.splice(_serviceLogData.Name.indexOf(name), 1);
+                        }
+                    });
+                }
+            }
+        });
+        if (name) {
+            $('#score').text(score);
+            $('#showStatisticsDetailModel').modal('show');
+        }
+    }, isLoad);
+}
+
+//统计弹窗
+function showStatisticsModel() {
+    getStatisticsList();
+    $('#showStatisticsModel').modal('show');
+}
+
+//获取统计列表
+function getStatisticsList() {
+    var opType = 447;
+    if (!permissionList[opType].have) {
+        return;
+    }
+    var startTime = $('#statSTime').val();
+    var endTime = $('#statETime').val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        layer.msg('请选择解决时间');
+        return;
+    }
+    if (comTimeDay(startTime, endTime)) {
+        return;
+    }
+    startTime = `${startTime} 00:00:00`;
+    endTime = `${endTime} 23:59:59`;
+    var data = {}
+    data.opType = opType;
+    data.opData = JSON.stringify({ startTime, endTime });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var order = function (a, b, c, d) {
+            return d.row + 1;
+        }
+        var detail = function (d) {
+            return `<button type="button" class="btn btn-primary btn-sm" onclick="getServiceLogList(1,\'${d.Account}\',\'${startTime}\',\'${endTime}\',\'${d.Score}\')">查看</button>`;
+        }
+        $("#statisticsList")
+            .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rtip',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
                 "language": oLanguage,
                 "data": ret.datas,
-                "aaSorting": [[per416 ? 1 : 0, "asc"]],
+                "aaSorting": [[0, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "visible": per416, "orderable": !per416 },
                     { "data": null, "title": "序号", "render": order },
-                    { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
-                    { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
-                    { "data": null, "title": "优先级", "render": priority },
-                    { "data": "Score", "title": "评分", "sClass": "text-primary" },
-                    { "data": "FaultSolver", "title": "解决人" },
-                    { "data": "Name", "title": "指派给" },
-                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
-                    { "data": "Remark", "title": "维修备注", "render": remark },
-                    { "data": "Proposer", "title": "报修人" },
-                    { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": rDesc },
-                    { "data": null, "title": "故障图片", "render": imgBtn },
-                    { "data": "Id", "title": "详情", "render": upServiceLog }
-                ],
-                "drawCallback": function (settings, json) {
-                    if (per416) {
-                        $(this).find('.isEnable').iCheck({
-                            handle: 'checkbox',
-                            checkboxClass: 'icheckbox_minimal-blue',
-                            increaseArea: '20%'
-                        }).on('ifChanged', function () {
-                            var v = $(this).val();
-                            var name = $(this).attr('fName');
-                            if ($(this).is(':checked')) {
-                                _serviceLogData.Id.push(v);
-                                _serviceLogData.Name.push(name);
-                            } else {
-                                _serviceLogData.Id.splice(_serviceLogData.Id.indexOf(v), 1);
-                                _serviceLogData.Name.splice(_serviceLogData.Name.indexOf(name), 1);
-                            }
-                        });
-                    }
-                }
+                    { "data": "Name", "title": "维修工" },
+                    { "data": "Score", "title": "评分" },
+                    { "data": null, "title": "详情", "render": detail }
+                ]
             });
     });
 }
@@ -966,7 +1043,7 @@ function delServiceLog() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    getServiceLogList();
+                    getServiceLogList(1);
                 }
             });
     }
@@ -1035,7 +1112,7 @@ function showServiceLogModal(id, isDel) {
         return;
     }
     $('#serLogFaultSup').prop('disabled', !!id);
-    $('#serviceLogTitle').text(id ? '修改维修记录' : '添加维修记录');
+    $('#serviceLogTitle').text(id ? '维修记录详情' : '添加维修记录');
     if (id) {
         $('#showServiceLogModal .isText').removeClass('hidden');
         $('#showServiceLogModal .noText').addClass('hidden');
@@ -1240,9 +1317,12 @@ function addUpServiceLog(isAdd) {
         layer.msg(ret.errmsg);
         if (ret.errno == 0) {
             $('#showServiceLogModal').modal('hide');
-            if (!$('#repairRecordList').is(':empty')) {
-                getServiceLogList();
-            }
+            $('#showStatisticsDetailModel').is(':hidden')
+                ? getServiceLogList(1)
+                : getServiceLogList(1, _statisticsParData.name,
+                    _statisticsParData.sTime,
+                    _statisticsParData.eTime,
+                    _statisticsParData.score);
         }
     });
 }
