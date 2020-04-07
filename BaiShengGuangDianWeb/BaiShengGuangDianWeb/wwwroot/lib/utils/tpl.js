@@ -9,8 +9,10 @@ var commonfunc = function () {
     $("#nuser_name").text(tkinfo.name);
     $("#nuser_role").text(tkinfo.role.length > 10 ? tkinfo.role.substring(0, 10) + "..." : tkinfo.role);
     $("#nuser_role").attr("title", tkinfo.role);
-    $("#user_name").prepend(tkinfo.name);
-    $("#user_email").text(tkinfo.email);
+    //$("#user_name").prepend(tkinfo.name);
+    $("#user_name").prepend(tkinfo.role.length > 10 ? tkinfo.role.substring(0, 10) + "..." : tkinfo.role);
+    $("#user_name").attr("title", tkinfo.role);
+    $("#user_email").prepend(tkinfo.email);
 
     $("#logoutBtn").click(function () {
         var tkinfo = getCookieTokenInfo();

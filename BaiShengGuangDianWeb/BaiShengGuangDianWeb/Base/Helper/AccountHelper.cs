@@ -179,8 +179,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <returns></returns>
         public static void AddAccountInfo(AccountInfo info)
         {
-            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `Phone`, `EmailType`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `DeviceIds`, `Default`, `ProductionRole`, `MaxProductionRole`) " +
-                      "VALUES (@Account, @Password, @Name, @Role, @Phone, @EmailType, @EmailAddress, @IsDeleted, @SelfPermissions, @DeviceIds, @Default, @ProductionRole, @MaxProductionRole);";
+            var sql = "INSERT INTO accounts (`Account`, `Password`, `Name`, `Role`, `Phone`, `EmailType`, `EmailAddress`, `IsDeleted`, `SelfPermissions`, `AllDevice`, `DeviceIds`, `Default`, `ProductionRole`, `MaxProductionRole`) " +
+                      "VALUES (@Account, @Password, @Name, @Role, @Phone, @EmailType, @EmailAddress, @IsDeleted, @SelfPermissions, @AllDevice, @DeviceIds, @Default, @ProductionRole, @MaxProductionRole);";
             ServerConfig.WebDb.Execute(sql, info);
         }
 
@@ -203,7 +203,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         public static void UpdateAccountInfo(AccountInfo info)
         {
             var sql = "UPDATE accounts SET `Account` = @Account, `Password` = @Password, `Name` = @Name, `Role` = @Role, `Phone` = @Phone, `EmailType` = @EmailType, `EmailAddress` = @EmailAddress, `IsDeleted` = @IsDeleted, " +
-                      "`SelfPermissions` = @SelfPermissions, `DeviceIds` = @DeviceIds, `Default` = @Default, `ProductionRole` = @ProductionRole, `MaxProductionRole` = @MaxProductionRole WHERE `Id` = @Id;";
+                      "`SelfPermissions` = @SelfPermissions, `AllDevice` = @AllDevice, `DeviceIds` = @DeviceIds, `Default` = @Default, `ProductionRole` = @ProductionRole, `MaxProductionRole` = @MaxProductionRole WHERE `Id` = @Id;";
             ServerConfig.WebDb.Execute(sql, info);
         }
     }

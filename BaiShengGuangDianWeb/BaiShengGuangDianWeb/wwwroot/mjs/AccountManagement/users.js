@@ -1,13 +1,13 @@
 ﻿function pageReady() {
     getUsersList();
     $(".ms2").select2();
-    $("#addProcessor").on("ifChanged", function (event) {
-        if ($(this).is(":checked")) {
-            $("#add_deviceDiv").removeClass("hidden");
-        } else {
-            $("#add_deviceDiv").addClass("hidden");
-        }
-    });
+    //$("#addProcessor").on("ifChanged", function (event) {
+    //    if ($(this).is(":checked")) {
+    //        $("#add_deviceDiv").removeClass("hidden");
+    //    } else {
+    //        $("#add_deviceDiv").addClass("hidden");
+    //    }
+    //});
 
     $("#add_perDiv").click(function (e) {
         var addRole = $("#addRole").val();
@@ -16,13 +16,13 @@
     });
 
 
-    $("#updateProcessor").on("ifChanged", function (event) {
-        if ($(this).is(":checked")) {
-            $("#update_deviceDiv").removeClass("hidden");
-        } else {
-            $("#update_deviceDiv").addClass("hidden");
-        }
-    });
+    //$("#updateProcessor").on("ifChanged", function (event) {
+    //    if ($(this).is(":checked")) {
+    //        $("#update_deviceDiv").removeClass("hidden");
+    //    } else {
+    //        $("#update_deviceDiv").addClass("hidden");
+    //    }
+    //});
 
     $("#update_perDiv").click(function (e) {
         var updateRole = $("#updateRole").val();
@@ -67,11 +67,11 @@ function getUsersList() {
                     '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                     '    </ul>' +
                     '</div>';
-                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\',\'{9}\')">修改</a></li>';
+                var upUsersFormat = '<li><a onclick="showUpdateUserModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\',\'{8}\',\'{9}\',\'{10}\')">修改</a></li>';
                 var delUsersFormat = '<li><a onclick="deleteUser({0}, \'{1}\')">删除</a></li>';
 
                 var op = function (data, type, row) {
-                    var upUsers = upUsersFormat.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.phone), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType))
+                    var upUsers = upUsersFormat.format(data.id, data.role, escape(data.account), escape(data.name), escape(data.phone), escape(data.emailAddress), escape(data.permissions), escape(data.deviceIds), escape(data.productionRole), escape(data.emailType), escape(data.allDevice))
                     var delUsers = delUsersFormat.format(data.id, escape(data.account));
                     return (!checkPermission76 && !checkPermission75) || data.isDeleted ? "" : htmlFormat.format(checkPermission76 ? upUsers : "", checkPermission75 ? delUsers : "");
                 }
@@ -378,13 +378,16 @@ function addUser() {
     var roleIds = pId.join(",");
 
     var deviceIds = "";
-    if ($("#checkAll").is(":checked"))
+    if ($("#checkAll").is(":checked")) {
+        //deviceIds = deviceId.join(",");
         deviceIds = deviceId.join(",");
+    }
     else {
-        if (pRole.indexOf(0) > -1)
-            deviceIds = addList.join(",");
-        else
-            addList = new Array();
+        deviceIds = addList.join(",");
+        //if (pRole.indexOf(0) > -1)
+        //    deviceIds = addList.join(",");
+        //else
+        //    addList = new Array();
     }
 
     if (isStrEmptyOrUndefined(addAccount)) {
@@ -428,6 +431,7 @@ function addUser() {
             role: addRole,
             permissions: roleIds,
             isProcessor: pRoles,
+            allDevice: $("#checkAll").is(":checked") ? "1" : "0",
             deviceIds: deviceIds
         }
         ajaxPost("/AccountManagement/Add", data,
@@ -445,7 +449,7 @@ function addUser() {
 var updateList = new Array();
 var permission = null;
 var tf1 = true;
-function showUpdateUserModal(id, role, account, name, phone, emailAddress, permissions, deviceIds, productionRole, emailType) {
+function showUpdateUserModal(id, role, account, name, phone, emailAddress, permissions, deviceIds, productionRole, emailType, allDevice) {
     role = role.split(",");
     account = unescape(account);
     name = unescape(name);
@@ -455,6 +459,7 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
     deviceIds = unescape(deviceIds);
     productionRole = unescape(productionRole);
     emailType = unescape(emailType);
+    allDevice = unescape(allDevice);
     if (!isStrEmptyOrUndefined(deviceIds))
         updateList = deviceIds.split(",");
     $("#update_protoDiv").click();
@@ -549,8 +554,14 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
                 return;
             }
 
+            if (allDevice == "true") {
+                updateList = new Array();
+            }
             for (var d in ret.datas) {
                 deviceId.push(ret.datas[d].Id.toString());
+                if (allDevice == "true") {
+                    updateList.push(ret.datas[d].Id);
+                }
             }
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.Id);
@@ -691,13 +702,16 @@ function updateUser() {
     }
     var roleIds = pId.join(",");
     var deviceIds = "";
-    if ($("#upCheckAll").is(":checked"))
-        deviceIds = deviceId.join(",");
+    if ($("#upCheckAll").is(":checked")) {
+        //deviceIds = deviceId.join(",");
+        deviceIds = "";
+    }
     else {
-        if (pRole.indexOf(0) > -1)
-            deviceIds = updateList.join(",");
-        else
-            updateList = new Array();
+        deviceIds = updateList.join(",");
+        //if (pRole.indexOf(0) > -1)
+        //    deviceIds = updateList.join(",");
+        //else
+        //    updateList = new Array();
     }
 
     if (isStrEmptyOrUndefined(updateName)) {
@@ -709,6 +723,7 @@ function updateUser() {
         layer.msg("手机号错误");
         return;
     }
+
     var data = {
         id: id,
         name: updateName,
@@ -718,6 +733,7 @@ function updateUser() {
         role: updateRole,
         permissions: roleIds,
         isProcessor: pRoles,
+        allDevice: $("#upCheckAll").is(":checked") ? "1" : "0",
         deviceIds: deviceIds
     }
     if (!isEmail(updateEmail) && !isStrEmptyOrUndefined(updateEmail)) {

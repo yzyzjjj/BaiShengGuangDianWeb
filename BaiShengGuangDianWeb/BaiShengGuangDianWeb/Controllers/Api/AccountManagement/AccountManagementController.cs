@@ -74,6 +74,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             var roleStr = param.GetValue("role");
             var permissions = param.GetValue("permissions");
             var isProcessor = param.GetValue("isProcessor");
+            var allDeviceStr = param.GetValue("allDevice");
             var deviceIds = param.GetValue("deviceIds");
             var emailType = param.GetValue("emailType");
             if (account.IsNullOrEmpty() || account.IsNullOrEmpty() || name.IsNullOrEmpty() || roleStr.IsNullOrEmpty())
@@ -123,7 +124,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
-            if (!deviceIds.IsNullOrEmpty())
+            var allDevice = !allDeviceStr.IsNullOrEmpty() && allDeviceStr == "1";
+            if (!allDevice && !deviceIds.IsNullOrEmpty())
             {
                 try
                 {
@@ -134,6 +136,11 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     return Result.GenError<Result>(Error.ParamError);
                 }
             }
+            else
+            {
+                deviceIds = "";
+            }
+
             var logParam = $"账号:{account},名字:{name},角色:{roleInfos.SelectMany(x => x.Name).Join(",")},手机号:{phone},邮箱:{email},邮件类型:{emailType},特殊权限列表:{permissions}";
             if (!isProcessor.IsNullOrEmpty())
             {
@@ -195,6 +202,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 EmailType = emailType,
                 EmailAddress = email,
                 SelfPermissions = permissions ?? "",
+                AllDevice = allDevice,
                 DeviceIds = deviceIds ?? "",
                 ProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor,
                 MaxProductionRole = isProcessor.IsNullOrEmpty() ? "" : isProcessor
@@ -514,7 +522,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     all.AddRange(oldProductionRoleList);
                     all.AddRange(isProcessorList);
 
-                    var opTypeList = new Dictionary<int,   Tuple<int, int, int>>
+                    var opTypeList = new Dictionary<int, Tuple<int, int, int>>
                     {
                         {0, new Tuple<int,int,int>(253, 250, 251)},
                         {1, new Tuple<int,int,int>(259, 256, 257)},
@@ -711,7 +719,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 }
             }
 
+            var allDeviceStr = param.GetValue("allDevice");
+            var allDevice = !allDeviceStr.IsNullOrEmpty() && allDeviceStr == "1";
             var deviceIds = param.GetValue("deviceIds");
+            accountInfo.AllDevice = allDevice;
             if (!deviceIds.IsNullOrEmpty() && accountInfo.DeviceIds != deviceIds)
             {
                 try
@@ -728,6 +739,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             {
                 accountInfo.DeviceIds = "";
             }
+
             AccountHelper.UpdateAccountInfo(accountInfo);
 
             opType = 431;
