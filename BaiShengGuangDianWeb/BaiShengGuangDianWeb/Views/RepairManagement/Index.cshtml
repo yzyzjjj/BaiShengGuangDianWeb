@@ -46,6 +46,7 @@
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
+                                                <option value="grade">故障等级</option>
                                                 <option value="state">状态</option>
                                                 <option value="maintainer">维修工</option>
                                                 <option value="solveTime">预计解决时间</option>
@@ -98,6 +99,7 @@
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
+                                                <option value="grade">故障等级</option>
                                                 <option value="maintainer">维修工</option>
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
@@ -149,6 +151,7 @@
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
+                                                <option value="grade">故障等级</option>
                                                 <option value="state">状态</option>
                                                 <option value="maintainer">维修工</option>
                                                 <option value="solveTime">预计解决时间</option>
@@ -198,6 +201,7 @@
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
+                                                <option value="grade">故障等级</option>
                                                 <option value="maintainer">维修工</option>
                                                 <option value="solveTime">预计解决时间</option>
                                             </select>
@@ -242,20 +246,29 @@
                     <h4 class="modal-title">指派</h4>
                 </div>
                 <div class="modal-body">
-                    <div style="margin: auto;width:210px">
+                    <div style="margin: auto;width:230px">
                         <div class="form-group flexStyle" style="justify-content: flex-end">
                             <label class="control-label text-nowrap">指派：</label>
                             <div style="flex-basis: 150px">
-                                <select class="ms2 form-control" id="designateName" style="width:100%"></select>
+                                <select class="form-control" id="designateName" style="width:100%"></select>
                             </div>
                         </div>
                         <div class="form-group flexStyle" style="justify-content: flex-end">
                             <label class="control-label text-nowrap">优先级：</label>
                             <div style="flex-basis: 150px">
-                                <select class="ms2 form-control" id="designatePro" style="width:100%">
+                                <select class="form-control" id="designatePro" style="width:100%">
                                     <option value="0">低</option>
                                     <option value="1">中</option>
                                     <option value="2">高</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group flexStyle" style="justify-content: flex-end">
+                            <label class="control-label text-nowrap">故障等级：</label>
+                            <div style="flex-basis: 150px">
+                                <select class="form-control" id="designateGrade" style="width:100%">
+                                    <option value="0">小修</option>
+                                    <option value="1">大修</option>
                                 </select>
                             </div>
                         </div>
@@ -557,6 +570,9 @@
                     <div class="form-group">
                         <label class="control-label text-nowrap">优先级：<span class="spanStyle" id="logPriority"></span></label>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">故障等级：<span class="spanStyle" id="logGrade"></span></label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -700,16 +716,17 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">机台号：<span class="spanStyle isText" id="serLogCodeText"></span></label>
-                        <div class="noText" style="width:300px">
+                        <label class="control-label text-nowrap">蓝玻璃研磨/抛光机机台号：<span class="spanStyle isText" id="serLogCodeText"></span></label>
+                        <div class="noText" style="flex: 1;min-width:350px">
                             <select class="ms2 form-control" style="width: 100%" id="serLogCode"></select>
                         </div>
                     </div>
                     <div class="form-group flexStyle noText" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">其他机台号：</label>
-                        <div class="flexStyle" style="width:300px">
-                            <select class="ms2 form-control" style="width: 50%" id="serLogWorkshop"></select>
-                            <input type="text" class="form-control" id="serLogCodeOther" placeholder="请输入" maxlength="20" style="width: 50%">
+                        <label class="control-label text-nowrap">其他设备：</label>
+                        <div class="flexStyle" style="width:500px">
+                            <select class="form-control" style="width: 30%" id="serLogWorkshop"></select>
+                            <select class="form-control" style="width: 30%" id="serLogDevSite"></select>
+                            <input type="text" class="form-control" id="serLogCodeOther" placeholder="请输入" maxlength="20" style="width: 40%">
                         </div>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
@@ -726,7 +743,7 @@
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap">故障类型：<span class="spanStyle isText" id="serLogFaultTypeText"></span></label>
                         <div class="noText">
-                            <select class="ms2 form-control" style="width: 200px" id="serLogFaultType"></select>
+                            <select class="form-control" style="width: 200px" id="serLogFaultType"></select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -746,9 +763,16 @@
                         </select>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap">故障等级：<span class="spanStyle isText" id="serLogGradeText"></span></label>
+                        <select class="form-control noText" style="width: 100px" id="serLogGrade">
+                            <option value="0">小修</option>
+                            <option value="1">大修</option>
+                        </select>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap">指派人：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
                         <div class="noText">
-                            <select class="ms2 form-control" style="width: 200px" id="serLogMaintainer"></select>
+                            <select class="form-control" style="width: 200px" id="serLogMaintainer"></select>
                         </div>
                     </div>
                     <div class="box" id="upServiceLogBox">
@@ -756,7 +780,7 @@
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
                                 <label class="control-label text-nowrap">解决人：<span class="spanStyle isText" id="serLogFaultSolverText"></span></label>
                                 <div class="noText">
-                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultSolver"></select>
+                                    <select class="form-control" style="width: 200px" id="serLogFaultSolver"></select>
                                 </div>
                             </div>
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
@@ -769,7 +793,7 @@
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
                                 <label class="control-label text-nowrap">实际故障类型：<span class="spanStyle isText" id="serLogFaultType1Text"></span></label>
                                 <div class="noText">
-                                    <select class="ms2 form-control" style="width: 200px" id="serLogFaultType1"></select>
+                                    <select class="form-control" style="width: 200px" id="serLogFaultType1"></select>
                                 </div>
                             </div>
                             <div class="form-group">

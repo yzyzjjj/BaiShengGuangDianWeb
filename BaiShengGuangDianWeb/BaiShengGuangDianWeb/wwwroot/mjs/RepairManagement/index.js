@@ -58,6 +58,9 @@ function pageReady() {
             case 'priority':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
                 break;
+            case 'grade':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
+                break;
             case 'state':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
                 break;
@@ -85,6 +88,9 @@ function pageReady() {
             case 'priority':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
                 break;
+            case 'grade':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
+                break;
             case 'maintainer':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
                 break;
@@ -107,6 +113,9 @@ function pageReady() {
                 break;
             case 'priority':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
+                break;
+            case 'grade':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
                 break;
             case 'state':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
@@ -135,6 +144,9 @@ function pageReady() {
             case 'priority':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _priority);
                 break;
+            case 'grade':
+                setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
+                break;
             case 'maintainer':
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
                 break;
@@ -145,6 +157,18 @@ function pageReady() {
     });
     getFaultDeviceList();
     setTimeout(() => getServiceLogList(0), 2000);
+    $("#batchAssignList").on('change', '.serviceName', function() {
+        if ($(this).val() == '同上') {
+            $(this).val($(this).parents('tr').prev().find('.serviceName').val());
+        }
+    });
+    $("#serLogDevSite").select2({
+        allowClear: true,
+        placeholder: "请选择(可不选)"
+    });
+    $("#serLogWorkshop").on("change", function (e) {
+        setWorkSiteSelect();
+    });
 }
 
 //查询条件
@@ -159,6 +183,9 @@ function setFaultDeviceGet(parentEl, attrEl, el, ops) {
 
 //优先级
 var _priority = '<option value="0">低</option><option value="1">中</option><option value="2">高</option>';
+
+//故障等级
+var _grade = '<option value="0">小修</option><option value="1">大修</option>';
 
 var _worker = null;
 //维修工选项
@@ -218,6 +245,35 @@ function getFaultTypeSelect() {
         }
         $('#serviceFaultType').append(_faultType);
     }, 0);
+} 
+
+//列表参数设置
+function setTable() {
+    return {
+        isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${d.DeviceCode}>`,
+        order: (a, b, c, d) => d.row + 1,
+        grade: d => d ? '<span class="text-red">大修</span>' : '小修',
+        setTime: d => d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':')),
+        rState: d => d.State == 0 ? '<span class="text-red">未确认</span>' : d.State == 1 ? '<span class="text-warning">已确认</span>' : '<span class="text-success">维修中</span>',
+        priority: d => d.Priority == 0 ? '低' : d.Priority == 1 ? '<span class="text-warning">中</span>' : '<span class="text-red">高</span>',
+        remark: d => d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`,
+        rDesc: d => {
+            var data = d.FaultDescription;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${d.FaultTypeId}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+        },
+        imgBtn: d => {
+            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
+        },
+        serIsEnable: d => {
+            var text = `机台号-${d.DeviceCode}：${d.FaultTypeName}`;
+            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${text}>`;
+        },
+        upServiceLog: (isLook, id) => `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${id},${isLook})">查看</button>`,
+        serviceName: d => d == '' ? '未指派' : d,
+        detailBtn: d => `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority},${d.Grade})">查看</button>`
+    }
 }
 
 var _faultDevData = null;
@@ -292,68 +348,32 @@ function getFaultDeviceList() {
         var per446 = permissionList[446].have;
         per423 ? $('#delChangeBtn').removeClass('hidden') : $('#delChangeBtn').addClass('hidden');
         per446 ? $('#showBatchAssignModalBtn').removeClass('hidden') : $('#showBatchAssignModalBtn').addClass('hidden');
-        var isEnable = function (d) {
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${d.DeviceCode}>`;
-        }
-        var order = function (a, b, c, d) {
-            return d.row + 1;
-        }
-        var rState = function (data, type, row) {
-            var state = data.State;
-            if (state == 0)
-                return '<span class="text-red">未确认</span>';
-            if (state == 1)
-                return '<span class="text-warning">已确认</span>';
-            return '<span class="text-success">维修中</span>';
-        }
-        var priority = function (data, type, row) {
-            var state = data.Priority;
-            if (state == 2)
-                return '<span class="text-red">高</span>';
-            if (state == 1)
-                return '<span class="text-warning">中</span>';
-            return '<span>低</span>';
-        }
-        var serviceName = function (d) {
-            var name = d.Name == '' ? '未指派' : d.Name;
-            return per445 ? `<a href="javascript:showDesignateModal(${d.Id},${d.Priority},\'${d.Maintainer ? d.Maintainer : 0}\')" style="padding:3px" class="designate"><i class="glyphicon glyphicon-hand-right"></i><span class="text-black">${name}</span></a>` : name;
-        }
-        var service = function (data) {
-            var state = data.State;
+        var service = function (d) {
+            var state = d.State;
             var btn = '<button type="button" class="btn btn-{0} btn-xs" onclick="{1}">{2}</button>';
             var attr = '', text = '', click = '';
             switch (state) {
                 case 0:
                     attr = 'danger';
                     text = '确认故障';
-                    click = `showConfirmModel(${data.Id}, 0,\'${data.EstimatedTime}\',\'${data.Remark}\')`;
+                    click = `showConfirmModel(${d.Id}, 0,\'${d.EstimatedTime}\',\'${d.Remark}\')`;
                     break;
                 case 1:
                     attr = 'info';
                     text = '开始维修';
-                    click = `showConfirmModel(${data.Id}, 1,\'${data.EstimatedTime}\',\'${data.Remark}\')`;
+                    click = `showConfirmModel(${d.Id}, 1,\'${d.EstimatedTime}\',\'${d.Remark}\')`;
                     break;
                 case 2:
                     attr = 'success';
                     text = '维修完成';
-                    click = `showServiceModel(${data.Id},\'${data.Maintainer}\',\'${data.EstimatedTime}\',${data.FaultTypeId})`;
+                    click = `showServiceModel(${d.Id},\'${d.Maintainer}\',\'${d.EstimatedTime}\',${d.FaultTypeId})`;
                     break;
             }
             return btn.format(attr, click, text);
         }
-        var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
-        }
-        var remark = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
-        }
-        var rDesc = function (d) {
-            var data = d.FaultDescription;
-            var id = d.FaultTypeId;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-        }
-        var detailBtn = function (d) {
-            return `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority})">查看</button>`;
+        var serviceName = function (d) {
+            var name = d.Name == '' ? '未指派' : d.Name;
+            return per445 ? `<a href="javascript:showDesignateModal(${d.Id},${d.Priority},\'${d.Maintainer ? d.Maintainer : 0}\',${d.Grade})" style="padding:3px" class="designate"><i class="glyphicon glyphicon-hand-right"></i><span class="text-black">${name}</span></a>` : name;
         }
         $("#faultDeviceList")
             .DataTable({
@@ -367,21 +387,22 @@ function getFaultDeviceList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "visible": per423, "orderable": !per423 },
-                    { "data": null, "title": "序号", "render": order },
+                    { "data": null, "title": "", "render": setTable().isEnable, "visible": per423, "orderable": !per423 },
+                    { "data": null, "title": "序号", "render": setTable().order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                    { "data": null, "title": "状态", "render": rState },
-                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": "FaultTime", "title": "故障时间", "render": setTable().setTime },
+                    { "data": null, "title": "状态", "render": setTable().rState },
+                    { "data": null, "title": "优先级", "render": setTable().priority },
+                    { "data": "Grade", "title": "故障等级", "render": setTable().grade },
                     { "data": null, "title": "维修", "render": service, "visible": per420 },
                     { "data": null, "title": "指派给", "render": serviceName },
                     { "data": "Phone", "title": "联系方式" },
-                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
-                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": setTable().setTime },
+                    { "data": "Remark", "title": "维修备注", "render": setTable().remark },
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": rDesc },
-                    { "data": null, "title": "故障详情", "render": detailBtn }
+                    { "data": null, "title": "故障描述", "render": setTable().rDesc },
+                    { "data": null, "title": "故障详情", "render": setTable().detailBtn }
                 ],
                 "drawCallback": function (settings, json) {
                     if (per423) {
@@ -419,33 +440,14 @@ function showBatchAssignModal() {
     for (var i = 0; i < len; i++) {
         rData.push(_faultDevData.data[faultIds[i]]);
     }
-    var order = function (a, b, c, d) {
-        return d.row + 1;
-    }
-    var estimatedTime = function (d) {
-        return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
-    }
-    var rState = function (d) {
-        var state = d.State;
-        if (state == 0)
-            return '<span class="text-red">未确认</span>';
-        if (state == 1)
-            return '<span class="text-warning">已确认</span>';
-        return '<span class="text-success">维修中</span>';
-    }
     var priority = function () {
         return `<div style="width:100%;min-width:80px;margin:auto"><select class="form-control priority" style="width: 100%">${_priority}</select></div>`;
     }
-    var serviceName = function () {
-        return `<div style="width:100%;min-width:120px;margin:auto"><select class="form-control serviceName" style="width: 100%">${_worker}</select></div>`;
+    var grade = function () {
+        return `<div style="width:100%;min-width:80px;margin:auto"><select class="form-control grade" style="width: 100%">${_grade}</select></div>`;
     }
-    var rDesc = function (d) {
-        var data = d.FaultDescription;
-        var id = d.FaultTypeId;
-        return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-    }
-    var detailBtn = function (d) {
-        return `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority})">查看</button>`;
+    var serviceName = function (a,b,c,d) {
+        return `<div style="width:100%;min-width:120px;margin:auto"><select class="form-control serviceName" style="width: 100%">${d.row == 0 ? '' : '<option value="同上">同上</option>'}${_worker}</select></div>`;
     }
     _batchAssignTable = $("#batchAssignList")
         .DataTable({
@@ -459,25 +461,27 @@ function showBatchAssignModal() {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "序号", "render": order },
+                { "data": null, "title": "序号", "render": setTable().order },
                 { "data": "DeviceCode", "title": "机台号" },
-                { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                { "data": null, "title": "状态", "render": rState },
+                { "data": "FaultTime", "title": "故障时间", "render": setTable().setTime },
+                { "data": null, "title": "状态", "render": setTable().rState },
                 { "data": null, "title": "优先级", "render": priority },
+                { "data": null, "title": "故障等级", "render": grade },
                 { "data": null, "title": "指派给", "render": serviceName },
                 { "data": "Phone", "title": "联系方式" },
                 { "data": "Proposer", "title": "报修人" },
                 { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障描述", "render": rDesc },
-                { "data": null, "title": "故障详情", "render": detailBtn }
+                { "data": null, "title": "故障描述", "render": setTable().rDesc },
+                { "data": null, "title": "故障详情", "render": setTable().detailBtn }
             ],
-            "createdRow": function (row, d, index) {
+            "createdRow": function (row, d,) {
                 var pri = d.Priority;
                 var main = d.Maintainer;
+                var gra = d.Grade;
                 if (isStrEmptyOrUndefined(main)) {
                     main = 0;
                 }
-                $(row).find('.priority').val(pri).end().find('.serviceName').val(main);
+                $(row).find('.priority').val(pri).end().find('.grade').val(gra).end().find('.serviceName').val(main);
             }
         });
     $('#showBatchAssignModal').modal('show');
@@ -496,11 +500,13 @@ function batchAssign() {
     for (var i = 0; i < trs; i++) {
         var tr = trsData[i].nTr;
         var priority = $(tr).find('.priority').val();
+        var grade = $(tr).find('.grade').val();
         var serviceName = $(tr).find('.serviceName').val();
         list.push({
             Id: _faultDevData.Id[i] >> 0,
             Maintainer: serviceName,
-            Priority: priority >> 0
+            Priority: priority >> 0,
+            Grade: grade >> 0
         });
     }
     var data = {}
@@ -624,10 +630,11 @@ function service() {
 }
 
 //指派弹窗
-function showDesignateModal(id, priority, name) {
+function showDesignateModal(id, priority, name, grade) {
     $('#designateBtn').val(id);
-    $('#designateName').val(name).trigger('change');
-    $('#designatePro').val(priority).trigger('change');
+    $('#designateName').val(name);
+    $('#designatePro').val(priority);
+    $('#designateGrade').val(grade);
     $('#showDesignateModal').modal('show');
 }
 
@@ -648,13 +655,20 @@ function designate() {
         layer.msg("请选择优先级");
         return;
     }
+
+    var grade = $('#designateGrade').val();
+    if (isStrEmptyOrUndefined(grade)) {
+        layer.msg("请选择故障等级");
+        return;
+    }
     var id = $(this).val();
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify([{
-        Id: parseInt(id),
+        Id: id >> 0,
         Maintainer: name,
-        Priority: parseInt(priority)
+        Priority: priority >> 0,
+        Grade: grade >> 0
     }]);
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -667,7 +681,7 @@ function designate() {
 }
 
 //故障详情弹窗
-function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescription, priority) {
+function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescription, priority, grade) {
     var opType = 406;
     if (!permissionList[opType].have) {
         return;
@@ -706,6 +720,7 @@ function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescriptio
                 break;
         }
         $('#logPriority').text(str).css('color', color);
+        $('#logGrade').text(grade == 0 ? '小修' : '大修').css('color', grade == 0 ? 'black' : 'red');
         $('#showLogDetailModel').modal('show');
     });
 }
@@ -819,40 +834,6 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
         //删除
         var per416 = permissionList[416].have;
         per416 ? $('#delServiceLogBtn').removeClass('hidden') : $('#delServiceLogBtn').addClass('hidden');
-        var isEnable = function (d) {
-            var text = `机台号-${d.DeviceCode}：${d.FaultTypeName}`;
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${text}>`;
-        }
-        var order = function (a, b, c, d) {
-            return d.row + 1;
-        }
-        var priority = function (data, type, row) {
-            var state = data.Priority;
-            if (state == 2)
-                return '<span class="text-red"><span class="hidden">2</span>高</span>';
-            if (state == 1)
-                return '<span class="text-warning"><span class="hidden">1</span>中</span>';
-            return '<span><span class="hidden">0</span>低</span>';
-        }
-        var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
-        }
-        var remark = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
-        }
-        var rDesc = function (d, type, row, meta) {
-            var data = d.FaultDescription;
-            var id = d.FaultTypeId;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-        }
-        var imgBtn = function (d) {
-            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
-                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
-            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
-        }
-        var upServiceLog = function (d) {
-            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d},0)">查看</button>`;
-        }
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
         var titleColumns = [6, 9];
         var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
@@ -890,23 +871,24 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "", "render": isEnable, "visible": per416 && !name, "orderable": !per416 && name },
-                { "data": null, "title": "序号", "render": order },
+                { "data": null, "title": "", "render": setTable().serIsEnable, "visible": per416 && !name, "orderable": !per416 && name },
+                { "data": null, "title": "序号", "render": setTable().order },
                 { "data": "DeviceCode", "title": "机台号" },
-                { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
+                { "data": "FaultTime", "title": "故障时间", "render": setTable().setTime },
+                { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": setTable().setTime },
                 { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
-                { "data": null, "title": "优先级", "render": priority },
+                { "data": null, "title": "优先级", "render": setTable().priority },
+                { "data": "Grade", "title": "故障等级", "render": setTable().grade },
                 { "data": "Score", "title": "评分", "sClass": "text-primary" },
                 { "data": "FaultSolver", "title": "解决人" },
-                { "data": "Name", "title": "指派给" },
-                { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
-                { "data": "Remark", "title": "维修备注", "render": remark },
+                { "data": "Name", "title": "指派给", "render": setTable().serviceName},
+                { "data": "EstimatedTime", "title": "预计解决时间", "render": setTable().setTime },
+                { "data": "Remark", "title": "维修备注", "render": setTable().remark },
                 { "data": "Proposer", "title": "报修人" },
                 { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障描述", "render": rDesc },
-                { "data": null, "title": "故障图片", "render": imgBtn },
-                { "data": "Id", "title": "详情", "render": upServiceLog }
+                { "data": null, "title": "故障描述", "render": setTable().rDesc },
+                { "data": null, "title": "故障图片", "render": setTable().imgBtn },
+                { "data": "Id", "title": "详情", "render": setTable().upServiceLog.bind(null,0) }
             ],
             "drawCallback": function (settings, json) {
                 if (per416 && !name) {
@@ -1104,6 +1086,50 @@ function getWorkShop(resolve) {
     }, 0);
 }
 
+var _siteData = null;
+//获取场地
+function getSite() {
+    var opType = 125;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var data = {}
+    data.opType = opType;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        _siteData = {};
+        var rData = ret.datas;
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            _siteData[d.SiteName]
+                ? _siteData[d.SiteName].push(d.RegionDescription)
+                : _siteData[d.SiteName] = [d.RegionDescription];
+        }
+        setWorkSiteSelect();
+    },0);
+}
+
+//车间对应场地
+function setWorkSiteSelect() {
+    $('#serLogDevSite').empty();
+    var workshop = $("#serLogWorkshop").val();
+    if (isStrEmptyOrUndefined(workshop)) {
+        return;
+    }
+    var sData = _siteData[workshop];
+    var ops = '';
+    for (var i = 0, len = sData.length; i < len; i++) {
+        var d = sData[i];
+        ops += `<option value=${d}>${d}</option>`;
+    }
+    $('#serLogDevSite').append(ops);
+    $("#serLogDevSite").val(0).trigger('change');
+}
+
 //添加修改维修记录弹窗
 function showServiceLogModal(id, isDel) {
     var opType = id ? isDel ? 425 : 412 : 415;
@@ -1148,6 +1174,8 @@ function showServiceLogModal(id, isDel) {
                     break;
             }
             $('#serLogPriorityText').text(str).css('color', color);
+            var grade = d.Grade;
+            $('#serLogGradeText').text(grade == 0 ? '小修' : '大修').css('color', grade == 0 ? 'black' : 'red');
             $('#serLogMaintainerText').text(d.Name == '' ? '未指派' : d.Name);
             var solveTime = d.SolveTime;
             $("#serLogFaultType1").empty();
@@ -1167,7 +1195,7 @@ function showServiceLogModal(id, isDel) {
                 $("#serLogFaultSolver").empty();
                 $("#serLogFaultSolver").append(_worker);
                 var faultSolver = $(`#serLogFaultSolver option[wname=${d.FaultSolver}]`).val();
-                $('#serLogFaultSolver').val(faultSolver).trigger('change');
+                $('#serLogFaultSolver').val(faultSolver ? faultSolver : 0);
                 if (solveTime == '0001-01-01 00:00:00') {
                     $('#serLogSolveDate').val(getDate()).datepicker('update');
                     $("#serLogSolveTime").timepicker('setTime', getTime());
@@ -1193,10 +1221,11 @@ function showServiceLogModal(id, isDel) {
         $("#serLogSolvePlan").prop('disabled', false);
         $('#serLogCodeOther,#serLogFaultSup,#serLogSolvePlan').val('');
         $('#serLogPriority').val(0);
+        $('#serLogGrade').val(0);
         $('#serLogProposer').val(getCookieTokenInfo().name);
         $('#serLogFaultDate,#serLogSolveDate').val(getDate()).datepicker('update');
         $("#serLogFaultTime,#serLogSolveTime").timepicker('setTime', getTime());
-        $("#serLogFaultType,#serLogFaultType1,#serLogMaintainer").empty();
+        $("#serLogFaultType,#serLogFaultType1,#serLogMaintainer,#serLogFaultSolver").empty();
         $("#serLogFaultType,#serLogFaultType1").append(_faultType);
         $("#serLogMaintainer,#serLogFaultSolver").append(_worker);
         var v = $('#serLogFaultType').val();
@@ -1212,6 +1241,7 @@ function showServiceLogModal(id, isDel) {
                 placeholder: "请选择"
             });
             $("#serLogWorkshop").append(e[1]);
+            getSite();
         });
     }
     $('#showServiceLogModal').modal('show');
@@ -1240,7 +1270,8 @@ function addUpServiceLog(isAdd) {
             return;
         }
         if (!isOther) {
-            serLogCodeOther = `${serLogWorkshop}-${serLogCodeOther}`;
+            var site = $('#serLogDevSite').val();
+            serLogCodeOther = `${serLogWorkshop}-${site ? site + '-' : ''}${serLogCodeOther}`;
             serLogCode = 0;
         }
         var serLogProposer = $('#serLogProposer').val().trim();
@@ -1266,6 +1297,12 @@ function addUpServiceLog(isAdd) {
             layer.msg('请选择优先级');
             return;
         }
+
+        var serLogGrade = $('#serLogGrade').val();
+        if (isStrEmptyOrUndefined(serLogGrade)) {
+            layer.msg('请选择故障等级');
+            return;
+        }
         var serLogMaintainer = $('#serLogMaintainer').val();
         if (serLogMaintainer == 0) {
             serLogMaintainer = '';
@@ -1278,6 +1315,7 @@ function addUpServiceLog(isAdd) {
             FaultTypeId: serLogFaultType,
             FaultDescription: serLogFaultSup,
             Priority: serLogPriority,
+            Grade: serLogGrade,
             Maintainer: serLogMaintainer
         }
     } else {
@@ -1383,47 +1421,6 @@ function getDelFaultDeviceList() {
             layer.msg(ret.errmsg);
             return;
         }
-        var isEnable = function (d) {
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${d.DeviceCode}>`;
-        }
-        var order = function (a, b, c, d) {
-            return d.row + 1;
-        }
-        var priority = function (data, type, row) {
-            var state = data.Priority;
-            if (state == 2)
-                return '<span class="text-red">高</span>';
-            if (state == 1)
-                return '<span class="text-warning">中</span>';
-            return '<span>低</span>';
-        }
-        var rState = function (data, type, row) {
-            var state = data.State;
-            if (state == 0)
-                return '<span class="text-red">未确认</span>';
-            if (state == 1)
-                return '<span class="text-warning">已确认</span>';
-            return '<span class="text-success">维修中</span>';
-        }
-        var serviceName = function (d) {
-            return d == '' ? '未指派' : d;
-        }
-        var remark = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
-        }
-        var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
-        }
-        var rDesc = function (d, type, row, meta) {
-            var data = d.FaultDescription;
-            var id = d.FaultTypeId;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-        }
-        var imgBtn = function (d) {
-            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
-                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
-            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
-        }
         $("#delFaultDeviceList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rtip',
@@ -1437,19 +1434,20 @@ function getDelFaultDeviceList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false, "visible": false },
-                    { "data": null, "title": "序号", "render": order },
+                    { "data": null, "title": "", "render": setTable().isEnable, "orderable": false, "visible": false },
+                    { "data": null, "title": "序号", "render": setTable().order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                    { "data": null, "title": "优先级", "render": priority },
-                    { "data": null, "title": "状态", "render": rState },
-                    { "data": "Name", "title": "指派给", "render": serviceName },
+                    { "data": "FaultTime", "title": "故障时间", "render": setTable().setTime },
+                    { "data": null, "title": "优先级", "render": setTable().priority },
+                    { "data": "Grade", "title": "故障等级", "render": setTable().grade },
+                    { "data": null, "title": "状态", "render": setTable().rState },
+                    { "data": "Name", "title": "指派给", "render": setTable().serviceName },
                     { "data": "Phone", "title": "联系方式" },
-                    { "data": "Remark", "title": "维修备注", "render": remark },
-                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
+                    { "data": "Remark", "title": "维修备注", "render": setTable().remark },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": setTable().setTime },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": rDesc },
-                    { "data": null, "title": "故障图片", "render": imgBtn }
+                    { "data": null, "title": "故障描述", "render": setTable().rDesc },
+                    { "data": null, "title": "故障图片", "render": setTable().imgBtn }
                 ],
                 "drawCallback": function (settings, json) {
                     $(this).find('.isEnable').iCheck({
@@ -1538,40 +1536,6 @@ function getDelServiceLogList() {
             layer.msg(ret.errmsg);
             return;
         }
-        var isEnable = function (d) {
-            var text = `机台号-${d.DeviceCode}：${d.FaultTypeName}`;
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} fName=${text}>`;
-        }
-        var order = function (a, b, c, d) {
-            return d.row + 1;
-        }
-        var priority = function (data, type, row) {
-            var state = data.Priority;
-            if (state == 2)
-                return '<span class="text-red"><span class="hidden">2</span>高</span>';
-            if (state == 1)
-                return '<span class="text-warning"><span class="hidden">1</span>中</span>';
-            return '<span><span class="hidden">0</span>低</span>';
-        }
-        var estimatedTime = function (d) {
-            return d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':'));
-        }
-        var remark = function (d) {
-            return d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`;
-        }
-        var rDesc = function (d, type, row, meta) {
-            var data = d.FaultDescription;
-            var id = d.FaultTypeId;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${id}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
-        }
-        var imgBtn = function (d) {
-            var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
-                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
-            return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
-        }
-        var upServiceLog = function (d) {
-            return `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${d},1)">查看</button>`;
-        }
         $("#delRepairList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rtip',
@@ -1584,23 +1548,24 @@ function getDelServiceLogList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "", "render": isEnable, "orderable": false, "visible": false },
-                    { "data": null, "title": "序号", "render": order },
+                    { "data": null, "title": "", "render": setTable().serIsEnable, "orderable": false, "visible": false },
+                    { "data": null, "title": "序号", "render": setTable().order },
                     { "data": "DeviceCode", "title": "机台号" },
-                    { "data": "FaultTime", "title": "故障时间", "render": estimatedTime },
-                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": estimatedTime },
+                    { "data": "FaultTime", "title": "故障时间", "render": setTable().setTime },
+                    { "data": "SolveTime", "title": "解决时间", "sClass": "text-primary", "render": setTable().setTime },
                     { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
-                    { "data": null, "title": "优先级", "render": priority },
+                    { "data": null, "title": "优先级", "render": setTable().priority },
+                    { "data": "Grade", "title": "故障等级", "render": setTable().grade },
                     { "data": "Score", "title": "评分", "sClass": "text-primary" },
                     { "data": "FaultSolver", "title": "解决人" },
-                    { "data": "Name", "title": "指派给" },
-                    { "data": "EstimatedTime", "title": "预计解决时间", "render": estimatedTime },
-                    { "data": "Remark", "title": "维修备注", "render": remark },
+                    { "data": "Name", "title": "指派给", "render": setTable().serviceName() },
+                    { "data": "EstimatedTime", "title": "预计解决时间", "render": setTable().setTime },
+                    { "data": "Remark", "title": "维修备注", "render": setTable().remark },
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": rDesc },
-                    { "data": null, "title": "故障图片", "render": imgBtn },
-                    { "data": "Id", "title": "详情", "render": upServiceLog }
+                    { "data": null, "title": "故障描述", "render": setTable().rDesc },
+                    { "data": null, "title": "故障图片", "render": setTable().imgBtn },
+                    { "data": "Id", "title": "详情", "render": setTable().upServiceLog.bind(null, 1) }
                 ],
                 "drawCallback": function (settings, json) {
                     $(this).find('.isEnable').iCheck({
@@ -1864,15 +1829,6 @@ function getFaultTypeList() {
                 '</ul>' +
                 '</div>';
 
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-
-            var rDesc = function (d, type, row, meta) {
-                var data = d.FaultDescription;
-                return `<span title = "${data}" onclick = "showAllContent('${escape(data)}', '故障类型描述')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>`;
-            }
             var op = function (data, type, row) {
                 var updateLi = '<li><a onclick="showUpdateFaultTypeModel({0})">修改</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
@@ -1880,10 +1836,10 @@ function getFaultTypeList() {
             }
 
             var columns = [
-                { "data": null, "title": "序号", "render": order },
+                { "data": null, "title": "序号", "render": setTable().order },
                 { "data": "Id", "title": "Id", "bVisible": false },
                 { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障类型描述", "render": rDesc }
+                { "data": null, "title": "故障类型描述", "render": setTable().rDesc }
             ];
 
             if (permissionList[408].have || permissionList[411].have) {
@@ -2116,10 +2072,6 @@ function showMaintainerModel(cover = 1, show = true) {
                 var xh = meta.row + 1;
                 return `<input type="checkbox" class="icb_minimal chose" value="${xh}" id="${data}">`;
             }
-            var order = function (data, type, row, meta) {
-                return meta.row + 1;
-            }
-
             var phone = function (data, type, row, meta) {
                 var xh = meta.row + 1;
                 return `<span class="chose1" id="userPhone1${xh}">${data}</span >
@@ -2132,7 +2084,7 @@ function showMaintainerModel(cover = 1, show = true) {
             }
 
             var columns = [
-                { "data": "Id", "title": "序号", "render": order, "sWidth": "80px" },
+                { "data": "Id", "title": "序号", "render": setTable().order, "sWidth": "80px" },
                 { "data": "Name", "title": "姓名", "sWidth": "120px" },
                 { "data": "Phone", "title": "手机号", "render": phone, "sWidth": "130px" },
                 { "data": "Remark", "title": "备注", "render": rRemark }

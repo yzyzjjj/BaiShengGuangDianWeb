@@ -84,7 +84,7 @@
     $("#stateSelect").on('change', function (e) {
         getLogList();
     });
-    $("#workshop").on("select2:select", function (e) {
+    $("#workshop").on("change", function (e) {
         setWorkSiteSelect();
     });
     $("#devSite").select2({
