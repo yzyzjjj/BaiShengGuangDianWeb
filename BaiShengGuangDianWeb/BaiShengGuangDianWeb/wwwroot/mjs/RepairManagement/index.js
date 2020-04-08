@@ -34,7 +34,7 @@ function pageReady() {
         $(li.find("a").attr("href")).addClass("active");
     }
     $(".ms2").select2();
-    $("#serLogFaultType").on("select2:select", function () {
+    $("#serLogFaultType").on("change", function () {
         var v = $(this).val();
         $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
     });
