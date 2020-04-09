@@ -65,7 +65,7 @@ function pageReady() {
                 setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
                 break;
             case 'maintainer':
-                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                setFaultDeviceGet(parentEl, attrEl, selectEl, `<option value="0" wname="0">未指派</option>${_worker}`);
                 break;
             case 'solveTime':
                 $('#solveSTime,#solveETime').removeAttr("readonly");
@@ -92,7 +92,7 @@ function pageReady() {
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
                 break;
             case 'maintainer':
-                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                setFaultDeviceGet(parentEl, attrEl, selectEl, `<option value="0" wname="0">未指派</option>${_worker}`);
                 break;
             default:
                 $('#serSTime,#serETime').removeAttr("readonly");
@@ -121,7 +121,7 @@ function pageReady() {
                 setFaultDeviceGet(parentEl, attrEl, selectEl, '<option value="0">未确认</option><option value="1">已确认</option><option value="2">维修中</option>');
                 break;
             case 'maintainer':
-                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                setFaultDeviceGet(parentEl, attrEl, selectEl, `<option value="0" wname="0">未指派</option>${_worker}`);
                 break;
             case 'solveTime':
                 $('#delFSolveSTime,#delFSolveETime').removeAttr("readonly");
@@ -148,7 +148,7 @@ function pageReady() {
                 setFaultDeviceGet(parentEl, attrEl, selectEl, _grade);
                 break;
             case 'maintainer':
-                setFaultDeviceGet(parentEl, attrEl, selectEl, _worker);
+                setFaultDeviceGet(parentEl, attrEl, selectEl, `<option value="0" wname="0">未指派</option>${_worker}`);
                 break;
             default:
                 $('#delRepSTime,#delRepETime').removeAttr("readonly");
@@ -208,7 +208,7 @@ function getWorkerSelect() {
         $('#designateName,#servicePro').empty();
         var list = ret.datas;
         var op = '<option value="{0}" wname="{1}">{1}</option>';
-        _worker = '<option value="0" wname="0">未指派</option>';
+        _worker = '';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             _worker += op.format(d.Account, d.Name);
