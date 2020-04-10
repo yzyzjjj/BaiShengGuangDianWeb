@@ -923,11 +923,11 @@ function showChangeFlowCard(type, flowCardName) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.QualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");

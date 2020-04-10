@@ -137,7 +137,7 @@ function setProcessorSelect(groupId, el) {
     for (var i = 0, len = _processor.length; i < len; i++) {
         var d = _processor[i];
         if (groupId == d.GroupId) {
-            ops += op.format(d.ProcessorId, d.Processor);
+            ops += op.format(d.Id, d.Processor);
         }
     }
     el.append(ops);
@@ -228,7 +228,7 @@ function getProcessor(resolve) {
         var options = '';
         for (var i = 0, len = _processor.length; i < len; i++) {
             var d = _processor[i];
-            options += option.format(d.ProcessorId, d.Processor);
+            options += option.format(d.Id, d.Processor);
         }
         if (resolve != null) {
             resolve(options);
@@ -441,14 +441,16 @@ function updateTask() {
         if (isStrEmptyOrUndefined(id)) {
             id = 0;
         }
-        //  操作员    模块名    是否检验 检验单   任务名 小时 分钟    绩效   描述  关联
-        var personId, moduleId, isCheck, checkId, item, hour, minute, score, desc, relation;
+        //  操作员Id 操作员Name    模块名    是否检验 检验单   任务名 小时 分钟    绩效   描述  关联
+        var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc, relation;
         if (isEnableEl.is(':checked') || id == 0) {
-            personId = tr.find('.processor').val();
+            var processorEl = tr.find('.processor');
+            personId = processorEl.val();
             if (isStrEmptyOrUndefined(personId)) {
                 layer.msg(`序列${i + 1}：请选择操作员`);
                 return;
             }
+            personName = processorEl.find('option:selected').text();
             moduleId = tr.find('.module').val();
             if (isStrEmptyOrUndefined(moduleId)) {
                 layer.msg(`序列${i + 1}：请选择模块名`);
@@ -491,6 +493,7 @@ function updateTask() {
         } else {
             var d = _taskItem[id];
             personId = d.Person;
+            personName = d.Processor;
             moduleId = d.ModuleId;
             isCheck = d.IsCheck;
             checkId = d.CheckId;
@@ -509,6 +512,7 @@ function updateTask() {
             TaskId: taskId,
             Order: i + 1,
             Person: personId,
+            Processor: personName,
             ModuleId: moduleId,
             IsCheck: isCheck,
             CheckId: checkId,

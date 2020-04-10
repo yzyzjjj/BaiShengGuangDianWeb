@@ -926,17 +926,17 @@ function addTask(id) {
                 </td>
                 <td class="totalOrder">${trData.TotalOrder + 1}</td>
                 <td class="order">${trData.Order + 1}</td>
-                <td><input type="text" class="form-control text-center relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+                <td><input type="text" class="form-control text-center relation toZero" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
                 <td></td>
                 <td>
                     <div class="flexStyle" style="width:140px;margin:auto">
-                        <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+                        <input type="text" class="form-control text-center hour toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" value="0">
                         <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-                        <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+                        <input type="text" class="form-control text-center minute toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" value="0">
                         <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
                     </div>
                 </td>
-                <td><input type="text" class="form-control text-center score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+                <td><input type="text" class="form-control text-center score toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
                 <td></td>
                 <td></td>
                 <td></td>

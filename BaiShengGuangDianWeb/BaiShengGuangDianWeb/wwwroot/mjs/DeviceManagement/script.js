@@ -670,7 +670,7 @@ function reset() {
             var tr = ('<tr id="av{0}">' +
                 '<td><label class="control-label" id="avx{0}">{0}</label></td>' +
                 '<td><input class="form-control" id="avb{0}" maxlength="20"></td>' +
-                '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}" maxlength="5"></td>' +
+                '<td><input class="form-control" oninput="onInput(this, 5, 0)" onblur="onInputEnd(this)" id="avd{0}"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>').format(1);
             $("#avBody").append(tr);

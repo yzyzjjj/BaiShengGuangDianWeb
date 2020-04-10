@@ -571,12 +571,12 @@ function showAddModel(id) {
                 if (ret.datas.length > 0) {
                     var tr = '<tr id="ap{0}" value="{2}">' +
                         '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
                         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                         '</tr>';
                     for (var j = 0; j < ret.datas.length; j++) {
@@ -732,12 +732,12 @@ function apReset() {
     $("#apBody").empty();
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{0}</label></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#apBody").append(tr);
@@ -753,12 +753,12 @@ function addOther() {
     //arBody
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#apBody").append(tr);
@@ -919,12 +919,12 @@ function showUpdateProcessModel(id) {
 
             var tr = '<tr id="ap{0}" value="{2}">' +
                 '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>';
             for (var j = 0; j < ret.datas.length; j++) {

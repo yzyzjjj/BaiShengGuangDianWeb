@@ -244,7 +244,7 @@ function queryFlowCard() {
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" oninput="value=value.replace(/[^\\d\\.]/g,\'\')" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
+                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
                     '</div>' +
                     '</div>';

@@ -282,7 +282,7 @@ function detailPage(deviceId, planId) {
             return `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn actualTime hidden" style="width:120px;cursor: pointer">`;
         }
         var actual = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn actual hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn actual hidden" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px" value=${data}>`;
         }
         var desc = function (data) {
             if (data === null) {
