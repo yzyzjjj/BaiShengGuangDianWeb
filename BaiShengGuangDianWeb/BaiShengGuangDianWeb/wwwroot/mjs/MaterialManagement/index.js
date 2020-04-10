@@ -353,7 +353,7 @@
         var id = $(this).val();
         var tr = $(this).parents('tr');
         tr.find('.number').text('0');
-        var i,d, len = _materialList.length;
+        var i, d, len = _materialList.length;
         for (i = 0; i < len; i++) {
             d = _materialList[i];
             if (id == d.Id) {
@@ -392,7 +392,7 @@
         siteId = tr.find('.site').val();
         tr.find('.number').text('0');
         ////货品名称
-        var i,d;
+        var i, d;
         for (i = 0; i < _consumeName.length; i++) {
             d = _consumeName[i];
             if (d.CategoryId == categoryId) {
@@ -567,7 +567,7 @@
             }
         }
     });
-    $('#reversalList').on('change', '.code', function() {
+    $('#reversalList').on('change', '.code', function () {
         var v = $(this).val();
         if (v != null) {
             var tr = $(this).parents('tr');
@@ -575,7 +575,7 @@
             tr.find('.codeLogModal').attr('onclick', `showLogModel(3,${v})`);
         }
     });
-    $('#reversalList').on('click', '.loadNumber', function() {
+    $('#reversalList').on('click', '.loadNumber', function () {
         var tr = $(this).parents('tr');
         var codeId = tr.find('.code').val();
         var numberEl = tr.find('.number');
@@ -604,7 +604,7 @@
             $(this).val("0");
         }
     });
-    $('#reversalAdd').on('click', function() {
+    $('#reversalAdd').on('click', function () {
         new Promise(function (resolve) {
             showPrintModal(resolve);
         }).then((result) => {
@@ -1198,8 +1198,34 @@ function getLogList(show = false) {
                     ];
                     break;
             }
+            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+            var titleColumns = [6,7];
             $("#logList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            text: '导出Excel',
+                            className: 'btn-primary btn-sm', //按钮的class样式
+                            exportOptions: {
+                                columns: excelColumns,
+                                format: {
+                                    // format有三个子标签，header，body和foot
+                                    body: function (data, row, column, node) {
+                                        //操作需要导出excel的数据格式                        
+                                        if (titleColumns.indexOf(column) > -1) {
+                                            var a = $(node).find("span").attr("title");
+                                            if (a != null) {
+                                                return "\u200C" + unescape(a);
+                                            }
+                                        }
+                                        return "\u200C" + node.textContent;
+                                    }
+                                }
+                            }
+                        }
+                    ],
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -1210,7 +1236,6 @@ function getLogList(show = false) {
                     "iDisplayLength": 40, //默认显示的记录数
                     "columns": columns
                 });
-
             if (show) {
                 $("#logModal").modal("show");
             }
