@@ -992,6 +992,7 @@ function getMaterialList(el, resolve) {
         }
         $("#materialList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -1202,7 +1203,7 @@ function getLogList(show = false) {
             var titleColumns = [6,7];
             $("#logList")
                 .DataTable({
-                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     buttons: [
                         {
                             extend: 'excel',
@@ -1406,6 +1407,7 @@ function getLogConsumeList(show = false) {
 
             $("#logConsumeList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -3679,6 +3681,7 @@ function consumeShow() {
 
     $("#consumeConfirmList")
         .DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -4074,6 +4077,7 @@ function reversalConModal() {
 
     $("#reversalConList")
         .DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,

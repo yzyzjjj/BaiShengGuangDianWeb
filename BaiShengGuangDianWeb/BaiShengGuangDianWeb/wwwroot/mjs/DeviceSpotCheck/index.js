@@ -296,6 +296,7 @@ function detailPage(deviceId, planId) {
             return data.ImageList.length ? op.format('ok', 'green', data.Id, escape(data.Item), escape(data.ImageList)) : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList));
         }
         $('#devicePlanDetailList').DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -305,7 +306,7 @@ function detailPage(deviceId, planId) {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "选择", "render": isEnable, "orderable": false },
                 { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
@@ -317,9 +318,6 @@ function detailPage(deviceId, planId) {
                 { "data": "Actual", "title": "实际", "render": actual },
                 { "data": "Desc", "title": "简述", "render": desc },
                 { "data": null, "title": "图片", "render": lookImg }
-            ],
-            "columnDefs": [
-                { "orderable": false, "targets": 0 }
             ],
             "createdRow": function (row, data, index) {
                 var time = data.CheckTime.slice(0, data.PlannedTime.indexOf(' '));

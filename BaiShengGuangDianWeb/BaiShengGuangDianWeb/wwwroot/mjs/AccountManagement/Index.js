@@ -318,6 +318,7 @@ function getMemberList(id, name) {
 
             $("#memberListTable")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -329,7 +330,6 @@ function getMemberList(id, name) {
                     "columnDefs": defs,
                     "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
-                        $("#memberListTable td").css("vertical-align", "middle");
                     }
                 });
         });
@@ -361,6 +361,7 @@ function showAddMemberModal() {
             }
             $("#memberList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -375,14 +376,10 @@ function showAddMemberModal() {
                         { "data": "name", "title": "姓名" },
                         { "data": "account", "title": "账号" },
                         { "data": "roleName", "title": "角色" },
-                        { "data": null, "title": "选择", "sClass": "text-red", "render": op }
-                    ],
-                    "columnDefs": [
-                        { "orderable": false, "targets": 5 }
+                        { "data": null, "title": "选择", "sClass": "text-red", "render": op, "orderable": false }
                     ],
                     "drawCallback": function (settings, json) {
                         $("#memberList td").css("padding", "3px");
-                        $("#memberList td").css("vertical-align", "middle");
                         $("#memberList .icb_minimal").iCheck({
                             checkboxClass: 'icheckbox_minimal',
                             radioClass: 'iradio_minimal',

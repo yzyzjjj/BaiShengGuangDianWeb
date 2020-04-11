@@ -547,6 +547,7 @@ function getMaterialList() {
         }
         $("#MaterialList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -556,7 +557,7 @@ function getMaterialList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false},
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Code", "title": "货品编号", "render": code },
                     { "data": null, "title": "类别", "render": category },
@@ -569,9 +570,6 @@ function getMaterialList() {
                     { "data": "Price", "title": "参考价格", "render": price },
                     { "data": "Stock", "title": "最低库存", "render": stock },
                     { "data": "Remark", "title": "备注", "render": remark }
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": 0 }
                 ],
                 "drawCallback": function (settings, json) {
                     $(this).find('.icb_minimal').iCheck({

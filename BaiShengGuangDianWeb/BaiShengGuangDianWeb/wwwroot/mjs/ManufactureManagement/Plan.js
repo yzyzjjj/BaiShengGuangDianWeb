@@ -493,7 +493,7 @@ function getPlanConfig() {
             return `<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(${data.Id})">查看</button>`;
         }
         _planConfigTab = $('#planConfigList').DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,

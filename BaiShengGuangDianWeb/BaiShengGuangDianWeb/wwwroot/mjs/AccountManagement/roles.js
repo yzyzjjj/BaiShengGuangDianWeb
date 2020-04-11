@@ -39,20 +39,16 @@ function getRoleList() {
                     { "data": null, "title": "序号", "render": order },
                     { "data": "id", "title": "Id", "bVisible": false },
                     { "data": "name", "title": "角色名称" },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "id", "title": "Id", "bVisible": false },
                     { "data": "name", "title": "角色名称" }
                 ];
-            var defs = checkPermission(80) || checkPermission(79)
-                ? [
-                    { "orderable": false, "targets": 3 }
-                ]
-                : "";
             $("#rolesList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -60,8 +56,7 @@ function getRoleList() {
                     "data": ret.datas,
                     "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
                     "iDisplayLength": 10, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

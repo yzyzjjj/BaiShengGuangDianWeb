@@ -382,7 +382,7 @@ function initItemList() {
         var titleColumns = [3, 7, 10];
         $("#itemList")
             .DataTable({
-                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 buttons: [
                     {
                         extend: 'excel',
@@ -696,6 +696,7 @@ function groupRank(show = true, time = true) {
             }
             $("#_6sGroupRankList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -764,6 +765,7 @@ function groupPersonRank(groupId, group, show = true, time = true) {
 
             $("#_6sGroupPersonRankList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -857,7 +859,7 @@ function groupPersonItemRank(groupId, person, show = true, time = true) {
             var titleColumns = [3, 7, 10];
             $("#_6sGroupPersonItemList")
                 .DataTable({
-                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     buttons: [
                         {
                             extend: 'excel',

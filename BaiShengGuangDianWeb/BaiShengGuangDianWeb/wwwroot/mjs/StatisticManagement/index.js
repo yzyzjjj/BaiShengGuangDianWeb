@@ -811,6 +811,7 @@ function getProcessDetail() {
                     $("#num" + i).text("每日加工次数：" + processData.ProcessCount + "次");
                     o = 0;
                     $("#processList" + i).DataTable({
+                        dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                         "destroy": true,
                         "paging": true,
                         "deferRender": false,
@@ -918,6 +919,7 @@ function rateList(i, deviceId, startTime, endTime, plan) {
         }
         $("#processList" + i).empty();
         $("#processList" + i).DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "deferRender": false,
@@ -993,6 +995,7 @@ function showProcessDetailModel(data) {
         return ++o;
     }
     $("#processList").DataTable({
+        dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         "destroy": true,
         "paging": false,
         "deferRender": false,

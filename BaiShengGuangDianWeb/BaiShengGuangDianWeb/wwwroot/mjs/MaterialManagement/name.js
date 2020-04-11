@@ -88,6 +88,7 @@ function getNameList() {
         }
         $("#nameList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -97,14 +98,11 @@ function getNameList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false},
                     { "data": null, "title": "序号", "render": order },
                     { "data": null, "title": "类别", "render": category },
                     { "data": "Name", "title": "名称", "render": name },
                     { "data": "Remark", "title": "备注", "render": remark }
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": 0 }
                 ],
                 "drawCallback": function (settings, json) {
                     $(this).find('.icb_minimal').iCheck({

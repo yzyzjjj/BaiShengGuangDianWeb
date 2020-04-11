@@ -378,7 +378,7 @@ function detailPage(deviceId, planId, isModal) {
         }
         var column = isModal
             ? [
-                { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "选择", "render": isEnable, "orderable": false },
                 { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
@@ -392,7 +392,7 @@ function detailPage(deviceId, planId, isModal) {
                 { "data": null, "title": "图片", "render": lookImg }
             ]
             : [
-                { "data": null, "title": "选择", "render": isEnable },
+                { "data": null, "title": "选择", "render": isEnable, "orderable": false },
                 { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "名称" },
                 { "data": "Max", "title": "上限" },
@@ -407,6 +407,7 @@ function detailPage(deviceId, planId, isModal) {
                 { "data": null, "title": "图片", "render": lookImg }
             ];
         elList.DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -416,9 +417,6 @@ function detailPage(deviceId, planId, isModal) {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": column,
-            "columnDefs": [
-                { "orderable": false, "targets": 0 }
-            ],
             "createdRow": function (row, data, index) {
                 var time = data.CheckTime.slice(0, data.PlannedTime.indexOf(' '));
                 var date = $(row).find('.form_date');
@@ -676,8 +674,17 @@ function getNextExamineList() {
         }
         var planFlag = null, flag = 0;
         var colors = ['#cdcdcd', '#daf5fa'];
+        var rModal = function(data, type, full, meta) {
+            full.Devices = full.Devices ? full.Devices : "";
+            return full.Devices.length > tdShowContentLength
+                ? full.Devices.substr(0, tdShowContentLength) +
+                '<a href = \"javascript:showDeviceModel(\'{0}\')\">...</a> '
+                .format(escape(full.Devices.trim()))
+                : full.Devices;
+        };
         $('#planCheckRecentList')
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -695,8 +702,8 @@ function getNextExamineList() {
                     { "data": "Min", "title": "下限" },
                     { "data": "Unit", "title": "单位" },
                     { "data": "Reference", "title": "参考标准" },
-                    { "data": "PlannedTime", "title": "计划时间", "render": plannedTime },
-                    { "data": "Devices", "title": "机台号" }
+                    { "data": "PlannedTime", "title": "计划时间", "render": plannedTime, "sClass": "text-primary" },
+                    { "data": "Devices", "title": "机台号", "render": rModal}
                 ],
                 "createdRow": function (row, data, index) {
                     var v = data.Plan;
@@ -715,24 +722,7 @@ function getNextExamineList() {
                         }
                     }
                     planFlag = v;
-                },
-                "columnDefs": [
-                    {
-                        "targets": 7,
-                        "sClass": "text-primary"
-                    },
-                    {
-                        "targets": 8,
-                        "render": function (data, type, full, meta) {
-                            full.Devices = full.Devices ? full.Devices : "";
-                            return full.Devices.length > tdShowContentLength
-                                ? full.Devices.substr(0, tdShowContentLength) +
-                                '<a href = \"javascript:showDeviceModel(\'{0}\')\">...</a> '
-                                    .format(escape(full.Devices.trim()))
-                                : full.Devices;
-                        }
-                    }
-                ]
+                }
             });
     });
 }

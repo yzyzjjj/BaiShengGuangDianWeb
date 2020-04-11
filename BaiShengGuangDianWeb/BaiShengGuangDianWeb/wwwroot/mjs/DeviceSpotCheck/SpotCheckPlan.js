@@ -200,6 +200,7 @@ function getSpotCheckList() {
         }
         $("#spotCheckList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -209,7 +210,7 @@ function getSpotCheckList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Item", "title": "名称", "render": item },
                     { "data": "Enable", "title": "启用", "render": using },
@@ -220,9 +221,6 @@ function getSpotCheckList() {
                     { "data": "Reference", "title": "参考标准", "render": reference },
                     { "data": "Remarks", "title": "备注", "render": remarks },
                     { "data": null, "title": "提醒间隔", "render": remindInterval }
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": 0 }
                 ],
                 "createdRow": function (row, data, index) {
                     _spotCheckBodyRow++;
