@@ -139,11 +139,9 @@ function getDeviceList() {
             var order = function (data, type, row, meta) {
                 return meta.row + 1;
             }
-            var tdWidth = function () {
-                $("#deviceList th").css("paddingRight", "22px").css("paddingLeft", 0);
-            }
             $("#deviceList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "pagingType": "full",
                     "destroy": true,
                     "paging": true,
@@ -156,17 +154,16 @@ function getDeviceList() {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Id", "title": "Id", "bVisible": false },
-                        { "data": "Code", "title": "机台号" },
+                        { "data": "Code", "title": "机台号", "type": "html-percent" },
                         { "data": "CategoryName", "title": "类型" },
                         { "data": null, "title": "设备状态", "render": deviceState },
                         { "data": "FlowCard", "title": "流程卡号" },
                         { "data": "ProcessTime", "title": "加工时间" },
                         { "data": "LeftTime", "title": "剩余时间" }
                     ],
-                    "columnDefs": [
-                        { "type": "html-percent", "targets": [2] }
-                    ],
-                    "drawCallback": tdWidth
+                    "drawCallback": function () {
+                        $("#deviceList th").css("paddingRight", "22px").css("paddingLeft", 0);
+                    }
                 });
             $(".ms2").empty();
             var html = "";
@@ -244,7 +241,7 @@ function queryFlowCard() {
                     '<div class="form-group form-inline hidden" id="differenceDiv">' +
                     '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
                     '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" maxlength="9" onkeyup="onInput(this)" oninput="value=value.replace(/[^\\d\\.]/g,\'\')" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
+                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
                     '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
                     '</div>' +
                     '</div>';
@@ -836,6 +833,7 @@ function getUsuallyFaultList() {
 
             $("#usuallyFaultList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -1065,6 +1063,7 @@ function queryRpFlowCard() {
             }
             $("#gxList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "bSort": false,
                     "paging": false,// 是否显示分页
@@ -1077,7 +1076,6 @@ function queryRpFlowCard() {
                     "aaSorting": [[0, "asc"]],
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
-                        //{ "data": "MarkedDateTime", "title": "修改时间" },
                         { "data": null, "title": "工序名称", "render": processStepName },
                         { "data": "ProcessStepRequirements", "title": "加工要求" },
                         { "data": null, "title": "加工人", "render": processorId },
@@ -1357,7 +1355,7 @@ function showMaintainerModel() {
             }
             $("#maintainerList")
                 .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rtip',
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "bAutoWidth": false,
                     "destroy": true,
                     "paging": true,
@@ -1480,7 +1478,7 @@ function getLogList() {
             }
             $("#logList")
                 .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rtip',
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "bAutoWidth": false,
                     "destroy": true,
                     "paging": true,

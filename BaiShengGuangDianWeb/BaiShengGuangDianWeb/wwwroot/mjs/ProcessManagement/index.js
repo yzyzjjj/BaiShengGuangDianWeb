@@ -97,26 +97,6 @@ function getProcessList(type = 307) {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
-                ? [
-                    { "data": null, "title": "操作", "render": op },
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "MarkedDateTime", "title": "修改时间" },
-                    { "data": "ProcessNumber", "title": "工艺编号" },
-                    { "data": "ModelName", "title": "设备型号" },
-                    { "data": "ProductionProcessName", "title": "产品型号" },
-                    { "data": "Code", "title": "机台号" }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "MarkedDateTime", "title": "修改时间" },
-                    { "data": "ProcessNumber", "title": "工艺编号" },
-                    { "data": "ModelName", "title": "设备型号" },
-                    { "data": "ProductionProcessName", "title": "产品型号" },
-                    { "data": "Code", "title": "机台号" }
-                ];
             var rProcessNumber = function (data, type, full, meta) {
                 if (full.ProcessNumber) {
                     if (full.ProcessNumber.length > tdShowContentLength) {
@@ -169,48 +149,29 @@ function getProcessList(type = 307) {
                     return "";
                 }
             };
-            var defs = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
+            var columns = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
                 ? [
-                    { "orderable": false, "targets": 0 },
-                    {
-                        "targets": [4],
-                        "render": rProcessNumber
-                    },
-                    {
-                        "targets": [5],
-                        "render": rModelName
-                    },
-                    {
-                        "targets": [6],
-                        "render": rProductionProcessName
-                    },
-                    {
-                        "targets": [7],
-                        "render": rCode,
-                        "type": "html-percent"
-                    }
+                    { "data": null, "title": "操作", "render": op, "orderable": false },
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProcessNumber", "title": "工艺编号", "render": rProcessNumber },
+                    { "data": "ModelName", "title": "设备型号", "render": rModelName},
+                    { "data": "ProductionProcessName", "title": "产品型号", "render": rProductionProcessName },
+                    { "data": "Code", "title": "机台号", "render": rCode, "type": "html-percent" }
                 ]
                 : [
-                    {
-                        "targets": [3],
-                        "render": rProcessNumber
-                    },
-                    {
-                        "targets": [4],
-                        "render": rModelName
-                    },
-                    {
-                        "targets": [5],
-                        "render": rProductionProcessName
-                    },
-                    {
-                        "targets": [6],
-                        "render": rCode,
-                        "type": "html-percent"
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "MarkedDateTime", "title": "修改时间" },
+                    { "data": "ProcessNumber", "title": "工艺编号", "render": rProcessNumber},
+                    { "data": "ModelName", "title": "设备型号", "render": rModelName},
+                    { "data": "ProductionProcessName", "title": "产品型号", "render": rProductionProcessName},
+                    { "data": "Code", "title": "机台号", "render": rCode, "type": "html-percent"}
                 ];
             $("#processList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -219,8 +180,7 @@ function getProcessList(type = 307) {
                     "aaSorting": [[1, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }
@@ -314,6 +274,7 @@ function showProcessDetailModel(id) {
                         }
                         $("#pdProcessDataList1")
                             .DataTable({
+                                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                                 "destroy": true,
                                 "bSort": false,
                                 "language": oLanguage,
@@ -367,8 +328,22 @@ function showProcessDetailModel(id) {
                         var order = function (data, type, row) {
                             return ++o;
                         }
+                        var rModal = function(data, type, full, meta) {
+                            if (full.Code) {
+                                if (full.Code.length > tdShowContentLength) {
+                                    return full.Code.substr(0, tdShowContentLength) +
+                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
+                                        .format(escape(full.Code), escape("适用机台号"));
+                                } else {
+                                    return full.Code;
+                                }
+                            } else {
+                                return "";
+                            }
+                        };
                         $("#pdProcessList2")
                             .DataTable({
+                                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                                 "destroy": true,
                                 "bSort": true,
                                 "language": oLanguage,
@@ -378,25 +353,7 @@ function showProcessDetailModel(id) {
                                     { "data": null, "title": "序号", "render": order },
                                     { "data": "Id", "title": "Id", "bVisible": false },
                                     { "data": "ProcessNumber", "title": "工艺编号" },
-                                    { "data": "Code", "title": "适用机台号" }
-                                ],
-                                "columnDefs": [
-                                    {
-                                        "targets": [3],
-                                        "render": function (data, type, full, meta) {
-                                            if (full.Code) {
-                                                if (full.Code.length > tdShowContentLength) {
-                                                    return full.Code.substr(0, tdShowContentLength) +
-                                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
-                                                            .format(escape(full.Code), escape("适用机台号"));
-                                                } else {
-                                                    return full.Code;
-                                                }
-                                            } else {
-                                                return "";
-                                            }
-                                        }
-                                    }
+                                    { "data": "Code", "title": "适用机台号", "render":rModal }
                                 ]
                             });
 
@@ -439,8 +396,22 @@ function showProcessDetailModel(id) {
                         var order = function (data, type, row) {
                             return ++o;
                         }
+                        var rModal = function(data, type, full, meta) {
+                            if (full.ProcessNumber) {
+                                if (full.ProcessNumber.length > tdShowContentLength) {
+                                    return full.ProcessNumber.substr(0, tdShowContentLength) +
+                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
+                                        .format(escape(full.ProcessNumber), escape("所用工艺编号"));
+                                } else {
+                                    return full.ProcessNumber;
+                                }
+                            } else {
+                                return "";
+                            }
+                        };
                         $("#pdProcessList3")
                             .DataTable({
+                                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                                 "destroy": true,
                                 "bSort": true,
                                 "language": oLanguage,
@@ -449,27 +420,8 @@ function showProcessDetailModel(id) {
                                 "columns": [
                                     { "data": null, "title": "序号", "render": order },
                                     { "data": "Id", "title": "Id", "bVisible": false },
-                                    { "data": "Code", "title": "机台号" },
-                                    { "data": "ProcessNumber", "title": "所用工艺编号" }
-                                ],
-                                "columnDefs": [
-                                    { "type": "html-percent", "targets": [2] },
-                                    {
-                                        "targets": [3],
-                                        "render": function (data, type, full, meta) {
-                                            if (full.ProcessNumber) {
-                                                if (full.ProcessNumber.length > tdShowContentLength) {
-                                                    return full.ProcessNumber.substr(0, tdShowContentLength) +
-                                                        '<a href = \"javascript:showDetailModel(\'{0}\',\'{1}\')\">...</a> '
-                                                            .format(escape(full.ProcessNumber), escape("所用工艺编号"));
-                                                } else {
-                                                    return full.ProcessNumber;
-                                                }
-                                            } else {
-                                                return "";
-                                            }
-                                        }
-                                    }
+                                    { "data": "Code", "title": "机台号", "type": "html-percent" },
+                                    { "data": "ProcessNumber", "title": "所用工艺编号", "render": rModal }
                                 ]
                             });
 
@@ -518,6 +470,7 @@ function showProcessDetailModel(id) {
                         }
                         $("#pdProcessList4")
                             .DataTable({
+                                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                                 "destroy": true,
                                 "bSort": true,
                                 "language": oLanguage,
@@ -571,12 +524,12 @@ function showAddModel(id) {
                 if (ret.datas.length > 0) {
                     var tr = '<tr id="ap{0}" value="{2}">' +
                         '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
                         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                         '</tr>';
                     for (var j = 0; j < ret.datas.length; j++) {
@@ -732,12 +685,12 @@ function apReset() {
     $("#apBody").empty();
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{0}</label></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(1);
     $("#apBody").append(tr);
@@ -753,12 +706,12 @@ function addOther() {
     //arBody
     var tr = ('<tr id="ap{0}" value="0">' +
         '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="0" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+        '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="0" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
         '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
         '</tr>').format(max, maxV);
     $("#apBody").append(tr);
@@ -919,12 +872,12 @@ function showUpdateProcessModel(id) {
 
             var tr = '<tr id="ap{0}" value="{2}">' +
                 '<td><label class="control-label" id="apx{0}">{1}</label></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="value=value.replace(/[^\\d]/g,\'\')" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
-                '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apJy1{0}" value="{3}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apJy2{0}" value="{4}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apGx1{0}" value="{5}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apGx2{0}" value="{6}" oninput="onInput(this, 9, 0)" onblur="value=isStrEmptyOrUndefined(value)?\'\':(parseInt(value)>59?59:parseInt(value))"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apYl{0}"  value="{7}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
+                '<td><input type="tel" class="form-control text-center" id="apSd{0}"  value="{8}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>';
             for (var j = 0; j < ret.datas.length; j++) {

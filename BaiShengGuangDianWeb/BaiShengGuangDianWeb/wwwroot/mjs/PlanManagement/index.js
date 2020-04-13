@@ -452,6 +452,7 @@ function getPlanList(isSelect, resolve, planId, isAll) {
             }
             $("#planList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -888,7 +889,7 @@ function planDetailModalData(id) {
         }
         var excelColumns = [0, 1, 2, 3, 4, 5, 6, 8, 9];
         $("#planDetailList").DataTable({
-            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             buttons: [
                 {
                     extend: 'excel',
@@ -1187,6 +1188,7 @@ function getLogList() {
         }
         $("#logList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,

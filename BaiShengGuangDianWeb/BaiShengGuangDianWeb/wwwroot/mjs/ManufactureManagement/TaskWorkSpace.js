@@ -132,7 +132,7 @@ function getAccountTask() {
         $('.finish').prop('disabled', state != 1);
         $('#taskName').text(d.Item);
         $('#planName').text(d.Plan);
-        $('#actualStartTime').text(d.ActualStartTime);
+        $('#actualStartTime').text(d.ActualStartTime == '0001-01-01 00:00:00' ? '' : d.ActualStartTime);
         $('#actualTime').text(d.ActualTime);
         $('#taskDesc').val(d.Desc);
         $('#estimatedTime').text(d.EstimatedTime);
@@ -206,7 +206,7 @@ function getUnFinishedList(isFinish, el, limit) {
             return d.row + 1;
         }
         $(el).DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,

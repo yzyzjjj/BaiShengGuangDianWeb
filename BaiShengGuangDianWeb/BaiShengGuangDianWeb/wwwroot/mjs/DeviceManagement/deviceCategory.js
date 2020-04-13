@@ -44,44 +44,31 @@ function getCategoryList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(142) || checkPermission(144)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "CategoryName", "title": "类型名" },
-                    { "data": "Description", "title": "描述" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "CategoryName", "title": "类型名" },
-                    { "data": "Description", "title": "描述" }
-                ];
             var rModel = function (data, type, full, meta) {
                 full.Description = full.Description ? full.Description : "";
                 return full.Description.length > tdShowContentLength
                     ? full.Description.substr(0, tdShowContentLength) +
                     '<a href = \"javascript:showDescriptionModel({0})\">...全部显示</a> '
-                        .format(full.Id)
+                    .format(full.Id)
                     : full.Description;
             }
-            var defs = checkPermission(142) || checkPermission(144)
+            var columns = checkPermission(142) || checkPermission(144)
                 ? [
-                    { "orderable": false, "targets": 4 },
-                    {
-                        "targets": [3],
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CategoryName", "title": "类型名" },
+                    { "data": "Description", "title": "描述", "render": rModel },
+                    { "data": null, "title": "操作", "render": op, "orderable": false}
                 ]
                 : [
-                    {
-                        "targets": [3],
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "CategoryName", "title": "类型名" },
+                    { "data": "Description", "title": "描述", "render": rModel }
                 ];
             $("#categoryList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -89,8 +76,7 @@ function getCategoryList() {
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

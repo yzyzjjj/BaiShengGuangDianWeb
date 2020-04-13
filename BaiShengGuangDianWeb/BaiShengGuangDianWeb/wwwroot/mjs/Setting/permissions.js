@@ -26,7 +26,7 @@ function getPermissionsList() {
             }
             var columns = checkPermission(81)
                 ? [
-                    { "data": null, "title": "请选择", "render": op },
+                    { "data": null, "title": "请选择", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "name", "title": "Name" },
                     { "data": "isPage", "title": "IsPage" },
@@ -40,24 +40,18 @@ function getPermissionsList() {
                     { "data": "type", "title": "Type" },
                     { "data": "label", "title": "Label" }
                 ];
-            var aaSorting = checkPermission(81) ? [[1, "asc"]] : [[0, "asc"]];
-            var defs = checkPermission(81)
-                ? [
-                    { "orderable": false, "targets": 0}
-                ]
-                : "";
             $("#permissionsList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": aaSorting,
+                    "aaSorting": [[checkPermission(81) ? 1 : 0, "asc"]],
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
                     "iDisplayLength": 15, //默认显示的记录数
                     "columns": columns,
-                    "columnDefs": defs,
                     "drawCallback": function () {
                         $("#permissionsList .icb_minimal").iCheck({
                             handle: 'checkbox',

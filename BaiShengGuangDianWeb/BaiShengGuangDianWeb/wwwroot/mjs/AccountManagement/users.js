@@ -92,16 +92,13 @@ function getUsersList() {
                         { "data": null, "title": "删除", "render": del }
                     ];
 
-                var defs = "";
                 if (checkPermission76 || checkPermission75) {
-                    columns.push({ "data": null, "title": "操作", "render": op });
-                    defs = [
-                        { "orderable": false, "targets": 6 }
-                    ];
+                    columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
                 }
 
                 $("#userTable")
                     .DataTable({
+                        dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                         "destroy": true,
                         "paging": true,
                         "searching": true,
@@ -109,8 +106,7 @@ function getUsersList() {
                         "data": ret.datas,
                         "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                         "iDisplayLength": 20, //默认显示的记录数  
-                        "columns": columns,
-                        "columnDefs": defs
+                        "columns": columns
                     });
             });
     });
@@ -220,6 +216,7 @@ function showAddUserModal(type = 0) {
 
             $("#addDeviceList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -229,18 +226,13 @@ function showAddUserModal(type = 0) {
                     "iDisplayLength": 20, //默认显示的记录数 
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op, "orderable": false},
                         { "data": "Id", "title": "Id", "render": order },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],
-                    //关闭第一列排序功能
-                    "columnDefs": [
-                        { "orderable": false, "targets": 0 }
-                    ],
                     "drawCallback": function (settings, json) {
                         $("#addDeviceList td").css("padding", "3px");
-                        $("#addDeviceList td").css("vertical-align", "middle");
                         $("#addDeviceList .icb_minimal").iCheck({
                             checkboxClass: 'icheckbox_minimal',
                             radioClass: 'iradio_minimal',
@@ -573,6 +565,7 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
             }
             $("#updateDeviceList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -582,18 +575,13 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
                     "iDisplayLength": 20, //默认显示的记录数  
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='upCheckAll'>", "render": op },
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='upCheckAll'>", "render": op, "orderable": false },
                         { "data": "Id", "title": "Id", "render": order },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
                     ],
-                    //关闭第一列排序功能
-                    "columnDefs": [
-                        { "orderable": false, "targets": 0 }
-                    ],
                     "drawCallback": function (settings, json) {
                         $("#updateDeviceList td").css("pupdateing", "3px");
-                        $("#updateDeviceList td").css("vertical-align", "middle");
                         $("#updateDeviceList .icb_minimal").iCheck({
                             checkboxClass: 'icheckbox_minimal',
                             radioClass: 'iradio_minimal',

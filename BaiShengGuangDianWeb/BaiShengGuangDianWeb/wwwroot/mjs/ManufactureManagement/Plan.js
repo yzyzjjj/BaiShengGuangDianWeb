@@ -33,6 +33,13 @@
             tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
         }
     });
+    $('#planConfigList').on('change', '.taskConfig', function () {
+        var planId = $(this).parents('tr').find('.isEnable').val();
+        if (!$('#planItem').is(':hidden') && $('#planText').attr('planid') == planId) {
+            var v = $(this).val();
+            isStrEmptyOrUndefined(v) ? $('#planItemList').empty() : getTaskConfigItem(v, '#planItemList', 0);
+        }
+    });
     $('#planConfigList,#planItemList,#addPlanTaskList,#planTime').on('focus', '.toZero', function () {
         var v = $(this).val();
         if (v == 0) {
@@ -177,7 +184,7 @@
     });
     $('#taskConfig').on('change', function () {
         var v = $(this).val();
-        isStrEmptyOrUndefined(v) ? $('#addPlanTaskList').empty() : getTaskConfigItem(v);
+        isStrEmptyOrUndefined(v) ? $('#addPlanTaskList').empty() : getTaskConfigItem(v,'#addPlanTaskList',1);
     });
     $('#planConfigList').on('input', '.minute,.hour', function () {
         var tr = $(this).parents('tr');
@@ -279,7 +286,7 @@ function reusePlanTask(planId) {
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             _reusePlanTaskItem[d.Id] = d;
-            ops += _planTaskTr.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
+            ops += _planTaskTr.format(d.Id, d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
         }
         $('#addPlanTaskList').append(ops);
         setTableStyle('#addPlanTaskList');
@@ -355,7 +362,7 @@ function getTaskConfig() {
 }
 
 //获取任务配置项Tr
-function getTaskConfigItem(taskId) {
+function getTaskConfigItem(taskId,el,isAdd) {
     var opType = 1055;
     if (!checkPermission(opType)) {
         layer.msg('没有权限');
@@ -371,18 +378,25 @@ function getTaskConfigItem(taskId) {
             return;
         }
         var rData = ret.datas;
-        $('#addPlanTaskList').empty();
-        _reusePlanTaskItem = {};
+        $(el).empty();
+        var list = {};
         var ops = '';
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
-            _reusePlanTaskItem[d.Id] = d;
-            ops += _planTaskTr.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
+            list[d.Id] = d;
+            ops += _planTaskTr.format(d.Id,0, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
         }
-        $('#addPlanTaskList').append(ops);
-        setTableStyle('#addPlanTaskList');
-        getTotalTime();
-        planEndTimeCount($('#planTime'));
+        $(el).append(ops);
+        setTableStyle(el);
+        if (isAdd) {
+            _reusePlanTaskItem = list;
+            getTotalTime();
+            planEndTimeCount($('#planTime'));
+        } else {
+            _planTaskItem = list;
+            _isUpMove = false;
+            $(el).find('.showLogModel').addClass('hidden');
+        }
     });
 }
 
@@ -433,40 +447,40 @@ function getPlanConfig() {
             var d = rData[i];
             _planConfigData[d.Id] = d;
         }
-        var isEnable = function (data) {
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${data.Id}>`;
+        var isEnable = function (d) {
+            return d.State == 1 ? `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id}>` : '';
         }
         var order = function (a, b, c, d) {
             return d.row + 1;
         }
-        var planName = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn planName hidden" maxlength="20" style="width:120px">`;
+        var planName = function (d) {
+            return d.State == 1 ? `<span class="textOn">${d.Plan}</span><input type="text" class="form-control text-center textIn planName hidden" maxlength="20" style="width:120px">` : d.Plan;
         }
-        var sTime = function (data) {
-            var time = data.slice(0, data.indexOf(' '));
-            if (time == '0001-01-01') {
-                time = '';
-            }
-            return `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn sTime hidden" style="width:120px;cursor: pointer">`;
+        var sTime = function (d) {
+            var plannedStartTime = d.PlannedStartTime;
+            var time = plannedStartTime == '0001-01-01 00:00:00'
+                ? ''
+                : plannedStartTime.slice(0, plannedStartTime.indexOf(' '));
+            return d.State == 1 ? `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn sTime hidden" style="width:120px;cursor: pointer">` : time;
         }
-        var eTime = function (data) {
-            var time = data.slice(0, data.indexOf(' '));
-            if (time == '0001-01-01') {
-                time = '';
-            }
-            return `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn eTime hidden" style="width:120px;cursor: pointer">`;
+        var eTime = function (d) {
+            var plannedEndTime = d.PlannedEndTime;
+            var time = plannedEndTime == '0001-01-01 00:00:00'
+                ? ''
+                : plannedEndTime.slice(0, plannedEndTime.indexOf(' '));
+            return d.State == 1 ? `<span class="textOn">${time}</span><input type="text" class="form_date form-control text-center textIn eTime hidden" style="width:120px;cursor: pointer">` : time;
         }
-        var predictTime = function (data) {
-            return `<span class="textOn">${data.EstimatedTime}</span>
+        var predictTime = function (d) {
+            return d.State == 1 ? `<span class="textOn">${d.EstimatedTime}</span>
             <div class="flexStyle textIn hidden" style="justify-content:center">
-            <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:50px">
+            <input type="text" class="form-control text-center hour toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:50px">
             <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-            <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:50px">
+            <input type="text" class="form-control text-center minute toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:50px">
             <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
-            </div>`;
+            </div>` : d.EstimatedTime;
         }
-        var taskConfig = function (data) {
-            return `<span class="textOn">${data}</span><div class="textIn hidden" style="width:120px;margin:auto"><select class="ms2 form-control taskConfig">${_taskConfigOp}</select></div>`;
+        var taskConfig = function (d) {
+            return d.State == 1 ? `<span class="textOn">${d.Task}</span><div class="textIn hidden" style="width:120px;margin:auto"><select class="form-control taskConfig">${_taskConfigOp}</select></div>` : d.Task;
 
         }
         var carryBtn = function (data) {
@@ -479,7 +493,7 @@ function getPlanConfig() {
             return `<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(${data.Id})">查看</button>`;
         }
         _planConfigTab = $('#planConfigList').DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -491,11 +505,11 @@ function getPlanConfig() {
             "columns": [
                 { "data": null, "title": "选择", "render": isEnable, "orderable": false },
                 { "data": null, "title": "序号", "render": order },
-                { "data": "Plan", "title": "计划号", "render": planName },
-                { "data": "PlannedStartTime", "title": "开始时间", "render": sTime },
-                { "data": "PlannedEndTime", "title": "结束时间", "render": eTime },
+                { "data": null, "title": "计划号", "render": planName },
+                { "data": null, "title": "开始时间", "render": sTime },
+                { "data": null, "title": "结束时间", "render": eTime },
                 { "data": null, "title": "预计用时", "render": predictTime },
-                { "data": "Task", "title": "任务配置", "render": taskConfig },
+                { "data": null, "title": "任务配置", "render": taskConfig },
                 { "data": null, "title": "实施", "render": carryBtn },
                 { "data": "StateDesc", "title": "状态" },
                 { "data": null, "title": "详情", "render": detailBtn, "orderable": false },
@@ -514,7 +528,6 @@ function getPlanConfig() {
                     todayBtn: "linked",
                     autoclose: true
                 });
-                $(this).find('.ms2').select2();
             }
         });
     });
@@ -667,7 +680,7 @@ function getTaskName(resolve) {
 }
 
 //计划任务Tr
-function planTaskTr(resolve,isAdd) {
+function planTaskTr(resolve, isAdd) {
     var groupSelect = new Promise(function (resolve) {
         getGroup(resolve);
     });
@@ -682,27 +695,27 @@ function planTaskTr(resolve,isAdd) {
     });
     Promise.all([groupSelect, processorSelect, moduleSelect, taskNameSelect]).then(function (results) {
         _planTaskTr = `<tr>
-            <td class="isIssue"><input type="checkbox" class="icb_minimal isEnable" value={0}></td>
+            <td class="isIssue"><input type="checkbox" class="icb_minimal isEnable" value={0} trid={1}></td>
             <td class="num"></td>
             <td>
-            <span class="textOn">{1}</span>
+            <span class="textOn">{2}</span>
             <div class="flexStyle textIn hidden" style="width: 240px;margin:auto"><select class="ms2 form-control group">${results[0]}</select><select class="ms2 form-control processor">${results[1]}</select></div>
             </td>
-            <td><span class="textOn">{2}</span><div class="textIn hidden" style="width: 120px;margin:auto"><select class="ms2 form-control module">${results[2]}</select></div></td>
-            <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div>${results[3]}</div></div></td>
-            <td><span class="textOn">{4}</span>
+            <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><select class="ms2 form-control module">${results[2]}</select></div></td>
+            <td><span class="textOn">{4}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div>${results[3]}</div></div></td>
+            <td><span class="textOn">{5}</span>
             <div class="flexStyle textIn hidden" style="width:140px;margin:auto">
-            <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')">
+            <input type="text" class="form-control text-center hour toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)">
             <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-            <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')">
+            <input type="text" class="form-control text-center minute toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)">
             <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
             </div>
             </td>
-            <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
-            <td class="no-padding"><span class="textOn">{6}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
-            <td><span class="textOn relationText">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto"></td>
+            <td><span class="textOn">{6}</span><input type="text" class="form-control text-center textIn hidden score toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
+            <td class="no-padding"><span class="textOn">{7}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
+            <td><span class="textOn relationText">{8}</span><input type="text" class="form-control text-center textIn hidden relation toZero" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
             <td class="isIssue"><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
-            ${isAdd ? '' : '<td><button type="button" class="btn btn-success btn-sm" onclick="showLogModel({8},{0})">日志</button></td>'}
+            ${isAdd ? '' : '<td><button type="button" class="btn btn-success btn-sm showLogModel" onclick="showLogModel({9},{0})">日志</button></td>'}
             <td class="isIssue"><button type="button" class="btn btn-danger btn-sm delPlanItem"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         _addPlanTaskTr = `<tr>
@@ -715,17 +728,17 @@ function planTaskTr(resolve,isAdd) {
             <td><div style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div class="hidden">${results[3]}</div></div></td>
             <td>
             <div class="flexStyle" style="width:140px;margin:auto">
-            <input type="text" class="form-control text-center hour toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+            <input type="text" class="form-control text-center hour toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" value="0">
             <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
-            <input type="text" class="form-control text-center minute toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" value="0">
+            <input type="text" class="form-control text-center minute toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" value="0">
             <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
             </div>
             </td>
-            <td><input type="text" class="form-control text-center score toZero" maxlength="3" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+            <td><input type="text" class="form-control text-center score toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
             <td class="no-padding"><textarea class="form-control desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
-            <td><input type="text" class="form-control text-center relation toZero" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px;margin:auto" value="0"></td>
+            <td><input type="text" class="form-control text-center relation toZero" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
-            <td></td>
+            ${isAdd ? '' : '<td></td>'}
             <td><button type="button" class="btn btn-danger btn-sm delPlanItem"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         resolve('success');
@@ -755,7 +768,7 @@ function planTaskDetail(planId, planName) {
             return;
         }
         new Promise(function (resolve) {
-            planTaskTr(resolve,0);
+            planTaskTr(resolve, 0);
         }).then(() => {
             var rData = ret.datas;
             $('#planItemList').empty();
@@ -764,7 +777,7 @@ function planTaskDetail(planId, planName) {
             for (var i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 _planTaskItem[d.Id] = d;
-                ops += _planTaskTr.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation, d.PlanId);
+                ops += _planTaskTr.format(d.Id, d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation, d.PlanId);
             }
             $('#planItemList').append(ops);
             setTableStyle('#planItemList');
@@ -809,13 +822,13 @@ function planTaskData(el, isUp) {
     for (i = 0; i < len; i++) {
         var tr = $(`${el} tr`).eq(i);
         var isEnableEl = tr.find('.isEnable');
-        var id = isEnableEl.val();
+        var id = isEnableEl.attr('trid');
         if (isStrEmptyOrUndefined(id)) {
             id = 0;
         }
         //  操作员id  操作员名字    模块名    是否检验 检验单   任务名 小时 分钟    绩效   描述  关联
         var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc, relation;
-        if (isEnableEl.is(':checked') || id == 0) {
+        if (!isEnableEl.length || isEnableEl.is(':checked')) {
             var personEl = tr.find('.processor');
             personId = personEl.val();
             if (isStrEmptyOrUndefined(personId)) {
@@ -863,7 +876,8 @@ function planTaskData(el, isUp) {
             desc = tr.find('.desc').val();
             relation = tr.find('.relation').val();
         } else {
-            var d = isUp ? _planTaskItem[id] : _reusePlanTaskItem[id];
+            var v = isEnableEl.val();
+            var d = isUp ? _planTaskItem[v] : _reusePlanTaskItem[v];
             personId = d.Person;
             personName = d.Processor;
             moduleId = d.ModuleId;
@@ -878,9 +892,6 @@ function planTaskData(el, isUp) {
         }
         if (isStrEmptyOrUndefined(relation)) {
             relation = 0;
-        }
-        if (!isUp) {
-            id = 0;
         }
         relation = parseInt(relation);
         list.push({
@@ -1023,7 +1034,7 @@ function delPlanConfig() {
         if (enableEl.is(':checked')) {
             var stateStr = trsData[i]._aData.State;
             if (stateStr != 1) {
-                layer.msg(`序号${i + 1}：${stateStr}的计划不能删除`);
+                layer.msg(`序号${i + 1}：非待下发计划不能删除`);
                 return;
             }
         }
@@ -1176,7 +1187,7 @@ function showPlanModal() {
     $('#planHour').val(0);
     $('#planMinute').val(0);
     $('#addPlanTaskList').empty();
-    new Promise(resolve => planTaskTr(resolve,1)).then(() => $('#showPlanModal').modal('show'));
+    new Promise(resolve => planTaskTr(resolve, 1)).then(() => $('#showPlanModal').modal('show'));
 }
 
 //删除所选计划

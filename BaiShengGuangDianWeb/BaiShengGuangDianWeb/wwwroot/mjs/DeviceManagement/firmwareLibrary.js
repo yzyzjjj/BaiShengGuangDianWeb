@@ -42,6 +42,14 @@ function getFirmwareList() {
             var order = function (data, type, row) {
                 return ++o;
             }
+            var rModel = function (data, type, full, meta) {
+                full.Description = full.Description ? full.Description : "";
+                return full.Description.length > tdShowContentLength
+                    ? full.Description.substr(0, tdShowContentLength) +
+                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
+                    .format(full.Id)
+                    : full.Description;
+            };
             var columns = checkPermission(132) || checkPermission(134)
                 ? [
                     { "data": null, "title": "序号", "render": order },
@@ -49,8 +57,8 @@ function getFirmwareList() {
                     { "data": "FirmwareName", "title": "固件版本名称" },
                     { "data": "VarNumber", "title": "变量数量" },
                     { "data": "FilePath", "title": "程序文件的位置及名称" },
-                    { "data": "Description", "title": "描述" },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": "Description", "title": "描述", "render": rModel },
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -58,32 +66,11 @@ function getFirmwareList() {
                     { "data": "FirmwareName", "title": "固件版本名称" },
                     { "data": "VarNumber", "title": "变量数量" },
                     { "data": "FilePath", "title": "程序文件的位置及名称" },
-                    { "data": "Description", "title": "描述" }
-                ];
-            var rModel = function (data, type, full, meta) {
-                full.Description = full.Description ? full.Description : "";
-                return full.Description.length > tdShowContentLength
-                    ? full.Description.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
-                        .format(full.Id)
-                    : full.Description;
-            };
-            var defs = checkPermission(132) || checkPermission(134)
-                ? [
-                    { "orderable": false, "targets": 6 },
-                    {
-                        "targets": [5],
-                        "render": rModel
-                    }
-                ]
-                : [
-                    {
-                        "targets": [5],
-                        "render": rModel
-                    }
+                    { "data": "Description", "title": "描述", "render": rModel }
                 ];
             $("#firmLibraryList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -91,8 +78,7 @@ function getFirmwareList() {
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

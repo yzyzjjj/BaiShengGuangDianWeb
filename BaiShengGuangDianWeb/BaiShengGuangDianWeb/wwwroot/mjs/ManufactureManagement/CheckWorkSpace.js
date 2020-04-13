@@ -77,7 +77,7 @@ function getCheckTask() {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="showImgModel(\'${data.ImageList}\',${data.Id})" ${state != 8 ? 'disabled' : ''}>查看</button>`;
         }
         $('#checkTaskList').DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -300,7 +300,7 @@ function getCheckList(num, el) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="showDetailModel(${data})">查看</button>`;
         }
         $(el).DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,
@@ -352,7 +352,7 @@ function showDetailModel(id) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="showImgModel(\'${data}\')">查看</button>`;
         }
         $('#showDetailList').DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rtip',
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
             "paging": true,
             "searching": true,

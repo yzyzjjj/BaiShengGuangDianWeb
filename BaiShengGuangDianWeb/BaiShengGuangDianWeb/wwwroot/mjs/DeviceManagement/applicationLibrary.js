@@ -44,23 +44,7 @@ function getApplicationList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(147) || checkPermission(149)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "ApplicationName", "title": "名称" },
-                    { "data": "FilePath", "title": "程序文件的位置及名称" },
-                    { "data": "Description", "title": "描述" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "ApplicationName", "title": "名称" },
-                    { "data": "FilePath", "title": "程序文件的位置及名称" },
-                    { "data": "Description", "title": "描述" }
-                ];
-            var rModel = function(data, type, full, meta) {
+            var rModel = function (data, type, full, meta) {
                 full.Description = full.Description ? full.Description : "";
                 return full.Description.length > tdShowContentLength
                     ? full.Description.substr(0, tdShowContentLength) +
@@ -68,22 +52,25 @@ function getApplicationList() {
                     .format(full.Id)
                     : full.Description;
             };
-            var defs = checkPermission(147) || checkPermission(149)
+            var columns = checkPermission(147) || checkPermission(149)
                 ? [
-                    { "orderable": false, "targets": 5 },
-                    {
-                        "targets": [4],
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ApplicationName", "title": "名称" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述", "render": rModel },
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
-                    {
-                        "targets": [4],
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "ApplicationName", "title": "名称" },
+                    { "data": "FilePath", "title": "程序文件的位置及名称" },
+                    { "data": "Description", "title": "描述", "render": rModel}
                 ];
             $("#applicationList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -91,8 +78,7 @@ function getApplicationList() {
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

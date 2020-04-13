@@ -99,6 +99,7 @@
                     }
                     $("#jsonList")
                         .DataTable({
+                            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                             "destroy": true,
                             "paging": true,
                             "searching": true,
@@ -222,6 +223,7 @@ function getScriptVersionAllList(type) {
                 ];
             $("#scriptVersionList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -511,6 +513,7 @@ function getScriptVersionDetailList() {
         }
         $("#valList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "pagingType": "full",
                 "destroy": true,
                 "paging": true,
@@ -538,6 +541,7 @@ function getScriptVersionDetailList() {
         }
         $("#inList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "pagingType": "full",
                 "destroy": true,
                 "paging": true,
@@ -565,6 +569,7 @@ function getScriptVersionDetailList() {
         }
         $("#outList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "pagingType": "full",
                 "destroy": true,
                 "paging": true,
@@ -670,7 +675,7 @@ function reset() {
             var tr = ('<tr id="av{0}">' +
                 '<td><label class="control-label" id="avx{0}">{0}</label></td>' +
                 '<td><input class="form-control" id="avb{0}" maxlength="20"></td>' +
-                '<td><input class="form-control" oninput="value=value.replace(/[^\\d]/g,\'\')" id="avd{0}" maxlength="5"></td>' +
+                '<td><input class="form-control" oninput="onInput(this, 5, 0)" onblur="onInputEnd(this)" id="avd{0}"></td>' +
                 '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
                 '</tr>').format(1);
             $("#avBody").append(tr);
@@ -916,6 +921,7 @@ function showUsuallyDictionary() {
         };
         $("#udtList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -927,7 +933,7 @@ function showUsuallyDictionary() {
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "变量用途" },
-                    { "data": null, "title": "变量地址", "render": op, "sClass": "text-left" },
+                    { "data": null, "title": "变量地址", "render": op, "sClass": "text-left" }
                 ],
                 "drawCallback": function (settings, json) {
                     var msl = $(".mSel");
@@ -1102,7 +1108,7 @@ function showUsuallyVariableTypeModel() {
                     { "data": "VariableName", "title": "变量名称" },
                     { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
                     { "data": "StatisticType", "title": "统计字段", "render": statistic },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -1110,13 +1116,9 @@ function showUsuallyVariableTypeModel() {
                     { "data": "IsDetail", "title": "是否为设备详情", "render": yesNo },
                     { "data": "StatisticType", "title": "统计字段", "render": statistic }
                 ];
-            var defs = checkPermission(160) || checkPermission(161)
-                ? [
-                    { "orderable": false, "targets": 4 }
-                ]
-                : [];
             $("#usuallyVariableTypeList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -1125,8 +1127,7 @@ function showUsuallyVariableTypeModel() {
                     "aaSorting": [0, "asc"],
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
                     "iDisplayLength": 15, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
             $("#usuallyVariableTypeModel").modal("show");
 

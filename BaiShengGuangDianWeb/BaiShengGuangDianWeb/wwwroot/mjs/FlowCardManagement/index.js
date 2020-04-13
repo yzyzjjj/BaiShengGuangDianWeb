@@ -428,7 +428,7 @@ function getFlowCardList() {
             }
             var columns = checkPermission(207) || checkPermission(208) || checkPermission(211)
                 ? [
-                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "CreateTime", "title": "创建时间" },
@@ -456,29 +456,19 @@ function getFlowCardList() {
                     { "data": "QualifiedNumber", "title": "当前合格数", "sClass": "text-info" },
                     { "data": "Code", "title": "当前机台号", "sClass": "text-info" }
                 ];
-            var aaSorting = checkPermission(207) || checkPermission(208) || checkPermission(211)
-                ? [[1, "asc"]]
-                : [[0, "asc"]];
-            var defs = checkPermission(207) || checkPermission(208) || checkPermission(211)
-                ? [
-                    { "orderable": false, "targets": 0 }
-                ]
-                : "";
             $("#flowCardList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
-                    //"deferRender": true,
                     "autoWidth": true,
-                    //"paginationType": "full_numbers", 
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": aaSorting,
+                    "aaSorting": [[checkPermission(207) || checkPermission(208) || checkPermission(211) ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
             $('#flowCardList tbody').on('focus', 'tr', function () {
                 trOne = this;
@@ -923,11 +913,11 @@ function showChangeFlowCard(type, flowCardName) {
             }
             //合格数
             var qualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.QualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c6f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)">'.format(o, data.QualifiedNumber);
             }
             //不合格数
             var unqualifiedNumber = function (data, type, row) {
-                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="9">'.format(o, data.UnqualifiedNumber);
+                return '<input class="can1 can2 form-control" id="c7f{0}" style="width:100%" value="{1}" oValue="{1}" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this)">'.format(o, data.UnqualifiedNumber);
             }
             //机台号
             var seDeviceId = option.format(0, "无");
@@ -957,6 +947,7 @@ function showChangeFlowCard(type, flowCardName) {
             }
             $("#gxList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "bSort": false,
                     "paging": false,// 是否显示分页
@@ -981,7 +972,7 @@ function showChangeFlowCard(type, flowCardName) {
                         { "data": null, "title": "不合格数", "render": unqualifiedNumber },
                         { "data": null, "title": "成厚范围(<span class=\"text-info\">例:0.2～0.3mm</span>)", "render": qualifiedRange },
                         { "data": null, "title": "成厚均值(<span class=\"text-info\">例:0.25</span>)", "render": qualifiedMode },
-                        { "data": null, "title": "操作", "render": op },
+                        { "data": null, "title": "操作", "render": op }
                     ],
                     "drawCallback": function (settings, json) {
                         $(".ms2").select2();
@@ -1376,7 +1367,7 @@ function getProductionProcessList() {
             }
             var columns = checkPermission218 || checkPermission221
                 ? [
-                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
@@ -1400,25 +1391,19 @@ function getProductionProcessList() {
                     { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
                     { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
                 ];
-            var aaSorting = checkPermission218 || checkPermission221 ? [[1, "asc"]] : [[0, "asc"]];
-            var defs = checkPermission218 || checkPermission221
-                ? [
-                    { "orderable": false, "targets": 0 }
-                ]
-                : "";
             $("#productionProcessList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
                     "autoWidth": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": aaSorting,
+                    "aaSorting": [[checkPermission218 || checkPermission221 ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }
@@ -1974,7 +1959,7 @@ function getRawMateriaList() {
             }
             var columns = checkPermission(235) || checkPermission(239)
                 ? [
-                    { "data": null, "title": "操作", "render": op },
+                    { "data": null, "title": "操作", "render": op, "orderable": false},
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
@@ -1984,27 +1969,21 @@ function getRawMateriaList() {
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
-                    { "data": "RawMateriaName", "title": "原料批号" },
+                    { "data": "RawMateriaName", "title": "原料批号" }
                 ];
-            var aaSorting = checkPermission(235) || checkPermission(239) ? [[1, "asc"]] : [[0, "asc"]];
-            var defs = checkPermission(235) || checkPermission(239)
-                ? [
-                    { "orderable": false, "targets": 0 }
-                ]
-                : "";
             $("#rawMateriaList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
                     "autoWidth": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": aaSorting,
+                    "aaSorting": [[checkPermission(235) || checkPermission(239) ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

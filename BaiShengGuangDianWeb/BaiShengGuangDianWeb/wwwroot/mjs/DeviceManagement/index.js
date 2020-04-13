@@ -155,8 +155,17 @@ function getDeviceList() {
             var order = function (data, type, row, meta) {
                 return meta.row + 1;
             }
+            var rModal = function(data, type, meta) {
+                var placeName = data.SiteName + data.RegionDescription;
+                return ("" + placeName).length > tdShowContentLength
+                    ? placeName.substr(0, tdShowContentLength) +
+                    ' <a href = \"javascript:showPlaceNameModel({0})\">...</a> '
+                    .format(data.Id)
+                    : placeName;
+            };
             $("#deviceList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -166,29 +175,14 @@ function getDeviceList() {
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
-                        { "data": "Code", "title": "机台号" },
+                        { "data": "Code", "title": "机台号", "type": "html-percent" },
                         { "data": null, "title": "设备型号", "render": modelName },
-                        { "data": null, "title": "摆放位置" },
+                        { "data": null, "title": "摆放位置", "render": rModal},
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorName", "title": "管理员" },
                         { "data": null, "title": "运行状态", "render": state },
                         { "data": null, "title": "设备状态", "render": deviceState },
-                        { "data": null, "title": "操作", "render": op }
-                    ],
-                    "columnDefs": [
-                        { "orderable": false, "targets": 8 },
-                        {
-                            "targets": [3],
-                            "render": function (data, type, meta) {
-                                var placeName = data.SiteName + data.RegionDescription;
-                                return ("" + placeName).length > tdShowContentLength
-                                    ? placeName.substr(0, tdShowContentLength) +
-                                    ' <a href = \"javascript:showPlaceNameModel({0})\">...</a> '
-                                        .format(data.Id)
-                                    : placeName;
-                            }
-                        },
-                        { "type": "html-percent", "targets": [2] }
+                        { "data": null, "title": "操作", "render": op, "orderable": false}
                     ]
                 });
         });

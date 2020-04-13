@@ -44,50 +44,33 @@ function getSiteList() {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(127) || checkPermission(129)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "SiteName", "title": "车间名" },
-                    { "data": "RegionDescription", "title": "场地位置" },
-                    { "data": "Manager", "title": "管理人" },
-                    { "data": null, "title": "操作", "render": op }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "SiteName", "title": "车间名" },
-                    { "data": "RegionDescription", "title": "场地位置" },
-                    { "data": "Manager", "title": "管理人" }
-                ];
             var rModel = function (data, type, full, meta) {
                 full.RegionDescription = full.RegionDescription ? full.RegionDescription : "";
                 return full.RegionDescription.length > tdShowContentLength
                     ? full.RegionDescription.substr(0, tdShowContentLength) +
                     '<a href = \"javascript:showRegionDescriptionModel({0})\">...</a> '
-                        .format(full.Id)
+                    .format(full.Id)
                     : full.RegionDescription;
             };
-            var defs = checkPermission(127) || checkPermission(129)
+            var columns = checkPermission(127) || checkPermission(129)
                 ? [
-                    { "orderable": false, "targets": 5 },
-                    { "type": "html-percent", "targets": [4] },
-                    {
-                        "targets": [3],
-                        "type": "html-percent",
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "SiteName", "title": "车间名" },
+                    { "data": "RegionDescription", "title": "场地位置", "type": "html-percent", "render": rModel },
+                    { "data": "Manager", "title": "管理人", "type": "html-percent" },
+                    { "data": null, "title": "操作", "render": op, "orderable": false}
                 ]
                 : [
-                    { "type": "html-percent", "targets": [4] },
-                    {
-                        "targets": [3],
-                        "type": "html-percent",
-                        "render": rModel
-                    }
+                    { "data": null, "title": "序号", "render": order },
+                    { "data": "Id", "title": "Id", "bVisible": false },
+                    { "data": "SiteName", "title": "车间名" },
+                    { "data": "RegionDescription", "title": "场地位置", "type": "html-percent", "render": rModel },
+                    { "data": "Manager", "title": "管理人", "type": "html-percent" }
                 ];
             $("#siteList")
                 .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                     "destroy": true,
                     "paging": true,
                     "searching": true,
@@ -95,8 +78,7 @@ function getSiteList() {
                     "data": ret.datas,
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "columnDefs": defs
+                    "columns": columns
                 });
         });
 }

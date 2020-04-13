@@ -86,7 +86,7 @@ function remindIntervalOption() {
     var op = '<div style="display:flex;justify-content:center;align-items:center">' +
         '<input type="radio" class="icb_minimal radio1 radioSelect icb_check" name="{2}">' +
         '<span>设置1：</span>' +
-        '<input class="form-control numTime radioOp1" maxlength="2" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:50px" value="1">' +
+        '<input class="form-control numTime radioOp1" oninput="onInput(this, 2, 0)" onblur="onInputEnd(this)" style="width:50px" value="1">' +
         '<select class="form-control timeSelect radioOp1" style="width:60px"><option value="0">日</option><option value="1">月</option></select>' +
         '<select class="form-control normalHour radioOp1" style="width:80px">{0}</select></div>' +
         '<div style="display:flex;justify-content:center;align-items:center">' +
@@ -152,10 +152,10 @@ function getSpotCheckList() {
             return '<input type="checkbox" class="icb_minimal remind icb_check prominent">';
         }
         var min = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn min numVal hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn min numVal hidden" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px" value=${data}>`;
         };
         var max = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn max numVal hidden" maxlength="10" oninput="value=value.replace(/[^\\d]/g,\'\')" style="width:80px" value=${data}>`;
+            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn max numVal hidden" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px" value=${data}>`;
         };
         var unit = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn unit hidden" maxlength="5" style="width:80px" value=${data}>`;
@@ -200,6 +200,7 @@ function getSpotCheckList() {
         }
         $("#spotCheckList")
             .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -209,7 +210,7 @@ function getSpotCheckList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Item", "title": "名称", "render": item },
                     { "data": "Enable", "title": "启用", "render": using },
@@ -220,9 +221,6 @@ function getSpotCheckList() {
                     { "data": "Reference", "title": "参考标准", "render": reference },
                     { "data": "Remarks", "title": "备注", "render": remarks },
                     { "data": null, "title": "提醒间隔", "render": remindInterval }
-                ],
-                "columnDefs": [
-                    { "orderable": false, "targets": 0 }
                 ],
                 "createdRow": function (row, data, index) {
                     _spotCheckBodyRow++;
@@ -376,8 +374,8 @@ function setSpotCheckOption(i) {
         '<td><input type="text" class="form-control text-center item" maxlength="10" style="width:170px"></td>' +
         '<td><input type="checkbox" class="icb_minimal using prominent"></td>' +
         '<td><input type="checkbox" class="icb_minimal remind prominent"></td>' +
-        '<td><input type="text" class="form-control text-center min numVal" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10" style="width:80px"></td>' +
-        '<td><input type="text" class="form-control text-center max numVal" value="0" oninput="value=value.replace(/[^\\d]/g,\'\')" maxlength="10" style="width:80px"></td>' +
+        '<td><input type="text" class="form-control text-center min numVal" value="0" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px"></td>' +
+        '<td><input type="text" class="form-control text-center max numVal" value="0" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px"></td>' +
         '<td><input type="text" class="form-control text-center unit" maxlength="5" style="width:80px"></td>' +
         '<td><textarea class="form-control reference" maxlength="500" style="resize:vertical;width:400px"></textarea></td>' +
         '<td><textarea class="form-control remarks" maxlength="500" style="resize:vertical;width:400px"></textarea></td>' +
