@@ -132,6 +132,42 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             return result;
         }
 
+        [HttpPost("NumberLogin")]
+        [AllowAnonymous]
+        public object NumberLogin()
+        {
+            var param = Request.GetRequestParams();
+            var loginBody = new LoginBody
+            {
+                Number = param.GetValue("number"),
+            };
+            var accountInfo = AccountHelper.GetAccountInfoByNumber(loginBody.Number);
+            if (accountInfo == null)
+            {
+                return Result.GenError<Result>(Error.NumberNotExist);
+            }
+
+            var token = TokenHelper.CreateJwtToken(accountInfo);
+            CookieHelper.SetCookie("token", token, Response);
+            CookieHelper.SetCookie("per", accountInfo.PermissionsList.Join(), Response);
+            //if (bool.TryParse(loginBody.RememberMe, out var rm) && rm)
+            //{
+            //    var exp = 3600 * 24 * 7;
+            //    CookieHelper.SetCookie("n", loginBody.Account, Response, exp);
+            //    CookieHelper.SetCookie("p", loginBody.Password, Response, exp);
+            //}
+            //else
+            //{
+            //    CookieHelper.DelCookie("n", Response);
+            //    CookieHelper.DelCookie("p", Response);
+            //}
+            OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
+            var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
+            var result = new DataResult();
+            result.datas.AddRange(pages);
+            return result;
+        }
+
         [HttpPost("Logout")]
         [AllowAnonymous]
         public Result Logout()

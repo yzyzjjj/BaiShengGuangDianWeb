@@ -87,18 +87,6 @@ namespace BaiShengGuangDianWeb.Base.Helper
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
             return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
-        /// <summary>
-        /// 根据账号获取账号信息  包括已删除
-        /// </summary>
-        /// <param name="account">账号</param>
-        /// <returns></returns>
-        public static AccountInfo GetAccountInfoAll(string account)
-        {
-            var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
-                      $"WHERE a.Account = @account AND b.IsDeleted = 0;";
-            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { account }).FirstOrDefault();
-            return info == null || info.Account.IsNullOrEmpty() ? null : info;
-        }
 
         /// <summary>
         /// 根据accountId 批量获取账号信息
@@ -113,15 +101,16 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
 
         /// <summary>
-        /// 根据code获取账号信息
+        /// 根据number获取账号信息
         /// </summary>
-        /// <param name="code"></param>
+        /// <param name="number"></param>
+        /// <param name="isAll">是否包含已删除</param>
         /// <returns></returns>
-        public static AccountInfo GetAccountInfoByCode(string code)
+        public static AccountInfo GetAccountInfoByNumber(string number, bool isAll = false)
         {
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
-                      $"WHERE a.Code = @code AND a.IsDeleted = 0 AND b.IsDeleted = 0;";
-            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { code }).FirstOrDefault();
+                      $"WHERE a.Number = @number {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
+            var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { number }).FirstOrDefault();
             return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
 

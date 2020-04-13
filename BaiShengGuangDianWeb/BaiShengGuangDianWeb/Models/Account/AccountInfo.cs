@@ -2,7 +2,6 @@
 using ServiceStack;
 using System.Collections.Generic;
 using System.Linq;
-using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Models.Account
 {
@@ -12,6 +11,7 @@ namespace BaiShengGuangDianWeb.Models.Account
         /// 账号Id
         /// </summary>
         public int Id { get; set; }
+        public string Number { get; set; }
         public string Account { get; set; }
         [JsonIgnore]
         public string Password { get; set; }
