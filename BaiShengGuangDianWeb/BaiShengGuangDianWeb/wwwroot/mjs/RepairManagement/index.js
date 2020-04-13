@@ -38,6 +38,10 @@ function pageReady() {
         var v = $(this).val();
         $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
     });
+    $("#faultType").on("change", function () {
+        var v = $(this).val();
+        $("#faultDefaultDesc").val(_faultTypeData[v].FaultDescription);
+    });
     getWorkerSelect();
     getFaultTypeSelect();
     var nowMonth = getMonthScope();
@@ -165,12 +169,19 @@ function pageReady() {
         var phoneTd = $(this).parents('td').next();
         phoneTd.text(phone);
     });
-    $("#serLogDevSite").select2({
+    $("#serLogDevSite,#devSite").select2({
         allowClear: true,
         placeholder: "请选择(可不选)"
     });
+    $("#faultCode").select2({
+        allowClear: true,
+        placeholder: "请选择"
+    });
     $("#serLogWorkshop").on("change", function (e) {
-        setWorkSiteSelect();
+        setWorkSiteSelect('#serLogWorkshop','#serLogDevSite');
+    });
+    $("#workshop").on("change", function (e) {
+        setWorkSiteSelect('#workshop', '#devSite');
     });
 }
 
@@ -1053,11 +1064,11 @@ function getDeviceCode(resolve) {
             return;
         }
         var list = ret.datas;
-        var op = '<option value="{0}">{1}</option>';
+        var op = '<option value="{0}" admin="{2}">{1}</option>';
         var ops = '';
         for (var i = 0; i < list.length; i++) {
             var d = list[i];
-            ops += op.format(d.Id, d.Code);
+            ops += op.format(d.Id, d.Code, d.Administrator);
         }
         if (resolve != null) {
             resolve(ops);
@@ -1094,7 +1105,7 @@ function getWorkShop(resolve) {
 
 var _siteData = null;
 //获取场地
-function getSite() {
+function getSite(workEl, siteEl) {
     var opType = 125;
     if (!checkPermission(opType)) {
         layer.msg("没有权限");
@@ -1115,14 +1126,14 @@ function getSite() {
                 ? _siteData[d.SiteName].push(d.RegionDescription)
                 : _siteData[d.SiteName] = [d.RegionDescription];
         }
-        setWorkSiteSelect();
+        setWorkSiteSelect(workEl, siteEl);
     }, 0);
 }
 
 //车间对应场地
-function setWorkSiteSelect() {
-    $('#serLogDevSite').empty();
-    var workshop = $("#serLogWorkshop").val();
+function setWorkSiteSelect(workEl,siteEl) {
+    $(siteEl).empty();
+    var workshop = $(workEl).val();
     if (isStrEmptyOrUndefined(workshop)) {
         return;
     }
@@ -1132,8 +1143,8 @@ function setWorkSiteSelect() {
         var d = sData[i];
         ops += `<option value=${d}>${d}</option>`;
     }
-    $('#serLogDevSite').append(ops);
-    $("#serLogDevSite").val(0).trigger('change');
+    $(siteEl).append(ops);
+    $(siteEl).val('').trigger('change');
 }
 
 //添加修改维修记录弹窗
@@ -1247,10 +1258,170 @@ function showServiceLogModal(id, isDel, isStatistics) {
                 placeholder: "请选择"
             });
             $("#serLogWorkshop").append(e[1]);
-            getSite();
+            getSite('#serLogWorkshop', '#serLogDevSite');
         });
     }
     $('#showServiceLogModal').modal('show');
+}
+
+//故障报修弹窗
+var _updateFirmwareUpload = null;
+function showFaultModel() {
+    var deviceCode = new Promise(resolve => getDeviceCode(resolve));
+    var workShop = new Promise(resolve => getWorkShop(resolve));
+    Promise.all([deviceCode, workShop]).then(e => {
+        $("#faultCode,#workshop").empty();
+        $("#faultCode").append(e[0]);
+        $("#faultCode").val("").trigger("change");
+        $("#workshop").append(e[1]);
+        getSite('#workshop','#devSite');
+    });
+    $('#faultType').empty().append(_faultType).trigger('change');
+    $("#faultOther").val("");
+    $("#proposer").val(getCookieTokenInfo().name);
+    $("#faultDate").val(getDate()).datepicker('update');
+    $("#faultTime").val(getTime()).timepicker('setTime', getTime());
+    if (_updateFirmwareUpload == null) {
+        _updateFirmwareUpload = initFileInputMultiple("addImg", fileEnum.FaultDevice);
+    }
+    $("#addImg").fileinput('clear');
+    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
+    $("#faultDesc").val("");
+    $("#faultModel").modal("show");
+}
+
+//故障上报
+function reportFault() {
+    var opType = 422;
+    if (!checkPermission(opType)) {
+        layer.msg("没有权限");
+        return;
+    }
+    var faultCode = $("#faultCode").val();
+    var faultOther = $("#faultOther").val().trim();
+    if (isStrEmptyOrUndefined(faultCode) && isStrEmptyOrUndefined(faultOther)) {
+        layer.msg('请选择或输入设备');
+        return;
+    }
+    var i, len;
+    //机台号
+    if (!isStrEmptyOrUndefined(faultCode) && !isStrEmptyOrUndefined(faultOther)) {
+        for (i = 0, len = faultCode.length; i < len; i++) {
+            if (faultOther == faultCode[i]) {
+                layer.msg('其他机台号已选择，请重新输入');
+                return;
+            }
+        }
+    }
+    if (!isStrEmptyOrUndefined(faultOther)) {
+        var workshop = $('#workshop').val();
+        if (isStrEmptyOrUndefined(workshop)) {
+            layer.msg('请选择车间');
+            return;
+        } else {
+            var site = $('#devSite').val();
+            faultOther = `${workshop}-${site ? site + '-' : ''}${faultOther}`;
+        }
+    }
+    //报修人
+    var proposer = $("#proposer").val().trim();
+    if (isStrEmptyOrUndefined(proposer)) {
+        layer.msg('报修人不能为空');
+        return;
+    }
+    //故障时间
+    var faultDate = $("#faultDate").val();
+    var faultTime = $("#faultTime").val();
+    var time = `${faultDate} ${faultTime}`;
+    if (exceedTime(time)) {
+        layer.msg("所选时间不能大于当前时间");
+        return;
+    }
+    //故障类型
+    var faultType = $("#faultType").val();
+    if (isStrEmptyOrUndefined(faultType)) {
+        layer.msg("请选择故障类型");
+        return;
+    }
+    var faultDesc = $("#faultDesc").val().trim();
+    var faults = [];
+    var admins = [];
+    var list = {
+        //故障时间
+        FaultTime: time,
+        //报修人
+        Proposer: proposer,
+        //故障描述
+        FaultDescription: faultDesc,
+        //故障类型
+        FaultTypeId: faultType
+    }
+    if (!isStrEmptyOrUndefined(faultOther)) {
+        var other = $.extend({}, list);
+        other.DeviceCode = faultOther;
+        faults.push(other);
+    }
+    if (faultCode != null) {
+        for (i = 0, len = faultCode.length; i < len; i++) {
+            var code = faultCode[i];
+            list.DeviceId = faultCode[i];
+            faults.push($.extend({}, list));
+            var admin = $("#faultCode option:selected").attr("admin");
+            admins.push({
+                Code: code,
+                Admin: admin
+            });
+        }
+    }
+    var imgJson = function (resolve) {
+        var imgData = $('#addImg').val();
+        if (!isStrEmptyOrUndefined(imgData)) {
+            $('#addImg').fileinput("upload");
+            fileCallBack[fileEnum.FaultDevice] = (fileRet) => {
+                if (fileRet.errno == 0) {
+                    var img = [];
+                    for (var key in fileRet.data) {
+                        img.push(fileRet.data[key].newName);
+                    }
+                    img = JSON.stringify(img);
+                    for (i = 0, len = faults.length; i < len; i++) {
+                        var d = faults[i];
+                        d.Images = img;
+                    }
+                    resolve('success');
+                }
+            };
+        } else {
+            resolve('success');
+        }
+    }
+    new Promise(function (resolve) {
+        imgJson(resolve);
+    }).then(function () {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(faults);
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                $("#faultModel").modal("hide");
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getFaultDeviceList();
+                    for (i = 0, len = admins.length; i < len; i++) {
+                        var admin = admins[i];
+                        var info = {
+                            ChatEnum: chatEnum.FaultDevice,
+                            Message: {
+                                Admin: admin.Admin,
+                                Code: admin.Code
+                            }
+                        }
+                        //调用服务器方法
+                        hubConnection.invoke('SendMsg', info);
+                    }
+                }
+            });
+    });
 }
 
 //添加修改维修记录
@@ -1926,6 +2097,7 @@ function deleteFaultType(id, faultTypeDesc) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getFaultTypeList();
+                    getFaultTypeSelect();
                 }
             });
     }
@@ -1974,6 +2146,7 @@ function addFaultType() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getFaultTypeList();
+                    getFaultTypeSelect();
                 }
             });
     }
@@ -2015,7 +2188,6 @@ function updateFaultType() {
         layer.msg("没有权限");
         return;
     }
-
     var update = true;
     var updateFaultTypeName = $("#updateFaultTypeName").val().trim();
     if (isStrEmptyOrUndefined(updateFaultTypeName)) {
@@ -2042,6 +2214,7 @@ function updateFaultType() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    getFaultTypeList();
                     getFaultTypeSelect();
                 }
             });

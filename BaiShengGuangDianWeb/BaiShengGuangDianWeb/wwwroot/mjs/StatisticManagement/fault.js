@@ -12,33 +12,21 @@
     getWorkShopList();
     getDeviceList(1);
     getDeviceList(2);
-    $("#startDate,#endDate").val(getDate()).datepicker('update');
-    $("#selectDay,#conDay").val(getDate()).datepicker('update');
-    $("#startDate1,#endDate1").val(getDate()).datepicker('update');
-    $("#startDateDev,#endDateDev").val(getDate()).datepicker('update');
-    $("#startDayTime,#endDayTime").val(getDate()).datepicker('update');
+    var nowMonth = getMonthScope();
+    $("#startDate,#selectDay,#startDate1,#startDateDev,#startDayTime").val(nowMonth.start).datepicker('update');
+    $("#endDate,#conDay,#endDate1,#endDateDev,#endDayTime").val(nowMonth.end).datepicker('update');
     var hourTime = new Date().format("hh-00-00");
     $("#startTime").val(hourTime).timepicker('setTime', hourTime);
     $("#endTime").val(hourTime).timepicker('setTime', hourTime);
-    $("#startTime").one("focus", function () {
-        var timeTop = $(".bootstrap-timepicker-widget")[0];
+    $("#startTime,#endTime").one("focus", function () {
+        var timeTop = $(".bootstrap-timepicker-widget").eq(0);
         var time = $(timeTop).find("table tbody tr");
-        $(time[0]).find("td")[2].remove();
-        $(time[0]).find("td")[3].remove();
-        $(time[1]).find("td input")[1].setAttribute("disabled", "disabled");
-        $(time[1]).find("td input")[2].setAttribute("disabled", "disabled");
-        $(time[2]).find("td")[2].remove();
-        $(time[2]).find("td")[3].remove();
-    });
-    $("#endTime").one("focus", function () {
-        var timeTop = $(".bootstrap-timepicker-widget")[0];
-        var time = $(timeTop).find("table tbody tr");
-        $(time[0]).find("td")[2].remove();
-        $(time[0]).find("td")[3].remove();
-        $(time[1]).find("td input")[1].setAttribute("disabled", "disabled");
-        $(time[1]).find("td input")[2].setAttribute("disabled", "disabled");
-        $(time[2]).find("td")[2].remove();
-        $(time[2]).find("td")[3].remove();
+        time.eq(0).find("td").eq(2).remove();
+        time.eq(0).find("td").eq(3).remove();
+        time.eq(1).find("td input").eq(1).prop("disabled", true);
+        time.eq(1).find("td input").eq(2).prop("disabled", true);
+        time.eq(2).find("td").eq(2).remove();
+        time.eq(2).find("td").eq(3).remove();
     });
     $(".form_month").val(getNowMonth()).datepicker("update");
     $(".week").val(getWeek()).datepicker({

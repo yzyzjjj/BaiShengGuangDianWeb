@@ -13,8 +13,14 @@
     <script src="~/mminjs/StatisticManagement/trend.min.js"></script>
     <script src="~/lib/echarts/echarts.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>数据统计</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content">
-    <h2 class="text-center">趋势图统计</h2>
     <div class="row">
         <div class="col-md-3">
             <div class="box box-primary">
@@ -53,9 +59,6 @@
                         <div class="form-group">
                             <label class="control-label" for="inputFlowCard">流程卡号：</label>
                             <div style="display: flex; align-items: center">
-                                <span class="iconfont icon-saoyisao" id="scanning" style="font-size:30px;cursor:pointer"></span>
-                                <span class="glyphicon glyphicon-upload" id="upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
-                                <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
                                 <input type="tel" class="form-control" id="inputFlowCard" autocomplete="off" placeholder="请输入流程卡号" onclick="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis:140px">
                                 <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left:3px">查询</button>
                                 <button type="button" id="flowCardEmpty" class="btn btn-success" style="margin-left:3px">清空</button><br>

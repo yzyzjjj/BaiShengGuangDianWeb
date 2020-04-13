@@ -9,8 +9,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/_6sManagement/set.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>6s检查</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content ">
-    <h2 class="text-center">6s检查设置</h2>
     <div class="box box-primary">
         <div class="box-header with-border">
             <div class="form-group">
@@ -55,16 +61,16 @@
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
-                        <td>选择</td>
-                        <td>序号</td>
-                        <td>显示顺序</td>
-                        <td>检查项目</td>
-                        <td>启用</td>
-                        <td>标准分</td>
-                        <td>要求及目标</td>
-                        <td>频次</td>
-                        <td>负责人</td>
-                        <td>删除</td>
+                        <th>选择</th>
+                        <th>序号</th>
+                        <th>显示顺序</th>
+                        <th>检查项目</th>
+                        <th>启用</th>
+                        <th>标准分</th>
+                        <th>要求及目标</th>
+                        <th>频次</th>
+                        <th>负责人</th>
+                        <th>删除</th>
                     </tr>
                 </thead>
                 <tbody id="itemList"></tbody>

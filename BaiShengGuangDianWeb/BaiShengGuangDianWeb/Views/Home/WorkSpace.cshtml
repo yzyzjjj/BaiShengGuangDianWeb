@@ -10,14 +10,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/Home/workSpace.min.js"></script>
 </environment>
-<section class="content-header">
-    <h1>
-        @ViewBag.Title
-        <button type="button" class="btn btn-warning pull-right btn-sm" style="margin-left: 10px" onclick="showMaintainerModel()">维修工名单</button>
-        <button type="button" class="btn btn-success pull-right btn-sm" style="margin-left: 10px" onclick="showLogModel()">报修记录</button>
-        <button type="button" class="btn btn-danger pull-right btn-sm" style="margin-left: 10px" onclick="showFaultModel()">故障报修</button>
-        <button type="button" class="btn btn-primary pull-right btn-sm" onclick="showInputReport()">报表输入</button>
-    </h1>
+<section class="content-header flexStyle" style="justify-content: space-between;flex-wrap: wrap">
+    <h1>@ViewBag.Title</h1>
+    <div class="flexStyle">
+        <button type="button" class="btn btn-primary btn-sm" onclick="showInputReport()">报表输入</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" style="margin-left: 10px">故障报修</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="showLogModel()" style="margin-left: 10px">报修记录</button>
+        <button type="button" class="btn btn-warning btn-sm" onclick="showMaintainerModel()" style="margin-left: 10px">维修工名单</button>
+    </div>
 </section>
 <section class="content ">
     <div class="row">
@@ -39,9 +39,6 @@
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div style="display: flex; align-items: center">
-                            <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('flowCard')"></span>
-                            <span class="glyphicon glyphicon-upload upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
-                            <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
                             <input type="tel" class="form-control" id="flowCard" value="" autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left: 3px">查询</button>
                             <button type="button" id="flowCardEmpty" class="btn btn-success" style="margin-left: 3px">清空</button>
@@ -160,7 +157,7 @@
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap" for="faultType"><span class="text-red">* </span>故障类型：</label>
                         <select class="ms2 form-control" style="width: 200px" id="faultType"></select>
-                        <a class="text-nowrap" style="text-decoration: underline" href='javascript:void(0);' onclick="getUsuallyFaultList()">常见故障及解决方法</a>
+                        <a class="text-nowrap" style="text-decoration: underline" href='javascript:getUsuallyFaultList();'>常见故障及解决方法</a>
                     </div>
                     <div class="form-group">
                         <label class="control-label text-nowrap" for="faultDefaultDesc">故障描述：</label>
@@ -240,8 +237,6 @@
                     <div class="form-group">
                         <label class="control-label">流程卡号：</label>
                         <div style="display: flex; align-items: center">
-                            <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('rpFlowCard')"></span>
-                            <span class="glyphicon glyphicon-upload upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
                             <input type="tel" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
                             <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()" style="margin-left: 3px">查询</button>
                             <button type="button" class="btn btn-success" onclick="clearRpFlowCard()" style="margin-left: 3px">清空</button><br>
