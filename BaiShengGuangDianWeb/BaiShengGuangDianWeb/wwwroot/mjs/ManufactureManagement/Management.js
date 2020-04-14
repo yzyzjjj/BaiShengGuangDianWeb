@@ -233,7 +233,7 @@ function getProcessor(resolve) {
         var options = '';
         for (var i = 0; i < len; i++) {
             var d = _processor[i];
-            options += option.format(d.ProcessorId, d.Processor);
+            options += option.format(d.Id, d.Processor);
         }
         if (resolve == null) {
             $('#processorSelect').empty();

@@ -83,8 +83,8 @@
                 $("#account").trigger('focus');
             } else {
                 var password = $("#password").val();
-                if (password.indexOf(',,') != -1) {
-                    $("#account").val(password);
+                if (password.indexOf(',') != -1) {
+                    $("#account").val(`${password},`);
                 }
             }
         }
