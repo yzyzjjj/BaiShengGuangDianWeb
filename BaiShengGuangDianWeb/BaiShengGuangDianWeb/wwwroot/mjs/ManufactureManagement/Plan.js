@@ -5,6 +5,9 @@
     var nowMonth = getMonthScope();
     $("#startTime").val(nowMonth.start).datepicker('update');
     $("#endTime").val(nowMonth.end).datepicker('update');
+    window.onload = () => {
+        $("#startTime,#endTime").removeAttr("readonly");
+    }
     $('#planConfigList').on('ifChanged', '.isEnable', function () {
         var tr = $(this).parents('tr');
         var v = $(this).val();
@@ -326,7 +329,7 @@ function getTaskState() {
         $('#selectState').empty();
         var list = ret.datas;
         var option = '<option value="{0}">{1}</option>';
-        var options = '<option value=0>所有状态</option>';
+        var options = '<option value="0">所有状态</option>';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.State);
@@ -415,27 +418,21 @@ function getPlanConfig() {
         layer.msg('请选择状态');
         return;
     }
+    var list = {
+        state: stateId,
+        menu: false
+    }
     var startTime = $('#startTime').val();
-    if (isStrEmptyOrUndefined(startTime)) {
-        layer.msg("请选择开始时间");
-        return;
+    if (!isStrEmptyOrUndefined(startTime)) {
+        list.sTime = `${startTime} 00:00:00`;
     }
     var endTime = $('#endTime').val();
-    if (isStrEmptyOrUndefined(endTime)) {
-        layer.msg("请选择结束时间");
-        return;
-    }
-    if (comTimeDay(startTime, endTime)) {
-        return;
+    if (!isStrEmptyOrUndefined(endTime)) {
+        list.eTime = `${endTime} 23:59:59`;
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({
-        state: stateId,
-        sTime: startTime,
-        eTime: endTime,
-        menu: false
-    });
+    data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);

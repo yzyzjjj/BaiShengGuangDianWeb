@@ -12,7 +12,9 @@
     $("#add_perDiv").click(function (e) {
         var addRole = $("#addRole").val();
         addRole = addRole == null ? "" : addRole.join();
-        getOtherPermission("add_per_body", addRole, null);
+        if (!isStrEmptyOrUndefined(addRole)) {
+            getOtherPermission("add_per_body", addRole, null);
+        }
     });
 
 
@@ -85,6 +87,7 @@ function getUsersList() {
                     [
                         { "data": "id", "title": "id", "render": order },
                         { "data": "account", "title": "用户名" },
+                        { "data": "number", "title": "编号" },
                         { "data": "name", "title": "姓名" },
                         { "data": "roleName", "title": "角色" },
                         { "data": "phone", "title": "手机号" },
@@ -184,7 +187,7 @@ function showAddUserModal(type = 0) {
                     html += option.format(d.id, d.name);
                 }
                 $("#addRole").append(html);
-                getOtherPermission("add_per_body", "", null);
+                //getOtherPermission("add_per_body", "", null);
             });
     });
     var opType = 100;

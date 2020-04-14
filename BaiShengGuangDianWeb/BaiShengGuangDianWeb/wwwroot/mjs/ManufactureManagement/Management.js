@@ -1,8 +1,10 @@
 ﻿function pageReady() {
     $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
-    $("#startTime").val(getDate()).datepicker('update');
-    $("#endTime").val(getDate()).datepicker('update');
+    $("#startTime,#endTime").val(getDate()).datepicker('update');
+    window.onload = () => {
+        $("#startTime,#endTime").removeAttr("readonly");
+    }
     getPlan();
     getGroup();
     getState();
@@ -154,7 +156,7 @@ function getPlan() {
         $('#planSelect').empty();
         var list = ret.datas;
         var option = '<option value="{0}" task="{2}">{1}</option>';
-        var options = '<option value=0 task=0>所有计划</option>';
+        var options = '<option value="0" task=0>所有计划</option>';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.Plan, d.TaskId);
@@ -189,7 +191,7 @@ function getGroup(resolve) {
         }
         if (resolve == null) {
             $('#groupSelect').empty();
-            $('#groupSelect').append('<option value=0>所有分组</option>');
+            $('#groupSelect').append('<option value="0">所有分组</option>');
             $('#groupSelect').append(options);
             getProcessor();
         } else {
@@ -235,7 +237,7 @@ function getProcessor(resolve) {
         }
         if (resolve == null) {
             $('#processorSelect').empty();
-            $('#processorSelect').append('<option value=0>所有人</option>');
+            $('#processorSelect').append('<option value="0">所有人</option>');
             $('#processorSelect').append(options);
         } else {
             resolve(options);
@@ -260,7 +262,7 @@ function getState() {
         $('#stateSelect').empty();
         var list = ret.datas;
         var option = '<option value="{0}">{1}</option>';
-        var options = '<option value=0>所有进度</option>';
+        var options = '<option value="-1">所有进度</option>';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
             options += option.format(d.Id, d.State);
@@ -341,18 +343,18 @@ function getTaskList() {
         layer.msg('请选择进度');
         return;
     }
+    var list = { planId, pId, state}
     var sTime = $('#startTime').val();
-    var eTime = $('#endTime').val();
-    if (isStrEmptyOrUndefined(eTime) || isStrEmptyOrUndefined(sTime)) {
-        layer.msg('请选择实际开始时间');
-        return;
+    if (!isStrEmptyOrUndefined(sTime)) {
+        list.sTime = `${sTime} 00:00:00`;
     }
-    if (comTimeDay(sTime, eTime)) {
-        return;
+    var eTime = $('#endTime').val();
+    if (!isStrEmptyOrUndefined(eTime)) {
+        list.eTime = `${eTime} 23:59:59`;
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({ planId, pId, state, sTime, eTime });
+    data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -386,7 +388,7 @@ function getTaskList() {
                     <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
-                    <td>${d.ActualStartTime}</td>
+                    <td>${noShowSecond(d.ActualStartTime)}</td>
                     <td>${d.ActualTime}</td>
                     <td>${d.ActualScore}</td>
                     <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${id})">详情</button></td>
@@ -439,8 +441,8 @@ function showDetailModal(tId) {
             $('#checkAssignor').text(d.Assignor);
             $('#checkEstimatedTime .textOn').text(d.EstimatedTime);
             $('#checkScore .textOn').text(d.Score);
-            $('#checkActualStartTime').text(d.ActualStartTime);
-            $('#checkActualEndTime').text(d.ActualEndTime);
+            $('#checkActualStartTime').text(noShowSecond(d.ActualStartTime));
+            $('#checkActualEndTime').text(noShowSecond(d.ActualEndTime));
             $('#checkActualTime .textOn').text(d.ActualTime);
             $('#checkActualScore .textOn').text(d.ActualScore);
             $('#checkDesc').val(d.Desc);
@@ -539,8 +541,8 @@ function showDetailModal(tId) {
             $('#taskRedo').text(d.IsRedo ? '已返工' : '未返工');
             $('#taskEstimatedTime .textOn').text(d.EstimatedTime);
             $('#taskScore .textOn').text(d.Score);
-            $('#taskActualStartTime').text(d.ActualStartTime);
-            $('#taskActualEndTime').text(d.ActualEndTime);
+            $('#taskActualStartTime').text(noShowSecond(d.ActualStartTime));
+            $('#taskActualEndTime').text(noShowSecond(d.ActualEndTime));
             $('#taskActualTime .textOn').text(d.ActualTime);
             $('#taskActualScore .textOn').text(d.ActualScore);
             $('#taskDesc').val(d.Desc);

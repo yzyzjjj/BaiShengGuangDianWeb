@@ -52,10 +52,8 @@ function getCheckTask() {
         $('#processor').text(rData.Processor);
         $('#checkProcessor').text(rData.CheckProcessor);
         $('#estimatedTime').text(rData.EstimatedTime);
-        var actualStartTime = rData.ActualStartTime;
-        $('#actualStartTime').text(actualStartTime == '0001-01-01 00:00:00' ? '' : actualStartTime);
-        var actualEndTime = rData.ActualEndTime;
-        $('#actualEndTime').text(actualEndTime == '0001-01-01 00:00:00' ? '' : actualEndTime);
+        $('#actualStartTime').text(noShowSecond(rData.ActualStartTime));
+        $('#actualEndTime').text(noShowSecond(rData.ActualEndTime));
         $('#score').text(rData.Score);
         $('#actualTime').text(rData.ActualTime);
         var order = function (a, b, c, d) {
@@ -343,7 +341,7 @@ function showDetailModel(id) {
             return d.row + 1;
         }
         var checkTime = function (data) {
-            return data == '0001-01-01 00:00:00' ? '' : data;
+            return noShowSecond(data);
         }
         var result = function (data) {
             return data == 1 ? '通过' : '不通过';

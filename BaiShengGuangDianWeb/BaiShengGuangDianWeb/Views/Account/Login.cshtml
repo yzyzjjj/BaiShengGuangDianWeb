@@ -28,14 +28,12 @@
             <p class="login-box-msg">登录</p>
             <form>
                 <div class="form-group has-feedback">
-                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" type="text" onfocusin="focusIn($(this), 'adt')"
-                           maxlength="32" value="@ViewData["n"]" />
+                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" type="text" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["n"]" />
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
                     <p id="accountTip" style="color: red" class="adt"></p>
                 </div>
                 <div class="form-group has-feedback">
-                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')"
-                           maxlength="32" value="@ViewData["p"]" />
+                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["p"]" />
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                     <p id="passwordTip" style="color: red" class="adt"></p>
                 </div>

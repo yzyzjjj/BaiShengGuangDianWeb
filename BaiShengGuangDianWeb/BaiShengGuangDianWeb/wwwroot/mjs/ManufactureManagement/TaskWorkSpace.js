@@ -132,7 +132,7 @@ function getAccountTask() {
         $('.finish').prop('disabled', state != 1);
         $('#taskName').text(d.Item);
         $('#planName').text(d.Plan);
-        $('#actualStartTime').text(d.ActualStartTime == '0001-01-01 00:00:00' ? '' : d.ActualStartTime);
+        $('#actualStartTime').text(noShowSecond(d.ActualStartTime));
         $('#actualTime').text(d.ActualTime);
         $('#taskDesc').val(d.Desc);
         $('#estimatedTime').text(d.EstimatedTime);

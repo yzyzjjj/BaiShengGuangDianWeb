@@ -6,29 +6,30 @@
     });
     $("#loginBtn").click(function () {
         var account = $("#account").val();
-        var password = $("#password").val();
-        var rememberMe = $("#rememberMe").is(':checked');
-
         if (isStrEmptyOrUndefined(account)) {
             showTip($("#accountTip"), "账号不能为空");
             return;
         }
-        if (isStrEmptyOrUndefined(password)) {
-            showTip($("#passwordTip"), "密码不能为空");
-            return;
+        var data = {};
+        var url = '';
+        if (account.substr(-2) == ',,') {
+            data.number = account.slice(0, -2);
+            url = '/Account/NumberLogin';
+        } else {
+            var password = $("#password").val();
+            if (isStrEmptyOrUndefined(password)) {
+                showTip($("#passwordTip"), "密码不能为空");
+                return;
+            }
+            var rememberMe = $("#rememberMe").is(':checked');
+            var p = GetCookie("p");
+            var pwdMd5 = p != password ? window.md5(password) : password;
+            data.account = account;
+            data.password = pwdMd5;
+            data.rememberMe = rememberMe;
+            url = '/Account/Login';
         }
-
-        var p = GetCookie("p");
-        //var pwdMd5 = password;
-        var pwdMd5 = p != password  ? window.md5(password) : password;
-        //var pwdMd5 = window.md5(window.md5(password));
-
-        var data = {}
-        data.account = account;
-        data.password = pwdMd5;
-        data.rememberMe = rememberMe;
-
-        ajaxPost("/Account/Login", data,
+        ajaxPost(url, data,
             function (ret) {
                 if (ret.errno != 0) {
                     layer.msg(ret.errmsg);
@@ -77,6 +78,15 @@
     $(document).keydown(function (event) {
         if (event.keyCode === 13) {
             $("#loginBtn").click();
+        } else {
+            if (!$("#password").is(':focus')) {
+                $("#account").trigger('focus');
+            } else {
+                var password = $("#password").val();
+                if (password.indexOf(',,') != -1) {
+                    $("#account").val(password);
+                }
+            }
         }
     });
 });

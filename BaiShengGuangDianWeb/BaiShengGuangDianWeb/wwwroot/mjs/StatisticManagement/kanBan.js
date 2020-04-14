@@ -315,13 +315,13 @@ function getBoardData() {
             //日最小同时使用台数
             $("#minDevice").empty();
             var minSimultaneousUseRate = ret.data.MinSimultaneousUseRate;
-            $("#minDevice").append("<div>" + "日最小同时使用台数：" + "<span class='par'>" + minSimultaneousUseRate + "台" + "</span>" + "</div>");
+            $("#minDevice").append(`<div>日最小同时使用台数：<span class='par'>${minSimultaneousUseRate}台</span></div>`);
             //日最小使用台数
             var minUse = ret.data.MinUse;
-            $("#minDevice").append("<div>" + "日最小使用台数：" + "<span class='par'>" + minUse + "台" + "</span>" + "</div>");
+            $("#minDevice").append(`<div>日最小使用台数：<span class='par'>${minUse}台</span></div>`);
             //日最小使用率
             var minUseRate = ret.data.MinUseRate;
-            $("#minDevice").append("<div>" + "日最小使用率：" + "<span class='par'>" + (minUseRate * 100).toFixed(2) + "%" + "</span>" + "</div>");
+            $("#minDevice").append(`<div>日最小使用率：<span class='par'>${(minUseRate * 100).toFixed(2)}%</span></div>`);
             $(".par").css("fontSize", 24).css("color", "blue");
             var minChart = echarts.init(document.getElementById("minChart"));
             var minOption = {
