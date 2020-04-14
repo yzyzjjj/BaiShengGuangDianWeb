@@ -109,7 +109,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         public static AccountInfo GetAccountInfoByNumber(string number, bool isAll = false)
         {
             var sql = $"SELECT a.*, GROUP_CONCAT(b.`Name`) RoleName, IF ( a.SelfPermissions = '', GROUP_CONCAT(b.Permissions), CONCAT( GROUP_CONCAT(b.Permissions), ',', a.SelfPermissions ) ) Permissions FROM `accounts` a JOIN `roles` b ON FIND_IN_SET(b.Id, a.Role) != 0 " +
-                      $"WHERE a.Number = @number {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
+                      $"WHERE MD5(a.Number) = @number {(isAll ? "" : "AND a.IsDeleted = 0")} AND b.IsDeleted = 0;";
             var info = ServerConfig.WebDb.Query<AccountInfo>(sql, new { number }).FirstOrDefault();
             return info == null || info.Account.IsNullOrEmpty() ? null : info;
         }
