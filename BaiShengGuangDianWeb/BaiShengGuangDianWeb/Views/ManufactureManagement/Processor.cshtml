@@ -27,27 +27,37 @@
             <div class="form-group">
                 <label class="control-label">项目组操作：</label>
                 <div class="form-group form-inline">
-                    <label class="control-label" for="GroupSelect">选择项目组：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="GroupSelect" style="width: 120px"></select>
+                    <div class="form-group">
+                        <label class="control-label" for="GroupSelect">选择项目组：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="GroupSelect" style="width: 120px"></select>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="deleteGroup()">删除</button>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="deleteGroup()">删除</button>
-                    <label class="control-label" for="GroupName">项目组名称：</label>
-                    <input class="form-control" id="GroupName" maxlength="40">
-                    <button type="button" class="btn btn-primary" onclick="addGroup()">新增</button>
-                    <button type="button" class="btn btn-primary" onclick="updateGroup()">修改</button>
+                    <div class="form-group">
+                        <label class="control-label" for="GroupName">项目组名称：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box;vertical-align: middle">
+                            <input class="form-control" id="GroupName" maxlength="40">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addGroup()">新增</button>
+                        <button type="button" class="btn btn-primary" onclick="updateGroup()">修改</button>
+                    </div>
                 </div>
                 <div class="form-group form-inline">
-                    <label class="control-label" for="ProcessorSelect">选择操作员：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms2 form-control" id="ProcessorSelect" style="width: 120px"></select>
+                    <div class="form-group">
+                        <label class="control-label" for="ProcessorSelect">选择操作员：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="ProcessorSelect" style="width: 120px"></select>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="deleteGroupProcessor()">删除</button>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="deleteGroupProcessor()">删除</button>
-                    <label class="control-label" for="AllProcessorSelect">新增操作员：</label>
-                    <div class="form-group no-margin" style="display: -webkit-inline-box">
-                        <select class="ms3 form-control" id="AllProcessorSelect" style="min-width: 450px" multiple="multiple"></select>
+                    <div class="form-group">
+                        <label class="control-label" for="AllProcessorSelect">新增操作员：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms3 form-control" id="AllProcessorSelect" style="min-width: 400px" multiple="multiple"></select>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addGroupProcessor()">新增</button>
                     </div>
-                    <button type="button" class="btn btn-primary" onclick="addGroupProcessor()">新增</button>
                 </div>
             </div>
             <div class="form-group">

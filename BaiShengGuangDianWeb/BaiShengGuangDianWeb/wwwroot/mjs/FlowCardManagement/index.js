@@ -91,35 +91,6 @@
             $("#ylBtn").addClass("hidden");
         }
     });
-    if (!pcAndroid()) {
-        $("#scanning").addClass("hidden");
-    } else {
-        $("#upload").addClass("hidden");
-    }
-    $('#scanning').on('click', function() {
-        new Promise(function (resolve) {
-            showPrintModal(resolve);
-        }).then((result) => {
-            if (result) {
-                $('#flowCardId').val(result.split(",")[2]);
-            }
-        });
-    });
-    $('#upload').on('click', function () {
-        $('#file').trigger('click');
-    });
-    $("#file").on('change', function () {
-        addCover();
-        new Promise(function (resolve) {
-            printImgUp(resolve, this);
-        }.bind(this)).then((result) => {
-            removeCover();
-            $(this).val("");
-            if (result) {
-                $("#flowCardId").val(result.split(",")[2]);
-            }
-        });
-    });
 }
 
 //流程卡

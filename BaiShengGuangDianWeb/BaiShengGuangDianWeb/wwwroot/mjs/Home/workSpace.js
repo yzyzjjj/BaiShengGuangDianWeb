@@ -60,27 +60,6 @@
             $("#thick").addClass("hidden");
         }
     });
-    if (!pcAndroid()) {
-        $(".scanning").addClass("hidden");
-    } else {
-        $(".upload").addClass("hidden");
-    }
-    $('.upload').on('click', function () {
-        $('#file').trigger('click');
-    });
-    $("#file").on('change', function () {
-        addCover();
-        new Promise(function (resolve) {
-            printImgUp(resolve, this);
-        }.bind(this)).then((result) => {
-            removeCover();
-            $(this).val("");
-            if (result) {
-                var f = result.split(",")[2];
-                $('#inputReportModel').is(':hidden') ? $("#flowCard").val(f) : $("#rpFlowCard").val(f);
-            }
-        });
-    });
     $("#stateSelect").on('change', function (e) {
         getLogList();
     });
@@ -90,17 +69,6 @@
     $("#devSite").select2({
         allowClear: true,
         placeholder: "请选择(可不选)"
-    });
-}
-
-//扫描二维码
-function scanning(el) {
-    new Promise(function (resolve) {
-        showPrintModal(resolve);
-    }).then((result) => {
-        if (result) {
-            $(`#${el}`).val(result.split(",")[2]);
-        }
     });
 }
 
@@ -664,7 +632,6 @@ function showFaultModel() {
     }
     $("#addImg").fileinput('clear');
     $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
-    hideClassTip('adt');
     $("#faultCode").val("").trigger("change");
     $("#faultOther").val("");
     $("#faultDate").val(getDate()).datepicker('update');

@@ -27,13 +27,15 @@ function getCodeList() {
         $("#selectCode").empty();
         var option = '<option value="{0}">{1}</option>';
         var i, len = ret.datas.length;
+        var options = '';
         for (i = 0; i < len; i++) {
             var d = ret.datas[i];
             var state = d.DeviceStateStr;
             if (state == '待加工' || state == '加工中') {
-                $("#selectCode").append(option.format(d.Id, d.Code));
+                options += option.format(d.Id, d.Code);
             }
         }
+        $("#selectCode").append(options);
         if (idStr != null) {
             $("#selectCode").val(idStr).trigger("change");
         }
@@ -49,7 +51,6 @@ function getVarTypeList() {
     }
     var deviceId = $("#selectCode").val();
     if (isStrEmptyOrUndefined(deviceId)) {
-        layer.msg("请选择设备");
         return;
     }
     var data = {};

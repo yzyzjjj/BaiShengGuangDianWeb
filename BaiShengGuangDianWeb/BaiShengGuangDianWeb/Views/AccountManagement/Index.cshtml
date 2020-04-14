@@ -1,7 +1,7 @@
 ﻿@model object
 
 @{
-    ViewBag.Title = "组织结构管理";
+    ViewBag.Title = "组织结构";
     Layout = "_Layout";
 }
 <environment include="Development">
@@ -10,8 +10,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/AccountManagement/Index.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>系统管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content">
-    <h2 class="text-center">组织结构</h2>
     <div class="row">
         <div class="col-md-6">
             <div class="box box-primary">

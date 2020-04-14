@@ -10,8 +10,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/AccountManagement/roles.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>系统管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content">
-    <h2 class="text-center">角色管理</h2>
     <div class="box box-primary">
         <div class="box-header">
             <h3 class="box-title">角色列表</h3>

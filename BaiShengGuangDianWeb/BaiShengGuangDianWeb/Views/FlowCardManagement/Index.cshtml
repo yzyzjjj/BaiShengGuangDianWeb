@@ -1,5 +1,4 @@
 ﻿@model object
-
 @{
     ViewBag.Title = "流程卡管理";
     Layout = "_Layout";
@@ -10,10 +9,10 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/FlowCardManagement/index.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+</section>
 <section class="content ">
-    <h2 class="text-center">
-        @ViewBag.Title
-    </h2>
     <div class="row">
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
@@ -44,12 +43,7 @@
                                 <div class="fcBody form-group">
                                     <label class="control-label" for="flowCardId" style="vertical-align:middle">流程卡号：</label>
                                     <div class="form-group no-margin" style="display: -webkit-inline-box;vertical-align:middle">
-                                        <div style="display: flex; align-items: center">
-                                            <span class="iconfont icon-saoyisao" id="scanning" style="font-size:30px;cursor:pointer"></span>
-                                            <span class="glyphicon glyphicon-upload" id="upload" title="上传二维码图片" style="font-size:30px; cursor: pointer;color:#1fa2ff"></span>
-                                            <input type="file" id="file" class="hidden" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
-                                            <input type="tel" id="flowCardId" autocomplete="off" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
-                                        </div>
+                                        <input type="tel" id="flowCardId" autocomplete="off" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
                                     </div>
                                 </div>
                                 <div class="fcBody form-group hidden">

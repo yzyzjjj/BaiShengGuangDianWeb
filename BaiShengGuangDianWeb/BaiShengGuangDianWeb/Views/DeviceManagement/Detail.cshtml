@@ -4,15 +4,20 @@
     ViewBag.Title = "设备详情";
     Layout = "_Layout";
 }
-
 <environment include="Development">
     <script src="~/mjs/DeviceManagement/deviceDetail.js"></script>
 </environment>
 <environment include="Staging,Production">
     <script src="~/mminjs/DeviceManagement/deviceDetail.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>设备管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content">
-    <h2 class="text-center">设备详情</h2>
     <div class="row">
         <div class="col-md-3">
             <div class="box box-primary">

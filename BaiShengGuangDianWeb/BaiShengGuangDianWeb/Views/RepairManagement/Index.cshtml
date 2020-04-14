@@ -11,13 +11,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/RepairManagement/index.min.js"></script>
 </environment>
-<section class="content-header">
-    <h1>
-        @ViewBag.Title
-        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin: 2px" id="getUsuallyFaultList" onclick="getUsuallyFaultList()">常见故障解决</button>
-        <button type="button" class="btn btn-primary pull-right btn-sm" style="margin: 2px" id="getFaultTypeList" onclick="getFaultTypeList()">故障类型</button>
-        <button type="button" class="btn btn-warning pull-right btn-sm" style="margin: 2px" id="showMaintainerModel" onclick="showMaintainerModel()">维修工管理</button>
-    </h1>
+<section class="content-header flexStyle" style="justify-content: space-between;flex-wrap: wrap">
+    <h1>@ViewBag.Title</h1>
+    <div class="flexStyle">
+        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" style="margin-right: 10px">故障报修</button>
+        <button type="button" class="btn btn-warning btn-sm" id="showMaintainerModel" onclick="showMaintainerModel()">维修工管理</button>
+        <button type="button" class="btn btn-primary btn-sm" style="margin: 0 10px" id="getFaultTypeList" onclick="getFaultTypeList()">故障类型</button>
+        <button type="button" class="btn btn-primary btn-sm" id="getUsuallyFaultList" onclick="getUsuallyFaultList()">常见故障解决</button>
+    </div>
 </section>
 <section class="content">
     <div class="row">
@@ -277,6 +278,69 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="designate.call(this)" id="designateBtn">指派</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 故障报修弹窗（Modal） -->
+    <div class="modal fade" tabindex="-1" id="faultModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">故障报修</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="flex-wrap: wrap">
+                        <label class="control-label text-nowrap" for="faultCode"><span class="text-blue">* </span>蓝玻璃研磨/抛光机机台号：</label>
+                        <div style="flex: 1;min-width: 350px">
+                            <select class="ms2 form-control" style="width: 100%" id="faultCode" multiple="multiple" onclick="focusIn($(this))"></select>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap" for="faultOther"><span class="text-blue">* </span>其他设备：</label>
+                        <div class="flexStyle" style="flex-basis: 500px">
+                            <select class="form-control" style="width: 30%" id="workshop"></select>
+                            <select class="form-control" style="width: 30%" id="devSite"></select>
+                            <input type="text" class="form-control" id="faultOther" placeholder="请输入" maxlength="20" style="width: 40%">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap" for="proposer"><span class="text-red">* </span>报修人：</label>
+                        <input class="form-control" disabled="disabled" id="proposer" onfocusin="focusIn($(this))" maxlength="20" style="flex-basis:140px">
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap"><span class="text-red">* </span>故障时间：</label>
+                        <div class="flexStyle" style="width: 240px">
+                            <input type="text" id="faultDate" class="form_date form-control text-center" style="cursor:pointer;min-width:80px">
+                            <input type="text" id="faultTime" class="form_time form-control text-center" style="cursor:pointer;min-width:80px">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
+                        <label class="control-label text-nowrap" for="faultType"><span class="text-red">* </span>故障类型：</label>
+                        <select class="form-control" style="width: 200px" id="faultType"></select>
+                        <a class="text-nowrap" style="text-decoration: underline" href='javascript:getUsuallyFaultList();'>常见故障及解决方法</a>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap" for="faultDefaultDesc">故障描述：</label>
+                        <textarea class="form-control" id="faultDefaultDesc" disabled="disabled" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap" for="faultDesc">补充：</label>
+                        <textarea class="form-control" id="faultDesc" style="resize: vertical; height: 80px; overflow-y: scroll;" maxlength="300"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">上传图片（可不传）：</label>
+                        <div id="addImgBox">
+                            <input id="addImg" parent="addImgBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="reportFault()">上报</button>
                 </div>
             </div>
         </div>

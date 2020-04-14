@@ -219,8 +219,8 @@ function getBoardData() {
             var useCodeList = ret.data.UseCodeList;
             $("#codeRateChart").append('<div style="width:100%;height:77px"><span style="font-size:18px;font-weight:bold;margin-left:5px">当前加工设备：</span><br><pre id="useList" style="font-size:18px;font-weight:bold;color:blue;""></pre></div>');
             $.each(useCodeList, function (i, e) {
-                $("#useList").append("<span style='margin-left:10px'>"+e+"</span>");
-            }); 
+                $("#useList").append("<span style='margin-left:10px'>" + e + "</span>");
+            });
             //所有利用率
             var allProcessRate = ret.data.AllProcessRate;
             $("#codeTimeList").empty();
@@ -257,28 +257,26 @@ function getBoardData() {
                 }]
             }
             codeRatesChart.setOption(codeRatesOption, true);
-            //运行时间
+            //设备详情
             $("#codeTime").empty();
-            $("#codeTime").append("<div>" + "运行时间：" + "<span class='par'>" + codeTime(ret.data.RunTime) + "</span>" + "</div>");
-            //加工时间
-            $("#codeTime").append("<div>" + "加工时间：" + "<span class='par'>" + codeTime(ret.data.ProcessTime) + "</span>" + "</div>");
-            //闲置时间
-            $("#codeTime").append("<div>" + "闲置时间：" + "<span class='par'>" + codeTime(ret.data.IdleTime) + "</span>" + "</div>");
-            //所有利用率
-            $("#codeTime").append("<div>" + "所有利用率：" + "<span class='par'>" + (allProcessRate * 100).toFixed(2) + "%" + "</span>" + "</div>");
+            var runtime = codeTime(ret.data.RunTime);
+            var processTime = codeTime(ret.data.ProcessTime);
+            var idleTime = codeTime(ret.data.IdleTime);
+            var timeOps = `<div>运行时间：<span class='par'>${runtime.indexOf('小时') == -1 ? runtime : runtime.slice(0, runtime.indexOf('小时')+2)}</span></div><div>加工时间：<span class='par'>${processTime.indexOf('小时') == -1 ? processTime : processTime.slice(0, processTime.indexOf('小时') + 2)}</span></div><div>闲置时间：<span class='par'>${idleTime.indexOf('小时') == -1 ? idleTime : idleTime.slice(0, idleTime.indexOf('小时') + 2)}</span></div><div>所有利用率：<span class='par'>${(allProcessRate * 100).toFixed(2)}%</span></div>`;
+            $("#codeTime").append(timeOps);
             $("#maxList").empty();
             $("#maxList").append('<div id="maxChart" style="float: left;width: 40%;height: 140px;"></div>' +
                 '<pre id = "maxDevice" style = "width: 60%; float: left;font-size: 15px;line-height: 40px;font-weight:bold;margin-top:-3px;font-family:"微软雅黑""></pre>');
             //日最大同时使用台数
             $("#maxDevice").empty();
             var maxSimultaneousUseRate = ret.data.MaxSimultaneousUseRate;
-            $("#maxDevice").append("<div>" + "日最大同时使用台数：" + "<span class='par'>" + maxSimultaneousUseRate + "台" + "</span>" + "</div>");
+            $("#maxDevice").append("<div>日最大同时使用台数：<span class='par'>" + maxSimultaneousUseRate + "台</span></div>");
             //日最大使用台数
             var maxUse = ret.data.MaxUse;
-            $("#maxDevice").append("<div>" + "日最大使用台数：" + "<span class='par'>" + maxUse + "台" + "</span>" + "</div>");
+            $("#maxDevice").append("<div>日最大使用台数：<span class='par'>" + maxUse + "台</span></div>");
             //日最大使用率
             var maxUseRate = ret.data.MaxUseRate;
-            $("#maxDevice").append("<div>" + "日最大使用率：" + "<span class='par'>" + (maxUseRate * 100).toFixed(2) + "%" + "</span>" + "</div>");
+            $("#maxDevice").append("<div>日最大使用率：<span class='par'>" + (maxUseRate * 100).toFixed(2) + "%</span></div>");
             var maxChart = echarts.init(document.getElementById("maxChart"));
             var maxOption = {
                 tooltip: {
@@ -355,7 +353,7 @@ function getBoardData() {
                 }]
             };
             minChart.setOption(minOption, true);
-            $("section").resize(function () {
+            $("section").off('resize').on('resize',function () {
                 for (var j = 0; j < deviceSum.length; j++) {
                     echarts.init(document.getElementById("deviceChart" + j)).resize();
                 }
@@ -364,5 +362,6 @@ function getBoardData() {
                 maxChart.resize();
                 minChart.resize();
             });
-        },0);
+        }, 0);
 }
+

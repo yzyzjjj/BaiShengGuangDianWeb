@@ -1,5 +1,4 @@
 ﻿@model object
-
 @{
     ViewBag.Title = "设备点检配置";
     Layout = "_Layout";
@@ -10,8 +9,14 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/DeviceSpotCheck/DeviceSpotCheck.min.js"></script>
 </environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>设备点检</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
 <section class="content ">
-    <h2 class="text-center" id="pageTitle">设备点检相关</h2>
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs ui-sortable-handle">
             <li class="active"><a href="#config" data-toggle="tab" aria-expanded="true" class="setTitle">配置</a></li>
