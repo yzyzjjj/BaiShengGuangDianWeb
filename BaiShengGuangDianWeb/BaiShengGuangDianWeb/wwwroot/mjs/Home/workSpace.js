@@ -5,6 +5,19 @@
     $("#flowCard").change(function () {
         $("#run").addClass("disabled");
     });
+    $("#flowCard").on('keydown', function(e) {
+        if (e.keyCode == 13) {
+            queryFlowCard();
+        }
+    });
+    window.onload = () => {
+        $("#flowCard").trigger('focus');
+    }
+    $("#rpFlowCard").on('keydown', function (e) {
+        if (e.keyCode == 13) {
+            queryRpFlowCard();
+        }
+    });
     $("#processCode").on("select2:select", function (e) {
         $("#run").addClass("disabled");
     });
@@ -48,7 +61,7 @@
         $("#pData").find("input").val(0);
     });
     $("#flowCardEmpty").click(function () {
-        $("#flowCard").val("");
+        $("#flowCard").val("").trigger('focus');
     });
     $("#opUl").on("click", "a", function () {
         $(this).css("backgroundColor", "#d3d3d3").parent().siblings().find("a").css("backgroundColor", "");
@@ -857,6 +870,7 @@ function showInputReport() {
     if (!p || !s)
         $("#reportFlowCard").removeClass("hidden");
     $("#inputReportModel").modal("show");
+    setTimeout(() => $("#rpFlowCard").trigger('focus'), 500);
 }
 
 var rpFcId;
@@ -1215,7 +1229,7 @@ function reportFlowCard() {
 }
 
 function clearRpFlowCard() {
-    $("#rpFlowCard").val("");
+    $("#rpFlowCard").val("").trigger('focus');
     $("#gxList").empty();
     $("#tableFlowCard").addClass("hidden");
 }
