@@ -774,7 +774,7 @@ function planTaskDetail(planId, planName) {
             for (var i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 _planTaskItem[d.Id] = d;
-                ops += _planTaskTr.format(d.Id, d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation, d.PlanId);
+                ops += _planTaskTr.format(d.Id, d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation == 0 ? '' : d.Relation, d.PlanId);
             }
             $('#planItemList').append(ops);
             setTableStyle('#planItemList');

@@ -406,7 +406,7 @@ function getTaskConfigItem() {
         for (var i = 0, len = data.length; i < len; i++) {
             var d = data[i];
             _taskItem[d.Id] = d;
-            ops += _taskTrData.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
+            ops += _taskTrData.format(d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation == 0 ? '' : d.Relation);
         }
         $('#configItem').append(ops);
         setTableStyle();

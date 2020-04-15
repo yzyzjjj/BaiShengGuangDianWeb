@@ -2,10 +2,6 @@
 function pageReady() {
     $('.table-bordered td').css('border', '1px solid');
     getCheckTask();
-    getCheckList(0, '#waitCheckList');
-    getCheckList(1, '#passCheckList');
-    getCheckList(2, '#redoCheckList');
-    getCheckList(3, '#blockCheckList');
     $('#imgOldList').on('click', '.delImg', function () {
         $(this).parents('.imgOption').remove();
         var e = $(this).val();
@@ -28,10 +24,9 @@ function getCheckTask() {
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
-            $('#startBtn,#pauseBtn').addClass('hidden');
             return;
         }
-        $('#startBtn,#pauseBtn').removeClass('hidden');
+        $('#startBtn,#pauseBtn,.content').removeClass('hidden');
         var rData = ret.datas[0];
         _taskData = {
             TaskId: rData.Id,
@@ -105,6 +100,10 @@ function getCheckTask() {
                 });
             }
         });
+        getCheckList(0, '#waitCheckList');
+        getCheckList(1, '#passCheckList');
+        getCheckList(2, '#redoCheckList');
+        getCheckList(3, '#blockCheckList');
     });
 }
 

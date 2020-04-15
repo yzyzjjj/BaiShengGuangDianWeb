@@ -384,7 +384,7 @@ function getTaskList() {
                     <td>${d.Item}</td>
                     <td class="totalOrder">${fromOrder}</td>
                     <td>${d.Order}</td>
-                    <td>${d.Relation}</td>
+                    <td>${d.Relation == 0 ? '' : d.Relation}</td>
                     <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
