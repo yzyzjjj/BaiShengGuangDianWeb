@@ -89,4 +89,7 @@
             }
         }
     });
+    $('#account').on('input', function () {
+        $(this).trigger('blur').trigger('focus');
+    });
 });

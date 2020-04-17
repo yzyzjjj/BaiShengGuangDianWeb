@@ -483,6 +483,10 @@ function getPlanConfig() {
         var carryBtn = function (data) {
             return data.State == 1 ? `<button type="button" class="btn btn-info btn-sm" onclick="issuePlan(${data.Id})">下发</button>` : '';
         }
+        var colors = ['', '#838a9d', 'black', '#6ee66e', 'green'];
+        var stateDesc = function(d) {
+            return `<span style="color:${colors[d.State]}">${d.StateDesc}</span>`;
+        }
         var detailBtn = function (data) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="planTaskDetail(${data.Id},\'${data.Plan}\')">查看任务</button>`;
         }
@@ -508,7 +512,7 @@ function getPlanConfig() {
                 { "data": null, "title": "预计用时", "render": predictTime },
                 { "data": null, "title": "任务配置", "render": taskConfig },
                 { "data": null, "title": "实施", "render": carryBtn },
-                { "data": "StateDesc", "title": "状态" },
+                { "data": null, "title": "状态", "render": stateDesc },
                 { "data": null, "title": "详情", "render": detailBtn, "orderable": false },
                 { "data": null, "title": "日志", "render": logBtn, "orderable": false }
             ],

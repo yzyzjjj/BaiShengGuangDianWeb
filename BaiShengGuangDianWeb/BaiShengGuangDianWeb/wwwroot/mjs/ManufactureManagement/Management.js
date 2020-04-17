@@ -1,9 +1,12 @@
 ﻿function pageReady() {
     $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
-    $("#startTime,#endTime").val(getDate()).datepicker('update');
+    var beforeDate = getDayAgo(1);
+    var nowDate = getDate();
+    $("#spTime,#startTime").val(beforeDate).datepicker('update');
+    $("#epTime,#endTime").val(nowDate).datepicker('update');
     window.onload = () => {
-        $("#startTime,#endTime").removeAttr("readonly");
+        $("#spTime,#epTime,#startTime,#endTime").removeAttr("readonly");
     }
     getPlan();
     getGroup();
@@ -81,19 +84,19 @@
         $('#taskList .addTask').prop('disabled', false);
         tr.remove();
     });
-    $('#taskList').on('input','.minute', function () {
+    $('#taskList').on('input', '.minute', function () {
         var v = $(this).val();
         if (parseInt(v) > 59) {
             $(this).val(59);
         }
     });
-    $('#taskList').on('focus','.toZero', function () {
+    $('#taskList').on('focus', '.toZero', function () {
         var v = $(this).val();
         if (v == 0) {
             $(this).val('');
         }
     });
-    $('#taskList').on('blur','.toZero', function () {
+    $('#taskList').on('blur', '.toZero', function () {
         var v = $(this).val();
         if (isStrEmptyOrUndefined(v)) {
             $(this).val('0');
@@ -119,8 +122,74 @@
             $(this).val(num);
         }
     });
+    $('#stateAll').on('ifChanged', function () {
+        if ($(this).is(':checked')) {
+            $('#stateCheck .icb_minimal').iCheck('check');
+        } else {
+            if (_stateCheck.length == $('#stateCheck').children().length) {
+                $('#stateCheck .icb_minimal').iCheck('uncheck');
+            }
+        }
+    });
+    $('#stateCheck').on('ifChanged', '.icb_minimal', function () {
+        var v = $(this).val();
+        if ($(this).is(':checked')) {
+            _stateCheck.push(v);
+            if (_stateCheck.length == $('#stateCheck').children().length) {
+                $('#stateAll').iCheck('check');
+            }
+        } else {
+            _stateCheck.splice(_stateCheck.indexOf(v), 1);
+            if (_stateCheck.length == $('#stateCheck').children().length - 1) {
+                $('#stateAll').iCheck('uncheck');
+            }
+        }
+    });
+    $('#processorAll').on('ifChanged', function () {
+        if ($(this).is(':checked')) {
+            $('#processorCheck .icb_minimal').iCheck('check');
+        } else {
+            if (_processorCheck.length == $('#processorCheck').children().length) {
+                $('#processorCheck .icb_minimal').iCheck('uncheck');
+            }
+        }
+    });
+    $('#processorCheck').on('ifChanged', '.icb_minimal', function () {
+        var v = $(this).val();
+        if ($(this).is(':checked')) {
+            _processorCheck.push(v);
+            if (_processorCheck.length == $('#processorCheck').children().length) {
+                $('#processorAll').iCheck('check');
+            }
+        } else {
+            _processorCheck.splice(_processorCheck.indexOf(v), 1);
+            if (_processorCheck.length == $('#processorCheck').children().length - 1) {
+                $('#processorAll').iCheck('uncheck');
+            }
+        }
+    });
     $('#taskTable').css('maxHeight', innerHeight * 0.7);
 }
+
+//折叠复选框项
+function foldList() {
+    $('#navBox').toggleClass('hidden');
+    $(this).toggleClass('glyphicon-triangle-left glyphicon-triangle-right').prop('title', $('#navBox').is(':hidden') ? '展开' : '收起');
+}
+
+//复选框样式
+function setCheckStyle(el) {
+    $(`${el} .icb_minimal`).iCheck({
+        handle: 'checkbox',
+        checkboxClass: 'icheckbox_minimal-green',
+        increaseArea: '20%'
+    });
+}
+
+//进度选项
+var _stateCheck = [];
+//操作员选项
+var _processorCheck = [];
 
 //设置操作员选项
 function setProcessorSelect(groupId, el) {
@@ -190,14 +259,11 @@ function getGroup(resolve) {
             options += option.format(d.Id, d.Group);
         }
         if (resolve == null) {
-            $('#groupSelect').empty();
-            $('#groupSelect').append('<option value="0">所有分组</option>');
-            $('#groupSelect').append(options);
+            $('#groupSelect').empty().append(`<option value="0">所有分组</option>${options}`);
             getProcessor();
         } else {
             resolve(options);
         }
-
     });
 }
 
@@ -229,18 +295,19 @@ function getProcessor(resolve) {
         if (!len) {
             return;
         }
-        var option = '<option value="{0}">{1}</option>';
-        var options = '';
+        var op = resolve == null
+            ? '<label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" value="{0}"><span class="textOverTop" style="margin-left: 5px">{1}</span></label>'
+            : '<option value="{0}">{1}</option>';
+        var ops = '';
         for (var i = 0; i < len; i++) {
             var d = _processor[i];
-            options += option.format(d.Id, d.Processor);
+            ops += op.format(d.Id, d.Processor);
         }
         if (resolve == null) {
-            $('#processorSelect').empty();
-            $('#processorSelect').append('<option value="0">所有人</option>');
-            $('#processorSelect').append(options);
+            $('#processorCheck').empty().append(ops);
+            setCheckStyle('#processorCheck');
         } else {
-            resolve(options);
+            resolve(ops);
         }
     }, 0);
 }
@@ -259,15 +326,15 @@ function getState() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#stateSelect').empty();
+        $('#stateCheck').empty();
         var list = ret.datas;
-        var option = '<option value="{0}">{1}</option>';
-        var options = '<option value="-1">所有进度</option>';
+        var ops = '';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
-            options += option.format(d.Id, d.State);
+            ops += `<label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" value=${d.Id}><span class="textOverTop" style="margin-left: 5px">${d.State}</span></label>`;
         }
-        $('#stateSelect').append(options);
+        $('#stateCheck').append(ops);
+        setCheckStyle('#stateCheck');
     });
 }
 
@@ -333,17 +400,15 @@ function getTaskList() {
         layer.msg('请选择计划号');
         return;
     }
-    var pId = $('#processorSelect').val();
-    if (isStrEmptyOrUndefined(pId)) {
-        layer.msg('请选择操作员');
-        return;
+    var list = { planId };
+    var spTime = $('#spTime').val();
+    if (!isStrEmptyOrUndefined(spTime)) {
+        list.spTime = `${spTime} 00:00:00`;
     }
-    var state = $('#stateSelect').val();
-    if (isStrEmptyOrUndefined(state)) {
-        layer.msg('请选择进度');
-        return;
+    var epTime = $('#epTime').val();
+    if (!isStrEmptyOrUndefined(epTime)) {
+        list.epTime = `${epTime} 23:59:59`;
     }
-    var list = { planId, pId, state}
     var sTime = $('#startTime').val();
     if (!isStrEmptyOrUndefined(sTime)) {
         list.sTime = `${sTime} 00:00:00`;
@@ -351,6 +416,26 @@ function getTaskList() {
     var eTime = $('#endTime').val();
     if (!isStrEmptyOrUndefined(eTime)) {
         list.eTime = `${eTime} 23:59:59`;
+    }
+    if ($('#stateAll').is(':checked')) {
+        list.state = -1;
+    } else {
+        if (_stateCheck.length) {
+            list.state = _stateCheck.join(',');
+        }
+    }
+    var gId = $('#groupSelect').val();
+    if (isStrEmptyOrUndefined(gId)) {
+        layer.msg('请选择工作组');
+        return;
+    }
+    list.gId = gId;
+    if ($('#processorAll').is(':checked')) {
+        list.pId = 0;
+    } else {
+        if (_processorCheck.length) {
+            list.pId = _processorCheck.join(',');
+        }
     }
     var data = {}
     data.opType = opType;
@@ -371,7 +456,8 @@ function getTaskList() {
         var ops = '';
         for (i = 0; i < len; i++) {
             var d = rData[i];
-            state = d.State;
+            var state = d.State;
+            var color = ['#838a9d', '#6ee66e', '#ff9800', 'green', 'red', '#ed21dc', 'pink', '#4d9ff3', 'blue'];
             var id = d.Id;
             _taskData[id] = d;
             var fromOrder = d.TotalOrder;
@@ -379,7 +465,7 @@ function getTaskList() {
                     <td class="num">${i + 1}</td>
                     <td>${d.Processor}</td>
                     <td>${d.Plan}</td>
-                    <td>${d.StateDesc}</td>
+                    <td style="color:${color[state]}">${d.StateDesc}</td>
                     <td>${d.Module}</td>
                     <td>${d.Item}</td>
                     <td class="totalOrder">${fromOrder}</td>
