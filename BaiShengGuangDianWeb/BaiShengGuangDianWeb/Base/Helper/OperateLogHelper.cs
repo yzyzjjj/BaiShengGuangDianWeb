@@ -64,11 +64,12 @@ namespace BaiShengGuangDianWeb.Base.Helper
         /// <param name="operateDesc"></param>
         public static void Log(HttpRequest request, int accountId, string url, string param = "", int opAccountId = 0, string operateDesc = "")
         {
-            var permission = PermissionHelper.Get(url);
-            if (operateDesc.IsNullOrEmpty())
-            {
-                operateDesc = permission.Name;
-            }
+            //var permission = PermissionHelper.Get(url);
+            //if (operateDesc.IsNullOrEmpty())
+            //{
+            //    operateDesc = permission.Name;
+            //}
+            operateDesc ="";
 
             var accountInfo = AccountHelper.GetAccountInfo(accountId);
             AccountInfo opAccountInfo = null;
@@ -84,7 +85,8 @@ namespace BaiShengGuangDianWeb.Base.Helper
                     AccountName = accountInfo.Name,
                     OperateAccountId = opAccountInfo?.Id ?? 0,
                     OperateAccountName = opAccountInfo?.Name ?? "",
-                    OperateType = permission.Id,
+                    OperateType = 0,
+                    //OperateType = permission.Id,
                     OperateDesc = operateDesc,
                     OperateTime = DateTime.Now,
                     IP = request.GetIp(),
