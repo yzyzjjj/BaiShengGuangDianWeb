@@ -9,19 +9,22 @@ namespace BaiShengGuangDianWeb.Base.Helper
     public class PermissionHelper
     {
         public static Dictionary<int, Permission> PermissionsList;
+        public static Dictionary<int, Permission> PermissionsDetailList;
 
         public static string TableName = "permissions_group";
 
         public static void LoadConfig()
         {
             PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions_group` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
+            PermissionsDetailList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
         }
 
         public static bool CheckPermission(string url)
         {
-            if (PermissionsList.Any())
+            return true;
+            if (PermissionsDetailList.Any())
             {
-                var permission = PermissionsList.Values.FirstOrDefault(x => x.Url == url);
+                var permission = PermissionsDetailList.Values.FirstOrDefault(x => x.Url == url);
                 if (permission != null)
                 {
                     if (AccountHelper.CurrentUser.PermissionsList.Contains(permission.Id))
