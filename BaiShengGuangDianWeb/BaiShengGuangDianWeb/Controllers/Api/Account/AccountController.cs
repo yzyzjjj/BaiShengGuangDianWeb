@@ -209,7 +209,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<DataResult>(Error.NoAuth);
             }
             var result = new DataResult();
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+            //result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
@@ -242,7 +243,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
 
             var result = new DataResult();
             var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !rolePermissionsList.Contains(x.Id)).ToList();
-            result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+            //result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+            result.datas.AddRange(otherPermissions);
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
@@ -263,7 +265,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
 
             var result = new DataResult();
             result.datas.AddRange(PermissionHelper.PermissionsList.Values
-                .Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Order, x.Label }));
+                //.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Order, x.Label }));
+                .Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)));
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
         }
