@@ -158,8 +158,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             //}
             //else
             //{
-            //    CookieHelper.DelCookie("n", Response);
-            //    CookieHelper.DelCookie("p", Response);
+            CookieHelper.DelCookie("n", Response);
+            CookieHelper.DelCookie("p", Response);
             //}
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
             var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));

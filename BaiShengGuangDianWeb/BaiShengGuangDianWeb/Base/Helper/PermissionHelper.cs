@@ -10,11 +10,11 @@ namespace BaiShengGuangDianWeb.Base.Helper
     {
         public static Dictionary<int, Permission> PermissionsList;
 
-        public static string TableName = "permissions";
+        public static string TableName = "permissions_group";
 
         public static void LoadConfig()
         {
-            PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
+            PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions_group` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
         }
 
         public static bool CheckPermission(string url)
@@ -49,10 +49,9 @@ namespace BaiShengGuangDianWeb.Base.Helper
             return PermissionsList.Values.Where(x => x.Type == 0).Select(x => x.Id);
         }
 
-
         public static void Delete(IEnumerable<int> list)
         {
-            ServerConfig.WebDb.Execute("UPDATE permissions SET  `IsDelete` = 1 WHERE `Id` IN @Id AND Type != 0;", new { Id = list });
+            ServerConfig.WebDb.Execute("UPDATE permissions_group SET  `IsDelete` = 1 WHERE `Id` IN @Id AND Type != 0;", new { Id = list });
         }
 
     }
