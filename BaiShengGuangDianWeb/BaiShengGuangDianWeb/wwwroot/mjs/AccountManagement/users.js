@@ -83,17 +83,16 @@ function getUsersList() {
                 var order = function (data, type, row, meta) {
                     return meta.row + 1;
                 }
-                var columns =
-                    [
-                        { "data": "id", "title": "id", "render": order },
-                        { "data": "account", "title": "用户名" },
-                        { "data": "number", "title": "编号" },
-                        { "data": "name", "title": "姓名" },
-                        { "data": "roleName", "title": "角色" },
-                        { "data": "phone", "title": "手机号" },
-                        { "data": "emailAddress", "title": "邮箱" },
-                        { "data": null, "title": "删除", "render": del }
-                    ];
+                var columns = [
+                    { "data": "id", "title": "id", "render": order },
+                    { "data": "account", "title": "用户名" },
+                    { "data": "number", "title": "编号" },
+                    { "data": "name", "title": "姓名" },
+                    { "data": "roleName", "title": "角色" },
+                    { "data": "phone", "title": "手机号" },
+                    { "data": "emailAddress", "title": "邮箱" },
+                    { "data": null, "title": "删除", "render": del }
+                ];
 
                 if (checkPermission76 || checkPermission75) {
                     columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
@@ -229,7 +228,7 @@ function showAddUserModal(type = 0) {
                     "iDisplayLength": 20, //默认显示的记录数 
                     "aaSorting": [[1, "asc"]],
                     "columns": [
-                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op, "orderable": false},
+                        { "data": null, "title": "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", "render": op, "orderable": false },
                         { "data": "Id", "title": "Id", "render": order },
                         { "data": "Code", "title": "机台号" },
                         { "data": "DeviceName", "title": "设备名" }
@@ -833,18 +832,6 @@ function showPermissions(uiName, list) {
                 <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
             </div>
         </div>`;
-    var mOptionStr2 =
-        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
-            <div class="box-header no-padding">
-                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse" style="opacity:0;"><i class="on_i fa fa-minus"></i></a>
-                <input type="checkbox" class="on_cb" style="width: 15px;"/>
-                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-            </div>
-            <div class="box-body no-padding">
-                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
-            </div>
-        </div>`;
-
     var mNameStr =
         `<li>
             <div class="box box-solid noShadow" style="margin-bottom: 0;">

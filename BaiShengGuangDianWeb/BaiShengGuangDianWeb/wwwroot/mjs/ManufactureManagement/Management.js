@@ -1,10 +1,6 @@
 ﻿function pageReady() {
     $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
-    var beforeDate = getDayAgo(1);
-    var nowDate = getDate();
-    $("#spTime,#startTime").val(beforeDate).datepicker('update');
-    $("#epTime,#endTime").val(nowDate).datepicker('update');
     window.onload = () => {
         $("#spTime,#epTime,#startTime,#endTime").removeAttr("readonly");
     }

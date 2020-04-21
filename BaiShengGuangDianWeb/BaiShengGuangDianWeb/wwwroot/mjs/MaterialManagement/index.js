@@ -1151,6 +1151,7 @@ function getLogList(show = false) {
                         { "data": "Specification", "title": "规格型号" },
                         { "data": "Type", "title": "入/出", "render": dType },
                         { "data": null, "title": "数量", "render": number },
+                        { "data": "Price", "title": "单价"},
                         { "data": "Purpose", "title": "来源/用途" },
                         { "data": "RelatedPerson", "title": "相关人" },
                         { "data": "Manager", "title": "物管员" }
@@ -1164,6 +1165,7 @@ function getLogList(show = false) {
                         { "data": "Name", "title": "货品名称" },
                         { "data": "Specification", "title": "规格型号" },
                         { "data": null, "title": "数量", "render": number },
+                        { "data": "Price", "title": "单价" },
                         { "data": "Purpose", "title": "货品来源" },
                         { "data": "RelatedPerson", "title": "采购/退回人" },
                         { "data": "Manager", "title": "物管员" },
@@ -1178,6 +1180,7 @@ function getLogList(show = false) {
                         { "data": "Name", "title": "货品名称" },
                         { "data": "Specification", "title": "规格型号" },
                         { "data": null, "title": "数量", "render": number },
+                        { "data": "Price", "title": "单价" },
                         { "data": "Purpose", "title": "货品用途" },
                         { "data": "RelatedPerson", "title": "领用人" },
                         { "data": "Manager", "title": "物管员" },

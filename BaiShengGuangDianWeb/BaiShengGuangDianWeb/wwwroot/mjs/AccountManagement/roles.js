@@ -71,11 +71,9 @@ function showAddRoles() {
                 layer.msg(ret.errmsg);
                 return;
             };
-
             if (ret.datas.length > 0) {
                 showPermissions("add_per_body", ret.datas);
             }
-
             $("#addRoleModel").modal("show");
         });
 }
@@ -219,126 +217,138 @@ function updateRole() {
 }
 
 function showPermissions(uiName, list) {
-    var mOptionStr1 =
-        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
-            <div class="box-header no-padding">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
-                <input type="checkbox" class="on_cb" style="width: 15px;"/>
-                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-            </div>
-            <div class="box-body no-padding">
-                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
-            </div>
-        </div>`;
-    var mOptionStr2 =
-        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
-            <div class="box-header no-padding">
-                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse" style="opacity:0;"><i class="on_i fa fa-minus"></i></a>
-                <input type="checkbox" class="on_cb" style="width: 15px;"/>
-                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-            </div>
-            <div class="box-body no-padding">
-                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
-            </div>
-        </div>`;
-
-    var mNameStr =
-        `<li>
-            <div class="box box-solid noShadow" style="margin-bottom: 0;">
-                <div class="box-header no-padding">
-                    <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
-                    <input type="checkbox" class="on_cb" style="width: 15px;" />
-                    <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-                </div>
-            </div>
-         </li>`;
-
-    var pageTypes = PermissionTypes;
-    var option = null;
-    for (var i = 0; i < pageTypes.length; i++) {
-        var pageType = pageTypes[i];
-        option = $(mOptionStr1).clone();
-        option.find("h3").text(pageType.name);
-        option.find(".on_cb").attr("value", pageType.id);
-        option.find(".on_cb").addClass("1");
-        option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + pageType.id);
-        $("#" + uiName).append(option);
-        var menus = getMenus(list, pageType);
-        for (var j = 0; j < menus.length; j++) {
-            var menu = menus[j];
-            var menuData = getMenuData(list, menu);
-            if (menuData.length > 0) {
-                if (pageType.isPage && menu.noChild) {
-                    var fData = menuData[0];
-                    option = $(mNameStr).clone();
-                    option.find("h3").text(fData.name);
-                    option.find(".on_cb").attr("value", fData.id);
-                    option.find(".on_cb").attr("pid", pageType.id);
-                    option.find(".on_cb").addClass("1");
-                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
-                } else {
-                    option = $("<li>" + mOptionStr1 + "<li>").clone();
-                    option.find("h3").text(menu.name);
-                    option.find(".on_cb").attr("value", menu.id);
-                    option.find(".on_cb").attr("pid", menu.parent);
-                    option.find(".on_cb").addClass("2");
-                    option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + menu.id);
-                    option.find("div:first").addClass("collapsed-box");
-                    option.find(".on_i").removeClass("fa-minus");
-                    option.find(".on_i").addClass("fa-plus");
-                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
-                    if (pageType.isPage) {
-                        for (var k = 0; k < menuData.length; k++) {
-                            var mData = menuData[k];
-                            option = $(mNameStr).clone();
-                            option.find("h3").text(mData.name);
-                            option.find(".on_cb").attr("value", mData.id);
-                            option.find(".on_cb").attr("pid", mData.parent);
-                            option.find(".on_cb").addClass("3");
-                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${mData.parent}]`).append(option);
-                        }
-                    } else {
-                        var dLabels = getLabels(menuData, menu);
-                        for (var k = 0; k < dLabels.length; k++) {
-                            var dLabel = dLabels[k];
-                            option = $("<li>" + mOptionStr1 + "<li>").clone();
-                            option.find("h3").text(dLabel.name);
-                            option.find(".on_cb").attr("value", dLabel.id);
-                            option.find(".on_cb").attr("pid", dLabel.parent);
-                            option.find(".on_cb").addClass("3");
-                            option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + dLabel.id);
-                            option.find("div:first").addClass("collapsed-box");
-                            option.find(".on_i").removeClass("fa-minus");
-                            option.find(".on_i").addClass("fa-plus");
-                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${dLabel.parent}]`).append(option);
-                            var labelData = getLabelData(menuData, dLabel);
-                            for (var l = 0; l < labelData.length; l++) {
-                                var lData = labelData[l];
-                                option = $(mNameStr).clone();
-                                option.find("h3").text(lData.name);
-                                option.find(".on_cb").attr("value", lData.id);
-                                option.find(".on_cb").attr("pid", lData.parent);
-                                option.find(".on_cb").addClass("4");
-                                $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${lData.parent}]`).append(option);
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
+    var permissionTypes = `<div class="box box-solid noShadow" style="margin-bottom: 0;">
+                        <div class="box-header no-padding">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
+                            <input type="checkbox" class="on_cb" style="width: 15px" value="0">
+                            <h3 class="box-title" style="vertical-align: middle;font-size: 16px">权限管理</h3>
+                        </div>
+                        <div class="box-body no-padding">
+                            <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{0}</ul>
+                        </div>
+                    </div>`;
+    var mOptionStr = `<li><div class="box box-solid noShadow collapsed-box" style="margin-bottom: 0;">
+                        <div class="box-header no-padding">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-plus"></i></button>
+                            <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                            <h3 class="box-title" style="vertical-align: middle;font-size: 16px">{1}</h3>
+                        </div>
+                        <div class="box-body no-padding">
+                            <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{2}</ul>
+                        </div>
+                    </div></li>`;
+    var mNameStr = `<li>
+                        <div class="box box-solid noShadow" style="margin-bottom: 0;">
+                            <div class="box-header no-padding">
+                                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
+                                <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                                <h3 class="box-title" style="vertical-align: middle;font-size: 16px">{1}</h3>
+                            </div>
+                        </div>
+                    </li>`;
+    var opObj = { parent: [] };
+    for (var i = 0, len = list.length; i < len; i++) {
+        var d = list[i];
+        var par = d.parent;
+        par == 0 ? opObj.parent.push(d) : opObj[par] ? opObj[par].push(d) : opObj[par] = [d];
     }
+    var child = arr => {
+        arr.sort((a, b) => a.order - b.order);
+        return arr.map(item => {
+            var obj = '';
+            obj += opObj[item.id]
+                ? mOptionStr.format(item.id, item.name, child(opObj[item.id]))
+                : mNameStr.format(item.id, item.name);
+            return obj;
+        }).join('');
+    }
+    $(`#${uiName}`).empty().append(permissionTypes.format(child(opObj.parent)));
+    //var pageTypes = PermissionTypes;
+    //var option = null;
+    //for (var i = 0; i < pageTypes.length; i++) {
+    //    var pageType = pageTypes[i];
+    //    option = $(mOptionStr1).clone();
+    //    option.find("h3").text(pageType.name);
+    //    option.find(".on_cb").attr("value", pageType.id);
+    //    option.find(".on_cb").addClass("1");
+    //    option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + pageType.id);
+    //    $("#" + uiName).append(option);
+    //    var menus = getMenus(list, pageType);
+    //    for (var j = 0; j < menus.length; j++) {
+    //        var menu = menus[j];
+    //        var menuData = getMenuData(list, menu);
+    //        if (menuData.length > 0) {
+    //            if (pageType.isPage && menu.noChild) {
+    //                var fData = menuData[0];
+    //                option = $(mNameStr).clone();
+    //                option.find("h3").text(fData.name);
+    //                option.find(".on_cb").attr("value", fData.id);
+    //                option.find(".on_cb").attr("pid", pageType.id);
+    //                option.find(".on_cb").addClass("1");
+    //                $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
+    //            } else {
+    //                option = $("<li>" + mOptionStr1 + "<li>").clone();
+    //                option.find("h3").text(menu.name);
+    //                option.find(".on_cb").attr("value", menu.id);
+    //                option.find(".on_cb").attr("pid", menu.parent);
+    //                option.find(".on_cb").addClass("2");
+    //                option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + menu.id);
+    //                option.find("div:first").addClass("collapsed-box");
+    //                option.find(".on_i").removeClass("fa-minus");
+    //                option.find(".on_i").addClass("fa-plus");
+    //                $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
+    //                if (pageType.isPage) {
+    //                    for (var k = 0; k < menuData.length; k++) {
+    //                        var mData = menuData[k];
+    //                        option = $(mNameStr).clone();
+    //                        option.find("h3").text(mData.name);
+    //                        option.find(".on_cb").attr("value", mData.id);
+    //                        option.find(".on_cb").attr("pid", mData.parent);
+    //                        option.find(".on_cb").addClass("3");
+    //                        $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${mData.parent}]`).append(option);
+    //                    }
+    //                } else {
+    //                    var dLabels = getLabels(menuData, menu);
+    //                    for (var k = 0; k < dLabels.length; k++) {
+    //                        var dLabel = dLabels[k];
+    //                        option = $("<li>" + mOptionStr1 + "<li>").clone();
+    //                        option.find("h3").text(dLabel.name);
+    //                        option.find(".on_cb").attr("value", dLabel.id);
+    //                        option.find(".on_cb").attr("pid", dLabel.parent);
+    //                        option.find(".on_cb").addClass("3");
+    //                        option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + dLabel.id);
+    //                        option.find("div:first").addClass("collapsed-box");
+    //                        option.find(".on_i").removeClass("fa-minus");
+    //                        option.find(".on_i").addClass("fa-plus");
+    //                        $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${dLabel.parent}]`).append(option);
+    //                        var labelData = getLabelData(menuData, dLabel);
+    //                        for (var l = 0; l < labelData.length; l++) {
+    //                            var lData = labelData[l];
+    //                            option = $(mNameStr).clone();
+    //                            option.find("h3").text(lData.name);
+    //                            option.find(".on_cb").attr("value", lData.id);
+    //                            option.find(".on_cb").attr("pid", lData.parent);
+    //                            option.find(".on_cb").addClass("4");
+    //                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${lData.parent}]`).append(option);
+    //                        }
+    //                    }
+
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
     $(".on_cb").iCheck({
         checkboxClass: 'icheckbox_minimal',
         increaseArea: '20%' // optional
     });
 
-    $(".on_cb").on('ifClicked', function (event) {
-        var f = $(this).is(":checked");
-        $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
-        updateCheckBoxState(uiName, this, f);
-    });
+    //$(".on_cb").on('ifClicked', function (event) {
+    //    var f = $(this).is(":checked");
+    //    $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
+    //    updateCheckBoxState(uiName, this, f);
+    //});
 }
 
 function rule(a, b) {
@@ -351,7 +361,7 @@ function rule(a, b) {
     return a.id > b.id ? 1 : -1;
 }
 
-var lid = -PermissionPageTypes.length;
+//var lid = -PermissionPageTypes.length;
 function getMenus(list, page) {
     var result = new Array();
     for (var i = 0; i < PermissionPageTypes.length; i++) {
