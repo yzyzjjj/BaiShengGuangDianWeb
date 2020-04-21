@@ -35,7 +35,7 @@
                     layer.msg(ret.errmsg);
                     return;
                 }
-
+                var rData = ret.datas;
                 var lastUrl = GetCookie(lastLocation);
                 if (!isStrEmptyOrUndefined(lastUrl)) {
                     DelCookie(lastLocation);
@@ -44,14 +44,14 @@
                 }
                 var first = indexUrl;
                 var find = false;
-                for (var i = 0; i < PermissionPageTypes.length; i++) {
+                var permissionPageTypes = ['工作台', '维修管理', '系统管理', '设备管理', '设备点检', '流程卡管理', '工艺管理', '生产管理', '计划管理', '物料管理', '6s检查', '数据统计','权限管理'];
+                for (var i = 0; i < permissionPageTypes.length; i++) {
                     if (find) break;
-                    const parent = PermissionPageTypes[i];
-                    for (var j = 0; j < ret.datas.length; j++) {
+                    for (var j = 0; j < rData.length; j++) {
                         if (find) break;
-                        var data = ret.datas[j];
-                        if (data.label == parent.name) {
-                            first = data.url;
+                        var d = rData[j];
+                        if (d.label == permissionPageTypes[i]) {
+                            first = d.url;
                             find = true;
                         }
                     }

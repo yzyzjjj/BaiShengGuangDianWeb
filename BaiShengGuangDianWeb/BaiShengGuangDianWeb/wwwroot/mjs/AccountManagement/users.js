@@ -954,7 +954,7 @@ function rule(a, b) {
     return a.id > b.id ? 1 : -1;
 }
 
-var lid = -PermissionPageTypes.length;
+//var lid = -PermissionPageTypes.length;
 function getMenus(list, page) {
     var result = new Array();
     for (var i = 0; i < PermissionPageTypes.length; i++) {
