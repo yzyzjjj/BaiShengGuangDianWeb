@@ -1,31 +1,14 @@
 ﻿function pageReady() {
     getUsersList();
     $(".ms2").select2();
-    //$("#addProcessor").on("ifChanged", function (event) {
-    //    if ($(this).is(":checked")) {
-    //        $("#add_deviceDiv").removeClass("hidden");
-    //    } else {
-    //        $("#add_deviceDiv").addClass("hidden");
-    //    }
-    //});
-
     $("#add_perDiv").click(function (e) {
         var addRole = $("#addRole").val();
         addRole = addRole == null ? "" : addRole.join();
+        $('#add_per_body').empty();
         if (!isStrEmptyOrUndefined(addRole)) {
             getOtherPermission("add_per_body", addRole, null);
         }
     });
-
-
-    //$("#updateProcessor").on("ifChanged", function (event) {
-    //    if ($(this).is(":checked")) {
-    //        $("#update_deviceDiv").removeClass("hidden");
-    //    } else {
-    //        $("#update_deviceDiv").addClass("hidden");
-    //    }
-    //});
-
     $("#update_perDiv").click(function (e) {
         var updateRole = $("#updateRole").val();
         updateRole = updateRole == null ? "" : updateRole.join();
@@ -40,11 +23,26 @@
             $("#updateNewPassword").removeAttr("disabled");
         }
     });
-    if (!checkPermission(74)) {
-        $("#showAddUserModal").addClass("hidden");
-    }
+    //if (!checkPermission(74)) {
+    //    $("#showAddUserModal").addClass("hidden");
+    //}
     $("#addEmail,#updateEmail").on("input", function () {
         $(this)[0].value = $(this)[0].value.replace(/[^\w\@\.\-]+/g, "");
+    });
+    $("#add_per_body,#update_per_body").on('ifClicked', '.on_cb', function (event) {
+        var f = !$(this).is(":checked");
+        var solid = $(this).parents(".box-solid");
+        solid.eq(0).find(".on_cb").iCheck(f ? "check" : 'uncheck');
+        if (f) {
+            solid.find('.on_cb:first').iCheck("check");
+        } else {
+            for (var i = 1, len = solid.length; i < len; i++) {
+                var el = solid.eq(i);
+                if (!el.find('ul:first > li').find('.on_cb:first').is(":checked")) {
+                    el.find('.on_cb:first').iCheck("uncheck");
+                };
+            }
+        }
     });
 }
 
@@ -159,14 +157,6 @@ function showAddUserModal(type = 0) {
     $(".dd").val("");
     $("#addProcessor").iCheck('uncheck');
     $("#addSurveyor").iCheck('uncheck');
-
-
-    var role = $("#addRole").val();
-    //if (lastAddRole == role) {
-    //    $("#addUserModal").modal("show");
-    //    return;
-    //}
-
     $("#addRole").empty();
     var func1 = new Promise(function (resolve) {
         ajaxGet("/RoleManagement/List",
@@ -186,7 +176,6 @@ function showAddUserModal(type = 0) {
                     html += option.format(d.id, d.name);
                 }
                 $("#addRole").append(html);
-                //getOtherPermission("add_per_body", "", null);
             });
     });
     var opType = 100;
@@ -238,7 +227,7 @@ function showAddUserModal(type = 0) {
                         $("#addDeviceList .icb_minimal").iCheck({
                             checkboxClass: 'icheckbox_minimal',
                             radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
+                            increaseArea: '20%'
                         });
 
                         $("#addDeviceList .icb_minimal").on('ifChanged', function (event) {
@@ -361,12 +350,12 @@ function addUser() {
         pRole.push(1);
     var pRoles = pRole.join(",");
 
-    var pId = new Array();
+    var pId = [];
     var cbs = $("#add_per_body .on_cb");
-    for (var i = 0; i < cbs.length; i++) {
-        var e = cbs[i];
-        var v = parseInt($(e).attr("value"));
-        if ($(e).is(":checked") && v > 0)
+    for (var i = 0, len = cbs.length; i < len; i++) {
+        var el = cbs.eq(i);
+        var v = el.val();
+        if (el.is(":checked") && v > 0)
             pId.push(v);
     }
     var roleIds = pId.join(",");
@@ -682,12 +671,12 @@ function updateUser() {
         pRole.push(1);
     var pRoles = pRole.join(",");
 
-    var pId = new Array();
+    var pId = [];
     var cbs = $("#update_per_body .on_cb");
-    for (var i = 0; i < cbs.length; i++) {
-        var e = cbs[i];
-        var v = parseInt($(e).attr("value"));
-        if ($(e).is(":checked") && v > 0)
+    for (var i = 0, len = cbs.length; i < len; i++) {
+        var el = cbs.eq(i);
+        var v = el.val();
+        if (el.is(":checked") && v > 0)
             pId.push(v);
     }
     var roleIds = pId.join(",");
@@ -775,271 +764,85 @@ function getOtherPermission(ui, role, permissions, type = 0) {
     if (!isStrEmptyOrUndefined(permissions))
         permissionList = permissions.split(",").map(Number);
 
-    $("#" + ui).empty();
-    ajaxGet("/Account/OtherPermissions",
-        {
-            role: role
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            var i;
-            var d;
-            var datas = new Array();
-            if (permissionList != null) {
-                for (i = 0; i < ret.datas.length; i++) {
-                    d = ret.datas[i];
-                    if (permissionList.indexOf(d.id) > -1)
-                        datas.push(d.id);
-                }
-            }
-            showPermissions(ui, ret.datas);
-
-            for (i = 0; i < datas.length; i++) {
-                $("#update_per_body .on_cb").filter("[value=" + datas[i] + "]").iCheck("check");
-            }
-
-            if (permissionList != null) {
-                var names = $("#update_per_body .4");
-                for (var i = 0; i < names.length; i++) {
-                    if ($(names[i]).is(":checked")) {
-                        updateCheckBoxState("update_per_body", names[i], false);
-                    }
-                }
-                var p3 = $("#update_per_body .3");
-                for (var i = 0; i < p3.length; i++) {
-                    if ($(p3[i]).is(":checked")) {
-                        updateCheckBoxState("update_per_body", p3[i], false);
-                    }
-                }
-            }
-        });
-
+    $(`#${ui}`).empty();
+    ajaxGet("/Account/OtherPermissions", { role }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        };
+        var rData = ret.datas;
+        var data = [];
+        if (permissionList != null) {
+            $.each(rData, (index, item) => {
+                if (permissionList.indexOf(item.id) > -1)
+                    data.push(item.id);
+            });
+        }
+        showPermissions(ui, rData);
+        var el = $("#update_per_body .on_cb");
+        if (data.length) {
+            el.filter('[value=0]').iCheck("check");
+        }
+        for (var i = 0, len = data.length; i < len; i++) {
+            el.filter(`[value=${data[i]}]`).iCheck("check");
+        }
+    });
 }
 
 
 function showPermissions(uiName, list) {
-    var mOptionStr1 =
-        `<div class="box box-solid noShadow" style="margin-bottom: 0;">
-            <div class="box-header no-padding">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
-                <input type="checkbox" class="on_cb" style="width: 15px;"/>
-                <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-            </div>
-            <div class="box-body no-padding">
-                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>
-            </div>
-        </div>`;
-    var mNameStr =
-        `<li>
-            <div class="box box-solid noShadow" style="margin-bottom: 0;">
-                <div class="box-header no-padding">
-                    <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
-                    <input type="checkbox" class="on_cb" style="width: 15px;" />
-                    <h3 class="box-title" style="vertical-align: middle;font-size: 16px;"></h3>
-                </div>
-            </div>
-         </li>`;
-
-    var pageTypes = PermissionTypes;
-    var option = null;
-    for (var i = 0; i < pageTypes.length; i++) {
-        var pageType = pageTypes[i];
-        option = $(mOptionStr1).clone();
-        option.find("h3").text(pageType.name);
-        option.find(".on_cb").attr("value", pageType.id);
-        option.find(".on_cb").addClass("1");
-        option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + pageType.id);
-        $("#" + uiName).append(option);
-        var menus = getMenus(list, pageType);
-        for (var j = 0; j < menus.length; j++) {
-            var menu = menus[j];
-            var menuData = getMenuData(list, menu);
-            if (menuData.length > 0) {
-                if (pageType.isPage && menu.noChild) {
-                    var fData = menuData[0];
-                    option = $(mNameStr).clone();
-                    option.find("h3").text(fData.name);
-                    option.find(".on_cb").attr("value", fData.id);
-                    option.find(".on_cb").attr("pid", fData.parent);
-                    option.find(".on_cb").addClass("1");
-                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
-                } else {
-                    option = $("<li>" + mOptionStr1 + "<li>").clone();
-                    option.find("h3").text(menu.name);
-                    option.find(".on_cb").attr("value", menu.id);
-                    option.find(".on_cb").attr("pid", menu.parent);
-                    option.find(".on_cb").addClass("2");
-                    option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + menu.id);
-                    option.find("div:first").addClass("collapsed-box");
-                    option.find(".on_i").removeClass("fa-minus");
-                    option.find(".on_i").addClass("fa-plus");
-                    $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${menu.parent}]`).append(option);
-                    if (pageType.isPage) {
-                        for (var k = 0; k < menuData.length; k++) {
-                            var mData = menuData[k];
-                            option = $(mNameStr).clone();
-                            option.find("h3").text(mData.name);
-                            option.find(".on_cb").attr("value", mData.id);
-                            option.find(".on_cb").attr("pid", mData.parent);
-                            option.find(".on_cb").addClass("3");
-                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${mData.parent}]`).append(option);
-                        }
-                    } else {
-                        var dLabels = getLabels(menuData, menu);
-                        for (var k = 0; k < dLabels.length; k++) {
-                            var dLabel = dLabels[k];
-                            option = $("<li>" + mOptionStr1 + "<li>").clone();
-                            option.find("h3").text(dLabel.name);
-                            option.find(".on_cb").attr("value", dLabel.id);
-                            option.find(".on_cb").attr("pid", dLabel.parent);
-                            option.find(".on_cb").addClass("3");
-                            option.find(".on_ul").attr("id", `${(pageType.isPage ? "t" : "f")}ul` + dLabel.id);
-                            option.find("div:first").addClass("collapsed-box");
-                            option.find(".on_i").removeClass("fa-minus");
-                            option.find(".on_i").addClass("fa-plus");
-                            $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${dLabel.parent}]`).append(option);
-                            var labelData = getLabelData(menuData, dLabel);
-                            for (var l = 0; l < labelData.length; l++) {
-                                var lData = labelData[l];
-                                option = $(mNameStr).clone();
-                                option.find("h3").text(lData.name);
-                                option.find(".on_cb").attr("value", lData.id);
-                                option.find(".on_cb").attr("pid", lData.parent);
-                                option.find(".on_cb").addClass("4");
-                                $("#" + uiName).find(`[id=${(pageType.isPage ? "t" : "f")}ul${lData.parent}]`).append(option);
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
+    var permissionTypes = `<div class="box box-solid noShadow" style="margin-bottom: 0;">
+                            <div class="box-header no-padding">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
+                                <label class="pointer" style="margin:0;font-weight:inherit">
+                                    <input type="checkbox" class="on_cb" style="width: 15px" value="0">
+                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">权限管理</span>
+                                </label>
+                            </div>
+                            <div class="box-body no-padding">
+                                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{0}</ul>
+                            </div>
+                        </div>`;
+    var mOptionStr = `<li><div class="box box-solid noShadow collapsed-box" style="margin-bottom: 0;">
+                        <div class="box-header no-padding">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-plus"></i></button>
+                            <label class="pointer" style="margin:0;font-weight:inherit">
+                                <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                                <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
+                            </label>
+                        </div>
+                        <div class="box-body no-padding">
+                            <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{2}</ul>
+                        </div>
+                    </div></li>`;
+    var mNameStr = `<li><div class="box box-solid noShadow" style="margin-bottom: 0;">
+                            <div class="box-header no-padding">
+                                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
+                                <label class="pointer" style="margin:0;font-weight:inherit">
+                                    <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
+                                </label>
+                            </div>
+                        </div></li>`;
+    var opObj = { parent: [] };
+    for (var i = 0, len = list.length; i < len; i++) {
+        var d = list[i];
+        var par = d.parent;
+        par == 0 ? opObj.parent.push(d) : opObj[par] ? opObj[par].push(d) : opObj[par] = [d];
     }
-
+    var childTree = arr => {
+        arr.sort((a, b) => a.order - b.order);
+        return arr.map(item => {
+            var obj = '';
+            obj += opObj[item.id]
+                ? mOptionStr.format(item.id, item.name, childTree(opObj[item.id]))
+                : mNameStr.format(item.id, item.name);
+            return obj;
+        }).join('');
+    }
+    $(`#${uiName}`).empty().append(opObj.parent.length ? permissionTypes.format(childTree(opObj.parent)) : '');
     $(".on_cb").iCheck({
         checkboxClass: 'icheckbox_minimal',
-        increaseArea: '20%' // optional
+        increaseArea: '20%'
     });
-
-    $(".on_cb").on('ifClicked', function (event) {
-        var f = $(this).is(":checked");
-        $(this).parents(".box-solid:first").find(".on_cb").iCheck(f ? "uncheck" : "check");
-        updateCheckBoxState(uiName, this, f);
-    });
-}
-
-function rule(a, b) {
-    if (a.parent != b.parent) {
-        return a.parent > b.parent ? 1 : -1;
-    }
-    if (a.order != b.order) {
-        return a.order > b.order ? 1 : -1;
-    }
-    return a.id > b.id ? 1 : -1;
-}
-
-//var lid = -PermissionPageTypes.length;
-function getMenus(list, page) {
-    var result = new Array();
-    for (var i = 0; i < PermissionPageTypes.length; i++) {
-        var menu = PermissionPageTypes[i];
-        for (var j = 0; j < list.length; j++) {
-            var data = list[j];
-            var add = false;
-            if (page.isPage) {
-                if (data.isPage == page.isPage && data.label == menu.name) {
-                    add = true;
-                }
-            } else {
-                if (data.isPage == page.isPage && data.type == menu.type) {
-                    add = true;
-                }
-            }
-            if (add) {
-                var d = clone(menu);
-                d.id = !page.isPage ? lid-- : menu.id;
-                d.isPage = page.isPage;
-                d.parent = page.id;
-                result.push(d);
-                break;
-            }
-        }
-    }
-    return result;
-}
-
-function getMenuData(list, menu) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        var add = false;
-        if (menu.isPage) {
-            if (data.isPage == menu.isPage && data.label == menu.name) {
-                add = true;
-            }
-        } else {
-            if (data.isPage == menu.isPage && data.type == menu.type) {
-                add = true;
-            }
-        }
-        if (add) {
-            var d = clone(data);
-            d.isPage = menu.isPage;
-            d.parent = menu.id;
-            result.push(d);
-        }
-    }
-    return result.sort(rule);
-}
-
-function getLabels(list, menu) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (data.isPage == menu.isPage && data.type == menu.type && !existArrayObj(result, "name", data.label)) {
-            var d = clone(data);
-            d.id = lid--;
-            d.name = data.label;
-            d.parent = menu.id;
-            result.push(d);
-        }
-    }
-    return result.sort(rule);
-}
-
-function getLabelData(list, label) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (data.isPage == label.isPage && data.type == label.type && data.label == label.name) {
-            var d = clone(data);
-            d.parent = label.id;
-            result.push(d);
-        }
-    }
-    return result.sort(rule);
-}
-
-function updateCheckBoxState(uiName, ui, f) {
-    var pid = $(ui).attr("pid");
-    if (!f) {
-        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
-    } else {
-        $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("uncheck");
-        var p2 = $("#" + uiName).find(".on_cb").filter("[pid=" + pid + "]");
-        for (var i = 0; i < p2.length; i++) {
-            if ($(p2[i]).is(":checked")) {
-                $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]").iCheck("check");
-                break;
-            }
-        }
-    }
-    pid = $(ui).attr("pid");
-    if (pid == null)
-        return;
-    ui = $("#" + uiName).find(".on_cb").filter("[value=" + pid + "]");
-    updateCheckBoxState(uiName, ui, f);
 }
