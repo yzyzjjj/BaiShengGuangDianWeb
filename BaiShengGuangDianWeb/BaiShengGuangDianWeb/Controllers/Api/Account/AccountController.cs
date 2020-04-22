@@ -192,10 +192,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<CommonResult>(Error.AccountNotExist);
             }
 
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<CommonResult>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<CommonResult>(Error.NoAuth);
+            //}
             var result = new CommonResult { data = accountInfo.Permissions };
             OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
             return result;
@@ -204,10 +204,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
         [HttpGet("Permissions")]
         public DataResult Permissions()
         {
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<DataResult>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<DataResult>(Error.NoAuth);
+            //}
             var result = new DataResult();
             //result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
             result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0));
@@ -218,10 +218,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
         [HttpGet("OtherPermissions")]
         public DataResult OtherPermissions()
         {
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<DataResult>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<DataResult>(Error.NoAuth);
+            //}
             var param = Request.GetRequestParams();
             var roleStr = param.GetValue("role");
 
@@ -258,10 +258,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 return Result.GenError<DataResult>(Error.AccountNotExist);
             }
 
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<DataResult>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<DataResult>(Error.NoAuth);
+            //}
 
             var result = new DataResult();
             result.datas.AddRange(PermissionHelper.PermissionsList.Values

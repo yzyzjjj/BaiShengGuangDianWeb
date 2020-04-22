@@ -25,10 +25,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<Result>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<Result>(Error.NoAuth);
+            //}
 
             var param = Request.GetRequestParams();
             var type = param.GetValue("type");
@@ -105,10 +105,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<Result>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<Result>(Error.NoAuth);
+            //}
 
             var param = Request.GetRequestParams();
             var type = param.GetValue("type");
@@ -187,10 +187,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<Result>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<Result>(Error.NoAuth);
+            //}
 
             var param = Request.GetRequestParams();
             var type = param.GetValue("type");

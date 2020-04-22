@@ -25,10 +25,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<Result>(Error.NoAuth);
-            }
+            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+            //{
+            //    return Result.GenError<Result>(Error.NoAuth);
+            //}
 
             var param = Request.GetRequestParams();
             var opTypeStr = param.GetValue("opType");

@@ -74,7 +74,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
             try
             {
                 var permissionList = permissions.Split(',').Select(int.Parse).ToList();
-                permissionList.AddRange(PermissionHelper.GetDefault());
+                //permissionList.AddRange(PermissionHelper.GetDefault());
                 roleInfo = new RoleInfo
                 {
                     Name = name,
@@ -188,7 +188,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 try
                 {
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
-                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    //permissionList.AddRange(PermissionHelper.GetDefault());
                     roleInfo.Permissions = permissionList.Distinct().Join(",");
                     logParam += $",新权限列表: {roleInfo.Permissions}";
                 }

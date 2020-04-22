@@ -115,7 +115,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                 {
                     var rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
-                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    //permissionList.AddRange(PermissionHelper.GetDefault());
                     permissions = permissionList.Distinct().Where(x => !rolePermissionsList.Contains(x)).Join(",");
                 }
                 catch (Exception)
@@ -476,7 +476,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.AccountManagement
                     var roleInfos = RoleHelper.GetRoleInfos(accountInfo.RoleList);
                     var rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
                     var permissionList = permissions.Split(',').Select(int.Parse).ToList();
-                    permissionList.AddRange(PermissionHelper.GetDefault());
+                    //permissionList.AddRange(PermissionHelper.GetDefault());
                     permissions = permissionList.Distinct().Where(x => !rolePermissionsList.Contains(x)).Join(",");
                     if (!permissions.IsNullOrEmpty() && accountInfo.Permissions != permissions)
                     {
