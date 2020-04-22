@@ -23,33 +23,28 @@
             <div class="col-md-2 col-md-push-10" style="text-align: right">
                 <button type="button" class="btn btn-success" onclick="showLogModel()">操作日志</button>
             </div>
-            <div class="col-md-5 col-md-pull-2">
-                <div class="flexStyle">
-                    <div class="flexStyle" style="flex-wrap: wrap;flex:1">
-                        <label class="control-label" style="white-space: nowrap; margin: 0">选择计划号：</label>
-                        <select class="ms2 form-control" id="planSelect" style="width: 90%"></select>
-                    </div>
-                    <div class="flexStyle" style="flex-wrap: wrap;flex:1">
-                        <label class="control-label" style="white-space: nowrap; margin: 0">选择操作员：</label>
-                        <div class="flexStyle" style="width: 100%">
-                            <select class="ms2 form-control" id="groupSelect" style="width: 50%"></select>
-                            <select class="ms2 form-control" id="processorSelect" style="width: 50%"></select>
+            <div class="col-md-10 col-md-pull-2">
+                <div class="flexStyle" style="flex-wrap: wrap">
+                    <div class="flexStyle">
+                        <div style="margin-right: 20px">
+                            <label class="control-label text-nowrap">选择计划号：</label>
+                            <select class="ms2 form-control" id="planSelect" style="width: 100%"></select>
+                        </div>
+                        <div>
+                            <label class="control-label text-nowrap">计划开始：</label>
+                            <div class="flexStyle">
+                                <input type="text" class="form_date form-control text-center" id="spTime" autocomplete="off" style="flex-basis: 150px; min-width: 100px">
+                                <label class="control-label" style="margin: 5px">至</label>
+                                <input type="text" class="form_date form-control text-center" id="epTime" autocomplete="off" style="flex-basis: 150px; min-width: 100px">
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-5 col-md-pull-2">
-                <div class="flexStyle">
-                    <div class="flexStyle" style="flex-wrap: wrap;flex: 2">
-                        <label class="control-label" style="white-space: nowrap; margin: 0">选择进度：</label>
-                        <select class="ms2 form-control" id="stateSelect" style="width: 90%"></select>
-                    </div>
-                    <div class="flexStyle" style="flex-wrap: wrap;flex: 3">
-                        <label class="control-label" style="white-space: nowrap; margin: 0">实际开始：</label>
-                        <div class="flexStyle" style="width: 100%">
-                            <input type="text" class="form_date form-control text-center" id="startTime" autocomplete="off" style="width: 40%;min-width: 100px">
+                    <div>
+                        <label class="control-label text-nowrap">实际开始：</label>
+                        <div class="flexStyle">
+                            <input type="text" class="form_date form-control text-center" id="startTime" autocomplete="off" style="flex-basis: 150px; min-width: 100px">
                             <label class="control-label" style="margin: 5px">至</label>
-                            <input type="text" class="form_date form-control text-center" id="endTime" autocomplete="off" style="width: 40%;min-width: 100px">
+                            <input type="text" class="form_date form-control text-center" id="endTime" autocomplete="off" style="flex-basis: 150px; min-width: 100px">
                             <button type="button" class="btn btn-primary" onclick="getTaskList()" style="margin-left: 3px">查询</button>
                         </div>
                     </div>
@@ -57,31 +52,56 @@
             </div>
         </div>
         <div class="box-body">
-            <div class="hidden" id="taskTable" style="overflow: auto">
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>操作员</th>
-                            <th>计划号</th>
-                            <th>进度</th>
-                            <th>模块</th>
-                            <th>任务名</th>
-                            <th>总顺序</th>
-                            <th>任务顺序</th>
-                            <th>关联</th>
-                            <th>排序</th>
-                            <th>计划用时</th>
-                            <th>绩效</th>
-                            <th>实际开始</th>
-                            <th>实际用时</th>
-                            <th>实际绩效</th>
-                            <th>详情</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="taskList"></tbody>
-                </table>
+            <div class="flexStyle" style="align-items: flex-start">
+                <div style="position: relative;min-width: 30px;min-height: 30px;">
+                    <div class="nav-tabs-custom" id="navBox">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a href="#stateBox" data-toggle="tab" aria-expanded="true">进度</a></li>
+                            <li><a href="#processorBox" data-toggle="tab" aria-expanded="false">操作员</a></li>
+                        </ul>
+                        <div class="tab-content no-padding" style="width: 144px">
+                            <div class="tab-pane active in" id="stateBox">
+                                <label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" id="stateAll" value="全选"><span class="textOverTop" style="margin-left: 5px">全选</span></label>
+                                <div style="margin-left: 20px;padding-bottom:10px" id="stateCheck"></div>
+                            </div>
+                            <div class="tab-pane fade in" id="processorBox">
+                                <div class="form-group">
+                                    <label class="control-label text-nowrap">工作组：</label>
+                                    <select class="ms2 form-control" id="groupSelect" style="width: 100%"></select>
+                                </div>
+                                <label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" id="processorAll" value="全选"><span class="textOverTop" style="margin-left: 5px">全选</span></label>
+                                <div style="margin-left: 20px;padding-bottom:10px" id="processorCheck"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="glyphicon glyphicon-triangle-left pointer" aria-hidden="true" title="收起" onclick="foldList.call(this)" style="position: absolute; right: 5px; top: 50%; font-size: 20px;color:#00A9FC"></span>
+                </div>
+                <div class="hidden" id="taskTable" style="overflow: auto; flex: 1">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>操作员</th>
+                                <th>计划号</th>
+                                <th>进度</th>
+                                <th>模块</th>
+                                <th>任务名</th>
+                                <th>总顺序</th>
+                                <th>任务顺序</th>
+                                <th>关联</th>
+                                <th>排序</th>
+                                <th>计划用时</th>
+                                <th>绩效</th>
+                                <th>实际开始</th>
+                                <th>实际用时</th>
+                                <th>实际绩效</th>
+                                <th>详情</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskList"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

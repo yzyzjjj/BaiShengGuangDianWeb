@@ -35,7 +35,7 @@ function getOrganizationUnits() {
             var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
                 '    <div class="box-header" style="padding: 2px;">' +
                 '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
-                '        <h3 class="box-title" style="vertical-align: middle;font-size: 16px;" onclick="onClick(\'{0}\',\'{1}\')"></h3>' +
+                '        <h3 class="box-title pointer" style="vertical-align: middle;font-size: 16px;" onclick="onClick(\'{0}\',\'{1}\')"></h3>' +
                 '    </div>' +
                 '    <div class="box-body no-padding">' +
                 '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +

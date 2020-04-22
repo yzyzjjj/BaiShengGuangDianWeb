@@ -50,76 +50,104 @@ var commonfunc = function () {
                 return;
             }
             var mMenu1 = '<li class="mli">' +
-                '   <a class="menuitem">' +
-                '       <i class="mi fa"></i> <span class="mt"></span>' +
+                '   <a class="menuitem" id="{0}" href="{1}">' +
+                '       <i class="mi fa {2}"></i><span class="mt">{3}</span>' +
                 '   </a>' +
                 '</li>';
 
             var mMenu2 = '<li class="mli treeview">' +
                 '    <a href="#">' +
-                '        <i class="mi fa"></i> <span class="mt"></span>' +
+                '        <i class="mi fa {1}"></i><span class="mt">{2}</span>' +
                 '        <span class="pull-right-container">' +
                 '           <i class="fa fa-angle-left pull-right"></i>' +
                 '        </span>' +
                 '    </a>' +
-                '    <ul class="treeview-menu">' +
-                '    </ul>' +
+                '    <ul class="treeview-menu" id="{0}">{3}</ul>' +
                 '</li>';
 
             var mMenu3 = '<li>' +
-                '   <a class="menuitem" > <i class="fa fa-circle-o"></i><span></span></a>' +
+                '   <a class="menuitem" href="{0}"><i class="fa fa-circle-o"></i><span>{1}</span></a>' +
                 '</li >';
             var select = '<option value="{0}">{1}</option>';
-            var datas = ret.datas;
-            $("#search-select").empty();
-            $("#search-select").append('<option></option>');
-            $.each(datas, function (index, item) {
+            var selectOps = '', liOps = '';
+            var childrenLi = { parent: [] };
+            var rData = ret.datas;
+            $.each(rData, (index, item) => {
                 if (!isStrEmptyOrUndefined(item.url)) {
-                    $("#search-select").append(select.format(item.url, item.name.trim()));
+                    selectOps += select.format(item.url, item.name.trim());
                 }
+                var par = item.parent;
+                par == 0 ? childrenLi.parent.push(item) : childrenLi[par] ? childrenLi[par].push(item) : childrenLi[par] = [item];
             });
+            $("#search-select").empty().append(`<option></option>${selectOps}`);
             var local = window.location.pathname;
             var canSee = false;
-            var parents = getParent(datas);
             var first = null;
-            for (var i = 0; i < parents.length; i++) {
-                var parent = parents[i];
-                var childs = getChild(datas, parent);
-                var option = null;
-                var child = null;
-                if (parent.noChild) {
-                    child = childs[0];
-                    if (child.url == local)
-                        canSee = true;
-                    if (!first)
-                        first = child.url;
-                    option = $(mMenu1).clone();
-                    option.find('.menuitem').attr('id', "main" + parent.id);
-                    option.find('.menuitem').attr('href', child.url);
-                    option.find('i.mi').addClass(parent.icon);
-                    option.find('span.mt').text(parent.name);
-                    $(".sidebar-menu").append(option);
-                } else {
-                    option = $(mMenu2).clone();
-                    option.find('.treeview-menu').attr('id', "main" + parent.id);
-                    option.find('i.mi').addClass(parent.icon);
-                    option.find('span.mt').text(parent.name);
-                    $(".sidebar-menu").append(option);
-                    for (var j = 0; j < childs.length; j++) {
-                        child = childs[j];
-                        if (child.url == local)
+            var i = 0, parLi = childrenLi.parent, len = parLi.length;
+            for (; i < len; i++) {
+                var d = parLi[i];
+                var childLi = childrenLi[d.id];
+                if (childLi) {
+                    var childLis = '';
+                    childLi.sort((a, b) => a.order - b.order);
+                    $.each(childLi, (index, item) => {
+                        childLis += mMenu3.format(item.url, item.name);
+                        if (item.url == local)
                             canSee = true;
                         if (!first)
-                            first = child.url;
-                        option = $(mMenu3).clone();
-                        option.find('.treeview-menu').attr('id', "main" + child.id);
-                        option.find('a').attr('href', child.url);
-                        option.find('span').text(child.name.trim());
-                        $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
-                    }
+                            first = item.url;
+                    });
+                    liOps += mMenu2.format(`main${d.id}`, d.icon, d.name, childLis);
+                } else {
+                    liOps += mMenu1.format(`main${d.id}`, d.url, d.icon, d.name);
+                    if (d.url == local)
+                        canSee = true;
+                    if (!first)
+                        first = d.url;
                 }
             }
-
+            $(".sidebar-menu").empty().append(liOps);
+            //var local = window.location.pathname;
+            //var canSee = false;
+            //var first = null;
+            //var parents = getParent(rData);
+            //for (i = 0; i < parents.length; i++) {
+            //    var parent = parents[i];
+            //    var childs = getChild(rData, parent);
+            //    var option = null;
+            //    var child = null;
+            //    if (parent.noChild) {
+            //        child = childs[0];
+            //        if (child.url == local)
+            //            canSee = true;
+            //        if (!first)
+            //            first = child.url;
+            //        option = $(mMenu1).clone();
+            //        option.find('.menuitem').attr('id', "main" + parent.id);
+            //        option.find('.menuitem').attr('href', child.url);
+            //        option.find('i.mi').addClass(parent.icon);
+            //        option.find('span.mt').text(parent.name);
+            //        $(".sidebar-menu").append(option);
+            //    } else {
+            //        option = $(mMenu2).clone();
+            //        option.find('.treeview-menu').attr('id', "main" + parent.id);
+            //        option.find('i.mi').addClass(parent.icon);
+            //        option.find('span.mt').text(parent.name);
+            //        $(".sidebar-menu").append(option);
+            //        for (var j = 0; j < childs.length; j++) {
+            //            child = childs[j];
+            //            if (child.url == local)
+            //                canSee = true;
+            //            if (!first)
+            //                first = child.url;
+            //            option = $(mMenu3).clone();
+            //            option.find('.treeview-menu').attr('id', "main" + child.id);
+            //            option.find('a').attr('href', child.url);
+            //            option.find('span').text(child.name.trim());
+            //            $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
+            //        }
+            //    }
+            //}
             if (!first)
                 first = "/";
             if (!canSee) {

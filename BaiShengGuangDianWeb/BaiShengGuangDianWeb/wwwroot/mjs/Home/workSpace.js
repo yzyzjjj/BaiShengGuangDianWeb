@@ -10,9 +10,6 @@
             queryFlowCard();
         }
     });
-    window.onload = () => {
-        $("#flowCard").trigger('focus');
-    }
     $("#rpFlowCard").on('keydown', function (e) {
         if (e.keyCode == 13) {
             queryRpFlowCard();
@@ -104,7 +101,7 @@ function getDeviceList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var rData = ret.datas;
             var deviceState = function (data, type, row) {
                 var state = data.DeviceStateStr;
                 if (state == '待加工')
@@ -128,7 +125,7 @@ function getDeviceList() {
                     "paging": true,
                     "searching": true,
                     "language": oLanguage,
-                    "data": ret.datas,
+                    "data": rData,
                     "aaSorting": [[0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
@@ -147,15 +144,16 @@ function getDeviceList() {
                     }
                 });
             $(".ms2").empty();
+            rData.sort((a, b) => a.Code - b.Code);
             var html = "";
             var option = '<option value="{0}" id="{2}" index="{3}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                var state = data.DeviceStateStr;
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                var state = d.DeviceStateStr;
                 if (state == '待加工' || state == '加工中') {
-                    $("#processCode,#addCraftCode").append(option.format(data.Id, data.Code, ''));
+                    $("#processCode,#addCraftCode").append(option.format(d.Id, d.Code, ''));
                 }
-                html += option.format(data.Code, data.Code, data.Administrator, data.Id);
+                html += option.format(d.Code, d.Code, d.Administrator, d.Id);
             }
             $("#faultCode").append(html);
         });
@@ -1475,7 +1473,7 @@ function getLogList() {
                         { "data": "Priority", "title": "优先级", "render": priority },
                         { "data": null, "title": "状态", "render": stateDesc },
                         { "data": "Score", "title": "评分", "sClass": "text-primary" },
-                        { "data": "Maintainer", "title": "维修工" },
+                        { "data": "Name", "title": "维修工" },
                         { "data": "Phone", "title": "联系方式" },
                         { "data": "Remark", "title": "维修备注", "render": remark },
                         { "data": "EstimatedTime", "title": "预计解决时间", "render": solveTime },
