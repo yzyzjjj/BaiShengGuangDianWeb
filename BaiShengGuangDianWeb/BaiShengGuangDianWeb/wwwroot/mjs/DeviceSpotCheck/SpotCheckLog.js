@@ -1,4 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[278] = { uIds: ['updateDeviceCheckBtn'] };
+    _permissionList[279] = { uIds: ['updateImgBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     $('ul .setTitle').on('click', function () {
         var title = $(this).text();
@@ -58,13 +62,8 @@ function selectDate() {
 
 //获取车间
 function getWorkShop() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -87,11 +86,6 @@ function getWorkShop() {
 var _pageRead = true;
 //获取车间设备
 function getWorkShopDevice(workShopName, el, all) {
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     if (isStrEmptyOrUndefined(workShopName)) {
         workShopName = $('#workShopRecent').val();
         if (isStrEmptyOrUndefined(workShopName)) {
@@ -100,7 +94,7 @@ function getWorkShopDevice(workShopName, el, all) {
         }
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShopName
     });
@@ -146,13 +140,8 @@ function getWorkShopDevice(workShopName, el, all) {
 
 //获取点检计划
 function getSpotPlan() {
-    var opType = 600;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 600;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -180,11 +169,6 @@ function getSpotPlan() {
 
 //获取设备点检情况
 function getThisCheckList() {
-    var opType = 613;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     $('#devicePlanDetail').empty();
     var list = {};
     var deviceId = $('#workShopDeviceRecent').val();
@@ -204,7 +188,7 @@ function getThisCheckList() {
         list.plans = planId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 613;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -268,10 +252,6 @@ function detailPage(deviceId, planId, isModal) {
     var opType = null, list = {};
     if (isModal) {
         opType = 614;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         if (isStrEmptyOrUndefined(deviceId) || isStrEmptyOrUndefined(planId)) {
             deviceId = $('#workShopDeviceDetail').val();
             planId = $('#spotPlanDetail').val();
@@ -288,10 +268,6 @@ function detailPage(deviceId, planId, isModal) {
         list.account = account;
     } else {
         opType = 618;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var startTime = $('#startTime').val();
         if (isStrEmptyOrUndefined(startTime)) {
             layer.msg("请选择开始时间");
@@ -462,17 +438,9 @@ function updateDeviceCheck(isModal) {
     var opType, checkData = [], trs;
     if (isModal) {
         opType = 616;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         trs = $('#devicePlanDetailList tbody').find('tr');
     } else {
         opType = 619;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         trs = $('#checkLogList tbody').find('tr');
     }
     var i = 0, len = trs.length;
@@ -579,14 +547,6 @@ function showImgModel(id, item, img) {
 //修改图片
 function updateImg() {
     var opType = _isListModal ? 617 : 620;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    //if (!hasPre()) {
-    //    layer.msg("请先上传图片");
-    //    return;
-    //}
     fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -620,11 +580,6 @@ function updateImg() {
 
 //下次检查
 function getNextExamineList() {
-    var opType = 615;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var list = {};
     var deviceId = $('#workShopDeviceRecent').val();
     if (isStrEmptyOrUndefined(deviceId)) {
@@ -645,7 +600,7 @@ function getNextExamineList() {
     var account = getCookieTokenInfo().account;
     list.account = account;
     var data = {}
-    data.opType = opType;
+    data.opType = 615;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

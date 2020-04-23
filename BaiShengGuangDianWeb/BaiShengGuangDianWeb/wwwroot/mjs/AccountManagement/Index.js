@@ -1,4 +1,11 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[107] = { uIds: ['showAddOrganizationUnitModal'] };
+    _permissionList[108] = { uIds: [] };
+    _permissionList[109] = { uIds: [] };
+    _permissionList[110] = { uIds: ['showAddMemberModal'] };
+    _permissionList[111] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     getOrganizationUnits();
     $("#rdo1").on("ifChanged", function (event) {
@@ -8,9 +15,6 @@
             $("#cbDiv").addClass("hidden");
         }
     });
-    if (!checkPermission(66)) {
-        $("#showAddOrganizationUnitModal").addClass("hidden");
-    }
 }
 
 function getOrganizationUnits() {
@@ -21,7 +25,6 @@ function getOrganizationUnits() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var doAction = '<div class="btn-group pull-right">' +
                 '<button type = "button" class="btn btn-default btn-sm" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                 '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
@@ -54,10 +57,10 @@ function getOrganizationUnits() {
                     var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>'.format(child.id, escape(child.name));
                     var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>'.format(child.id, escape(child.name));
                     var da = "";
-                    if (checkPermission(67) || checkPermission(68)) {
+                    if (_permissionList[108].have || _permissionList[109].have) {
                         da = doAction.format(
-                            checkPermission(67) ? upUnit : "",
-                            checkPermission(68) ? delUnit : "");
+                            _permissionList[108].have ? upUnit : "",
+                            _permissionList[109].have ? delUnit : "");
                     }
                     if (child.parentId == 0) {
                         mMenu = mMenuStr.format(child.id, escape(child.name));
@@ -269,12 +272,7 @@ function getMemberList(id, name) {
     memberList = new Array();
     $("#unName").text(name);
     $("#unName").attr("value", id);
-    $("#showAddMemberModal").removeClass("hidden");
     $("#showBolModal").removeClass("hidden");
-    var opType = 71;
-    if (!checkPermission(opType)) {
-        $("#showAddMemberModal").addClass("hidden");
-    }
     ajaxGet("/OrganizationUnitManagement/MemberList",
         {
             organizationUnitId: id
@@ -296,13 +294,13 @@ function getMemberList(id, name) {
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(72)
+            var columns = _permissionList[111].have
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "Name", "title": "姓名" },
                     { "data": "RoleName", "title": "角色" },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": null, "title": "操作", "render": op, "orderable": false}
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -310,12 +308,6 @@ function getMemberList(id, name) {
                     { "data": "Name", "title": "姓名" },
                     { "data": "RoleName", "title": "角色" }
                 ];
-            var defs = checkPermission(72)
-                ? [
-                    { "orderable": false, "targets": 4 }
-                ]
-                : "";
-
             $("#memberListTable")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -327,7 +319,6 @@ function getMemberList(id, name) {
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数  
                     "columns": columns,
-                    "columnDefs": defs,
                     "drawCallback": function (settings, json) {
                         $("#memberListTable td").css("padding", "3px");
                     }

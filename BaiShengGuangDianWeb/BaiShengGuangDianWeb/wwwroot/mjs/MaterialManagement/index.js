@@ -692,10 +692,10 @@ var _logConsumePlanBill = null;
 //类别选项
 function categorySelect(resolve) {
     var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var data = {}
     data.opType = opType;
     ajaxPost('/Relay/Post', data, function (ret) {
@@ -721,10 +721,10 @@ function categorySelect(resolve) {
 //名称选项
 function nameSelect(resolve, first = false, el) {
     var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var list = {};
     if (!first) {
         var categoryId = $(`#category${el}`).val();
@@ -763,10 +763,10 @@ function nameSelect(resolve, first = false, el) {
 //供应商选项
 function supplierSelect(resolve, first = false, el) {
     var opType = 831;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var list = {};
     if (!first) {
         var categoryId = $(`#category${el}`).val();
@@ -814,10 +814,10 @@ function supplierSelect(resolve, first = false, el) {
 //规格选项
 function specificationSelect(resolve, first = false, el) {
     var opType = 839;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var list = {};
     if (!first) {
         var categoryId = $(`#category${el}`).val();
@@ -873,10 +873,10 @@ function specificationSelect(resolve, first = false, el) {
 //场地选项
 function siteSelect(resolve) {
     var opType = 847;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var data = {}
     data.opType = opType;
     ajaxPost('/Relay/Post', data, function (ret) {
@@ -902,10 +902,10 @@ function siteSelect(resolve) {
 //获取物料信息
 function getMaterialList(el, resolve) {
     var opType = 800;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var list = {};
     var categoryId = $(`#category${el}`).val();
     if (isStrEmptyOrUndefined(categoryId)) {
@@ -1034,11 +1034,11 @@ function showLogModel(type = 0, id = 0) {
         $("#logEndDate").val(getDate());
     }
     _type = type;
-    var opType = 803;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //var opType = 803;
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var title = "";
     switch (type) {
         case 0:
@@ -1262,11 +1262,11 @@ function showLogConsumeModel(id, purpose, planId = 0) {
         $("#logConsumeEndDate").val(getDate());
     }
     _purposeConsume = purpose;
-    var opType = 803;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //var opType = 803;
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     var title = "领用日志";
     $("#logConsumeModal").find("h4").html(title);
     $('#billInfoConsume').addClass('hidden');
@@ -1431,11 +1431,11 @@ function getLogConsumeList(show = false) {
 /////////////////////////////////////////////入库/////////////////////////////////////////////
 //入库弹窗
 function showIncreaseModel() {
-    var opType = 801;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //var opType = 801;
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     resetIncreaseList();
 
     var planListFunc = new Promise(function (resolve, reject) {
@@ -2124,11 +2124,11 @@ function tabClick(type) {
 
 //领用弹窗
 function showConsumeModel() {
-    var opType = 802;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //var opType = 802;
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     _consumePlanList = new Array();
     _consumeOtherList = new Array();
     _consumeActualList = new Array();
@@ -3870,11 +3870,11 @@ function getQrList() {
 var _reversalTr = null;
 //冲正弹窗
 function showReversalModel() {
-    var opType = 804;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
+    //var opType = 804;
+    //if (!checkPermission(opType)) {
+    //    layer.msg('没有权限');
+    //    return;
+    //}
     $("#reversalList").empty();
     var materialListFunc = new Promise(function (resolve, reject) {
         var data = {}

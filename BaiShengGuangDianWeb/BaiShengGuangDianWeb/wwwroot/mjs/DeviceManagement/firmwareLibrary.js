@@ -1,56 +1,50 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[208] = { uIds: ['showAddFirmwareModal'] };
+    _permissionList[209] = { uIds: [] };
+    _permissionList[210] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getFirmwareList();
-    if (!checkPermission(133)) {
-        $("#showAddFirmwareModal").addClass("hidden");
-    }
-}
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-        '    </ul>' +
-        '</div>';
-    var updateLi = '<li><a onclick="showUpdateFirmwareModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\')">修改</a></li>'.format(data.Id, escape(data.FirmwareName), escape(data.VarNumber), escape(data.CommunicationProtocol), escape(data.FilePath), escape(data.Description));
-    var deleteLi = '<li><a onclick="deleteFirmware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FirmwareName));
-    html = html.format(
-        checkPermission(132) ? updateLi : "",
-        checkPermission(134) ? deleteLi : "");
-    return html;
 }
 
 function getFirmwareList() {
-    var opType = 130;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 130
         },
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var per209 = _permissionList[209].have;
+            var per210 = _permissionList[210].have;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
             var rModel = function (data, type, full, meta) {
                 full.Description = full.Description ? full.Description : "";
                 return full.Description.length > tdShowContentLength
                     ? full.Description.substr(0, tdShowContentLength) +
                     '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
-                    .format(full.Id)
+                        .format(full.Id)
                     : full.Description;
             };
-            var columns = checkPermission(132) || checkPermission(134)
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '        <span class="caret"></span>' +
+                    '        <span class="sr-only">Toggle Dropdown</span>' +
+                    '    </button>' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                    '    </ul>' +
+                    '</div>';
+                var updateLi = '<li><a onclick="showUpdateFirmwareModal({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\')">修改</a></li>'.format(data.Id, escape(data.FirmwareName), escape(data.VarNumber), escape(data.CommunicationProtocol), escape(data.FilePath), escape(data.Description));
+                var deleteLi = '<li><a onclick="deleteFirmware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FirmwareName));
+                return html.format(per209 ? updateLi : '', per210 ? deleteLi : '');
+            }
+            var columns = per209 || per210
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
@@ -84,14 +78,8 @@ function getFirmwareList() {
 }
 
 function showFilePathModel(id) {
-    var opType = 130;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 130;
     data.opData = JSON.stringify({
         id: id
     });
@@ -109,14 +97,8 @@ function showFilePathModel(id) {
 }
 
 function showDescriptionModel(id) {
-    var opType = 130;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 130;
     data.opData = JSON.stringify({
         id: id
     });
@@ -145,11 +127,6 @@ function showAddFirmwareModal() {
 }
 
 function addFirmware() {
-    var opType = 133;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var addName = $("#addName").val();
     var addNumber = $("#addNumber").val();
     var addCommunication = $("#addCommunication").val();
@@ -176,7 +153,7 @@ function addFirmware() {
         if (fileRet.errno == 0) {
             $("#addModel").modal("hide");
             var data = {};
-            data.opType = opType;
+            data.opType = 133;
             data.opData = JSON.stringify({
                 //固件版本名称
                 FirmwareName: addName,
@@ -211,16 +188,9 @@ function addFirmware() {
 
 function deleteFirmware(id, firmwareName) {
     firmwareName = unescape(firmwareName);
-
-    var opType = 134;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 134;
         data.opData = JSON.stringify({
             id: id
         });
@@ -261,13 +231,7 @@ function showUpdateFirmwareModal(id, firmwareName, firmwareNumber, firmwareCommu
 }
 
 function updateFirmware() {
-    var opType = 132;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
-
     var updateName = $("#updateName").val().trim();
     var updateNumber = $("#updateNumber").val().trim();
     var updateCommunication = $("#updateCommunication").val().trim();
@@ -291,7 +255,7 @@ function updateFirmware() {
         doSth = function () {
             $("#updateFirm").modal("hide");
             var data = {}
-            data.opType = opType;
+            data.opType = 132;
             data.opData = JSON.stringify({
                 id: id,
                 //固件版本名称
@@ -349,5 +313,4 @@ function updateFirmware() {
         };
         showConfirm("修改", doSth);
     }
-
 }

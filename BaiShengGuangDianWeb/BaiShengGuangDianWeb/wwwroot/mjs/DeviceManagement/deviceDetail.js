@@ -1,11 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[169] = { uIds: ['upgradeFirmwareBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $("#detailFirmware").select2();
-    //检查设备升级权限
-    if (checkPermission(108)) {
-        $("#upgradeFirmwareBtn").removeClass("hidden");
-    } else {
-        $("#upgradeFirmwareBtn").addClass("hidden");
-    }
     var idStr = getQueryString("id");
     if (idStr != null) {
         id = parseInt(idStr);
@@ -14,7 +11,6 @@
         getControlList();
         getStateList();
     });
-
     $("#detailFirmware").on("select2:select", function (e) {
         if ($("#detailFirmware").val() == $("#detailFirmware").attr("oval")) {
             $("#upgradeFirmwareBtn").attr("disabled", "disabled");
@@ -22,21 +18,12 @@
             $("#upgradeFirmwareBtn").removeAttr("disabled");
         }
     });
-    //$("#detailFirmware").select2({
-    //    allowClear: true,
-    //    placeholder: "请选择"
-    //});
 }
 
 var id = 1;
 function getControlList() {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     data.opData = JSON.stringify({
         hard: true
     });
@@ -46,7 +33,6 @@ function getControlList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             $(".ms2").empty();
             $(".ms2").select2();
             var exit = false;
@@ -106,13 +92,8 @@ function selectChange(datas) {
 //状态信息
 function getStateList() {
     $("#StateBox input").val("无数据");
-    var opType = 109;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 109;
     data.opData = JSON.stringify({
         id: id
     });
@@ -131,7 +112,7 @@ function getStateList() {
                 switch (key) {
                     case 1:
                         //if (val == 0) {
-                            info = firstData.DeviceStateStr;
+                        info = firstData.DeviceStateStr;
                         //}
                         break;
                     default:
@@ -143,42 +124,26 @@ function getStateList() {
 }
 
 function getFirmwareList(func) {
-    var opType = 130;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    ajaxPost("/Relay/Post",
-        {
-            opType: opType
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            $("#detailFirmware").empty();
-            var option = '<option value="{0}" path="{2}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#detailFirmware").append(option.format(data.Id, data.FirmwareName, data.FilePath));
-            }
-            func();
-        });
+    ajaxPost("/Relay/Post", { opType: 130 }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $("#detailFirmware").empty();
+        var option = '<option value="{0}" path="{2}">{1}</option>';
+        for (var i = 0; i < ret.datas.length; i++) {
+            var data = ret.datas[i];
+            $("#detailFirmware").append(option.format(data.Id, data.FirmwareName, data.FilePath));
+        }
+        func();
+    });
 }
 
 //升级固件
 function upgradeFirmware() {
-    var opType = 108;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var v = $("#detailFirmware").val();
     var data = {}
-    data.opType = opType;
+    data.opType = 108;
     data.opData = JSON.stringify({
         Type: fileEnum.FirmwareLibrary,
         DeviceId: $("#detailCode2").val(),
@@ -189,7 +154,7 @@ function upgradeFirmware() {
         function (ret) {
             layer.msg(ret.errmsg);
             if (ret.errno == 0) {
-                getControlList()
+                getControlList();
             }
         });
 }

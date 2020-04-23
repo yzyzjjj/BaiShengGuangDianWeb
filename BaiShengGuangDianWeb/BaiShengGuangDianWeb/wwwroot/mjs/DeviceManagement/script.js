@@ -1,4 +1,16 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[200] = { uIds: ['showManageModelBtn'] };
+    _permissionList[236] = { uIds: ['showAddScriptVersionModel'] };
+    _permissionList[237] = { uIds: [] };
+    _permissionList[238] = { uIds: [] };
+    _permissionList[201] = { uIds: ['showUsuallyDictionaryTypeModelBtn'] };
+    _permissionList[202] = { uIds: ['showUsuallyVariableTypeModelBtn'] };
+    _permissionList[241] = { uIds: ['showAddUsuallyVariableTypeModel'] };
+    _permissionList[242] = { uIds: [] };
+    _permissionList[243] = { uIds: [] };
+    _permissionList[203] = { uIds: ['showAddModel'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ads").css("width", "100%");
     $(".ads").select2();
     getDataTypeList();
@@ -32,7 +44,6 @@
         $("#jsonName").val(name);
     });
     $("#aDataType").change(function (e) {
-        var aDataType = $("#aDataType").val();
         var fScriptVersion = $("#fScriptVersion").val();
         switch (fScriptVersion) {
             case "1":
@@ -129,12 +140,8 @@
         allowClear: true,
         placeholder: "请选择"
     });
-    var opType = 113;
-    if (!checkPermission(opType)) {
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 113;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -142,13 +149,9 @@
         }
         scriptData = ret.datas;
     });
-    opType = 112;
-    if (!checkPermission(opType)) {
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 112
         },
         function (ret) {
             if (ret.errno != 0) {
@@ -160,23 +163,12 @@
     $("#udtScriptVersion").on("select2:select", function (e) {
         showUsuallyDictionaryTypeModel(true);
     });
-    if (!checkPermission(111)) {
-        $("#showAddModel").addClass("hidden");
-    }
-    if (!checkPermission(114)) {
-        $("#showAddScriptVersionModel").addClass("hidden");
-    }
 }
 var jsonData = null;
 var scriptData = null;
 function getScriptVersionAllList(type) {
-    var opType = 113;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 113;
     ajaxPost("/Relay/Post",
         data,
         function (ret) {
@@ -185,9 +177,10 @@ function getScriptVersionAllList(type) {
                 return;
             }
             scriptData = ret.datas;
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var per237 = _permissionList[237].have;
+            var per238 = _permissionList[238].have;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">{0}{1}</div>';
@@ -197,13 +190,9 @@ function getScriptVersionAllList(type) {
                 var delBtn =
                     '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'
                         .format(data.Id, escape(data.ScriptName));
-
-                html = html.format(
-                    checkPermission(115) ? changeBtn : "",
-                    checkPermission(116) ? delBtn : "");
-                return html;
+                return html.format(per237 ? changeBtn : "", per238 ? delBtn : "");
             };
-            var columns = checkPermission(115) || checkPermission(116)
+            var columns = per237 || per238
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
@@ -211,7 +200,7 @@ function getScriptVersionAllList(type) {
                     { "data": "ValueNumber", "title": "变量数" },
                     { "data": "InputNumber", "title": "输入口数" },
                     { "data": "OutputNumber", "title": "输出口数" },
-                    { "data": null, "title": "操作", "render": op }
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -248,11 +237,6 @@ function showAddScriptVersionModel() {
 }
 
 function addScriptVersion() {
-    var opType = 114;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var addScriptVersionDeviceModel = $("#addScriptVersionDeviceModel").val();
     var addScriptVersionName = $("#addScriptVersionName").val().trim();
     if (isStrEmptyOrUndefined(addScriptVersionName)) {
@@ -267,7 +251,7 @@ function addScriptVersion() {
     var doSth = function () {
         $("#addScriptVersionModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 114;
         data.opData = JSON.stringify({
             //类型名称
             DeviceModelId: addScriptVersionDeviceModelList,
@@ -286,14 +270,9 @@ function addScriptVersion() {
 }
 
 function deleteScriptVersion(id, name) {
-    var opType = 116;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 116;
         data.opData = JSON.stringify({
             id: id
         });
@@ -323,11 +302,6 @@ function showUpdateScriptVersionModel(id, deviceModel, name) {
 }
 
 function updateScriptVersion() {
-    var opType = 115;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var updateScriptVersionDeviceModel = $("#updateScriptVersionDeviceModel").val();
     var updateScriptVersionName = $("#updateScriptVersionName").val().trim();
     if (isStrEmptyOrUndefined(updateScriptVersionName)) {
@@ -343,7 +317,7 @@ function updateScriptVersion() {
     var doSth = function () {
         $("#updateScriptVersionModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 115;
         data.opData = JSON.stringify({
             id: id,
             //类型名称
@@ -366,34 +340,25 @@ var valueType = null;
 var deModel = 0;
 var sScrId = 0;
 function getDataTypeList() {
-    var opType = 112;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    ajaxPost("/Relay/Post",
-        {
-            opType: opType
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            valueType = ret.datas;
-            $("#aDataType").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $("#aDataType").append(option.format(data.Id, data.TypeName));
-            }
-            $("#addDataType").empty();
-            var option1 = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data1 = ret.datas[i];
-                $("#addDataType").append(option1.format(data1.Id, data1.TypeName));
-            }
-        });
+    ajaxPost("/Relay/Post", { opType: 112 }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        valueType = ret.datas;
+        $("#aDataType").empty();
+        var option = '<option value="{0}">{1}</option>';
+        for (var i = 0; i < ret.datas.length; i++) {
+            var data = ret.datas[i];
+            $("#aDataType").append(option.format(data.Id, data.TypeName));
+        }
+        $("#addDataType").empty();
+        var option1 = '<option value="{0}">{1}</option>';
+        for (var i = 0; i < ret.datas.length; i++) {
+            var data1 = ret.datas[i];
+            $("#addDataType").append(option1.format(data1.Id, data1.TypeName));
+        }
+    });
 }
 
 function getDeviceModelList() {
@@ -405,47 +370,31 @@ function getDeviceModelList() {
     $("#outList_wrapper").parent().empty()
         .append('<table class="table table-hover table-striped" id="outList"></table>');
     deModel = 0;
-    var opType = 120;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    ajaxPost("/Relay/Post",
-        {
-            opType: opType
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            $("#sDeviceModel").empty();
-            $("#addScriptVersionDeviceModel").empty();
-            $("#updateScriptVersionDeviceModel").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (deModel == 0)
-                    deModel = data.Id;
-                $("#sDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-                $("#addScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-                $("#updateScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-            }
-            getScriptVersionList();
-
-        });
+    ajaxPost("/Relay/Post", { opType: 120 }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $("#sDeviceModel").empty();
+        $("#addScriptVersionDeviceModel").empty();
+        $("#updateScriptVersionDeviceModel").empty();
+        var option = '<option value="{0}">{1}</option>';
+        for (var i = 0; i < ret.datas.length; i++) {
+            var data = ret.datas[i];
+            if (deModel == 0)
+                deModel = data.Id;
+            $("#sDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+            $("#addScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+            $("#updateScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+        }
+        getScriptVersionList();
+    });
 }
 
 function getScriptVersionList() {
     sScrId = 0;
-    var opType = 105;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 105;
     data.opData = JSON.stringify({
         //设备类型
         id: deModel
@@ -455,7 +404,6 @@ function getScriptVersionList() {
             layer.msg(ret.errmsg);
             return;
         }
-
         $("#sScriptVersion").empty();
         var option = '<option value="{0}">{1}</option>';
         for (var i = 0; i < ret.datas.length; i++) {
@@ -466,27 +414,19 @@ function getScriptVersionList() {
         }
         $("#sScriptVersion").val(0).trigger("update");
         //getScriptVersionDetailList();
-
-
     });
 }
 
 function getScriptVersionDetailList() {
-    var opType = 106;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (sScrId == 0) {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 106;
     data.opData = JSON.stringify({
         //设备类型
         id: sScrId
     });
-
     $("#valList").empty();
     $("#inList").empty();
     $("#outList").empty();
@@ -495,7 +435,6 @@ function getScriptVersionDetailList() {
             layer.msg(ret.errmsg);
             return;
         }
-
         function getData(results, type) {
             var res = new Array();
             for (var i = 0; i < results.length; i++) {
@@ -531,7 +470,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false}
+                    { "data": "Remark", "title": "备注", "bVisible": false }
                 ]
             });
         var data2 = getData(ret.datas, 2);
@@ -559,7 +498,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false}
+                    { "data": "Remark", "title": "备注", "bVisible": false }
                 ]
             });
         var data3 = getData(ret.datas, 3);
@@ -587,7 +526,7 @@ function getScriptVersionDetailList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "VariableName", "title": "名称" },
                     { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false}
+                    { "data": "Remark", "title": "备注", "bVisible": false }
                 ]
             });
     });
@@ -598,42 +537,28 @@ var adeModel = 0;
 var asScrId = 0;
 function getDeviceModelList1(type) {
     adeModel = 0;
-    var opType = 120;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    ajaxPost("/Relay/Post",
-        {
-            opType: opType
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
+    ajaxPost("/Relay/Post", { opType: 120 }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
 
-            $("#aDeviceModel").empty();
-            var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                if (adeModel == 0)
-                    adeModel = data.Id;
-                $("#aDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-            }
-            getScriptVersionList1(type);
-        });
+        $("#aDeviceModel").empty();
+        var option = '<option value="{0}">{1}</option>';
+        for (var i = 0; i < ret.datas.length; i++) {
+            var data = ret.datas[i];
+            if (adeModel == 0)
+                adeModel = data.Id;
+            $("#aDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
+        }
+        getScriptVersionList1(type);
+    });
 }
 
 function getScriptVersionList1(type) {
     asScrId = 0;
-    var opType = 105;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 105;
     data.opData = JSON.stringify({
         //设备类型
         id: adeModel
@@ -662,7 +587,6 @@ function getScriptVersionList1(type) {
 }
 
 function showAddModel() {
-    //$("#fScriptVersion").val(0).trigger("change");
     reset();
     getDeviceModelList1(1);
 }
@@ -734,11 +658,6 @@ function delSelf(id) {
 }
 
 function addValues() {
-    var opType = 111;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var v = $("#fScriptVersion").val();
     var sDeviceModel = $("#sDeviceModel").val();
     var aDataType = $("#aDataType").val();
@@ -809,7 +728,7 @@ function addValues() {
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 111;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -840,14 +759,8 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
                 //    $("#udtScriptVersion").val(scriptId).trigger("update");
             }
         }
-
-        var opType = 118;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
-        data.opType = opType;
+        data.opType = 118;
         data.opData = JSON.stringify({
             id: $("#udtScriptVersion").val()
         });
@@ -876,14 +789,8 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
 }
 var usData = null;
 function showUsuallyDictionary() {
-    var opType = 106;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 106;
     data.opData = JSON.stringify({
         id: $("#udtScriptVersion").val()
     });
@@ -996,13 +903,7 @@ function updateUdt() {
     var scrId = $("#udtScriptVersion").val();
     if (scrId == null)
         return;
-
     if (usData.length > 0) {
-        var opType = 119;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var change = false;
         var postData = [];
         for (var d in usData) {
@@ -1041,7 +942,7 @@ function updateUdt() {
 
         var doSth = function () {
             var data = {}
-            data.opType = opType;
+            data.opType = 119;
             data.opData = JSON.stringify(postData);
             ajaxPost("/Relay/Post", data, function (ret) {
                 layer.msg(ret.errmsg);
@@ -1057,19 +958,16 @@ var statisticTypeName;
 var dataStatisticType;
 function showUsuallyVariableTypeModel() {
     dataStatisticType = new Array();
-    var opType = 157;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 157;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var per242 = _permissionList[242].have;
+            var per243 = _permissionList[243].have;
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">{0}{1}</div>';
                 var changeBtn =
@@ -1079,14 +977,10 @@ function showUsuallyVariableTypeModel() {
                     '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteVariableType({0}, \'{1}\')">删除</button>'
                         .format(data.Id, escape(data.VariableName));
 
-                html = html.format(
-                    checkPermission(160) ? changeBtn : "",
-                    checkPermission(161) ? delBtn : "");
-                return html;
+                return html.format(per242 ? changeBtn : '', per243 ? delBtn : '');
             };
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (a, b, c,d) {
+                return ++d.row;
             }
             var statistic = function (data, type, full, meta) {
                 if (full.StatisticType == 0) {
@@ -1102,7 +996,7 @@ function showUsuallyVariableTypeModel() {
             var yesNo = function (data, type, full, meta) {
                 return full.IsDetail == true ? "是" : "否";
             }
-            var columns = checkPermission(160) || checkPermission(161)
+            var columns = per242 || per243
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "VariableName", "title": "变量名称" },
@@ -1161,14 +1055,9 @@ function showUsuallyVariableTypeModel() {
 }
 
 function deleteVariableType(id, name) {
-    var opType = 161;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 161;
         data.opData = JSON.stringify({
             id: id
         });
@@ -1191,11 +1080,6 @@ function showAddUsuallyVariableTypeModel() {
 }
 
 function addVariableType() {
-    var opType = 159;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var variableName = $("#addVariableName").val().trim();
     var dataType = $("#addDataType").val();
     var variableSite = $("#addVariableSite").val().replace(/\b(0+)/gi, "");
@@ -1210,7 +1094,7 @@ function addVariableType() {
     var doSth = function () {
         $("#addUsuallyVariableTypeModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 159;
         data.opData = JSON.stringify({
             VariableTypeId: dataType,
             DictionaryId: variableSite,
@@ -1236,11 +1120,6 @@ function showUpdateVariableTypeModel(id, variableName, statisticType) {
 }
 
 function updateVariableType() {
-    var opType = 160;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var updateVariableName = $("#updateVariableName").val().trim();
     var updateStatisticType = $("#updateStatisticType").val().trim();
     if (isStrEmptyOrUndefined(updateVariableName)) {
@@ -1251,7 +1130,7 @@ function updateVariableType() {
     var doSth = function () {
         $("#updateUsuallyVariableTypeModel").modal("hide");
         var data = {};
-        data.opType = opType;
+        data.opType = 160;
         data.opData = JSON.stringify({
             id: id,
             VariableName: updateVariableName,

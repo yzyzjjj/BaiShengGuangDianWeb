@@ -1,48 +1,26 @@
-﻿
+﻿var _permissionList = [];
 function pageReady() {
+    _permissionList[215] = { uIds: ['showAddHardwareModal'] };
+    _permissionList[216] = { uIds: [] };
+    _permissionList[217] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getHardwareList();
-    if (!checkPermission(138)) {
-        $("#showAddHardwareModal").addClass("hidden");
-    }
-}
-
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-        '    </ul>' +
-        '</div>';
-    var updateLi = '<li><a onclick="showUpdateHardware({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, escape(data.HardwareName), data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, escape(data.Description));
-    var deleteLi = '<li><a onclick="deleteHardware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.HardwareName));
-    html = html.format(
-        checkPermission(137) ? updateLi : "",
-        checkPermission(139) ? deleteLi : "");
-    return html;
 }
 
 function getHardwareList() {
-    var opType = 135;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 135
         },
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var per216 = _permissionList[216].have;
+            var per217 = _permissionList[217].have;
+            var order = function (a, b, c,d) {
+                return ++d.row;
             }
             var rModel = function (data, type, full, meta) {
                 full.Description = full.Description ? full.Description : "";
@@ -52,7 +30,21 @@ function getHardwareList() {
                     .format(full.Id)
                     : full.Description;
             };
-            var columns = checkPermission(137) || checkPermission(139)
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '        <span class="caret"></span>' +
+                    '        <span class="sr-only">Toggle Dropdown</span>' +
+                    '    </button>' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                    '    </ul>' +
+                    '</div>';
+                var updateLi = '<li><a onclick="showUpdateHardware({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', \'{7}\', \'{8}\')">修改</a></li>'.format(data.Id, escape(data.HardwareName), data.InputNumber, data.OutputNumber, data.DacNumber, data.AdcNumber, data.AxisNumber, data.ComNumber, escape(data.Description));
+                var deleteLi = '<li><a onclick="deleteHardware({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.HardwareName));
+                return html.format(per216 ? updateLi : '',per217 ? deleteLi : '');
+            }
+            var columns = per216 || per217
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
@@ -94,14 +86,8 @@ function getHardwareList() {
 }
 
 function showDescriptionModel(id) {
-    var opType = 135;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 135;
     data.opData = JSON.stringify({
         id: id
     });
@@ -125,11 +111,6 @@ function showAddHardwareModal() {
 }
 
 function addHardware() {
-    var opType = 138;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var addHardwareName = $("#addHardwareName").val().trim();
     var addInputNumber = $("#addInputNumber").val().trim();
     var addOutputNumber = $("#addOutputNumber").val().trim();
@@ -170,7 +151,7 @@ function addHardware() {
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 138;
         data.opData = JSON.stringify({
             //硬件版本名称
             HardwareName: addHardwareName,
@@ -202,15 +183,9 @@ function addHardware() {
 
 function deleteHardware(id, hardName) {
     hardName = unescape(hardName);
-    var opType = 139;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 139;
         data.opData = JSON.stringify({
             id: id
         });
@@ -243,13 +218,7 @@ function showUpdateHardware(id, hardName, inputNumber, outputNumber, dacNumber, 
 }
 
 function updateHardware() {
-    var opType = 137;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
-
     var updateHardwareName = $("#updateHardwareName").val().trim();
     var updateInputNumber = $("#updateInputNumber").val().trim();
     var updateOutputNumber = $("#updateOutputNumber").val().trim();
@@ -291,7 +260,7 @@ function updateHardware() {
         $("#updateHardwareModal").modal("hide");
 
         var data = {}
-        data.opType = opType;
+        data.opType = 137;
         data.opData = JSON.stringify({
             id: id,
             //硬件版本名称
@@ -320,7 +289,4 @@ function updateHardware() {
             });
     }
     showConfirm("修改", doSth);
-
 }
-
-

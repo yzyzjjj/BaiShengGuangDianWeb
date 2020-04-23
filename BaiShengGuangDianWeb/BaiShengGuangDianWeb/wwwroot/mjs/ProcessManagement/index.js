@@ -1,8 +1,16 @@
-﻿function pageReady() {
-
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[357] = { uIds: ['getProcessListBtn307'] };
+    _permissionList[366] = { uIds: [] };
+    _permissionList[367] = { uIds: [] };
+    _permissionList[368] = { uIds: [] };
+    _permissionList[358] = { uIds: ['getProcessListBtn308'] };
+    _permissionList[359] = { uIds: ['getProcessListBtn309'] };
+    _permissionList[360] = { uIds: ['getProcessListBtn310'] };
+    _permissionList[361] = { uIds: ['showAddModel'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     getProcessList();
-
     $("#pdProcess1").on("select2:select", function (e) {
         var id = $("#pdProcess1").val();
         showProcessDetailModel(id);
@@ -36,9 +44,6 @@
     $("#apProductionProcessName").on("select2:unselect", function (e) {
         getDeviceList(-1);
     });
-    if (!checkPermission(316)) {
-        $("#showAddModel").addClass("hidden");
-    }
     $("#apBody").off("focusin").on("focusin", "input", function () {
         var v = $(this).val();
         if (v == 0) {
@@ -63,11 +68,6 @@ function getProcessList(type = 307) {
             return;
         else
             opType = lastType;
-
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (type != -1)
         lastType = type;
     var data = {}
@@ -78,6 +78,9 @@ function getProcessList(type = 307) {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var per366 = _permissionList[366].have;
+            var per367 = _permissionList[367].have;
+            var per368 = _permissionList[368].have;
             lastData = ret.datas;
             var op = function (data, type, row) {
                 var html = "{0}{1}{2}{3}";
@@ -85,17 +88,14 @@ function getProcessList(type = 307) {
                 var updateBtn = '<button type="button" class="btn btn-warning" onclick="showUpdateProcessModel({0})">修改</button>'.format(data.Id);
                 var copyBtn = '<button type="button" class="btn btn-info" onclick="showAddModel({0})">拷贝</button>'.format(data.Id);
                 var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteProcess({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.ProcessNumber));
-
-                html = html.format(
-                    checkPermission(313) ? detailBtn : "",
-                    checkPermission(313) && lastType == 307 ? updateBtn : "",
-                    checkPermission(316) && lastType == 307 ? copyBtn : "",
-                    checkPermission(317) && lastType == 307 ? delBtn : "");
-                return html;
+                return html.format(
+                    per366 ? detailBtn : "",
+                    per366 && lastType == 307 ? updateBtn : "",
+                    per367 && lastType == 307 ? copyBtn : "",
+                    per368 && lastType == 307 ? delBtn : "");
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (a, b, c,d) {
+                return ++d.row;
             }
             var rProcessNumber = function (data, type, full, meta) {
                 if (full.ProcessNumber) {
@@ -149,7 +149,8 @@ function getProcessList(type = 307) {
                     return "";
                 }
             };
-            var columns = checkPermission(313) || ((checkPermission(316) || checkPermission(317)) && lastType == 307)
+            var tf = per366 || per367 || per368;
+            var columns = tf && lastType == 307
                 ? [
                     { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
@@ -195,16 +196,9 @@ function showDetailModel(content, title) {
 
 function deleteProcess(id, name) {
     name = unescape(name);
-
-    var opType = 317;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 317;
         data.opData = JSON.stringify({
             id: id
         });
@@ -569,14 +563,9 @@ function getMenuList() {
 
 function getDeviceModelList(resolve = null) {
     $("#apDeviceModel").empty();
-    var opType = 120;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 120
         },
         function (ret) {
             if (resolve != null)
@@ -593,20 +582,13 @@ function getDeviceModelList(resolve = null) {
             }
             if (cData != null)
                 $("#apDeviceModel").val(cData.DeviceModels.split(",")).trigger("change");
-
-            //getProductionProcessList();
         });
 }
 
 function getProductionProcessList(resolve = null) {
     $("#apProductionProcessName").empty();
-    var opType = 215;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 215;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -618,7 +600,6 @@ function getProductionProcessList(resolve = null) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var option = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {
                 var data = ret.datas[i];
@@ -634,12 +615,6 @@ function getProductionProcessList(resolve = null) {
 
 function getDeviceList(type = 0, resolve = null) {
     $("#apCode").empty();
-    var opType = 319;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var deviceModelIds = $("#apDeviceModel").val();
     var productionProcessIds = $("#apProductionProcessName").val();
     if (deviceModelIds == null ||
@@ -648,9 +623,8 @@ function getDeviceList(type = 0, resolve = null) {
         $("#addProcessModel").modal("show");
         return;
     }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 319;
     var d = {
         DeviceModelIds: deviceModelIds.join(","),
         ProductionProcessIds: productionProcessIds
@@ -737,11 +711,6 @@ function delSelf(id) {
 }
 
 function addProcess() {
-    var opType = 316;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var apProcess = $("#apProcess").val().trim();
     if (isStrEmptyOrUndefined(apProcess)) {
         showTip($("#apProcessTip"), "工艺编号不能为空");
@@ -822,7 +791,7 @@ function addProcess() {
     var doSth = function () {
         $("#addProcessModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 316;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -897,11 +866,6 @@ function showUpdateProcessModel(id) {
 }
 
 function updateProcess() {
-    var opType = 313;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var apProcess = $("#apProcess").val().trim();
     if (isStrEmptyOrUndefined(apProcess)) {
         showTip($("#apProcessTip"), "工艺编号不能为空");
@@ -985,7 +949,7 @@ function updateProcess() {
     var doSth = function () {
         $("#addProcessModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 313;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {

@@ -1,4 +1,12 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[286] = { uIds: ['addSpotPlanCheckModalBtn'] };
+    _permissionList[287] = { uIds: ['showUpdateSpotPlanBtn'] };
+    _permissionList[288] = { uIds: ['delSpotPlanBtn'] };
+    _permissionList[289] = { uIds: ['addSpotCheckModalBtn'] };
+    _permissionList[290] = { uIds: ['updateSportPlanCheckBtn'] };
+    _permissionList[291] = { uIds: ['delSpotPlanCheckBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     getSpotPlan();
     $('#spotPlanSelect').on('select2:select', function () {
@@ -51,13 +59,8 @@
 var _planId = null;
 //获取点检计划
 function getSpotPlan() {
-    var opType = 600;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 600;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -113,17 +116,12 @@ function getSpotCheckList() {
     _spotCheckBodyRow = 0;
     _spotCheckIdData = [];
     _spotCheckNameData = [];
-    var opType = 605;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     _planId = $('#spotPlanSelect').val();
     if (isStrEmptyOrUndefined(_planId)) {
         return;
     }
     var data = {};
-    data.opType = opType;
+    data.opType = 605;
     data.opData = JSON.stringify({
         qId: _planId
     });
@@ -333,11 +331,6 @@ function showUpdateSpotPlan() {
 
 //修改计划
 function updateSpotPlan() {
-    var opType = 601;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var planId = parseInt($("#updateSpotPlanSelect").val());
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg('请选择点检计划');
@@ -350,7 +343,7 @@ function updateSpotPlan() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 601;
         data.opData = JSON.stringify({
             id: planId,
             Plan: spotPlan
@@ -519,10 +512,6 @@ function addSpotPlan() {
     var opType, spotCheckItems = [], planCheck, spotPlanId, i = 0, trData;
     if (_isPlanOP) {
         opType = 607;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         spotPlanId = $('#addSpotPlanCheck').val();
         if (isStrEmptyOrUndefined(spotPlanId)) {
             layer.msg('请选择点检计划');
@@ -543,10 +532,6 @@ function addSpotPlan() {
         planCheck = spotCheckItems;
     } else {
         opType = 602;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         planCheck = {};
         var spotPlanName = $('#addSpotPlan').val().trim();
         if (isStrEmptyOrUndefined(spotPlanName)) {
@@ -586,11 +571,6 @@ function addSpotPlan() {
 
 //删除计划
 function delSpotPlan() {
-    var opType = 603;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var planId = _planId;
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg('请选择点检计划');
@@ -599,7 +579,7 @@ function delSpotPlan() {
     var planName = $('#spotPlanSelect').find(`[value=${planId}]`).text();
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 603;
         data.opData = JSON.stringify({
             id: planId
         });
@@ -618,11 +598,6 @@ function delSpotPlan() {
 var _spotCheckBodyRow = 0;
 //保存修改
 function updateSportPlanCheck() {
-    var opType = 606;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var planId = _planId;
     var planCheckBody = $('#spotCheckList tbody');
     if (!_spotCheckBodyRow) {
@@ -649,7 +624,7 @@ function updateSportPlanCheck() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 606;
         data.opData = JSON.stringify(spotCheckItems);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -666,11 +641,6 @@ var _spotCheckIdData = [];
 var _spotCheckNameData = [];
 //删除点检
 function delSpotPlanCheck() {
-    var opType = 608;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_spotCheckIdData.length) {
         layer.msg("请选择要删除的点检项");
         return;
@@ -678,7 +648,7 @@ function delSpotPlanCheck() {
     var name = _spotCheckNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 608;
         data.opData = JSON.stringify({
             ids: _spotCheckIdData
         });

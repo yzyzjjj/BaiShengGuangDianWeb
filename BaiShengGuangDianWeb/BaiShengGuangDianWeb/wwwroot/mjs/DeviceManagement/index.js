@@ -1,13 +1,17 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[161] = { uIds: ['showAddModel'] };
+    _permissionList[162] = { uIds: [] };
+    _permissionList[163] = { uIds: [] };
+    _permissionList[164] = { uIds: [] };
+    _permissionList[148] = { uIds: [] };
+    _permissionList[147] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getDeviceList();
     $(".ads").css("width", "100%");
     $(".col-sm-2").addClass("mcolsm2");
     $("#addIp").inputmask("ip");
     $("#updateIp").inputmask("ip");
-    if (!checkPermission(103)) {
-        $("#showAddModel").addClass("hidden");
-    }
-
     $("#addDeviceCategory").on("select2:select", function (e) {
         hideTip("addDeviceModelTip");
         hideTip("addScriptTip");
@@ -32,7 +36,6 @@
             }
         }
     });
-
     $("#addDeviceModel").on("select2:select", function (e) {
         hideTip("addScriptTip");
         var modelId = parseInt($("#addDeviceModel option:checked").val());
@@ -44,7 +47,6 @@
             }
         }
     });
-
     $("#updateDeviceCategory").on("select2:select", function (e) {
         hideTip("updateDeviceModelTip");
         hideTip("updateScriptTip");
@@ -69,7 +71,6 @@
             }
         }
     });
-
     $("#updateDeviceModel").on("select2:select", function (e) {
         var modelId = parseInt($("#updateDeviceModel option:checked").val());
         $("#updateScript").empty();
@@ -83,13 +84,8 @@
     });
 }
 function getDeviceList() {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     data.opData = JSON.stringify({
         hard: true
     });
@@ -99,7 +95,11 @@ function getDeviceList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var per148 = _permissionList[148].have;
+            var per147 = _permissionList[147].have;
+            var per162 = _permissionList[162].have;
+            var per164 = _permissionList[164].have;
+            var per163 = _permissionList[163].have;
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
@@ -110,7 +110,6 @@ function getDeviceList() {
                     '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}{2}{3}{4}' +
                     '</ul>' +
                     '</div>';
-
                 var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
                 var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15})">修改</a></li>'
@@ -118,18 +117,16 @@ function getDeviceList() {
                         escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId));
                 var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.Code));
-
                 html = html.format(
-                    controlLi,
-                    checkPermission(101) ? detailLi : "",
-                    checkPermission(102) ? updateLi : "",
-                    checkPermission(108) ? upgradeLi : "",
-                    checkPermission(104) ? deleteLi : "");
-
+                    per148 ? controlLi : '',
+                    per147 ? detailLi : '',
+                    per162 ? updateLi : '',
+                    per164 ? upgradeLi : '',
+                    per163 ? deleteLi : '');
                 return html;
             }
             var ip = function (data, type, row) {
-                return data.Ip + ':' + data.Port;
+                return `${data.Ip}:${data.Port}`;
             }
             var state = function (data, type, row) {
                 var state = data.StateStr;
@@ -155,12 +152,12 @@ function getDeviceList() {
             var order = function (data, type, row, meta) {
                 return meta.row + 1;
             }
-            var rModal = function(data, type, meta) {
+            var rModal = function (data, type, meta) {
                 var placeName = data.SiteName + data.RegionDescription;
                 return ("" + placeName).length > tdShowContentLength
                     ? placeName.substr(0, tdShowContentLength) +
                     ' <a href = \"javascript:showPlaceNameModel({0})\">...</a> '
-                    .format(data.Id)
+                        .format(data.Id)
                     : placeName;
             };
             $("#deviceList")
@@ -177,26 +174,20 @@ function getDeviceList() {
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Code", "title": "机台号", "type": "html-percent" },
                         { "data": null, "title": "设备型号", "render": modelName },
-                        { "data": null, "title": "摆放位置", "render": rModal},
+                        { "data": null, "title": "摆放位置", "render": rModal },
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorName", "title": "管理员" },
                         { "data": null, "title": "运行状态", "render": state },
                         { "data": null, "title": "设备状态", "render": deviceState },
-                        { "data": null, "title": "操作", "render": op, "orderable": false}
+                        { "data": null, "title": "操作", "render": op, "orderable": false, "visible": per148 || per147 || per162 || per164 || per163 }
                     ]
                 });
         });
 }
 
 function showPlaceNameModel(id) {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     data.opData = JSON.stringify({
         id: id
     });
@@ -245,13 +236,8 @@ function initAddSelect() {
 }
 
 function showAddModel() {
-    var opType = 107;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 107;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -315,11 +301,6 @@ function showAddModel() {
 }
 
 function addDevice() {
-    var opType = 103;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var add = true;
     //机台号
     var code = $("#addCode").val().trim();
@@ -408,7 +389,7 @@ function addDevice() {
         $("#addModel").modal("hide");
 
         var data = {}
-        data.opType = opType;
+        data.opType = 103;
         data.opData = JSON.stringify({
             //机台号
             Code: code,
@@ -487,14 +468,8 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
     administrator = unescape(administrator);
     remark = unescape(remark);
     categoryId = unescape(categoryId);
-
-    var opType = 107;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 107;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -564,11 +539,6 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
 }
 
 function updateDevice() {
-    var opType = 102;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
     var update = true;
     //机台号
@@ -658,7 +628,7 @@ function updateDevice() {
         $("#updateModel").modal("hide");
 
         var data = {}
-        data.opType = opType;
+        data.opType = 102;
         data.opData = JSON.stringify({
             id: id,
             //机台号
@@ -720,15 +690,9 @@ function showUpgrade(id) {
 
 function deleteDevice(id, code) {
     code = unescape(code);
-
-    var opType = 104;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 104;
         data.opData = JSON.stringify({
             id: id
         });
@@ -742,6 +706,3 @@ function deleteDevice(id, code) {
     }
     showConfirm("删除机台号：" + code, doSth);
 }
-
-
-

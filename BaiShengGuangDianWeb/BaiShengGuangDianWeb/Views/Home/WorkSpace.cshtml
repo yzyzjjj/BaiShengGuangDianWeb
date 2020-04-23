@@ -13,10 +13,10 @@
 <section class="content-header flexStyle" style="justify-content: space-between;flex-wrap: wrap">
     <h1>@ViewBag.Title</h1>
     <div class="flexStyle">
-        <button type="button" class="btn btn-primary btn-sm" onclick="showInputReport()">报表输入</button>
-        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" style="margin-left: 10px">故障报修</button>
-        <button type="button" class="btn btn-success btn-sm" onclick="showLogModel()" style="margin-left: 10px">报修记录</button>
-        <button type="button" class="btn btn-warning btn-sm" onclick="showMaintainerModel()" style="margin-left: 10px">维修工名单</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="showInputReport()" id="showInputReportBtn">报表输入</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" id="showFaultModelBtn" style="margin-left: 10px">故障报修</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="showLogModel()" id="showLogModelBtn" style="margin-left: 10px">报修记录</button>
+        <button type="button" class="btn btn-warning btn-sm" onclick="showMaintainerModel()" id="showMaintainerModelBtn" style="margin-left: 10px">维修工名单</button>
     </div>
 </section>
 <section class="content ">
@@ -26,7 +26,7 @@
                 <div class="box-header with-border">
                     <h3 class="box-title">生产加工</h3>
                     <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="addCraftModal()">操作</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addCraftModal()" id="addCraftModalBtn">操作</button>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div style="display: flex; align-items: center">
                             <input type="tel" class="form-control" id="flowCard" value="" autofocus autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
-                            <button type="button" class="btn btn-primary" onclick="queryFlowCard()" style="margin-left: 3px">查询</button>
+                            <button type="button" class="btn btn-primary" onclick="queryFlowCard()" id="queryFlowCardBtn" style="margin-left: 3px">查询</button>
                             <button type="button" id="flowCardEmpty" class="btn btn-success" style="margin-left: 3px">清空</button>
                         </div>
                     </div>
@@ -57,12 +57,12 @@
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <td>工序</td>
-                                            <td>工序名称</td>
-                                            <td>加工要求</td>
-                                            <td>加工均值</td>
-                                            <td>成厚范围</td>
-                                            <td>成厚均值</td>
+                                            <th>工序</th>
+                                            <th>工序名称</th>
+                                            <th>加工要求</th>
+                                            <th>加工均值</th>
+                                            <th>成厚范围</th>
+                                            <th>成厚均值</th>
                                         </tr>
                                     </thead>
                                     <tbody id="processSteps"></tbody>
@@ -73,7 +73,7 @@
                             <hr>
                             <div>
                                 <h4 class="text-blue text-center">工艺数据</h4>
-                                <div class="pull-right hidden" id="isChangeDiv">
+                                <div class="pull-right" id="isChangeDiv">
                                     <button type="button" class="btn btn-info btn-xs hidden" id="refresh" title="重置"><i class="fa fa-refresh"></i></button>
                                     <label for="isChange" class="text-danger">是否修改：</label>
                                     <input type="checkbox" id="isChange" class="icb_minimal">

@@ -1,24 +1,22 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[312] = { uIds: ['getFlowCardListBtn'] };
+    _permissionList[319] = { uIds: ['showAddFlowCardModel'] };
+    _permissionList[320] = { uIds: [] };
+    _permissionList[321] = { uIds: [] };
+    _permissionList[322] = { uIds: [] };
+    _permissionList[313] = { uIds: ['getProductionProcessListBtn'] };
+    _permissionList[327] = { uIds: ['showProductionProcessModel'] };
+    _permissionList[328] = { uIds: [] };
+    _permissionList[329] = { uIds: [] };
+    _permissionList[314] = { uIds: ['getRawMateriaListBtn'] };
+    _permissionList[334] = { uIds: ['showAddRawMateriaModel'] };
+    _permissionList[335] = { uIds: [] };
+    _permissionList[336] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
-    $("#selectPlanList").select2();
-    $("#selectJhList").select2();
-    $("#selectYlList").select2();
-    $("#flowCardStartDate").val(getDate()).datepicker('update');
-    $("#flowCardEndDate").val(getDate()).datepicker('update');
-    $("#jhStartDate").val(getDate()).datepicker('update');
-    $("#jhEndDate").val(getDate()).datepicker('update');
-    $("#ylStartDate").val(getDate()).datepicker('update');
-    $("#ylEndDate").val(getDate()).datepicker('update');
-    if (!checkPermission(210)) {
-        $("#showAddFlowCardModel").addClass("hidden");
-    }
-    if (!checkPermission(220)) {
-        $("#showProductionProcessModel").addClass("hidden");
-    }
-    if (!checkPermission(237)) {
-        $("#showAddRawMateriaModel").addClass("hidden");
-    }
+    $("#flowCardStartDate,#flowCardEndDate,#jhStartDate,#jhEndDate,#ylStartDate,#ylEndDate").val(getDate()).datepicker('update');
     selectPlan();
     selectRaw();
     $(".fcHead input,.fcHead span").css("verticalAlign", "middle");
@@ -104,13 +102,8 @@ function showAddFlowCardModel() {
     $("#afRemarks").val("");
 
     var afProductionProcessFunc = new Promise(function (resolve, reject) {
-        var opType = 215;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
-        data.opType = opType;
+        data.opType = 215;
         data.opData = JSON.stringify({
             menu: true
         });
@@ -134,13 +127,8 @@ function showAddFlowCardModel() {
     });
 
     var afRawMateriaFunc = new Promise(function (resolve, reject) {
-        var opType = 232;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var data = {}
-        data.opType = opType;
+        data.opType = 232;
         data.opData = JSON.stringify({
             menu: true
         });
@@ -170,11 +158,6 @@ function showAddFlowCardModel() {
 }
 
 function addFlowCard() {
-    var opType = 210;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var afProductionProcess = $("#afProductionProcess").val().trim();
     var afRawMateria = $("#afRawMateria").val().trim();
     var afRawMaterialQuantity = $("#afRawMaterialQuantity").val().trim();
@@ -239,7 +222,7 @@ function addFlowCard() {
     var doSth = function () {
         $("#addFlowCardModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 210;
         data.opData = JSON.stringify(pData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -250,13 +233,8 @@ function addFlowCard() {
 }
 
 function selectPlan() {
-    var opType = 215;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 215;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -278,13 +256,8 @@ function selectPlan() {
 }
 
 function selectRaw() {
-    var opType = 232;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 232;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -308,14 +281,9 @@ function selectRaw() {
 
 var trOne = null;
 function getFlowCardList() {
-    var opType = 200;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
     var list = {}
-    data.opType = opType;
+    data.opType = 200;
     if ($(".fcHead .icb_minimal").is(":checked")) {
         var fcName = $("#flowCardId").val().trim();
         if ($(".fcHead .icb_minimal").eq(0).is(":checked")) {
@@ -362,22 +330,18 @@ function getFlowCardList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var per320 = _permissionList[320].have;
+            var per321 = _permissionList[321].have;
+            var per322 = _permissionList[322].have;
             var op = function (data, type, row) {
                 var html = "{0}{1}{2}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateFlowCard({0})">修改</button>'.format(data.Id);
                 var updateBtn = '<button type="button" class="btn btn-info" onclick="showChangeFlowCard({0}, \'{1}\')">更新</button>'.format(data.Id, escape(data.FlowCardName));
                 var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteFlowCard({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.FlowCardName));
-
-                html = html.format(
-                    checkPermission(207) ? changeBtn : "",
-                    checkPermission(208) ? updateBtn : "",
-                    checkPermission(211) ? delBtn : "");
-                return html;
+                return html.format(per320 ? changeBtn : '', per321 ? updateBtn : '', per322 ? delBtn : '');
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
             var processTime = function (data, type, row) {
                 if (data.ProcessTime == '0001-01-01 00:00:00')
@@ -397,7 +361,8 @@ function getFlowCardList() {
                     return '<span class="text-warning"><span class="hidden">1</span>中</span>';
                 return '<span class="text-success"><span class="hidden">0</span>低</span>';
             }
-            var columns = checkPermission(207) || checkPermission(208) || checkPermission(211)
+            var tf = per320 || per321 || per322;
+            var columns = tf
                 ? [
                     { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
@@ -436,7 +401,7 @@ function getFlowCardList() {
                     "autoWidth": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": [[checkPermission(207) || checkPermission(208) || checkPermission(211) ? 1 : 0, "asc"]],
+                    "aaSorting": [[tf ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": columns
@@ -449,16 +414,9 @@ function getFlowCardList() {
 
 function deleteFlowCard(id, name) {
     name = unescape(name);
-
-    var opType = 211;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 211;
         data.opData = JSON.stringify({
             id: id
         });
@@ -484,18 +442,13 @@ function showUpdateFlowCard(type) {
         $("#ufGGBody").empty();
         $("#ufGXBody").empty();
         ufGGmax = ufGGmaxV = ufGXmax = ufGXmaxV = 1;
-        var opType = 201;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         if (type == -1 && ufRecover == 1)
             return;
         if (type == -1)
             ufRecover = 1;
         var id = type == -1 ? $("#updateFCId").html() : type;
         var data = {}
-        data.opType = opType;
+        data.opType = 201;
         data.opData = JSON.stringify({
             id: id
         });
@@ -572,11 +525,6 @@ function showUpdateFlowCard(type) {
 }
 
 function updateFlowCard() {
-    var opType = 207;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var priority = $("#ufPriority").val().trim();
     var rawMaterialQuantity = $("#ufRawMaterialQuantity").val().trim();
     var sender = $("#ufSender").val().trim();
@@ -678,7 +626,7 @@ function updateFlowCard() {
     var doSth = function () {
         $("#updateFlowCardModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 207;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -802,18 +750,13 @@ var gxLength = 1;
 function showChangeFlowCard(type, flowCardName) {
     $("#cfGXBody").empty();
     gxLength = 1;
-    var opType = 202;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (type == -1 && cfRecover == 1)
         return;
     if (type == -1)
         cfRecover = 1;
     var id = type == -1 ? $("#changeFCId").html() : type;
     var data = {}
-    data.opType = opType;
+    data.opType = 202;
     data.opData = JSON.stringify({
         Id: id
     });
@@ -1123,11 +1066,6 @@ function initTime() {
 }
 
 function changeFlowCard() {
-    var opType = 208;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var flowCardId = parseInt($("#changeFCId").html());
     var oData = $("#gxList tbody").children();
     var postData = new Array();
@@ -1237,7 +1175,7 @@ function changeFlowCard() {
         return;
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 208;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1253,13 +1191,8 @@ function changeFlowCard() {
 }
 
 function getChangeFCName(fcName) {
-    var opType = 200;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {};
-    data.opType = opType;
+    data.opType = 200;
     data.opData = JSON.stringify({
         flowCardName: fcName
     });
@@ -1278,15 +1211,9 @@ function getChangeFCName(fcName) {
 
 //计划号
 function getProductionProcessList() {
-    var opType = 215;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
     var list = {}
-    data.opType = opType;
+    data.opType = 215;
     if ($(".jhHead .icb_minimal").is(":checked")) {
         var productionName = $("#selectJhList").val();
         if ($(".jhHead .icb_minimal").eq(0).is(":checked")) {
@@ -1324,19 +1251,18 @@ function getProductionProcessList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var checkPermission218 = checkPermission(218);
-            var checkPermission221 = checkPermission(221);
+            var per328 = _permissionList[328].have;
+            var per329 = _permissionList[329].have;
             var changeBtnFormat = '<button type="button" class="btn btn-primary" onclick="showProductionProcessModel({0})">详情</button>';
             var delBtnFormat = '<button type="button" class="btn btn-danger" onclick="deleteProductionProcess({0}, \'{1}\')">删除</button>';
             var op = function (data, type, row) {
-                var changeBtn = changeBtnFormat.format(data.Id);
-                var delBtn = delBtnFormat.format(data.Id, escape(data.ProductionProcessName));
-                return (checkPermission218 ? changeBtn : "") + (checkPermission221 ? delBtn : "");
+                return (per328 ? changeBtnFormat.format(data.Id) : '') + (per329 ? delBtnFormat.format(data.Id, escape(data.ProductionProcessName)) : '');
             }
-            var order = function (data, type, row, meta) {
-                return meta.row + 1;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
-            var columns = checkPermission218 || checkPermission221
+            var tf = per328 || per329;
+            var columns = tf
                 ? [
                     { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
@@ -1360,7 +1286,7 @@ function getProductionProcessList() {
                     { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
                     { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
                     { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
-                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" },
+                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
                 ];
             $("#productionProcessList")
                 .DataTable({
@@ -1371,7 +1297,7 @@ function getProductionProcessList() {
                     "autoWidth": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": [[checkPermission218 || checkPermission221 ? 1 : 0, "asc"]],
+                    "aaSorting": [[tf ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": columns
@@ -1381,15 +1307,9 @@ function getProductionProcessList() {
 
 function deleteProductionProcess(id, name) {
     name = unescape(name);
-    var opType = 221;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 221;
         data.opData = JSON.stringify({
             id: id
         });
@@ -1407,13 +1327,8 @@ function deleteProductionProcess(id, name) {
 
 function showProductionProcess(id) {
     hideClassTip("adt");
-    var opType = 216;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 216;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1448,18 +1363,12 @@ function showProductionProcessModel(type) {
             $("#apGGBody").empty();
             $("#apGXBody").empty();
             apGGmax = apGGmaxV = apGXmax = apGXmaxV = 1;
-
-            var opType = 216;
-            if (!checkPermission(opType)) {
-                layer.msg("没有权限");
-                return;
-            }
             if (type == -1 && recover == 1)
                 return;
             if (type == -1)
                 recover = 1;
             var data = {}
-            data.opType = opType;
+            data.opType = 216;
             var id = type == -1 ? $("#updateppId").html() : type;
             data.opData = JSON.stringify({
                 id: id
@@ -1545,14 +1454,9 @@ function showProductionProcessModel(type) {
 
 function checkDeviceProcessData(func) {
     if (DeviceProcessData == null) {
-        var opType = 150;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         ajaxPost("/Relay/Post",
             {
-                opType: opType
+                opType: 150
             },
             function (ret) {
                 if (ret.errno != 0) {
@@ -1680,11 +1584,6 @@ function apGXDelSelf(id) {
 }
 
 function addProductionProcess() {
-    var opType = 220;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var productionProcessName = $("#productionProcessName").val().trim();
     if (isStrEmptyOrUndefined(productionProcessName)) {
         showTip($("#productionProcessNameTip"), "计划号不能为空");
@@ -1756,7 +1655,7 @@ function addProductionProcess() {
     var doSth = function () {
         $("#productionProcessModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 220;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1770,11 +1669,6 @@ function addProductionProcess() {
 }
 
 function updateProductionProcess() {
-    var opType = 218;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var productionProcessName = $("#productionProcessName").val().trim();
     if (isStrEmptyOrUndefined(productionProcessName)) {
         showTip($("#productionProcessNameTip"), "计划号不能为空");
@@ -1852,7 +1746,7 @@ function updateProductionProcess() {
     var doSth = function () {
         $("#productionProcessModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 218;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1867,15 +1761,9 @@ function updateProductionProcess() {
 
 //原料
 function getRawMateriaList() {
-    var opType = 232;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
     var list = {}
-    data.opType = opType;
+    data.opType = 232;
     if ($(".ylHead .icb_minimal").is(":checked")) {
         var rawMateriaName = $("#selectYlList").val();
         if ($(".ylHead .icb_minimal").eq(0).is(":checked")) {
@@ -1913,24 +1801,21 @@ function getRawMateriaList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var per335 = _permissionList[335].have;
+            var per336 = _permissionList[336].have;
             var op = function (data, type, row) {
                 var html = "{0}{1}";
                 var changeBtn = '<button type="button" class="btn btn-primary" onclick="showUpdateRawMateriaModel({0})">详情</button>'.format(data.Id);
                 var delBtn = '<button type="button" class="btn btn-danger" onclick="deleteRawMateria({0}, \'{1}\')">删除</button>'.format(data.Id, escape(data.RawMateriaName));
-
-                html = html.format(
-                    checkPermission(235) ? changeBtn : "",
-                    checkPermission(239) ? delBtn : "");
-                return html;
+                return html.format(per335 ? changeBtn : '', per336 ? delBtn : '');
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
-            var columns = checkPermission(235) || checkPermission(239)
+            var tf = per335 || per336;
+            var columns = tf
                 ? [
-                    { "data": null, "title": "操作", "render": op, "orderable": false},
+                    { "data": null, "title": "操作", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
@@ -1951,7 +1836,7 @@ function getRawMateriaList() {
                     "autoWidth": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": [[checkPermission(235) || checkPermission(239) ? 1 : 0, "asc"]],
+                    "aaSorting": [[tf ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": columns
@@ -1961,15 +1846,9 @@ function getRawMateriaList() {
 
 function deleteRawMateria(id, name) {
     name = unescape(name);
-    var opType = 239;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 239;
         data.opData = JSON.stringify({
             id: id
         });
@@ -1992,13 +1871,8 @@ function showUpdateRawMateriaModel(id, type = 0) {
     $("#urRawMateriaName").val("");
     $("#urBody").empty();
     uMax = uMaxV = 1;
-    var opType = 233;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 233;
     data.opData = JSON.stringify({
         id: id
     });
@@ -2037,11 +1911,6 @@ function showUpdateRawMateriaModel(id, type = 0) {
 }
 
 function updateRawMateria() {
-    var opType = 235;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var urRawMateriaName = $("#urRawMateriaName").val().trim();
     if (isStrEmptyOrUndefined(urRawMateriaName)) {
         showTip($("#urRawMateriaNameTip"), "原料批次不能为空");
@@ -2081,7 +1950,7 @@ function updateRawMateria() {
     var doSth = function () {
         $("#updateRawMateriaModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 235;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -2174,11 +2043,6 @@ function delSelf(id) {
 }
 
 function addRawMateria() {
-    var opType = 237;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var arRawMateriaName = $("#arRawMateriaName").val().trim();
     if (isStrEmptyOrUndefined(arRawMateriaName)) {
         showTip($("#arRawMateriaNameTip"), "原料批次不能为空");
@@ -2216,7 +2080,7 @@ function addRawMateria() {
     var doSth = function () {
         $("#addRawMateriaModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 237;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {

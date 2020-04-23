@@ -1,101 +1,81 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[193] = { uIds: ['showAddModel'] };
+    _permissionList[194] = { uIds: [] };
+    _permissionList[195] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").css("width", "100%");
     $(".ms2").select2();
     getDeviceProcessStepList();
-    if (!checkPermission(153)) {
-        $("#showAddModel").addClass("hidden");
-    }
-}
-
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-        '    </ul>' +
-        '</div>';
-
-    var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', {4})">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.StepName), escape(data.Description), data.IsSurvey);
-    var deleteLi = '<li><a onclick="deleteDeviceProcessStep({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.StepName));
-
-    html = html.format(
-        checkPermission(152) ? updateLi : "",
-        checkPermission(154) ? deleteLi : "");
-
-    return html;
 }
 
 function getDeviceProcessStepList() {
-    var opType = 150;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    ajaxPost("/Relay/Post",
-        {
-            opType: opType
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-            var rModel = function (data, type, full, meta) {
-                full.Description = full.Description ? full.Description : "";
-                return full.Description.length > tdShowContentLength
-                    ? full.Description.substr(0, tdShowContentLength) +
-                    '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
+    ajaxPost("/Relay/Post", { opType: 150 }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var per194 = _permissionList[194].have;
+        var per195 = _permissionList[195].have;
+        var order = function (a, b, c, d) {
+            return ++d.row;
+        }
+        var rModel = function (data, type, full, meta) {
+            full.Description = full.Description ? full.Description : "";
+            return full.Description.length > tdShowContentLength
+                ? full.Description.substr(0, tdShowContentLength) +
+                '<a href = \"javascript:showDescriptionModel({0})\">...</a> '
                     .format(full.Id)
-                    : full.Description;
-            };
-            var columns = checkPermission(152) || checkPermission(154)
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "CategoryName", "title": "设备类型" },
-                    { "data": "StepName", "title": "工序名" },
-                    { "data": "Description", "title": "备注", "render": rModel },
-                    { "data": null, "title": "操作", "render": op, "orderable": false }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "CategoryName", "title": "设备类型" },
-                    { "data": "StepName", "title": "工序名" },
-                    { "data": "Description", "title": "备注", "render": rModel }
-                ];
-            $("#deviceProcessStepList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns
-                });
-        });
+                : full.Description;
+        };
+        var op = function (data, type, row) {
+            var html = '<div class="btn-group">' +
+                '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                '        <span class="caret"></span>' +
+                '        <span class="sr-only">Toggle Dropdown</span>' +
+                '    </button>' +
+                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                '    </ul>' +
+                '</div>';
+            var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', {4})">修改</a></li>'.format(data.Id, data.DeviceCategoryId, escape(data.StepName), escape(data.Description), data.IsSurvey);
+            var deleteLi = '<li><a onclick="deleteDeviceProcessStep({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.StepName));
+            return html.format(per194 ? updateLi : "", per195 ? deleteLi : "");
+        }
+        var columns = per194 || per195
+            ? [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "Id", "title": "Id", "bVisible": false },
+                { "data": "CategoryName", "title": "设备类型" },
+                { "data": "StepName", "title": "工序名" },
+                { "data": "Description", "title": "备注", "render": rModel },
+                { "data": null, "title": "操作", "render": op, "orderable": false }
+            ]
+            : [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "Id", "title": "Id", "bVisible": false },
+                { "data": "CategoryName", "title": "设备类型" },
+                { "data": "StepName", "title": "工序名" },
+                { "data": "Description", "title": "备注", "render": rModel }
+            ];
+        $("#deviceProcessStepList")
+            .DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": oLanguage,
+                "data": ret.datas,
+                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 20, //默认显示的记录数  
+                "columns": columns
+            });
+    });
 }
 
 function showDescriptionModel(id) {
-    var opType = 150;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 150;
     data.opData = JSON.stringify({
         id: id
     });
@@ -114,16 +94,11 @@ function showDescriptionModel(id) {
 
 
 function showAddModel() {
-    $("#addStepName").val(""); 
+    $("#addStepName").val("");
     $("#addDesc").val("");
     addStepNameCheck();
-    var opType = 140;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 140;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -147,11 +122,6 @@ function addStepNameCheck() {
 }
 
 function addModel() {
-    var opType = 153;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var modelId = $("#addSelect").val();
     var stepName = $("#addStepName").val().trim();
     if (isStrEmptyOrUndefined(stepName)) {
@@ -164,7 +134,7 @@ function addModel() {
         $("#addModel").modal("hide");
 
         var data = {}
-        data.opType = opType;
+        data.opType = 153;
         data.opData = JSON.stringify({
             //设备类型
             DeviceCategoryId: modelId,
@@ -188,14 +158,9 @@ function addModel() {
 
 function deleteDeviceProcessStep(id, stepName) {
     stepName = unescape(stepName);
-    var opType = 154;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 154;
         data.opData = JSON.stringify({
             id: id
         });
@@ -213,13 +178,8 @@ function deleteDeviceProcessStep(id, stepName) {
 function showUpdateModel(id, deviceCategoryId, stepName, description, isSurvey) {
     stepName = unescape(stepName);
     description = unescape(description);
-    var opType = 140;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 140;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -249,11 +209,6 @@ function updateStepNameCheck() {
 }
 
 function updateModel() {
-    var opType = 152;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
     var categoryId = $("#updateSelect").val();
     var stepName = $("#updateStepName").val().trim();
@@ -266,7 +221,7 @@ function updateModel() {
     var doSth = function () {
         $("#updateModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 152;
         data.opData = JSON.stringify({
             id: id,
             //设备类型

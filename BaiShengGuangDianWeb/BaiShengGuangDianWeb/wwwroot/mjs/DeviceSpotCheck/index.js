@@ -1,4 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[272] = { uIds: ['updateDeviceCheckBtn'] };
+    _permissionList[273] = { uIds: ['updateImgBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     getWorkShop();
     $('#workShop').on('select2:select', function () {
@@ -26,13 +30,8 @@
 
 //获取车间
 function getWorkShop() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -55,11 +54,6 @@ function getWorkShop() {
 var _pageRead = true;
 //获取车间设备
 function getWorkShopDevice(workShopName, el, all) {
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     if (isStrEmptyOrUndefined(workShopName)) {
         workShopName = $('#workShop').val();
         if (isStrEmptyOrUndefined(workShopName)) {
@@ -68,7 +62,7 @@ function getWorkShopDevice(workShopName, el, all) {
         }
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShopName
     });
@@ -110,13 +104,8 @@ function getWorkShopDevice(workShopName, el, all) {
 
 //获取点检计划
 function getSpotPlan() {
-    var opType = 600;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 600;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -141,11 +130,6 @@ function getSpotPlan() {
 
 //获取设备点检情况
 function getThisCheckList() {
-    var opType = 613;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     $('#devicePlan').empty();
     var list = {};
     var deviceId = $('#workShopDevice').val();
@@ -165,7 +149,7 @@ function getThisCheckList() {
         list.plans = planId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 613;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -224,11 +208,6 @@ function getThisCheckList() {
 
 //获取设备点检详情
 function detailPage(deviceId, planId) {
-    var opType = 614;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var list = {};
     if (isStrEmptyOrUndefined(deviceId) || isStrEmptyOrUndefined(planId)) {
         deviceId = $('#workShopDeviceDetail').val();
@@ -255,7 +234,7 @@ function detailPage(deviceId, planId) {
     var account = getCookieTokenInfo().account;
     list.account = account;
     var data = {}
-    data.opType = opType;
+    data.opType = 614;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -362,11 +341,6 @@ function detailPage(deviceId, planId) {
 
 //更新设备点检项
 function updateDeviceCheck() {
-    var opType = 616;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#devicePlanDetailList tbody').find('tr');
     var checkData = [];
     var i = 0, len = trs.length;
@@ -407,7 +381,7 @@ function updateDeviceCheck() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 616;
         data.opData = JSON.stringify(checkData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -472,15 +446,6 @@ function showImgModel(id, item, img) {
 
 //修改图片
 function updateImg() {
-    var opType = 617;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    //if (!hasPre()) {
-    //    layer.msg("请先上传图片");
-    //    return;
-    //}
     fileCallBack[fileEnum.SpotCheck] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -491,7 +456,7 @@ function updateImg() {
             imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
-            data.opType = opType;
+            data.opType = 617;
             data.opData = JSON.stringify({
                 Images: imgNew,
                 Id: id

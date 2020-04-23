@@ -1,8 +1,10 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[123] = { uIds: ['showAddRoles'] };
+    _permissionList[124] = { uIds: [] };
+    _permissionList[125] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getRoleList();
-    //if (!checkPermission(78)) {
-    //    $("#showAddRoles").addClass("hidden");
-    //}
     $("#add_per_body,#update_per_body").on('ifClicked', '.on_cb', function (event) {
         var f = !$(this).is(":checked");
         var solid = $(this).parents(".box-solid");
@@ -27,7 +29,8 @@ function getRoleList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
+            var per124 = _permissionList[124].have;
+            var per125 = _permissionList[125].have;
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
@@ -40,17 +43,14 @@ function getRoleList() {
                     '</div>';
                 var upRole = '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions));
                 var delRole = '<li><a onclick="deleteRole({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.name));
-                //html = html.format(
-                //    checkPermission(80) ? upRole : "",
-                //    checkPermission(79) ? delRole : "");
-                html = html.format(upRole, delRole);
+                html = html.format(per124 ? upRole : "", per125 ? delRole : "");
                 return html;
             }
             var o = 0;
             var order = function (data, type, row) {
                 return ++o;
             }
-            var columns = checkPermission(80) || checkPermission(79)
+            var columns = per124 || per125
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "id", "title": "Id", "bVisible": false },

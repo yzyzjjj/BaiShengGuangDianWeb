@@ -1,4 +1,9 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[116] = { uIds: ['showAddUserModal'] };
+    _permissionList[117] = { uIds: [] };
+    _permissionList[118] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getUsersList();
     $(".ms2").select2();
     $("#add_perDiv").click(function (e) {
@@ -17,15 +22,11 @@
 
     $("#updatePassword").on("ifChanged", function (event) {
         if (!$(this).is(":checked")) {
-            $("#updateNewPassword").attr("disabled", "disabled");
-            $("#updateNewPassword").val("");
+            $("#updateNewPassword").attr("disabled", "disabled").val("");
         } else {
             $("#updateNewPassword").removeAttr("disabled");
         }
     });
-    //if (!checkPermission(74)) {
-    //    $("#showAddUserModal").addClass("hidden");
-    //}
     $("#addEmail,#updateEmail").on("input", function () {
         $(this)[0].value = $(this)[0].value.replace(/[^\w\@\.\-]+/g, "");
     });
@@ -56,8 +57,8 @@ function getUsersList() {
                     layer.msg(ret.errmsg);
                     return;
                 }
-                var checkPermission76 = checkPermission(76);
-                var checkPermission75 = checkPermission(75);
+                var checkPermission76 = _permissionList[117].have;
+                var checkPermission75 = _permissionList[118].have;
                 var htmlFormat = '<div class="btn-group">' +
                     '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
                     '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
@@ -178,15 +179,10 @@ function showAddUserModal(type = 0) {
                 $("#addRole").append(html);
             });
     });
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var func2 = new Promise(function (resolve) {
         deviceId = new Array();
         var data = {}
-        data.opType = opType;
+        data.opType = 100;
         ajaxPost("/Relay/Post", data, function (ret) {
             resolve('success');
             if (ret.errno != 0) {
@@ -497,8 +493,6 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
                 }
             });
     });
-
-
     $("#updateRole").empty();
     var func2 = new Promise(function (resolve) {
         ajaxGet("/RoleManagement/List", null, function (ret) {
@@ -520,16 +514,10 @@ function showUpdateUserModal(id, role, account, name, phone, emailAddress, permi
             getOtherPermission("update_per_body", $("#updateRole").val(), permissions);
         });
     });
-
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var func3 = new Promise(function (resolve) {
         deviceId = new Array();
         var data = {}
-        data.opType = opType;
+        data.opType = 100;
         ajaxPost("/Relay/Post", data, function (ret) {
             resolve('success');
             if (ret.errno != 0) {

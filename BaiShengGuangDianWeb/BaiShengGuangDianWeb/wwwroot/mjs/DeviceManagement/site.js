@@ -1,65 +1,57 @@
-
+var _permissionList = [];
 function pageReady() {
+    _permissionList[229] = { uIds: ['showAddSite'] };
+    _permissionList[230] = { uIds: [] };
+    _permissionList[231] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getSiteList();
-    if (!checkPermission(128)) {
-        $("#showAddSite").addClass("hidden");
-    }
-}
-
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-        '    </ul>' +
-        '</div>';
-    var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.SiteName), escape(data.RegionDescription), escape(data.Manager));
-    var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.SiteName + " " + data.RegionDescription));
-    html = html.format(
-        checkPermission(127) ? updateLi : "",
-        checkPermission(129) ? deleteLi : "");
-    return html;
 }
 
 function getSiteList() {
-    var opType = 125;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 125
         },
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var per230 = _permissionList[230].have;
+            var per231 = _permissionList[231].have;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
             var rModel = function (data, type, full, meta) {
                 full.RegionDescription = full.RegionDescription ? full.RegionDescription : "";
                 return full.RegionDescription.length > tdShowContentLength
                     ? full.RegionDescription.substr(0, tdShowContentLength) +
                     '<a href = \"javascript:showRegionDescriptionModel({0})\">...</a> '
-                    .format(full.Id)
+                        .format(full.Id)
                     : full.RegionDescription;
             };
-            var columns = checkPermission(127) || checkPermission(129)
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '        <span class="caret"></span>' +
+                    '        <span class="sr-only">Toggle Dropdown</span>' +
+                    '    </button>' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                    '    </ul>' +
+                    '</div>';
+                var updateLi = '<li><a onclick="showUpdateSite({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.SiteName), escape(data.RegionDescription), escape(data.Manager));
+                var deleteLi = '<li><a onclick="deleteSite({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.SiteName + " " + data.RegionDescription));
+                return html.format(per230 ? updateLi : '', per231 ? deleteLi : '');
+            }
+            var columns = per230 || per231
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "SiteName", "title": "车间名" },
                     { "data": "RegionDescription", "title": "场地位置", "type": "html-percent", "render": rModel },
                     { "data": "Manager", "title": "管理人", "type": "html-percent" },
-                    { "data": null, "title": "操作", "render": op, "orderable": false}
+                    { "data": null, "title": "操作", "render": op, "orderable": false }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
@@ -84,14 +76,8 @@ function getSiteList() {
 }
 
 function showSiteNameModel(id) {
-    var opType = 125;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 125;
     data.opData = JSON.stringify({
         id: id
     });
@@ -109,14 +95,8 @@ function showSiteNameModel(id) {
 }
 
 function showRegionDescriptionModel(id) {
-    var opType = 125;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 125;
     data.opData = JSON.stringify({
         id: id
     });
@@ -142,11 +122,6 @@ function showAddSite() {
 }
 
 function addSite() {
-    var opType = 128;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var addSiteName = $("#addSiteName").val().trim();
     var addLocations = $("#addLocations").val().trim();
     var manager = $("#addManager").val();
@@ -162,7 +137,7 @@ function addSite() {
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 128;
         data.opData = JSON.stringify({
             //车间名称
             SiteName: addSiteName,
@@ -184,15 +159,9 @@ function addSite() {
 
 function deleteSite(id, siteName) {
     siteName = unescape(siteName);
-    var opType = 129;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 129;
         data.opData = JSON.stringify({
             id: id
         });
@@ -220,17 +189,10 @@ function showUpdateSite(id, adSiteNames, locationsReg, man) {
 }
 
 function updateSite() {
-    var opType = 127;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
-
     var updateSiteName = $("#updateSiteName").val().trim();
     var updateRegions = $("#updateRegions").val().trim();
     var manager = $("#updateManager").val();
-
     if (isStrEmptyOrUndefined(updateSiteName)) {
         showTip($("#updateSiteNameTip"), "车间名不能为空");
         return;
@@ -239,12 +201,10 @@ function updateSite() {
         showTip($("#updateRegionsTip"), "场地位置不能为空");
         return;
     }
-
     var doSth = function () {
         $("#updateSiteModal").modal("hide");
-
         var data = {}
-        data.opType = opType;
+        data.opType = 127;
         data.opData = JSON.stringify({
             id: id,
             //车间名称

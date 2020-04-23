@@ -14,7 +14,7 @@
 <section class="content-header flexStyle" style="justify-content: space-between;flex-wrap: wrap">
     <h1>@ViewBag.Title</h1>
     <div class="flexStyle">
-        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" style="margin-right: 10px">故障报修</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="showFaultModel()" id="showFaultModelBtn" style="margin-right: 10px">故障报修</button>
         <button type="button" class="btn btn-warning btn-sm" id="showMaintainerModel" onclick="showMaintainerModel()">维修工管理</button>
         <button type="button" class="btn btn-primary btn-sm" style="margin: 0 10px" id="getFaultTypeList" onclick="getFaultTypeList()">故障类型</button>
         <button type="button" class="btn btn-primary btn-sm" id="getUsuallyFaultList" onclick="getUsuallyFaultList()">常见故障解决</button>
@@ -66,11 +66,11 @@
                                             <label class="control-label" style="margin: 5px">至</label>
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="solveETime" style="flex-basis: 140px; min-width: 100px">
                                         </div>
-                                        <button type="button" class="btn btn-primary" onclick="getFaultDeviceList()" style="margin-left: 2px">查询</button>
+                                        <button type="button" class="btn btn-primary" onclick="getFaultDeviceList()" id="getFaultDeviceListBtn" style="margin-left: 2px">查询</button>
                                     </div>
                                     <div class="flexStyle" style="margin-left: 2px">
-                                        <button type="button" class="btn btn-primary hidden" onclick="showBatchAssignModal()" id="showBatchAssignModalBtn" style="margin-left:2px">批量指派</button>
-                                        <button type="button" class="btn btn-danger hidden" onclick="delChange()" id="delChangeBtn" style="margin-left: 2px">删除</button>
+                                        <button type="button" class="btn btn-primary" onclick="showBatchAssignModal()" id="showBatchAssignModalBtn" style="margin-left:2px">批量指派</button>
+                                        <button type="button" class="btn btn-danger" onclick="delChange()" id="delChangeBtn" style="margin-left: 2px">删除</button>
                                     </div>
                                 </div>
                             </div>
@@ -118,10 +118,10 @@
                                             <label class="control-label" style="margin: 5px">至</label>
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="serETime" style="flex-basis: 140px; min-width: 100px">
                                         </div>
-                                        <button type="button" class="btn btn-primary" onclick="getServiceLogList(1)" style="margin-left: 2px">查询</button>
+                                        <button type="button" class="btn btn-primary" onclick="getServiceLogList(1)" id="getServiceLogListBtn" style="margin-left: 2px">查询</button>
                                     </div>
                                     <div class="flexStyle" style="margin-left:2px">
-                                        <button type="button" class="btn btn-primary" onclick="showStatisticsModel()">统计</button>
+                                        <button type="button" class="btn btn-primary" onclick="showStatisticsModel()" id="showStatisticsModelBtn">统计</button>
                                         <button type="button" class="btn btn-primary" onclick="showServiceLogModal()" id="addServiceLogBtn" style="margin-left:2px">添加</button>
                                         <button type="button" class="btn btn-danger hidden" onclick="delServiceLog()" id="delServiceLogBtn" style="margin-left:2px">删除</button>
                                     </div>
@@ -171,7 +171,7 @@
                                             <label class="control-label" style="margin: 5px">至</label>
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="delFSolveETime" style="flex-basis: 140px; min-width: 100px">
                                         </div>
-                                        <button type="button" class="btn btn-primary" onclick="getDelFaultDeviceList()" style="margin-left: 2px">查询</button>
+                                        <button type="button" class="btn btn-primary" onclick="getDelFaultDeviceList()" id="getDelFaultDeviceListBtn" style="margin-left: 2px">查询</button>
                                     </div>
                                     <button type="button" class="btn btn-success hidden" onclick="delFRecover()" id="delFRecoverBtn" style="margin-left:2px">恢复</button>
                                 </div>
@@ -220,7 +220,7 @@
                                             <label class="control-label" style="margin: 5px">至</label>
                                             <input type="text" class="form_date form-control text-center" autocomplete="off" id="delRepETime" style="flex-basis: 140px; min-width: 100px">
                                         </div>
-                                        <button type="button" class="btn btn-primary" onclick="getDelServiceLogList()" style="margin-left: 2px">查询</button>
+                                        <button type="button" class="btn btn-primary" onclick="getDelServiceLogList()" id="getDelServiceLogListBtn" style="margin-left: 2px">查询</button>
                                     </div>
                                     <button type="button" class="btn btn-success hidden" onclick="delRepairRecover()" id="delRepairRecoverBtn" style="margin-left:2px">恢复</button>
                                 </div>
@@ -869,7 +869,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary noText" onclick="addUpServiceLog(1)">添加</button>
-                    <button type="button" class="btn btn-primary isText" onclick="addUpServiceLog.call(this,0)" id="updateServiceLogBtn">修改</button>
+                    <button type="button" class="btn btn-primary" onclick="addUpServiceLog.call(this,0)" id="updateServiceLogBtn">修改</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

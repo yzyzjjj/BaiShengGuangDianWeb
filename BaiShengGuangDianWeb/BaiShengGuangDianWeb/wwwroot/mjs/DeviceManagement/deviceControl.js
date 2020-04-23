@@ -1,4 +1,7 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[174] = { uIds: ['setCodeVarParBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     idStr = getQueryString("id");
     getCodeList();
@@ -9,13 +12,8 @@
 
 var idStr;
 function getCodeList() {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {};
-    data.opType = opType;
+    data.opType = 100;
     data.opData = JSON.stringify({
         hard: true
     });
@@ -44,17 +42,12 @@ function getCodeList() {
 }
 
 function getVarTypeList() {
-    var opType = 164;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var deviceId = $("#selectCode").val();
     if (isStrEmptyOrUndefined(deviceId)) {
         return;
     }
     var data = {};
-    data.opType = opType;
+    data.opType = 164;
     data.opData = JSON.stringify({
         DeviceId: deviceId
     });
@@ -74,11 +67,6 @@ function getVarTypeList() {
 }
 
 function setCodeVarPar() {
-    var opType = 165;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var deviceId = $("#selectCode").val();
     if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg("请选择设备");
@@ -99,7 +87,7 @@ function setCodeVarPar() {
         return;
     }
     var data = {};
-    data.opType = opType;
+    data.opType = 165;
     data.opData = JSON.stringify({
         DeviceId: deviceId,
         UsuallyDictionaryId: codeVarId,
@@ -112,22 +100,12 @@ function setCodeVarPar() {
 }
 
 //加工数据
-function getDataList() {
+function getDataList() {}
 
-}
+function openDevice() {}
 
-function openDevice() {
+function closeDevice() {}
 
-}
+function lockDevice() {}
 
-function closeDevice() {
-
-}
-
-function lockDevice() {
-
-}
-
-function unlockDevice() {
-
-}
+function unlockDevice() {}

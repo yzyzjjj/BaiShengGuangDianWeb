@@ -1,4 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[280] = { uIds: ['delDevicePlanModalBtn'] };
+    _permissionList[281] = { uIds: ['setDeviceCheckBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     $('ul .setTitle').on('click', function () {
         var title = $(this).text();
@@ -36,13 +40,8 @@
 
 //获取车间
 function getWorkShop() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -66,11 +65,6 @@ var _pageRead = true;
 var _isConfigPage = true;
 //获取车间设备
 function getWorkShopDevice(workShopName, el) {
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     if (isStrEmptyOrUndefined(workShopName)) {
         workShopName = $('#selectWorkShop').val();
         if (isStrEmptyOrUndefined(workShopName)) {
@@ -79,7 +73,7 @@ function getWorkShopDevice(workShopName, el) {
         }
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShopName
     });
@@ -111,11 +105,6 @@ function getWorkShopDevice(workShopName, el) {
 
 //获取设备绑定计划
 function getDeviceCheckPlan() {
-    var opType = 609;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var deviceId = $('#selectWorkShopDevice').val();
     if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg("请选择设备");
@@ -123,7 +112,7 @@ function getDeviceCheckPlan() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 609;
     data.opData = JSON.stringify({
         id: deviceId
     });
@@ -148,13 +137,8 @@ function getDeviceCheckPlan() {
 
 //获取点检计划
 function getSpotPlan() {
-    var opType = 600;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 600;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -177,13 +161,8 @@ function getSpotPlan() {
 var _surveyorSelect = null;
 //负责人选项
 function surveyor() {
-    var opType = 254;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 254;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -206,10 +185,6 @@ function getSpotPlanCheckList(e, el) {
     var opType, planId, jsonData = {};
     if (e) {
         opType = 605;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         planId = $('#selectSpotPlanSet').val();
         if (isStrEmptyOrUndefined(planId)) {
             return;
@@ -217,10 +192,6 @@ function getSpotPlanCheckList(e, el) {
         jsonData.qId = planId;
     } else {
         opType = 610;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var deviceId = $('#selectWorkShopDevice').val();
         if (isStrEmptyOrUndefined(deviceId)) {
             layer.msg('请选择设备');
@@ -333,11 +304,6 @@ function planItemReload() {
 
 //设置设备点检项
 function setDeviceCheck() {
-    var opType = 611;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planId = $('#selectSpotPlanSet').val();
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg('请选择点检计划');
@@ -367,7 +333,7 @@ function setDeviceCheck() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 611;
         data.opData = JSON.stringify({
             PlanId: planId,
             DeviceId: deviceId,
@@ -395,11 +361,6 @@ function delDevicePlanModal() {
 
 //删除设备计划
 function delDevicePlan() {
-    var opType = 612;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var deviceId = $('#selectWorkShopDeviceDel').val();
     if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg('请选择设备');
@@ -413,7 +374,7 @@ function delDevicePlan() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 612;
         data.opData = JSON.stringify({
             DeviceId: deviceId,
             PlanId: planId

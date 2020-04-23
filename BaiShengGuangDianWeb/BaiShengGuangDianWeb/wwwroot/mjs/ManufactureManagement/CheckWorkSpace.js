@@ -1,5 +1,11 @@
 ﻿var _admin = getCookieTokenInfo().account;
+var _permissionList = [];
 function pageReady() {
+    _permissionList[400] = { uIds: ['getCheckTaskBtn'] };
+    _permissionList[401] = { uIds: ['startBtn'] };
+    _permissionList[402] = { uIds: ['pauseBtn'] };
+    _permissionList[403] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.table-bordered td').css('border', '1px solid');
     getCheckTask();
     $('#imgOldList').on('click', '.delImg', function () {
@@ -11,13 +17,8 @@ function pageReady() {
 
 //获取检验任务
 function getCheckTask() {
-    var opType = 1012;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1012;
     data.opData = JSON.stringify({
         account: _admin
     });
@@ -34,13 +35,8 @@ function getCheckTask() {
         }
         var state = rData.State;
         $('#startBtn').prop('disabled', !(state == 2 || state == 7));
-        if (state == 8) {
-            $('.finish').removeClass('hidden');
-            $('#pauseBtn').prop('disabled', false);
-        } else {
-            $('.finish').addClass('hidden');
-            $('#pauseBtn').prop('disabled', true);
-        }
+        $('#pauseBtn').prop('disabled', state != 8);
+        state == 8 && _permissionList[403].have ? $('.finish').removeClass('hidden') : $('.finish').addClass('hidden');
         $('#check').text(rData.Check);
         $('#plan').text(rData.Plan);
         $('#item').text(rData.Item);
@@ -110,7 +106,7 @@ function getCheckTask() {
 var _taskData = null;
 //检验任务开始 暂停 完成
 function checkTaskHandle(apId, finishId) {
-    var opType;
+    var opType = null;
     switch (apId) {
         case 0:
             opType = 1017;
@@ -122,10 +118,6 @@ function checkTaskHandle(apId, finishId) {
             opType = 1019;
             _taskData.CheckResult = finishId;
             break;
-    }
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
     }
     var data = {}
     data.opType = opType;
@@ -140,17 +132,12 @@ function checkTaskHandle(apId, finishId) {
 
 //检验任务更新
 function updateCheckTask(id, result) {
-    var opType = 1020;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var tr = $(this).parents('tr');
     var desc = tr.find('.desc').val();
     var checkTime = tr.find('.checkTime').val();
     checkTime = isStrEmptyOrUndefined(checkTime) ? getFullTime() : `${checkTime} 00:00:00`;
     var data = {}
-    data.opType = opType;
+    data.opType = 1020;
     data.opData = JSON.stringify({
         CheckTime: checkTime,
         Desc: desc,
@@ -169,7 +156,7 @@ function updateCheckTask(id, result) {
 var _updateFirmwareUpload = null;
 var _imgNameData = null;
 //图片详情模态框
-function showImgModel(img,id) {
+function showImgModel(img, id) {
     if (_updateFirmwareUpload == null) {
         _updateFirmwareUpload = initFileInputMultiple("addImg", fileEnum.Manufacture);
     }
@@ -220,11 +207,6 @@ function showImgModel(img,id) {
 
 //修改图片
 function updateImg() {
-    var opType = 1020;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     fileCallBack[fileEnum.Manufacture] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -235,7 +217,7 @@ function updateImg() {
             imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
-            data.opType = opType;
+            data.opType = 1020;
             data.opData = JSON.stringify({
                 Images: imgNew,
                 Id: id,
@@ -259,7 +241,7 @@ function updateImg() {
 
 //获取待检验 检验通过 检验返工 阻塞表格数据
 function getCheckList(num, el) {
-    var opType;
+    var opType = null;
     switch (num) {
         case 0:
             opType = 1013;
@@ -273,10 +255,6 @@ function getCheckList(num, el) {
         case 3:
             opType = 1016;
             break;
-    }
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
     }
     var data = {}
     data.opType = opType;
@@ -293,7 +271,7 @@ function getCheckList(num, el) {
         var order = function (a, b, c, d) {
             return d.row + 1;
         }
-        var detail = function(data) {
+        var detail = function (data) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="showDetailModel(${data})">查看</button>`;
         }
         $(el).DataTable({
@@ -320,17 +298,12 @@ function getCheckList(num, el) {
 
 //检验详情
 function showDetailModel(id) {
-    var opType = 1021;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1021;
     data.opData = JSON.stringify({
         qId: id
     });
-    ajaxPost('/Relay/Post', data, function(ret) {
+    ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -362,7 +335,7 @@ function showDetailModel(id) {
                 { "data": null, "title": "序号", "render": order },
                 { "data": "Item", "title": "检验流程" },
                 { "data": "Method", "title": "检验要求" },
-                { "data": "Desc", "title": "检验说明"},
+                { "data": "Desc", "title": "检验说明" },
                 { "data": "CheckTime", "title": "检验时间", "render": checkTime },
                 { "data": "Result", "title": "检验结果", "render": result },
                 { "data": "ImageList", "title": "图片", "render": img }

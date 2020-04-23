@@ -1,11 +1,21 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[2] = { uIds: ['queryFlowCardBtn'] };
+    _permissionList[3] = { uIds: ['run'] };
+    _permissionList[4] = { uIds: ['addCraftModalBtn'] };
+    _permissionList[5] = { uIds: ['showInputReportBtn'] };
+    _permissionList[6] = { uIds: ['showFaultModelBtn'] };
+    _permissionList[7] = { uIds: ['showLogModelBtn'] };
+    _permissionList[13] = { uIds: [] };
+    _permissionList[8] = { uIds: ['showMaintainerModelBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     $("#run").addClass("disabled");
     getDeviceList();
     $("#flowCard").change(function () {
         $("#run").addClass("disabled");
     });
-    $("#flowCard").on('keydown', function(e) {
+    $("#flowCard").on('keydown', function (e) {
         if (e.keyCode == 13) {
             queryFlowCard();
         }
@@ -84,13 +94,8 @@
 
 var faultData = null;
 function getDeviceList() {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     data.opData = JSON.stringify({
         hard: true,
         work: true
@@ -163,11 +168,6 @@ var oProcessData = null;
 var processData = null;
 function queryFlowCard() {
     hideTip("processCodeTip");
-    var opType = 260;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     $("#fcBody").addClass("hidden");
     $("#isChangeDiv").addClass("hidden");
     $("#processSteps").empty();
@@ -194,7 +194,7 @@ function queryFlowCard() {
         return;
 
     var data = {}
-    data.opType = opType;
+    data.opType = 260;
     data.opData = JSON.stringify({
         Id: deviceId,
         FlowCardName: flowCard
@@ -205,33 +205,24 @@ function queryFlowCard() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            if (checkPermission(156))
-                $("#isChangeDiv").removeClass("hidden");
-
-
             $("#fcBody").removeClass("hidden");
-
-            if (checkPermission(323)) {
-                var head =
-                    '<div class="form-group border-left">' +
-                    '<label for="isDifference" class="text-danger">是否微调：</label>' +
-                    '<input type="checkbox" id="isDifference" class="icb_minimal">' +
-                    '</div>' +
-                    '<div class="form-group form-inline hidden" id="differenceDiv">' +
-                    '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
-                    '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
-                    '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
-                    '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
-                    '</div>' +
-                    '</div>';
-                $("#info").append(head);
-            }
+            var head ='<div class="form-group border-left">' +
+                '<label for="isDifference" class="text-danger">是否微调：</label>' +
+                '<input type="checkbox" id="isDifference" class="icb_minimal">' +
+                '</div>' +
+                '<div class="form-group form-inline hidden" id="differenceDiv">' +
+                '<label class="control-label" for="difference">当前厚度(mm)：</label>' +
+                '<div class="from-group no-margin" style="display:-webkit-inline-box">' +
+                '<input type="tel" class="form-control" id="difference" autocomplete="off" placeholder="请输入当前厚度" style="width:150px" onfocusin="focusIn($(this))" oninput="onInput(this, 9, 0)" onblur="onInputEnd(this); queryProcessData();" maxlength="6">' +
+                '<label class="label-danger hidden" id="differenceTip" style="display:table-cell;height:34px;vertical-align:middle"></label>' +
+                '</div>' +
+                '</div>';
+            $("#info").append(head);
             $("#isDifference").iCheck({
                 checkboxClass: 'icheckbox_minimal',
                 radioClass: 'iradio_minimal',
                 increaseArea: '20%' // optional
             });
-
             $("#isDifference").on('ifChanged', function (event) {
                 var ui = $(this);
                 if (ui.is(":checked")) {
@@ -291,13 +282,7 @@ var TarLand = 0;
 function queryProcessData() {
     if (!$("#isDifference").is(":checked"))
         return;
-    var opType = 323;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     newProcessData = null;
-
     //当前厚度
     var difference = $("#difference").val().trim();
     if (isStrEmptyOrUndefined(difference)) {
@@ -331,7 +316,7 @@ function queryProcessData() {
 
     $("#pData").empty();
     var data = {}
-    data.opType = opType;
+    data.opType = 323;
     data.opData = JSON.stringify(pd);
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -495,20 +480,14 @@ function setProcessData() {
         }
         da.ProcessDatas = pd;
     }
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var doSth = function () {
         var data = {}
         data.opType = opType;
         data.opData = JSON.stringify(da);
-
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    //getDeviceList();
                     addCraftModal();
                     if ($("#isDifference").is(":checked")) {
                         var difference = $("#difference").val().trim();
@@ -537,13 +516,8 @@ function setProcessData() {
 
 //获取故障类型
 function getFaultType() {
-    var opType = 406;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 406;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -565,13 +539,8 @@ function getFaultType() {
 
 //获取车间
 function getWorkShop() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -593,13 +562,8 @@ function getWorkShop() {
 var _siteData = null;
 //获取场地
 function getSite() {
-    var opType = 125;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 125;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -654,11 +618,6 @@ function showFaultModel() {
 }
 
 function reportFault() {
-    var opType = 422;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var faultCode = $("#faultCode").val();
     var faultOther = $("#faultOther").val().trim();
     if (isStrEmptyOrUndefined(faultCode) && isStrEmptyOrUndefined(faultOther)) {
@@ -763,7 +722,7 @@ function reportFault() {
         imgJson(resolve);
     }).then(function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 422;
         data.opData = JSON.stringify(faults);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -789,14 +748,9 @@ function reportFault() {
 }
 
 function getUsuallyFaultList() {
-    var opType = 400;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     $("#usuallyFaultList").empty();
     var data = {}
-    data.opType = opType;
+    data.opType = 400;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -832,13 +786,8 @@ function getUsuallyFaultList() {
 }
 
 function showUsuallyFaultDetailModel(id) {
-    var opType = 401;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 401;
     data.opData = JSON.stringify({
         id: id
     });
@@ -875,11 +824,6 @@ var rpFcId;
 function queryRpFlowCard() {
     $("#gxList").empty();
     $("#tableFlowCard").removeClass("hidden");
-    var opType = 202;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     //流程卡
     var flowCard = $("#rpFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
@@ -888,7 +832,7 @@ function queryRpFlowCard() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 202;
     data.opData = JSON.stringify({
         FlowCard: flowCard
     });
@@ -1096,11 +1040,6 @@ function initTime() {
 }
 
 function reportFlowCard() {
-    var opType = 208;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var flowCardId = parseInt(rpFcId);
     var oData = $("#gxList tbody").children();
     var postData = new Array();
@@ -1213,7 +1152,7 @@ function reportFlowCard() {
         return;
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 208;
         data.opData = JSON.stringify(postData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1243,11 +1182,6 @@ function addCraftModal() {
 }
 
 function addCraft() {
-    var opType = 166;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var addCode = $("#addCraftCode").val();
     if (isStrEmptyOrUndefined(addCode)) {
         layer.msg("请选择设备");
@@ -1291,7 +1225,7 @@ function addCraft() {
     var doSth = function () {
         $("#addCraftModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 166;
         data.opData = JSON.stringify({
             DeviceId: addCode,
             Time: time,
@@ -1307,14 +1241,9 @@ function addCraft() {
 }
 
 function showMaintainerModel() {
-    var opType = 430;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     $("#maintainerList").empty();
     var data = {}
-    data.opType = opType;
+    data.opType = 430;
     data.opData = JSON.stringify({ menu: true });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -1356,11 +1285,6 @@ function showMaintainerModel() {
 
 //报修记录弹窗
 function showLogModel() {
-    var opType = 438;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var nowMonth = getMonthScope();
     $('#logSTime,#logETime').off('changeDate');
     $("#logSTime").val(nowMonth.start).datepicker('update');
@@ -1375,11 +1299,6 @@ function showLogModel() {
 
 //获取报修记录
 function getLogList() {
-    var opType = 438;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var startTime = $('#logSTime').val();
     var endTime = $('#logETime').val();
     if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
@@ -1395,7 +1314,7 @@ function getLogList() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 438;
     data.opData = JSON.stringify({ startTime, endTime, state });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -1453,7 +1372,7 @@ function getLogList() {
             }
             var detailBtn = function (d) {
                 var op = '<button type="button" class="btn btn-{0} btn-sm" onclick="showLogDetailModel({2},{3})"}>{1}</button>';
-                return d.State == 3 && d.Score == 0 && d.Account == account ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
+                return _permissionList[13].have && d.State == 3 && d.Score == 0 && d.Account == account ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
             }
             $("#logList")
                 .DataTable({
@@ -1486,13 +1405,8 @@ function getLogList() {
 
 //报修记录详情弹窗
 function showLogDetailModel(logId, isLook) {
-    var opType = 438;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 438;
     data.opData = JSON.stringify({
         qId: logId
     });
@@ -1579,11 +1493,6 @@ function showLogDetailModel(logId, isLook) {
 
 //保存报修记录评价
 function updateComment() {
-    var opType = 439;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($(this).val());
     var score = $('#scoreInput').val().trim();
     if (isStrEmptyOrUndefined(score)) {
@@ -1593,7 +1502,7 @@ function updateComment() {
     score = parseInt(score);
     var comment = $('#comment').val().trim();
     var data = {}
-    data.opType = opType;
+    data.opType = 439;
     data.opData = JSON.stringify({
         Id: id,
         Score: score,

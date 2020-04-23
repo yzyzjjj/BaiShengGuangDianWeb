@@ -1,4 +1,16 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[408] = { uIds: ['showLogModelBtn'] };
+    _permissionList[409] = { uIds: [] };
+    _permissionList[410] = { uIds: [] };
+    _permissionList[411] = { uIds: [] };
+    _permissionList[412] = { uIds: [] };
+    _permissionList[413] = { uIds: [] };
+    _permissionList[414] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
+    if (!_permissionList[410].have) {
+        $('.updateTaskDetailBtn').addClass('hidden');
+    }
     $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
     window.onload = () => {
@@ -206,13 +218,8 @@ var _isClick = false;
 
 //获取计划号
 function getPlan() {
-    var opType = 1025;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1025;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -232,13 +239,8 @@ function getPlan() {
 
 //获取分组
 function getGroup(resolve) {
-    var opType = 1077;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1077;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -266,17 +268,12 @@ function getGroup(resolve) {
 var _processor = null;
 //获取操作员
 function getProcessor(resolve) {
-    var opType = 1081;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var groupId = resolve == null ? $('#groupSelect').val() : 0;
     if (groupId == null) {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 1081;
     data.opData = JSON.stringify({
         groupId: groupId,
         menu: true
@@ -310,13 +307,8 @@ function getProcessor(resolve) {
 
 //获取任务状态
 function getState() {
-    var opType = 1024;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1024;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -336,11 +328,6 @@ function getState() {
 
 //计划日志弹窗
 function showLogModel() {
-    var opType = 1088;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planId = $('#planSelect').val();
     if (isStrEmptyOrUndefined(planId)) {
         layer.msg('请选择计划号');
@@ -348,7 +335,7 @@ function showLogModel() {
     }
     $('#planName').text($('#planSelect option:selected').text());
     var data = {}
-    data.opType = opType;
+    data.opType = 1088;
     data.opData = JSON.stringify({ planId });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -385,11 +372,6 @@ function showLogModel() {
 var _taskData = null;
 //获取任务管理列表
 function getTaskList() {
-    var opType = 1026;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _taskData = {};
     var planId = $('#planSelect').val();
     if (isStrEmptyOrUndefined(planId)) {
@@ -434,13 +416,18 @@ function getTaskList() {
         }
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 1026;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
+        var per409 = _permissionList[409].have;
+        var per411 = _permissionList[411].have;
+        var per412 = _permissionList[412].have;
+        var per413 = _permissionList[413].have;
+        var per414 = _permissionList[414].have;
         $('#taskList').empty();
         var rData = ret.datas;
         var i, len = rData.length;
@@ -467,23 +454,25 @@ function getTaskList() {
                     <td class="totalOrder">${fromOrder}</td>
                     <td>${d.Order}</td>
                     <td>${d.Relation == 0 ? '' : d.Relation}</td>
-                    <td>${state == 0 && i != 0 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
+                    <td class="upTask">${state == 0 && i != 0 && per409 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
                     <td>${noShowSecond(d.ActualStartTime)}</td>
                     <td>${d.ActualTime}</td>
                     <td>${d.ActualScore}</td>
                     <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${id})">详情</button></td>
-                    <td>
-                        <button type="button" class="btn btn-success btn-sm addTask" onclick="addTask.call(this,${id})"><i class="fa fa-plus"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="delTask(${id},\'${d.Item}\')"><i class="fa fa-minus"></i></button>
-                        ${state == 3 ? '' : state == 4 ? '<button type="button" class="btn btn-primary btn-sm" onclick="taskStartStop(1,{0},\'{1}\')">启动</button>'.format(id, d.Item) : '<button type="button" class="btn btn-warning btn-sm" onclick="taskStartStop(0,{0},\'{1}\')">停止</button>'.format(id, d.Item)}
+                    <td class="taskHandle">
+                        ${per411 ? '<button type="button" class="btn btn-success btn-sm addTask" onclick="addTask.call(this,{0})"><i class="fa fa-plus"></i></button>'.format(id) : ''}
+                        ${per412 ? '<button type="button" class="btn btn-danger btn-sm" onclick="delTask({0},\'{1}\')"><i class="fa fa-minus"></i></button>'.format(id, d.Item) : ''}
+                        ${state == 3 ? '' : state == 4 ? per413 ? '<button type="button" class="btn btn-primary btn-sm" onclick="taskStartStop(1,{0},\'{1}\')">启动</button>'.format(id, d.Item) : '' : per414 ? '<button type="button" class="btn btn-warning btn-sm" onclick="taskStartStop(0,{0},\'{1}\')">停止</button>'.format(id, d.Item) : ''}
                     </td>
                 </tr>`;
             ops += tr;
         }
         $('#taskList').append(ops);
         $('#taskTable').removeClass('hidden');
+        per409 ? $('#taskList .upTask').removeClass('hidden') : $('#taskList .upTask').addClass('hidden');
+        per411 || per412 || per413 || per414 ? $('#taskList .taskHandle').removeClass('hidden') : $('#taskList .taskHandle').addClass('hidden');
     });
 }
 
@@ -491,13 +480,8 @@ var _taskDetailData = null;
 var _taskDetailId = null;
 //详情查看
 function showDetailModal(tId) {
-    var opType = 1027;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1027;
     data.opData = JSON.stringify({ tId });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -635,17 +619,12 @@ function showDetailModal(tId) {
 
 //检验项通过不通过更新
 function updateCheckTask(id, result) {
-    var opType = 1028;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var tr = $(this).parents('tr');
     var desc = tr.find('.desc').val();
     var checkTime = tr.find('.checkTime').val();
     checkTime = isStrEmptyOrUndefined(checkTime) ? getFullTime() : `${checkTime} 00:00:00`;
     var data = {}
-    data.opType = opType;
+    data.opType = 1028;
     data.opData = JSON.stringify({
         Id: _taskDetailId,
         Items: [{
@@ -698,11 +677,6 @@ function showImgModel(img) {
 
 //任务详情保存修改
 function updateTaskDetail() {
-    var opType = 1028;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     if (!_isClick) {
         layer.msg('请先修改数据');
         return;
@@ -747,7 +721,7 @@ function updateTaskDetail() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1028;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -762,11 +736,6 @@ function updateTaskDetail() {
 
 //检验详情保存修改
 function updateCheckDetail() {
-    var opType = 1028;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     if (!_isClick) {
         layer.msg('请先修改数据');
         return;
@@ -817,7 +786,7 @@ function updateCheckDetail() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1028;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -833,10 +802,6 @@ function updateCheckDetail() {
 //任务启动停止
 function taskStartStop(isStart, tId, itemName) {
     var opType = isStart ? 1032 : 1033;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var doSth = function () {
         var data = {}
         data.opType = opType;
@@ -854,14 +819,9 @@ function taskStartStop(isStart, tId, itemName) {
 
 //删除任务
 function delTask(tId, itemName) {
-    var opType = 1030;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1030;
         data.opData = JSON.stringify({ tId });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -876,11 +836,6 @@ function delTask(tId, itemName) {
 
 //上移任务
 function upTask(fromOrder, toOrder, fromId, toId) {
-    var opType = 1034;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var fromData = _taskData[fromId];
     var toData = _taskData[toId];
     if (fromData.Processor == toData.Processor && toData.State == 1) {
@@ -893,7 +848,7 @@ function upTask(fromOrder, toOrder, fromId, toId) {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1034;
         data.opData = JSON.stringify({
             FromOrder: fromOrder,
             ToOrder: toOrder
@@ -911,13 +866,8 @@ function upTask(fromOrder, toOrder, fromId, toId) {
 
 //获取模块名
 function getModule(resolve) {
-    var opType = 1058;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1058;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -941,13 +891,8 @@ function getModule(resolve) {
 
 //获取检验单
 function getTaskName(resolve) {
-    var opType = 1066;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1066;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -1054,11 +999,6 @@ function setNumTotalOrder(tr, count) {
 
 //保存添加的任务项
 function updateAddTask(planId, totalOrder) {
-    var opType = 1029;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var tr = $(this).parents('tr');
     var person = tr.find('.processor').val();
     if (isStrEmptyOrUndefined(person)) {
@@ -1109,7 +1049,7 @@ function updateAddTask(planId, totalOrder) {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1029;
         data.opData = JSON.stringify({
             Person: person,
             PlanId: planId,

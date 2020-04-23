@@ -1,48 +1,26 @@
-﻿
+﻿var _permissionList = [];
 function pageReady() {
+    _permissionList[222] = { uIds: ['showAddApplication'] };
+    _permissionList[223] = { uIds: [] };
+    _permissionList[224] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     getApplicationList();
-    if (!checkPermission(148)) {
-        $("#showAddApplication").addClass("hidden");
-    }
-}
-
-var op = function (data, type, row) {
-    var html = '<div class="btn-group">' +
-        '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-        '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-        '        <span class="caret"></span>' +
-        '        <span class="sr-only">Toggle Dropdown</span>' +
-        '    </button>' +
-        '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-        '    </ul>' +
-        '</div>';
-    var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.ApplicationName), escape(data.FilePath), escape(data.Description));
-    var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.ApplicationName));
-    html = html.format(
-        checkPermission(147) ? updateLi : "",
-        checkPermission(149) ? deleteLi : "");
-    return html;
 }
 
 function getApplicationList() {
-    var opType = 145;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     ajaxPost("/Relay/Post",
         {
-            opType: opType
+            opType: 145
         },
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var per216 = _permissionList[223].have;
+            var per217 = _permissionList[224].have;
+            var order = function (a, b, c,d) {
+                return ++d.row;
             }
             var rModel = function (data, type, full, meta) {
                 full.Description = full.Description ? full.Description : "";
@@ -52,7 +30,21 @@ function getApplicationList() {
                     .format(full.Id)
                     : full.Description;
             };
-            var columns = checkPermission(147) || checkPermission(149)
+            var op = function (data, type, row) {
+                var html = '<div class="btn-group">' +
+                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+                    '        <span class="caret"></span>' +
+                    '        <span class="sr-only">Toggle Dropdown</span>' +
+                    '    </button>' +
+                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+                    '    </ul>' +
+                    '</div>';
+                var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.ApplicationName), escape(data.FilePath), escape(data.Description));
+                var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.ApplicationName));
+                return html.format(per216 ? updateLi : '',per217 ? deleteLi : '');
+            }
+            var columns = per216 || per217
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
@@ -84,14 +76,8 @@ function getApplicationList() {
 }
 
 function showFilePathModel(id) {
-    var opType = 145;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 145;
     data.opData = JSON.stringify({
         id: id
     });
@@ -109,14 +95,8 @@ function showFilePathModel(id) {
 }
 
 function showDescriptionModel(id) {
-    var opType = 145;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 145;
     data.opData = JSON.stringify({
         id: id
     });
@@ -142,11 +122,6 @@ function showAddApplication() {
 }
 
 function addApplication() {
-    var opType = 148;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var applicationName = $("#addApplicationName").val().trim();
     var filePath = $("#addFilePath").val().trim();
     var desc = $("#addDesc").val();
@@ -162,7 +137,7 @@ function addApplication() {
     var doSth = function () {
         $("#addModel").modal("hide");
         var data = {}
-        data.opType = opType;
+        data.opType = 148;
         data.opData = JSON.stringify({
             //名称
             ApplicationName: applicationName,
@@ -184,15 +159,9 @@ function addApplication() {
 
 function deleteApplication(id, applicationName) {
     applicationName = unescape(applicationName);
-    var opType = 149;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 149;
         data.opData = JSON.stringify({
             id: id
         });
@@ -220,13 +189,7 @@ function showUpdateApplication(id, applicationName, filePath, desc) {
 }
 
 function updateApplication() {
-    var opType = 147;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var id = parseInt($("#updateId").html());
-
     var appName = $("#updateApplicationName").val().trim();
     var appFilePath = $("#updateFilePath").val().trim();
     var appDesc = $("#updateDesc").val();
@@ -240,9 +203,8 @@ function updateApplication() {
     }
     var doSth = function () {
         $("#updateApplicationModal").modal("hide");
-
         var data = {}
-        data.opType = opType;
+        data.opType = 147;
         data.opData = JSON.stringify({
             id: id,
             //名称
@@ -261,7 +223,4 @@ function updateApplication() {
             });
     }
     showConfirm("修改", doSth);
-
 }
-
-

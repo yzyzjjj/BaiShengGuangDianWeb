@@ -1,4 +1,10 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[392] = { uIds: ['getAccountTaskBtn'] };
+    _permissionList[393] = { uIds: ['startBtn'] };
+    _permissionList[394] = { uIds: ['pauseBtn'] };
+    _permissionList[395] = { uIds: ['finishBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
     getGroup();
@@ -10,13 +16,8 @@
 
 //获取分组
 function getGroup() {
-    var opType = 1077;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1077;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -41,14 +42,9 @@ function getGroup() {
 
 //获取操作员
 function getProcessor() {
-    var opType = 1081;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var groupId = $('#groupSelect').val();
     var data = {}
-    data.opType = opType;
+    data.opType = 1081;
     data.opData = JSON.stringify({
         groupId: groupId,
         menu: true
@@ -72,14 +68,9 @@ function getProcessor() {
 
 //任务绩效表
 function getScoreList() {
-    var opType = 1003;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var groupId = $('#groupSelect').val();
     var data = {}
-    data.opType = opType;
+    data.opType = 1003;
     data.opData = JSON.stringify({
         gId: groupId
     });
@@ -102,11 +93,6 @@ function getScoreList() {
 var _taskData = null;
 //获取任务
 function getAccountTask() {
-    var opType = 1000;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _taskData = {};
     var account = $('#processorSelect option:selected').attr('account');
     if (isStrEmptyOrUndefined(account)) {
@@ -115,7 +101,7 @@ function getAccountTask() {
     }
     _taskData.Account = account;
     var data = {}
-    data.opType = opType;
+    data.opType = 1000;
     data.opData = JSON.stringify({ account });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -155,7 +141,7 @@ function getAccountTask() {
 
 //任务开始 暂停 完成
 function taskHandle(num) {
-    var opType;
+    var opType = null;
     switch (num) {
         case 0:
             opType = 1004;
@@ -166,10 +152,6 @@ function taskHandle(num) {
         case 2:
             opType = 1006;
             break;
-    }
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
     }
     var data = {}
     data.opType = opType;
@@ -185,10 +167,6 @@ function taskHandle(num) {
 //待完成 已完成任务
 function getUnFinishedList(isFinish, el, limit) {
     var opType = isFinish ? 1002 : 1001;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var account = _taskData.Account;
     if (limit == null) {
         limit = 10;
