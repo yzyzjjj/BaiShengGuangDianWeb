@@ -130,9 +130,9 @@ function getStateList() {
                 var val = data.Item2;
                 switch (key) {
                     case 1:
-                        if (val == 0) {
+                        //if (val == 0) {
                             info = firstData.DeviceStateStr;
-                        }
+                        //}
                         break;
                     default:
                         info = val;

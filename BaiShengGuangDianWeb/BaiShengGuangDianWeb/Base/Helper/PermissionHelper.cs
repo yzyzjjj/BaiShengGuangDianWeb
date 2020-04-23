@@ -18,7 +18,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
         {
             PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions_group` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
             PermissionsDetailList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
-            UpdateOrder();
+            //UpdateOrder();
         }
 
         public static bool CheckPermission(string url)
@@ -79,7 +79,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 }
             }
 
-            ServerConfig.WebDb.Execute("UPDATE `permissions_group` SET `Order` = @Order WHERE Id = @Id;", permissionsList);
+            ServerConfig.WebDb.Execute("UPDATE `permissions_group` SET `Order` = @Order WHERE Id = @Id AND `Order` = 0;", permissionsList);
         }
     }
 }
