@@ -1,4 +1,11 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[545] = { uIds: ['updateMaterialBtn'] };
+    _permissionList[546] = { uIds: ['addMaterialModalBtn'] };
+    _permissionList[547] = { uIds: ['batchAddMaterialModalBtn'] };
+    _permissionList[548] = { uIds: ['delMaterialBtn'] };
+    _permissionList[549] = { uIds: ['updateImgBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     siteSelect();
     var categoryId, nameId, supplierId;
@@ -218,13 +225,8 @@
 var _categorySelect = null;
 //类别选项
 function categorySelect(resolve) {
-    var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 816;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -252,11 +254,6 @@ function categorySelect(resolve) {
 
 //名称选项
 function nameSelect(resolve, categoryId, isTable) {
-    var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var list = {};
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg('请选择货品类别');
@@ -266,7 +263,7 @@ function nameSelect(resolve, categoryId, isTable) {
         list.categoryId = categoryId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 824;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -296,11 +293,6 @@ function nameSelect(resolve, categoryId, isTable) {
 
 //供应商选项
 function supplierSelect(resolve, categoryId, nameId, isTable) {
-    var opType = 831;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var list = {};
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg('请选择货品类别');
@@ -317,7 +309,7 @@ function supplierSelect(resolve, categoryId, nameId, isTable) {
         list.nameId = nameId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 831;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -347,11 +339,6 @@ function supplierSelect(resolve, categoryId, nameId, isTable) {
 
 //规格选项
 function specificationSelect(resolve, categoryId, nameId, supplierId, isTable) {
-    var opType = 839;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var list = {};
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg('请选择货品类别');
@@ -375,7 +362,7 @@ function specificationSelect(resolve, categoryId, nameId, supplierId, isTable) {
         list.supplierId = supplierId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 839;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -406,13 +393,8 @@ function specificationSelect(resolve, categoryId, nameId, supplierId, isTable) {
 var _siteSelect = null;
 //位置选项
 function siteSelect(resolve) {
-    var opType = 847;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 847;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -440,11 +422,6 @@ function siteSelect(resolve) {
 
 //货品管理列表
 function getMaterialList() {
-    var opType = 808;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _materialIdData = [];
     _materialNameData = [];
     var list = {};
@@ -490,7 +467,7 @@ function getMaterialList() {
         list.siteId = siteId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 808;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -501,9 +478,8 @@ function getMaterialList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var number = 0;
-        var order = function () {
-            return ++number;
+        var order = function (a,b,c,d) {
+            return ++d.row;
         }
         var code = function (data) {
             return `<span class="textOn codeOld">${data}</span><input type="text" class="form-control text-center textIn code hidden" maxlength="20" style="width:120px" value=${data}>`;
@@ -543,7 +519,7 @@ function getMaterialList() {
             return (data.length > tdShowLength
                 ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
                 : `<span title = "${data}" class="textOn">${data}</span>`)
-                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
+                + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
         $("#MaterialList")
             .DataTable({
@@ -640,11 +616,6 @@ function getMaterialList() {
 
 //保存货品信息
 function updateMaterial() {
-    var opType = 809;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#MaterialList tbody').find('tr');
     var nameData = [];
     var i = 0, len = trs.length;
@@ -702,7 +673,7 @@ function updateMaterial() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 809;
         data.opData = JSON.stringify(nameData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -761,11 +732,6 @@ function addMaterialModal() {
 
 //添加货品信息
 function addMaterial() {
-    var opType = 810;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var categoryId = $('#addCategorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg("请选择类别");
@@ -819,7 +785,7 @@ function addMaterial() {
             }
             img = JSON.stringify(img);
             var data = {}
-            data.opType = opType;
+            data.opType = 810;
             data.opData = JSON.stringify([{
                 SpecificationId: specificationId,
                 SiteId: siteId,
@@ -850,11 +816,6 @@ var _materialIdData = [];
 var _materialNameData = [];
 //删除货品
 function delMaterial() {
-    var opType = 811;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_materialIdData.length) {
         layer.msg("请选择要删除的货品编号");
         return;
@@ -862,7 +823,7 @@ function delMaterial() {
     var name = _materialNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 811;
         data.opData = JSON.stringify({
             ids: _materialIdData
         });
@@ -939,11 +900,6 @@ function showImgModel(id, code, category, name, supplier, specification, img, si
 
 //修改图片
 function updateImg() {
-    var opType = 809;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     fileCallBack[fileEnum.Material] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -954,7 +910,7 @@ function updateImg() {
             imgNew = JSON.stringify(imgNew);
             var id = $('#checkId').text();
             var data = {}
-            data.opType = opType;
+            data.opType = 809;
             data.opData = JSON.stringify([{
                 UpdateImage: true,
                 Images: imgNew,
@@ -981,11 +937,6 @@ var batchAddMax = 0, batchAddMaxV = 0;
 
 //批量添加货品模态框
 function batchAddMaterialModal() {
-    var opType = 810;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     $('#batchAddMaterial').removeAttr("disabled");
     $('.batchAddBtn').attr("disabled", "disabled");
     resetBatchAddList();

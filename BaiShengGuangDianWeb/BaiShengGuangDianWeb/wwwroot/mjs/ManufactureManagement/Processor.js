@@ -1,4 +1,14 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[444] = { uIds: ['addGroupBtn'] };
+    _permissionList[445] = { uIds: [] };
+    _permissionList[446] = { uIds: ['deleteGroupBtn'] };
+    _permissionList[447] = { uIds: ['addGroupProcessorBtn'] };
+    _permissionList[448] = { uIds: ['deleteGroupProcessorBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
+    if (!_permissionList[445].have) {
+        $('.updateGroup').addClass('hidden');
+    }
     $(".ms2").select2();
     $(".ms3").select2({
         allowClear: true,
@@ -102,14 +112,8 @@ var _allProcessors = null;
 var _allProcessorOptions = "";
 //获取分组
 function getGroupList(resolve, groupId = 0) {
-    var opType = 1077;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 1077;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -135,14 +139,8 @@ function getGroupList(resolve, groupId = 0) {
 
 //获取操作工
 function getAllProcessorList(resolve) {
-    var opType = 248;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 248;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -158,14 +156,8 @@ function getAllProcessorList(resolve) {
 function initProcessorSelect(groupId, resolve = null) {
     $('#ProcessorSelect').empty();
     if (!isStrEmptyOrUndefined(groupId)) {
-        var opType = 1081;
-        if (!checkPermission(opType)) {
-            layer.msg('没有权限');
-            return;
-        }
-
         var data = {}
-        data.opType = opType;
+        data.opType = 1081;
         data.opData = JSON.stringify({
             groupId: groupId,
             menu: true
@@ -205,20 +197,13 @@ function initProcessorSelect(groupId, resolve = null) {
 
 //删除分组
 function deleteGroup() {
-    var opType = 1080;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupId = $("#GroupSelect").val();
     if (isStrEmptyOrUndefined(groupId)) {
         return;
     }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1080;
         data.opData = JSON.stringify({
             ids: [groupId]
         });
@@ -235,12 +220,6 @@ function deleteGroup() {
 
 //添加分组
 function addGroup() {
-    var opType = 1079;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupName = $("#GroupName").val();
     var oldGroupName = $("#GroupSelect option:selected").text();
     if (isStrEmptyOrUndefined(groupName)) {
@@ -250,14 +229,12 @@ function addGroup() {
     if (groupName == oldGroupName) {
         return;
     }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1079;
         data.opData = JSON.stringify({
             Group: groupName
         });
-
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
@@ -275,12 +252,6 @@ function addGroup() {
 
 //修改分组
 function updateGroup() {
-    var opType = 1078;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupName = $("#GroupName").val();
     var oldGroupName = $("#GroupSelect option:selected").text();
     var groupId = $("#GroupSelect").val();
@@ -295,10 +266,9 @@ function updateGroup() {
     if (groupName == oldGroupName) {
         return;
     }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1078;
         data.opData = JSON.stringify({
             Id: groupId,
             Group: groupName,
@@ -318,12 +288,6 @@ function updateGroup() {
 
 //修改排名时间
 function updateGroupTime() {
-    var opType = 1078;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var dayType = $("#DateTypeSelect").val();
     var day = $("#Day").val();
     var groupId = $("#GroupSelect").val();
@@ -336,14 +300,13 @@ function updateGroupTime() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1078;
         data.opData = JSON.stringify({
             Id: groupId,
             Interval: dayType,
             ScoreTime: day,
             IsName: false
         });
-
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
@@ -357,12 +320,6 @@ function updateGroupTime() {
 
 //删除分组成员
 function deleteGroupProcessor() {
-    var opType = 1083;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupId = $("#GroupSelect").val();
     if (isStrEmptyOrUndefined(groupId)) {
         layer.msg("请选择项目组");
@@ -375,7 +332,7 @@ function deleteGroupProcessor() {
 
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1083;
         data.opData = JSON.stringify({
             ids: [processorId]
         });
@@ -392,12 +349,6 @@ function deleteGroupProcessor() {
 
 //添加分组成员
 function addGroupProcessor() {
-    var opType = 1082;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupId = $("#GroupSelect").val();
     if (isStrEmptyOrUndefined(groupId)) {
         layer.msg("请选择项目组");
@@ -421,7 +372,7 @@ function addGroupProcessor() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1082;
         data.opData = JSON.stringify(opData);
 
         ajaxPost("/Relay/Post", data,

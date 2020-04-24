@@ -1,4 +1,9 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[568] = { uIds: ['updateSupplierBtn'] };
+    _permissionList[569] = { uIds: ['addSupplierModalBtn'] };
+    _permissionList[570] = { uIds: ['delSupplierBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     var one = new Promise(function (resolve, reject) {
         categorySelect(resolve);
@@ -27,8 +32,7 @@
         new Promise(function (resolve, reject) {
             tableNameSelect(resolve, categoryId, null, 0);
         }).then(function (e) {
-            tr.find('.name').empty();
-            tr.find('.name').append(e);
+            tr.find('.name').empty().append(e);
         });
     });
     $('#addCategorySelect').on('select2:select', function () {
@@ -40,13 +44,8 @@
 var _categorySelect = null;
 //类别选项
 function categorySelect(resolve) {
-    var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 816;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -74,11 +73,6 @@ function categorySelect(resolve) {
 
 //名称选项
 function nameSelect(resolve) {
-    var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var list = {};
     var categoryId = $('#categorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
@@ -89,7 +83,7 @@ function nameSelect(resolve) {
         list.categoryId = categoryId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 824;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -117,13 +111,8 @@ function nameSelect(resolve) {
 
 //表格名称选项
 function tableNameSelect(resolve, categoryId, el, tf) {
-    var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 824;
     data.opData = JSON.stringify({
         categoryId: categoryId
     });
@@ -152,11 +141,6 @@ function tableNameSelect(resolve, categoryId, el, tf) {
 
 //获取供应商信息
 function getSupplierList() {
-    var opType = 831;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _supplierIdData = [];
     _supplierNameData = [];
     var list = {};
@@ -177,7 +161,7 @@ function getSupplierList() {
         list.nameId = nameId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 831;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -188,9 +172,8 @@ function getSupplierList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var number = 0;
-        var order = function () {
-            return ++number;
+        var order = function (a, b, c, d) {
+            return ++d.row;
         }
         var category = function (data) {
             return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
@@ -203,10 +186,11 @@ function getSupplierList() {
         }
         var remark = function (data) {
             return (data.length > tdShowLength
-                    ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
-                    : `<span title = "${data}" class="textOn">${data}</span>`)
-                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
+                ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                : `<span title = "${data}" class="textOn">${data}</span>`)
+                + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
+        var tf = _permissionList[568].have || _permissionList[570].have;
         $("#supplierList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -219,7 +203,7 @@ function getSupplierList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf },
                     { "data": null, "title": "序号", "render": order },
                     { "data": null, "title": "类别", "render": category },
                     { "data": null, "title": "名称", "render": name },
@@ -270,11 +254,6 @@ function getSupplierList() {
 
 //保存供应商信息
 function updateSupplier() {
-    var opType = 832;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#supplierList tbody').find('tr');
     var nameData = [];
     var i = 0, len = trs.length;
@@ -308,7 +287,7 @@ function updateSupplier() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 832;
         data.opData = JSON.stringify(nameData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -336,11 +315,6 @@ function addSupplierModal() {
 
 //添加货品供应商信息
 function addSupplier() {
-    var opType = 833;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var categoryId = $('#addCategorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg("请选择类别");
@@ -359,7 +333,7 @@ function addSupplier() {
     var remark = $('#addRemark').val().trim();
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 833;
         data.opData = JSON.stringify({
             NameId: nameId,
             Supplier: supplierName,
@@ -381,11 +355,6 @@ var _supplierIdData = [];
 var _supplierNameData = [];
 //删除货品供应商
 function delSupplier() {
-    var opType = 834;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_supplierIdData.length) {
         layer.msg("请选择要删除的货品供应商");
         return;
@@ -393,7 +362,7 @@ function delSupplier() {
     var name = _supplierNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 834;
         data.opData = JSON.stringify({
             ids: _supplierIdData
         });

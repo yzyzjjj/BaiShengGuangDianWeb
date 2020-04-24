@@ -1,8 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[744] = { uIds: ['delPermission'] };
+    _permissionList = checkPermissionUi(_permissionList);
     getPermissionsList();
-    if (!checkPermission(81)) {
-        $("#delPermission").addClass("hidden");
-    }
 }
 
 var delList = null;
@@ -15,16 +15,14 @@ function getPermissionsList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0},{1}" name="chkItem" class="icb_minimal" onclick="">'.format(data.id, data.name);
             }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (a, b, c,d) {
+                return ++d.row;
             }
-            var columns = checkPermission(81)
+            var per744 = _permissionList[744].have;
+            var columns = per744
                 ? [
                     { "data": null, "title": "请选择", "render": op, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
@@ -48,7 +46,7 @@ function getPermissionsList() {
                     "searching": true,
                     "language": oLanguage,
                     "data": ret.datas,
-                    "aaSorting": [[checkPermission(81) ? 1 : 0, "asc"]],
+                    "aaSorting": [[per744 ? 1 : 0, "asc"]],
                     "aLengthMenu": [15, 30, 60], //更改显示记录数选项  
                     "iDisplayLength": 15, //默认显示的记录数
                     "columns": columns,
@@ -76,20 +74,11 @@ function getPermissionsList() {
 }
 
 function delPermission() {
-    //数组转化成字符串
     var list = delList.join();
-    //分割以","为界的字符串组成新的数组
     var newList = list.split(",");
-    //定义两个新数组
     var listId = [], listName = [];
-    //根据数组ID下标奇偶数组成新的数组(delId偶数数组,delName奇数数组)
     for (var i = 0; i < newList.length; i++) {
-        if (i % 2 == 0) {
-            //向空数组添加新的元素
-            listId.push(newList[i]);
-        } else {
-            listName.push(newList[i].trim());
-        }
+        i % 2 == 0 ? listId.push(newList[i]) : listName.push(newList[i].trim());
     }
     var delId = listId.join(",");
     var delName = listName.join("<br>");
@@ -104,10 +93,5 @@ function delPermission() {
                 }
             });
     }
-
-    if (isStrEmptyOrUndefined(delId)) {
-        layer.msg('请选择要删除的数据');
-    } else {
-        showConfirm("删除以下权限:" + "<pre style='color:red'>" + delName + "</pre>", doSth);
-    }
+    isStrEmptyOrUndefined(delId) ? layer.msg('请选择要删除的数据') : showConfirm(`删除以下权限:<pre style='color:red'>${delName}</pre>`, doSth);
 }

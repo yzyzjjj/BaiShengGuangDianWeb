@@ -1,18 +1,18 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[554] = { uIds: ['updateCategoryBtn'] };
+    _permissionList[555] = { uIds: ['addCategoryModalBtn'] };
+    _permissionList[556] = { uIds: ['delCategoryBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     getCategoryList();
 }
 
 //获取类别信息
 function getCategoryList() {
-    var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     _categoryIdData = [];
     _categoryNameData = [];
     var data = {}
-    data.opType = opType;
+    data.opType = 816;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -22,9 +22,8 @@ function getCategoryList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var number = 0;
-        var order = function () {
-            return ++number;
+        var order = function (a,b,c,d) {
+            return ++d.row;
         }
         var category = function (data) {
             return `<span class="textOn categoryOld">${data}</span><input type="text" class="form-control text-center textIn category hidden" maxlength="20" style="width:120px" value=${data}>`;
@@ -33,8 +32,9 @@ function getCategoryList() {
             return (data.length > tdShowLength
                     ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
                     : `<span title = "${data}" class="textOn">${data}</span>`)
-                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
+                + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
+        var tf = _permissionList[554].have || _permissionList[556].have;
         $("#categoryList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -47,7 +47,7 @@ function getCategoryList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf},
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Category", "title": "类别", "render": category },
                     { "data": "Remark", "title": "备注", "render": remark }
@@ -86,11 +86,6 @@ function getCategoryList() {
 
 //保存类别信息
 function updateCategory() {
-    var opType = 817;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#categoryList tbody').find('tr');
     var categoryData = [];
     var i = 0, len = trs.length;
@@ -118,7 +113,7 @@ function updateCategory() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 817;
         data.opData = JSON.stringify(categoryData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -140,11 +135,6 @@ function addCategoryModal() {
 
 //添加货品类别信息
 function addCategory() {
-    var opType = 818;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var category = $('#addCategory').val().trim();
     if (isStrEmptyOrUndefined(category)) {
         layer.msg("新类别不能为空");
@@ -153,7 +143,7 @@ function addCategory() {
     var remark = $('#addRemark').val().trim();
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 818;
         data.opData = JSON.stringify({
             Category: category,
             Remark: remark
@@ -174,11 +164,6 @@ var _categoryIdData = [];
 var _categoryNameData = [];
 //删除货品类别
 function delCategory() {
-    var opType = 819;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_categoryIdData.length) {
         layer.msg("请选择要删除的货品类别");
         return;
@@ -186,7 +171,7 @@ function delCategory() {
     var name = _categoryNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 819;
         data.opData = JSON.stringify({
             ids: _categoryIdData
         });

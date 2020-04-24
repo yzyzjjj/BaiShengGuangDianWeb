@@ -1,4 +1,11 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[700] = { uIds: [] };
+    _permissionList[701] = { uIds: ['getProcessDetailBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
+    if (!_permissionList[700].have) {
+        $('.createChart').addClass('hidden');
+    }
     $(".ms2").select2();
     $("#selectDevice").select2({
         allowClear: true,
@@ -128,13 +135,8 @@ var leadTimeDay = 86400000;
 //时差1月
 var leadTimeMonth = 2592000000;
 function getDeviceList(par) {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -163,13 +165,8 @@ function getDeviceList(par) {
 }
 
 function getWorkShopList() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -192,13 +189,8 @@ function getWorkShopDeviceList() {
         getDeviceList(1);
         return;
     }
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShop
     });
@@ -226,13 +218,8 @@ function getWorkShopDevList() {
         getDeviceList(2);
         return;
     }
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShop
     });
@@ -252,11 +239,6 @@ function getWorkShopDevList() {
 
 var dataTime;
 function createChart(start1, end1) {
-    var opType = 502;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var device = $("#selectDevice").val();
     if (isStrEmptyOrUndefined(device)) {
         layer.msg("请选择设备");
@@ -320,7 +302,7 @@ function createChart(start1, end1) {
         dataTime = $("#parTime").find("input:checked").val();
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 502;
     data.opData = JSON.stringify({
         WorkshopName: workShop,
         DeviceId: deviceId.join(","),
@@ -678,13 +660,8 @@ function monthChart() {
 }
 
 function selectPlan() {
-    var opType = 215;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 215;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -704,11 +681,6 @@ function selectPlan() {
 }
 
 function getProcessDetail() {
-    var opType = 506;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var deviceId = $("#selectDevice1").val();
     if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg("请选择车间设备");
@@ -740,7 +712,7 @@ function getProcessDetail() {
         list["ProductionId"] = plan;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 506;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -871,11 +843,6 @@ function getProcessDetail() {
 }
 
 function rateList(i, deviceId, startTime, endTime, plan) {
-    var opType = 506;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
     var list = {
         DeviceId: deviceId,
@@ -885,7 +852,7 @@ function rateList(i, deviceId, startTime, endTime, plan) {
     if (plan != 0) {
         list["ProductionId"] = plan;
     }
-    data.opType = opType;
+    data.opType = 506;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

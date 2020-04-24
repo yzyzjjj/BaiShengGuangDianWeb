@@ -1,4 +1,9 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[561] = { uIds: ['updateNameBtn'] };
+    _permissionList[562] = { uIds: ['addNameModalBtn'] };
+    _permissionList[563] = { uIds: ['delNameBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     surveyor();
     $('#categorySelect').on('select2:select', function () {
@@ -9,13 +14,8 @@
 var _categorySelect = null;
 //类别选项
 function surveyor() {
-    var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 816;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -42,11 +42,6 @@ function surveyor() {
 
 //获取名称信息
 function getNameList() {
-    var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     _nameIdData = [];
     _nameNameData = [];
     var list = {};
@@ -59,7 +54,7 @@ function getNameList() {
         list.categoryId = categoryId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 824;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -70,9 +65,8 @@ function getNameList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var number = 0;
-        var order = function () {
-            return ++number;
+        var order = function (a,b,c,d) {
+            return ++d.row;
         }
         var category = function (data) {
             return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
@@ -84,8 +78,9 @@ function getNameList() {
             return (data.length > tdShowLength
                     ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
                     : `<span title = "${data}" class="textOn">${data}</span>`)
-                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
+                + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
+        var tf = _permissionList[561].have || _permissionList[563].have;
         $("#nameList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -98,7 +93,7 @@ function getNameList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false},
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf},
                     { "data": null, "title": "序号", "render": order },
                     { "data": null, "title": "类别", "render": category },
                     { "data": "Name", "title": "名称", "render": name },
@@ -140,11 +135,6 @@ function getNameList() {
 
 //保存名称信息
 function updateName() {
-    var opType = 825;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#nameList tbody').find('tr');
     var nameData = [];
     var i = 0, len = trs.length;
@@ -178,7 +168,7 @@ function updateName() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 825;
         data.opData = JSON.stringify(nameData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -207,11 +197,6 @@ function addNameModal() {
 
 //添加货品名称信息
 function addCategory() {
-    var opType = 826;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var categoryId = $('#addCategorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg("请选择类别");
@@ -225,7 +210,7 @@ function addCategory() {
     var remark = $('#addRemark').val().trim();
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 826;
         data.opData = JSON.stringify({
             CategoryId: categoryId,
             Name: nameName,
@@ -250,11 +235,6 @@ var _nameIdData = [];
 var _nameNameData = [];
 //删除货品名称
 function delName() {
-    var opType = 827;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_nameIdData.length) {
         layer.msg("请选择要删除的货品名称");
         return;
@@ -262,7 +242,7 @@ function delName() {
     var name = _nameNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 827;
         data.opData = JSON.stringify({
             ids: _nameIdData
         });

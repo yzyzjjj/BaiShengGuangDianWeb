@@ -21,9 +21,9 @@
     <div class="box box-primary">
         <div class="box-header with-border">
             <div class="form-group col-md-4 col-md-push-8" style="text-align: right; padding: 0">
-                <button type="button" class="btn btn-success btn-sm" onclick="showPlanModal()">计划管理</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="delPlanConfig()">删除</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanConfig()">保存</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="showPlanModal()" id="showPlanModalBtn">计划管理</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="delPlanConfig()" id="delPlanConfigBtn">删除</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanConfig()" id="updatePlanConfigBtn">保存</button>
             </div>
             <div class="col-md-8 col-md-pull-4" style="padding:0">
                 <div class="flexStyle">
@@ -55,7 +55,7 @@
                     <label class="control-label" style="white-space: nowrap">计划号：<span class="spanStyle" id="planText"></span></label>
                     <div style="text-align: right" class="isIssue">
                         <button type="button" class="btn btn-warning btn-sm" onclick="resetPlanItemList()">重置</button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanTaskItem()">保存</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="updatePlanTaskItem()" id="updatePlanTaskItemBtn">保存</button>
                     </div>
                 </div>
                 <div class="form-group maxHeight" id="planItemTable" style="overflow: auto">
@@ -101,12 +101,12 @@
                             <label class="control-label" style="white-space: nowrap;margin: 0">选择计划：</label>
                             <select class="form-control" id="planSelect" style="width: 180px"></select>
                             <button type="button" class="btn btn-info btn-sm" id="planReuse" style="margin-left: 3px">复用</button>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="delPlanSelect()" style="margin-left: 3px">删除</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delPlanSelect()" id="delPlanSelectBtn" style="margin-left: 3px">删除</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">新计划：</label>
                             <input class="form-control" id="newPlan" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
-                            <button type="button" class="btn btn-primary btn-sm" onclick="addPlan()" style="margin-left: 3px">新增</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addPlan()" id="addPlanBtn" style="margin-left: 3px">新增</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">任务配置：</label>

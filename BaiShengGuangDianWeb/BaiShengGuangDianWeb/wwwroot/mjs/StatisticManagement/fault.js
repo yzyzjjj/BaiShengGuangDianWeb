@@ -116,13 +116,8 @@ function getWeeks(e) {
     }
 }
 function getWorkShopList() {
-    var opType = 162;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 162;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -148,13 +143,8 @@ function getWorkShopDeviceList() {
         getDeviceList(1);
         return;
     }
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShop
     });
@@ -180,13 +170,8 @@ function getWorkShopDevList() {
         getDeviceList(2);
         return;
     }
-    var opType = 163;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShop
     });
@@ -206,13 +191,8 @@ function getWorkShopDevList() {
 }
 
 function getDeviceList(par) {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -242,11 +222,6 @@ function getDeviceList(par) {
 
 var FaultsData;
 function getFaultChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!$("#par label").find(".icb_minimal").is(":checked")) {
         layer.msg("请选择参数");
         return;
@@ -271,7 +246,7 @@ function getFaultChart() {
         compare = 2;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         DeviceId: workDeviceName,
@@ -797,11 +772,6 @@ function getFaultAppChart() {
 //}
 var dayData;
 function dayChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShopName = $("#selectWorkShop1").val();
     if (workShopName == "所有车间") {
         workShopName = "";
@@ -813,7 +783,7 @@ function dayChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         StartTime: oneTime,
@@ -1074,11 +1044,6 @@ function dayAppChart() {
 
 var weekData;
 function weekChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShopName = $("#selectWorkShop1").val();
     if (workShopName == "所有车间") {
         workShopName = "";
@@ -1090,7 +1055,7 @@ function weekChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         StartTime: oneTime,
@@ -1351,11 +1316,6 @@ function weekAppChart() {
 
 var monthData;
 function monthChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShopName = $("#selectWorkShopMonth").val();
     if (workShopName == "所有车间") {
         workShopName = "";
@@ -1367,7 +1327,7 @@ function monthChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         StartTime: oneTime,
@@ -1631,11 +1591,6 @@ function monthAppChart() {
 
 var shopData, shopTime;
 function shopChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShopName = $("#selectWorkShop1").val();
     if (isStrEmptyOrUndefined(workShopName) || workShopName.length < 2) {
         layer.msg("请选择两个及以上的车间");
@@ -1657,7 +1612,7 @@ function shopChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         StartTime: startTime,
@@ -2068,11 +2023,6 @@ function shopAppChart() {
 
 var devData, devTime;
 function devChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShopName = $("#selectWorkShopDev").val();
     if (workShopName == "所有车间") {
         workShopName = "";
@@ -2098,7 +2048,7 @@ function devChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShopName,
         DeviceId: deviceName,
@@ -2384,11 +2334,6 @@ function devAppChart() {
 
 var hourData, hourTime;
 function getFaultTimeChart() {
-    var opType = 505;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var workShop = $("#selectWorkShopTime").val();
     if (workShop == "所有车间") {
         workShop = "";
@@ -2412,7 +2357,7 @@ function getFaultTimeChart() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 505;
     data.opData = JSON.stringify({
         WorkshopName: workShop,
         StartTime: startDay,

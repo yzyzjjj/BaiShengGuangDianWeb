@@ -1,14 +1,14 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[627] = { uIds: ['reportBtn'] };
+    _permissionList[628] = { uIds: ['updateImgBtn'] };
+    _permissionList[629] = { uIds: ['groupRankBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
-
     $('#_6sCondition1').on('change', function () {
         $('#_6sCondition2').empty();
         var v = $(this).val();
         var options = "";
-        //<option value="0">负责人</option>
-        //<option value="1">检查项目</option>
-        //<option value="2">截止时间</option>
-        //<option value="3">评分</option>
         if (v == 0) {
             options =
                 `<option value="0">等于</option>`;
@@ -116,14 +116,8 @@ function init() {
 var _groups = null;
 //获取6s分组
 function getGroupList(resolve) {
-    var opType = 900;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 900;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -150,14 +144,8 @@ var _surveyors = null;
 var _surveyorOptions = "";
 //获取检查员
 function getSurveyorList(resolve) {
-    var opType = 254;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 254;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -188,17 +176,12 @@ function getItemList() {
     $("#6sGroupAll").html(0);
     $("#6sGroupCount").html(0);
     $("#itemList").empty();
-    var opType = 920;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var gId = $("#6sGroupSelect").val();
     var sTime = $("#_6sItemCheckTime1").val();
     var eTime = $("#_6sItemCheckTime2").val();
     if (!isStrEmptyOrUndefined(gId) && !isStrEmptyOrUndefined(sTime) && !isStrEmptyOrUndefined(eTime)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 920;
         data.opData = JSON.stringify({
             gId: gId,
             sTime: sTime,
@@ -330,10 +313,8 @@ function initItemList() {
             var xh = meta.row;
             return `<input type="checkbox" value="${xh}" class="icb_minimal chose" id="itemChose${xh}">`;
         }
-        var number = 0;
-        var order = function (data, type, row, meta) {
-            number = meta.row + 1;
-            return number;
+        var order = function (a, b, c, d) {
+            return ++d.row;
         }
         var reference = function (data) {
             return data.length > tdShowLength
@@ -477,12 +458,6 @@ function initItemList() {
 }
 
 function report() {
-    var opType = 921;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var list = new Array();
     var itemNames = new Array();
     for (var i = 0; i < showItems.length; i++) {
@@ -529,7 +504,7 @@ function report() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 921;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -550,8 +525,6 @@ function showImgModel(id, item, img) {
     tid = id;
     titem = item;
     timg = img;
-    $('#showImgModel .new').addClass("hidden");
-    $('#showImgModel .new').removeClass("hidden");
     if (_imgUpload == null) {
         _imgUpload = initFileInputMultiple("addImg", fileEnum._6s);
     }
@@ -601,15 +574,6 @@ function showImgModel(id, item, img) {
 
 //修改图片
 function updateImg() {
-    var opType = 921;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    //if (!hasPre()) {
-    //    layer.msg("请先上传图片");
-    //    return;
-    //}
     fileCallBack[fileEnum._6s] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -621,7 +585,7 @@ function updateImg() {
             var imgNew = JSON.stringify(imgNameData);
             var id = $('#checkId').text();
             var data = {}
-            data.opType = opType;
+            data.opType = 921;
             data.opData = JSON.stringify([{
                 UpdateImage: true,
                 Images: imgNew,
@@ -664,17 +628,11 @@ function groupRank(show = true, time = true) {
         $("#_6sGroupRankTime2").datepicker('update');
     }
     $("#_6sGroupRankList").empty();
-    var opType = 930;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var sTime = $("#_6sGroupRankTime1").val();
     var eTime = $("#_6sGroupRankTime2").val();
     if (!isStrEmptyOrUndefined(sTime) && !isStrEmptyOrUndefined(eTime)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 930;
         data.opData = JSON.stringify({
             sTime: sTime,
             eTime: eTime
@@ -684,13 +642,9 @@ function groupRank(show = true, time = true) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var number = 0;
-            var order = function (data, type, row, meta) {
-                number = meta.row + 1;
-                return number;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
-
             var detail = function (data) {
                 return `<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="groupPersonRank(${data.Id}, \'${data.Group}\')">查看</button>`;
             }
@@ -731,17 +685,11 @@ function groupPersonRank(groupId, group, show = true, time = true) {
     $("#_6sGroupGroup").html(group);
     $("#_6sGroupGroupId").html(groupId);
     $("#_6sGroupPersonRankList").empty();
-    var opType = 931;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var sTime = $("#_6sGroupPersonRankTime1").val();
     var eTime = $("#_6sGroupPersonRankTime2").val();
     if (!isStrEmptyOrUndefined(groupId) && !isStrEmptyOrUndefined(sTime) && !isStrEmptyOrUndefined(eTime)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 931;
         data.opData = JSON.stringify({
             gId: groupId,
             sTime: sTime,
@@ -752,17 +700,12 @@ function groupPersonRank(groupId, group, show = true, time = true) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var number = 0;
-            var order = function (data, type, row, meta) {
-                number = meta.row + 1;
-                return number;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
-
             var detail = function (data) {
                 return `<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="groupPersonItemRank(${groupId}, ${data.Id})">查看</button>`;
             }
-
             $("#_6sGroupPersonRankList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -799,17 +742,11 @@ function groupPersonItemRank(groupId, person, show = true, time = true) {
     }
     $("#_6sGroupPersonId").html(person);
     $("#_6sGroupPersonItemList").empty();
-    var opType = 920;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var sTime = $("#_6sGroupPersonItemRankTime1").val();
     var eTime = $("#_6sGroupPersonItemRankTime2").val();
     if (!isStrEmptyOrUndefined(groupId) && !isStrEmptyOrUndefined(sTime) && !isStrEmptyOrUndefined(eTime)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 920;
         data.opData = JSON.stringify({
             gId: groupId,
             pId: person,
@@ -821,11 +758,8 @@ function groupPersonItemRank(groupId, person, show = true, time = true) {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var number = 0;
-            var order = function (data, type, row, meta) {
-                number = meta.row + 1;
-                return number;
+            var order = function (a, b, c, d) {
+                return ++d.row;
             }
             var reference = function (data) {
                 return data.length > tdShowLength

@@ -1,14 +1,13 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[621] = { uIds: ['reportBtn'] };
+    _permissionList[622] = { uIds: ['updateImgBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
-
     $('#_6sCondition1').on('change', function () {
         $('#_6sCondition2').empty();
         var v = $(this).val();
         var options = "";
-        //<option value="0">负责人</option>
-        //<option value="1">检查项目</option>
-        //<option value="2">截止时间</option>
-        //<option value="3">评分</option>
         if (v == 0) {
             options =
                 `<option value="0">等于</option>`;
@@ -56,11 +55,8 @@ function init() {
     var groupFunc = new Promise(function (resolve, reject) {
         getGroupList(resolve);
     });
-
     Promise.all([groupFunc])
         .then((result) => {
-            //console.log('准备工作完毕');
-            //console.log(result);
             getItemList();
         });
 }
@@ -68,14 +64,8 @@ function init() {
 var _groups = null;
 //获取6s分组
 function getGroupList(resolve) {
-    var opType = 900;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 900;
     data.opData = JSON.stringify({
         account: getCookieTokenInfo().account
     });
@@ -110,15 +100,10 @@ function getItemList() {
     $("#6sGroupAll").html(0);
     $("#6sGroupCount").html(0);
     $("#itemList").empty();
-    var opType = 910;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var gId = $("#6sGroupSelect").val();
     if (!isStrEmptyOrUndefined(gId)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 910;
         data.opData = JSON.stringify({
             gId: gId
         });
@@ -327,12 +312,6 @@ function initItemList() {
 }
 
 function report() {
-    var opType = 911;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var list = new Array();
     var itemNames = new Array();
     if (showItems == null) {
@@ -371,7 +350,7 @@ function report() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 911;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -392,8 +371,6 @@ function showImgModel(id, item, img) {
     tid = id;
     titem = item;
     timg = img;
-    $('#showImgModel .new').addClass("hidden");
-    $('#showImgModel .new').removeClass("hidden");
     if (_imgUpload == null) {
         _imgUpload = initFileInputMultiple("addImg", fileEnum._6s);
     }
@@ -443,15 +420,6 @@ function showImgModel(id, item, img) {
 
 //修改图片
 function updateImg() {
-    var opType = 911;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
-    //if (!hasPre()) {
-    //    layer.msg("请先上传图片");
-    //    return;
-    //}
     fileCallBack[fileEnum._6s] = function (fileRet) {
         if (fileRet.errno == 0) {
             var img = [];
@@ -463,7 +431,7 @@ function updateImg() {
             var imgNew = JSON.stringify(imgNameData);
             var id = $('#checkId').text();
             var data = {}
-            data.opType = opType;
+            data.opType = 911;
             data.opData = JSON.stringify([{
                 UpdateImage: true,
                 Images: imgNew,

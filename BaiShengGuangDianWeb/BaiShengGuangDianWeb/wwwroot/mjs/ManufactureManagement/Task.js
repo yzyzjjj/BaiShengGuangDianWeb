@@ -1,4 +1,17 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[429] = { uIds: ['taskConfigModalBtn'] };
+    _permissionList[460] = { uIds: ['addConfigBtn'] };
+    _permissionList[461] = { uIds: ['updateConfigBtn'] };
+    _permissionList[462] = { uIds: ['delConfigBtn'] };
+    _permissionList[430] = { uIds: ['taskModuleModalBtn'] };
+    _permissionList[467] = { uIds: ['addUpModuleBtn'] };
+    _permissionList[468] = { uIds: ['updateModuleBtn'] };
+    _permissionList[469] = { uIds: ['delModuleBtn'] };
+    _permissionList[431] = { uIds: ['delTaskItemBtn'] };
+    _permissionList[432] = { uIds: ['resetTaskBtn'] };
+    _permissionList[433] = { uIds: ['updateTaskBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     getTaskConfig();
     $('#configItem').on('ifChanged', '.isEnable', function () {
@@ -146,13 +159,8 @@ function setProcessorSelect(groupId, el) {
 var _taskConfigName = null;
 //获取任务配置
 function getTaskConfig() {
-    var opType = 1051;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1051;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -176,13 +184,8 @@ function getTaskConfig() {
 
 //获取分组
 function getGroup(resolve) {
-    var opType = 1077;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1077;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -207,13 +210,8 @@ function getGroup(resolve) {
 var _processor = null;
 //获取操作员
 function getProcessor(resolve) {
-    var opType = 1081;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1081;
     data.opData = JSON.stringify({
         groupId: 0,
         menu: true
@@ -239,13 +237,8 @@ function getProcessor(resolve) {
 var _moduleName = null;
 //获取模块名
 function getModule(resolve) {
-    var opType = 1058;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1058;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -270,13 +263,8 @@ function getModule(resolve) {
 }
 //获取任务名
 function getTaskName(resolve) {
-    var opType = 1066;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1066;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -381,18 +369,13 @@ function taskTrData() {
 var _taskItem = null;
 //获取任务配置项
 function getTaskConfigItem() {
-    var opType = 1055;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _taskItemId = [];
     var taskId = $('#selectConfig').val();
     if (isStrEmptyOrUndefined(taskId)) {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 1055;
     data.opData = JSON.stringify({ taskId });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -416,11 +399,6 @@ function getTaskConfigItem() {
 var _isUpMove = true;
 //保存任务配置
 function updateTask() {
-    var opType = 1056;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var taskId = $('#selectConfig').val();
     if (isStrEmptyOrUndefined(taskId)) {
         layer.msg('请选择配置');
@@ -527,7 +505,7 @@ function updateTask() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1056;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -554,11 +532,6 @@ function addTask() {
 var _taskItemId = [];
 //删除任务配置
 function delTaskItem() {
-    var opType = 1057;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var len = _taskItemId.length;
     if (!len) {
         layer.msg('请选择需要删除的数据');
@@ -570,7 +543,7 @@ function delTaskItem() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1057;
         data.opData = JSON.stringify({
             ids: _taskItemId
         });
@@ -600,11 +573,6 @@ function taskConfigModal() {
 
 //删除配置
 function delConfig() {
-    var opType = 1054;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var configId = $('#configSelect').val();
     if (isStrEmptyOrUndefined(configId)) {
         layer.msg('请选择配置');
@@ -612,7 +580,7 @@ function delConfig() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1054;
         data.opData = JSON.stringify({
             id: configId
         });
@@ -629,11 +597,6 @@ function delConfig() {
 
 //新增配置
 function addConfig() {
-    var opType = 1053;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var newConfig = $("#newConfig").val().trim();
     if (isStrEmptyOrUndefined(newConfig)) {
         layer.msg("新配置不能为空");
@@ -651,7 +614,7 @@ function addConfig() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1053;
         data.opData = JSON.stringify({
             Task: newConfig,
             CopyId: isChecked ? configId : 0
@@ -671,11 +634,6 @@ function addConfig() {
 
 //修改配置
 function updateConfig() {
-    var opType = 1052;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var newConfig = $("#newConfig").val().trim();
     var oldConfig = $("#configSelect option:selected").text();
     var configId = $("#configSelect").val();
@@ -693,7 +651,7 @@ function updateConfig() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1052;
         data.opData = JSON.stringify({
             Id: configId,
             Task: newConfig
@@ -727,11 +685,6 @@ function taskModuleModal() {
 
 //删除模块
 function delModule() {
-    var opType = 1061;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var moduleId = $('#moduleSelect').val();
     if (isStrEmptyOrUndefined(moduleId)) {
         layer.msg('请选择模块');
@@ -739,7 +692,7 @@ function delModule() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1061;
         data.opData = JSON.stringify({
             id: moduleId
         });
@@ -758,10 +711,6 @@ function delModule() {
 //新增修改模块
 function addUpModule(isUp) {
     var opType = isUp ? 1059 : 1060;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var newModuleName = $('#newModule').val().trim();
     var moduleId = $('#moduleSelect').val();
     var olModuleName = $("#moduleSelect option:selected").text();

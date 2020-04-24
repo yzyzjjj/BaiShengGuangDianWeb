@@ -3,13 +3,8 @@
 }
 
 function getBoardData() {
-    var opType = 504;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {};
-    data.opType = opType;
+    data.opType = 504;
     ajaxPost("/Relay/Post",
         data,
         function (ret) {

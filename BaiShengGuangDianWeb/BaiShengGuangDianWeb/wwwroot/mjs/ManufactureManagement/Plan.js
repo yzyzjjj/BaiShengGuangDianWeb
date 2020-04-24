@@ -1,4 +1,15 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[419] = { uIds: ['showPlanModalBtn'] };
+    _permissionList[453] = { uIds: ['addPlanBtn'] };
+    _permissionList[454] = { uIds: ['planReuse'] };
+    _permissionList[455] = { uIds: ['delPlanSelectBtn'] };
+    _permissionList[420] = { uIds: ['delPlanConfigBtn'] };
+    _permissionList[421] = { uIds: ['updatePlanConfigBtn'] };
+    _permissionList[422] = { uIds: [] };
+    _permissionList[423] = { uIds: [] };
+    _permissionList[424] = { uIds: ['updatePlanTaskItemBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     getTaskConfig();
     getTaskState();
@@ -266,14 +277,9 @@ function planEndTimeCount(tr) {
 var _reusePlanTaskItem = null;
 //计划管理复用
 function reusePlanTask(planId) {
-    var opType = 1040;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _isUpMove = true;
     var data = {}
-    data.opType = opType;
+    data.opType = 1040;
     data.opData = JSON.stringify({
         qId: planId
     });
@@ -314,13 +320,8 @@ function setProcessorSelect(groupId, el) {
 
 //任务状态选项
 function getTaskState() {
-    var opType = 1038;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1038;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -342,13 +343,8 @@ function getTaskState() {
 var _taskConfigOp = null;
 //获取任务配置
 function getTaskConfig() {
-    var opType = 1051;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1051;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -366,14 +362,9 @@ function getTaskConfig() {
 
 //获取任务配置项Tr
 function getTaskConfigItem(taskId,el,isAdd) {
-    var opType = 1055;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _isUpMove = true;
     var data = {}
-    data.opType = opType;
+    data.opType = 1055;
     data.opData = JSON.stringify({ taskId });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
@@ -407,11 +398,6 @@ var _planConfigData = null;
 var _planConfigTab = null;
 //计划配置项
 function getPlanConfig() {
-    var opType = 1039;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _planIdData = [];
     var stateId = $('#selectState').val();
     if (isStrEmptyOrUndefined(stateId)) {
@@ -431,21 +417,26 @@ function getPlanConfig() {
         list.eTime = `${endTime} 23:59:59`;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 1039;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
+        var per420 = _permissionList[420].have;
+        var per421 = _permissionList[421].have;
+        var per422 = _permissionList[422].have;
+        var per423 = _permissionList[423].have;
         var rData = ret.datas;
         _planConfigData = {};
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             _planConfigData[d.Id] = d;
         }
+        var isEnablePer = per420 || per421;
         var isEnable = function (d) {
-            return d.State == 1 ? `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id}>` : '';
+            return d.State == 1 && isEnablePer ? `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id}>` : '';
         }
         var order = function (a, b, c, d) {
             return d.row + 1;
@@ -481,7 +472,7 @@ function getPlanConfig() {
 
         }
         var carryBtn = function (data) {
-            return data.State == 1 ? `<button type="button" class="btn btn-info btn-sm" onclick="issuePlan(${data.Id})">下发</button>` : '';
+            return data.State == 1 && per422 ? `<button type="button" class="btn btn-info btn-sm" onclick="issuePlan(${data.Id})">下发</button>` : '';
         }
         var colors = ['', '#838a9d', 'black', '#6ee66e', 'green'];
         var stateDesc = function(d) {
@@ -491,7 +482,7 @@ function getPlanConfig() {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="planTaskDetail(${data.Id},\'${data.Plan}\')">查看任务</button>`;
         }
         var logBtn = function (data) {
-            return `<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(${data.Id})">查看</button>`;
+            return per423 ? `<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(${data.Id})">查看</button>` : '';
         }
         _planConfigTab = $('#planConfigList').DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -504,17 +495,17 @@ function getPlanConfig() {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "选择", "render": isEnable, "orderable": false },
+                { "data": null, "title": "选择", "render": isEnable, "orderable": false, "visible": isEnablePer},
                 { "data": null, "title": "序号", "render": order },
                 { "data": null, "title": "计划号", "render": planName },
                 { "data": null, "title": "开始时间", "render": sTime },
                 { "data": null, "title": "结束时间", "render": eTime },
                 { "data": null, "title": "预计用时", "render": predictTime },
                 { "data": null, "title": "任务配置", "render": taskConfig },
-                { "data": null, "title": "实施", "render": carryBtn },
+                { "data": null, "title": "实施", "render": carryBtn, "visible": per422},
                 { "data": null, "title": "状态", "render": stateDesc },
                 { "data": null, "title": "详情", "render": detailBtn, "orderable": false },
-                { "data": null, "title": "日志", "render": logBtn, "orderable": false }
+                { "data": null, "title": "日志", "render": logBtn, "orderable": false, "visible": per423 }
             ],
             "drawCallback": function (settings, json) {
                 $(this).find('.isEnable').iCheck({
@@ -536,15 +527,10 @@ function getPlanConfig() {
 
 //下发计划
 function issuePlan(planId) {
-    var opType = 1041;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planName = _planConfigData[planId].Plan;
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1041;
         data.opData = JSON.stringify({
             id: planId
         });
@@ -561,13 +547,8 @@ function issuePlan(planId) {
 
 //获取分组
 function getGroup(resolve) {
-    var opType = 1077;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1077;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -592,13 +573,8 @@ function getGroup(resolve) {
 var _processor = null;
 //获取操作员
 function getProcessor(resolve) {
-    var opType = 1081;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1081;
     data.opData = JSON.stringify({
         groupId: 0,
         menu: true
@@ -622,13 +598,8 @@ function getProcessor(resolve) {
 }
 //获取模块名
 function getModule(resolve) {
-    var opType = 1058;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1058;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -651,13 +622,8 @@ function getModule(resolve) {
 }
 //获取任务名
 function getTaskName(resolve) {
-    var opType = 1066;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1066;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -750,16 +716,11 @@ var _planTaskTr = null;
 var _planTaskItem = null;
 //计划任务详情
 function planTaskDetail(planId, planName) {
-    var opType = 1040;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     _isUpMove = true;
     $('#planText').text(planName);
     $('#planText').attr('planid', planId);
     var data = {}
-    data.opType = opType;
+    data.opType = 1040;
     data.opData = JSON.stringify({
         qId: planId
     });
@@ -917,11 +878,6 @@ function planTaskData(el, isUp) {
 var _isUpMove = true;
 //计划任务项保存
 function updatePlanTaskItem() {
-    var opType = 1042;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planId = $('#planText').attr('planid');
     var taskId = _planConfigData[planId].TaskId;
     var list = {
@@ -938,7 +894,7 @@ function updatePlanTaskItem() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1042;
         data.opData = JSON.stringify([list]);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -969,17 +925,12 @@ function setTableStyle(el) {
 
 //计划日志弹窗
 function showLogModel(planId, itemId) {
-    var opType = 1088;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var list = { planId };
     if (!isStrEmptyOrUndefined(itemId)) {
         list.itemId = itemId;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 1088;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -1016,11 +967,6 @@ function showLogModel(planId, itemId) {
 var _planIdData = [];
 //删除计划配置
 function delPlanConfig() {
-    var opType = 1044;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var len = _planIdData.length;
     if (!len) {
         layer.msg('请选择需要删除的数据');
@@ -1046,7 +992,7 @@ function delPlanConfig() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1044;
         data.opData = JSON.stringify({
             ids: _planIdData
         });
@@ -1062,11 +1008,6 @@ function delPlanConfig() {
 
 //修改计划
 function updatePlanConfig() {
-    var opType = 1042;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var len = _planIdData.length;
     if (!len) {
         layer.msg('请选择需要修改的数据');
@@ -1130,7 +1071,7 @@ function updatePlanConfig() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1042;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1146,13 +1087,8 @@ function updatePlanConfig() {
 var _planName = null;
 //获取计划选项
 function getPlanSelect() {
-    var opType = 1039;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 1039;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -1193,11 +1129,6 @@ function showPlanModal() {
 
 //删除所选计划
 function delPlanSelect() {
-    var opType = 1044;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planSelectEl = $('#planSelect');
     var planId = planSelectEl.val();
     if (isStrEmptyOrUndefined(planId)) {
@@ -1211,7 +1142,7 @@ function delPlanSelect() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1044;
         data.opData = JSON.stringify({
             ids: [planId]
         });
@@ -1238,11 +1169,6 @@ function addPlanTaskConTr() {
 
 //新增修改计划
 function addPlan() {
-    var opType = 1043;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var newPlan = $("#newPlan").val().trim();
     if (isStrEmptyOrUndefined(newPlan)) {
         layer.msg("新计划不能为空");
@@ -1296,7 +1222,7 @@ function addPlan() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1043;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {

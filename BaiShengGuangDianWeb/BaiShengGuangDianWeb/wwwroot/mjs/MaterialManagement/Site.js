@@ -1,18 +1,18 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[584] = { uIds: ['updateSiteBtn'] };
+    _permissionList[585] = { uIds: ['addSiteModalBtn'] };
+    _permissionList[586] = { uIds: ['delSiteBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     getCargoSiteList();
 }
 
 //获取位置信息
 function getCargoSiteList() {
-    var opType = 847;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     _siteIdData = [];
     _siteNameData = [];
     var data = {}
-    data.opType = opType;
+    data.opType = 847;
     ajaxPost("/Relay/Post", data, function(ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -29,12 +29,12 @@ function getCargoSiteList() {
             return (data.length > tdShowLength
                     ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
                     : `<span title = "${data}" class="textOn">${data}</span>`)
-                + `<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>`;
+                + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
-        var number = 0;
-        var order = function() {
-            return ++number;
+        var order = function(a,b,c,d) {
+            return ++d.row;
         }
+        var tf = _permissionList[584].have || _permissionList[586].have;
         $("#cargoSiteList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -47,7 +47,7 @@ function getCargoSiteList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false},
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf},
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Site", "title": "位置", "render": site },
                     { "data": "Remark", "title": "备注", "render": remark }
@@ -86,11 +86,6 @@ function getCargoSiteList() {
 
 //保存位置信息
 function updateSite() {
-    var opType = 848;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var trs = $('#cargoSiteList tbody').find('tr');
     var siteData = [];
     var i = 0, len = trs.length;
@@ -118,7 +113,7 @@ function updateSite() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 848;
         data.opData = JSON.stringify(siteData);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -140,11 +135,6 @@ function addSiteModal() {
 
 //添加货品位置信息
 function addSite() {
-    var opType = 849;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var site = $('#addSite').val().trim();
     if (isStrEmptyOrUndefined(site)) {
         layer.msg("新位置不能为空");
@@ -153,7 +143,7 @@ function addSite() {
     var remark = $('#addRemark').val().trim();
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 849;
         data.opData = JSON.stringify({
             Site: site,
             Remark: remark
@@ -174,11 +164,6 @@ var _siteIdData = [];
 var _siteNameData = [];
 //删除货品位置
 function delSite() {
-    var opType = 850;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     if (!_siteIdData.length) {
         layer.msg("请选择要删除的货品位置");
         return;
@@ -186,7 +171,7 @@ function delSite() {
     var name = _siteNameData.join('<br>');
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 850;
         data.opData = JSON.stringify({
             ids: _siteIdData
         });

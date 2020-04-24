@@ -26,13 +26,13 @@
                     <select class="ms2 form-control selectConfig" id="selectConfig" style="flex-basis: 140px"></select>
                 </div>
                 <div class="flexStyle" style="flex: 1; justify-content: center;align-self: flex-end">
-                    <button type="button" class="btn btn-success" onclick="taskConfigModal()">配置管理</button>
-                    <button type="button" class="btn btn-success" onclick="taskModuleModal()" style="margin-left: 3px">模块管理</button>
+                    <button type="button" class="btn btn-success" onclick="taskConfigModal()" id="taskConfigModalBtn">配置管理</button>
+                    <button type="button" class="btn btn-success" onclick="taskModuleModal()" id="taskModuleModalBtn" style="margin-left: 3px">模块管理</button>
                 </div>
                 <div class="flexStyle" style="flex: 1; justify-content: flex-end; align-self: flex-end;margin: 2px">
-                    <button type="button" class="btn btn-danger btn-sm" onclick="delTaskItem()">删除</button>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="resetTask()" style="margin-left: 3px">重置</button>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="updateTask()" style="margin-left: 3px">保存</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="delTaskItem()" id="delTaskItemBtn">删除</button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="resetTask()" style="margin-left: 3px" id="resetTaskBtn">重置</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="updateTask()" id="updateTaskBtn" style="margin-left: 3px">保存</button>
                 </div>
             </div>
         </div>
@@ -76,13 +76,13 @@
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">选择配置：</label>
                             <select class="ms2 form-control selectConfig" id="configSelect" style="width: 180px"></select>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="delConfig()" style="margin-left: 3px">删除</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delConfig()" id="delConfigBtn" style="margin-left: 3px">删除</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">新配置：</label>
                             <input class="form-control" id="newConfig" maxlength="200" style="flex-basis:180px">
                             <label class="flexStyle" style="margin: 0; padding-left: 5px;cursor:pointer"><input type="checkbox" id="configReuse" class="icb_minimal"><span class="textOverTop" style="margin-left: 5px">复用</span></label>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="addConfig()" style="margin-left: 3px">新增</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addConfig()" id="addConfigBtn" style="margin-left: 3px">新增</button>
                             <button type="button" class="btn btn-primary btn-sm" onclick="updateConfig()" style="margin-left: 3px" id="updateConfigBtn">修改</button>
                         </div>
                     </div>
@@ -108,13 +108,13 @@
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">选择模块：</label>
                             <select class="ms2 form-control" id="moduleSelect" style="width: 180px"></select>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="delModule()" style="margin-left: 3px">删除</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delModule()" id="delModuleBtn" style="margin-left: 3px">删除</button>
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label" style="white-space: nowrap;margin: 0">新模块：</label>
                             <input class="form-control" id="newModule" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
                             <label class="flexStyle" style="margin: 0; padding-left: 5px;cursor:pointer"><input type="checkbox" id="isCheckout" class="icb_minimal"><span class="textOverTop" style="margin-left: 5px">检验</span></label>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpModule(0)" style="margin-left: 3px">新增</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addUpModule(0)" style="margin-left: 3px" id="addUpModuleBtn">新增</button>
                             <button type="button" class="btn btn-primary btn-sm" onclick="addUpModule(1)" style="margin-left: 3px" id="updateModuleBtn">修改</button>
                         </div>
                     </div>

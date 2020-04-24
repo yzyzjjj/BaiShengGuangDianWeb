@@ -75,10 +75,10 @@
                                     <label style="margin-left: 5px;cursor:pointer"><input type="radio" name="dRadio" class="icb_minimal" value="2"><span style="margin-left: 5px">天</span></label>
                                 </div>
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-primary" onclick="createChart()">生成图表</button>
-                                    <button type="button" class="btn btn-info" onclick="hourChart()" style="margin-left: 10px">一小时以内</button>
-                                    <button type="button" class="btn btn-info" onclick="dayChart()">一天以内</button>
-                                    <button type="button" class="btn btn-info" onclick="monthChart()">一个月以内</button>
+                                    <button type="button" class="btn btn-primary createChart" onclick="createChart()">生成图表</button>
+                                    <button type="button" class="btn btn-info createChart" onclick="hourChart()" style="margin-left: 10px">一小时以内</button>
+                                    <button type="button" class="btn btn-info createChart" onclick="dayChart()">一天以内</button>
+                                    <button type="button" class="btn btn-info createChart" onclick="monthChart()">一个月以内</button>
                                 </div>
                             </div>
                             <div id="recordChart">
@@ -120,7 +120,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <button type="button" class="btn btn-primary" onclick="getProcessDetail()" style="margin-left: 4px">查询</button>
+                                    <button type="button" class="btn btn-primary" onclick="getProcessDetail()" id="getProcessDetailBtn" style="margin-left: 4px">查询</button>
                                 </div>
                             </div>
                             <div class="form-group">

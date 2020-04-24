@@ -1,4 +1,11 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[497] = { uIds: ['logModalBtn'] };
+    _permissionList[498] = { uIds: ['addPlanModalBtn'] };
+    _permissionList[499] = { uIds: ['reuse'] };
+    _permissionList[500] = { uIds: [] };
+    _permissionList[501] = { uIds: [] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     getPlanList(false);
     $('#addPlanTableBtn').on('click', function () {
@@ -398,13 +405,8 @@ function getPriceSum() {
 
 //计划列表
 function getPlanList(isSelect, resolve, planId, isAll) {
-    var opType = 700;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 700;
     if (isSelect) {
         data.opData = JSON.stringify({
             qId: planId,
@@ -440,15 +442,20 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                 var op = `<font style="color:{0}">${actual}</font>/<font style="color:blue">${planned}</font>/<font style="color:{1}">${extra}</font>`;
                 return op.format(actual == planned ? 'blue' : 'green', extra > 0 ? 'red' : 'black');
             }
+            var per497 = _permissionList[497].have;
+            var per500 = _permissionList[500].have;
             var operation = function (data) {
-                var op = '<button type="button" class="btn btn-info btn-sm" onclick="planDetailModal({0})">详情</button>' +
-                    '<button type="button" class="btn btn-primary btn-sm" style="margin-left:2px" onclick="updatePlanModal({0})">修改</button>' +
-                    '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px" onclick="logModal(false,{0})">日志</button>';
+                var op = `<button type="button" class="btn btn-info btn-sm" onclick="planDetailModal({0})">详情</button>
+                    ${per500 ? '<button type="button" class="btn btn-primary btn-sm" style="margin-left:2px" onclick="updatePlanModal({0})">修改</button>' : ''}
+                    ${per497 ? '<button type="button" class="btn btn-success btn-sm" style="margin-left:2px" onclick="logModal(false,{0})">日志</button>' : ''}`;
                 return op.format(data.Id);
             }
+            var per501 = _permissionList[501].have;
             var del = function (data) {
-                var op = '<i class="glyphicon glyphicon-remove" aria-hidden="true" style="color:red;font-size:25px;cursor:pointer;text-shadow:2px 2px 2px black" onclick="delPlan({0},\'{1}\')"></i>';
-                return op.format(data.Id, escape(data.Plan));
+                return per501
+                    ? '<i class="glyphicon glyphicon-remove" aria-hidden="true" style="color:red;font-size:25px;cursor:pointer;text-shadow:2px 2px 2px black" onclick="delPlan({0},\'{1}\')"></i>'
+                    .format(data.Id, escape(data.Plan))
+                    : '';
             }
             $("#planList")
                 .DataTable({
@@ -468,11 +475,8 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                         { "data": "Remark", "title": "备注" },
                         { "data": "PlannedCost", "title": "计划造价" },
                         { "data": "ActualCost", "title": "实际造价" },
-                        { "data": null, "title": "操作", "render": operation },
-                        { "data": null, "title": "删除", "render": del }
-                    ],
-                    "columnDefs": [
-                        { "orderable": false, "targets": [6, 7] }
+                        { "data": null, "title": "操作", "render": operation, "orderable": false},
+                        { "data": null, "title": "删除", "render": del, "visible": per501, "orderable": false}
                     ]
                 });
         } else {
@@ -483,15 +487,10 @@ function getPlanList(isSelect, resolve, planId, isAll) {
 
 //删除生产计划
 function delPlan(id, plan) {
-    var opType = 703;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     plan = unescape(plan);
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 703;
         data.opData = JSON.stringify({
             id: id
         });
@@ -511,13 +510,8 @@ var _cond = {};
 var _firstCode = null;
 //货品编号选项
 function codeSelect(resolve) {
-    var opType = 808;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 808;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -543,13 +537,8 @@ function codeSelect(resolve) {
 
 //货品类别选项
 function categorySelect(resolve) {
-    var opType = 816;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 816;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -572,13 +561,8 @@ function categorySelect(resolve) {
 var _siteData = null;
 //货品位置选项
 function siteSelect(resolve) {
-    var opType = 847;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 847;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -601,13 +585,8 @@ function siteSelect(resolve) {
 var _nameData = null;
 //名称选项
 function nameSelect(resolve) {
-    var opType = 824;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 824;
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -633,13 +612,8 @@ function nameSelect(resolve) {
 var _supplierData = null;
 //供应商选项
 function supplierSelect(resolve) {
-    var opType = 831;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 831;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -665,13 +639,8 @@ function supplierSelect(resolve) {
 var _specificationData = null;
 //规格选项
 function specificationSelect(resolve) {
-    var opType = 839;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 839;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -802,11 +771,6 @@ function addUpPlanClass(isUp, id) {
 
 //添加新计划
 function addPlan() {
-    var opType = 702;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var plan = $('#addPlan').val().trim();
     if (isStrEmptyOrUndefined(plan)) {
         layer.msg('请输入新计划');
@@ -844,7 +808,7 @@ function addPlan() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 702;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1003,11 +967,6 @@ function updatePlanModal(id) {
 
 //修改计划
 function updatePlan() {
-    var opType = 701;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var planId = $('#updatePlanSelect').val();
     var plan = $('#updatePlanSelect').find(`option[value=${planId}]`).text();
     var remark = $('#addRemark').val().trim();
@@ -1048,7 +1007,7 @@ function updatePlan() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 701;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -1064,13 +1023,8 @@ function updatePlan() {
 
 //日志计划选项
 function logPlanSelect(resolve) {
-    var opType = 700;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 700;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -1118,11 +1072,6 @@ function logModal(isAll, id) {
 
 //获取日志详情
 function getLogList() {
-    var opType = 803;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var startTime = $('#logStartDate').val();
     if (isStrEmptyOrUndefined(startTime)) {
         layer.msg("请选择开始时间");
@@ -1175,7 +1124,7 @@ function getLogList() {
         $('#billInfo').addClass('hidden');
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 803;
     data.opData = JSON.stringify(list);
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

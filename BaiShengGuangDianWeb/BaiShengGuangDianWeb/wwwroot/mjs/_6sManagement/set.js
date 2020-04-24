@@ -1,4 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[634] = { uIds: ['saveItemListBtn'] };
+    _permissionList[635] = { uIds: ['delGroupBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     $(".ms3").select2({
         allowClear: true,
@@ -23,7 +27,6 @@
     init();
 }
 
-//groupId!=0 修改
 function init(groupId = 0) {
     var groupFunc = new Promise(function (resolve, reject) {
         getGroupList(resolve, groupId);
@@ -33,8 +36,6 @@ function init(groupId = 0) {
     });
     Promise.all([groupFunc, surveyorFunc])
         .then((result) => {
-            //console.log('准备工作完毕');
-            //console.log(result);
             initSurveyorSelect();
             getItemList();
         });
@@ -69,14 +70,8 @@ function new6sGroupTxt() {
 
 //获取6s分组
 function getGroupList(resolve, groupId = 0) {
-    var opType = 900;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 900;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -102,14 +97,8 @@ function getGroupList(resolve, groupId = 0) {
 
 //获取检查员
 function getSurveyorList(resolve) {
-    var opType = 254;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 254;
     ajaxPost("/Relay/Post", data, function (ret) {
         if (resolve != null)
             resolve('success');
@@ -155,15 +144,10 @@ var item = null;
 //获取6s检查项
 function getItemList() {
     $("#itemList").empty();
-    var opType = 904;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var qId = $("#6sGroupSelect").val();
     if (!isStrEmptyOrUndefined(qId)) {
         var data = {}
-        data.opType = opType;
+        data.opType = 904;
         data.opData = JSON.stringify({
             qId: qId
         });
@@ -410,11 +394,6 @@ function saveItemList() {
         change = true;
     }
     group.SurveyorId = newSurveyorId;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var list = new Array();
     var i;
     //已存在
@@ -522,21 +501,14 @@ function saveItemList() {
 
 //删除一行
 function delGroup() {
-    var opType = 903;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var groupId = $("#6sGroupSelect").val();
     if (isStrEmptyOrUndefined(groupId)) {
         layer.msg("请选择分组");
         return;
     }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 903;
         data.opData = JSON.stringify({
             ids: [groupId]
         });
@@ -550,4 +522,3 @@ function delGroup() {
     }
     showConfirm("删除分组：" + $("#6sGroupSelect option:selected").text(), doSth);
 }
-

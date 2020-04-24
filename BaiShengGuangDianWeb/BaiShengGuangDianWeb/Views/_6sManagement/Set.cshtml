@@ -32,7 +32,7 @@
                 </div>
                 <input id="6sGroupChangeCheck" type="checkbox" class="icb_minimal">
                 <label id="6sGroupChangeCheckLbl" class="control-label text-red" onclick="_6sGroupChangeLabel()">修改分组名</label>
-                <button type="button" class="btn btn-primary btn-danger pull-right" onclick="delGroup()">删除分组</button>
+                <button type="button" class="btn btn-primary btn-danger pull-right" onclick="delGroup()" id="delGroupBtn">删除分组</button>
             </div>
             <div class="form-group hidden" id="6sGroupChangeDiv">
                 <label class="control-label" for="6sGroupChangeTxt">分组修改：</label>
@@ -49,7 +49,7 @@
         </div>
         <div class="box-body">
             <div class="form-group pull-right no-margin">
-                <button type="button" class="btn btn-primary btn-sm" onclick="saveItemList()">保存</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveItemList()" id="saveItemListBtn">保存</button>
                 <button type="button" class="btn btn-default btn-sm" onclick="resetItemList()"><i class="fa fa-refresh"></i> 重置</button>
                 <button type="button" class="btn btn-default btn-sm" onclick="addOneItemList()"><i class="fa fa-plus"></i> 添加新项</button>
             </div>

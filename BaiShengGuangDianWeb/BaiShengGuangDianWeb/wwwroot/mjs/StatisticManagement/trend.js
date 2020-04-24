@@ -1,4 +1,8 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[689] = { uIds: ['createChartBtn0'] };
+    _permissionList[690] = { uIds: ['createChartBtn1'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     getDeviceChart();
     getDevicePar();
@@ -52,13 +56,8 @@
 }
 
 function getDeviceChart() {
-    var opType = 100;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var data = {}
-    data.opType = opType;
+    data.opType = 100;
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -76,14 +75,9 @@ function getDeviceChart() {
 
 var parList = null;
 function getDevicePar() {
-    parList = new Array();
-    var opType = 500;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
+    parList = [];
     var data = {}
-    data.opType = opType;
+    data.opType = 500;
     ajaxPost("/Relay/Post",
         data,
         function (ret) {
@@ -124,11 +118,6 @@ function createChart(type) {
     time = new Array();
     v = new Object();
     if (type == 0) {
-        var opType = 501;
-        if (!checkPermission(opType)) {
-            layer.msg("没有权限");
-            return;
-        }
         var device = $("#selectDevice").val();
         var start = $("#selectStartDate").val() + " " + $("#selectStartTime").val();
         var end = $("#selectEndDate").val() + " " + $("#selectEndTime").val();
@@ -183,7 +172,7 @@ function createChart(type) {
         $("#deviceCode").text(code);
 
         var data = {}
-        data.opType = opType;
+        data.opType = 501;
         data.opData = JSON.stringify({
             DeviceId: device,
             StartTime: start,
@@ -291,11 +280,6 @@ function createChart(type) {
             });
     }
     if (type == 1) {
-        var opType1 = 503;
-        if (!checkPermission(opType1)) {
-            layer.msg("没有权限");
-            return;
-        }
         if (isStrEmptyOrUndefined($("#selectProcess").val())) {
             layer.msg("请先输入流程卡号查询选择工序");
             return;
@@ -325,7 +309,7 @@ function createChart(type) {
         isStrEmptyOrUndefined(code1) ? $("#deviceCode").text("趋势图") : $("#deviceCode").text(code1);
 
         var data1 = {}
-        data1.opType = opType1;
+        data1.opType = 503;
         data1.opData = JSON.stringify({
             FlowCardId: flowCardId,
             Order: order,
@@ -406,11 +390,6 @@ function createChart(type) {
 }
 
 function queryFlowCard() {
-    var opType = 202;
-    if (!checkPermission(opType)) {
-        layer.msg("没有权限");
-        return;
-    }
     var flowCard = $("#inputFlowCard").val().trim();
     if (isStrEmptyOrUndefined(flowCard)) {
         showTip("inputFlowCardTip", "流程卡号不能为空");
@@ -418,7 +397,7 @@ function queryFlowCard() {
         return;
     }
     var data = {}
-    data.opType = opType;
+    data.opType = 202;
     data.opData = JSON.stringify({
         FlowCard: flowCard
     });

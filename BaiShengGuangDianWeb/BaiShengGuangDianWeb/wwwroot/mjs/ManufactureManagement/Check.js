@@ -1,4 +1,11 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[438] = { uIds: ['showCheckListModelBtn'] };
+    _permissionList[474] = { uIds: ['addCheckListBtn'] };
+    _permissionList[475] = { uIds: ['updateCheckListBtn'] };
+    _permissionList[476] = { uIds: ['deleteCheckListBtn'] };
+    _permissionList[439] = { uIds: ['saveCheckConfigBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
     $('#CheckListSelect').on('select2:select', function () {
         $('#CheckListName').val($(this).find("option:checked").text());
@@ -91,14 +98,8 @@ function showCheckListModel(checkId = 0, show = true) {
 }
 
 function getCheckList(resolve) {
-    var opType = 1066;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var data = {}
-    data.opType = opType;
+    data.opType = 1066;
     data.opData = JSON.stringify({
         menu: true
     });
@@ -117,20 +118,13 @@ function getCheckList(resolve) {
 
 //删除配置
 function deleteCheckList() {
-    var opType = 1069;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var checkId = $("#CheckListSelect").val();
     if (isStrEmptyOrUndefined(checkId)) {
         return;
     }
-
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1069;
         data.opData = JSON.stringify({
             id: checkId
         });
@@ -147,12 +141,6 @@ function deleteCheckList() {
 
 //修改配置名
 function updateCheckList() {
-    var opType = 1067;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var checkName = $("#CheckListName").val();
     var oldCheckName = $("#CheckListSelect option:selected").text();
     var checkId = $("#CheckListSelect").val();
@@ -170,7 +158,7 @@ function updateCheckList() {
 
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1067;
         data.opData = JSON.stringify({
             Id: checkId,
             Check: checkName
@@ -189,12 +177,6 @@ function updateCheckList() {
 
 //添加配置
 function addCheckList() {
-    var opType = 1068;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
-
     var checkName = $("#CheckListName").val();
     var oldCheckName = $("#CheckListSelect option:selected").text();
     if (isStrEmptyOrUndefined(checkName)) {
@@ -211,7 +193,7 @@ function addCheckList() {
     }
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1068;
         data.opData = JSON.stringify({
             Check: checkName,
             CopyId: $("#CopyCheckListChoose").is(":checked") ? checkId : 0
@@ -239,14 +221,8 @@ function initCheckConfig(checkId, resolve = null) {
     $("#selectAll").iCheck("uncheck");
     $('#checkConfig').empty();
     if (!isStrEmptyOrUndefined(checkId)) {
-        var opType = 1070;
-        if (!checkPermission(opType)) {
-            layer.msg('没有权限');
-            return;
-        }
-
         var data = {}
-        data.opType = opType;
+        data.opType = 1070;
         data.opData = JSON.stringify({
             checkId: checkId,
             menu: true
@@ -397,11 +373,6 @@ function delCheckConfig() {
 
 //保存和修改
 function saveCheckConfig() {
-    var opType = 1071;
-    if (!checkPermission(opType)) {
-        layer.msg('没有权限');
-        return;
-    }
     var checkId = $("#CheckSelect").val();
     if (isStrEmptyOrUndefined(checkId)) {
         layer.msg("请选择配置");
@@ -444,7 +415,7 @@ function saveCheckConfig() {
         return;
     var doSth = function () {
         var data = {}
-        data.opType = opType;
+        data.opType = 1071;
         data.opData = JSON.stringify(list);
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -456,4 +427,3 @@ function saveCheckConfig() {
     }
     showConfirm("保存", doSth);
 }
-
