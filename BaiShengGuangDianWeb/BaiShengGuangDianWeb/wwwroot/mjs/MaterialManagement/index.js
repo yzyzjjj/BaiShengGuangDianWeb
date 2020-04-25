@@ -967,7 +967,7 @@ function getMaterialList(el, resolve) {
                     ${per539 ? '<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(2, {0})">领用</button>' : ''}`;
             return op.format(data.Id);
         }
-        var order = function (a, b, c,d) {
+        var order = function (a, b, c, d) {
             return ++d.row;
         }
         $("#materialList")
@@ -991,7 +991,7 @@ function getMaterialList(el, resolve) {
                     { "data": "Specification", "title": "规格" },
                     { "data": "Site", "title": "位置" },
                     { "data": "Unit", "title": "单位" },
-                    { "data": "Id", "title": "详情", "render": detail, "orderable": false},
+                    { "data": "Id", "title": "详情", "render": detail, "orderable": false },
                     { "data": "Price", "title": "价格" },
                     { "data": "Stock", "title": "最低库存", "sClass": "text-blue" },
                     { "data": "InTime", "title": "上次入库", "render": inTime },
@@ -1113,70 +1113,61 @@ function getLogList(show = false) {
             var update = function (data) {
                 return data.Number > data.OldNumber ? `<span class="text-success">${data.Number}</span>` : `<span class="text-danger">${data.Number}</span>`;
             }
-            var columns = null;
+            var columns = [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "Time", "title": "时间" },
+                { "data": "Code", "title": "货品编号" },
+                { "data": "Category", "title": "类别", "bVisible": false },
+                { "data": "Name", "title": "货品名称" },
+                { "data": "Supplier", "title": "供应商", "bVisible": false },
+                { "data": "Specification", "title": "规格型号" },
+                { "data": "Site", "title": "位置", "bVisible": false },
+                { "data": "Unit", "title": "单位", "bVisible": false }
+            ];
+            var excelColumns = null;
             switch (_type) {
                 case 0:
-                    columns = [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Time", "title": "时间" },
-                        { "data": "Code", "title": "货品编号" },
-                        { "data": "Name", "title": "货品名称" },
-                        { "data": "Specification", "title": "规格型号" },
-                        { "data": "Type", "title": "入/出", "render": dType },
+                    columns.push({ "data": "Type", "title": "入/出", "render": dType },
                         { "data": null, "title": "数量", "render": number },
-                        { "data": "Price", "title": "单价"},
+                        { "data": "Price", "title": "单价" },
                         { "data": "Purpose", "title": "来源/用途" },
+                        { "data": "Number", "title": "入库数量", "bVisible": false },
                         { "data": "RelatedPerson", "title": "相关人" },
-                        { "data": "Manager", "title": "物管员" }
-                    ];
+                        { "data": "Manager", "title": "物管员" });
+                    excelColumns = [0, 1, 2, 4, 6, 9, 10, 11, 12, 14, 15];
                     break;
                 case 1:
-                    columns = [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Time", "title": "时间" },
-                        { "data": "Code", "title": "货品编号" },
-                        { "data": "Name", "title": "货品名称" },
-                        { "data": "Specification", "title": "规格型号" },
-                        { "data": null, "title": "数量", "render": number },
+                    columns.push({ "data": null, "title": "数量", "render": number },
                         { "data": "Price", "title": "单价" },
                         { "data": "Purpose", "title": "货品来源" },
+                        { "data": "Number", "title": "入库数量", "bVisible": false },
                         { "data": "RelatedPerson", "title": "采购/退回人" },
                         { "data": "Manager", "title": "物管员" },
-                        { "data": null, "title": "Id", "bVisible": false }
-                    ];
+                        { "data": null, "title": "Id", "bVisible": false });
+                    excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
                     break;
                 case 2:
-                    columns = [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Time", "title": "时间" },
-                        { "data": "Code", "title": "货品编号" },
-                        { "data": "Name", "title": "货品名称" },
-                        { "data": "Specification", "title": "规格型号" },
-                        { "data": null, "title": "数量", "render": number },
+                    columns.push({ "data": null, "title": "数量", "render": number },
                         { "data": "Price", "title": "单价" },
                         { "data": "Purpose", "title": "货品用途" },
+                        { "data": "Number", "title": "入库数量", "bVisible": false },
                         { "data": "RelatedPerson", "title": "领用人" },
                         { "data": "Manager", "title": "物管员" },
-                        { "data": null, "title": "Id", "bVisible": false }
-                    ];
+                        { "data": null, "title": "Id", "bVisible": false });
+                    excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
                     break;
                 case 3:
-                    columns = [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Time", "title": "时间" },
-                        { "data": "Code", "title": "货品编号" },
-                        { "data": "Name", "title": "货品名称" },
-                        { "data": "Specification", "title": "规格型号" },
-                        { "data": "OldNumber", "title": "修改前" },
+                    columns.push({ "data": "OldNumber", "title": "修改前" },
                         { "data": null, "title": "修改后", "render": update },
+                        { "data": "Number", "title": "入库数量", "bVisible": false },
                         { "data": "Purpose", "title": "备注" },
                         { "data": "Manager", "title": "物管员" },
-                        { "data": null, "title": "Id", "bVisible": false }
-                    ];
+                        { "data": null, "title": "Id", "bVisible": false },
+                        { "data": null, "title": "Id", "bVisible": false });
+                    excelColumns = [0, 1, 2, 4, 6, 9, 10, 12, 13];
                     break;
             }
-            var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-            var titleColumns = [6,7];
+            var titleColumns = [];
             $("#logList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -1540,10 +1531,9 @@ function addIncreaseList() {
             <td><select class="ms2 form-control" id="inMc{0}"></select></td>
             <td><select class="ms2 form-control" id="inGys{0}"></select></td>
             <td><select class="ms2 form-control" id="inGg{0}"></select></td>
-            <td><select class="ms2 form-control" id="inWz{0}"></select></td>
-
-            <td style="vertical-align: inherit;"><label class="control-label" id="inDw{0}"></label></td>
             <td style="vertical-align: inherit;"><label class="control-label" id="inJg{0}"></label></td>
+            <td><select class="ms2 form-control" id="inWz{0}"></select></td>
+            <td style="vertical-align: inherit;"><label class="control-label" id="inDw{0}"></label></td>
             <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
             <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>

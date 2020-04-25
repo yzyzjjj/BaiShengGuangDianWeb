@@ -478,7 +478,7 @@ function getMaterialList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var order = function (a,b,c,d) {
+        var order = function (a, b, c, d) {
             return ++d.row;
         }
         var code = function (data) {
@@ -533,7 +533,7 @@ function getMaterialList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false},
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Code", "title": "货品编号", "render": code },
                     { "data": null, "title": "类别", "render": category },
@@ -787,8 +787,16 @@ function addMaterial() {
             var data = {}
             data.opType = 810;
             data.opData = JSON.stringify([{
+                CategoryId: categoryId,
+                Category: $('#addCategorySelect option:selected').text(),
+                NameId: nameId,
+                Name: $('#addNameSelect option:selected').text(),
+                SupplierId: supplierId,
+                Supplier: $('#addSupplierSelect option:selected').text(),
                 SpecificationId: specificationId,
+                Specification: $('#addSpecificationSelect option:selected').text(),
                 SiteId: siteId,
+                Site: $('#addSiteSelect option:selected').text(),
                 Code: code,
                 Unit: unit,
                 Price: price,
@@ -1228,7 +1236,6 @@ function copyBatchAddList(id) {
     var supplierId = $(`#batchAddGys${id}`).val();
     var specificationId = $(`#batchAddGg${id}`).val();
     var siteId = $(`#batchAddWz${id}`).val();
-
     addOneBatchAddList(categoryId, nameId, supplierId, specificationId, siteId);
 }
 
@@ -1238,15 +1245,16 @@ function batchAddMaterial() {
     var bill = new Array();
     var i;
     for (i = 1; i <= batchAddMax; i++) {
-        if ($("#batchAddBh" + i).length > 0) {
-            var batchAddGg = $("#batchAddGg" + i).val();
-            var batchAddWz = $("#batchAddWz" + i).val();
-
-            var batchAddBh = $("#batchAddBh" + i).val().trim();
-            var batchAddKc = $("#batchAddKc" + i).val().trim();
-            var batchAddDw = $("#batchAddDw" + i).val().trim();
-            var batchAddJg = $("#batchAddJg" + i).val().trim();
-
+        if ($(`#batchAddBh${i}`).length > 0) {
+            var batchAddLb = $(`#batchAddLb${i}`).val();
+            var batchAddMc = $(`#batchAddMc${i}`).val();
+            var batchAddGys = $(`#batchAddGys${i}`).val();
+            var batchAddGg = $(`#batchAddGg${i}`).val();
+            var batchAddWz = $(`#batchAddWz${i}`).val();
+            var batchAddBh = $(`#batchAddBh${i}`).val().trim();
+            var batchAddKc = $(`#batchAddKc${i}`).val().trim();
+            var batchAddDw = $(`#batchAddDw${i}`).val().trim();
+            var batchAddJg = $(`#batchAddJg${i}`).val().trim();
             if (isStrEmptyOrUndefined(batchAddGg)) {
                 layer.msg("请选择规格");
                 return;
@@ -1272,8 +1280,16 @@ function batchAddMaterial() {
                 return;
             }
             bill.push({
+                CategoryId: batchAddLb,
+                Category: $(`#batchAddLb${i} option:selected`).text(),
+                NameId: batchAddMc,
+                Name: $(`#batchAddMc${i} option:selected`).text(),
+                SupplierId: batchAddGys,
+                Supplier: $(`#batchAddGys${i} option:selected`).text(),
                 SpecificationId: batchAddGg,
+                Specification: $(`#batchAddGg${i} option:selected`).text(),
                 SiteId: batchAddWz,
+                Site: $(`#batchAddWz${i} option:selected`).text(),
                 Code: batchAddBh,
                 Stock: batchAddKc,
                 Unit: batchAddDw,

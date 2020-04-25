@@ -166,17 +166,17 @@
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
-                                    <td>序号</td>
-                                    <td>类别</td>
-                                    <td>名称</td>
-                                    <td>供应商</td>
-                                    <td>规格</td>
-                                    <td>位置</td>
-                                    <td>编号</td>
-                                    <td>最低库存</td>
-                                    <td>单位</td>
-                                    <td>价格</td>
-                                    <td>操作</td>
+                                    <th>序号</th>
+                                    <th>类别</th>
+                                    <th>名称</th>
+                                    <th>供应商</th>
+                                    <th>规格</th>
+                                    <th>位置</th>
+                                    <th>编号</th>
+                                    <th>最低库存</th>
+                                    <th>单位</th>
+                                    <th>价格</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody id="batchAddList"></tbody>
@@ -204,23 +204,12 @@
                 <div class="modal-body">
                     <div class="modal-body box">
                         <div class="hidden" id="checkId"></div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">编号：<span id="codeName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">类别：<span id="categoryName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">名称：<span id="nameName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">供应商：<span id="supplierName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">规格：<span id="specificationName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label textOverTop">位置：<span id="siteName" style="text-decoration: underline; font-size: 20px;color:blue"></span></label>
+                        <div class="flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label textOverTop" for="codeName">编号：<span class="spanStyle" id="codeName"></span></label>
+                            <label class="control-label textOverTop" for="categoryName">类别：<span class="spanStyle" id="categoryName"></span></label>
+                            <label class="control-label textOverTop" for="nameName">名称：<span class="spanStyle" id="nameName"></span></label>
+                            <label class="control-label textOverTop" for="supplierName">供应商：<span class="spanStyle" id="supplierName"></span></label>
+                            <label class="control-label textOverTop" for="siteName">位置：<span class="spanStyle" id="siteName"></span></label>
                         </div>
                         <div class="form-group">
                             <label class="control-label textOverTop" style="white-space: nowrap" id="imgOld">图片：</label>
