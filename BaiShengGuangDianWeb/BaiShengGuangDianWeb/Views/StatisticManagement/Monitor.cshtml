@@ -1,8 +1,44 @@
 ﻿@model object
-
 @{
-    ViewBag.Title = "title";
+    ViewBag.Title = "监控数据";
     Layout = "_Layout";
 }
-
-<h2>title</h2>
+<environment include="Development">
+    <script src="~/mjs/StatisticManagement/monitor.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/StatisticManagement/monitor.min.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>数据统计</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#realQuery" data-toggle="tab" aria-expanded="true">实时查询</a></li>
+                <li><a href="#historyData" data-toggle="tab" aria-expanded="false">历史数据</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="realQuery">
+                    <div class="box box-primary">
+                        <div class="box-header with-border"></div>
+                        <div class="box-body"></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="historyData">
+                    <div class="box box-primary">
+                        <div class="box-header with-border"></div>
+                        <div class="box-body"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

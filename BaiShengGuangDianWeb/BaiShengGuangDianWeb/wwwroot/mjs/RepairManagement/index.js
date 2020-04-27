@@ -808,8 +808,8 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
         var setRow = setTable();
         //删除
         var per416 = _permissionList[79].have;
-        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-        var titleColumns = [6, 9];
+        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,15];
+        var titleColumns = [12, 15];
         var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
         el.DataTable({
             dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -817,21 +817,11 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
                 {
                     extend: 'excel',
                     text: '导出Excel',
-                    className: 'btn-primary btn-sm', //按钮的class样式
+                    className: 'btn-primary btn-sm',
                     exportOptions: {
                         columns: excelColumns,
                         format: {
-                            // format有三个子标签，header，body和foot
-                            body: function (data, row, column, node) {
-                                //操作需要导出excel的数据格式                        
-                                if (titleColumns.indexOf(column) > -1) {
-                                    var a = $(node).find("span").attr("title");
-                                    if (a != null) {
-                                        return "\u200C" + unescape(a);
-                                    }
-                                }
-                                return "\u200C" + node.textContent;
-                            }
+                            body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
                         }
                     }
                 }
@@ -2109,7 +2099,8 @@ function showMaintainerModel(cover = 1, show = true) {
                 return `<span class="chose1" title="${data}" id ="userRemark1${xh}" onclick = "showAllContent('${escape(data)}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>
                         <input class="chose2 hidden form-control" style="width: 100%;" old="${data}" id ="userRemark2${xh}" onchange="changeMaintainer(this, 'Remark')">`;
             }
-
+            var excelColumns = [0, 1, 2, 3];
+            var titleColumns = [3];
             var columns = [
                 { "data": "Id", "title": "序号", "render": setRow.order, "sWidth": "80px" },
                 { "data": "Name", "title": "姓名", "sWidth": "120px" },
@@ -2118,9 +2109,9 @@ function showMaintainerModel(cover = 1, show = true) {
             ];
             if (_permissionList[46].have || _permissionList[47].have) {
                 columns.unshift({ "data": "Id", "title": "选择", "render": chose, "sWidth": "80px", "orderable": false });
+                excelColumns = [1, 2, 3,4];
+                titleColumns = [4];
             }
-            var excelColumns = [0, 1, 2, 3, 4];
-            var titleColumns = [4];
             $("#maintainerList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -2128,27 +2119,15 @@ function showMaintainerModel(cover = 1, show = true) {
                         {
                             extend: 'excel',
                             text: '导出Excel',
-                            className: 'btn-primary btn-sm', //按钮的class样式
+                            className: 'btn-primary btn-sm',
                             exportOptions: {
                                 columns: excelColumns,
                                 format: {
-                                    // format有三个子标签，header，body和foot
-                                    body: function (data, row, column, node) {
-                                        //操作需要导出excel的数据格式                        
-                                        if (titleColumns.indexOf(column) > -1) {
-                                            var a = $(node).find("span").attr("title");
-                                            if (a != null) {
-                                                return "\u200C" + unescape(a);
-                                            }
-                                        }
-                                        return "\u200C" + node.textContent;
-                                    }
+                                    body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
                                 }
                             }
                         }
                     ],
-                    //"pagingType": "input",
-                    //"serverSide": true,
                     "bAutoWidth": false,
                     "destroy": true,
                     "paging": true,

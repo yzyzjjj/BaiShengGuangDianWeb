@@ -860,14 +860,7 @@ function planDetailModalData(id) {
                     text: '导出Excel',
                     className: 'btn-primary btn-sm', //按钮的class样式
                     exportOptions: {
-                        columns: excelColumns,
-                        format: {
-                            // format有三个子标签，header，body和foot
-                            body: function (data, row, column, node) {
-                                //操作需要导出excel的数据格式                        
-                                return "\u200C" + node.textContent;
-                            }
-                        }
+                        columns: excelColumns
                     }
                 }
             ],

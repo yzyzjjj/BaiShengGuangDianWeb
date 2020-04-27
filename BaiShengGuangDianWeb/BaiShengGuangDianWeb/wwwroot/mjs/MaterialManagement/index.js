@@ -1167,7 +1167,7 @@ function getLogList(show = false) {
                     excelColumns = [0, 1, 2, 4, 6, 9, 10, 12, 13];
                     break;
             }
-            var titleColumns = [];
+            //var titleColumns = [];
             $("#logList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -1177,20 +1177,10 @@ function getLogList(show = false) {
                             text: '导出Excel',
                             className: 'btn-primary btn-sm', //按钮的class样式
                             exportOptions: {
-                                columns: excelColumns,
-                                format: {
-                                    // format有三个子标签，header，body和foot
-                                    body: function (data, row, column, node) {
-                                        //操作需要导出excel的数据格式                        
-                                        if (titleColumns.indexOf(column) > -1) {
-                                            var a = $(node).find("span").attr("title");
-                                            if (a != null) {
-                                                return "\u200C" + unescape(a);
-                                            }
-                                        }
-                                        return "\u200C" + node.textContent;
-                                    }
-                                }
+                                columns: excelColumns
+                                //format: {
+                                //    body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
+                                //}
                             }
                         }
                     ],
@@ -3565,6 +3555,7 @@ function consumeOtherActual() {
 var isPlan = false;
 //显示领用
 function consumeShow() {
+    consumePlanActual();
     $("#consumePurpose").html('');
     isPlan = _consumeType == 0;
     var data = _consumeOtherList;
@@ -3769,14 +3760,14 @@ function getQrList() {
             '<div style="width: 50%; height: 100%">' +
             '<div class="createQrCode" style="margin: 4px"></div>' +
             '</div>' +
-            '<span class="glyphicon glyphicon-remove delQrCode" aria-hidden="true" style="position:absolute;right:3px;top:3px;font-size:20px;color:red;cursor:pointer"></span>' +
+            '<span class="glyphicon glyphicon-remove delQrCode pointer" aria-hidden="true" style="position:absolute;right:3px;top:3px;font-size:20px;color:red"></span>' +
             '<div style="width: 50%; height: 100%; text-align: center;display:flex;flex-direction:column;justify-content:center;font-size:12px">' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{0}</span>' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{1}</span>' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{2}</span>' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{3}</span>' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{4}</span>' +
-            '<span style="width:100%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{5}</span>' +
+            '<span class="textOverTop">{0}</span>' +
+            '<span class="textOverTop">{1}</span>' +
+            '<span class="textOverTop">{2}</span>' +
+            '<span class="textOverTop">{3}</span>' +
+            '<span class="textOverTop">{4}</span>' +
+            '<span class="textOverTop">{5}</span>' +
             '</div>' +
             '</div>' +
             '</div>';

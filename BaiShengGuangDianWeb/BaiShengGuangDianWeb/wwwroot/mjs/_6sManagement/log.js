@@ -360,7 +360,7 @@ function initItemList() {
                 : op.format('remove', 'red', data.Id, escape(data.Item), escape(data.ImageList));
         }
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13];
-        var titleColumns = [3, 7, 10];
+        var titleColumns = [4, 10];
         $("#itemList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -368,21 +368,11 @@ function initItemList() {
                     {
                         extend: 'excel',
                         text: '导出Excel',
-                        className: 'btn-primary btn-sm', //按钮的class样式
+                        className: 'btn-primary btn-sm',
                         exportOptions: {
                             columns: excelColumns,
                             format: {
-                                // format有三个子标签，header，body和foot
-                                body: function (data, row, column, node) {
-                                    //操作需要导出excel的数据格式                        
-                                    if (titleColumns.indexOf(column) > -1) {
-                                        var a = $(node).find("span").attr("title");
-                                        if (a != null) {
-                                            return "\u200C" + unescape(a);
-                                        }
-                                    }
-                                    return "\u200C" + node.textContent;
-                                }
+                                body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
                             }
                         }
                     }
@@ -790,7 +780,7 @@ function groupPersonItemRank(groupId, person, show = true, time = true) {
             }
 
             var excelColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12];
-            var titleColumns = [3, 7, 10];
+            var titleColumns = [3, 10];
             $("#_6sGroupPersonItemList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -798,21 +788,11 @@ function groupPersonItemRank(groupId, person, show = true, time = true) {
                         {
                             extend: 'excel',
                             text: '导出Excel',
-                            className: 'btn-primary btn-sm', //按钮的class样式
+                            className: 'btn-primary btn-sm',
                             exportOptions: {
                                 columns: excelColumns,
                                 format: {
-                                    // format有三个子标签，header，body和foot
-                                    body: function (data, row, column, node) {
-                                        //操作需要导出excel的数据格式                        
-                                        if (titleColumns.indexOf(column) > -1) {
-                                            var a = $(node).find("span").attr("title");
-                                            if (a != null) {
-                                                return "\u200C" + unescape(a);
-                                            }
-                                        }
-                                        return "\u200C" + node.textContent;
-                                    }
+                                    body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
                                 }
                             }
                         }

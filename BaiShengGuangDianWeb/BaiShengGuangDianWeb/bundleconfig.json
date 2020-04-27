@@ -270,6 +270,12 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/mminjs/StatisticManagement/monitor.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/StatisticManagement/monitor.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/mminjs/_6sManagement/index.min.js",
     "inputFiles": [
       "wwwroot/mjs/_6sManagement/index.js"
