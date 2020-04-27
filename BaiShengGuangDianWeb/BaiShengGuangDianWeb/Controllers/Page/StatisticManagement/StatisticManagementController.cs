@@ -30,5 +30,9 @@ namespace BaiShengGuangDianWeb.Controllers.Page.StatisticManagement
         {
             return View();
         }
+        public IActionResult Monitor()
+        {
+            return View();
+        }
     }
 }
