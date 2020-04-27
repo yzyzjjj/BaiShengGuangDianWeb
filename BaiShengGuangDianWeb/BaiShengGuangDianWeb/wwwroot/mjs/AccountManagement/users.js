@@ -36,14 +36,16 @@ function pageReady() {
         solid.eq(0).find(".on_cb").iCheck(f ? "check" : 'uncheck');
         if (f) {
             solid.find('.on_cb:first').iCheck("check");
-        } else {
-            for (var i = 1, len = solid.length; i < len; i++) {
-                var el = solid.eq(i);
-                if (!el.find('ul:first > li').find('.on_cb:first').is(":checked")) {
-                    el.find('.on_cb:first').iCheck("uncheck");
-                };
-            }
         }
+        //else {
+        //    solid.eq(0).find(".on_cb").iCheck('uncheck');
+        //    for (var i = 1, len = solid.length; i < len; i++) {
+        //        var el = solid.eq(i);
+        //        if (!el.find('ul:first > li').find('.on_cb:first').is(":checked")) {
+        //            el.find('.on_cb:first').iCheck("uncheck");
+        //        };
+        //    }
+        //}
     });
 }
 

@@ -28,8 +28,25 @@
             <div class="tab-content no-padding">
                 <div class="tab-pane active in" id="realQuery">
                     <div class="box box-primary">
-                        <div class="box-header with-border"></div>
-                        <div class="box-body"></div>
+                        <div class="box-header with-border">
+                            <div class="flexStyle">
+                                <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
+                                    <label class="control-label text-nowrap">选择设备：</label>
+                                    <div class="flexStyle">
+                                        <select class="ms2 form-control" id="selectConfig" style="min-width: 120px"></select>
+                                        <button type="button" class="btn btn-primary" onclick="" style="margin-left: 3px">查询</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <input list="users">
+                            <datalist id="users">
+                                <option>Jamse</option>
+                                <option>Jack</option>
+                                <option>Mary</option>
+                            </datalist>
+                        </div>
                     </div>
                 </div>
                 <div class="tab-pane fade in" id="historyData">
