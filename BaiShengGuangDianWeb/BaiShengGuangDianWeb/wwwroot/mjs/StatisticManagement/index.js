@@ -143,21 +143,23 @@ function getDeviceList(par) {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var rData = ret.datas;
+            rData.sort((a, b) => a.Code - b.Code);
             var option;
-            var i, d, len = ret.datas.length;
+            var i, d, len = rData.length;
             if (par == 1) {
                 $("#selectDevice").empty();
                 option = '<option value="{0},{1}">{1}</option>';
                 $("#selectDevice").append(option.format(0, "所有设备"));
                 for (i = 0; i < len; i++) {
-                    d = ret.datas[i];
+                    d = rData[i];
                     $("#selectDevice").append(option.format(d.Id, d.Code));
                 }
             } else {
                 $("#selectDevice1").empty();
                 option = '<option value="{0}">{1}</option>';
                 for (i = 0; i < len; i++) {
-                    d = ret.datas[i];
+                    d = rData[i];
                     $("#selectDevice1").append(option.format(d.Id, d.Code));
                 }
             }
