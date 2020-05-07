@@ -125,3 +125,8 @@ fileCallBack[fileEnum.Manufacture] = function () { };
 fileAccept[fileEnum.FaultDevice] = "image/*";
 fileExt[fileEnum.FaultDevice] = ["bmp", "jpg", "jpeg", "png", "gif"];
 fileCallBack[fileEnum.FaultDevice] = function () { };
+
+// 流程脚本
+fileAccept[fileEnum.Script] = ".npc";
+fileExt[fileEnum.Script] = ["npc"];
+fileCallBack[fileEnum.Script] = function () { };
