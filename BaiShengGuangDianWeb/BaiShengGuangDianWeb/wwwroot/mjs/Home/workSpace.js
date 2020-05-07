@@ -354,10 +354,11 @@ function showProcessData(canChange = false) {
         '    <td><button type="button" class="minus btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>' +
         '<button type="button" class="plus btn btn-success btn-xs"><i class="fa fa-plus"></i></button></td>' +
         '</tr>';
+    $("#run").removeClass("disabled");
+
     if (pds != null && pds.length > 0) {
         $("#pData").empty();
         var tr = !canChange ? tr1 : tr2;
-        $("#run").removeClass("disabled");
         for (var j = 0; j < pds.length; j++) {
             var pd = pds[j];
             $("#pData").append(tr.format(pd.ProcessOrder, pd.PressurizeMinute, pd.PressurizeSecond, pd.ProcessMinute, pd.ProcessSecond, pd.Pressure, pd.Speed));

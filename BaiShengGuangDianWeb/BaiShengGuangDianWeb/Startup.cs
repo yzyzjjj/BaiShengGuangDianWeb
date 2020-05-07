@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModelBase.Base.Filter;
@@ -74,9 +75,20 @@ namespace BaiShengGuangDianWeb
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            //添加MIME
+            var provider = new FileExtensionContentTypeProvider
+            {
+                Mappings =
+                {
+                    [".bin"] = "application/octet-stream",
+                    [".npc"] = "application/octet-stream",
+                }
+            };
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = provider
+            });
             app.UseCookiePolicy();
             app.UseSignalR(routes =>
             {

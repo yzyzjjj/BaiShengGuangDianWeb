@@ -394,10 +394,10 @@ function getDeviceModelList() {
 function getScriptVersionList() {
     sScrId = 0;
     var data = {}
-    data.opType = 105;
+    data.opType = 113;
     data.opData = JSON.stringify({
         //设备类型
-        id: deModel
+        deviceModelId: deModel
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -558,10 +558,10 @@ function getDeviceModelList1(type) {
 function getScriptVersionList1(type) {
     asScrId = 0;
     var data = {}
-    data.opType = 105;
+    data.opType = 113;
     data.opData = JSON.stringify({
         //设备类型
-        id: adeModel
+        deviceModelId: deModel
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

@@ -31,5 +31,9 @@
         /// 故障上报
         /// </summary>
         FaultDevice,
+        /// <summary>
+        /// 流程脚本
+        /// </summary>
+        Script,
     }
 }
