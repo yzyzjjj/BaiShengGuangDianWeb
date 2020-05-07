@@ -263,6 +263,22 @@ function pageReady() {
             codeEl.val(codeEl.val()).trigger('change').trigger('select2:select');
             stockNumEl.prop('placeholder', '');
         }
+        if (v == '采购') {
+            tr.find('.msTag2').select2({
+                width: "120px",
+                tags: true,
+                createTag: params => {
+                    return {
+                        id: `tag${params.term}`,
+                        text: params.term
+                    }
+                }
+            });
+        } else {
+            tr.find('.msTag2').select2({
+                width: "120px"
+            });
+        }
     });
     $('#increaseList').on('change', '.planList', function () {
         var planId = $(this).val();
@@ -279,13 +295,13 @@ function pageReady() {
             tr.find('.stockNum').prop('placeholder', `货品领用数量：${actual}`);
         });
     });
-    $('#increaseList').on('focusin', '.stockNum', function () {
+    $('#increaseList').on('focusin', '.stockNum,.zeroNum', function () {
         var v = $(this).val();
         if (v == 0) {
             $(this).val("");
         }
     });
-    $('#increaseList').on('focusout', '.stockNum', function () {
+    $('#increaseList').on('focusout', '.stockNum,.zeroNum', function () {
         var v = $(this).val();
         if (isStrEmptyOrUndefined(v)) {
             $(this).val("0");
@@ -1455,7 +1471,6 @@ function showIncreaseModel() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             _consumeSpecification = ret.datas;
             resolve('success');
         }, 0);
@@ -1469,7 +1484,6 @@ function showIncreaseModel() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
             _consumeSite = ret.datas;
             _consumeSiteDict = new Array();
             for (var i = 0; i < _consumeSite.length; i++) {
@@ -1479,7 +1493,26 @@ function showIncreaseModel() {
         }, 0);
     });
 
-    Promise.all([planListFunc, materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
+    var priceFunc = new Promise(function (resolve, reject) {
+        var data = {}
+        data.opType = 852;
+        ajaxPost("/Relay/Post", data, function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var rData = ret.datas;
+            _consumePrice = {};
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                var flag = `${d.SpecificationId}${d.SiteId}`;
+                _consumePrice[flag] ? _consumePrice[flag].push(d) : _consumePrice[flag] = [d];
+            }
+            resolve('success');
+        }, 0);
+    });
+
+    Promise.all([planListFunc, materialListFunc, categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc, priceFunc])
         .then((result) => {
             $("#addIncreaseListBtn").removeAttr("disabled");
         });
@@ -1515,18 +1548,18 @@ function addIncreaseList() {
             </td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
-                <select class="ms2 form-control code" id="inBh{0}"></select>
+                <select class="msTag2 form-control code" id="inBh{0}"></select>
             </td>
-            <td><select class="ms2 form-control" id="inLb{0}"></select></td>
-            <td><select class="ms2 form-control" id="inMc{0}"></select></td>
-            <td><select class="ms2 form-control" id="inGys{0}"></select></td>
-            <td><select class="ms2 form-control" id="inGg{0}"></select></td>
-            <td style="vertical-align: inherit;"><label class="control-label" id="inJg{0}"></label></td>
-            <td><select class="ms2 form-control" id="inWz{0}"></select></td>
-            <td style="vertical-align: inherit;"><label class="control-label" id="inDw{0}"></label></td>
-            <td style="vertical-align: inherit;"><label class="control-label" id="inKc{0}"></label></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inLb{0}"></select></div><input class="form-control text-center hidden textOn" id="inLbInput{0}" maxlength="20" style="min-width:120px"></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inMc{0}"></select></div><input class="form-control text-center hidden textOn" id="inMcInput{0}" maxlength="20" style="min-width:120px"></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inGys{0}"></select></div><input class="form-control text-center hidden textOn" id="inGysInput{0}" maxlength="20" style="min-width:120px"></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inGg{0}"></select></div><input class="form-control text-center hidden textOn" id="inGgInput{0}" maxlength="20" style="min-width:120px"></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inDj{0}"></select></div><input class="form-control text-center zeroNum hidden textOn" id="inDjInput{0}" onkeyup="onInput(this, 8, 2)" onblur="onInputEnd(this)" style="min-width:120px"></td>
+            <td><div class="textIn"><select class="ms2 form-control" id="inWz{0}"></select></div><input class="form-control text-center hidden textOn" id="inWzInput{0}" maxlength="20" style="min-width:120px"></td>
+            <td style="vertical-align: inherit"><label class="control-label textIn" id="inDw{0}"></label><input class="form-control text-center zeroNum hidden textOn" id="inDwInput{0}"  maxlength="4" style="min-width:70px"></td>
+            <td style="vertical-align: inherit"><label class="control-label textIn" id="inKc{0}"></label><input class="form-control text-center zeroNum hidden textOn" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" id="inKcInput{0}" style="min-width:70px"></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
-            <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>
+            <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" style="width:140px;margin:auto"></td>
             <td>
                <div style="display:flex;width:160px">
                    <input class="form-control text-center" id="inCg{0}" maxlength="64" />
@@ -1554,7 +1587,7 @@ function addIncreaseList() {
         planListEl.append(ops);
         var selector = "#inBh" + xh;
         $(selector).empty();
-        var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+        var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0, price = 0;
         for (var i = 0; i < _materialList.length; i++) {
             var d = _materialList[i];
             $(selector).append(option.format(d.Id, d.Code));
@@ -1564,20 +1597,32 @@ function addIncreaseList() {
                 nameId = d.NameId;
                 supplierId = d.SupplierId;
                 specificationId = d.SpecificationId;
+                siteId = d.SiteId;
+                price = d.Price;
                 $("#inDw" + xh).html(d.Unit);
-                $("#inJg" + increaseMax).html(d.Price);
                 $("#inKc" + increaseMax).html(d.Number);
                 $("#inRk" + increaseMax).val(0);
             }
         }
         $(selector).on('select2:select', function () {
-            var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0, price = 0;
             var id = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             var i, len = _materialList.length;
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
+            $("#inLb" + xh).val(0).trigger("change");
+            $("#inMc" + xh).val(0).trigger("change");
+            $("#inGys" + xh).val(0).trigger("change");
+            $("#inGg" + xh).val(0).trigger("change");
+            $("#inDj" + xh).val('').trigger("change");
+            $("#inWz" + xh).val('').trigger("change");
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
+            var trEl = $(this).parents('tr');
+            trEl.find('.textOn').val('');
+            $(`#inKcInput${xh},#inDjInput${xh}`).val(0);
+            $(this).find(':selected').data('select2Tag')
+                ? trEl.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden')
+                : trEl.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
             for (i = 0; i < len; i++) {
                 var d = _materialList[i];
                 if (id == d.Id) {
@@ -1587,10 +1632,10 @@ function addIncreaseList() {
                     supplierId = d.SupplierId;
                     specificationId = d.SpecificationId;
                     siteId = d.SiteId;
+                    price = d.Price;
                     $("#inWz" + xh).val(siteId).trigger("change");
                     $("#inLb" + xh).val(categoryId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
                     $("#inKc" + xh).html(d.Number);
 
                     ////货品名称
@@ -1608,7 +1653,7 @@ function addIncreaseList() {
                     selector = "#inGg" + xh;
                     updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
 
-                    var consumeSiteArray = new Array();
+                    var consumeSiteArray = [];
                     for (var i = 0; i < _materialList.length; i++) {
                         var d = _materialList[i];
                         if (d.SpecificationId == specificationId) {
@@ -1616,12 +1661,18 @@ function addIncreaseList() {
                                 consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                         }
                     }
-                    if (consumeSiteArray.length > 0)
-                        siteId = consumeSiteArray[0].Id;
+                    consumeSiteArray = [...new Set(consumeSiteArray)];
+
+                    //位置
                     updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
+                    //单价
+                    selector = `#inDj${xh}`;
+                    var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+                    priceSelect(priceData, selector, price);
                     break;
                 }
             }
+
             $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
             var codeId = $(this).val();
             var actual = $(this).find(`option[value=${codeId}]`).attr('actual');
@@ -1636,14 +1687,12 @@ function addIncreaseList() {
         selector = "#inLb" + xh;
         updateConsumeSelect(selector, categoryId, _consumeCategory, "Category");
         $(selector).on('select2:select', function () {
-            var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, categoryId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0, price = 0;
             categoryId = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             siteId = $("#inWz" + xh).val();
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
-
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
             ////货品名称
             //var _consumeName = [];
             for (var i = 0; i < _consumeName.length; i++) {
@@ -1688,19 +1737,25 @@ function addIncreaseList() {
                         consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                 }
             }
+            consumeSiteArray = [...new Set(consumeSiteArray)];
             if (consumeSiteArray.length > 0)
                 siteId = consumeSiteArray[0].Id;
             updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
 
+            //单价
+            var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+            price = priceData[0] ? priceData[0].Price : '';
+            priceSelect(priceData, `#inDj${xh}`, price);
+
             $("#inBh" + xh).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
-                if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
                     billId = d.BillId;
                     $("#in" + xh).attr("billId", billId);
                     $("#inBh" + xh).val(billId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
+                    $("#inDj" + xh).val(price).trigger("change");
                     $("#inKc" + xh).html(d.Number);
                     break;
                 }
@@ -1713,15 +1768,12 @@ function addIncreaseList() {
         selector = "#inMc" + xh;
         updateConsumeSelect(selector, nameId, _consumeName, "Name", "CategoryId", categoryId);
         $(selector).on('select2:select', function () {
-            var billId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, nameId = 0, supplierId = 0, specificationId = 0, siteId = 0, price = 0;
             nameId = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             siteId = $("#inWz" + xh).val();
-
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
-
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
             ////供应商
             //var _consumeSupplier = [];
             for (var i = 0; i < _consumeSupplier.length; i++) {
@@ -1754,19 +1806,25 @@ function addIncreaseList() {
                         consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                 }
             }
+            consumeSiteArray = [...new Set(consumeSiteArray)];
             if (consumeSiteArray.length > 0)
                 siteId = consumeSiteArray[0].Id;
             updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
+            //单价
+            var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+            price = priceData[0] ? priceData[0].Price : '';
+            priceSelect(priceData, `#inDj${xh}`, price);
+
             $("#in" + xh).attr("billId", 0);
             $("#inBh" + xh).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
-                if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
                     billId = d.BillId;
                     $("#in" + xh).attr("billId", billId);
                     $("#inBh" + xh).val(billId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
+                    $("#inDj" + xh).val(price).trigger("change");
                     $("#inKc" + xh).html(d.Number);
                     break;
                 }
@@ -1779,15 +1837,12 @@ function addIncreaseList() {
         selector = "#inGys" + xh;
         updateConsumeSelect(selector, supplierId, _consumeSupplier, "Supplier", "NameId", nameId);
         $(selector).on('select2:select', function () {
-            var billId = 0, supplierId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, supplierId = 0, specificationId = 0, siteId = 0, price = 0;
             supplierId = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             siteId = $("#inWz" + xh).val();
-
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
-
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
             ////规格型号
             //var _consumeSpecification = [];
             for (var i = 0; i < _consumeSpecification.length; i++) {
@@ -1808,19 +1863,25 @@ function addIncreaseList() {
                         consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                 }
             }
+            consumeSiteArray = [...new Set(consumeSiteArray)];
             if (consumeSiteArray.length > 0)
                 siteId = consumeSiteArray[0].Id;
             updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
+            //单价
+            var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+            price = priceData[0] ? priceData[0].Price : '';
+            priceSelect(priceData, `#inDj${xh}`, price);
+
             $("#in" + xh).attr("billId", 0);
             $("#inBh" + xh).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
-                if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
                     billId = d.BillId;
                     $("#in" + xh).attr("billId", billId);
                     $("#inBh" + xh).val(billId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
+                    $("#inDj" + xh).val(price).trigger("change");
                     $("#inKc" + xh).html(d.Number);
                     break;
                 }
@@ -1833,7 +1894,7 @@ function addIncreaseList() {
         selector = "#inGg" + xh;
         updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
         $(selector).on('select2:select', function () {
-            var billId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, specificationId = 0, siteId = 0, price = 0;
             specificationId = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             var consumeSiteArray = new Array();
@@ -1844,24 +1905,26 @@ function addIncreaseList() {
                         consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                 }
             }
+            consumeSiteArray = [...new Set(consumeSiteArray)];
             if (consumeSiteArray.length > 0)
                 siteId = consumeSiteArray[0].Id;
-            updateConsumeSelect(selector, siteId, consumeSiteArray, "Site");
-
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
-
+            updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
+            //单价
+            var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+            price = priceData[0] ? priceData[0].Price : '';
+            priceSelect(priceData, `#inDj${xh}`, price);
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
             $("#in" + xh).attr("billId", 0);
             $("#inBh" + xh).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
-                if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
                     billId = d.BillId;
                     $("#in" + xh).attr("billId", billId);
                     $("#inBh" + xh).val(billId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
+                    $("#inDj" + xh).val(price).trigger('change');
                     $("#inKc" + xh).html(d.Number);
                     break;
                 }
@@ -1880,29 +1943,29 @@ function addIncreaseList() {
                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
             }
         }
-        if (consumeSiteArray.length > 0)
-            siteId = consumeSiteArray[0].Id;
+        consumeSiteArray = [...new Set(consumeSiteArray)];
         updateConsumeSelect(selector, siteId, consumeSiteArray, "Site");
         $(selector).on('select2:select', function () {
-            var billId = 0, specificationId = 0, siteId = 0;
+            var billId = 0, specificationId = 0, siteId = 0, price = 0;
             siteId = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             specificationId = $("#inGg" + xh).val();
-
-            $("#inDw" + xh).html('');
-            $("#inJg" + xh).html(0);
-            $("#inKc" + xh).html(0);
-
+            //单价
+            var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+            price = priceData[0] ? priceData[0].Price : '';
+            priceSelect(priceData, `#inDj${xh}`, price);
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
             $("#in" + xh).attr("billId", 0);
             $("#inBh" + xh).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
-                if (d.SpecificationId == specificationId && d.SiteId == siteId) {
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
                     billId = d.BillId;
                     $("#in" + xh).attr("billId", billId);
                     $("#inBh" + xh).val(billId).trigger("change");
                     $("#inDw" + xh).html(d.Unit);
-                    $("#inJg" + xh).html(d.Price);
+                    $("#inDj" + xh).val(price).trigger("change");
                     $("#inKc" + xh).html(d.Number);
                     break;
                 }
@@ -1910,15 +1973,60 @@ function addIncreaseList() {
             $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
         });
 
-        $("#in" + xh).find(".ms2").css("width", "100%");
-        $("#in" + xh).find(".ms2").select2({
+        //单价
+        selector = `#inDj${xh}`;
+        var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
+        priceSelect(priceData, selector, price);
+        $(selector).on('select2:select', function () {
+            var billId = 0, specificationId = 0, siteId = 0, price = 0;
+            price = $(this).val();
+            var xh = $(this).parents('tr:first').attr("value");
+            specificationId = $("#inGg" + xh).val();
+            siteId = $("#inWz" + xh).val();
+            $(`#inDw${xh}`).html('');
+            $(`#inKc${xh}`).html(0);
+            $("#in" + xh).attr("billId", 0);
+            $("#inBh" + xh).val(0).trigger("change");
+            for (var i = 0; i < _materialList.length; i++) {
+                var d = _materialList[i];
+                if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
+                    billId = d.BillId;
+                    $("#in" + xh).attr("billId", billId);
+                    $("#inBh" + xh).val(billId).trigger("change");
+                    $("#inDw" + xh).html(d.Unit);
+                    $("#inKc" + xh).html(d.Number);
+                    break;
+                }
+            }
+            $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+        });
+        $("#in" + xh).find(".msTag2").select2({
+            width: "120px",
+            tags: true,
+            createTag: params => {
+                return {
+                    id: `tag${params.term}`,
+                    text: params.term
+                }
+            }
+        }).end().find('.ms2').select2({
             width: "120px"
         });
-
         $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
     }
     $('#increaseTable').scrollTop($('#increaseTable')[0].scrollHeight);
     ditto();
+}
+
+//单价选择
+function priceSelect(priceData, el, price) {
+    var op = '<option value="{0}">{0}</option>';
+    var ops = '';
+    for (var i = 0, len = priceData.length; i < len; i++) {
+        var d = priceData[i];
+        ops += op.format(d.Price);
+    }
+    $(el).empty().append(ops).val(price).trigger('change');
 }
 
 //入库删除一行
@@ -1957,45 +2065,134 @@ function increase() {
     var bill = new Array();
     var i;
     for (i = 1; i <= increaseMax; i++) {
-        if ($("#inBh" + i).length > 0) {
-            var actualEl = $("#inRk" + i);
-            var tr = actualEl.parents('tr');
-            var codeEl = tr.find('.code');
-            var codeId = codeEl.val();
-            var actual = codeEl.find(`option[value=${codeId}]`).attr('actual');
-            var inBh = $("#inBh" + i).val();
-            var inLy = $("#inLy" + i).val();
-            var inRk = actualEl.val();
-            var inCg = $("#inCg" + i).val();
-
-            if (isStrEmptyOrUndefined(inBh)) {
+        if ($(`#inBh${i}`).length > 0) {
+            var codeId = $(`#inBh${i}`).val();
+            if (isStrEmptyOrUndefined(codeId)) {
                 layer.msg("货品编号不能为空");
                 return;
             }
+            var tagTf = $(`#inBh${i} :selected`).data('select2Tag');
+            codeId = tagTf ? '0' : codeId;
+            var categoryId, category, nameId, name, supplierId, supplier, specificationId, specification, siteId, site, price, unit, stock;
+            if (tagTf) {
+                categoryId = nameId = supplierId = specificationId = siteId = 0;
+                category = $(`#inLbInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(category)) {
+                    layer.msg("请输入类别");
+                    return;
+                }
+                name = $(`#inMcInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(name)) {
+                    layer.msg("请输入名称");
+                    return;
+                }
+                supplier = $(`#inGysInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(supplier)) {
+                    layer.msg("请输入供应商");
+                    return;
+                }
+                specification = $(`#inGgInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(specification)) {
+                    layer.msg("请输入规格");
+                    return;
+                }
+                price = $(`#inDjInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(price)) {
+                    layer.msg("请输入单价");
+                    return;
+                }
+                site = $(`#inWzInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(site)) {
+                    layer.msg("请输入位置");
+                    return;
+                }
+                unit = $(`#inDwInput${i}`).val().trim();
+                if (isStrEmptyOrUndefined(unit)) {
+                    layer.msg("请输入单位");
+                    return;
+                }
+                stock = $(`#inKcInput${i}`).val().trim();
+            } else {
+                categoryId = $(`#inLb${i}`).val();
+                if (isStrEmptyOrUndefined(categoryId)) {
+                    layer.msg("请选择类别");
+                    return;
+                }
+                category = $(`#inLb${i} :selected`).text();
+                nameId = $(`#inMc${i}`).val();
+                if (isStrEmptyOrUndefined(nameId)) {
+                    layer.msg("请选择名称");
+                    return;
+                }
+                name = $(`#inMc${i} :selected`).text();
+                supplierId = $(`#inGys${i}`).val();
+                if (isStrEmptyOrUndefined(supplierId)) {
+                    layer.msg("请选择供应商");
+                    return;
+                }
+                supplier = $(`#inGys${i} :selected`).text();
+                specificationId = $(`#inGg${i}`).val();
+                if (isStrEmptyOrUndefined(specificationId)) {
+                    layer.msg("请选择规格");
+                    return;
+                }
+                specification = $(`#inGg${i} :selected`).text();
+                price = $(`#inDj${i}`).val();
+                if (isStrEmptyOrUndefined(price)) {
+                    layer.msg("请选择单价");
+                    return;
+                }
+                siteId = $(`#inWz${i}`).val();
+                if (isStrEmptyOrUndefined(siteId)) {
+                    layer.msg("请选择位置");
+                    return;
+                }
+                site = $(`#inWz${i} :selected`).text();
+                unit = $(`#inDw${i}`).text();
+                stock = $(`#inKc${i}`).text();
+            }
+            var inRk = $(`#inRk${i}`).val();
+            var actual = $(`#inBh${i} :selected`).attr('actual');
             if (isStrEmptyOrUndefined(inRk)) {
-                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} option:checked`).text() + ": 入库数量不能为空");
+                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} :checked`).text() + ": 入库数量不能为空");
                 return;
             }
             if (parseFloat(inRk) <= 0) {
-                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} option:checked`).text() + ": 入库数量需大于0");
+                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} :checked`).text() + ": 入库数量需大于0");
                 return;
             }
             if (!!actual && parseFloat(inRk) > parseFloat(actual)) {
                 layer.msg('入库数量大于货品领用数量');
                 return;
             }
+            var inCg = $(`#inCg${i}`).val();
             if (isStrEmptyOrUndefined(inCg)) {
                 layer.msg("采购/退回人不能为空");
                 return;
             }
+            var inLy = $(`#inLy${i}`).val();
             var list = {
+                CategoryId: categoryId,
+                Category: category,
+                NameId: nameId,
+                Name: name,
+                SupplierId: supplierId,
+                Supplier: supplier,
+                SpecificationId: specificationId,
+                Specification: specification,
+                SiteId: siteId,
+                Site: site,
+                Code: $(`#inBh${i} :selected`).text(),
+                Unit: unit,
+                Price: price,
+                Stock: stock,
                 Purpose: inLy,
                 RelatedPerson: inCg,
-                BillId: inBh,
+                BillId: codeId,
                 Number: inRk
             };
             if (inLy == '计划退回') {
-                var planId = $("#inLy" + i).next().find('.planList').val();
+                var planId = $(`#inLy${i}`).next().find('.planList').val();
                 list.PlanId = planId;
             }
             bill.push(list);
@@ -2044,6 +2241,8 @@ var _consumeSpecification = null;
 var _consumeSite = null;
 //位置
 var _consumeSiteDict = null;
+//价格
+var _consumePrice = null;
 //录入列表
 var _consumePlanList = null;
 var _consumeOtherList = null;

@@ -39,7 +39,7 @@
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
                         <div style="display: flex; align-items: center">
-                            <input type="tel" class="form-control" id="flowCard" value="" autofocus autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
+                            <input type="search" class="form-control" id="flowCard" value="" autofocus autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()" id="queryFlowCardBtn" style="margin-left: 3px">查询</button>
                             <button type="button" id="flowCardEmpty" class="btn btn-success" style="margin-left: 3px">清空</button>
                         </div>
