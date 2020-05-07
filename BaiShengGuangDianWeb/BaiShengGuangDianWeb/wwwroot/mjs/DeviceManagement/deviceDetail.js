@@ -95,7 +95,7 @@ function getStateList() {
     var data = {}
     data.opType = 109;
     data.opData = JSON.stringify({
-        id: id
+        qId: id
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {

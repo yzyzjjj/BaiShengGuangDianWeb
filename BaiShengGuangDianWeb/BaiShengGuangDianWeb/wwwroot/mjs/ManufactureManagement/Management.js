@@ -712,8 +712,9 @@ function updateTaskDetail() {
             actualMin = 0;
         }
         var actualScore = $('#taskActualScore .score').val();
-        if (isStrEmptyOrUndefined(actualScore)) {
-            actualScore = 0;
+        if (actualScore != parseInt(actualScore)) {
+            layer.msg('实际绩效分不合法');
+            return;
         }
         list.ActualHour = actualHour;
         list.ActualMin = actualMin;
@@ -771,8 +772,9 @@ function updateCheckDetail() {
             actualMin = 0;
         }
         var actualScore = $('#checkActualScore .score').val();
-        if (isStrEmptyOrUndefined(actualScore)) {
-            actualScore = 0;
+        if (actualScore != parseInt(actualScore)) {
+            layer.msg('实际绩效分不合法');
+            return;
         }
         var checkResult = $('#checkResult').val();
         if (isStrEmptyOrUndefined(checkResult)) {

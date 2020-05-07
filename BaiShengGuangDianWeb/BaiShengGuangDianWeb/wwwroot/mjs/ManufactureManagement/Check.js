@@ -133,16 +133,17 @@ function deleteCheckList() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     showCheckListModel(0, false);
+                    init();
                 }
             });
     }
-    showConfirm("删除配置：" + $("#CheckListSelect option:selected").text(), doSth);
+    showConfirm(`删除配置：${$("#CheckListSelect :selected").text()}`, doSth);
 }
 
 //修改配置名
 function updateCheckList() {
     var checkName = $("#CheckListName").val();
-    var oldCheckName = $("#CheckListSelect option:selected").text();
+    var oldCheckName = $("#CheckListSelect :selected").text();
     var checkId = $("#CheckListSelect").val();
     if (isStrEmptyOrUndefined(checkId)) {
         layer.msg("请选择配置");
@@ -169,16 +170,17 @@ function updateCheckList() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     showCheckListModel(checkId, false);
+                    init();
                 }
             });
     }
-    showConfirm("修改配置：" + $("#CheckListSelect option:selected").text(), doSth);
+    showConfirm(`修改配置：${oldCheckName}`, doSth);
 }
 
 //添加配置
 function addCheckList() {
     var checkName = $("#CheckListName").val();
-    var oldCheckName = $("#CheckListSelect option:selected").text();
+    var oldCheckName = $("#CheckListSelect :selected").text();
     if (isStrEmptyOrUndefined(checkName)) {
         layer.msg("名称不能为空");
         return;
@@ -208,10 +210,11 @@ function addCheckList() {
                         checkId = 0;
                     }
                     showCheckListModel(checkId, false);
+                    init();
                 }
             });
     }
-    showConfirm("新增配置：" + checkName, doSth);
+    showConfirm(`新增配置：${checkName}`, doSth);
 }
 
 var checkConfig = null;

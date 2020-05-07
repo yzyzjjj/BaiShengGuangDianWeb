@@ -179,7 +179,7 @@ function deleteSite(id, siteName) {
 function showUpdateSite(id, adSiteNames, locationsReg, man) {
     adSiteNames = unescape(adSiteNames);
     locationsReg = unescape(locationsReg);
-
+    man = unescape(man);
     hideClassTip('adt');
     $("#updateId").html(id);
     $("#updateSiteName").val(adSiteNames);

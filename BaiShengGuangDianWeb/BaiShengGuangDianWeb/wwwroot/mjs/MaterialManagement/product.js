@@ -737,31 +737,36 @@ function addMaterialModal() {
 
 //添加货品信息
 function addMaterial() {
-    var categoryId = $('#addCategorySelect :selected').data('select2Tag') ? '0' : $('#addCategorySelect').val();
+    var categoryId = $('#addCategorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg("请选择类别");
         return;
     }
-    var nameId = $('#addNameSelect :selected').data('select2Tag') ? '0' : $('#addNameSelect').val();
+    categoryId = $('#addCategorySelect :selected').data('select2Tag') ? '0' : categoryId;
+    var nameId = $('#addNameSelect').val();
     if (isStrEmptyOrUndefined(nameId)) {
         layer.msg("请选择名称");
         return;
     }
-    var supplierId = $('#addSupplierSelect :selected').data('select2Tag') ? '0' : $('#addSupplierSelect').val();
+    nameId = $('#addNameSelect :selected').data('select2Tag') ? '0' : nameId;
+    var supplierId = $('#addSupplierSelect').val();
     if (isStrEmptyOrUndefined(supplierId)) {
         layer.msg("请选择供应商");
         return;
     }
-    var specificationId = $('#addSpecificationSelect :selected').data('select2Tag') ? '0' : $('#addSpecificationSelect').val();
+    supplierId = $('#addSupplierSelect :selected').data('select2Tag') ? '0' : supplierId;
+    var specificationId = $('#addSpecificationSelect').val();
     if (isStrEmptyOrUndefined(specificationId)) {
         layer.msg("请选择规格");
         return;
     }
-    var siteId = $('#addSiteSelect :selected').data('select2Tag') ? '0' : $('#addSiteSelect').val();
+    specificationId = $('#addSpecificationSelect :selected').data('select2Tag') ? '0' : specificationId;
+    var siteId = $('#addSiteSelect').val();
     if (isStrEmptyOrUndefined(siteId)) {
         layer.msg("请选择位置");
         return;
     }
+    siteId = $('#addSiteSelect :selected').data('select2Tag') ? '0' : siteId;
     var code = $('#addCode').val().trim();
     if (isStrEmptyOrUndefined(code)) {
         layer.msg("请输入编号");
@@ -793,15 +798,15 @@ function addMaterial() {
             data.opType = 810;
             data.opData = JSON.stringify([{
                 CategoryId: categoryId,
-                Category: $('#addCategorySelect option:selected').text(),
+                Category: $('#addCategorySelect :selected').text(),
                 NameId: nameId,
-                Name: $('#addNameSelect option:selected').text(),
+                Name: $('#addNameSelect :selected').text(),
                 SupplierId: supplierId,
-                Supplier: $('#addSupplierSelect option:selected').text(),
+                Supplier: $('#addSupplierSelect :selected').text(),
                 SpecificationId: specificationId,
-                Specification: $('#addSpecificationSelect option:selected').text(),
+                Specification: $('#addSpecificationSelect :selected').text(),
                 SiteId: siteId,
-                Site: $('#addSiteSelect option:selected').text(),
+                Site: $('#addSiteSelect :selected').text(),
                 Code: code,
                 Unit: unit,
                 Price: price,
@@ -812,8 +817,8 @@ function addMaterial() {
             ajaxPost("/Relay/Post", data,
                 function (ret) {
                     layer.msg(ret.errmsg);
-                    $("#addMaterialModal").modal("hide");
                     if (ret.errno == 0) {
+                        $("#addMaterialModal").modal("hide");
                         getMaterialList();
                     }
                 });

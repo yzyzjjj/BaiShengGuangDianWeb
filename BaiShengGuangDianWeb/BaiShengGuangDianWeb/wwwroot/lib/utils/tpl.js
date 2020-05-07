@@ -369,6 +369,33 @@ $(function () {
     //$("input").attr("onpaste", "this.value=this.value.replace(/[\\/\\\\\"\']/g,'');");
     $.fn.modal.Constructor.prototype.enforceFocus = function () { };
     $.fn.select2.defaults.set('width', '100%');
+    $('input[name="datePicker"]').daterangepicker({
+        timePicker: true, //显示时间
+        timePicker24Hour: true, //时间制
+        timePickerSeconds: true, //时间显示到秒
+        startDate: moment().hours(0).minutes(0).seconds(0), //设置开始日期
+        endDate: moment(new Date()), //设置结束器日期
+        maxDate: moment(new Date()), //设置最大日期
+        opens: 'right',
+        ranges: {
+            '今天': [moment().hours(0).minutes(0).seconds(0), moment()],
+            '昨天': [moment().subtract(1, 'days').hours(0).minutes(0).seconds(0), moment().subtract(1, 'days').hours(23).minutes(59).seconds(59)],
+            '上周': [moment().subtract(6, 'days'), moment()],
+            '前30天': [moment().subtract(29, 'days'), moment()],
+            '本月': [moment().startOf('month'), moment().endOf('month')],
+            '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        locale: {
+            format: 'YYYY-MM-DD HH:mm:ss', //设置显示格式
+            separator: ' 至 ',
+            applyLabel: '确定', //确定按钮文本
+            cancelLabel: '取消', //取消按钮文本
+            customRangeLabel: '自定义',
+            daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+            monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            firstDay: 1
+        }
+    });
 });
 //datatables自定义排序
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {

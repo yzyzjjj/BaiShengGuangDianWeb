@@ -120,7 +120,7 @@ function getDeviceList() {
                 return '<span class="text-red">' + state + '</span>';
             }
             var order = function (data, type, row, meta) {
-                return meta.row + 1;
+                return ++meta.row;
             }
             $("#deviceList")
                 .DataTable({

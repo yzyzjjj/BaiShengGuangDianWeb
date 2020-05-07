@@ -23,30 +23,184 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li class="active"><a href="#realQuery" data-toggle="tab" aria-expanded="true">实时查询</a></li>
-                <li><a href="#historyData" data-toggle="tab" aria-expanded="false">历史数据</a></li>
+                <li id="historyPage"><a href="#historyData" data-toggle="tab" aria-expanded="false">历史数据</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane active in" id="realQuery">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <div class="flexStyle">
-                                <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
-                                    <label class="control-label text-nowrap">选择设备：</label>
-                                    <div class="flexStyle">
-                                        <select class="ms2 form-control" id="selectConfig" style="min-width: 120px"></select>
-                                        <button type="button" class="btn btn-primary" onclick="" style="margin-left: 3px">查询</button>
-                                    </div>
+                            <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
+                                <label class="control-label text-nowrap">选择设备：</label>
+                                <div class="flexStyle">
+                                    <select class="ms2 form-control" id="selectCode" style="min-width: 120px"></select>
+                                    <button type="button" class="btn btn-primary" onclick="getCodeDetail()" style="margin-left: 3px">查询</button>
                                 </div>
                             </div>
                         </div>
                         <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="script"></span></label>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">变量</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="valList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">输入</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="insList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">输出</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="outList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane fade in" id="historyData">
                     <div class="box box-primary">
-                        <div class="box-header with-border"></div>
-                        <div class="box-body"></div>
+                        <div class="box-header with-border">
+                            <div class="col-sm-4">
+                                <label class="control-label text-nowrap">选择设备：</label>
+                                <select class="ms2 form-control" id="selectCodeHistory" style="width: 100%"></select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label text-nowrap">时间：</label>
+                                <input type="text" class="form-control text-center" id="reservationTime" name="datePicker" style="width: 100%">
+                            </div>
+                            <div class="col-sm-4" style="margin-top: 24px">
+                                <div class="flexStyle">
+                                    <select class="form-control" id="chartTypeSelect" style="min-width: 100px">
+                                        <option value="0">独立表</option>
+                                        <option value="1">合并表</option>
+                                    </select>
+                                    <select class="form-control hidden" id="chartSelect" style="min-width: 100px">
+                                        <option value="0">表1</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary" onclick="getHistoryData()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="historyScript"></span></label>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">变量</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyValList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">输入</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyInsList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">输出</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyOutList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="box box-success">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">表1</h3>
+                                        <div class="box-tools pull-right">
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="删除"><i class="fa fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="nav-tabs-custom">
+                                                    <ul class="nav nav-tabs ui-sortable-handle">
+                                                        <li class="active hidden"><a href="#aa" data-toggle="tab" aria-expanded="true">变量</a></li>
+                                                        <li class="hidden"><a href="#bb" data-toggle="tab" aria-expanded="false">输入</a></li>
+                                                        <li class="hidden"><a href="#cc" data-toggle="tab" aria-expanded="false">输出</a></li>
+                                                    </ul>
+                                                    <div class="tab-content no-padding">
+                                                        <div class="tab-pane active in" id="aa"></div>
+                                                        <div class="tab-pane fade in" id="bb"></div>
+                                                        <div class="tab-pane fade in" id="cc"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                <canvas height="300" style="background: red"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
