@@ -9,7 +9,7 @@
 var _codeData = null;
 //获取设备
 function getDevice() {
-    var data = {}
+    var data = {};
     data.opType = 100;
     data.opData = JSON.stringify({
         hard: true
@@ -42,7 +42,7 @@ function getCodeDetail() {
         layer.msg('请选择设备');
         return;
     }
-    var data = {}
+    var data = {};
     data.opType = 106;
     data.opData = JSON.stringify({
         id: id
@@ -69,7 +69,7 @@ function getScriptValue() {
         layer.msg('请选择设备');
         return;
     }
-    var data = {}
+    var data = {};
     data.opType = 109;
     data.opData = JSON.stringify({
         all: true,
@@ -124,6 +124,7 @@ function getScriptValue() {
     });
 }
 
+var _historyData = null;
 //历史数据脚本
 function getHistoryScript() {
     $('#historyScript').text(_codeData[$('#selectCodeHistory').val()].ScriptName);
@@ -132,7 +133,7 @@ function getHistoryScript() {
         layer.msg('请选择设备');
         return;
     }
-    var data = {}
+    var data = {};
     data.opType = 106;
     data.opData = JSON.stringify({
         id: id
@@ -143,12 +144,13 @@ function getHistoryScript() {
             return;
         }
         var rData = ret.datas;
-        var scriptData = { 1: [], 2: [], 3: [], id: {} };
+        var scriptData = { 1: [], 2: [], 3: [] };
+        _historyData = {};
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             var typeId = d.VariableTypeId;
             scriptData[typeId].push(d);
-            scriptData.id[d.Id] = d;
+            _historyData[d.Id] = d;
         }
         var addVar = (type, d) => `<button type="button" class="btn btn-success btn-xs" onclick="addVar(\'${type}\',${d})"><i class="fa fa-plus"></i></button>`;
         var tablesConfig = {
@@ -205,7 +207,7 @@ function getHistoryData() {
     time = time.split(' 至 ');
     var sTime = time[0];
     var eTime = time[1];
-    var data = {}
+    var data = {};
     data.opType = 507;
     data.opData = JSON.stringify({
         StartTime: sTime,
@@ -223,10 +225,44 @@ function getHistoryData() {
 }
 
 var _deviceData = { vals: [], ins: [], outs: [] };
+var _tableType = { separateTable: { id: [] }, combinedTable: {} };
 var _flag = 0;
+var _isTableInsert = true;
 //历史数据添加变量
 function addVar(type, id) {
     if (_deviceData[type].indexOf(id) == -1) {
         _deviceData[type].push(id);
+    }
+    var tableType = $('#chartTypeSelect').val();
+    var arr;
+    switch (tableType) {
+        case '0':
+            arr = _tableType.separateTable.id;
+            if (arr.indexOf(id) == -1) {
+                arr.push(id);
+                _flag++;
+                _isTableInsert = true;
+                _tableType.separateTable[`table${_flag}`] = _historyData[id];
+            } else {
+                layer.msg('该名称独立表已存在');
+            }
+            break;
+        case '1':
+            if (_isTableInsert) {
+                _flag++;
+                _isTableInsert = false;
+                _tableType.combinedTable[`table${_flag}`] = { id: [id], data: [_historyData[id]] };
+                //$('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
+            } else {
+                var tableName = _tableType.combinedTable[`table${_flag}`];
+                arr = tableName.id;
+                if (arr.indexOf(id) == -1) {
+                    tableName.id.push(id);
+                    tableName.data.push(_historyData[id]);
+                } else {
+                    layer.msg('该合并表已存在该名称');
+                }
+            }
+            break;
     }
 }
