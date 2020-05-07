@@ -225,43 +225,65 @@ function getHistoryData() {
 }
 
 var _deviceData = { vals: [], ins: [], outs: [] };
-var _tableType = { separateTable: { id: [] }, combinedTable: {} };
+var _tableType = {};
 var _flag = 0;
-var _isTableInsert = true;
 //历史数据添加变量
 function addVar(type, id) {
     if (_deviceData[type].indexOf(id) == -1) {
         _deviceData[type].push(id);
     }
     var tableType = $('#chartTypeSelect').val();
-    var arr;
     switch (tableType) {
         case '0':
-            arr = _tableType.separateTable.id;
-            if (arr.indexOf(id) == -1) {
-                arr.push(id);
-                _flag++;
-                _isTableInsert = true;
-                _tableType.separateTable[`table${_flag}`] = _historyData[id];
-            } else {
-                layer.msg('该名称独立表已存在');
-            }
+            _flag++;
+            var table = `table${_flag}`;
+            _tableType[table] = { id: [id], data: [_historyData[id]] };
+            $('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
+            var box = `<div class="box box-success">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">表${_flag}</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" title="删除"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="nav-tabs-custom">
+                                        <ul class="nav nav-tabs ui-sortable-handle">
+                                            <li class="active hidden"><a href="#${table}_val" data-toggle="tab" aria-expanded="true">变量</a></li>
+                                            <li class="hidden"><a href="#${table}_ins" data-toggle="tab" aria-expanded="false">输入</a></li>
+                                            <li class="hidden"><a href="#${table}_out" data-toggle="tab" aria-expanded="false">输出</a></li>
+                                        </ul>
+                                        <div class="tab-content no-padding">
+                                            <div class="tab-pane active in" id="${table}_val"></div>
+                                            <div class="tab-pane fade in" id="${table}_ins"></div>
+                                            <div class="tab-pane fade in" id="${table}_out"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="chart" style="width: 100%;height:400px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                     </div>`;
+            $('#tableChart').append(box);
+
             break;
         case '1':
-            if (_isTableInsert) {
-                _flag++;
-                _isTableInsert = false;
-                _tableType.combinedTable[`table${_flag}`] = { id: [id], data: [_historyData[id]] };
-                //$('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
-            } else {
-                var tableName = _tableType.combinedTable[`table${_flag}`];
-                arr = tableName.id;
-                if (arr.indexOf(id) == -1) {
-                    tableName.id.push(id);
-                    tableName.data.push(_historyData[id]);
+            var tableNum = $('#chartSelect').val();
+            if (!isStrEmptyOrUndefined(tableNum)) {
+                var arr = _tableType[`table${tableNum}`];
+                if (arr.id.indexOf(id) == -1) {
+                    arr.id.push(id);
+                    arr.data.push(_historyData[id]);
                 } else {
-                    layer.msg('该合并表已存在该名称');
+                    layer.msg(`${$('#chartSelect :selected').text()}已存在该名称`);
                 }
+            } else {
+                layer.msg('目前未存在相关表');
             }
             break;
     }

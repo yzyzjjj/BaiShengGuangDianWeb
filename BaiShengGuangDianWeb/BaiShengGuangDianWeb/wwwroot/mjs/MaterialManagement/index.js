@@ -1124,7 +1124,7 @@ function getLogList(show = false) {
             }
             var number = function (data, type, row) {
                 //状态 1 入库; 2 出库;
-                return data.Type == 1 ? `<span class="text-success">${data.Number}</span>` : `<span class="text-danger">${data.Number}</span>`;
+                return data.Type == 1 ? `<span class="text-success">+${data.Number}</span>` : `<span class="text-danger">-${data.Number}</span>`;
             }
             var update = function (data) {
                 return data.Number > data.OldNumber ? `<span class="text-success">${data.Number}</span>` : `<span class="text-danger">${data.Number}</span>`;
