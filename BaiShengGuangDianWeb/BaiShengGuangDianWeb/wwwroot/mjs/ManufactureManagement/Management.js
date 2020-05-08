@@ -694,6 +694,10 @@ function updateTaskDetail() {
     if (isStrEmptyOrUndefined(score)) {
         score = 0;
     }
+    if (score != parseInt(score)) {
+        layer.msg('绩效分不合法');
+        return;
+    }
     var list = {
         Id: _taskDetailId,
         EstimatedHour: estimatedHour,
@@ -753,6 +757,10 @@ function updateCheckDetail() {
     var score = $('#checkScore .score').val();
     if (isStrEmptyOrUndefined(score)) {
         score = 0;
+    }
+    if (score != parseInt(score)) {
+        layer.msg('绩效分不合法');
+        return;
     }
     var list = {
         Id: _taskDetailId,
