@@ -29,7 +29,7 @@
                 <div class="tab-pane active in" id="realQuery">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <div class="flexStyle" style="flex: 1;flex-wrap: wrap">
+                            <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
                                 <label class="control-label text-nowrap">选择设备：</label>
                                 <div class="flexStyle">
                                     <select class="ms2 form-control" id="selectCode" style="min-width: 120px"></select>
@@ -51,6 +51,20 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'valList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'valList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'valList')">
+                                            </div>
                                             <div class="table-responsive mailbox-messages">
                                                 <table class="table table-hover table-striped" id="valList"></table>
                                             </div>
@@ -66,6 +80,20 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'insList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'insList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'insList')">
+                                            </div>
                                             <div class="table-responsive mailbox-messages">
                                                 <table class="table table-hover table-striped" id="insList"></table>
                                             </div>
@@ -81,6 +109,20 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'outList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'outList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'outList')">
+                                            </div>
                                             <div class="table-responsive mailbox-messages">
                                                 <table class="table table-hover table-striped" id="outList"></table>
                                             </div>
@@ -128,6 +170,19 @@
                                                 </div>
                                             </div>
                                             <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyValList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyValList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyValList')">
+                                                </div>
                                                 <div class="table-responsive mailbox-messages">
                                                     <table class="table table-hover table-striped" id="historyValList"></table>
                                                 </div>
@@ -143,6 +198,19 @@
                                                 </div>
                                             </div>
                                             <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyInsList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyInsList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyInsList')">
+                                                </div>
                                                 <div class="table-responsive mailbox-messages">
                                                     <table class="table table-hover table-striped" id="historyInsList"></table>
                                                 </div>
@@ -158,6 +226,19 @@
                                                 </div>
                                             </div>
                                             <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyOutList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyOutList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyOutList')">
+                                                </div>
                                                 <div class="table-responsive mailbox-messages">
                                                     <table class="table table-hover table-striped" id="historyOutList"></table>
                                                 </div>
@@ -173,4 +254,5 @@
             </div>
         </div>
     </div>
+    <div class="back-top" id="backTop" title="回到顶部"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>
 </section>

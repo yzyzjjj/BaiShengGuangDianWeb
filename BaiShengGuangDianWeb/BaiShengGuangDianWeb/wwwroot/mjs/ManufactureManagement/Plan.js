@@ -765,6 +765,7 @@ function addPlanTaskTr() {
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle('#planItemList');
+    lastEl.find('.group').trigger('select2:select');
     $('#planItemTable').scrollTop($('#planItemTable')[0].scrollHeight);
 }
 
@@ -1164,6 +1165,7 @@ function addPlanTaskConTr() {
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle('#addPlanTaskList');
+    lastEl.find('.group').trigger('select2:select');
     $('#addPlanTaskTable').scrollTop($('#addPlanTaskTable')[0].scrollHeight);
 }
 

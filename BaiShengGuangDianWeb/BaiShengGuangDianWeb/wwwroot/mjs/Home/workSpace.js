@@ -90,6 +90,20 @@ function pageReady() {
         allowClear: true,
         placeholder: "请选择(可不选)"
     });
+    if (!pcAndroid()) {
+        $(".scanning").addClass("hidden");
+    }
+}
+
+//扫描二维码
+function scanning(el) {
+    new Promise(function (resolve) {
+        showPrintModal(resolve);
+    }).then((result) => {
+        if (result) {
+            $(`#${el}`).val(result.split(",")[2]);
+        }
+    });
 }
 
 var faultData = null;

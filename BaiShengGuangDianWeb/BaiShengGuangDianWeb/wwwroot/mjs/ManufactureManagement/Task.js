@@ -526,6 +526,7 @@ function addTask() {
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
     setTableStyle();
+    lastEl.find('.group').trigger('select2:select');
     $('#configTable').scrollTop($('#configTable')[0].scrollHeight);
 }
 

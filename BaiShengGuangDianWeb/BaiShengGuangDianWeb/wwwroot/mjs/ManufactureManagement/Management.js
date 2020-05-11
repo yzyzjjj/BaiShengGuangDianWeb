@@ -16,8 +16,7 @@ function pageReady() {
     window.onload = () => {
         $("#spTime,#epTime,#startTime,#endTime").removeAttr("readonly");
     }
-    getPlan();
-    getGroup();
+    new Promise(resolve => getPlan(resolve)).then(() => getGroup());
     getState();
     $('#groupSelect').on('select2:select', function () {
         getProcessor();
@@ -217,7 +216,7 @@ function setProcessorSelect(groupId, el) {
 var _isClick = false;
 
 //获取计划号
-function getPlan() {
+function getPlan(resolve) {
     var data = {}
     data.opType = 1025;
     ajaxPost('/Relay/Post', data, function (ret) {
@@ -234,6 +233,7 @@ function getPlan() {
             options += option.format(d.Id, d.Plan, d.TaskId);
         }
         $('#planSelect').append(options);
+        resolve('success');
     });
 }
 
@@ -259,6 +259,7 @@ function getGroup(resolve) {
         if (resolve == null) {
             $('#groupSelect').empty().append(`<option value="0">所有分组</option>${options}`);
             getProcessor();
+            getTaskList();
         } else {
             resolve(options);
         }
@@ -323,6 +324,7 @@ function getState() {
         }
         $('#stateCheck').append(ops);
         setCheckStyle('#stateCheck');
+        $('#stateAll').iCheck('check');
     });
 }
 
@@ -988,10 +990,11 @@ function addTask(id) {
         trEl.after(tr);
         var addTr = trEl.next();
         addTr.find('.ms2').select2();
-        var isCheck = parseInt(addTr.find('.module option:selected').attr('ischeck'));
+        var isCheck = parseInt(addTr.find('.module :selected').attr('ischeck'));
         addTr.find(isCheck ? '.taskName' : '.taskNameTwo').addClass('hidden');
         setNumTotalOrder(addTr, 1);
         $('#taskList .addTask').prop('disabled', true);
+        addTr.find('.group').trigger('select2:select');
     });
 }
 

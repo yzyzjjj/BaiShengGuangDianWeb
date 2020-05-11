@@ -60,7 +60,7 @@ function getProcessor() {
         var options = '';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
-            options += option.format(d.ProcessorId, d.Processor, d.Account);
+            options += option.format(d.Id, d.Processor, d.Account);
         }
         $('#processorSelect').append(options);
     });

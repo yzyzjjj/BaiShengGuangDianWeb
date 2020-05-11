@@ -10,6 +10,31 @@
         $('#tableChart').off('resize');
     });
     $('#historyPage').one('click', () => getHistoryScript());
+    $(window).on('scroll', () => $(document).scrollTop() > 900 ? $("#backTop").fadeIn() : $("#backTop").fadeOut());
+    $("#backTop").on('click', () => {
+        $("html,body").stop().animate({
+            scrollTop: 0
+        });
+    });
+}
+
+var _dataTableData = {};
+//自定义datatables搜索
+function dataTableSearch(type) {
+    var table = _dataTableData[type];
+    var parent = $(this).parent();
+    var val = parent.find('.val').val().trim();
+    table.columns([0, 1, 2, 3]).search('').draw();
+    if (!isStrEmptyOrUndefined(val)) {
+        var sym = parent.find('.sym').val();
+        if (sym == 0) {
+            val = `^${val}$`;
+        } else if (sym == 1) {
+            val = `^(?!${val}$).+$`;
+        }
+        var colText = parent.find('.thText').val();
+        table.columns(colText).search(val, true, false).draw();
+    }
 }
 
 var _codeData = null;
@@ -27,6 +52,7 @@ function getDevice() {
         }
         _codeData = {};
         var list = ret.datas;
+        list.sort((a, b) => a.Code - b.Code);
         var op = '<option value="{0}" script="{1}">{2}</option>';
         var ops = '';
         for (var i = 0; i < list.length; i++) {
@@ -68,6 +94,24 @@ function getCodeDetail() {
     });
 }
 
+var _tablesConfig = {
+    dom: '<"pull-left"l><"pull-right hidden"f>rt<"col-sm-0"i><"col-sm-12"p>',
+    "pagingType": "full",
+    "destroy": true,
+    "paging": true,
+    "deferRender": false,
+    "bLengthChange": false,
+    "sort": true,
+    "info": false,
+    "searching": true,
+    "autoWidth": true,
+    "language": oLanguage,
+    "columns": [
+        { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
+        { "data": "VariableName", "title": "名称" },
+        { "data": "PointerAddress", "title": "地址" }
+    ]
+};
 //获取脚本值
 function getScriptValue() {
     var id = $('#selectCode').val();
@@ -91,42 +135,24 @@ function getScriptValue() {
         var insData = rData['ins'] || [];
         var outData = rData['outs'] || [];
         var valueFn = (arr, a, b, c, d) => arr[d.row] || 0;
-        var tablesConfig = {
-            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
-            "pagingType": "full",
-            "destroy": true,
-            "paging": true,
-            "deferRender": false,
-            "bLengthChange": false,
-            "sort": true,
-            "info": false,
-            "searching": true,
-            "autoWidth": true,
-            "language": oLanguage,
-            //"aLengthMenu": [20, 40, 60],
-            "iDisplayLength": 20,
-            "columns": [
-                { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
-                { "data": "VariableName", "title": "名称" },
-                { "data": "PointerAddress", "title": "地址" },
-                { "data": null, "title": "值" }
-            ]
-        };
+        var tablesConfig = $.extend(true, {}, _tablesConfig);
+        tablesConfig.iDisplayLength = 20;
+        tablesConfig.columns[3] = { "data": null, "title": "值" };
         //变量
         var valConfig = $.extend(true, {}, tablesConfig);
         valConfig.data = _codeDetailObj[1];
         valConfig.columns[3].render = valueFn.bind(null, valData);
-        $("#valList").DataTable(valConfig);
+        _dataTableData.valList = $("#valList").DataTable(valConfig);
         //输入
         var insConfig = $.extend(true, {}, tablesConfig);
         insConfig.data = _codeDetailObj[2];
         insConfig.columns[3].render = valueFn.bind(null, insData);
-        $("#insList").DataTable(insConfig);
+        _dataTableData.insList = $("#insList").DataTable(insConfig);
         //输出
         var outConfig = $.extend(true, {}, tablesConfig);
         outConfig.data = _codeDetailObj[3];
         outConfig.columns[3].render = valueFn.bind(null, outData);
-        $("#outList").DataTable(outConfig);
+        _dataTableData.outList = $("#outList").DataTable(outConfig);
     });
 }
 
@@ -163,42 +189,24 @@ function getHistoryScript() {
             _historyData[d.PointerAddress] = d;
         }
         var addVar = (type, d) => `<button type="button" class="btn btn-success btn-xs" onclick="addVar(\'${type}\',${d.PointerAddress})"><i class="fa fa-plus"></i></button>`;
-        var tablesConfig = {
-            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
-            "pagingType": "full",
-            "destroy": true,
-            "paging": true,
-            "deferRender": false,
-            "bLengthChange": false,
-            "sort": true,
-            "info": false,
-            "searching": true,
-            "autoWidth": true,
-            "language": oLanguage,
-            //"aLengthMenu": [20, 40, 60],
-            "iDisplayLength": 10,
-            "columns": [
-                { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
-                { "data": 'VariableName', "title": "名称" },
-                { "data": 'PointerAddress', "title": "地址" },
-                { "data": null, "title": "添加", "orderable": false }
-            ]
-        };
+        var tablesConfig = $.extend(true, {}, _tablesConfig);
+        tablesConfig.iDisplayLength = 10;
+        tablesConfig.columns[3] = { "data": null, "title": "添加", "orderable": false };
         //变量
         var valConfig = $.extend(true, {}, tablesConfig);
         valConfig.data = scriptData[1];
         valConfig.columns[3].render = addVar.bind(null, 'vals');
-        $("#historyValList").DataTable(valConfig);
+        _dataTableData.historyValList = $("#historyValList").DataTable(valConfig);
         //输入
         var insConfig = $.extend(true, {}, tablesConfig);
         insConfig.data = scriptData[2];
         insConfig.columns[3].render = addVar.bind(null, 'ins');
-        $("#historyInsList").DataTable(insConfig);
+        _dataTableData.historyInsList = $("#historyInsList").DataTable(insConfig);
         //输出
         var outConfig = $.extend(true, {}, tablesConfig);
         outConfig.data = scriptData[3];
         outConfig.columns[3].render = addVar.bind(null, 'outs');
-        $("#historyOutList").DataTable(outConfig);
+        _dataTableData.historyOutList = $("#historyOutList").DataTable(outConfig);
     });
 }
 
@@ -250,7 +258,7 @@ function getHistoryData() {
         var xAxis = [];
         var yData = {};
         for (key in rData) {
-            xAxis.push(key);
+            xAxis.push(key.replace(' ', '\n'));
             var v = rData[key];
             $.each(resData.vals, (index, item) => {
                 yData[item] ? yData[item].push(v.vals[index]) : yData[item] = [v.vals[index]];
@@ -297,7 +305,8 @@ function getHistoryData() {
                 dataZoom: [{
                     type: "slider",
                     start: 0,
-                    end: 20
+                    end: 20,
+                    bottom: 0
                 },
                 {
                     type: "inside",
@@ -305,7 +314,7 @@ function getHistoryData() {
                     end: 20
                 }],
                 toolbox: {
-                    top: 18,
+                    top: 20,
                     left: "center",
                     feature: {
                         dataZoom: {
@@ -321,7 +330,7 @@ function getHistoryData() {
             var begin = new Date();
             return () => {
                 var current = new Date();
-                if (current - begin >= 500) {
+                if (current - begin >= 200) {
                     for (var chart in _tableType) {
                         echarts.init($(`#${chart}_chart`)[0]).resize();
                     }
@@ -337,7 +346,20 @@ var _tableType = {};
 var _flag = 0;
 //历史数据添加变量
 function addVar(type, res) {
-    var tableCon = `<div style="overflow: auto;max-height:360px">
+    var tableCon = `<div class="flexStyle box-header" style="justify-content: flex-end">
+                        <select class="form-control thText" style="max-width:80px" onchange="searchTr.call(this,\'{0}\',\'{1}\')">
+                            <option value="num">序号</option>
+                            <option value="name">名称</option>
+                            <option value="res">地址</option>
+                        </select>
+                        <select class="form-control sym" style="max-width:100px" onchange="searchTr.call(this,\'{0}\',\'{1}\')">
+                            <option value="0">等于</option>
+                            <option value="1">不等于</option>
+                            <option value="2">包含</option>
+                        </select>
+                        <input type="text" class="form-control val" placeholder="搜索" style="max-width:150px" oninput="searchTr.call(this,\'{0}\',\'{1}\')">
+                    </div>
+                    <div style="overflow: auto;max-height:300px">
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
@@ -350,7 +372,7 @@ function addVar(type, res) {
                             <tbody id="{0}_{1}_tbody"></tbody>
                         </table>
                     </div>`;
-    var tBodyTr = '<tr><td class="num">1</td><td>{0}</td><td>{1}</td><td><button type="button" class="btn btn-danger btn-xs" onclick="delVarTr.call(this,{1},\'{2}\',\'{3}\')"><i class="fa fa-minus"></i></button></td></tr>';
+    var tBodyTr = '<tr><td class="num">1</td><td class="name">{0}</td><td class="res">{1}</td><td><button type="button" class="btn btn-danger btn-xs" onclick="delVarTr.call(this,{1},\'{2}\',\'{3}\')"><i class="fa fa-minus"></i></button></td></tr>';
     var table;
     var tableType = $('#chartTypeSelect').val();
     var d = _historyData[res];
@@ -413,6 +435,36 @@ function addVar(type, res) {
                 layer.msg('目前未存在相关表');
             }
             break;
+    }
+}
+
+//表格tr搜索
+function searchTr(table, type) {
+    var parent = $(this).parent();
+    var val = parent.find('.val').val().trim();
+    var trs = $(`#${table}_${type}_tbody tr`);
+    if (isStrEmptyOrUndefined(val)) {
+        trs.removeClass('hidden');
+    } else {
+        var fn = new Function();
+        var sym = parent.find('.sym').val();
+        switch (sym) {
+            case '0':
+                fn = (a, b) => a == b;
+                break;
+            case '1':
+                fn = (a, b) => a != b;
+                break;
+            case '2':
+                fn = (a, b) => a.indexOf(b) != -1;
+                break;
+        }
+        var th = parent.find('.thText').val();
+        for (var i = 0, len = trs.length; i < len; i++) {
+            var tr = trs.eq(i);
+            var tdText = tr.find(`.${th}`).text();
+            fn(tdText, val) ? tr.removeClass('hidden') : tr.addClass('hidden');
+        }
     }
 }
 

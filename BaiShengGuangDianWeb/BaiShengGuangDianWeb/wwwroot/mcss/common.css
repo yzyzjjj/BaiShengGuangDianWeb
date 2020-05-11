@@ -325,3 +325,27 @@ select, .pointer {
 .span-paddright {
     padding-right: 20px;
 }
+
+.back-top {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: #909090;
+    background: #fff;
+    border: 1px solid #f1f1f1;
+    box-shadow: 0 0 5px rgba(0,0,0,.5);
+    position: fixed;
+    bottom: 80px;
+    right: 50px;
+    cursor: pointer;
+    display: none;
+    text-align: center;
+    padding: 12px;
+    font-size: 20px;
+}
+    .back-top:active {
+        transform: translateY(-6px);
+        transition: all .1s ease-out;
+        background: #d6d6d6;
+        border: inherit;
+    }
