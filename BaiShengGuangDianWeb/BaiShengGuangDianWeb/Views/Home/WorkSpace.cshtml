@@ -38,7 +38,7 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label" for="flowCard">流程卡号：</label>
-                        <div style="display: flex; align-items: center">
+                        <div class="flexStyle">
                             <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('flowCard')"></span>
                             <input type="search" class="form-control" id="flowCard" value="" autofocus autocomplete="off" placeholder="请输入流程卡号" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
                             <button type="button" class="btn btn-primary" onclick="queryFlowCard()" id="queryFlowCardBtn" style="margin-left: 3px">查询</button>
@@ -237,7 +237,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="control-label">流程卡号：</label>
-                        <div style="display: flex; align-items: center">
+                        <div class="flexStyle">
                             <span class="iconfont icon-saoyisao scanning" style="font-size:30px;cursor:pointer" onclick="scanning('rpFlowCard')"></span>
                             <input type="tel" class="form-control" id="rpFlowCard" placeholder="请输入流程卡号" value="" autocomplete="off" onfocusin="focusIn($(this))" oninput="value=value.replace(/[^\d]/g,'')" maxlength="20" style="flex-basis: 140px">
                             <button type="button" class="btn btn-primary" onclick="queryRpFlowCard()" style="margin-left: 3px">查询</button>

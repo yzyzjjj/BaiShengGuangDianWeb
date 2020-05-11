@@ -1,9 +1,44 @@
 ﻿$(function () {
+    if (!pcAndroid()) {
+        $("#scanning").addClass("hidden");
+        $('.glyphicon-user').css({
+            right: 0,
+            top: 0
+        });
+    }
     $('input').iCheck({
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
         increaseArea: '20%' // optional
     });
+    var ajaxFn = ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var rData = ret.datas;
+        var lastUrl = GetCookie(lastLocation);
+        if (!isStrEmptyOrUndefined(lastUrl)) {
+            DelCookie(lastLocation);
+            window.location.href = lastUrl;
+            return;
+        }
+        var first = indexUrl;
+        var find = false;
+        var permissionPageTypes = ['工作台', '维修管理', '系统管理', '设备管理', '设备点检', '流程卡管理', '工艺管理', '生产管理', '计划管理', '物料管理', '6s检查', '数据统计', '权限管理'];
+        for (var i = 0; i < permissionPageTypes.length; i++) {
+            if (find) break;
+            for (var j = 0; j < rData.length; j++) {
+                if (find) break;
+                var d = rData[j];
+                if (d.label == permissionPageTypes[i]) {
+                    first = d.url;
+                    find = true;
+                }
+            }
+        }
+        window.location.href = first;
+    };
     $("#loginBtn").click(function () {
         var account = $("#account").val();
         if (isStrEmptyOrUndefined(account)) {
@@ -29,35 +64,7 @@
             data.rememberMe = rememberMe;
             url = '/Account/Login';
         }
-        ajaxPost(url, data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                var rData = ret.datas;
-                var lastUrl = GetCookie(lastLocation);
-                if (!isStrEmptyOrUndefined(lastUrl)) {
-                    DelCookie(lastLocation);
-                    window.location.href = lastUrl;
-                    return;
-                }
-                var first = indexUrl;
-                var find = false;
-                var permissionPageTypes = ['工作台', '维修管理', '系统管理', '设备管理', '设备点检', '流程卡管理', '工艺管理', '生产管理', '计划管理', '物料管理', '6s检查', '数据统计','权限管理'];
-                for (var i = 0; i < permissionPageTypes.length; i++) {
-                    if (find) break;
-                    for (var j = 0; j < rData.length; j++) {
-                        if (find) break;
-                        var d = rData[j];
-                        if (d.label == permissionPageTypes[i]) {
-                            first = d.url;
-                            find = true;
-                        }
-                    }
-                }
-                window.location.href = first;
-            });
+        ajaxPost(url, data, ajaxFn);
     });
 
     var acc = getQueryString("acc");
@@ -91,5 +98,14 @@
     });
     $('#account').on('input', function () {
         $(this).trigger('blur').trigger('focus');
+    });
+    $('#scanning').on('click', () => {
+        new Promise(resolve => {
+            showPrintModal(resolve);
+        }).then(result => {
+            if (result) {
+                ajaxPost('/Account/NumberLogin', { number: result.slice(0, -2) }, ajaxFn);
+            }
+        });
     });
 });

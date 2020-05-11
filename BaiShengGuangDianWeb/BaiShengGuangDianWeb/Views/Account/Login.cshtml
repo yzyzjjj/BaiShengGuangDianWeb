@@ -18,6 +18,7 @@
     <link href="~/lib/AdminLTE-2.3.11/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/lib/AdminLTE-2.3.11/dist/css/AdminLTE.min.css" rel="stylesheet" />
     <link href="~/lib/AdminLTE-2.3.11/plugins/iCheck/square/blue.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/mfont/iconfont.css" />
 </head>
 <body class="hold-transition login-page">
     <div class="login-box">
@@ -28,8 +29,13 @@
             <p class="login-box-msg">登录</p>
             <form>
                 <div class="form-group has-feedback">
-                    <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" autocomplete="off" type="text" style="ime-mode:disabled" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["n"]" />
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
+                    <div style="display: flex; align-items: center">
+                        <div style="flex: 1">
+                            <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" autocomplete="off" type="text" style="ime-mode: disabled" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["n"]" />
+                            <span class="glyphicon glyphicon-user form-control-feedback" style="right: 30px;top:4px"></span>
+                        </div>
+                        <span class="iconfont icon-saoyisao" style="font-size: 30px; cursor: pointer" id="scanning"></span>
+                    </div>
                     <p id="accountTip" style="color: red" class="adt"></p>
                 </div>
                 <div class="form-group has-feedback">
@@ -50,6 +56,7 @@
             <p class="text-center">忘记密码请联系管理员</p>
         </div>
     </div>
+    <section class="content"></section>
     <script src="~/lib/AdminLTE-2.3.11/plugins/jquery/jquery-2.2.3.min.js"></script>
     <script src="~/lib/AdminLTE-2.3.11/bootstrap/js/bootstrap.min.js"></script>
     <script src="~/lib/AdminLTE-2.3.11/plugins/iCheck/icheck.min.js"></script>
@@ -57,6 +64,7 @@
     @*<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>*@
     <script src="~/lib/utils/md5.min.js"></script>
     <script src="~/lib/utils/base64.min.js"></script>
+    <script src="~/lib/qrcode/qrcode.min.js"></script>
     <environment include="Development">
         <script src="~/lib/layer/layer.js"></script>
         <script src="~/lib/utils/util.js"></script>
