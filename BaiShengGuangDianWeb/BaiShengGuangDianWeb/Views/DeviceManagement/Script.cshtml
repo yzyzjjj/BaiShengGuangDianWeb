@@ -138,6 +138,12 @@
                         <input class="form-control" id="addScriptVersionName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="adt label-danger hidden" id="addScriptVersionNameTip"></label>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">脚本文件：</label>
+                        <div id="addFileBox">
+                            <input id="addFile" parent="addFileBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -167,6 +173,13 @@
                         <label class="control-label" for="updateScriptVersionName"><span class="text-red">* </span>脚本名称：</label>
                         <input class="form-control" id="updateScriptVersionName" onfocusin="focusIn($(this))" maxlength="20">
                         <label class="label-danger hidden" id="updateScriptVersionNameTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-nowrap">脚本文件：</label>
+                        <div id="updateFileBox">
+                            <input id="updateFile" parent="updateFileBox" type="file" name="filename[]" onchange="inputChange($(this), 'col-sm-9')">
+                            <input id="oldUpdateFile" class="hidden">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

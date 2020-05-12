@@ -78,19 +78,25 @@ function getProcessor(isFirst) {
 
 //获取检验任务
 function getCheckTask() {
-    var account;
+    var account,gId;
     if (_have404) {
         account = $('#processorSelect').val();
         if (isStrEmptyOrUndefined(account)) {
             layer.msg('请选择操作员');
             return;
         }
+        gId = $('#groupSelect').val() || 0;
     } else {
         account = _admin;
+        gId = 0;
+    }
+    _taskData = {
+        Account: account,
+        GId: gId
     }
     var data = {}
     data.opType = 1012;
-    data.opData = JSON.stringify({ account });
+    data.opData = JSON.stringify({ account, gId });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -98,10 +104,7 @@ function getCheckTask() {
         }
         $('#startBtn,#pauseBtn,.content').removeClass('hidden');
         var rData = ret.datas[0];
-        _taskData = {
-            TaskId: rData.Id,
-            Account: account
-        }
+        _taskData.TaskId = rData.Id;
         var state = rData.State;
         $('#startBtn').prop('disabled', !(state == 2 || state == 7));
         $('#pauseBtn').prop('disabled', state != 8);
@@ -329,7 +332,8 @@ function getCheckList(num, el) {
     data.opType = opType;
     data.opData = JSON.stringify({
         account: _admin,
-        limit: 10
+        limit: 10,
+        gId: _taskData.GId
     });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {

@@ -87,7 +87,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Upload
                         formFile.CopyTo(stream);
                         stream.Flush();
                     }
-                    var result = new ModelBase.Models.Result.FileResult { data = fileName };
+                    var result = new ModelBase.Models.Result.FileResult { data = newFileName };
                     return result;
                 }
             }

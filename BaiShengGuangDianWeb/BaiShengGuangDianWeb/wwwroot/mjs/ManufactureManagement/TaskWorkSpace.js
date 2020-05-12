@@ -69,6 +69,10 @@ function getProcessor() {
 //任务绩效表
 function getScoreList() {
     var groupId = $('#groupSelect').val();
+    if (isStrEmptyOrUndefined(groupId)) {
+        layer.msg('请选择工作组');
+        return;
+    }
     var data = {}
     data.opType = 1003;
     data.opData = JSON.stringify({
@@ -93,21 +97,23 @@ function getScoreList() {
 var _taskData = null;
 //获取任务
 function getAccountTask() {
-    _taskData = {};
     var account = $('#processorSelect option:selected').attr('account');
     if (isStrEmptyOrUndefined(account)) {
         layer.msg('请选择操作员');
         return;
     }
-    _taskData.Account = account;
+    var gId = $('#groupSelect').val() || 0;
+    _taskData = {
+        Account: account,
+        GId: gId
+    };
     var data = {}
     data.opType = 1000;
-    data.opData = JSON.stringify({ account });
+    data.opData = JSON.stringify({ gId, account });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
-            $('#taskDetail').addClass('hidden');
-            $('#finishList').addClass('hidden');
+            $('#taskDetail,#finishList').addClass('hidden');
             return;
         }
         var d = ret.datas[0];
@@ -173,16 +179,13 @@ function getUnFinishedList(isFinish, el, limit) {
     }
     var data = {}
     data.opType = opType;
-    data.opData = JSON.stringify({ account, limit });
+    data.opData = JSON.stringify({ account, gId: _taskData.GId, limit });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
         var rData = ret.datas;
-        var order = function (a, b, c, d) {
-            return d.row + 1;
-        }
         $(el).DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,
@@ -194,7 +197,7 @@ function getUnFinishedList(isFinish, el, limit) {
             "aLengthMenu": [10, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 10, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "序号", "render": order },
+                { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
                 { "data": "Item", "title": "任务名称" },
                 { "data": "Plan", "title": "所属计划号" },
                 { "data": "EstimatedTime", "title": "预计用时" },

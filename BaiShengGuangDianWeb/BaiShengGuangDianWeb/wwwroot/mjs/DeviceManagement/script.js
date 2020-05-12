@@ -10,9 +10,9 @@ function pageReady() {
     _permissionList[242] = { uIds: [] };
     _permissionList[243] = { uIds: [] };
     _permissionList[203] = { uIds: ['showAddModel'] };
+    _permissionList[204] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
-    $(".ads").css("width", "100%");
-    $(".ads").select2();
+    $(".ads").css('width', '100%').select2();
     getDataTypeList();
     getDeviceModelList();
     $("#fScriptVersion").change(function () {
@@ -185,31 +185,25 @@ function getScriptVersionAllList(type) {
             var op = function (data, type, row) {
                 var html = '<div class="btn-group">{0}{1}</div>';
                 var changeBtn =
-                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\')">修改</button>'
-                        .format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName));
+                    '<button type="button" class="btn btn-primary mbtn-group" onclick="showUpdateScriptVersionModel({0}, \'{1}\', \'{2}\',\'{3}\')">修改</button>'
+                        .format(data.Id, escape(data.DeviceModelId), escape(data.ScriptName), escape(data.ScriptFile));
                 var delBtn =
                     '<button type="button" class="btn btn-danger mbtn-group" onclick="deleteScriptVersion({0}, \'{1}\')">删除</button>'
                         .format(data.Id, escape(data.ScriptName));
                 return html.format(per237 ? changeBtn : "", per238 ? delBtn : "");
             };
-            var columns = per237 || per238
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "ScriptName", "title": "脚本名称" },
-                    { "data": "ValueNumber", "title": "变量数" },
-                    { "data": "InputNumber", "title": "输入口数" },
-                    { "data": "OutputNumber", "title": "输出口数" },
-                    { "data": null, "title": "操作", "render": op, "orderable": false }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "ScriptName", "title": "脚本名称" },
-                    { "data": "ValueNumber", "title": "变量数" },
-                    { "data": "InputNumber", "title": "输入口数" },
-                    { "data": "OutputNumber", "title": "输出口数" }
-                ];
+            var columns = [
+                { "data": null, "title": "序号", "render": order },
+                { "data": "Id", "title": "Id", "bVisible": false },
+                { "data": "ScriptName", "title": "脚本名称" },
+                { "data": "ValueNumber", "title": "变量数" },
+                { "data": "InputNumber", "title": "输入口数" },
+                { "data": "OutputNumber", "title": "输出口数" },
+                { "data": 'ScriptFile', "title": "脚本文件", "render": d => d ? `<span style="vertical-align:middle">${d.slice(d.indexOf('_') + 1)}</span><button type="button" class="btn btn-success btn-xs" onclick="fileDownload(\'${escape(d)}\')" title="下载脚本文件"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button>` : '' }
+            ];
+            if (per237 || per238) {
+                columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
+            }
             $("#scriptVersionList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -227,44 +221,79 @@ function getScriptVersionAllList(type) {
         });
 }
 
+//下载文件
+function fileDownload(fileName) {
+    fileName = unescape(fileName);
+    var data = {
+        type: fileEnum.Script,
+        files: JSON.stringify([fileName])
+    };
+    ajaxPost("/Upload/Path", data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        downLoad(ret.data[0].path, fileName.slice(fileName.indexOf('_') + 1));
+    });
+}
+
 function showManageModel() {
     getScriptVersionAllList(1);
 }
 
+var _addFirmwareUpload = null;
 function showAddScriptVersionModel() {
+    if (_addFirmwareUpload == null) {
+        _addFirmwareUpload = initFileInput("addFile", fileEnum.Script);
+    }
+    $("#addFile").fileinput('clear');
+    $('#addFileBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择.npc文件...');
     hideClassTip("adt");
+    $('#addScriptVersionDeviceModel').val('').trigger('change');
+    $('#addScriptVersionName').val('');
     $("#addScriptVersionModel").modal("show");
 }
 
 function addScriptVersion() {
     var addScriptVersionDeviceModel = $("#addScriptVersionDeviceModel").val();
     var addScriptVersionName = $("#addScriptVersionName").val().trim();
-    if (isStrEmptyOrUndefined(addScriptVersionName)) {
-        showTip($("#addScriptVersionNameTip"), "脚本名称不能为空");
-        return;
-    }
+    var addFile = $('#addFile').val();
     var addScriptVersionDeviceModelList = addScriptVersionDeviceModel == null ? "" : addScriptVersionDeviceModel.join(",");
     if (addScriptVersionDeviceModelList.length == 0) {
         layer.msg("请选择设备型号");
         return;
     }
-    var doSth = function () {
-        $("#addScriptVersionModel").modal("hide");
-        var data = {}
-        data.opType = 114;
-        data.opData = JSON.stringify({
-            //类型名称
-            DeviceModelId: addScriptVersionDeviceModelList,
-            //描述
-            ScriptName: addScriptVersionName,
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getScriptVersionAllList(0);
-                }
+    if (isStrEmptyOrUndefined(addScriptVersionName)) {
+        showTip($("#addScriptVersionNameTip"), "脚本名称不能为空");
+        return;
+    }
+    if (isStrEmptyOrUndefined(addFile)) {
+        layer.msg('请选择.npc文件');
+        return;
+    }
+    fileCallBack[fileEnum.Script] = function (fileRet) {
+        if (fileRet.errno == 0) {
+            $("#addScriptVersionModel").modal("hide");
+            var data = {}
+            data.opType = 114;
+            data.opData = JSON.stringify({
+                DeviceModelId: addScriptVersionDeviceModelList,
+                ScriptName: addScriptVersionName,
+                ScriptFile: fileRet.data
             });
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        getScriptVersionAllList(0);
+                    }
+                });
+        } else {
+            layer.msg(fileRet.errmsg);
+        }
+    };
+    var doSth = function () {
+        $('#addFile').fileinput("upload");
     }
     showConfirm("添加", doSth);
 }
@@ -287,17 +316,23 @@ function deleteScriptVersion(id, name) {
     showConfirm("删除脚本：" + unescape(name), doSth);
 }
 
-function showUpdateScriptVersionModel(id, deviceModel, name) {
+var _updateFirmwareUpload = null;
+function showUpdateScriptVersionModel(id, deviceModel, name, scriptFile) {
     deviceModel = unescape(deviceModel);
     name = unescape(name);
+    scriptFile = unescape(scriptFile);
     $("#updateId").html(id);
     hideClassTip("adt");
     var deviceModelList = [];
     if (!isStrEmptyOrUndefined(deviceModel))
         deviceModelList = deviceModel.split(",").map(Number);
-
     $("#updateScriptVersionDeviceModel").val(deviceModelList).trigger("change");
     $("#updateScriptVersionName").val(name);
+    if (_updateFirmwareUpload == null)
+        _updateFirmwareUpload = initFileInput("updateFile", fileEnum.Script);
+    $("#updateFile").fileinput('clear');
+    $('#updateFileBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择.npc文件...').val(scriptFile.slice(scriptFile.indexOf('_') + 1));
+    $('#oldUpdateFile').val(scriptFile);
     $("#updateScriptVersionModel").modal("show");
 }
 
@@ -313,17 +348,15 @@ function updateScriptVersion() {
         layer.msg("请选择设备型号");
         return;
     }
-    var id = parseInt($("#updateId").html());
-    var doSth = function () {
+    var fn = name => {
         $("#updateScriptVersionModel").modal("hide");
         var data = {}
         data.opType = 115;
         data.opData = JSON.stringify({
-            id: id,
-            //类型名称
+            id: $("#updateId").text() >> 0,
             DeviceModelId: updateScriptVersionDeviceModelList,
-            //描述
             ScriptName: updateScriptVersionName,
+            ScriptFile: name
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
@@ -332,6 +365,14 @@ function updateScriptVersion() {
                     getScriptVersionAllList(0);
                 }
             });
+    }
+    var doSth;
+    var upFile = $('#updateFile').val();
+    if (isStrEmptyOrUndefined(upFile)) {
+        doSth = () => fn($('#oldUpdateFile').val());
+    } else {
+        fileCallBack[fileEnum.Script] = fileRet => fileRet.errno == 0 ? fn(fileRet.data) : layer.msg(fileRet.errmsg);
+        doSth = () => $('#updateFile').fileinput("upload");
     }
     showConfirm("修改", doSth);
 }
@@ -424,112 +465,73 @@ function getScriptVersionDetailList() {
     var data = {}
     data.opType = 106;
     data.opData = JSON.stringify({
-        //设备类型
         id: sScrId
     });
-    $("#valList").empty();
-    $("#inList").empty();
-    $("#outList").empty();
+    $("#valList,#inList,#outList").empty();
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        function getData(results, type) {
-            var res = new Array();
-            for (var i = 0; i < results.length; i++) {
-                var result = results[i];
-                if (result.VariableTypeId == type)
-                    res.push(result);
-            }
-            return res;
+        var rData = ret.datas;
+        var scriptData = { 1: [], 2: [], 3: [] };
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            scriptData[d.VariableTypeId].push(d);
         }
-
-        var data1 = getData(ret.datas, 1);
-        var o1 = 0;
-        var order1 = function (data, type, row) {
-            return ++o1;
-        }
-        $("#valList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                "pagingType": "full",
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "info": false,
-                "searching": true,
-                "autoWidth": true,
-                "language": oLanguage,
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数  
-                "data": data1,
-                "columns": [
-                    { "data": null, "title": "序号", "render": order1 },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false }
-                ]
-            });
-        var data2 = getData(ret.datas, 2);
-        var o2 = 0;
-        var order2 = function (data, type, row) {
-            return ++o2;
-        }
-        $("#inList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                "pagingType": "full",
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "info": false,
-                "searching": true,
-                "autoWidth": true,
-                "language": oLanguage,
-                "data": data2,
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order2 },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false }
-                ]
-            });
-        var data3 = getData(ret.datas, 3);
-        var o3 = 0;
-        var order3 = function (data, type, row) {
-            return ++o3;
-        }
-        $("#outList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                "pagingType": "full",
-                "destroy": true,
-                "paging": true,
-                "deferRender": false,
-                "bLengthChange": false,
-                "info": false,
-                "searching": true,
-                "autoWidth": true,
-                "language": oLanguage,
-                "data": data3,
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数  
-                "columns": [
-                    { "data": null, "title": "序号", "render": order3 },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "VariableName", "title": "名称" },
-                    { "data": "PointerAddress", "title": "地址" },
-                    { "data": "Remark", "title": "备注", "bVisible": false }
-                ]
-            });
+        var per204 = _permissionList[204].have;
+        var tablesConfig = {
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
+            "pagingType": "full",
+            "destroy": true,
+            "paging": true,
+            "deferRender": false,
+            "bLengthChange": false,
+            "info": false,
+            "searching": true,
+            "autoWidth": true,
+            "language": oLanguage,
+            "iDisplayLength": 20, //默认显示的记录数  
+            "columns": [
+                { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
+                { "data": "Id", "title": "Id", "bVisible": false },
+                { "data": "VariableName", "title": "名称" },
+                { "data": "PointerAddress", "title": "地址" },
+                { "data": "Remark", "title": "备注", "bVisible": false },
+                { "data": null, "title": "删除", "render": d => `<button type="button" class="btn btn-danger btn-xs" onclick="delVar(${d.Id},\'${escape(d.VariableName)}\')">删除</button>`, "orderable": false, "bVisible": per204 }
+            ]
+        };
+        //变量
+        var valConfig = $.extend(true, {}, tablesConfig);
+        valConfig.data = scriptData[1];
+        $("#valList").DataTable(valConfig);
+        //输入
+        var insConfig = $.extend(true, {}, tablesConfig);
+        insConfig.data = scriptData[2];
+        $("#inList").DataTable(insConfig);
+        //输出
+        var outConfig = $.extend(true, {}, tablesConfig);
+        outConfig.data = scriptData[2];
+        $("#outList").DataTable(outConfig);
     });
+}
+
+//删除变量
+function delVar(id, name) {
+    name = unescape(name);
+    var doSth = function () {
+        var data = {}
+        data.opType = 105;
+        data.opData = JSON.stringify({ id });
+        ajaxPost("/Relay/Post", data,
+            function (ret) {
+                layer.msg(ret.errmsg);
+                if (ret.errno == 0) {
+                    getScriptVersionDetailList();
+                }
+            });
+    }
+    showConfirm(`删除：${name}`, doSth);
 }
 
 
@@ -979,7 +981,7 @@ function showUsuallyVariableTypeModel() {
 
                 return html.format(per242 ? changeBtn : '', per243 ? delBtn : '');
             };
-            var order = function (a, b, c,d) {
+            var order = function (a, b, c, d) {
                 return ++d.row;
             }
             var statistic = function (data, type, full, meta) {

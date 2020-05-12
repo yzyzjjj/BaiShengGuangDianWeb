@@ -79,6 +79,8 @@ var fileEnum = {
     Manufacture: 6,
     // 故障上报
     FaultDevice: 7,
+    // 脚本文件
+    Script:8
 }
 
 //文件Accept
