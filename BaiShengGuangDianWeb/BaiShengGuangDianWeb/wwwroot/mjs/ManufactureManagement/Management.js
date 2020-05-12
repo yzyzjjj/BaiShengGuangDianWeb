@@ -12,7 +12,7 @@ function pageReady() {
         $('.updateTaskDetailBtn').addClass('hidden');
     }
     $('.ms2').select2();
-    $('.table-bordered td').css('border', '1px solid');
+    $('.table-bordered td').css('border', '1px solid black');
     window.onload = () => {
         $("#spTime,#epTime,#startTime,#endTime").removeAttr("readonly");
     }
@@ -206,7 +206,7 @@ function setProcessorSelect(groupId, el) {
     for (var i = 0, len = _processor.length; i < len; i++) {
         var d = _processor[i];
         if (groupId == d.GroupId) {
-            ops += op.format(d.ProcessorId, d.Processor);
+            ops += op.format(d.Id, d.Processor);
         }
     }
     el.append(ops);
@@ -459,7 +459,7 @@ function getTaskList() {
                     <td class="upTask">${state == 0 && i != 0 && per409 ? '<button type="button" class="btn btn-primary btn-sm" onclick="upTask({0},{1},{2},{3})">上移</button>'.format(fromOrder, rData[i - 1].TotalOrder, id, rData[i - 1].Id) : ''}</td>
                     <td>${d.EstimatedTime}</td>
                     <td>${d.Score}</td>
-                    <td>${noShowSecond(d.ActualStartTime)}</td>
+                    <td>${noShowSecond(d.FirstStartTime)}</td>
                     <td>${d.ActualTime}</td>
                     <td>${d.ActualScore}</td>
                     <td><button type="button" class="btn btn-info btn-sm" onclick="showDetailModal(${id})">详情</button></td>
@@ -509,7 +509,7 @@ function showDetailModal(tId) {
             $('#checkAssignor').text(d.Assignor);
             $('#checkEstimatedTime .textOn').text(d.EstimatedTime);
             $('#checkScore .textOn').text(d.Score);
-            $('#checkActualStartTime').text(noShowSecond(d.ActualStartTime));
+            $('#checkActualStartTime').text(noShowSecond(d.FirstStartTime));
             $('#checkActualEndTime').text(noShowSecond(d.ActualEndTime));
             $('#checkActualTime .textOn').text(d.ActualTime);
             $('#checkActualScore .textOn').text(d.ActualScore);
@@ -609,7 +609,7 @@ function showDetailModal(tId) {
             $('#taskRedo').text(d.IsRedo ? '已返工' : '未返工');
             $('#taskEstimatedTime .textOn').text(d.EstimatedTime);
             $('#taskScore .textOn').text(d.Score);
-            $('#taskActualStartTime').text(noShowSecond(d.ActualStartTime));
+            $('#taskActualStartTime').text(noShowSecond(d.FirstStartTime));
             $('#taskActualEndTime').text(noShowSecond(d.ActualEndTime));
             $('#taskActualTime .textOn').text(d.ActualTime);
             $('#taskActualScore .textOn').text(d.ActualScore);

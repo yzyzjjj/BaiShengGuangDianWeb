@@ -22,24 +22,21 @@
         <div class="box-body">
             <div class="row">
                 <div class="col-md-9 col-md-push-3">
-                    <div class="form-group flexStyle">
-                        <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
-                            <label class="control-label textOverTop">切换工作组：</label>
-                            <div class="flexStyle" style="flex-basis: 200px">
-                                <select class="ms2 form-control" id="groupSelect" style="flex-basis: 150px"></select>
+                    <div class="box-header with-border">
+                        <div class="form-inline">
+                            <div class="form-group">
+                                <label class="control-label text-nowrap">切换工作组：</label>
+                                <select class="ms2 form-control" id="groupSelect" style="width: 150px"></select>
                             </div>
-                        </div>
-                        <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
-                            <label class="control-label textOverTop">切换操作员：</label>
-                            <div class="flexStyle" style="flex-basis: 200px">
-                                <select class="ms2 form-control" id="processorSelect"></select>
-                                <button type="button" class="btn btn-primary" onclick="getAccountTask()" id="getAccountTaskBtn" style="margin-left: 3px">查询</button>
+                            <div class="form-group">
+                                <label class="control-label text-nowrap">切换操作员：</label>
+                                <select class="ms2 form-control" id="processorSelect" style="width: 120px"></select>
+                                <button type="button" class="btn btn-primary" onclick="getAccountTask()" id="getAccountTaskBtn">查询</button>
                             </div>
                         </div>
                     </div>
                     <div class="form-group hidden" id="taskDetail">
                         <div class="form-group" style="overflow-y: auto">
-                            @*<div style="max-width: 600px;margin: auto">*@
                             <table class="table table-bordered table-responsive" style="margin: 0">
                                 <thead></thead>
                                 <tbody>
@@ -57,7 +54,6 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            @*</div>*@
                         </div>
                         <div class="form-group" style="text-align: center">
                             <button type="button" class="btn btn-info" onclick="getAccountTask()">刷新任务</button>
@@ -107,11 +103,11 @@
                     <div class="form-group" style="overflow-y: auto">
                         <table class="table table-hover table-striped">
                             <thead>
-                            <tr>
-                                <th>名次</th>
-                                <th>姓名</th>
-                                <th>绩效</th>
-                            </tr>
+                                <tr>
+                                    <th>名次</th>
+                                    <th>姓名</th>
+                                    <th>绩效</th>
+                                </tr>
                             </thead>
                             <tbody id="scoreList"></tbody>
                         </table>

@@ -19,21 +19,33 @@
 </section>
 <section class="content hidden">
     <div class="box box-primary">
+        <div class="box-header with-border" id="getAccountCheckTaskBox">
+            <div class="form-inline">
+                <div class="form-group">
+                    <label class="control-label text-nowrap">切换工作组：</label>
+                    <select class="ms2 form-control" id="groupSelect" style="width: 178px"></select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label text-nowrap">切换操作员：</label>
+                        <select class="ms2 form-control" id="processorSelect" style="width: 120px"></select>
+                    <button type="button" class="btn btn-primary" onclick="getCheckTask()">查询</button>
+                </div>
+            </div>
+        </div>
         <div class="box-body">
             <div class="row">
-                <div class="col-md-6" style="text-align: center;padding-bottom:10px">
+                <div class="col-xs-6" style="text-align: left; padding-bottom: 10px">
                     <button type="button" id="getCheckTaskBtn" class="btn btn-info" onclick="getCheckTask()">刷新任务</button>
                     <button type="button" id="startBtn" class="btn btn-primary hidden" onclick="checkTaskHandle(0)">任务开始</button>
                     <button type="button" id="pauseBtn" class="btn btn-warning hidden" onclick="checkTaskHandle(1)">任务暂停</button>
                 </div>
-                <div class="col-md-6" style="text-align: center;padding-bottom:10px">
-                    <button type="button" class="btn btn-primary finish hidden" onclick="checkTaskHandle(2,1)">合格</button>
-                    <button type="button" class="btn btn-primary finish hidden" onclick="checkTaskHandle(2,2)">返工</button>
-                    <button type="button" class="btn btn-primary finish hidden" onclick="checkTaskHandle(2,3)">阻塞</button>
+                <div class="col-xs-6" style="text-align: right; padding-bottom: 10px">
+                    <button type="button" class="btn btn-success finish hidden" onclick="checkTaskHandle(2, 1)">合格</button>
+                    <button type="button" class="btn btn-warning finish hidden" onclick="checkTaskHandle(2, 2)">返工</button>
+                    <button type="button" class="btn btn-danger finish hidden" onclick="checkTaskHandle(2, 3)">阻塞</button>
                 </div>
             </div>
             <div class="form-group" style="overflow-y: auto">
-                @*<div style="max-width: 600px;margin: auto">*@
                 <table class="table table-bordered table-responsive" style="margin: 0">
                     <thead></thead>
                     <tbody>
@@ -69,7 +81,6 @@
                         </tr>
                     </tbody>
                 </table>
-                @*</div>*@
             </div>
             <div class="form-group">
                 <div class="table-responsive mailbox-messages">

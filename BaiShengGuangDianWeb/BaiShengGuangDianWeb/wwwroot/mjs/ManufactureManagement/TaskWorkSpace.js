@@ -199,8 +199,8 @@ function getUnFinishedList(isFinish, el, limit) {
                 { "data": "Plan", "title": "所属计划号" },
                 { "data": "EstimatedTime", "title": "预计用时" },
                 { "data": "Score", "title": "任务绩效" },
-                { "data": "ActualTime", "title": "实际工时", "visible": limit !== 10 },
-                { "data": "ActualScore", "title": "实际绩效", "visible": limit !== 10 }
+                { "data": "ActualTime", "title": "实际工时", "visible": limit !== 10, "sClass": "text-info" },
+                { "data": "ActualScore", "title": "实际绩效", "visible": limit !== 10, "sClass": "text-info" }
             ]
         });
         $('#finishList').removeClass('hidden');

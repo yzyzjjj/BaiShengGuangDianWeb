@@ -838,6 +838,10 @@ function planTaskData(el, isUp) {
             score = parseInt(score);
             desc = tr.find('.desc').val();
             relation = tr.find('.relation').val();
+            if (relation >> 0 == 0 && isCheck) {
+                layer.msg(`序列${i + 1}：检验单需先关联任务`);
+                return 1;
+            }
         } else {
             var v = isEnableEl.val();
             var d = isUp ? _planTaskItem[v] : _reusePlanTaskItem[v];

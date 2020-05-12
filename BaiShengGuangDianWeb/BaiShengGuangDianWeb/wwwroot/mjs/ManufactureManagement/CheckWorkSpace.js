@@ -1,27 +1,96 @@
 ﻿var _admin = getCookieTokenInfo().account;
 var _permissionList = [];
+var _have404 = null;
 function pageReady() {
     _permissionList[400] = { uIds: ['getCheckTaskBtn'] };
     _permissionList[401] = { uIds: ['startBtn'] };
     _permissionList[402] = { uIds: ['pauseBtn'] };
     _permissionList[403] = { uIds: [] };
+    _permissionList[404] = { uIds: ['getAccountCheckTaskBox'] };
     _permissionList = checkPermissionUi(_permissionList);
+    _have404 = _permissionList[404].have;
+    $('.ms2').select2();
     $('.table-bordered td').css('border', '1px solid');
-    getCheckTask();
+    _have404 ? getGroup() : getCheckTask();
     $('#imgOldList').on('click', '.delImg', function () {
         $(this).parents('.imgOption').remove();
         var e = $(this).val();
         _imgNameData.splice(_imgNameData.indexOf(e), 1);
     });
+    $('#groupSelect').on('select2:select', function () {
+        getProcessor(false);
+    });
+}
+
+//获取分组
+function getGroup() {
+    var data = {}
+    data.opType = 1077;
+    data.opData = JSON.stringify({
+        menu: true
+    });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#groupSelect').empty();
+        var list = ret.datas;
+        var option = '<option value = "{0}">{1}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Id, d.Group);
+        }
+        $('#groupSelect').append(options);
+        getProcessor(true);
+    });
+}
+
+//获取操作员
+function getProcessor(isFirst) {
+    var groupId = $('#groupSelect').val();
+    var data = {}
+    data.opType = 1081;
+    data.opData = JSON.stringify({
+        groupId: groupId,
+        menu: true
+    });
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#processorSelect').empty();
+        var list = ret.datas;
+        var option = '<option value="{0}">{1}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Account, d.Processor);
+        }
+        $('#processorSelect').append(options);
+        if (isFirst) {
+            getCheckTask();
+        }
+    });
 }
 
 //获取检验任务
 function getCheckTask() {
+    var account;
+    if (_have404) {
+        account = $('#processorSelect').val();
+        if (isStrEmptyOrUndefined(account)) {
+            layer.msg('请选择操作员');
+            return;
+        }
+    } else {
+        account = _admin;
+    }
     var data = {}
     data.opType = 1012;
-    data.opData = JSON.stringify({
-        account: _admin
-    });
+    data.opData = JSON.stringify({ account });
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -31,7 +100,7 @@ function getCheckTask() {
         var rData = ret.datas[0];
         _taskData = {
             TaskId: rData.Id,
-            Account: _admin
+            Account: account
         }
         var state = rData.State;
         $('#startBtn').prop('disabled', !(state == 2 || state == 7));
