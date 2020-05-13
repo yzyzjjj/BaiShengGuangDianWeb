@@ -264,7 +264,7 @@ function pageReady() {
             stockNumEl.prop('placeholder', '');
         }
         if (v == '采购') {
-            tr.find('.msTag2').select2({
+            tr.find('.ms2').select2({
                 width: "120px",
                 tags: true,
                 createTag: params => {
@@ -275,7 +275,7 @@ function pageReady() {
                 }
             });
         } else {
-            tr.find('.msTag2').select2({
+            tr.find('.ms2').select2({
                 width: "120px"
             });
         }
@@ -402,6 +402,7 @@ function pageReady() {
                             consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                     }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
                 if (consumeSiteArray.length > 0)
                     siteId = consumeSiteArray[0].Id;
                 updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
@@ -451,6 +452,7 @@ function pageReady() {
                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
             }
         }
+        consumeSiteArray = [...new Set(consumeSiteArray)];
         if (consumeSiteArray.length > 0)
             siteId = consumeSiteArray[0].Id;
         updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
@@ -498,6 +500,7 @@ function pageReady() {
                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
             }
         }
+        consumeSiteArray = [...new Set(consumeSiteArray)];
         if (consumeSiteArray.length > 0)
             siteId = consumeSiteArray[0].Id;
         updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
@@ -535,6 +538,7 @@ function pageReady() {
                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
             }
         }
+        consumeSiteArray = [...new Set(consumeSiteArray)];
         if (consumeSiteArray.length > 0)
             siteId = consumeSiteArray[0].Id;
         updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
@@ -562,6 +566,7 @@ function pageReady() {
                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
             }
         }
+        consumeSiteArray = [...new Set(consumeSiteArray)];
         if (consumeSiteArray.length > 0)
             siteId = consumeSiteArray[0].Id;
         updateConsumeSelect(tr.find('.site')[0], siteId, consumeSiteArray, "Site");
@@ -1548,15 +1553,15 @@ function addIncreaseList() {
             </td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
-                <select class="msTag2 form-control code" id="inBh{0}"></select>
+                <select class="ms2 form-control code" id="inBh{0}"></select>
             </td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inLb{0}"></select></div><input class="form-control text-center hidden textOn" id="inLbInput{0}" maxlength="20" style="min-width:120px"></td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inMc{0}"></select></div><input class="form-control text-center hidden textOn" id="inMcInput{0}" maxlength="20" style="min-width:120px"></td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inGys{0}"></select></div><input class="form-control text-center hidden textOn" id="inGysInput{0}" maxlength="20" style="min-width:120px"></td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inGg{0}"></select></div><input class="form-control text-center hidden textOn" id="inGgInput{0}" maxlength="20" style="min-width:120px"></td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inDj{0}"></select></div><input class="form-control text-center zeroNum hidden textOn" id="inDjInput{0}" onkeyup="onInput(this, 8, 2)" onblur="onInputEnd(this)" style="min-width:120px"></td>
-            <td><div class="textIn"><select class="ms2 form-control" id="inWz{0}"></select></div><input class="form-control text-center hidden textOn" id="inWzInput{0}" maxlength="20" style="min-width:120px"></td>
-            <td style="vertical-align: inherit"><label class="control-label textIn" id="inDw{0}"></label><input class="form-control text-center zeroNum hidden textOn" id="inDwInput{0}"  maxlength="4" style="min-width:70px"></td>
+            <td><select class="ms2 form-control" id="inLb{0}"></select></td>
+            <td><select class="ms2 form-control" id="inMc{0}"></select></td>
+            <td><select class="ms2 form-control" id="inGys{0}"></select></td>
+            <td><select class="ms2 form-control" id="inGg{0}"></select></td>
+            <td><select class="ms2 form-control" id="inDj{0}"></select></td>
+            <td><select class="ms2 form-control" id="inWz{0}"></select></td>
+            <td style="vertical-align: inherit"><label class="control-label textIn" id="inDw{0}"></label><input class="form-control text-center hidden textOn" id="inDwInput{0}"  maxlength="4" style="min-width:70px"></td>
             <td style="vertical-align: inherit"><label class="control-label textIn" id="inKc{0}"></label><input class="form-control text-center zeroNum hidden textOn" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" id="inKcInput{0}" style="min-width:70px"></td>
             <td><button class="btn btn-info btn-sm" type="button" id="inDetail{0}" onclick="showDetailModel({0})">详情</button></td>
             <td><input class="form-control text-center stockNum" type="tel" id="inRk{0}" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" style="width:140px;margin:auto"></td>
@@ -1609,20 +1614,26 @@ function addIncreaseList() {
             var id = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             var i, len = _materialList.length;
-            $("#inLb" + xh).val(0).trigger("change");
-            $("#inMc" + xh).val(0).trigger("change");
-            $("#inGys" + xh).val(0).trigger("change");
-            $("#inGg" + xh).val(0).trigger("change");
-            $("#inDj" + xh).val('').trigger("change");
-            $("#inWz" + xh).val('').trigger("change");
+            $(`#inLb${xh}`).val(0).trigger("change");
+            $(`#inMc${xh}`).val(0).trigger("change");
+            $(`#inGys${xh}`).val(0).trigger("change");
+            $(`#inGg${xh}`).val(0).trigger("change");
+            $(`#inDj${xh}`).val('').trigger("change");
+            $(`#inWz${xh}`).val('').trigger("change");
             $(`#inDw${xh}`).html('');
             $(`#inKc${xh}`).html(0);
             var trEl = $(this).parents('tr');
             trEl.find('.textOn').val('');
             $(`#inKcInput${xh},#inDjInput${xh}`).val(0);
-            $(this).find(':selected').data('select2Tag')
-                ? trEl.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden')
-                : trEl.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            if ($(this).find(':selected').data('select2Tag')) {
+                $(`#inMc${xh},#inGys${xh},#inGg${xh},#inDj${xh}`).empty();
+                updateConsumeSelect(`#inWz${xh}`, 0, _consumeSite, "Site");
+                $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
+                trEl.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
+                return;
+            } else {
+                trEl.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            }
             for (i = 0; i < len; i++) {
                 var d = _materialList[i];
                 if (id == d.Id) {
@@ -1728,7 +1739,9 @@ function addIncreaseList() {
             }
             selector = "#inGg" + xh;
             updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
-
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var consumeSiteArray = new Array();
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
@@ -1741,13 +1754,12 @@ function addIncreaseList() {
             if (consumeSiteArray.length > 0)
                 siteId = consumeSiteArray[0].Id;
             updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
-
             //单价
             var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
             price = priceData[0] ? priceData[0].Price : '';
             priceSelect(priceData, `#inDj${xh}`, price);
 
-            $("#inBh" + xh).val(0).trigger("change");
+            $(`#inBh${xh}`).val(0).trigger("change");
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
                 if (d.SpecificationId == specificationId && d.SiteId == siteId && d.Price == price) {
@@ -1797,7 +1809,9 @@ function addIncreaseList() {
             }
             selector = "#inGg" + xh;
             updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
-
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var consumeSiteArray = new Array();
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
@@ -1854,7 +1868,9 @@ function addIncreaseList() {
             }
             selector = "#inGg" + xh;
             updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
-
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var consumeSiteArray = new Array();
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
@@ -1894,9 +1910,12 @@ function addIncreaseList() {
         selector = "#inGg" + xh;
         updateConsumeSelect(selector, specificationId, _consumeSpecification, "Specification", "SupplierId", supplierId);
         $(selector).on('select2:select', function () {
+            var xh = $(this).parents('tr:first').attr("value");
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var billId = 0, specificationId = 0, siteId = 0, price = 0;
             specificationId = $(this).val();
-            var xh = $(this).parents('tr:first').attr("value");
             var consumeSiteArray = new Array();
             for (var i = 0; i < _materialList.length; i++) {
                 var d = _materialList[i];
@@ -1946,9 +1965,12 @@ function addIncreaseList() {
         consumeSiteArray = [...new Set(consumeSiteArray)];
         updateConsumeSelect(selector, siteId, consumeSiteArray, "Site");
         $(selector).on('select2:select', function () {
+            var xh = $(this).parents('tr:first').attr("value");
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var billId = 0, specificationId = 0, siteId = 0, price = 0;
             siteId = $(this).val();
-            var xh = $(this).parents('tr:first').attr("value");
             specificationId = $("#inGg" + xh).val();
             //单价
             var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
@@ -1978,9 +2000,12 @@ function addIncreaseList() {
         var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
         priceSelect(priceData, selector, price);
         $(selector).on('select2:select', function () {
+            var xh = $(this).parents('tr:first').attr("value");
+            if ($(`#inBh${xh}`).find(':selected').data('select2Tag')) {
+                return;
+            }
             var billId = 0, specificationId = 0, siteId = 0, price = 0;
             price = $(this).val();
-            var xh = $(this).parents('tr:first').attr("value");
             specificationId = $("#inGg" + xh).val();
             siteId = $("#inWz" + xh).val();
             $(`#inDw${xh}`).html('');
@@ -2000,7 +2025,7 @@ function addIncreaseList() {
             }
             $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
         });
-        $("#in" + xh).find(".msTag2").select2({
+        $("#in" + xh).find(".ms2").select2({
             width: "120px",
             tags: true,
             createTag: params => {
@@ -2009,8 +2034,6 @@ function addIncreaseList() {
                     text: params.term
                 }
             }
-        }).end().find('.ms2').select2({
-            width: "120px"
         });
         $("#inDetail" + xh).attr("onclick", `showDetailModel(${billId})`);
     }
@@ -2066,123 +2089,98 @@ function increase() {
     var i;
     for (i = 1; i <= increaseMax; i++) {
         if ($(`#inBh${i}`).length > 0) {
+            var xh = $(`#inXh${i}`).html();
             var codeId = $(`#inBh${i}`).val();
             if (isStrEmptyOrUndefined(codeId)) {
-                layer.msg("货品编号不能为空");
+                layer.msg(`序列${xh}：货品编号不能为空`);
                 return;
             }
             var tagTf = $(`#inBh${i} :selected`).data('select2Tag');
             codeId = tagTf ? '0' : codeId;
-            var categoryId, category, nameId, name, supplierId, supplier, specificationId, specification, siteId, site, price, unit, stock;
+            var code = $(`#inBh${i} :checked`).text();
+            var categoryId = $(`#inLb${i}`).val();
+            if (isStrEmptyOrUndefined(categoryId)) {
+                layer.msg(`序列${xh}：请选择类别`);
+                return;
+            }
+            categoryId = $(`#inLb${i} :selected`).data('select2Tag') ? '0' : categoryId;
+            var nameId = $(`#inMc${i}`).val();
+            if (isStrEmptyOrUndefined(nameId)) {
+                layer.msg(`序列${xh}：请选择名称`);
+                return;
+            }
+            nameId = $(`#inMc${i} :selected`).data('select2Tag') ? '0' : nameId;
+            var supplierId = $(`#inGys${i}`).val();
+            if (isStrEmptyOrUndefined(supplierId)) {
+                layer.msg(`序列${xh}：请选择供应商`);
+                return;
+            }
+            supplierId = $(`#inGys${i} :selected`).data('select2Tag') ? '0' : supplierId;
+            var specificationId = $(`#inGg${i}`).val();
+            if (isStrEmptyOrUndefined(specificationId)) {
+                layer.msg(`序列${xh}：请选择规格`);
+                return;
+            }
+            specificationId = $(`#inGg${i} :selected`).data('select2Tag') ? '0' : specificationId;
+            var price = $(`#inDj${i} :selected`).text();
+            if (isStrEmptyOrUndefined(price)) {
+                layer.msg(`序列${xh}：请选择单价`);
+                return;
+            }
+            if (parseFloat(price) != price) {
+                layer.msg(`序列${xh}：单价不合法`);
+                return;
+            }
+            var siteId = $(`#inWz${i}`).val();
+            if (isStrEmptyOrUndefined(siteId)) {
+                layer.msg(`序列${xh}：请选择位置`);
+                return;
+            }
+            siteId = $(`#inWz${i} :selected`).data('select2Tag') ? '0' : siteId;
+            var unit, stock;
             if (tagTf) {
-                categoryId = nameId = supplierId = specificationId = siteId = 0;
-                category = $(`#inLbInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(category)) {
-                    layer.msg("请输入类别");
-                    return;
-                }
-                name = $(`#inMcInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(name)) {
-                    layer.msg("请输入名称");
-                    return;
-                }
-                supplier = $(`#inGysInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(supplier)) {
-                    layer.msg("请输入供应商");
-                    return;
-                }
-                specification = $(`#inGgInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(specification)) {
-                    layer.msg("请输入规格");
-                    return;
-                }
-                price = $(`#inDjInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(price)) {
-                    layer.msg("请输入单价");
-                    return;
-                }
-                site = $(`#inWzInput${i}`).val().trim();
-                if (isStrEmptyOrUndefined(site)) {
-                    layer.msg("请输入位置");
-                    return;
-                }
                 unit = $(`#inDwInput${i}`).val().trim();
                 if (isStrEmptyOrUndefined(unit)) {
-                    layer.msg("请输入单位");
+                    layer.msg(`序列${xh}：请输入单位`);
                     return;
                 }
                 stock = $(`#inKcInput${i}`).val().trim();
             } else {
-                categoryId = $(`#inLb${i}`).val();
-                if (isStrEmptyOrUndefined(categoryId)) {
-                    layer.msg("请选择类别");
-                    return;
-                }
-                category = $(`#inLb${i} :selected`).text();
-                nameId = $(`#inMc${i}`).val();
-                if (isStrEmptyOrUndefined(nameId)) {
-                    layer.msg("请选择名称");
-                    return;
-                }
-                name = $(`#inMc${i} :selected`).text();
-                supplierId = $(`#inGys${i}`).val();
-                if (isStrEmptyOrUndefined(supplierId)) {
-                    layer.msg("请选择供应商");
-                    return;
-                }
-                supplier = $(`#inGys${i} :selected`).text();
-                specificationId = $(`#inGg${i}`).val();
-                if (isStrEmptyOrUndefined(specificationId)) {
-                    layer.msg("请选择规格");
-                    return;
-                }
-                specification = $(`#inGg${i} :selected`).text();
-                price = $(`#inDj${i}`).val();
-                if (isStrEmptyOrUndefined(price)) {
-                    layer.msg("请选择单价");
-                    return;
-                }
-                siteId = $(`#inWz${i}`).val();
-                if (isStrEmptyOrUndefined(siteId)) {
-                    layer.msg("请选择位置");
-                    return;
-                }
-                site = $(`#inWz${i} :selected`).text();
                 unit = $(`#inDw${i}`).text();
                 stock = $(`#inKc${i}`).text();
             }
             var inRk = $(`#inRk${i}`).val();
             var actual = $(`#inBh${i} :selected`).attr('actual');
             if (isStrEmptyOrUndefined(inRk)) {
-                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} :checked`).text() + ": 入库数量不能为空");
+                layer.msg(`序列${xh}：${code}: 入库数量不能为空`);
                 return;
             }
             if (parseFloat(inRk) <= 0) {
-                layer.msg($(`#inXh${i}`).html() + ". " + $(`#inBh${i} :checked`).text() + ": 入库数量需大于0");
+                layer.msg(`序列${xh}：${code}: 入库数量需大于0`);
                 return;
             }
             if (!!actual && parseFloat(inRk) > parseFloat(actual)) {
-                layer.msg('入库数量大于货品领用数量');
+                layer.msg(`序列${xh}：入库数量大于货品领用数量`);
                 return;
             }
             var inCg = $(`#inCg${i}`).val();
             if (isStrEmptyOrUndefined(inCg)) {
-                layer.msg("采购/退回人不能为空");
+                layer.msg(`序列${xh}：采购/退回人不能为空`);
                 return;
             }
             var inLy = $(`#inLy${i}`).val();
             var list = {
                 CategoryId: categoryId,
-                Category: category,
+                Category: $(`#inLb${i} :selected`).text(),
                 NameId: nameId,
-                Name: name,
+                Name: $(`#inMc${i} :selected`).text(),
                 SupplierId: supplierId,
-                Supplier: supplier,
+                Supplier: $(`#inGys${i} :selected`).text(),
                 SpecificationId: specificationId,
-                Specification: specification,
+                Specification: $(`#inGg${i} :selected`).text(),
                 SiteId: siteId,
-                Site: site,
-                Code: $(`#inBh${i} :selected`).text(),
+                Site: $(`#inWz${i} :selected`).text(),
+                Code: code,
                 Unit: unit,
                 Price: price,
                 Stock: stock,
@@ -2736,6 +2734,7 @@ function addConsumePlanList() {
                                     consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                             }
                         }
+                        consumeSiteArray = [...new Set(consumeSiteArray)];
                         if (consumeSiteArray.length > 0)
                             siteId = consumeSiteArray[0].Id;
                         updateConsumeSelect($("#conPlanWz" + xh), siteId, consumeSiteArray, "Site");
@@ -2810,6 +2809,7 @@ function addConsumePlanList() {
                             consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                     }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
                 if (consumeSiteArray.length > 0)
                     siteId = consumeSiteArray[0].Id;
                 updateConsumeSelect($("#conPlanWz" + xh), siteId, consumeSiteArray, "Site");
@@ -2887,6 +2887,7 @@ function addConsumePlanList() {
                             consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                     }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
                 if (consumeSiteArray.length > 0)
                     siteId = consumeSiteArray[0].Id;
                 updateConsumeSelect($("#conPlanWz" + xh), siteId, consumeSiteArray, "Site");
@@ -2953,6 +2954,7 @@ function addConsumePlanList() {
                             consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                     }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
                 if (consumeSiteArray.length > 0)
                     siteId = consumeSiteArray[0].Id;
                 updateConsumeSelect($("#conPlanWz" + xh), siteId, consumeSiteArray, "Site");
@@ -3003,6 +3005,7 @@ function addConsumePlanList() {
                             consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                     }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
                 if (consumeSiteArray.length > 0)
                     siteId = consumeSiteArray[0].Id;
                 updateConsumeSelect($("#conPlanWz" + xh), siteId, consumeSiteArray, "Site");
@@ -3050,6 +3053,7 @@ function addConsumePlanList() {
                         consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
                 }
             }
+            consumeSiteArray = [...new Set(consumeSiteArray)];
             updateConsumeSelect(selector, siteId, consumeSiteArray, "Site");
             $(selector).on('select2:select', function () {
                 var billId = 0, specificationId = 0, siteId = 0;
@@ -4116,13 +4120,15 @@ function showReversalModel() {
             var op = '<option value = "{0}">{1}</option>';
             var i, d, len = _materialList.length;
             var firstCode = _materialList[0];
+            var site = {};
             for (i = 0; i < len; i++) {
                 d = _materialList[i];
                 codeOp += op.format(d.Id, d.Code);
                 if (d.SpecificationId == firstCode.SpecificationId) {
-                    var siteData = _consumeSiteDict[d.SiteId];
-                    if (siteData) {
+                    if (!site[d.SiteId]) {
+                        var siteData = _consumeSiteDict[d.SiteId];
                         siteOp += op.format(siteData.Id, siteData.Site);
+                        site[d.SiteId] = 1;
                     }
                 }
             }

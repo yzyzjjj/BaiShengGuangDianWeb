@@ -403,7 +403,6 @@ function getDataTypeList() {
 }
 
 function getDeviceModelList() {
-
     $("#valList_wrapper").parent().empty()
         .append('<table class="table table-hover table-striped" id="valList"></table>');
     $("#inList_wrapper").parent().empty()
@@ -511,7 +510,7 @@ function getScriptVersionDetailList() {
         $("#inList").DataTable(insConfig);
         //输出
         var outConfig = $.extend(true, {}, tablesConfig);
-        outConfig.data = scriptData[2];
+        outConfig.data = scriptData[3];
         $("#outList").DataTable(outConfig);
     });
 }

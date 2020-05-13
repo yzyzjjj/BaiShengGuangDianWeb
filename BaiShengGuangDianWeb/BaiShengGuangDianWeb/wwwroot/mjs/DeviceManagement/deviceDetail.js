@@ -78,8 +78,7 @@ function selectChange(datas) {
         $("#detailIdentifier").val(firstData.Identifier);
         $("#detailDeviceModel").val(firstData.ModelName);
         $("#detailScript").val(firstData.ScriptName);
-        $("#detailFirmware").val(firstData.FirmwareId).trigger("change");
-        $("#detailFirmware").attr("oval", firstData.FirmwareId);
+        $("#detailFirmware").val(firstData.FirmwareId).trigger("change").attr("oval", firstData.FirmwareId);
         $("#detailHardware").val(firstData.HardwareName);
         $("#detailApplication").val(firstData.ApplicationName);
         $("#detailSite").val(firstData.SiteName + firstData.RegionDescription);
