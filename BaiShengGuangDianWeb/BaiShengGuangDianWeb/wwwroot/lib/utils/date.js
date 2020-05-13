@@ -175,5 +175,5 @@ function getMonthScope() {
 
 //时间不显示秒
 function noShowSecond(time) {
-    return time == '0001-01-01 00:00:00' || time == '' ? '0分' : time.slice(0, time.lastIndexOf(':'));
+    return time == '0001-01-01 00:00:00' || time == '' ? '' : time.slice(0, time.lastIndexOf(':'));
 }

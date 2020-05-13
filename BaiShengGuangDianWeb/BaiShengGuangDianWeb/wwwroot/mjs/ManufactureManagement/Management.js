@@ -121,12 +121,11 @@ function pageReady() {
     });
     $('#taskList').on('input', '.relation', function () {
         var v = $(this).val();
-        v = parseInt(v);
         var tr = $(this).parents('tr');
         var num = tr.find('.order').text();
-        num = parseInt(num) - 1;
-        if (v > num) {
-            $(this).val(num);
+        num = (num >> 0) - 1;
+        if (v >> 0 > num) {
+            $(this).val(v.slice(0, -1));
         }
     });
     $('#stateAll').on('ifChanged', function () {
@@ -735,6 +734,7 @@ function updateTaskDetail() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     showDetailModal(_taskDetailId);
+                    getTaskList();
                 }
             });
     }
@@ -805,6 +805,7 @@ function updateCheckDetail() {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     showDetailModal(_taskDetailId);
+                    getTaskList();
                 }
             });
     }

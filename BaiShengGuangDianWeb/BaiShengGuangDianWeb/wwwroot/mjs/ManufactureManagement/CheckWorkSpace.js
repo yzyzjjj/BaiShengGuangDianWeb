@@ -100,9 +100,10 @@ function getCheckTask() {
     ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
+            $('#startBtn,#pauseBtn,.box-content').addClass('hidden');
             return;
         }
-        $('#startBtn,#pauseBtn,.content').removeClass('hidden');
+        $('#startBtn,#pauseBtn,.box-content').removeClass('hidden');
         var rData = ret.datas[0];
         _taskData.TaskId = rData.Id;
         var state = rData.State;
@@ -331,7 +332,7 @@ function getCheckList(num, el) {
     var data = {}
     data.opType = opType;
     data.opData = JSON.stringify({
-        account: _admin,
+        account: _taskData.Account,
         limit: 10,
         gId: _taskData.GId
     });

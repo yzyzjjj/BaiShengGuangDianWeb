@@ -118,12 +118,11 @@ function pageReady() {
     });
     $('#configItem').on('input', '.relation', function () {
         var v = $(this).val();
-        v = parseInt(v);
         var tr = $(this).parents('tr');
         var num = tr.find('.num').text();
-        num = parseInt(num) - 1;
-        if (v > num) {
-            $(this).val(num);
+        num = (num >> 0) - 1;
+        if (v >> 0 > num) {
+            $(this).val(v.slice(0, -1));
         }
     });
     $('#configSelect').on('select2:select', function () {

@@ -114,6 +114,12 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailDeviceState">设备状态：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailDeviceState">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-3 control-label" for="detailMacAddress">MAC地址：</label>
                             <div class="col-sm-9">
                                 <input class="form-control" disabled="disabled" id="detailMacAddress">
@@ -138,6 +144,12 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-3 control-label" for="detailDeviceType">设备类型：</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" disabled="disabled" id="detailDeviceType">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-3 control-label" for="detailDeviceModel">设备型号：</label>
                             <div class="col-sm-9">
                                 <input class="form-control" disabled="disabled" id="detailDeviceModel">
@@ -152,14 +164,11 @@
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="detailFirmware">固件版本：</label>
                             <div class="col-sm-9">
-                                <div class="col-xs-11" style="margin-left:-15px;">
+                                <div class="flexStyle">
                                     <select class="form-control" style="width: 100%" id="detailFirmware"></select>
-                                </div>
-                                <div class="col-xs-1" style="margin-left:-15px;">
                                     <button type="button" class="btn btn-primary" disabled="disabled" onclick="upgradeFirmware()" id="upgradeFirmwareBtn">升级</button>
                                 </div>
                             </div>
-
                         </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="detailHardware">硬件版本：</label>
@@ -180,7 +189,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailAdministrator">管理员用户：</label>
+                            <label class="col-sm-3 control-label" for="detailAdministrator">设备管理员：</label>
                             <div class="col-sm-9">
                                 <input class="form-control" disabled="disabled" id="detailAdministrator">
                             </div>
