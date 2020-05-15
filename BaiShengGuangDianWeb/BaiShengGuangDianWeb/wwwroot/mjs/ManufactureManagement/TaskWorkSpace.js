@@ -111,16 +111,18 @@ function getAccountTask() {
     data.opType = 1000;
     data.opData = JSON.stringify({ gId, account });
     ajaxPost('/Relay/Post', data, function (ret) {
+        getUnFinishedList(0, '#unFinishEdList');
+        getUnFinishedList(1, '#finishEdList');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
-            $('#taskDetail,#finishList').addClass('hidden');
+            $('#taskDetail').addClass('hidden');
             return;
         }
         var d = ret.datas[0];
         _taskData.TaskId = d.Id;
         d.IsRedo ? $('#redo').removeClass('hidden') : $('#redo').addClass('hidden');
         var state = d.State;
-        $('#startBtn').prop('disabled', !(state == 0 || state == 2));
+        $('#startBtn').prop('disabled', !(state == 0 || state == 2 || state == 5));
         $('.finish').prop('disabled', state != 1);
         $('#taskName').text(d.Item);
         $('#planName').text(d.Plan);
@@ -140,8 +142,6 @@ function getAccountTask() {
             $('#checkProcessor').text(checkProcessor);
         }
         $('#taskDetail').removeClass('hidden');
-        getUnFinishedList(0, '#unFinishEdList');
-        getUnFinishedList(1, '#finishEdList');
     });
 }
 
@@ -186,6 +186,9 @@ function getUnFinishedList(isFinish, el, limit) {
             return;
         }
         var rData = ret.datas;
+        if (rData[0] == null) {
+            rData = [];
+        }
         $(el).DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             "destroy": true,

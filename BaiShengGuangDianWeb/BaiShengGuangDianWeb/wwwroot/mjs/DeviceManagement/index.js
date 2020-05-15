@@ -8,7 +8,7 @@ function pageReady() {
     _permissionList[147] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
     getDeviceList();
-    $(".ads").css("width", "100%");
+    $(".ads").css("width", "100%").select2();;
     $(".col-sm-2").addClass("mcolsm2");
     $("#addIp").inputmask("ip");
     $("#updateIp").inputmask("ip");
@@ -82,8 +82,51 @@ function pageReady() {
             }
         }
     });
+    $('#scriptList').on('select2:select', '.code', function () {
+        var id = $(this).val();
+        _codeSelect.push(id);
+        var oldVal = $(this).data("last");
+        $(this).data("last", id);
+        if (!isStrEmptyOrUndefined(oldVal)) {
+            _codeSelect.splice(_codeSelect.indexOf(oldVal), 1);
+            $(`#scriptList .code option[value=${oldVal}]`).prop('disabled', false);
+        }
+        for (var i = 0, len = _codeSelect.length; i < len; i++) {
+            $(`#scriptList .code option[value=${_codeSelect[i]}]`).prop('disabled', true);
+        }
+        $('#scriptList .code').select2();
+        var tr = $(this).parents('tr');
+        tr.find('.delTr').val(id);
+        var d = _deviceData[id];
+        var state = d.DeviceStateStr;
+        var stateClass;
+        switch (state) {
+            case '待加工':
+                stateClass = 'success';
+                break;
+            case '加工中':
+                stateClass = 'success';
+                break;
+            case '已确认':
+                stateClass = 'warning';
+                break;
+            case '维修中':
+                stateClass = 'info';
+                break;
+            default:
+                stateClass = 'red';
+        }
+        tr.find('.devState').html(`<span class="text-${stateClass}">${state}</span>`);
+        tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
+        new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
+            tr.find('.script').empty().append(e).val(d.ScriptId).trigger('change');
+        });
+    });
+    $('#script_nav_table').css('maxHeight', innerHeight * 0.7);
 }
-function getDeviceList() {
+
+var _deviceData = null;
+function getDeviceList(resolve) {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
@@ -93,6 +136,16 @@ function getDeviceList() {
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
+                return;
+            }
+            var rData = ret.datas;
+            _deviceData = {};
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                _deviceData[d.Id] = d;
+            }
+            if (!isStrEmptyOrUndefined(resolve)) {
+                resolve('success');
                 return;
             }
             var per148 = _permissionList[148].have;
@@ -107,7 +160,7 @@ function getDeviceList() {
                     '   <span class="caret"></span>' +
                     '   <span class="sr-only">Toggle Dropdown</span>' +
                     '</button>' +
-                    '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}{2}{3}{4}' +
+                    '<ul class="dropdown-menu pointer" role="menu">{0}{1}{2}{3}{4}' +
                     '</ul>' +
                     '</div>';
                 var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
@@ -167,9 +220,9 @@ function getDeviceList() {
                     "paging": true,
                     "searching": true,
                     "language": oLanguage,
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
+                    "data": rData,
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项
+                    "iDisplayLength": 20, //默认显示的记录数
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Code", "title": "机台号", "type": "html-percent" },
@@ -244,8 +297,7 @@ function showAddModel() {
                 layer.msg(ret.errmsg);
                 return;
             };
-            $(".ads").empty();
-            $(".ads").select2();
+            $("#addModel .ads").empty();
             $("#addCode").val("");
             $("#addDeviceName").val("");
             $("#addMacAddress").val("");
@@ -477,8 +529,7 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
                 return;
             };
 
-            $(".ads").empty();
-            $(".ads").select2();
+            $("#updateModel .ads").empty();
             var i;
             var data;
             var html = "";
@@ -684,8 +735,253 @@ function showControl(id, str) {
     }
 }
 
+//获取升级相关选项
+function getUpgrade(resolve, opType, path, name, modelId) {
+    var data = {}
+    data.opType = opType;
+    if (modelId) {
+        data.opData = JSON.stringify({
+            deviceModelId: modelId
+        });
+    }
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var list = ret.datas;
+        var option = '<option value="{0}" path="{1}">{2}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Id, d[path], d[name]);
+        }
+        resolve(options);
+    }, 0);
+}
+
+//设备升级弹窗
 function showUpgrade(id) {
-    window.location = '/DeviceManagement/Detail?id=' + id;
+    var d = _deviceData[id];
+    $('#upgradeModel .upgrade-btn').val(id);
+    $('#upgradeCode').val(d.Code);
+    $('#upgradeDeviceName').val(d.DeviceName);
+    $('#upgradeDeviceState').val(d.DeviceStateStr);
+    $('#upgradeMacAddress').val(d.MacAddress);
+    $('#upgradeIp').val(d.Ip);
+    $('#upgradePort').val(d.Port);
+    $('#upgradeIdentifier').val(d.Identifier);
+    $('#upgradeDeviceCategory').val(d.CategoryName);
+    $('#upgradeDeviceModel').val(d.ModelName);
+    var getScript = new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId));
+    var getFirmware = new Promise(resolve => getUpgrade(resolve, 130, 'FilePath', 'FirmwareName'));
+    var getHardware = new Promise(resolve => getUpgrade(resolve, 135, 'FilePath', 'HardwareName'));
+    var getApplication = new Promise(resolve => getUpgrade(resolve, 145, 'FilePath', 'ApplicationName'));
+    $('#upgradeScript,#upgradeFirmware,#upgradeHardware,#upgradeApplication').empty();
+    Promise.all([getScript, getFirmware, getHardware, getApplication]).then(e => {
+        $('#upgradeScript').append(e[0]).val(d.ScriptId).trigger('change');
+        $('#upgradeFirmware').append(e[1]).val(d.FirmwareId).trigger('change');
+        $('#upgradeHardware').append(e[2]).val(d.HardwareId).trigger('change');
+        $('#upgradeApplication').append(e[3]).val(d.ApplicationId).trigger('change');
+    });
+    $('#upgradeSite').val(d.SiteName);
+    $('#upgradeAdministrator').val(d.AdministratorName);
+    $('#upgradeRemark').val(d.Remark);
+    $('#upgradeModel').modal('show');
+}
+
+//设备升级
+function deviceUpgrade(type = 0) {
+    var codeId = $(this).val();
+    if (_deviceData[codeId].DeviceStateStr != '待加工') {
+        layer.msg('非待加工设备不能升级');
+        return;
+    }
+    var fileId = null, fileType = null, fileName = null, hintText = '';
+    switch (type) {
+        case 1:
+            fileId = $('#upgradeScript').val();
+            fileType = fileEnum.Script;
+            fileName = $('#upgradeScript :selected').attr('path');
+            hintText = '流程脚本版本';
+            break;
+        case 2:
+            fileId = $('#upgradeFirmware').val();
+            fileType = fileEnum.Firmware;
+            fileName = $('#upgradeFirmware :selected').attr('path');
+            hintText = '固件版本';
+            break;
+        case 3:
+            fileId = $('#upgradeHardware').val();
+            fileType = fileEnum.Hardware;
+            fileName = $('#upgradeHardware :selected').attr('path');
+            hintText = '硬件版本';
+            break;
+        case 4:
+            fileId = $('#upgradeApplication').val();
+            fileType = fileEnum.Application;
+            fileName = $('#upgradeApplication :selected').attr('path');
+            hintText = '应用层版本';
+            break;
+    }
+    if (isStrEmptyOrUndefined(fileId)) {
+        layer.msg(`请选择：<span style="font-weight:bold">${hintText}</span>`);
+        return;
+    }
+    var doSth = () => {
+        var data = {
+            type: fileType,
+            files: JSON.stringify([fileName])
+        };
+        ajaxPost("/Upload/Path", data, ret => {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            data = {};
+            data.opType = 108;
+            data.opData = JSON.stringify({
+                Type: type,
+                Infos: [{
+                    Type: 1,
+                    FileId: fileId,
+                    FileUrl: `${location.origin}${ret.data[0].path}`,
+                    DeviceId: codeId
+                }]
+            });
+            ajaxPost("/Relay/Post", data, ret => {
+                var d = ret.datas[0];
+                layer.msg(d.errmsg);
+                if (d.errno == 0) {
+                    $('#upgradeModel').modal('hide');
+                    getDeviceList();
+                }
+            });
+        }, 0);
+    }
+    showConfirm(`升级${hintText}`, doSth);
+}
+
+//批量升级弹窗
+function showBatchUpgradeModel() {
+    new Promise(resolve => getDeviceList(resolve)).then(() => $('#addScriptListBtn').removeAttr('disabled'));
+    _codeSelect = [];
+    $('#scriptList').empty();
+    $('#batchUpgradeModel').modal('show');
+}
+
+var _codeSelect = null;
+//批量升级添加新项
+function addBatchUpgradeTr() {
+    var op = '<option value="{0}" {2}>{1}</option>';
+    var ops = '';
+    for (var key in _deviceData) {
+        var d = _deviceData[key];
+        ops += op.format(key, d.Code, _codeSelect.indexOf(key) == -1 ? '' : 'disabled');
+    }
+    var tr = `<tr>
+                <td class="num"></td>
+                <td style="width:100px"><select class="ms2 form-control code">${ops}</select></td>
+                <td class="devState"></td>
+                <td class="devModel"></td>
+                <td style="min-width:120px"><select class="ms2 form-control script"></select></td>
+                <td class="result"></td>
+                <td><button type="button" class="btn btn-danger btn-sm delTr" onclick="delBatchUpgradeTr.call(this)"><i class="fa fa-minus"></i></button></td>
+              </tr>`;
+    $('#scriptList').append(tr).find('.ms2').select2();
+    batchUpgradeSort();
+    $('#scriptList .code:last').trigger('select2:select');
+    if (Object.keys(_deviceData).length == _codeSelect.length) {
+        $('#addScriptListBtn').attr('disabled', true);
+    }
+    $('#script_nav_table').scrollTop($('#script_nav_table')[0].scrollHeight);
+}
+
+//批量升级tr排序
+function batchUpgradeSort() {
+    var trs = $('#scriptList tr');
+    for (var i = 0, len = trs.length; i < len; i++) {
+        trs.eq(i).find('.num').text(i + 1);
+    }
+}
+
+//批量升级删除tr
+function delBatchUpgradeTr() {
+    var tr = $(this).parents('tr');
+    tr.remove();
+    batchUpgradeSort();
+    var v = $(this).val();
+    _codeSelect.splice(_codeSelect.indexOf(v), 1);
+    $(`#scriptList .code option[value=${v}]`).prop('disabled', false);
+    $('#addScriptListBtn').attr('disabled', false);
+    $('#scriptList .code').select2();
+}
+
+//批量升级
+function batchUpgrade() {
+    var trs = $('#scriptList tr');
+    var info = { codeId: [], fileId: [], filePath: [] };
+    var i, len;
+    for (i = 0, len = trs.length; i < len; i++) {
+        var tr = trs.eq(i);
+        var codeId = tr.find('.delTr').val();
+        if (_deviceData[codeId].DeviceStateStr != '待加工') {
+            layer.msg(`序列${i + 1}：非待加工设备不能升级`);
+            return;
+        }
+        var scriptEl = tr.find('.script');
+        var fileId = scriptEl.val();
+        var filePath = scriptEl.find(':selected').attr('path');
+        if (isStrEmptyOrUndefined(filePath)) {
+            layer.msg(`序列${i + 1}：请选择流程脚本版本`);
+            return;
+        }
+        info.codeId.push(codeId);
+        info.fileId.push(fileId);
+        info.filePath.push(filePath);
+    }
+    var doSth = () => {
+        var data = {
+            type: fileEnum.Script,
+            files: JSON.stringify(info.filePath)
+        };
+        ajaxPost("/Upload/Path", data, ret => {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            var paths = ret.data;
+            len = paths.length;
+            var infos = [];
+            var origin = location.origin;
+            for (i = 0; i < len; i++) {
+                var path = `${origin}${paths[i].path}`;
+                infos.push({
+                    Type: 1,
+                    FileId: info.fileId[i],
+                    FileUrl: path,
+                    DeviceId: info.codeId[i]
+                });
+            }
+            data = {};
+            data.opType = 108;
+            data.opData = JSON.stringify({
+                Type: 1,
+                Infos: infos
+            });
+            ajaxPost("/Relay/Post", data, ret => {
+                var results = ret.datas;
+                len = results.length;
+                var resultEl = $('#scriptList .result');
+                for (i = 0; i < len; i++) {
+                    var result = results[i];
+                    var color = result.errno == 0 ? 'success' : 'red';
+                    resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
+                }
+            });
+        }, 0);
+    }
+    showConfirm('升级流程脚本版本', doSth);
 }
 
 function deleteDevice(id, code) {

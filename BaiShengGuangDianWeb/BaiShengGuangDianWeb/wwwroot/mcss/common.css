@@ -349,3 +349,6 @@ select, .pointer {
         background: #d6d6d6;
         border: inherit;
     }
+.dropdown-menu {
+    min-width: 92px
+}

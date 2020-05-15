@@ -1,14 +1,37 @@
 ﻿@model object
+@{
+    ViewBag.Title = "数据报表";
+    Layout = "_Layout";
+}
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/Statistic.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/Statistic.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>生产管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#performance_nav" data-toggle="tab" aria-expanded="true">绩效统计表</a></li>
+                <li><a href="#plan_time_nav" data-toggle="tab" aria-expanded="false">计划用时统计表</a></li>
+                <li><a href="#task_time_nav" data-toggle="tab" aria-expanded="false">任务平均用时统计表</a></li>
+                <li><a href="#task_finish_nav" data-toggle="tab" aria-expanded="false">任务完成情况汇总表</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="performance_nav"></div>
+                <div class="tab-pane active in" id="plan_time_nav"></div>
+                <div class="tab-pane active in" id="task_time_nav"></div>
+                <div class="tab-pane active in" id="task_finish_nav"></div>
+            </div>
+        </div>
+    </div>
+</section>

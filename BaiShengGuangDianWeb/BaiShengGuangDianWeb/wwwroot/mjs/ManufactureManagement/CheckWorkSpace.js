@@ -98,12 +98,17 @@ function getCheckTask() {
     data.opType = 1012;
     data.opData = JSON.stringify({ account, gId });
     ajaxPost('/Relay/Post', data, function (ret) {
+        getCheckList(0, '#waitCheckList');
+        getCheckList(1, '#passCheckList');
+        getCheckList(2, '#redoCheckList');
+        getCheckList(3, '#blockCheckList');
+        $('#checkDetailBox').removeClass('hidden');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
-            $('#startBtn,#pauseBtn,.box-content').addClass('hidden');
+            $('#startBtn,#pauseBtn,#boxContext').addClass('hidden');
             return;
         }
-        $('#startBtn,#pauseBtn,.box-content').removeClass('hidden');
+        $('#startBtn,#pauseBtn,#boxContext').removeClass('hidden');
         var rData = ret.datas[0];
         _taskData.TaskId = rData.Id;
         var state = rData.State;
@@ -169,10 +174,6 @@ function getCheckTask() {
                 });
             }
         });
-        getCheckList(0, '#waitCheckList');
-        getCheckList(1, '#passCheckList');
-        getCheckList(2, '#redoCheckList');
-        getCheckList(3, '#blockCheckList');
     });
 }
 

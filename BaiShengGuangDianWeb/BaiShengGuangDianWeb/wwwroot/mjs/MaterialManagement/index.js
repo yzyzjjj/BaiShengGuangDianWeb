@@ -1916,18 +1916,22 @@ function addIncreaseList() {
             }
             var billId = 0, specificationId = 0, siteId = 0, price = 0;
             specificationId = $(this).val();
-            var consumeSiteArray = new Array();
-            for (var i = 0; i < _materialList.length; i++) {
-                var d = _materialList[i];
-                if (d.SpecificationId == specificationId) {
-                    if (_consumeSiteDict[d.SiteId])
-                        consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+            if ($(this).find(':selected').data('select2Tag')) {
+                updateConsumeSelect(`#inWz${xh}`, 0, _consumeSite, "Site");
+            } else {
+                var consumeSiteArray = new Array();
+                for (var i = 0; i < _materialList.length; i++) {
+                    var d = _materialList[i];
+                    if (d.SpecificationId == specificationId) {
+                        if (_consumeSiteDict[d.SiteId])
+                            consumeSiteArray.push(_consumeSiteDict[d.SiteId]);
+                    }
                 }
+                consumeSiteArray = [...new Set(consumeSiteArray)];
+                if (consumeSiteArray.length > 0)
+                    siteId = consumeSiteArray[0].Id;
+                updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
             }
-            consumeSiteArray = [...new Set(consumeSiteArray)];
-            if (consumeSiteArray.length > 0)
-                siteId = consumeSiteArray[0].Id;
-            updateConsumeSelect("#inWz" + xh, siteId, consumeSiteArray, "Site");
             //单价
             var priceData = _consumePrice[`${specificationId}${siteId}`] || [];
             price = priceData[0] ? priceData[0].Price : '';
@@ -2008,6 +2012,9 @@ function addIncreaseList() {
             price = $(this).val();
             specificationId = $("#inGg" + xh).val();
             siteId = $("#inWz" + xh).val();
+            if ($(this).find(':selected').data('select2Tag')) {
+                updateConsumeSelect(`#inWz${xh}`, 0, _consumeSite, "Site");
+            }
             $(`#inDw${xh}`).html('');
             $(`#inKc${xh}`).html(0);
             $("#in" + xh).attr("billId", 0);

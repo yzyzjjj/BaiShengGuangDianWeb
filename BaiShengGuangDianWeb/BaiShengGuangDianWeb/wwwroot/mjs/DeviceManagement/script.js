@@ -43,15 +43,13 @@ function pageReady() {
         var name = $("#jScriptVersion").val();
         $("#jsonName").val(name);
     });
-    $("#aDataType").change(function (e) {
+    $("#aDataType").on("select2:select",function (e) {
         var fScriptVersion = $("#fScriptVersion").val();
-        switch (fScriptVersion) {
-            case "1":
-                $("#jsonFile").val("");
-                initDiv1();
-            default:
+        if (fScriptVersion == 1) {
+            $("#jsonFile").val("");
+            initDiv1();
         }
-
+        $('#siteCount').text($(this).val() == 1 ? 700 : 100);
     });
     $("#jsonFile").change(function (e) {
         initDiv1();
@@ -199,7 +197,7 @@ function getScriptVersionAllList(type) {
                 { "data": "ValueNumber", "title": "变量数" },
                 { "data": "InputNumber", "title": "输入口数" },
                 { "data": "OutputNumber", "title": "输出口数" },
-                { "data": 'ScriptFile', "title": "脚本文件", "render": d => d ? `<span style="vertical-align:middle">${d.slice(d.indexOf('_') + 1)}</span><button type="button" class="btn btn-success btn-xs" onclick="fileDownload(\'${escape(d)}\')" title="下载脚本文件"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button>` : '' }
+                { "data": 'ScriptFile', "title": "脚本文件", "render": d => d ? `<span style="vertical-align:middle;padding-right:5px">${d.slice(d.indexOf('_') + 1)}</span><button type="button" class="btn btn-success btn-xs" onclick="fileDownload(\'${escape(d)}\')" title="下载脚本文件"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button>` : '' }
             ];
             if (per237 || per238) {
                 columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });
@@ -667,6 +665,7 @@ function addValues() {
         case "0":
             var aScriptVersion = $("#aScriptVersion").val();
             var inputData = new Array();
+            var siteCount = $('#siteCount').text();
             for (var i = 1; i < max; i++) {
                 if ($("#av" + i).length > 0) {
                     var variableName = $("#avb" + i).val();
@@ -674,10 +673,13 @@ function addValues() {
                         layer.msg("名称不能为空");
                         return;
                     }
-
                     var pointerAddress = $("#avd" + i).val();
                     if (isStrEmptyOrUndefined(pointerAddress)) {
                         layer.msg("地址不能为空");
+                        return;
+                    }
+                    if (pointerAddress >> 0 > siteCount >> 0) {
+                        layer.msg(`${variableName}：地址不能超过${siteCount}`);
                         return;
                     }
                     inputData.push({

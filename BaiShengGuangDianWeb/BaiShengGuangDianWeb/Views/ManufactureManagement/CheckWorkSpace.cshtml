@@ -32,62 +32,64 @@
                 </div>
             </div>
         </div>
-        <div class="box-body box-content hidden">
-            <div class="row">
-                <div class="col-xs-6" style="text-align: left; padding-bottom: 10px">
-                    <button type="button" id="getCheckTaskBtn" class="btn btn-info" onclick="getCheckTask()">刷新任务</button>
-                    <button type="button" id="startBtn" class="btn btn-primary hidden" onclick="checkTaskHandle(0)">任务开始</button>
-                    <button type="button" id="pauseBtn" class="btn btn-warning hidden" onclick="checkTaskHandle(1)">任务暂停</button>
+        <div class="box-body">
+            <div id="boxContext" class="hidden">
+                <div class="row">
+                    <div class="col-xs-6" style="text-align: left; padding-bottom: 10px">
+                        <button type="button" id="getCheckTaskBtn" class="btn btn-info" onclick="getCheckTask()">刷新任务</button>
+                        <button type="button" id="startBtn" class="btn btn-primary hidden" onclick="checkTaskHandle(0)">任务开始</button>
+                        <button type="button" id="pauseBtn" class="btn btn-warning hidden" onclick="checkTaskHandle(1)">任务暂停</button>
+                    </div>
+                    <div class="col-xs-6" style="text-align: right; padding-bottom: 10px">
+                        <button type="button" class="btn btn-success finish hidden" onclick="checkTaskHandle(2, 1)">合格</button>
+                        <button type="button" class="btn btn-warning finish hidden" onclick="checkTaskHandle(2, 2)">返工</button>
+                        <button type="button" class="btn btn-danger finish hidden" onclick="checkTaskHandle(2, 3)">阻塞</button>
+                    </div>
                 </div>
-                <div class="col-xs-6" style="text-align: right; padding-bottom: 10px">
-                    <button type="button" class="btn btn-success finish hidden" onclick="checkTaskHandle(2, 1)">合格</button>
-                    <button type="button" class="btn btn-warning finish hidden" onclick="checkTaskHandle(2, 2)">返工</button>
-                    <button type="button" class="btn btn-danger finish hidden" onclick="checkTaskHandle(2, 3)">阻塞</button>
+                <div class="form-group" style="overflow-y: auto">
+                    <table class="table table-bordered table-responsive" style="margin: 0">
+                        <thead></thead>
+                        <tbody>
+                            <tr>
+                                <td class="mbold">检验单名称</td>
+                                <td id="check"></td>
+                                <td class="mbold">所属计划号</td>
+                                <td id="plan"></td>
+                            </tr>
+                            <tr>
+                                <td class="mbold">任务名称</td>
+                                <td id="item"></td>
+                                <td class="mbold">工序完成人</td>
+                                <td id="processor"></td>
+                            </tr>
+                            <tr>
+                                <td class="mbold">检验人</td>
+                                <td id="checkProcessor"></td>
+                                <td class="mbold">计划用时</td>
+                                <td id="estimatedTime"></td>
+                            </tr>
+                            <tr>
+                                <td class="mbold">开始时间</td>
+                                <td id="actualStartTime"></td>
+                                <td class="mbold">完成时间</td>
+                                <td id="actualEndTime"></td>
+                            </tr>
+                            <tr>
+                                <td class="mbold">绩效分</td>
+                                <td id="score"></td>
+                                <td class="mbold">实际用时</td>
+                                <td id="actualTime"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="checkTaskList"></table>
+                    </div>
                 </div>
             </div>
-            <div class="form-group" style="overflow-y: auto">
-                <table class="table table-bordered table-responsive" style="margin: 0">
-                    <thead></thead>
-                    <tbody>
-                        <tr>
-                            <td class="mbold">检验单名称</td>
-                            <td id="check"></td>
-                            <td class="mbold">所属计划号</td>
-                            <td id="plan"></td>
-                        </tr>
-                        <tr>
-                            <td class="mbold">任务名称</td>
-                            <td id="item"></td>
-                            <td class="mbold">工序完成人</td>
-                            <td id="processor"></td>
-                        </tr>
-                        <tr>
-                            <td class="mbold">检验人</td>
-                            <td id="checkProcessor"></td>
-                            <td class="mbold">计划用时</td>
-                            <td id="estimatedTime"></td>
-                        </tr>
-                        <tr>
-                            <td class="mbold">开始时间</td>
-                            <td id="actualStartTime"></td>
-                            <td class="mbold">完成时间</td>
-                            <td id="actualEndTime"></td>
-                        </tr>
-                        <tr>
-                            <td class="mbold">绩效分</td>
-                            <td id="score"></td>
-                            <td class="mbold">实际用时</td>
-                            <td id="actualTime"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="form-group">
-                <div class="table-responsive mailbox-messages">
-                    <table class="table table-hover table-striped" id="checkTaskList"></table>
-                </div>
-            </div>
-            <div class="form-group">
+            <div class="form-group hidden" id="checkDetailBox">
                 <div class="nav-tabs-custom">
                     <ul class="nav nav-tabs ui-sortable-handle">
                         <li class="active"><a href="#waitCheck" data-toggle="tab" aria-expanded="true">待检验</a></li>
@@ -155,7 +157,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
     <!-- 检验单详情页面模态框 -->
