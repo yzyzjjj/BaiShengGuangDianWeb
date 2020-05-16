@@ -1,8 +1,8 @@
 ﻿var _permissionList = [];
 function pageReady() {
-    _permissionList[169] = { uIds: ['upgradeFirmwareBtn'] };
+    _permissionList[169] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
-    $("#detailFirmware").select2();
+    $(".ads,.ms2").select2();
     var idStr = getQueryString("id");
     if (idStr != null) {
         id = parseInt(idStr);
@@ -11,16 +11,10 @@ function pageReady() {
         getControlList();
         getStateList();
     });
-    $("#detailFirmware").on("select2:select", function (e) {
-        if ($("#detailFirmware").val() == $("#detailFirmware").attr("oval")) {
-            $("#upgradeFirmwareBtn").attr("disabled", "disabled");
-        } else {
-            $("#upgradeFirmwareBtn").removeAttr("disabled");
-        }
-    });
 }
 
 var id = 1;
+var _deviceData = null;
 function getControlList() {
     var data = {}
     data.opType = 100;
@@ -33,27 +27,30 @@ function getControlList() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            var rData = ret.datas;
             $(".ms2").empty();
-            $(".ms2").select2();
             var exit = false;
             var option = '<option value="{0}">{1}</option>';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var data = ret.datas[i];
-                $(".ms2").append(option.format(data.Id, data.Code));
-                if (data.Id == id) {
-                    firstData = data;
+            var options = '';
+            _deviceData = {};
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                _deviceData[d.Id] = d;
+                options += option.format(d.Id, d.Code);
+                if (d.Id == id) {
+                    firstData = d;
                     exit = true;
                 }
             }
-            if (!exit && ret.datas.length > 0) {
-                firstData = ret.datas[0];
+            $(".ms2").append(options);
+            if (!exit && rData.length > 0) {
+                firstData = rData[0];
                 id = 1;
             }
-            selectChange(ret.datas);
-
+            selectChange(rData);
             $(".ms2").on("select2:select", function (e) {
-                id = parseInt($("#" + e.currentTarget.id + " option:checked").val());
-                selectChange(ret.datas);
+                id = parseInt($(`#${e.currentTarget.id} :selected`).val());
+                selectChange(rData);
             });
         });
 }
@@ -70,6 +67,8 @@ function selectChange(datas) {
         id = 1;
     }
     if (firstData != null) {
+        $("#detailScript").empty();
+        new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', firstData.DeviceModelId)).then(e => $("#detailScript").append(e).val(firstData.ScriptId).trigger("change"));
         $(".ms2").val(id).trigger("change");
         $("#detailDeviceName").val(firstData.DeviceName);
         $("#detailMacAddress").val(firstData.MacAddress);
@@ -77,10 +76,9 @@ function selectChange(datas) {
         $("#detailPort").val(firstData.Port);
         $("#detailIdentifier").val(firstData.Identifier);
         $("#detailDeviceModel").val(firstData.ModelName);
-        $("#detailScript").val(firstData.ScriptName);
-        $("#detailFirmware").val(firstData.FirmwareId).trigger("change").attr("oval", firstData.FirmwareId);
-        $("#detailHardware").val(firstData.HardwareName);
-        $("#detailApplication").val(firstData.ApplicationName);
+        $("#detailFirmware").val(firstData.FirmwareId).trigger("change");
+        $("#detailHardware").val(firstData.HardwareId).trigger("change");
+        $("#detailApplication").val(firstData.ApplicationId).trigger("change");
         $("#detailSite").val(firstData.SiteName + firstData.RegionDescription);
         $("#detailAdministrator").val(firstData.Administrator);
         $("#detailRemark").val(firstData.Remark);
@@ -122,38 +120,115 @@ function getStateList() {
         });
 }
 
-function getFirmwareList(func) {
-    ajaxPost("/Relay/Post", { opType: 130 }, function (ret) {
+//获取升级相关选项
+function getUpgrade(resolve, opType, path, name, modelId) {
+    var data = {}
+    data.opType = opType;
+    if (modelId) {
+        data.opData = JSON.stringify({
+            deviceModelId: modelId
+        });
+    }
+    ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#detailFirmware").empty();
-        var option = '<option value="{0}" path="{2}">{1}</option>';
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            $("#detailFirmware").append(option.format(data.Id, data.FirmwareName, data.FilePath));
+        var list = ret.datas;
+        var option = '<option value="{0}" path="{1}">{2}</option>';
+        var options = '';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            options += option.format(d.Id, d[path], d[name]);
         }
+        resolve(options);
+    }, 0);
+}
+
+function getFirmwareList(func) {
+    var getFirmware = new Promise(resolve => getUpgrade(resolve, 130, 'FilePath', 'FirmwareName'));
+    var getHardware = new Promise(resolve => getUpgrade(resolve, 135, 'FilePath', 'HardwareName'));
+    var getApplication = new Promise(resolve => getUpgrade(resolve, 145, 'FilePath', 'ApplicationName'));
+    $('#detailFirmware,#detailHardware,#detailApplication').empty();
+    Promise.all([getFirmware, getHardware, getApplication]).then(e => {
+        $('#detailFirmware').append(e[0]);
+        $('#detailHardware').append(e[1]);
+        $('#detailApplication').append(e[2]);
         func();
     });
 }
 
-//升级固件
-function upgradeFirmware() {
-    var v = $("#detailFirmware").val();
-    var data = {}
-    data.opType = 108;
-    data.opData = JSON.stringify({
-        Type: fileEnum.FirmwareLibrary,
-        DeviceId: $("#detailCode2").val(),
-        FirmwareId: v,
-        Path: $("#detailFirmware").children().filter("[value=" + v + "]").attr("path")
-    });
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            layer.msg(ret.errmsg);
-            if (ret.errno == 0) {
-                getControlList();
+//设备升级
+function deviceUpgrade(type = 0) {
+    var codeId = $('#detailCode2').val();
+    if (isStrEmptyOrUndefined(codeId)) {
+        layer.msg('请选择机台号');
+        return;
+    }
+    if (_deviceData[codeId].DeviceStateStr != '待加工') {
+        layer.msg('非待加工设备不能升级');
+        return;
+    }
+    var fileId = null, fileType = null, fileName = null, hintText = '';
+    switch (type) {
+        case 1:
+            fileId = $('#detailScript').val();
+            fileType = fileEnum.Script;
+            fileName = $('#detailScript :selected').attr('path');
+            hintText = '流程脚本版本';
+            break;
+        case 2:
+            fileId = $('#detailFirmware').val();
+            fileType = fileEnum.Firmware;
+            fileName = $('#detailFirmware :selected').attr('path');
+            hintText = '固件版本';
+            break;
+        case 3:
+            fileId = $('#detailHardware').val();
+            fileType = fileEnum.Hardware;
+            fileName = $('#detailHardware :selected').attr('path');
+            hintText = '硬件版本';
+            break;
+        case 4:
+            fileId = $('#detailApplication').val();
+            fileType = fileEnum.Application;
+            fileName = $('#detailApplication :selected').attr('path');
+            hintText = '应用层版本';
+            break;
+    }
+    if (isStrEmptyOrUndefined(fileId)) {
+        layer.msg(`请选择：<span style="font-weight:bold">${hintText}</span>`);
+        return;
+    }
+    var doSth = () => {
+        var data = {
+            type: fileType,
+            files: JSON.stringify([fileName])
+        };
+        ajaxPost("/Upload/Path", data, ret => {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
             }
-        });
+            data = {};
+            data.opType = 108;
+            data.opData = JSON.stringify({
+                Type: type,
+                Infos: [{
+                    Type: 1,
+                    FileId: fileId,
+                    FileUrl: `${location.origin}${ret.data[0].path}`,
+                    DeviceId: codeId
+                }]
+            });
+            ajaxPost("/Relay/Post", data, ret => {
+                var d = ret.datas[0];
+                layer.msg(d.errmsg);
+                if (d.errno == 0) {
+                    getControlList();
+                }
+            });
+        }, 0);
+    }
+    showConfirm(`升级${hintText}`, doSth);
 }
