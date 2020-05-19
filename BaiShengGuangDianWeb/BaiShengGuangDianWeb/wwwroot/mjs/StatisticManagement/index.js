@@ -749,9 +749,11 @@ function getProcessDetail() {
                         .format(escape(data.ProcessData))
                     : "";
             }
-            var o;
-            var order = function (data, type, row) {
-                return ++o;
+            var order = function (data, type, row, meta) {
+                return ++meta.row;
+            }
+            var opName = function (data, type, row, meta) {
+                return data == "闲置" ? `<span class="text-red">${data}</span>` : data;
             }
             var time = function (data, type, row) {
                 return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
@@ -797,16 +799,16 @@ function getProcessDetail() {
                         "iDisplayLength": 5, //默认显示的记录数  
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
-                            { "data": "OpName", "title": "操作" },
+                            { "data": "OpName", "title": "操作", "render": opName },
                             { "data": "StartTime", "title": "开始时间" },
                             { "data": null, "title": "结束时间", "render": time },
                             { "data": null, "title": "加工时间", "render": totalTime },
                             { "data": "ProductionProcessName", "title": "计划号" },
                             { "data": "FlowCardName", "title": "流程卡号" },
+                            { "data": null, "title": "工艺", "render": op },
                             { "data": null, "title": "片厚", "render": actualThickness },
                             { "data": null, "title": "要求", "render": requirementMid },
-                            { "data": "ProcessorName", "title": "加工人" },
-                            { "data": null, "title": "工艺", "render": op }
+                            { "data": "ProcessorName", "title": "加工人" }
                         ]
                     });
                     var meanTime = 0;
@@ -864,9 +866,11 @@ function rateList(i, deviceId, startTime, endTime, plan) {
         var processCount = ret.datas[0].ProcessCount + "次";
         var rData = ret.datas[0].ProcessLog;
         $("#num" + i).text("每日加工次数：" + processCount);
-        var o = 0;
-        var order = function (data, type, row) {
-            return ++o;
+        var order = function (data, type, row, meta) {
+            return ++meta.row;
+        }
+        var opName = function (data, type, row, meta) {
+            return data == "闲置" ? `<span class="text-red">${data}</span>` : data;
         }
         var time = function (data, type, row) {
             return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
@@ -900,16 +904,16 @@ function rateList(i, deviceId, startTime, endTime, plan) {
             "iDisplayLength": 5, //默认显示的记录数  
             "columns": [
                 { "data": null, "title": "序号", "render": order },
-                { "data": "OpName", "title": "操作" },
+                { "data": "OpName", "title": "操作", "render": opName },
                 { "data": "StartTime", "title": "开始时间" },
                 { "data": null, "title": "结束时间", "render": time },
                 { "data": null, "title": "加工时间", "render": totalTime },
                 { "data": "ProductionProcessName", "title": "计划号" },
                 { "data": "FlowCardName", "title": "流程卡号" },
+                { "data": null, "title": "工艺", "render": op },
                 { "data": null, "title": "片厚", "render": actualThickness },
                 { "data": null, "title": "要求", "render": requirementMid },
-                { "data": "ProcessorName", "title": "加工人" },
-                { "data": null, "title": "工艺", "render": op }
+                { "data": "ProcessorName", "title": "加工人" }
             ]
         });
         var meanTime = 0;
