@@ -144,30 +144,39 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailScript">流程脚本版本：</label>
-                            <div class="col-sm-9">
-                                <input class="form-control" disabled="disabled" id="detailScript">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-3" for="detailFirmware">固件版本：</label>
+                            <label class="control-label col-sm-3">流程脚本版本：</label>
                             <div class="col-sm-9">
                                 <div class="flexStyle">
-                                    <select class="form-control" style="width: 100%" id="detailFirmware"></select>
-                                    <button type="button" class="btn btn-primary" disabled="disabled" onclick="upgradeFirmware()" id="upgradeFirmwareBtn">升级</button>
+                                    <select class="ads form-control" style="width: 100%" id="detailScript"></select>
+                                    <button type="button" class="btn btn-primary" onclick="deviceUpgrade(1)">升级</button>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailHardware">硬件版本：</label>
+                            <label class="control-label col-sm-3">固件版本：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" disabled="disabled" id="detailHardware">
+                                <div class="flexStyle">
+                                    <select class="ads form-control" style="width: 100%" id="detailFirmware"></select>
+                                    <button type="button" class="btn btn-primary" disabled="disabled" onclick="">升级</button>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="detailApplication">应用层版本：</label>
+                            <label class="control-label col-sm-3">硬件版本：</label>
                             <div class="col-sm-9">
-                                <input class="form-control" disabled="disabled" id="detailApplication">
+                                <div class="flexStyle">
+                                    <select class="ads form-control" style="width: 100%" id="detailHardware"></select>
+                                    <button type="button" class="btn btn-primary" disabled="disabled" onclick="">升级</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="detailFirmware">应用层版本：</label>
+                            <div class="col-sm-9">
+                                <div class="flexStyle">
+                                    <select class="ads form-control" style="width: 100%" id="detailApplication"></select>
+                                    <button type="button" class="btn btn-primary" disabled="disabled" onclick="">升级</button>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">

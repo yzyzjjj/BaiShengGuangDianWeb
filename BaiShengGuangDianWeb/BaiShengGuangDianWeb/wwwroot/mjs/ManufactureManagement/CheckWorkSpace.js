@@ -390,8 +390,8 @@ function showDetailModel(id) {
         var checkTime = function (data) {
             return noShowSecond(data);
         }
-        var result = function (data) {
-            return data == 1 ? '通过' : '不通过';
+        var result = function (d) {
+            return d.Result == 0 ? d.ResultDesc : d.Result == 1 ? '通过' : '不通过';
         }
         var img = function (data) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="showImgModel(\'${data}\')">查看</button>`;
@@ -412,7 +412,7 @@ function showDetailModel(id) {
                 { "data": "Method", "title": "检验要求" },
                 { "data": "Desc", "title": "检验说明" },
                 { "data": "CheckTime", "title": "检验时间", "render": checkTime },
-                { "data": "Result", "title": "检验结果", "render": result },
+                { "data": null, "title": "检验结果", "render": result },
                 { "data": "ImageList", "title": "图片", "render": img }
             ]
         });

@@ -3,7 +3,7 @@ function pageReady() {
     _permissionList[161] = { uIds: ['showAddModel'] };
     _permissionList[162] = { uIds: [] };
     _permissionList[163] = { uIds: [] };
-    _permissionList[164] = { uIds: [] };
+    _permissionList[164] = { uIds: ['showBatchUpgradeModelBtn'] };
     _permissionList[148] = { uIds: [] };
     _permissionList[147] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
@@ -921,8 +921,12 @@ function delBatchUpgradeTr() {
 function batchUpgrade() {
     var trs = $('#scriptList tr');
     var info = { codeId: [], fileId: [], filePath: [] };
-    var i, len;
-    for (i = 0, len = trs.length; i < len; i++) {
+    var i = 0, len = trs.length;
+    if (!len) {
+        layer.msg('请先添加设备');
+        return;
+    }
+    for (; i < len; i++) {
         var tr = trs.eq(i);
         var codeId = tr.find('.delTr').val();
         if (_deviceData[codeId].DeviceStateStr != '待加工') {
