@@ -77,7 +77,7 @@ function getDayAgo(daysAgo) {
 function getNowWeekRange(weekDay = 0) {
     return {
         start: new Date(new Date().setDate(new Date().getDate() - (weekDay - 1))).format("yyyy-MM-dd"),
-        end: new Date(new Date().setDate(new Date().getDate() + (weekDay - 7))).format("yyyy-MM-dd")
+        end: new Date(new Date().setDate(new Date().getDate() + (7 - weekDay))).format("yyyy-MM-dd")
     };
 }
 

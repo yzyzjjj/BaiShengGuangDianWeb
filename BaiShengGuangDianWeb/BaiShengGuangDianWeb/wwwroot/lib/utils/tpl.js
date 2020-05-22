@@ -337,7 +337,6 @@ $(function () {
         startView: 1,
         minViewMode: 1,
         maxViewMode: 2,
-        todayBtn: "linked",
         autoclose: true
     });
     $('.form_time').timepicker({
@@ -348,7 +347,6 @@ $(function () {
         showSeconds: true,
         secondStep: 1
     });
-
     $('.icb_minimal').iCheck({
         checkboxClass: 'icheckbox_minimal',
         radioClass: 'iradio_minimal',
