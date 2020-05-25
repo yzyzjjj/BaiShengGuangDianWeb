@@ -6,7 +6,7 @@
     $('#eTime,#planeTime,#taskeTime').val(nowMonth.end).datepicker('update');
     $('#monthTime').val(getNowMonth()).datepicker('update');
     var time = 0;
-    $('#performance_chart,#plan_chart,#task_chart,#finish_chart').on("resize", e => {
+    $('#performance_chart,#plan_chart,#task_chart').on("resize", e => {
         clearTimeout(time);
         time = setTimeout(() => echarts.init($(`#${e.target.id}`)[0]).resize(), 200);
     });
@@ -83,6 +83,32 @@
     //        }
     //    }
     //});
+    echarts.init($('#finish_chart')[0]).on('click', e => {
+        var v = e.value;
+        if (v[1] > 4) {
+            var data = _finishList[v[0]];
+            $('#finishTime').text(v[0]);
+            $('#finishProcessor').text(_finishProcessor);
+            $("#finishList")
+                .DataTable({
+                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                    "destroy": true,
+                    "paging": true,
+                    "searching": true,
+                    "language": oLanguage,
+                    "data": data,
+                    "aaSorting": [[0, "asc"]],
+                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                    "iDisplayLength": 20, //默认显示的记录数
+                    "columns": [
+                        { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
+                        { "data": "item", "title": "任务名" },
+                        { "data": "actualTime", "title": "任务用时" }
+                    ]
+                });
+            $('#showFinishModel').modal('show');
+        }
+    });
 }
 
 //柱状图
@@ -112,7 +138,10 @@ var _option = {
         barWidth: '60%',
         label: {
             show: true,
-            position: 'top'
+            position: 'top',
+            formatter: params => {
+                return (params.value + '').indexOf('.') == -1 ? params.value : params.value.toFixed(2);
+            }
         }
     },
     dataZoom: [{
@@ -376,6 +405,8 @@ function getMonthDay(monthTime) {
     }
 }
 
+var _finishProcessor = null;
+var _finishList = null;
 //var _finishStatus = [];
 //获取任务完成情况汇总表
 function getTaskFinishChart() {
@@ -402,6 +433,7 @@ function getTaskFinishChart() {
         layer.msg('请选择操作员');
         return;
     }
+    _finishProcessor = $('#finishItem .icb_minimal:checked').parent().next().text();
     var data = {}
     data.opType = 1101;
     data.opData = JSON.stringify({
@@ -421,46 +453,55 @@ function getTaskFinishChart() {
         var obj = {};
         var i = 0, len = rData.length;
         for (; i < len; i++) {
-            var time = rData[i].ActualEndTime.split(' ')[0];
-            obj[time] ? obj[time].push(rData[i].Item) : obj[time] = [rData[i].Item];
+            var d = rData[i];
+            var actualTime = `${d.ActualHour == 0 ? '' : d.ActualHour + 'h'}${d.ActualHour != 0 && d.ActualMin == 0 ? '' : d.ActualMin + 'm'}`;
+            var time = d.ActualEndTime.split(' ')[0];
+            var dir = {
+                item: d.Item,
+                actualTime
+            }
+            obj[time] ? obj[time].push(dir) : obj[time] = [dir];
         }
+        _finishList = $.extend(true, {}, obj);
         var system = getChartData(monthTime, obj);
         var arr = [];
         var max = 1;
         for (var k in obj) {
             var objArr = obj[k];
             max = objArr.length > max ? objArr.length : max;
-            objArr.unshift(k,1);
+            objArr.unshift(k, 1);
             arr.push(objArr);
         }
+        var month = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
         var option = {
             tooltip: {
-                formatter: function (params) {
-                    var day = params.value[0];
-                    var str = '完成任务：';
-                    var d = obj[day];
-                    if (d) {
-                        for (i = 2, len = d.length; i < len; i++) {
-                            str += `<br>&nbsp&nbsp${d[i]}`;
-                        }
-                    } else {
-                        str += '<br>&nbsp&nbsp无';
-                    }
-                    return str;
-                }
+                show: false
+                //formatter: function (params) {
+                //    var day = params.value[0];
+                //    var str = '完成任务：';
+                //    var d = obj[day];
+                //    if (d) {
+                //        for (i = 2, len = d.length; i < len; i++) {
+                //            str += `<br>&nbsp;&nbsp;${'<span style="color:#00da88">' + d[i].actualTime + '</span>'}&nbsp;&nbsp;${d[i].item}`;
+                //        }
+                //    } else {
+                //        str += '<br>&nbsp&nbsp无';
+                //    }
+                //    return str;
+                //}
             },
             visualMap: {
                 show: false,
                 min: 0,
                 max: max,
                 inRange: {
-                    color: ['#fff', '#00A9FC']
+                    color: ['#fff', 'rgba(0,169,252,.1)']
                 }
             },
             calendar: {
                 top: 40,
                 left: 'center',
-                cellSize: ['auto',100],
+                cellSize: [180, 100],
                 range: monthTime,
                 itemStyle: {
                     borderWidth: 1
@@ -474,7 +515,8 @@ function getTaskFinishChart() {
                     nameMap: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
                     fontSize: 15,
                     fontWeight: 700
-                }
+                },
+                splitLine: { show: false }
             },
             series: [{
                 type: 'scatter',
@@ -486,16 +528,32 @@ function getTaskFinishChart() {
                         var arrData = params.value;
                         var str = '';
                         for (i = 2, len = arrData.length; i < len; i++) {
-                            str += `\n${arrData[i]}`;
                             if (i == 6) {
-                                str += '\n...';
+                                str += '\n{more|点击查看更多}';
                                 break;
                             }
+                            str += `\n{time|${arrData[i].actualTime}}${arrData[i].item.length > 7 ? arrData[i].item.slice(0, 7) + '...' : arrData[i].item}`;
                         }
                         return str;
                     },
                     fontSize: 14,
-                    color: '#000'
+                    color: '#000',
+                    align: 'left',
+                    offset: [-80, 0],
+                    lineHeight: 17,
+                    rich: {
+                        time: {
+                            color: '#00da88',
+                            fontSize: 13,
+                            fontWeight: 500,
+                            width: 50
+                        },
+                        more: {
+                            color: '#ff5d5d',
+                            fontSize: 12,
+                            padding: [0, 0, 0, 42]
+                        }
+                    }
                 },
                 data: arr
             }, {
@@ -503,13 +561,29 @@ function getTaskFinishChart() {
                 coordinateSystem: 'calendar',
                 label: {
                     show: true,
-                    formatter:  params => {
-                        return echarts.number.parseDate(params.value[0]).getDate();
+                    formatter: params => {
+                        var t = echarts.number.parseDate(params.value[0]);
+                        var day = t.getDate();
+                        if (day == 1) {
+                            day = `{mon|${month[t.getMonth()]}月}${day}`;
+                        }
+                        return day;
                     },
                     fontSize: 14,
                     fontWeight: 700,
                     color: '#000',
-                    position: 'insideTopRight'
+                    position: 'insideTopRight',
+                    rich: {
+                        mon: {
+                            backgroundColor: '#838a9d',
+                            color: '#fff',
+                            padding: 5,
+                            borderRadius: 50,
+                            fontWeight: 800,
+                            lineHeight: 0,
+                            fontSize: 12
+                        }
+                    }
                 },
                 data: system
             }]

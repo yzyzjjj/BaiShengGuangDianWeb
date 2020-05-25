@@ -144,9 +144,38 @@
                                     </div>
                                     <span class="glyphicon glyphicon-triangle-left pointer" aria-hidden="true" title="收起" onclick="foldList.call(this, '#task_finish_item')" style="position: absolute; right: -5px; top: 5%; font-size: 20px; color: #00A9FC"></span>
                                 </div>
-                                <div class="hidden" id="finish_chart" style="width: 100%; height: 550px"></div>
+                                <div style="margin: 0 auto;overflow:auto">
+                                    <div class="hidden" id="finish_chart" style="width: 1270px; height: 650px"></div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showFinishModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">任务完成情况</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label text-nowrap">时间：<span class="spanStyle" id="finishTime"></span></label>
+                            <label class="control-label text-nowrap">操作员：<span class="spanStyle" id="finishProcessor"></span></label>
+                        </div>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="finishList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     </div>
                 </div>
             </div>
