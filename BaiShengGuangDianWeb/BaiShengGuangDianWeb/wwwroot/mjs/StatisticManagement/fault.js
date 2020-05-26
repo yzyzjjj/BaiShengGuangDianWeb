@@ -199,6 +199,7 @@ function getDeviceList(par) {
                 layer.msg(ret.errmsg);
                 return;
             }
+            ret.datas.sort((a, b) => a.Code - b.Code);
             var option, i, d, len = ret.datas.length;
             if (par == 1) {
                 $("#selectDevice").empty();

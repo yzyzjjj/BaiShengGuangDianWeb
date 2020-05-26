@@ -64,6 +64,7 @@ function getDeviceChart() {
                 layer.msg(ret.errmsg);
                 return;
             }
+            ret.datas.sort((a, b) => a.Code - b.Code);
             $("#selectDevice").empty();
             var option1 = '<option value="{0}">{1}</option>';
             for (var i = 0; i < ret.datas.length; i++) {

@@ -656,6 +656,13 @@ function pageReady() {
     });
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
+
+//刷新
+function refresh() {
+    $('#siteSelect').val(0).trigger('change');
+    $('#categorySelect').val(0).trigger('change').trigger('select2:select');
+}
+
 //冲正相关
 function setReversalList() {
     var trEl = $('#reversalList tr');

@@ -83,6 +83,7 @@ function getScoreList() {
             layer.msg(ret.errmsg);
             return;
         }
+        $('#scoreTime').text(`${ret.sTime.split(' ')[0]} ~ ${ret.eTime.split(' ')[0]}`);
         $('#scoreList').empty();
         var rData = ret.datas;
         var trs = '';

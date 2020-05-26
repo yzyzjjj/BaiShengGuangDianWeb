@@ -28,6 +28,7 @@ function getControlList() {
                 return;
             }
             var rData = ret.datas;
+            rData.sort((a, b) => a.Code - b.Code);
             $(".ms2").empty();
             var exit = false;
             var option = '<option value="{0}">{1}</option>';
@@ -179,7 +180,7 @@ function deviceUpgrade(type = 0) {
             break;
         case 2:
             fileId = $('#detailFirmware').val();
-            fileType = fileEnum.Firmware;
+            fileType = fileEnum.FirmwareLibrary;
             fileName = $('#detailFirmware :selected').attr('path');
             hintText = '固件版本';
             break;
@@ -191,7 +192,7 @@ function deviceUpgrade(type = 0) {
             break;
         case 4:
             fileId = $('#detailApplication').val();
-            fileType = fileEnum.Application;
+            fileType = fileEnum.ApplicationLibrary;
             fileName = $('#detailApplication :selected').attr('path');
             hintText = '应用层版本';
             break;

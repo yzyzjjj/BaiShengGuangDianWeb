@@ -227,6 +227,12 @@ function pageReady() {
     $('#batchAddMaterialModal').attr("data-backdrop", "static");
 }
 
+//刷新
+function refresh() {
+    $('#siteSelect').val(0).trigger('change');
+    $('#categorySelect').val(0).trigger('change').trigger('select2:select');
+}
+
 var _categorySelect = null;
 //类别选项
 function categorySelect(resolve) {

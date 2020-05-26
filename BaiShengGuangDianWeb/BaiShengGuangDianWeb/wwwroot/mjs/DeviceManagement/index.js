@@ -82,19 +82,22 @@ function pageReady() {
             }
         }
     });
-    $('#scriptList').on('select2:select', '.code', function () {
+    $('#scriptList,#firmwareList').on('select2:select', '.code', function (ev) {
+        var el = ev.delegateTarget.id;
+        var e = $('#batchType li[class~=active]').prevAll().length;
+        var codeData = _batchCodeData[e];
         var id = $(this).val();
-        _codeSelect.push(id);
+        codeData.push(id);
         var oldVal = $(this).data("last");
         $(this).data("last", id);
         if (!isStrEmptyOrUndefined(oldVal)) {
-            _codeSelect.splice(_codeSelect.indexOf(oldVal), 1);
-            $(`#scriptList .code option[value=${oldVal}]`).prop('disabled', false);
+            codeData.splice(codeData.indexOf(oldVal), 1);
+            $(`#${el} .code option[value=${oldVal}]`).prop('disabled', false);
         }
-        for (var i = 0, len = _codeSelect.length; i < len; i++) {
-            $(`#scriptList .code option[value=${_codeSelect[i]}]`).prop('disabled', true);
+        for (var i = 0, len = codeData.length; i < len; i++) {
+            $(`#${el} .code option[value=${codeData[i]}]`).prop('disabled', true);
         }
-        $('#scriptList .code').select2();
+        $(`#${el} .code`).select2();
         var tr = $(this).parents('tr');
         tr.find('.delTr').val(id);
         var d = _deviceData[id];
@@ -117,12 +120,25 @@ function pageReady() {
                 stateClass = 'red';
         }
         tr.find('.devState').html(`<span class="text-${stateClass}">${state}</span>`);
-        tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
-        new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
-            tr.find('.script').empty().append(e).val(d.ScriptId).trigger('change');
-        });
+        switch (e) {
+            case 0:
+                tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
+                new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
+                    tr.find('.script').empty().append(e).val(d.ScriptId).trigger('change');
+                });
+                break;
+            case 1:
+                new Promise(resolve => getUpgrade(resolve, 130, 'FilePath', 'FirmwareName')).then(e => {
+                    tr.find('.firmware').empty().append(e).val(d.FirmwareId).trigger('change');
+                });
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
     });
-    $('#script_nav_table').css('maxHeight', innerHeight * 0.7);
+    $('#script_nav_table,#firmware_nav_table').css('maxHeight', innerHeight * 0.7);
 }
 
 var _deviceData = null;
@@ -139,10 +155,13 @@ function getDeviceList(resolve) {
                 return;
             }
             var rData = ret.datas;
-            _deviceData = {};
+            _deviceData = { state: 0 };
             for (var i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 _deviceData[d.Id] = d;
+                if (d.DeviceStateStr == '待加工') {
+                    _deviceData.state++;
+                }
             }
             if (!isStrEmptyOrUndefined(resolve)) {
                 resolve('success');
@@ -203,7 +222,7 @@ function getDeviceList(resolve) {
                 return data.CategoryName + "-" + data.ModelName;
             }
             var order = function (data, type, row, meta) {
-                return meta.row + 1;
+                return ++meta.row;
             }
             var rModal = function (data, type, meta) {
                 var placeName = data.SiteName + data.RegionDescription;
@@ -807,7 +826,7 @@ function deviceUpgrade(type = 0) {
             break;
         case 2:
             fileId = $('#upgradeFirmware').val();
-            fileType = fileEnum.Firmware;
+            fileType = fileEnum.FirmwareLibrary;
             fileName = $('#upgradeFirmware :selected').attr('path');
             hintText = '固件版本';
             break;
@@ -819,7 +838,7 @@ function deviceUpgrade(type = 0) {
             break;
         case 4:
             fileId = $('#upgradeApplication').val();
-            fileType = fileEnum.Application;
+            fileType = fileEnum.ApplicationLibrary;
             fileName = $('#upgradeApplication :selected').attr('path');
             hintText = '应用层版本';
             break;
@@ -864,62 +883,64 @@ function deviceUpgrade(type = 0) {
 
 //批量升级弹窗
 function showBatchUpgradeModel() {
-    new Promise(resolve => getDeviceList(resolve)).then(() => $('#addScriptListBtn').removeAttr('disabled'));
-    _codeSelect = [];
-    $('#scriptList').empty();
+    new Promise(resolve => getDeviceList(resolve)).then(() => $('#addScriptListBtn,#addFirmwareListBtn').removeAttr('disabled'));
+    _batchCodeData = [[], [], [], []];
+    $('#scriptList,#firmwareList').empty();
     $('#batchUpgradeModel').modal('show');
 }
 
-var _codeSelect = null;
+var _batchCodeData = null;
 //批量升级添加新项
-function addBatchUpgradeTr() {
+function addBatchUpgradeTr(e, el) {
     var op = '<option value="{0}" {2}>{1}</option>';
     var ops = '';
     for (var key in _deviceData) {
         var d = _deviceData[key];
-        ops += op.format(key, d.Code, _codeSelect.indexOf(key) == -1 ? '' : 'disabled');
+        if (d.DeviceStateStr == '待加工') {
+            ops += op.format(key, d.Code, _batchCodeData[e].indexOf(key) == -1 ? '' : 'disabled');
+        }
     }
     var tr = `<tr>
                 <td class="num"></td>
                 <td style="width:100px"><select class="ms2 form-control code">${ops}</select></td>
                 <td class="devState"></td>
-                <td class="devModel"></td>
-                <td style="min-width:120px"><select class="ms2 form-control script"></select></td>
+                ${e == 0 ? '<td class="devModel"></td>' : ''}
+                <td style="min-width:120px"><select class="ms2 form-control ${el}"></select></td>
                 <td class="result"></td>
-                <td><button type="button" class="btn btn-danger btn-sm delTr" onclick="delBatchUpgradeTr.call(this)"><i class="fa fa-minus"></i></button></td>
+                <td><button type="button" class="btn btn-danger btn-sm delTr" onclick="delBatchUpgradeTr.call(this,${e},\'${el}\')"><i class="fa fa-minus"></i></button></td>
               </tr>`;
-    $('#scriptList').append(tr).find('.ms2').select2();
-    batchUpgradeSort();
-    $('#scriptList .code:last').trigger('select2:select');
-    if (Object.keys(_deviceData).length == _codeSelect.length) {
-        $('#addScriptListBtn').attr('disabled', true);
+    $(`#${el}List`).append(tr).find('.ms2').select2();
+    batchUpgradeSort(el);
+    $(`#${el}List .code:last`).trigger('select2:select');
+    if (_deviceData.state == _batchCodeData[e].length) {
+        $(`#add${el[0].toUpperCase() + el.slice(1)}ListBtn`).attr('disabled', true);
     }
-    $('#script_nav_table').scrollTop($('#script_nav_table')[0].scrollHeight);
+    $(`#${el}_nav_table`).scrollTop($(`#${el}_nav_table`)[0].scrollHeight);
 }
 
 //批量升级tr排序
-function batchUpgradeSort() {
-    var trs = $('#scriptList tr');
+function batchUpgradeSort(el) {
+    var trs = $(`#${el}List tr`);
     for (var i = 0, len = trs.length; i < len; i++) {
         trs.eq(i).find('.num').text(i + 1);
     }
 }
 
 //批量升级删除tr
-function delBatchUpgradeTr() {
+function delBatchUpgradeTr(e, el) {
     var tr = $(this).parents('tr');
     tr.remove();
-    batchUpgradeSort();
+    batchUpgradeSort(el);
     var v = $(this).val();
-    _codeSelect.splice(_codeSelect.indexOf(v), 1);
-    $(`#scriptList .code option[value=${v}]`).prop('disabled', false);
-    $('#addScriptListBtn').attr('disabled', false);
-    $('#scriptList .code').select2();
+    _batchCodeData[e].splice(_batchCodeData[e].indexOf(v), 1);
+    $(`#${el}List .code option[value=${v}]`).prop('disabled', false);
+    $(`#add${el[0].toUpperCase() + el.slice(1)}ListBtn`).attr('disabled', false);
+    $(`#${el}List .code`).select2();
 }
 
 //批量升级
-function batchUpgrade() {
-    var trs = $('#scriptList tr');
+function batchUpgrade(e, el) {
+    var trs = $(`#${el}List tr`);
     var info = { codeId: [], fileId: [], filePath: [] };
     var i = 0, len = trs.length;
     if (!len) {
@@ -933,7 +954,7 @@ function batchUpgrade() {
             layer.msg(`序列${i + 1}：非待加工设备不能升级`);
             return;
         }
-        var scriptEl = tr.find('.script');
+        var scriptEl = tr.find(`.${el}`);
         var fileId = scriptEl.val();
         var filePath = scriptEl.find(':selected').attr('path');
         if (isStrEmptyOrUndefined(filePath)) {
@@ -944,9 +965,28 @@ function batchUpgrade() {
         info.fileId.push(fileId);
         info.filePath.push(filePath);
     }
+    var fileType = null, hintText = '';
+    switch (e) {
+        case 0:
+            fileType = fileEnum.Script;
+            hintText = '流程脚本版本';
+            break;
+        case 1:
+            fileType = fileEnum.FirmwareLibrary;
+            hintText = '固件版本';
+            break;
+        case 2:
+            fileType = fileEnum.Hardware;
+            hintText = '硬件版本';
+            break;
+        case 3:
+            fileType = fileEnum.ApplicationLibrary;
+            hintText = '应用层版本';
+            break;
+    }
     var doSth = () => {
         var data = {
-            type: fileEnum.Script,
+            type: fileType,
             files: JSON.stringify(info.filePath)
         };
         ajaxPost("/Upload/Path", data, ret => {
@@ -970,22 +1010,23 @@ function batchUpgrade() {
             data = {};
             data.opType = 108;
             data.opData = JSON.stringify({
-                Type: 1,
+                Type: e + 1,
                 Infos: infos
             });
             ajaxPost("/Relay/Post", data, ret => {
                 var results = ret.datas;
                 len = results.length;
-                var resultEl = $('#scriptList .result');
+                var resultEl = $(`#${el}List .result`);
                 for (i = 0; i < len; i++) {
                     var result = results[i];
                     var color = result.errno == 0 ? 'success' : 'red';
                     resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
                 }
+                getDeviceList();
             });
         }, 0);
     }
-    showConfirm('升级流程脚本版本', doSth);
+    showConfirm(`升级${hintText}`, doSth);
 }
 
 function deleteDevice(id, code) {

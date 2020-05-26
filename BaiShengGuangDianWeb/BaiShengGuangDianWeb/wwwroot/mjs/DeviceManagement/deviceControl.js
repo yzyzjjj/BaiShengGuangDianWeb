@@ -22,6 +22,7 @@ function getCodeList() {
             layer.msg(ret.errmsg);
             return;
         }
+        ret.datas.sort((a, b) => a.Code - b.Code);
         $("#selectCode").empty();
         var option = '<option value="{0}">{1}</option>';
         var i, len = ret.datas.length;

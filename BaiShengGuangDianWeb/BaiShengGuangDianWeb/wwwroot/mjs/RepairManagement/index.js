@@ -997,6 +997,7 @@ function getDeviceCode(resolve) {
             return;
         }
         var list = ret.datas;
+        list.sort((a, b) => a.Code - b.Code);
         var op = '<option value="{0}" admin="{2}">{1}</option>';
         var ops = '';
         for (var i = 0; i < list.length; i++) {
