@@ -465,18 +465,18 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                     "searching": true,
                     "language": oLanguage,
                     "data": rData,
-                    "aaSorting": [[0, "asc"]],
+                    "aaSorting": [[per501 ? 1 : 0, "asc"]],
                     "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                     "iDisplayLength": 20, //默认显示的记录数
                     "columns": [
+                        { "data": null, "title": "删除", "render": del, "visible": per501, "orderable": false },
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Plan", "title": "计划" },
                         { "data": null, "title": "领料状态(<font style='color:green'>已</font>/<font style='color:blue'>总</font>/<font style='color:red'>超</font>)", "render": status },
                         { "data": "Remark", "title": "备注" },
                         { "data": "PlannedCost", "title": "计划造价" },
                         { "data": "ActualCost", "title": "实际造价" },
-                        { "data": null, "title": "操作", "render": operation, "orderable": false},
-                        { "data": null, "title": "删除", "render": del, "visible": per501, "orderable": false}
+                        { "data": null, "title": "操作", "render": operation, "orderable": false}
                     ]
                 });
         } else {

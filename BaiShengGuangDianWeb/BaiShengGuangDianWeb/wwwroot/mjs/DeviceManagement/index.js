@@ -142,7 +142,7 @@ function pageReady() {
 }
 
 var _deviceData = null;
-function getDeviceList(resolve) {
+function getDeviceList(resolve, isUpgrade) {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
@@ -163,7 +163,7 @@ function getDeviceList(resolve) {
                     _deviceData.state++;
                 }
             }
-            if (!isStrEmptyOrUndefined(resolve)) {
+            if (!isStrEmptyOrUndefined(resolve) && isUpgrade) {
                 resolve('success');
                 return;
             }
@@ -254,6 +254,9 @@ function getDeviceList(resolve) {
                         { "data": null, "title": "操作", "render": op, "orderable": false, "visible": per148 || per147 || per162 || per164 || per163 }
                     ]
                 });
+            if (!isStrEmptyOrUndefined(resolve) && !isUpgrade) {
+                resolve('success');
+            }
         });
 }
 
@@ -883,7 +886,7 @@ function deviceUpgrade(type = 0) {
 
 //批量升级弹窗
 function showBatchUpgradeModel() {
-    new Promise(resolve => getDeviceList(resolve)).then(() => $('#addScriptListBtn,#addFirmwareListBtn').removeAttr('disabled'));
+    new Promise(resolve => getDeviceList(resolve, true)).then(() => $('#addScriptListBtn,#addFirmwareListBtn').removeAttr('disabled'));
     _batchCodeData = [[], [], [], []];
     $('#scriptList,#firmwareList').empty();
     $('#batchUpgradeModel').modal('show');
@@ -938,6 +941,49 @@ function delBatchUpgradeTr(e, el) {
     $(`#${el}List .code`).select2();
 }
 
+//批量升级刷新
+function batchRefresh(e, el) {
+    var data = {}
+    data.opType = 100;
+    data.opData = JSON.stringify({
+        hard: true,
+        ids: _batchCodeData[e].join(',')
+    });
+    ajaxPost("/Relay/Post", data, ret => {
+        var list = ret.datas;
+        data = {};
+        var i = 0, len = list.length, d;
+        for (; i < len; i++) {
+            d = list[i];
+            data[d.Id] = d;
+        }
+        var devStateEl = $(`#${el}List .devState`);
+        var devData = _batchCodeData[e];
+        for (i = 0, len = devData.length; i < len; i++) {
+            d = data[devData[i]];
+            var state = d.DeviceStateStr;
+            var stateClass;
+            switch (state) {
+                case '待加工':
+                    stateClass = 'success';
+                    break;
+                case '加工中':
+                    stateClass = 'success';
+                    break;
+                case '已确认':
+                    stateClass = 'warning';
+                    break;
+                case '维修中':
+                    stateClass = 'info';
+                    break;
+                default:
+                    stateClass = 'red';
+            }
+            devStateEl.eq(i).html(`<span class="text-${stateClass}">${state}</span>`);
+        }
+    });
+}
+
 //批量升级
 function batchUpgrade(e, el) {
     var trs = $(`#${el}List tr`);
@@ -950,7 +996,7 @@ function batchUpgrade(e, el) {
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var codeId = tr.find('.delTr').val();
-        if (_deviceData[codeId].DeviceStateStr != '待加工') {
+        if (tr.find('.devState span').text() != '待加工') {
             layer.msg(`序列${i + 1}：非待加工设备不能升级`);
             return;
         }
@@ -1022,7 +1068,7 @@ function batchUpgrade(e, el) {
                     var color = result.errno == 0 ? 'success' : 'red';
                     resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
                 }
-                getDeviceList();
+                batchRefresh(e, el);
             });
         }, 0);
     }
