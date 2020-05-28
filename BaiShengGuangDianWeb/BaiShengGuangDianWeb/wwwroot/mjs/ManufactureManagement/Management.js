@@ -24,15 +24,18 @@ function pageReady() {
     $('#updateTask').on('click', function () {
         _isClick = !_isClick;
         if (_isClick) {
-            $('#taskEstimatedTime .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            $('#taskEstimatedTime .textOn,#taskGroupText,#taskProText').addClass('hidden').siblings('.textIn').removeClass('hidden');
             $('#taskScore .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
             $('#taskEstimatedTime .hour').val(_taskDetailData.EstimatedHour);
             $('#taskEstimatedTime .minute').val(_taskDetailData.EstimatedMin);
             $('#taskScore .score').val(_taskDetailData.Score);
+            var groupId = _taskDetailData.GroupId;
+            $('#taskGroupSelect').val(groupId).trigger('change');
+            setProcessorSelect(groupId, $('#taskProSelect'));
+            $('#taskProSelect').val(_taskDetailData.Person).trigger('change');
             var v = $(this).val();
             if (v == 3) {
-                $('#taskActualTime .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
-                $('#taskActualScore .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+                $('#taskActualTime .textOn,#taskActualScore .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
                 $('#taskActualTime .hour').val(_taskDetailData.ActualHour);
                 $('#taskActualTime .minute').val(_taskDetailData.ActualMin);
                 $('#taskActualScore .score').val(_taskDetailData.ActualScore);
@@ -43,13 +46,20 @@ function pageReady() {
         }
         $('#taskDesc').prop('disabled', !_isClick);
     });
+    $('#taskGroupSelect').on('select2:select', function() {
+        setProcessorSelect($(this).val(), $('#taskProSelect'));
+    });
     $('#updateCheck').on('click', function () {
         _isClick = !_isClick;
         if (_isClick) {
-            $('#checkDetailTable .textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            $('#checkDetailTable .textOn,#checkGroupText,#checkProText').addClass('hidden').siblings('.textIn').removeClass('hidden');
             $('#checkEstimatedTime .hour').val(_taskDetailData.EstimatedHour);
             $('#checkEstimatedTime .minute').val(_taskDetailData.EstimatedMin);
             $('#checkScore .score').val(_taskDetailData.Score);
+            var groupId = _taskDetailData.GroupId;
+            $('#checkGroupSelect').val(groupId).trigger('change');
+            setProcessorSelect(groupId, $('#checkProSelect'));
+            $('#checkProSelect').val(_taskDetailData.Person).trigger('change');
             var v = $(this).val();
             if (v == 3) {
                 $('#checkActualTime .hour').val(_taskDetailData.ActualHour);
@@ -57,15 +67,16 @@ function pageReady() {
                 $('#checkActualScore .score').val(_taskDetailData.ActualScore);
                 $('#checkResult').val(_taskDetailData.CheckResult);
             } else {
-                $('#checkActualTime .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
-                $('#checkActualScore .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
-                $('#checkResultDesc .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+                $('#checkActualTime .textOn,#checkActualScore .textOn,#checkResultDesc .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
             }
         } else {
             $('#checkDesc').val(_taskDetailData.Desc);
             $('#checkDetailTable .textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
         }
         $('#checkDesc').prop('disabled', !_isClick);
+    });
+    $('#checkGroupSelect').on('select2:select', function () {
+        setProcessorSelect($(this).val(), $('#checkProSelect'));
     });
     $('.minute').on('input', function () {
         var v = $(this).val();
@@ -199,7 +210,6 @@ var _processorCheck = [];
 
 //设置操作员选项
 function setProcessorSelect(groupId, el) {
-    el.empty();
     var op = '<option value = "{0}">{1}</option>';
     var ops = '';
     for (var i = 0, len = _processor.length; i < len; i++) {
@@ -208,7 +218,7 @@ function setProcessorSelect(groupId, el) {
             ops += op.format(d.Id, d.Processor);
         }
     }
-    el.append(ops);
+    el.empty().append(ops);
 }
 
 //是否点击修改/取消
@@ -256,6 +266,7 @@ function getGroup(resolve) {
             options += option.format(d.Id, d.Group);
         }
         if (resolve == null) {
+            $('#taskGroupSelect,#checkGroupSelect').empty().append(options);
             $('#groupSelect').empty().append(`<option value="0">所有分组</option>${options}`);
             getProcessor();
             getTaskList();
@@ -283,8 +294,11 @@ function getProcessor(resolve) {
             layer.msg(ret.errmsg);
             return;
         }
-        _processor = ret.datas;
-        var len = _processor.length;
+        var rData = ret.datas;
+        if (groupId == 0) {
+            _processor = ret.datas;
+        }
+        var len = rData.length;
         if (!len) {
             return;
         }
@@ -293,7 +307,7 @@ function getProcessor(resolve) {
             : '<option value="{0}">{1}</option>';
         var ops = '';
         for (var i = 0; i < len; i++) {
-            var d = _processor[i];
+            var d = rData[i];
             ops += op.format(d.Id, d.Processor);
         }
         if (resolve == null) {
@@ -501,7 +515,8 @@ function showDetailModal(tId) {
             $('#checkName').text(d.Check);
             $('#checkPlan').text(d.Plan);
             $('#checkTaskName').text(d.Item);
-            $('#checkTaskProcessor').text(d.Processor);
+            $('#checkGroupText').text(d.Group);
+            $('#checkProText').text(d.Processor);
             $('#checkRedo').text(d.IsRedo ? '已返工' : '未返工');
             $('#checkResultDesc .textOn').text(d.CheckResultDesc);
             $('#checkProcessor').text(d.CheckProcessor);
@@ -602,12 +617,12 @@ function showDetailModal(tId) {
             $('#updateTask').val(d.State);
             $('#taskName').text(d.Item);
             $('#taskPlan').text(d.Plan);
-            $('#taskProcessor').text(d.Processor);
-            $('#taskAssignor').text(d.Assignor);
-            $('#taskState').text(d.StateDesc);
-            $('#taskRedo').text(d.IsRedo ? '已返工' : '未返工');
+            $('#taskGroupText').text(d.Group);
+            $('#taskProText').text(d.Processor);
             $('#taskEstimatedTime .textOn').text(d.EstimatedTime);
             $('#taskScore .textOn').text(d.Score);
+            $('#taskAssignor').text(d.Assignor);
+            $('#taskRedo').text(d.IsRedo ? '已返工' : '未返工');
             $('#taskActualStartTime').text(noShowSecond(d.FirstStartTime));
             $('#taskActualEndTime').text(noShowSecond(d.ActualEndTime));
             $('#taskActualTime .textOn').text(d.ActualTime);
@@ -682,7 +697,11 @@ function updateTaskDetail() {
         layer.msg('请先修改数据');
         return;
     }
-    var desc = $('#taskDesc').val();
+    var perId = $('#taskProSelect').val();
+    if (isStrEmptyOrUndefined(perId)) {
+        layer.msg('请选择操作员');
+        return;
+    }
     var estimatedHour = $('#taskEstimatedTime .hour').val();
     if (isStrEmptyOrUndefined(estimatedHour)) {
         estimatedHour = 0;
@@ -704,8 +723,10 @@ function updateTaskDetail() {
         EstimatedHour: estimatedHour,
         EstimatedMin: estimatedMin,
         Score: score,
-        Desc: desc
-    }
+        Desc: $('#taskDesc').val(),
+        Person: perId,
+        Processor: $('#taskProSelect :selected').text()
+}
     var state = $('#updateTask').val();
     if (state == 3) {
         var actualHour = $('#taskActualTime .hour').val();
@@ -747,7 +768,11 @@ function updateCheckDetail() {
         layer.msg('请先修改数据');
         return;
     }
-    var desc = $('#checkDesc').val();
+    var perId = $('#checkProSelect').val();
+    if (isStrEmptyOrUndefined(perId)) {
+        layer.msg('请选择操作员');
+        return;
+    }
     var estimatedHour = $('#checkEstimatedTime .hour').val();
     if (isStrEmptyOrUndefined(estimatedHour)) {
         estimatedHour = 0;
@@ -769,7 +794,9 @@ function updateCheckDetail() {
         EstimatedHour: estimatedHour,
         EstimatedMin: estimatedMin,
         Score: score,
-        Desc: desc
+        Desc: $('#checkDesc').val(),
+        Person: perId,
+        Processor: $('#checkProSelect :selected').text()
     }
     var state = $('#updateCheck').val();
     if (state == 3) {

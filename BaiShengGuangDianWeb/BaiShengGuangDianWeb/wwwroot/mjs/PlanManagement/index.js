@@ -61,6 +61,10 @@ function pageReady() {
         var tr = $(this).parents('tr');
         setTrSelect(tr, 5);
     });
+    $('#addPlanBody').on('select2:select', '.price select', function () {
+        var tr = $(this).parents('tr');
+        setTrSelect(tr, 6);
+    });
     $('#reuse').on('click', function () {
         var planId = $('#addPlanSelect').val();
         if (isStrEmptyOrUndefined(planId)) {
@@ -86,6 +90,7 @@ function pageReady() {
                 tr.find('.name').append(html.format(_nameOp));
                 tr.find('.supplier').append(html.format(_supplierOp));
                 tr.find('.specification').append(html.format(_specificationOp));
+                tr.find('.price').append(html.format(_priceOp));
                 tr.find('.site').append(html.format(_siteOp));
                 var plannedConsumption = tr.find('.plannedConsumption span').text();
                 tr.find('.plannedConsumption').append(input.format(plannedConsumption));
@@ -121,12 +126,12 @@ function pageReady() {
     });
     $('#addPlanBody').on('click', '.pdModal', function () {
         var tr = $(this).parents('tr');
-        var category = tr.find('.category option:selected').text();
-        var name = tr.find('.name option:selected').text();
-        var supplier = tr.find('.supplier option:selected').text();
-        var specification = tr.find('.specification option:selected').text();
-        var site = tr.find('.site option:selected').text();
-        var codeSelect = tr.find('.code option:selected');
+        var category = tr.find('.category :selected').text();
+        var name = tr.find('.name :selected').text();
+        var supplier = tr.find('.supplier :selected').text();
+        var specification = tr.find('.specification :selected').text();
+        var site = tr.find('.site :selected').text();
+        var codeSelect = tr.find('.code :selected');
         var code = codeSelect.text();
         var stock = codeSelect.attr('stock');
         var price = tr.find('.price').text();
@@ -138,14 +143,11 @@ function pageReady() {
         var id = $(this).val();
         addUpPlanTable(id, true);
     });
-    $('#logPlanSelect,#logBillSelect').on('select2:select', function () {
-        getLogList();
-    });
+    $('#logPlanSelect,#logBillSelect').on('select2:select', () => getLogList());
     $("#logStartDate").val(getDate());
     $("#logEndDate").val(getDate());
-    $("#logStartDate,#logEndDate").datepicker('update').on('changeDate', function (ev) {
-        getLogList();
-    });
+    $("#logStartDate,#logEndDate").datepicker('update').on('changeDate', () => getLogList());
+    $('#logPlanType').on('change', () => getLogList());
 }
 
 //默认货品编号选择
@@ -154,6 +156,7 @@ function setDefaultCode(el) {
     el.find('.name select').val(_firstCode.NameId).trigger('change');
     el.find('.supplier select').val(_firstCode.SupplierId).trigger('change');
     el.find('.specification select').val(_firstCode.SpecificationId).trigger('change');
+    el.find('.price select').val(_firstCode.Price).trigger('change');
     el.find('.site select').val(_firstCode.SiteId).trigger('change');
 }
 
@@ -168,9 +171,9 @@ function setTableStyle() {
 
 //添加修改计划列表
 function addUpPlanTable(planId, isUp) {
-    new Promise(function (resolve, reject) {
+    new Promise(resolve => {
         getPlanList(true, resolve, planId, true);
-    }).then(function (e) {
+    }).then(e => {
         var data = e[0];
         $('#addPlan').val(data.Plan);
         $('#addRemark').val(data.Remark);
@@ -188,9 +191,9 @@ function addUpPlanTable(planId, isUp) {
                 '<td class="name"><span class="textIn">{1}</span></td>' +
                 '<td class="supplier"><span class="textIn">{2}</span></td>' +
                 '<td class="specification"><span class="textIn">{3}</span></td>' +
+                '<td class="price"><span class="textIn">{7}</span></td>' +
                 '<td class="site"><span class="textIn">{4}</span></td>' +
                 '<td><button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button></td>' +
-                '<td class="price">{7}</td>' +
                 '<td class="plannedConsumption"><span class="textIn">{10}</span></td>' +
                 '<td class="actualConsumption">{11}</td>' +
                 '<td>' +
@@ -225,7 +228,7 @@ function addUpPlanTable(planId, isUp) {
             $('#addPlanBody').append(ops);
             setTableStyle();
             getPriceSum();
-            setTableTrCount($("#addPlanBody"), _planTrCount, isUp);
+            setTableTrCount($("#addPlanBody"), _planTrCount);
         }
         $('#addPlanTableBtn').attr('disabled', false);
     });
@@ -233,13 +236,12 @@ function addUpPlanTable(planId, isUp) {
 
 var _planTr = null;
 //操作清单表格行数序号设置
-function setTableTrCount(el, count, isUp) {
+function setTableTrCount(el, count) {
     for (var i = 0; i < count; i++) {
         el.find('.num').eq(i).text(i + 1);
     }
     $(' #addPlanBody .ms2').select2();
-    isUp = $('#addPlanSelect').is(':hidden');
-    isUp ? $(' #addPlanTable .actualConsumption').removeClass('hidden') : $(' #addPlanTable .actualConsumption').addClass('hidden');
+    $('#addPlanSelect').is(':hidden') ? $(' #addPlanTable .actualConsumption').removeClass('hidden') : $(' #addPlanTable .actualConsumption').addClass('hidden');
 }
 
 //清单表格选项加载
@@ -252,10 +254,6 @@ function setTableSelect(el) {
     var specificationId = data.SpecificationId;
     var siteId = data.SiteId;
     var price = data.Price;
-    var nameEl = el.find('.name select');
-    var supplierEl = el.find('.supplier select');
-    var specificationEl = el.find('.specification select');
-    var siteEl = el.find('.site select');
     el.find('.category select').val(categoryId).trigger('change');
     var nameData = _nameData[categoryId];
     var i, d, len = nameData.length;
@@ -265,9 +263,7 @@ function setTableSelect(el) {
         d = nameData[i];
         options += option.format(d.Id, d.Name);
     }
-    nameEl.empty();
-    nameEl.append(options);
-    nameEl.val(nameId).trigger('change');
+    el.find('.name select').empty().append(options).val(nameId).trigger('change');
     options = '';
     var supplierData = _supplierData[nameId];
     len = supplierData.length;
@@ -275,9 +271,7 @@ function setTableSelect(el) {
         d = supplierData[i];
         options += option.format(d.Id, d.Supplier);
     }
-    supplierEl.empty();
-    supplierEl.append(options);
-    supplierEl.val(supplierId).trigger('change');
+    el.find('.supplier select').empty().append(options).val(supplierId).trigger('change');
     options = '';
     var specificationData = _specificationData[supplierId];
     len = specificationData.length;
@@ -285,9 +279,7 @@ function setTableSelect(el) {
         d = specificationData[i];
         options += option.format(d.Id, d.Specification);
     }
-    specificationEl.empty();
-    specificationEl.append(options);
-    specificationEl.val(specificationId).trigger('change');
+    el.find('.specification select').empty().append(options).val(specificationId).trigger('change');
     options = '';
     len = _siteData.length;
     for (i = 0; i < len; i++) {
@@ -297,10 +289,14 @@ function setTableSelect(el) {
             options += option.format(siteVal, siteName);
         }
     }
-    siteEl.empty();
-    siteEl.append(options);
-    siteEl.val(siteId).trigger('change');
-    el.find('.price').text(price);
+    el.find('.site select').empty().append(options).val(siteId).trigger('change');
+    options = '';
+    var pData = _priceData[`${specificationId}${siteId}`];
+    len = pData.length;
+    for (i = 0; i < len; i++) {
+        options += option.format(pData[i].Price, pData[i].Price);
+    }
+    el.find('.price select').empty().append(options).val(price).trigger('change');
     setTableTrCount($("#addPlanBody"), _planTrCount);
     getPriceSum();
 }
@@ -313,6 +309,7 @@ function setTrSelect(tr, e) {
     var nameEl = tr.find('.name select');
     var supplierEl = tr.find('.supplier select');
     var specificationEl = tr.find('.specification select');
+    var priceEl = tr.find('.price select');
     var siteEl = tr.find('.site select');
     if (e === 1) {
         options = '';
@@ -323,8 +320,7 @@ function setTrSelect(tr, e) {
             d = nameData[i];
             options += option.format(d.Id, d.Name);
         }
-        nameEl.empty();
-        nameEl.append(options);
+        nameEl.empty().append(options);
     }
     if (e === 1 || e === 2) {
         options = '';
@@ -335,8 +331,7 @@ function setTrSelect(tr, e) {
             d = supplierData[i];
             options += option.format(d.Id, d.Supplier);
         }
-        supplierEl.empty();
-        supplierEl.append(options);
+        supplierEl.empty().append(options);
     }
     if (e === 1 || e === 2 || e === 3) {
         options = '';
@@ -347,13 +342,11 @@ function setTrSelect(tr, e) {
             d = specificationData[i];
             options += option.format(d.Id, d.Specification);
         }
-        specificationEl.empty();
-        specificationEl.append(options);
+        specificationEl.empty().append(options);
     }
     if (e === 1 || e === 2 || e === 3 || e === 4) {
         options = '';
         var specificationId = specificationEl.val();
-        siteEl.empty();
         len = _siteData.length;
         for (i = 0; i < len; i++) {
             var siteId = _siteData[i].Id;
@@ -362,20 +355,27 @@ function setTrSelect(tr, e) {
                 options += option.format(siteId, siteName);
             }
         }
-        siteEl.append(options);
+        siteEl.empty().append(options);
     }
     if (e === 1 || e === 2 || e === 3 || e === 4 || e === 5) {
+        options = '';
         var specificationVal = specificationEl.val();
         var siteVal = siteEl.val();
         var cond = `${specificationVal}${siteVal}`;
-        var codeEl = tr.find('.code select');
-        var codeId = codeEl.find(`[cond=${cond}]`).val();
-        codeEl.val(codeId).trigger('change');
-        if (isStrEmptyOrUndefined(codeId)) {
-            tr.find('.price').text('');
-        } else {
-            var price = _codeData[codeId].Price;
-            tr.find('.price').text(price);
+        var pData = _priceData[cond];
+        len = pData.length;
+        for (i = 0; i < len; i++) {
+            options += option.format(pData[i].Price, pData[i].Price);
+        }
+        priceEl.empty().append(options);
+    }
+    if (e === 1 || e === 2 || e === 3 || e === 4 || e === 5 || e === 6) {
+        for (var k in _codeData) {
+            d = _codeData[k];
+            if (d.SpecificationId == specificationEl.val() && d.SiteId == siteEl.val() && d.Price == priceEl.val()) {
+                tr.find('.code select').val(k).trigger('change');
+                break;
+            }
         }
         getPriceSum();
     }
@@ -388,17 +388,21 @@ function getPriceSum() {
     var priceSum = 0;
     for (; i < len; i++) {
         var tr = trs.eq(i);
-        var price = tr.find('.price').text();
+        var price, plannedConsumption;
+        if (tr.find('.textIn').is(':hidden')) {
+            price = tr.find('.price select').val();
+            plannedConsumption = tr.find('.plannedConsumption input').val();
+        } else {
+            price = tr.find('.price span').text();
+            plannedConsumption = tr.find('.plannedConsumption span').text();
+        }
         if (isStrEmptyOrUndefined(price)) {
             price = 0;
         }
-        var plannedConsumption = tr.find('.textIn').is(':hidden')
-            ? tr.find('.plannedConsumption input').val()
-            : tr.find('.plannedConsumption span').text();
         if (isStrEmptyOrUndefined(plannedConsumption)) {
             plannedConsumption = 0;
         }
-        priceSum += parseInt(price) * parseInt(plannedConsumption);
+        priceSum += (price >> 0) * (plannedConsumption >> 0);
     }
     $('#planCost').text(priceSum.toFixed(2));
 }
@@ -454,7 +458,7 @@ function getPlanList(isSelect, resolve, planId, isAll) {
             var del = function (data) {
                 return per501
                     ? '<i class="glyphicon glyphicon-remove" aria-hidden="true" style="color:red;font-size:25px;cursor:pointer;text-shadow:2px 2px 2px black" onclick="delPlan({0},\'{1}\')"></i>'
-                    .format(data.Id, escape(data.Plan))
+                        .format(data.Id, escape(data.Plan))
                     : '';
             }
             $("#planList")
@@ -476,7 +480,7 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                         { "data": "Remark", "title": "备注" },
                         { "data": "PlannedCost", "title": "计划造价" },
                         { "data": "ActualCost", "title": "实际造价" },
-                        { "data": null, "title": "操作", "render": operation, "orderable": false}
+                        { "data": null, "title": "操作", "render": operation, "orderable": false }
                     ]
                 });
         } else {
@@ -663,7 +667,28 @@ function specificationSelect(resolve) {
     }, 0);
 }
 
-var _codeOp, _categoryOp, _nameOp, _supplierOp, _specificationOp, _siteOp;
+var _priceData = null;
+//单价选项
+function priceSelect(resolve) {
+    var data = {}
+    data.opType = 852;
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var rData = ret.datas;
+        _priceData = {};
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            var flag = `${d.SpecificationId}${d.SiteId}`;
+            _priceData[flag] ? _priceData[flag].push(d) : _priceData[flag] = [d];
+        }
+        resolve('success');
+    }, 0);
+}
+
+var _codeOp, _categoryOp, _nameOp, _supplierOp, _specificationOp, _priceOp, _siteOp;
 //清单tr
 function addPlanTr(resolve) {
     var bodyTr = '<tr><td></td>' +
@@ -673,9 +698,9 @@ function addPlanTr(resolve) {
         '<td class="name"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{2}</select></div></td>' +
         '<td class="supplier"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{3}</select></div></td>' +
         '<td class="specification"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{4}</select></div></td>' +
+        '<td class="price"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{6}</select></div></td>' +
         '<td class="site"><span class="textIn hidden"></span><div style="width:140px;margin:auto"><select class="ms2 form-control">{5}</select></div></td>' +
         '<td><button type="button" class="btn btn-info btn-sm pdModal">详情</button></td>' +
-        '<td class="price">{6}</td>' +
         '<td class="plannedConsumption"><span class="textIn hidden"></span><input type="text" class="form-control text-center" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" maxlength="10" style="width:140px;margin:auto"></td>' +
         '<td class="actualConsumption"></td>' +
         '<td style="width:100px">' +
@@ -683,28 +708,18 @@ function addPlanTr(resolve) {
         '<button type="button" class="btn btn-success btn-sm addPlanTr" style="margin-left:5px"><i class="fa fa-plus"></i></button>' +
         '</td>' +
         '</tr>';
-    var code = new Promise(function (resolve, reject) {
-        codeSelect(resolve);
-    });
-    var category = new Promise(function (resolve, reject) {
-        categorySelect(resolve);
-    });
-    var name = new Promise(function (resolve, reject) {
-        nameSelect(resolve);
-    });
-    var supplier = new Promise(function (resolve, reject) {
-        supplierSelect(resolve);
-    });
-    var specification = new Promise(function (resolve, reject) {
-        specificationSelect(resolve);
-    });
-    var site = new Promise(function (resolve, reject) {
-        siteSelect(resolve);
-    });
-    Promise.all([code, category, name, supplier, specification, site]).then(function (results) {
+    var code = new Promise(resolve => codeSelect(resolve));
+    var category = new Promise(resolve => categorySelect(resolve));
+    var name = new Promise(resolve => nameSelect(resolve));
+    var supplier = new Promise(resolve => supplierSelect(resolve));
+    var specification = new Promise(resolve => specificationSelect(resolve));
+    var site = new Promise(resolve => siteSelect(resolve));
+    var price = new Promise(resolve => priceSelect(resolve));
+
+    Promise.all([code, category, name, supplier, specification, site, price]).then(results => {
         _codeOp = results[0];
         _categoryOp = results[1];
-        _nameOp = '', _supplierOp = '', _specificationOp = '', _siteOp = '';
+        _nameOp = '', _supplierOp = '', _specificationOp = '', _priceOp = '', _siteOp = '';
         var op = '<option value = "{0}">{1}</option>';
         var nameData = _nameData[_firstCode.CategoryId];
         var i, d, len = nameData.length;
@@ -725,6 +740,7 @@ function addPlanTr(resolve) {
             _specificationOp += op.format(d.Id, d.Specification);
         }
         var specificationId = _firstCode.SpecificationId;
+        var firstSite = _firstCode.SiteId;
         len = _siteData.length;
         for (i = 0; i < len; i++) {
             d = _siteData[i];
@@ -733,7 +749,12 @@ function addPlanTr(resolve) {
                 _siteOp += op.format(siteId, d.Site);
             }
         }
-        var option = bodyTr.format(_codeOp, _categoryOp, _nameOp, _supplierOp, _specificationOp, _siteOp, _firstCode.Price);
+        var pData = _priceData[`${specificationId}${firstSite}`];
+        len = pData.length;
+        for (i = 0; i < len; i++) {
+            _priceOp += op.format(pData[i].Price, pData[i].Price);
+        }
+        var option = bodyTr.format(_codeOp, _categoryOp, _nameOp, _supplierOp, _specificationOp, _siteOp, _priceOp);
         resolve(option);
     });
 }
@@ -741,6 +762,7 @@ function addPlanTr(resolve) {
 var _planTrCount = 0;
 //添加计划模态框
 function addPlanModal() {
+    $("#addPlanTableBtn").attr('disabled', true);
     $('#addPlanModal .addPlan').removeClass('hidden');
     $('#addPlanModal .updatePlan').addClass('hidden');
     $('#addPlan').val('');
@@ -763,9 +785,7 @@ function addUpPlanClass(isUp, id) {
         addPlanTr(resolve);
     }).then(function (e) {
         _planTr = e;
-        if (isUp) {
-            addUpPlanTable(id, isUp);
-        }
+        isUp ? addUpPlanTable(id, isUp) : $("#addPlanTableBtn").attr('disabled', false);
     });
 }
 
@@ -1037,13 +1057,9 @@ function logPlanSelect(resolve) {
 
 //日志弹窗
 function logModal(isAll, id) {
-    var planSt = new Promise(function (resolve) {
-        logPlanSelect(resolve);
-    });
-    var codeSt = new Promise(function (resolve) {
-        codeSelect(resolve);
-    });
-    Promise.all([planSt, codeSt]).then(function (results) {
+    var planSt = new Promise(resolve => logPlanSelect(resolve));
+    var codeSt = new Promise(resolve => codeSelect(resolve));
+    Promise.all([planSt, codeSt]).then(results => {
         var planOp = results[0];
         var codeOp = results[1];
         $('#logPlanSelect').empty();
@@ -1124,9 +1140,16 @@ function getLogList() {
             layer.msg(ret.errmsg);
             return;
         }
-        var o = 0;
-        var order = function () {
-            return ++o;
+        var rData = ret.datas;
+        var type = $('#logPlanType').val();
+        if (type == 0 || type == 1) {
+            for (var i = 0, len = rData.length; i < len; i++) {
+                if (rData[i].Mode != type) {
+                    rData.splice(i, 1);
+                    i--;
+                    len--;
+                }
+            }
         }
         $("#logList")
             .DataTable({
@@ -1135,15 +1158,21 @@ function getLogList() {
                 "paging": true,
                 "searching": true,
                 "language": oLanguage,
-                "data": ret.datas,
+                "data": rData,
                 "aaSorting": [[0, "asc"]],
                 "aLengthMenu": [40, 80, 120], //更改显示记录数选项  
                 "iDisplayLength": 40, //默认显示的记录数
                 "columns": [
-                    { "data": null, "title": "序号", "render": order },
+                    { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
                     { "data": "Time", "title": "时间" },
+                    { "data": "Mode", "title": "类型", "render": a => a == 0 ? '<span style="color:red">退回</span>' : '<span style="color:green">领用</span>'},
                     { "data": "Purpose", "title": "计划号" },
                     { "data": "Code", "title": "货品编号" },
+                    { "data": "Category", "title": "类别" },
+                    { "data": "Name", "title": "名称" },
+                    { "data": "Supplier", "title": "供应商" },
+                    { "data": "Specification", "title": "规格型号" },
+                    { "data": "Price", "title": "单价" },
                     { "data": "Number", "title": "数量" },
                     { "data": "RelatedPerson", "title": "领用人" },
                     { "data": "Manager", "title": "物管员" }

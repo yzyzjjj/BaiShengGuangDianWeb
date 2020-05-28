@@ -153,16 +153,20 @@
                                         <td id="taskPlan"></td>
                                     </tr>
                                     <tr class="success">
+                                        <td class="mbold">所属工作组</td>
+                                        <td>
+                                            <span class="textOn" id="taskGroupText"></span>
+                                            <div class="textIn" style="width:100%;margin:auto">
+                                                <select class="ms2 form-control" id="taskGroupSelect" style="width: 100%"></select>
+                                            </div>
+                                        </td>
                                         <td class="mbold">操作工</td>
-                                        <td id="taskProcessor"></td>
-                                        <td class="mbold">下发员</td>
-                                        <td id="taskAssignor"></td>
-                                    </tr>
-                                    <tr class="success">
-                                        <td class="mbold text-red">任务状态</td>
-                                        <td id="taskState"></td>
-                                        <td class="mbold">返工情况</td>
-                                        <td id="taskRedo"></td>
+                                        <td>
+                                            <span class="textOn" id="taskProText"></span>
+                                            <div class="textIn" style="width:100%;margin:auto">
+                                                <select class="ms2 form-control" id="taskProSelect" style="width: 100%"></select>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr class="success">
                                         <td class="mbold">预计用时</td>
@@ -180,6 +184,12 @@
                                             <span class="textOn"></span>
                                             <input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" oninput="value=value.replace(/[^\-?\d]/g,'')" style="width:80px;margin:auto">
                                         </td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">下发员</td>
+                                        <td id="taskAssignor"></td>
+                                        <td class="mbold">返工情况</td>
+                                        <td id="taskRedo"></td>
                                     </tr>
                                     <tr class="success">
                                         <td class="mbold text-red">实际开始</td>
@@ -254,8 +264,28 @@
                                         <td id="checkTaskProcessor"></td>
                                     </tr>
                                     <tr class="success">
+                                        <td class="mbold">下发员</td>
+                                        <td id="checkAssignor"></td>
                                         <td class="mbold text-red">返工情况</td>
                                         <td id="checkRedo"></td>
+                                    </tr>
+                                    <tr class="success">
+                                        <td class="mbold">所属工作组</td>
+                                        <td>
+                                            <span class="textOn" id="checkGroupText"></span>
+                                            <div class="textIn" style="width:100%;margin:auto">
+                                                <select class="ms2 form-control" id="checkGroupSelect" style="width: 100%"></select>
+                                            </div>
+                                        </td>
+                                        <td class="mbold">检验人</td>
+                                        <td>
+                                            <span class="textOn" id="checkProText"></span>
+                                            <div class="textIn" style="width:100%;margin:auto">
+                                                <select class="ms2 form-control" id="checkProSelect" style="width: 100%"></select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="success">
                                         <td class="mbold text-red">检验情况</td>
                                         <td id="checkResultDesc">
                                             <span class="textOn"></span>
@@ -267,12 +297,8 @@
                                                 </select>
                                             </div>
                                         </td>
-                                    </tr>
-                                    <tr class="success">
-                                        <td class="mbold">检验人</td>
-                                        <td id="checkProcessor"></td>
-                                        <td class="mbold">下发员</td>
-                                        <td id="checkAssignor"></td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                     <tr class="success">
                                         <td class="mbold">预计用时</td>
