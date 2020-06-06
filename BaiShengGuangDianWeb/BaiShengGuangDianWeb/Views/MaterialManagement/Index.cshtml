@@ -23,7 +23,8 @@
                 <button type="button" class="btn btn-warning btn-sm" onclick="createQrModal()" id="createQrModalBtn">
                     <span class="glyphicon glyphicon-qrcode"></span>&nbsp;<span>生成</span>
                 </button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="showIncreaseModel()" id="showIncreaseModelBtn">入库</button>
+                <button type="button" class="btn btn-primary btn-sm fastIncreaseModelBtn" onclick="showFastIncreaseModel()">快捷入库</button>
+                <button type="button" class="btn btn-primary btn-sm fastIncreaseModelBtn" onclick="showIncreaseModel()">入库</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showConsumeModel()" id="showConsumeModelBtn">领用</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showReversalModel()" id="showReversalModelBtn">冲正</button>
                 <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(1)" id="putLogBtn">入库日志</button>
@@ -62,7 +63,6 @@
             </div>
         </div>
     </div>
-
     <!-- 入库模态框 -->
     <div class="modal fade" tabindex="-1" id="increaseModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -73,45 +73,93 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group text-right">
-                        <button type="button" class="btn btn-default btn-sm" onclick="resetIncreaseList()"><i class="fa fa-refresh"></i> 重置</button>
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#increaseList')"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
-                    <div class="form-group maxHeight" id="increaseTable" style="overflow: auto">
+                    <div class="form-group maxHeight" id="increaseListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
                                     <th>序号</th>
                                     <th>来源</th>
-                                    <th>货品编号</th>
                                     <th>类别</th>
                                     <th>名称</th>
                                     <th>供应商</th>
                                     <th>规格</th>
                                     <th>单价</th>
                                     <th>位置</th>
+                                    <th>入库数量</th>
                                     <th>单位</th>
+                                    <th>采购/退回人</th>
+                                    <th>货品编号</th>
                                     <th>剩余库存</th>
                                     <th>货品详情</th>
-                                    <th>入库数量</th>
-                                    <th>采购/退回人</th>
                                     <th>删除</th>
                                 </tr>
                             </thead>
-                            <tbody id="increaseList"></tbody>
+                            <tbody id="increaseList" data-index="0"></tbody>
                         </table>
                     </div>
                     <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" id="increaseAdd" style="font-size: 30px; cursor: pointer"></span>
-                        <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addIncreaseListBtn" onclick="addIncreaseList()"><i class="fa fa-plus"></i> 添加新项</button>
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(0,'#increaseList')" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="addIncreaseListBtn" onclick="addListTr(0)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="increase()">入库</button>
+                    <button type="button" class="btn btn-warning" onclick="">拷贝</button>
+                    <button type="button" class="btn btn-info" onclick="exportExcel('#increaseList')">导出</button>
+                    <button type="button" class="btn btn-primary" onclick="increase(false)">入库</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-
+    <!--快捷入库模态框 -->
+    <div class="modal fade" tabindex="-1" id="fastIncreaseModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">快捷入库</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList')"><i class="fa fa-refresh"></i> 重置</button>
+                    </div>
+                    <div class="form-group maxHeight" id="fastIncreaseListTable" style="overflow: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>类别</th>
+                                    <th>名称</th>
+                                    <th>供应商</th>
+                                    <th>规格</th>
+                                    <th>单价</th>
+                                    <th>位置</th>
+                                    <th>入库数量</th>
+                                    <th>单位</th>
+                                    <th>采购/退回人</th>
+                                    <th>货品编号</th>
+                                    <th>删除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fastIncreaseList" data-index="4"></tbody>
+                        </table>
+                    </div>
+                    <div class="flexStyle" style="justify-content: center">
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(4,'#fastIncreaseList')" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="addFastIncreaseListBtn" onclick="addListTr(4)"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" onclick="">拷贝</button>
+                    <button type="button" class="btn btn-info" onclick="exportExcel('#fastIncreaseList')">导出</button>
+                    <button type="button" class="btn btn-primary" onclick="increase(true)">入库</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- 领用模态框 -->
     <div class="modal fade" tabindex="-1" id="consumeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -126,8 +174,8 @@
                     <div class="row">
                         <div class="nav-tabs-custom">
                             <ul class="nav nav-tabs ui-sortable-handle">
-                                <li class="active"><a id="planConsumeLi" href="#planConsume" data-toggle="tab" onclick="tabClick(0)" aria-expanded="true">计划</a></li>
-                                <li><a href="#otherConsume" data-toggle="tab" onclick="tabClick(1)" aria-expanded="false">其他</a></li>
+                                <li class="active"><a id="planConsumeLi" href="#planConsume" data-toggle="tab" aria-expanded="true">计划</a></li>
+                                <li><a href="#otherConsume" data-toggle="tab" aria-expanded="false">其他</a></li>
                             </ul>
                             <div class="tab-content no-padding">
                                 <div class="tab-pane active in" id="planConsume">
@@ -139,30 +187,26 @@
                                                     <select class="ms2 form-control" id="consumePlanSelect" style="width: 160px"></select>
                                                 </div>
                                             </div>
-                                            <div class="form-group hidden no-margin" id="consumePlanRemarkDiv">
-                                                <label class="control-label" for="consumePlanRemark">备注：</label>
-                                                <span class="control-label" id="consumePlanRemark"></span>
-                                            </div>
                                             <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space: nowrap">清单：</label>
-                                                <div style="display: flex; justify-content: center;align-items:center">
-                                                    <select class="form-control" id="consumePlanCondition1" onchange="showPlanBill(true,'Plan')" style="flex-basis: 140px">
-                                                        <option value="Code">货品编号</option>
-                                                        <option value="Category">货品类别</option>
-                                                        <option value="Name">货品名称</option>
-                                                        <option value="Supplier">供应商</option>
-                                                        <option value="Specification">规格型号</option>
-                                                        <option value="Site">货品位置</option>
+                                                <div class="flexStyle">
+                                                    <select class="form-control thText" onchange="searchTr.call(this,'#consumePlanList')" style="flex-basis: 140px">
+                                                        <option value="code">货品编号</option>
+                                                        <option value="category">货品类别</option>
+                                                        <option value="name">货品名称</option>
+                                                        <option value="supplier">供应商</option>
+                                                        <option value="specification">规格型号</option>
+                                                        <option value="site">货品位置</option>
                                                     </select>
-                                                    <select class="form-control" id="consumePlanCondition2" onchange="showPlanBill(true,'Plan')" style="flex-basis: 140px;margin-left:3px">
+                                                    <select class="form-control sym" onchange="searchTr.call(this,'#consumePlanList')" style="flex-basis: 140px">
                                                         <option value="0">等于</option>
                                                         <option value="1">不等于</option>
                                                         <option value="2">包含</option>
                                                     </select>
-                                                    <input class="form-control" id="consumePlanCondition" oninput="showPlanBill(true,'Plan')" maxlength="20" style="flex-basis: 140px;margin-left:3px">
+                                                    <input class="form-control val" id="consumePlanCondition" oninput="searchTr.call(this,'#consumePlanList')" maxlength="20" style="flex-basis: 140px">
                                                 </div>
                                             </div>
-                                            <div class="form-group maxHeight" id="consumePlanTable" style="overflow: auto">
+                                            <div class="form-group maxHeight" id="consumePlanListTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
                                                         <tr>
@@ -172,24 +216,24 @@
                                                             <th class="text-info">货品名称</th>
                                                             <th class="text-info">供应商</th>
                                                             <th class="text-info">规格型号</th>
+                                                            <th class="text-info">单价</th>
                                                             <th class="text-info">位置</th>
-                                                            <th>单位</th>
-                                                            <th>货品详情</th>
+                                                            <th>领用数量</th>
                                                             <th>计划用量</th>
                                                             <th>实际用量</th>
                                                             <th class="text-red">剩余库存</th>
-                                                            <th>领用数量</th>
                                                             <th>领用人</th>
+                                                            <th>货品详情</th>
                                                             <th>日志</th>
                                                             <th>删除</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="consumePlanList"></tbody>
+                                                    <tbody id="consumePlanList" data-index="1"></tbody>
                                                 </table>
                                             </div>
                                             <div class="flexStyle" style="justify-content: center">
-                                                <span class="iconfont icon-saoyisao" id="planConsumeAdd" style="font-size: 30px; cursor: pointer"></span>
-                                                <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumePlanListBtn" onclick="addConsumePlanList()" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(1,'#consumePlanList')" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" id="addConsumePlanListBtn" onclick="addListTr(1)" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
                                             </div>
                                         </div>
                                     </div>
@@ -197,30 +241,30 @@
                                 <div class="tab-pane fade in" id="otherConsume">
                                     <div class="box box-primary">
                                         <div class="box-body">
-                                            <div class="form-group" style="display: flex;align-items:center">
+                                            <div class="form-group flexStyle">
                                                 <label class="control-label" for="consumeOther" style="white-space:nowrap">用途：</label>
-                                                <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" onchange="consumeOtherActual()" style="flex-basis:180px">
+                                                <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
                                             </div>
                                             <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space:nowrap">清单：</label>
-                                                <div class="flexStyle" style="justify-content: center">
-                                                    <select class="form-control" id="consumeOtherCondition1" onchange="showPlanBill(true,'Other')" style="flex-basis: 140px">
-                                                        <option value="Code">货品编号</option>
-                                                        <option value="Category">货品类别</option>
-                                                        <option value="Name">货品名称</option>
-                                                        <option value="Supplier">供应商</option>
-                                                        <option value="Specification">规格型号</option>
-                                                        <option value="Site">货品位置</option>
+                                                <div class="flexStyle">
+                                                    <select class="form-control thText" onchange="searchTr.call(this,'#consumeOtherList')" style="flex-basis: 140px">
+                                                        <option value="code">货品编号</option>
+                                                        <option value="category">货品类别</option>
+                                                        <option value="name">货品名称</option>
+                                                        <option value="supplier">供应商</option>
+                                                        <option value="specification">规格型号</option>
+                                                        <option value="site">货品位置</option>
                                                     </select>
-                                                    <select class="form-control" id="consumeOtherCondition2" onchange="showPlanBill(true,'Other')" style="flex-basis: 140px;margin-left:3px">
+                                                    <select class="form-control sym" onchange="searchTr.call(this,'#consumeOtherList')" style="flex-basis: 140px">
                                                         <option value="0">等于</option>
                                                         <option value="1">不等于</option>
                                                         <option value="2">包含</option>
                                                     </select>
-                                                    <input class="form-control" id="consumeOtherCondition" oninput="showPlanBill(true,'Other')" maxlength="20" style="flex-basis: 140px;margin-left:3px">
+                                                    <input class="form-control val" id="consumeOtherCondition" oninput="searchTr.call(this,'#consumeOtherList')" maxlength="20" style="flex-basis: 140px">
                                                 </div>
                                             </div>
-                                            <div class="form-group maxHeight" id="consumeOtherTable" style="overflow: auto">
+                                            <div class="form-group maxHeight" id="consumeOtherListTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
                                                         <tr>
@@ -230,22 +274,22 @@
                                                             <th class="text-info">货品名称</th>
                                                             <th class="text-info">供应商</th>
                                                             <th class="text-info">规格型号</th>
+                                                            <th class="text-info">单价</th>
                                                             <th class="text-info">位置</th>
-                                                            <th>单位</th>
-                                                            <th>货品详情</th>
-                                                            <th class="text-red">剩余库存</th>
                                                             <th>领用数量</th>
+                                                            <th class="text-red">剩余库存</th>
                                                             <th>领用人</th>
+                                                            <th>货品详情</th>
                                                             <th>日志</th>
                                                             <th>删除</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="consumeOtherList"></tbody>
+                                                    <tbody id="consumeOtherList" data-index="2"></tbody>
                                                 </table>
                                             </div>
                                             <div class="flexStyle" style="justify-content: center">
-                                                <span class="iconfont icon-saoyisao" id="otherConsumeAdd" style="font-size: 30px; cursor: pointer"></span>
-                                                <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addConsumeOtherListBtn" onclick="addConsumeOtherList()"><i class="fa fa-plus"></i> 添加新项</button>
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(2,'#consumeOtherList')" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" id="addConsumeOtherListBtn" onclick="addListTr(2)"><i class="fa fa-plus"></i> 添加新项</button>
                                             </div>
                                         </div>
                                     </div>
@@ -255,13 +299,12 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="consumeShow()">领用</button>
+                    <button type="button" class="btn btn-primary" onclick="consumeConfirm()">领用</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- 领用确认模态框 -->
     <div class="modal fade" tabindex="-1" id="consumeConfirmModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -288,58 +331,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 计划日志模态框 -->
-    <div class="modal fade" tabindex="-1" id="logConsumeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title"></h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="control-label" for="logStartDate">时间范围：</label>
-                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <input type="text" id="logConsumeStartDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
-                            <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
-                            <input type="text" id="logConsumeEndDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
-                        </div>
-                    </div>
-                    <div class="form-group" id="logConsumePlanSelectDiv">
-                        <label class="control-label" for="logBillSelect">计划号：</label>
-                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <select class="ms2 form-control" id="logConsumePlanSelect" style="width: 160px"></select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label" for="logConsumeBillSelect">货品编号：</label>
-                        <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <select class="ms2 form-control" id="logConsumeBillSelect" style="width: 160px"></select>
-                        </div>
-                    </div>
-                    <div class="form-group hidden" id="billInfoConsume">
-                        <div class="flexStyle" style="flex-wrap: wrap">
-                            <label class="control-label textOverTop" for="logConsumeCategory">货品类别：<span class="spanStyle" id="logConsumeCategory"></span></label>
-                            <label class="control-label textOverTop" for="logConsumeName">货品名称：<span class="spanStyle" id="logConsumeName"></span></label>
-                            <label class="control-label textOverTop" for="logConsumeSupplier">供应商：<span class="spanStyle" id="logConsumeSupplier"></span></label>
-                            <label class="control-label textOverTop" for="logConsumeSpecification">规格型号：<span class="spanStyle" id="logConsumeSpecification"></span></label>
-                            <label class="control-label textOverTop" for="logConsumePrice">货品价格：<span class="spanStyle" id="logConsumePrice"></span></label>
-                        </div>
-                    </div>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="logConsumeList"></table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 生成二维码弹窗 -->
     <div class="modal fade" tabindex="-1" id="createQrModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -405,9 +396,12 @@
                 <div class="modal-body">
                     <div class="form-group flexStyle" style="justify-content:space-between">
                         <label class="control-label" style="white-space: nowrap">清单：</label>
-                        <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                        <div>
+                            <button type="button" class="btn btn-default btn-sm" onclick="resetList('#reversalList')"><i class="fa fa-refresh"></i> 重置</button>
+                            <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                        </div>
                     </div>
-                    <div class="form-group maxHeight" id="reversalTable" style="overflow: auto">
+                    <div class="form-group maxHeight" id="reversalListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
@@ -417,25 +411,27 @@
                                     <th>名称</th>
                                     <th>供应商</th>
                                     <th>规格</th>
+                                    <th>单价</th>
                                     <th>位置</th>
+                                    <th>单位</th>
                                     <th class="text-red">剩余库存</th>
-                                    <th>库存修改</th>
+                                    <th class="text-info">库存修改</th>
                                     <th>备注</th>
                                     <th>货品详情</th>
                                     <th>日志</th>
                                     <th>删除</th>
                                 </tr>
                             </thead>
-                            <tbody id="reversalList"></tbody>
+                            <tbody id="reversalList" data-index="3"></tbody>
                         </table>
                     </div>
                     <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" id="reversalAdd" style="font-size: 30px; cursor: pointer"></span>
-                        <button type="button" class="btn btn-default btn-sm" disabled="disabled" id="addReversalListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(3,'#reversalList')" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="addReversalListBtn" onclick="addListTr(3)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="reversalConModal()">确认</button>
+                    <button type="button" class="btn btn-primary" onclick="reversalConModal()">冲正</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -457,7 +453,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="reversalCon()">冲正</button>
+                    <button type="button" class="btn btn-primary" onclick="reversalCon()">确认</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -505,15 +501,21 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title"></h4>
+                    <h4 class="modal-title" id="logTitle"></h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="control-label" for="logStartDate">时间范围：</label>
                         <div class="form-group no-margin" style="display: -webkit-inline-box">
-                            <input type="text" id="logStartDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                            <input type="text" id="logStartDate" class="form_date form-control pointer text-center" style="width: 130px">
                             <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
-                            <input type="text" id="logEndDate" class="form_date form-control" style="width: 130px; cursor: pointer" onchange="">
+                            <input type="text" id="logEndDate" class="form_date form-control pointer text-center" style="width: 130px">
+                        </div>
+                    </div>
+                    <div class="form-group" id="logPlanBox">
+                        <label class="control-label" for="logBillSelect">计划号：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="logPlanSelect" style="width: 160px"></select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -522,13 +524,13 @@
                             <select class="ms2 form-control" id="logBillSelect" style="width: 160px"></select>
                         </div>
                     </div>
-                    <div class="form-group hidden" id="billInfo">
+                    <div class="form-group" id="billInfo">
                         <div class="flexStyle" style="flex-wrap:wrap">
                             <label class="control-label textOverTop" for="logCategory">货品类别：<span class="spanStyle" id="logCategory"></span></label>
                             <label class="control-label textOverTop" for="logName">货品名称：<span class="spanStyle" id="logName"></span></label>
                             <label class="control-label textOverTop" for="logSupplier">供应商：<span class="spanStyle" id="logSupplier"></span></label>
                             <label class="control-label textOverTop" for="logSpecification">规格型号：<span class="spanStyle" id="logSpecification"></span></label>
-                            <label class="control-label textOverTop" for="logPrice">货品价格：<span class="spanStyle" id="logPrice"></span></label>
+                            <label class="control-label textOverTop" for="logPrice">单价：<span class="spanStyle" id="logPrice"></span></label>
                         </div>
                     </div>
                     <div class="table-responsive mailbox-messages">

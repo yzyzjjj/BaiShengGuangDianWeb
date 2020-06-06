@@ -1584,3 +1584,48 @@ function downLoad(content, fileName) {
     aEle.href = content;// content为后台返回的下载地址
     aEle.click();// 设置点击事件
 }
+
+//创建tag
+function createTag(params) {
+    var term = params.term.trim();
+    if (term != '') {
+        return {
+            id: `tag${term}`,
+            text: term
+        }
+    }
+}
+
+//汉字首字母搜索
+function matcher(params, data) {
+    if ($.trim(params.term) === '') {
+        return data;
+    }
+    if (data.children && data.children.length > 0) {
+        var match = $.extend(true, {}, data);
+        for (var c = data.children.length - 1; c >= 0; c--) {
+            var child = data.children[c];
+            var matches = matcher(params, child);
+            if (matches == null) {
+                match.children.splice(c, 1);
+            }
+        }
+        if (match.children.length > 0) {
+            return match;
+        }
+        return matcher(params, match);
+    }
+    var original = '';
+    var term = params.term ? params.term.toUpperCase().trim() : '';
+    if (data.text.toPinYin != undefined) {
+        var result = data.text.toPinYin().toUpperCase();
+        original = result.indexOf(term);
+        if (original == -1) {
+            original = data.text.toUpperCase().indexOf(term);
+        }
+    }
+    if (original > -1) {
+        return data;
+    }
+    return null;
+}

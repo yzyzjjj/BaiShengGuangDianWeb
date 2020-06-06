@@ -24,6 +24,12 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/lib/utils/pinyin.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/pinyin.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/mminjs/Account/login.min.js",
     "inputFiles": [
       "wwwroot/mjs/Account/login.js"
