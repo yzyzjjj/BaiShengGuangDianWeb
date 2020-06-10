@@ -94,7 +94,6 @@ function pageReady() {
             }
         }
     });
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //公共事件
     $('#increaseList,#consumePlanList,#consumeOtherList,#reversalList,#fastIncreaseList').on('click', '.scanPrint', function () {
         new Promise(resolve => showPrintModal(resolve)).then(result => {
@@ -120,6 +119,11 @@ function pageReady() {
         var typeIndex = $(e.delegateTarget).data('index');
         var elFlag = $(e.target).data('flag');
         typeof elFlag == 'undefined' ? codeGanged.call(this, typeIndex) : codeNoGanged.call(this, elFlag, typeIndex);
+        if (typeIndex == 0) {
+            $('#copyBtn,#exportBtn').attr('disabled', true);
+        } else if (typeIndex == 4) {
+            $('#fastCopyBtn,#fastExportBtn').attr('disabled', true);
+        }
     });
     //入库事件
     $('#increaseList').on('change', '.source', function () {
@@ -127,7 +131,7 @@ function pageReady() {
         var tr = $(this).parents('tr');
         if (v == '计划退回') {
             $(this).next().removeClass('hidden');
-            tr.find('.planList').trigger('change');
+            tr.find('.planList').trigger('change').trigger('select2:select');
         } else {
             $(this).next().addClass('hidden');
             var codeOp = selectOp(_codeAllData, 'Id', 'Code');
@@ -148,7 +152,7 @@ function pageReady() {
             });
         }
     });
-    $('#increaseList').on('change', '.planList', function () {
+    $('#increaseList').on('select2:select', '.planList', function () {
         var planId = $(this).val();
         var tr = $(this).parents('tr');
         new Promise(resolve => planSend(resolve, planId)).then(e => {
@@ -171,6 +175,37 @@ function pageReady() {
         $('#consumePlanList').empty();
         $("#consumePlanCondition").val('');
         getPlanCode();
+    });
+    $('#planInto,#otherInto').on('change', function (e) {
+        var files = e.target.files;
+        var fileReader = new FileReader();
+        fileReader.readAsBinaryString(files[0]);// 以二进制方式打开文件
+        $(this).val('');
+        var index = $(this).data('index');
+        fileReader.onload = ev => {
+            var workbook;
+            try {
+                workbook = XLSX.read(ev.target.result, { type: 'binary' }); // 以二进制流方式读取得到整份excel表格对象
+            } catch (e) {
+                layer.msg('文件类型不正确');
+                return;
+            }
+            var persons = []; // 存储获取到的数据
+            for (var sheet in workbook.Sheets) {// 遍历每张表读取
+                if (workbook.Sheets.hasOwnProperty(sheet)) {
+                    workbook.Sheets[sheet]['!ref'] = workbook.Sheets[sheet]['!ref'].replace('A1', 'A2');//表格范围设置
+                    persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
+                    /*使用XLSX.utils.sheet_to_json方法解析表格对象返回相应的JSON数据 */
+                    // break; // 如果只取第一张表，就取消注释这行
+                }
+            }
+            for (var i = 0, len = persons.length; i < len; i++) {
+                var codeId = _codeNameData[persons[i]['货品编号']];
+                if (codeId) {
+                    addListTr(index, codeId);
+                }
+            }
+        };
     });
     //日志事件
     $('#logPlanSelect').on('select2:select', function (e, codeId) {
@@ -199,12 +234,11 @@ function pageReady() {
 }
 
 //扫描添加
-function scanAdd(e, el) {
+function scanAdd(e) {
     new Promise(resolve => showPrintModal(resolve)).then(result => {
         if (result) {
-            addListTr(e);
             var codeId = result.split(',')[0];
-            $(`${el} tr:last .code`).val(codeId).trigger('change').trigger('select2:select');
+            addListTr(e, codeId);
         }
     });
 }
@@ -517,6 +551,8 @@ function getMaterialList(el, resolve) {
             var d = rData[i];
             _codeIdData[d.Id] = d;
         }
+        $('#codeCount').text(ret.Count);
+        $('#codeSum').text(ret.Sum);
         var detail = function (data) {
             return `<button type="button" class="btn btn-info btn-sm" onclick="showDetailModel(${data})">查看</button>`;
         }
@@ -544,7 +580,16 @@ function getMaterialList(el, resolve) {
         }
         $("#materialList")
             .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                buttons: [{
+                    extend: 'excel',
+                    text: '导出Excel',
+                    className: 'btn-primary btn-sm',
+                    filename: `物料详情_${getDate()}`,
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+                    }
+                }],
                 "destroy": true,
                 "paging": true,
                 "searching": true,
@@ -625,12 +670,17 @@ function setTableTr(el) {
 }
 
 //重置表格
-function resetList(el) {
+function resetList(el, isIncrease) {
     $(el).empty();
+    if (isIncrease == 0) {
+        $('#copyBtn,#exportBtn').attr('disabled', true);
+    } else if (isIncrease == 4) {
+        $('#fastCopyBtn,#fastExportBtn').attr('disabled', true);
+    }
 }
 
 //添加一行
-function addListTr(e) {
+function addListTr(e, codeId, upTr) {
     var el = '', tr = '';
     var selectConfig = {
         width: "120px",
@@ -642,6 +692,7 @@ function addListTr(e) {
             tr = _gangedTr;
             selectConfig.tags = true;
             selectConfig.createTag = createTag;
+            $('#copyBtn,#exportBtn').attr('disabled', true);
             break;
         case 1:
             el = '#consumePlanList';
@@ -662,17 +713,24 @@ function addListTr(e) {
             tr = _gangedFastTr;
             selectConfig.tags = true;
             selectConfig.createTag = createTag;
+            $('#fastCopyBtn,#fastExportBtn').attr('disabled', true);
             break;
     }
-    $(el).append(tr);
-    var addOp = $(`${el} tr:last`);
+    var addOp;
+    if (upTr) {
+        upTr.after(tr);
+        addOp = upTr.next();
+    } else {
+        $(el).append(tr);
+        addOp = $(`${el} tr:last`);
+        codeId ? addOp.find('.code').val(codeId).trigger('change').trigger('select2:select') : addOp.find('.code').trigger('select2:select');
+        $(`${el}Table`).scrollTop($(`${el}Table`)[0].scrollHeight);
+    }
     if (!pcAndroid()) {
         addOp.find('.scanPrint').addClass('hidden');
     }
     addOp.find('.ms2').select2(selectConfig);
     setTableTr(el);
-    addOp.find('.code').trigger('select2:select');
-    $(`${el}Table`).scrollTop($(`${el}Table`)[0].scrollHeight);
 }
 
 //删除一行
@@ -821,6 +879,7 @@ function codeNoGanged(e, type) {
     var priceEl = tr.find('.price');
     var specificationId = specificationEl.val() || '';
     var siteId = siteEl.val() || '';
+    var codeId = tr.find('.code').val();
     switch (e) {
         case 0:
             var categoryId = tr.find('.category').val() || '';
@@ -836,7 +895,7 @@ function codeNoGanged(e, type) {
             specificationEl.empty().append(specificationOp);
         case 3:
             specificationId = specificationEl.val() || '';
-            var siteOp = tagTf
+            var siteOp = tagTf || !codeId
                 ? selectOp(_siteData, 'Id', 'Site')
                 : selectOp(specificationId == '' ? _siteData : _siteObj[specificationId], 'Id', 'Site');
             siteEl.empty().append(siteOp);
@@ -856,6 +915,22 @@ function codeNoGanged(e, type) {
             } else {
                 tr.find('.code').val(codeData.Id || '').trigger('change');
             }
+            if (!codeData.Id) {
+                var name = tr.find('.name :selected').text();
+                var supplier = tr.find('.supplier :selected').text();
+                var specification = tr.find('.specification :selected').text();
+                if (!isStrEmptyOrUndefined(name) && !isStrEmptyOrUndefined(supplier) && !isStrEmptyOrUndefined(specification)) {
+                    specification = specification.replace(/[&\|\\\*^%$#@\-]/g, '');
+                    var newCode = `${name.toPinYin()}${supplier.toPinYin()}${specification.toPinYin()}`;
+                    var flag = 0;
+                    while (_codeNameData[newCode]) {
+                        flag++;
+                        newCode += flag + '';
+                    }
+                    var op = `<option value="tag${newCode}" data-select2-tag="true">${newCode}</option>`;
+                    tr.find('.code').append(op).val(`tag${newCode}`).trigger('change');
+                }
+            }
             TrNoEqual(type, tr, codeData);
     }
 }
@@ -874,20 +949,31 @@ var _increaseEqualTds = `<td><input class="form-control text-center stockNum zer
             <td>
                <div class="flexStyle" style="width:160px">
                    <input class="form-control text-center purchase" maxlength="64">
-                   <button class="btn btn-primary btn-sm pull-right" type="button" onclick="copy.call(this)" style="margin-left:3px" title="同上"><i class="fa fa-copy"></i></button>
+                   <button class="btn btn-primary btn-sm pull-right" type="button" onclick="copyTr.call(this,{1})" style="margin-left:3px" title="复制"><i class="fa fa-copy"></i></button>
                </div>
             </td>
             <td>
                 <span class="iconfont icon-saoyisao scanPrint" style="font-size:30px;cursor:pointer;vertical-align:middle"></span>
                 <select class="ms2 form-control code">{0}</select>
             </td>`;
+
+//获取编号名字
+function getCodeName() {
+    _codeNameData = {};
+    for (var i = 0, len = _codeAllData.length; i < len; i++) {
+        var d = _codeAllData[i];
+        _codeNameData[d.Code] = d.Id;
+    }
+}
+
 /////////////////////////////////////////////入库////////////////////////////////////////////
 var _gangedTr = null;
 //入库弹窗
 function showIncreaseModel() {
-    $('#addIncreaseListBtn').attr('disabled', true);
+    $('#addIncreaseListBtn,#copyBtn,#exportBtn').attr('disabled', true);
     $("#increaseList").empty();
     new Promise(resolve => initGangedData(resolve)).then(e => {
+        getCodeName();
         _gangedTr = `<tr>
             <td class="num"></td>
             <td>
@@ -900,7 +986,7 @@ function showIncreaseModel() {
                     <div class="hidden" style="width:110px"><select class="ms2 form-control planList">${e.planOp}</select></div>
                 </div>
             </td>
-            ${_noCodeTds.format(e.categoryOp)}${_increaseEqualTds.format(e.codeOp)}
+            ${_noCodeTds.format(e.categoryOp)}${_increaseEqualTds.format(e.codeOp, 0)}
             <td class="number"><label class="control-label textIn"></label><input type="tel" value="0" class="form-control text-center zeroNum hidden textOn" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" style="min-width:70px"></td>
             <td><button class="btn btn-info btn-sm show-btn" type="button" onclick="showDetailModel()">查看</button></td>
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#increaseList')"><i class="fa fa-minus"></i></button></td>
@@ -914,12 +1000,13 @@ function showIncreaseModel() {
 var _gangedFastTr = null;
 //快捷入库弹窗
 function showFastIncreaseModel() {
-    $('#addFastIncreaseListBtn').attr('disabled', true);
+    $('#addFastIncreaseListBtn,#fastCopyBtn,#fastExportBtn').attr('disabled', true);
     $("#fastIncreaseList").empty();
     new Promise(resolve => initGangedData(resolve)).then(e => {
+        getCodeName();
         _gangedFastTr = `<tr>
             <td class="num"></td>
-            ${_noCodeTds.format(e.categoryOp)}${_increaseEqualTds.format(e.codeOp)}
+            ${_noCodeTds.format(e.categoryOp)}${_increaseEqualTds.format(e.codeOp, 4)}
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#fastIncreaseList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $('#addFastIncreaseListBtn').attr('disabled', false);
@@ -928,15 +1015,41 @@ function showFastIncreaseModel() {
 }
 
 //点击入库复制
-function copy() {
+function copyTr(e) {
     var tr = $(this).parents('tr');
-    tr.after(tr.clone());
-    tr.next().find('.ms2').select2({
-        width: "120px",
-        tags: true,
-        createTag,
-        matcher
-    });
+    addListTr(e, null, tr);
+    var downTr = tr.next();
+    var stockNum = tr.find('.stockNum').val().trim();
+    var purchase = tr.find('.purchase').val().trim();
+    downTr.find('.stockNum').val(stockNum);
+    downTr.find('.purchase').val(purchase);
+    //入库复制变动
+    var copyTrChange = (selectEl, downSelectEl) => downSelectEl.empty().append(selectEl.html()).val(selectEl.val()).trigger('change');
+    if (e === 0) {
+        var source = tr.find('.source').val();
+        downTr.find('.source').val(source);
+        if (source == '计划退回') {
+            downTr.find('.planList').parent().removeClass('hidden');
+            downTr.find('.planList').val(tr.find('.planList').val()).trigger('change');
+            copyTrChange(tr.find('.code'), downTr.find('.code'));
+        }
+        downTr.find('.number').replaceWith(tr.find('.number').clone(true));
+        downTr.find('.show-btn').replaceWith(tr.find('.show-btn').clone(true));
+    }
+    var codeId = tr.find('.code').val();
+    var codeTags = tr.find('.code :selected').data('select2Tag');
+    if (!codeTags && codeId) {
+        downTr.find('.code').val(codeId).trigger('change').trigger('select2:select');
+        return;
+    }
+    copyTrChange(tr.find('.code'), downTr.find('.code'));
+    copyTrChange(tr.find('.category'), downTr.find('.category'));
+    copyTrChange(tr.find('.name'), downTr.find('.name'));
+    copyTrChange(tr.find('.supplier'), downTr.find('.supplier'));
+    copyTrChange(tr.find('.specification'), downTr.find('.specification'));
+    copyTrChange(tr.find('.price'), downTr.find('.price'));
+    copyTrChange(tr.find('.site'), downTr.find('.site'));
+    downTr.find('.unit').replaceWith(tr.find('.unit').clone(true));
 }
 
 //入库
@@ -1075,7 +1188,7 @@ function increase(isFast) {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    $(`${el}Modal`).modal('hide');
+                    isFast ? $('#fastCopyBtn,#fastExportBtn').attr('disabled', false) : $('#copyBtn,#exportBtn').attr('disabled', false);
                     getMaterialList('Select');
                 }
             });
@@ -1128,6 +1241,18 @@ function exportExcel(el) {
     }).buttons('.buttons-excel').trigger();
 }
 
+var _copyData = [];
+//拷贝
+function copyTable(el) {
+    var trs = $(`${el} tr`);
+    _copyData = [];
+    for (var i = 0, len = trs.length; i < len; i++) {
+        var codeName = trs.eq(i).find('.code :selected').text().trim();
+        _copyData.push(codeName);
+    }
+    layer.msg(_copyData.length ? '拷贝成功' : '请先添加货品');
+}
+
 /////////////////////////////////////////////领用/////////////////////////////////////////////
 var _planBillData = null;
 //获取计划下货品信息
@@ -1154,6 +1279,7 @@ function getPlanCode() {
 
 var _gangedPlanTr = null;
 var _gangedOtherTr = null;
+var _codeNameData = null;
 //领用弹窗
 function showConsumeModel() {
     $('#addConsumePlanListBtn,#addConsumeOtherListBtn').attr('disabled', true);
@@ -1166,6 +1292,7 @@ function showConsumeModel() {
         $('#consumePlanSelect').append(e.planOp);
         $('#logPlanSelect').append(`<option value="0">所有</option>${e.planOp}`);
         getPlanCode();
+        getCodeName();
         var addTr = `<tr>
             <td class="num"></td>
             <td>
@@ -1398,6 +1525,21 @@ function consume() {
             });
     }
     showConfirm('领用', doSth);
+}
+
+//领用粘贴
+function receiveStick(e) {
+    var len = _copyData.length;
+    if (!len) {
+        layer.msg('请先拷贝入库数据');
+        return;
+    }
+    for (var i = 0; i < len; i++) {
+        var codeId = _codeNameData[_copyData[i]];
+        if (codeId) {
+            addListTr(e, codeId);
+        }
+    }
 }
 
 /////////////////////////////////////////////冲正/////////////////////////////////////////////
@@ -1823,8 +1965,7 @@ function getQrList() {
             options += option.format(d.Code, d.Category, d.Name, d.Supplier, d.Specification, d.Site, flag ? 'float:left' : 'page-break-after:always');
             codeData.push(`${d.BillId},${d.Code}`);
         }
-        $('#qrCodeList').empty();
-        $('#qrCodeList').append(options);
+        $('#qrCodeList').empty().append(options);
         for (i = 0; i < len; i++) {
             new QRCode($('#qrCodeList .createQrCode')[i],
                 {

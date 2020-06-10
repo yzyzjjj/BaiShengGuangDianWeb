@@ -5,9 +5,11 @@
 }
 <environment include="Development">
     <script src="~/mjs/MaterialManagement/index.js"></script>
+    <script src="/lib/utils/xlsx.core.min.js"></script>
 </environment>
 <environment include="Staging,Production">
     <script src="~/mminjs/MaterialManagement/index.min.js"></script>
+    <script src="/lib/utils/xlsx.core.min.js"></script>
 </environment>
 <section class="content-header">
     <h1>@ViewBag.Title</h1>
@@ -34,29 +36,31 @@
             </div>
         </div>
         <div class="box-body">
-            <div class="form-group">
-                <div class="flexStyle" style="flex-wrap: wrap">
-                    <div style="flex: 1">
-                        <label class="control-label text-nowrap no-margin">类别：</label>
-                        <select class="ms2 form-control categorySelect" id="categorySelect" style="width:95%"></select>
-                    </div>
-                    <div style="flex: 1">
-                        <label class="control-label text-nowrap no-margin">名称：</label>
-                        <select class="ms2 form-control" id="nameSelect" style="width:95%"></select>
-                    </div>
-                    <div style="flex: 1">
-                        <label class="control-label text-nowrap no-margin">供应商：</label>
-                        <select class="ms2 form-control" id="supplierSelect" style="width:95%"></select>
-                    </div>
-                    <div style="flex: 1">
-                        <label class="control-label text-nowrap no-margin">规格：</label>
-                        <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
-                    </div>
-                    <div style="flex: 1">
-                        <label class="control-label text-nowrap no-margin">位置：</label>
-                        <select class="ms2 form-control" id="siteSelect" style="width:95%"></select>
-                    </div>
+            <div class="flexStyle" style="flex-wrap: wrap">
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">类别：</label>
+                    <select class="ms2 form-control categorySelect" id="categorySelect" style="width:95%"></select>
                 </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">名称：</label>
+                    <select class="ms2 form-control" id="nameSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">供应商：</label>
+                    <select class="ms2 form-control" id="supplierSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">规格：</label>
+                    <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">位置：</label>
+                    <select class="ms2 form-control" id="siteSelect" style="width:95%"></select>
+                </div>
+            </div>
+            <div style="padding-top:5px">
+                <label class="control-label textOverTop">货品数量：<span id="codeCount" style="color: green;font-size:20px"></span></label>
+                <label class="control-label textOverTop" style="margin-left:20px">总价格：<span  style="color: red"><span id="codeSum" style="font-size:20px"></span>元</span></label>
             </div>
             <div class="table-responsive mailbox-messages">
                 <table class="table table-hover table-striped" id="materialList"></table>
@@ -73,7 +77,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group text-right">
-                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#increaseList')"><i class="fa fa-refresh"></i> 重置</button>
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#increaseList',0)"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
                     <div class="form-group maxHeight" id="increaseListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
@@ -100,13 +104,13 @@
                         </table>
                     </div>
                     <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" onclick="scanAdd(0,'#increaseList')" style="font-size: 30px; cursor: pointer"></span>
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(0)" style="font-size: 30px; cursor: pointer"></span>
                         <button type="button" class="btn btn-default btn-sm" id="addIncreaseListBtn" onclick="addListTr(0)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" onclick="">拷贝</button>
-                    <button type="button" class="btn btn-info" onclick="exportExcel('#increaseList')">导出</button>
+                    <button type="button" class="btn btn-warning" id="copyBtn" onclick="copyTable('#increaseList')">拷贝</button>
+                    <button type="button" class="btn btn-info" id="exportBtn" onclick="exportExcel('#increaseList')" title="导出Excel">导出</button>
                     <button type="button" class="btn btn-primary" onclick="increase(false)">入库</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
@@ -123,7 +127,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group text-right">
-                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList')"><i class="fa fa-refresh"></i> 重置</button>
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList',4)"><i class="fa fa-refresh"></i> 重置</button>
                     </div>
                     <div class="form-group maxHeight" id="fastIncreaseListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
@@ -147,13 +151,13 @@
                         </table>
                     </div>
                     <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" onclick="scanAdd(4,'#fastIncreaseList')" style="font-size: 30px; cursor: pointer"></span>
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(4)" style="font-size: 30px; cursor: pointer"></span>
                         <button type="button" class="btn btn-default btn-sm" id="addFastIncreaseListBtn" onclick="addListTr(4)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" onclick="">拷贝</button>
-                    <button type="button" class="btn btn-info" onclick="exportExcel('#fastIncreaseList')">导出</button>
+                    <button type="button" class="btn btn-warning" id="fastCopyBtn" onclick="copyTable('#fastIncreaseList')">拷贝</button>
+                    <button type="button" class="btn btn-info" id="fastExportBtn" onclick="exportExcel('#fastIncreaseList')" title="导出Excel">导出</button>
                     <button type="button" class="btn btn-primary" onclick="increase(true)">入库</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
@@ -181,16 +185,26 @@
                                 <div class="tab-pane active in" id="planConsume">
                                     <div class="box box-primary">
                                         <div class="box-body">
-                                            <div class="form-group">
-                                                <label class="control-label" for="consumePlanSelect">计划：</label>
-                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                                    <select class="ms2 form-control" id="consumePlanSelect" style="width: 160px"></select>
+                                            <div class="flexStyle"  style="justify-content: space-between">
+                                                <div class="form-group">
+                                                    <label class="control-label" for="consumePlanSelect">计划：</label>
+                                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                        <select class="ms2 form-control" id="consumePlanSelect" style="width: 160px"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-warning btn-sm" onclick="receiveStick(1)">粘贴</button>
+                                                    <div class="btn btn-info btn-sm btn-file">
+                                                        导入
+                                                        <input type="file" data-index="1" id="planInto" title="请选择Excel导入" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                                    </div>
+                                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#consumePlanList')"><i class="fa fa-refresh"></i> 重置</button>
                                                 </div>
                                             </div>
                                             <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space: nowrap">清单：</label>
                                                 <div class="flexStyle">
-                                                    <select class="form-control thText" onchange="searchTr.call(this,'#consumePlanList')" style="flex-basis: 140px">
+                                                    <select class="form-control thText" onchange="searchTr.call(this, '#consumePlanList')" style="flex-basis: 140px">
                                                         <option value="code">货品编号</option>
                                                         <option value="category">货品类别</option>
                                                         <option value="name">货品名称</option>
@@ -198,7 +212,7 @@
                                                         <option value="specification">规格型号</option>
                                                         <option value="site">货品位置</option>
                                                     </select>
-                                                    <select class="form-control sym" onchange="searchTr.call(this,'#consumePlanList')" style="flex-basis: 140px">
+                                                    <select class="form-control sym" onchange="searchTr.call(this, '#consumePlanList')" style="flex-basis: 140px">
                                                         <option value="0">等于</option>
                                                         <option value="1">不等于</option>
                                                         <option value="2">包含</option>
@@ -209,31 +223,31 @@
                                             <div class="form-group maxHeight" id="consumePlanListTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
-                                                        <tr>
-                                                            <th>序号</th>
-                                                            <th class="text-blue">货品编号</th>
-                                                            <th class="text-info">货品类别</th>
-                                                            <th class="text-info">货品名称</th>
-                                                            <th class="text-info">供应商</th>
-                                                            <th class="text-info">规格型号</th>
-                                                            <th class="text-info">单价</th>
-                                                            <th class="text-info">位置</th>
-                                                            <th>领用数量</th>
-                                                            <th>计划用量</th>
-                                                            <th>实际用量</th>
-                                                            <th class="text-red">剩余库存</th>
-                                                            <th>领用人</th>
-                                                            <th>货品详情</th>
-                                                            <th>日志</th>
-                                                            <th>删除</th>
-                                                        </tr>
+                                                    <tr>
+                                                        <th>序号</th>
+                                                        <th class="text-blue">货品编号</th>
+                                                        <th class="text-info">货品类别</th>
+                                                        <th class="text-info">货品名称</th>
+                                                        <th class="text-info">供应商</th>
+                                                        <th class="text-info">规格型号</th>
+                                                        <th class="text-info">单价</th>
+                                                        <th class="text-info">位置</th>
+                                                        <th>领用数量</th>
+                                                        <th>计划用量</th>
+                                                        <th>实际用量</th>
+                                                        <th class="text-red">剩余库存</th>
+                                                        <th>领用人</th>
+                                                        <th>货品详情</th>
+                                                        <th>日志</th>
+                                                        <th>删除</th>
+                                                    </tr>
                                                     </thead>
                                                     <tbody id="consumePlanList" data-index="1"></tbody>
                                                 </table>
                                             </div>
                                             <div class="flexStyle" style="justify-content: center">
-                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(1,'#consumePlanList')" style="font-size: 30px; cursor: pointer"></span>
-                                                <button type="button" class="btn btn-default btn-sm" id="addConsumePlanListBtn" onclick="addListTr(1)" style="margin-left:3px"><i class="fa fa-plus"></i> 添加新项</button>
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(1)" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" id="addConsumePlanListBtn" onclick="addListTr(1)" style="margin-left: 3px"><i class="fa fa-plus"></i> 添加新项</button>
                                             </div>
                                         </div>
                                     </div>
@@ -241,9 +255,19 @@
                                 <div class="tab-pane fade in" id="otherConsume">
                                     <div class="box box-primary">
                                         <div class="box-body">
-                                            <div class="form-group flexStyle">
-                                                <label class="control-label" for="consumeOther" style="white-space:nowrap">用途：</label>
-                                                <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
+                                            <div class="flexStyle" style="justify-content: space-between">
+                                                <div class="form-group flexStyle">
+                                                    <label class="control-label" for="consumeOther" style="white-space:nowrap">用途：</label>
+                                                    <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
+                                                </div>
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-warning btn-sm" onclick="receiveStick(2)">粘贴</button>
+                                                    <div class="btn btn-info btn-sm btn-file">
+                                                        导入
+                                                        <input type="file" data-index="2" id="otherInto" title="请选择Excel导入" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                                    </div>
+                                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#consumeOtherList')"><i class="fa fa-refresh"></i> 重置</button>
+                                                </div>
                                             </div>
                                             <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label" style="white-space:nowrap">清单：</label>
@@ -288,7 +312,7 @@
                                                 </table>
                                             </div>
                                             <div class="flexStyle" style="justify-content: center">
-                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(2,'#consumeOtherList')" style="font-size: 30px; cursor: pointer"></span>
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(2)" style="font-size: 30px; cursor: pointer"></span>
                                                 <button type="button" class="btn btn-default btn-sm" id="addConsumeOtherListBtn" onclick="addListTr(2)"><i class="fa fa-plus"></i> 添加新项</button>
                                             </div>
                                         </div>
@@ -426,7 +450,7 @@
                         </table>
                     </div>
                     <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" onclick="scanAdd(3,'#reversalList')" style="font-size: 30px; cursor: pointer"></span>
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(3)" style="font-size: 30px; cursor: pointer"></span>
                         <button type="button" class="btn btn-default btn-sm" id="addReversalListBtn" onclick="addListTr(3)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
