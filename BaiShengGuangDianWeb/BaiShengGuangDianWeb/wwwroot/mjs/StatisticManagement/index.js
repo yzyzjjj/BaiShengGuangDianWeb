@@ -6,12 +6,8 @@ function pageReady() {
     if (!_permissionList[700].have) {
         $('.createChart').addClass('hidden');
     }
-    $(".ms2").select2();
-    $("#selectDevice").select2({
-        allowClear: true,
-        placeholder: "请选择"
-    });
-    $("#selectDevice1").select2({
+    $('.ms2').select2();
+    $('#selectDevice,#selectDevice1').select2({
         allowClear: true,
         placeholder: "请选择"
     });
@@ -20,28 +16,26 @@ function pageReady() {
         radioClass: 'iradio_minimal-blue',
         increaseArea: '20%'
     });
-    $("#selectDevice").on("select2:select", function (e) {
-        var v = $("#selectDevice").val();
+    $("#selectDevice").on("select2:select", function () {
+        var v = $(this).val();
         if (v.indexOf("0,所有设备") > -1) {
-            $("#selectDevice").val("0,所有设备").trigger("change");
+            $(this).val("0,所有设备").trigger("change");
         }
     });
-    getDeviceList(1);
-    getDeviceList(2);
     getWorkShopList();
-    $("#selectStartDate").val(getDate()).datepicker('update');
-    $("#selectEndDate").val(getDate()).datepicker('update');
-    $("#selectDayDate").val(getDate()).datepicker('update');
-    $("#selectDay2Date").val(getDate()).datepicker('update');
-    $("#selectWorkShop").on("select2:select", function (e) {
+    getDeviceList();
+    $('.form_date').val(getDate()).datepicker('update');
+    $("#selectWorkShop").on("select2:select", function () {
         $("#recordChart").empty();
-        getWorkShopDeviceList();
+        var v = $(this).val();
+        new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice').empty().append(`<option value="0">所有设备</option>${e}`));
     });
     var tf = true;
-    $("#selectWorkShop1").on("select2:select", function (e) {
+    $("#selectWorkShop1").on("select2:select", function () {
         $("#processDetailList").empty();
-        getWorkShopDevList();
         $("#checkAll").iCheck("uncheck");
+        var v = $(this).val();
+        new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice1').empty().append(e));
     });
     $("#checkAll").on("ifChanged", function () {
         var i, len = $("#selectDevice1").find("option").length;
@@ -73,8 +67,7 @@ function pageReady() {
         }
     });
     $("#selectDevice1").next(".select2-container").css("maxHeight", "37px").css("overflowY", "auto");
-    $("#par input,#par span").css("verticalAlign", "middle");
-    $("#parTime input,#parTime span").css("verticalAlign", "middle");
+    $("#parTime input,#parTime span,#par input,#par span").css("verticalAlign", "middle");
     radioTime();
     $("#selectStartDate,#selectStartTime,#selectEndDate,#selectEndTime").on("change", function () {
         radioTime();
@@ -88,6 +81,18 @@ function pageReady() {
             $(".planBody").addClass("hidden");
             $("#selectJhList").val($("#selectJhList").find("option:first").val()).trigger("change");
         }
+    });
+    $('#productionWorkShop').on('select2:select', function () {
+        var v = $(this).val();
+        new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#productionDevice').empty().append(e).trigger('select2:select'));
+    });
+    $('#productionDevice').on('select2:select', function () {
+        $('#deviceType').text(_deviceType[$(this).val()]);
+    });
+    var time = 0;
+    $('#production_chart').on('resize', function () {
+        clearTimeout(time);
+        time = setTimeout(() => echarts.init($(this)[0]).resize(), 200);
     });
 }
 
@@ -134,38 +139,8 @@ var leadTimeHour = 3600000;
 var leadTimeDay = 86400000;
 //时差1月
 var leadTimeMonth = 2592000000;
-function getDeviceList(par) {
-    var data = {}
-    data.opType = 100;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            var rData = ret.datas;
-            rData.sort((a, b) => a.Code - b.Code);
-            var option;
-            var i, d, len = rData.length;
-            if (par == 1) {
-                $("#selectDevice").empty();
-                option = '<option value="{0},{1}">{1}</option>';
-                $("#selectDevice").append(option.format(0, "所有设备"));
-                for (i = 0; i < len; i++) {
-                    d = rData[i];
-                    $("#selectDevice").append(option.format(d.Id, d.Code));
-                }
-            } else {
-                $("#selectDevice1").empty();
-                option = '<option value="{0}">{1}</option>';
-                for (i = 0; i < len; i++) {
-                    d = rData[i];
-                    $("#selectDevice1").append(option.format(d.Id, d.Code));
-                }
-            }
-        });
-}
 
+//获取车间
 function getWorkShopList() {
     var data = {}
     data.opType = 162;
@@ -174,75 +149,76 @@ function getWorkShopList() {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#selectWorkShop,#selectWorkShop1").empty();
-        var option = '<option value = "{0}">{1}</option>';
-        $("#selectWorkShop,#selectWorkShop1").append(option.format("", "所有车间"));
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            $("#selectWorkShop,#selectWorkShop1").append(option.format(data.SiteName, data.SiteName));
+        var list = ret.datas;
+        var op = '<option value = "{0}">{0}</option>';
+        var ops = '<option value = "所有车间">所有车间</option>';
+        for (var i = 0, len = list.length; i < len; i++) {
+            var d = list[i];
+            ops += op.format(d.SiteName);
         }
+        $("#selectWorkShop,#selectWorkShop1,#productionWorkShop").empty().append(ops);
     });
 }
 
-function getWorkShopDeviceList() {
-    var workShop = $("#selectWorkShop").val();
-    if (isStrEmptyOrUndefined(workShop)) {
-        $("#selectDevice").empty();
-        getDeviceList(1);
-        return;
-    }
+var _deviceType = null;
+//获取所有设备
+function getDeviceList(resolve) {
+    var data = {}
+    data.opType = 100;
+    data.opData = JSON.stringify({ hard: true, work: true });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            _deviceType = {};
+            var rData = ret.datas;
+            rData.sort((a, b) => a.Code - b.Code);
+            var op = '<option value="{0}">{1}</option>';
+            var ops = '';
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                ops += op.format(d.Id, d.Code);
+                _deviceType[d.Id] = d.CategoryName;
+            }
+            if (resolve) {
+                resolve(ops);
+            } else {
+                $('#selectDevice').empty().append(`<option value="0">所有设备</option>${ops}`);
+                $('#selectDevice1,#productionDevice').empty().append(ops);
+                $('#deviceType').text(_deviceType[$('#productionDevice').val()]);
+            }
+        });
+}
+
+//获取车间设备
+function getWorkShopDevice(resolve, workShop) {
     var data = {}
     data.opType = 163;
     data.opData = JSON.stringify({
         workshopName: workShop
     });
-    ajaxPost("/Relay/Post", data, function (ret) {
+    ajaxPost("/Relay/Post", data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#selectDevice").empty();
-        var option = '<option value = "{0},{1}">{1}</option>';
-        if (ret.datas.length > 1) {
-            $("#selectDevice").append(option.format(0, "所有设备"));
+        var rData = ret.datas;
+        var op = '<option value="{0}">{1}</option>';
+        var ops = '';
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            ops += op.format(d.Id, d.Code);
         }
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            $("#selectDevice").append(option.format(data.Id, data.Code));
-        }
-    });
-}
-
-function getWorkShopDevList() {
-    var workShop = $("#selectWorkShop1").val();
-    if (isStrEmptyOrUndefined(workShop)) {
-        $("#selectDevice1").empty();
-        getDeviceList(2);
-        return;
-    }
-    var data = {}
-    data.opType = 163;
-    data.opData = JSON.stringify({
-        workshopName: workShop
-    });
-    ajaxPost("/Relay/Post", data, function (ret) {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
-        }
-        $("#selectDevice1").empty();
-        var option = '<option value = "{0}">{1}</option>';
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            $("#selectDevice1").append(option.format(data.Id, data.Code));
-        }
+        resolve(ops);
     });
 }
 
 var dataTime;
 function createChart(start1, end1) {
-    var device = $("#selectDevice").val();
-    if (isStrEmptyOrUndefined(device)) {
+    var deviceId = $("#selectDevice").val();
+    if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg("请选择设备");
         return;
     }
@@ -251,15 +227,10 @@ function createChart(start1, end1) {
         return;
     }
     var workShop = $("#selectWorkShop").val();
-    var list = device.join();
-    var newList = list.split(",");
-    var deviceId = [], deviceName = [];
-    for (var i = 0; i < newList.length; i++) {
-        if (i % 2 == 0) {
-            deviceId.push(newList[i]);
-        } else {
-            deviceName.push(newList[i]);
-        }
+    var devEl = $('#selectDevice :selected');
+    var deviceName = [];
+    for (var i = 0, len = devEl.length; i < len; i++) {
+        deviceName.push(devEl.eq(i).text());
     }
     var start;
     if (isStrEmptyOrUndefined(start1)) {
@@ -670,15 +641,14 @@ function selectPlan() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            $("#selectJhList").empty();
-            var option = "<option value='{0}'>{1}</option>";
-            var arr = [];
-            for (var i = 0; i < ret.datas.length; i++) {
-                var d = ret.datas[i];
-                arr.push(option.format(d.Id, d.ProductionProcessName));
+            var rData = ret.datas;
+            var op = "<option value='{0}'>{1}</option>";
+            var ops = '';
+            for (var i = 0, len = rData.length; i < len; i++) {
+                var d = rData[i];
+                ops += op.format(d.Id, d.ProductionProcessName);
             }
-            arr = arr.join("");
-            $("#selectJhList").append(arr);
+            $('#selectJhList').empty().append(ops);
         });
 }
 
@@ -989,4 +959,130 @@ function showProcessDetailModel(data) {
         ]
     });
     $("#processModel").modal("show");
+}
+
+//生产数据
+function getProductionChart() {
+    var deviceId = $('#productionDevice').val();
+    if (isStrEmptyOrUndefined(deviceId)) {
+        layer.msg('请选择设备');
+        return;
+    }
+    var sTime = $('#productionSTime').val();
+    if (isStrEmptyOrUndefined(sTime)) {
+        layer.msg('请选择开始时间');
+        return;
+    }
+    var eTime = $('#productionETime').val();
+    if (isStrEmptyOrUndefined(eTime)) {
+        layer.msg('请选择结束时间');
+        return;
+    }
+    if (compareDate(sTime, eTime)) {
+        layer.msg('结束时间不能小于开始时间');
+        return;
+    }
+    sTime += ' 00:00:00';
+    eTime += ' 23:59:59';
+    var pars = $('#production_par input');
+    if (!pars.is(':checked')) {
+        layer.msg('请选择参数');
+        return;
+    }
+    var data = {}
+    data.opType = 508;
+    data.opData = JSON.stringify({
+        DeviceId: deviceId,
+        StartTime: sTime,
+        EndTime: eTime
+    });
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
+            if (ret.errno != 0) {
+                layer.msg(ret.errmsg);
+                return;
+            }
+            $('#production_chart').removeClass('hidden');
+            var rData = ret.datas;
+            var i, len, d;
+            var chartData = {
+                Time: [],
+                FaChu: [],
+                HeGe: [],
+                LiePian: [],
+                Rate: [],
+                ProcessTime: []
+            };
+            for (i = 0, len = rData.length; i < len; i++) {
+                d = rData[i];
+                chartData.Time.push(d.Time.replace(' ', '\n'));
+                chartData.FaChu.push(d.FaChu);
+                chartData.HeGe.push(d.HeGe);
+                chartData.LiePian.push(d.LiePian);
+                chartData.Rate.push(d.Rate);
+                chartData.ProcessTime.push(d.ProcessTime);
+            }
+            var seriesData = [], legendData = [];
+            var parNames = $('#production_par span');
+            for (i = 0, len = pars.length; i < len; i++) {
+                var par = pars.eq(i);
+                if (par.is(':checked')) {
+                    var v = par.val();
+                    var legName = parNames.eq(i).text();
+                    legendData.push(legName);
+                    seriesData.push({
+                        name: legName,
+                        type: 'line',
+                        data: chartData[v]
+                    });
+                }
+            }
+            var option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: legendData
+                },
+                grid: {
+                    left: '3%',
+                    right: '3%',
+                    top: '10%',
+                    bottom: '8%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: chartData.Time
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: seriesData,
+                dataZoom: [{
+                    type: 'inside'
+                }, {
+                    handleIcon: _handleIcon,
+                    handleSize: '80%',
+                    handleStyle: {
+                        color: '#fff',
+                        shadowBlur: 3,
+                        shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        shadowOffsetX: 2,
+                        shadowOffsetY: 2
+                    }
+                }],
+                toolbox: {
+                    left: 'center',
+                    top: '3%',
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: "none"
+                        },
+                        restore: {}
+                    }
+                }
+            };
+            echarts.init($('#production_chart')[0]).setOption(option,true);
+        });
 }

@@ -71,6 +71,7 @@ th, td {
     border: 1px solid;
     border-radius: 10px;
 }
+
 /*遮盖层*/
 #body-cover {
     position: fixed;

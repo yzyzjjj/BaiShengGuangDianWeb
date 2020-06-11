@@ -180,7 +180,7 @@ function setChart(arr, x, y, name, chartEl) {
     op.xAxis.data = xData;
     op.series.data = yData;
     op.series.name = name;
-    echarts.init($(chartEl)[0]).setOption(op);
+    echarts.init($(chartEl)[0]).setOption(op,true);
 }
 
 //折叠复选框项
@@ -588,7 +588,7 @@ function getTaskFinishChart() {
                 data: system
             }]
         };
-        echarts.init($('#finish_chart')[0]).setOption(option);
+        echarts.init($('#finish_chart')[0]).setOption(option,true);
     });
 }
 

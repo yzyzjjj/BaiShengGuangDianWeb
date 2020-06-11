@@ -432,12 +432,7 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                 var d = rData[i];
                 options += option.format(d.Id, d.Plan);
             }
-            $('.planSelect').empty();
-            $('.planSelect').append(options);
-            var number = 0;
-            var order = function () {
-                return ++number;
-            }
+            $('.planSelect').empty().append(options);
             var status = function (data) {
                 //已/总/超-ActualConsumption/PlannedConsumption/ExtraConsumption
                 var actual = data.ActualConsumption;
@@ -461,28 +456,27 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                         .format(data.Id, escape(data.Plan))
                     : '';
             }
-            $("#planList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": rData,
-                    "aaSorting": [[per501 ? 1 : 0, "asc"]],
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数
-                    "columns": [
-                        { "data": null, "title": "删除", "render": del, "visible": per501, "orderable": false },
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "Plan", "title": "计划" },
-                        { "data": null, "title": "领料状态(<font style='color:green'>已</font>/<font style='color:blue'>总</font>/<font style='color:red'>超</font>)", "render": status },
-                        { "data": "Remark", "title": "备注" },
-                        { "data": "PlannedCost", "title": "计划造价" },
-                        { "data": "ActualCost", "title": "实际造价" },
-                        { "data": null, "title": "操作", "render": operation, "orderable": false }
-                    ]
-                });
+            $("#planList").DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                "destroy": true,
+                "paging": true,
+                "searching": true,
+                "language": oLanguage,
+                "data": rData,
+                "aaSorting": [[per501 ? 1 : 0, "desc"]],
+                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+                "iDisplayLength": 20, //默认显示的记录数
+                "columns": [
+                    { "data": null, "title": "删除", "render": del, "visible": per501, "orderable": false },
+                    { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
+                    { "data": "Plan", "title": "计划" },
+                    { "data": null, "title": "领料状态(<font style='color:green'>已</font>/<font style='color:blue'>总</font>/<font style='color:red'>超</font>)", "render": status },
+                    { "data": "Remark", "title": "备注" },
+                    { "data": "PlannedCost", "title": "计划造价" },
+                    { "data": "ActualCost", "title": "实际造价" },
+                    { "data": null, "title": "操作", "render": operation, "orderable": false }
+                ]
+            });
         } else {
             resolve(rData);
         }
@@ -1165,7 +1159,7 @@ function getLogList() {
                 "columns": [
                     { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
                     { "data": "Time", "title": "时间" },
-                    { "data": "Mode", "title": "类型", "render": a => a == 0 ? '<span style="color:red">退回</span>' : '<span style="color:green">领用</span>'},
+                    { "data": "Mode", "title": "类型", "render": a => a == 0 ? '<span style="color:red">退回</span>' : '<span style="color:green">领用</span>' },
                     { "data": "Purpose", "title": "计划号" },
                     { "data": "Code", "title": "货品编号" },
                     { "data": "Category", "title": "类别" },

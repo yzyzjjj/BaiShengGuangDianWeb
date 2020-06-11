@@ -807,17 +807,22 @@ function codeGanged(e) {
     var supplierId = d.SupplierId || '';
     var specificationId = d.SpecificationId || '';
     var siteId = d.SiteId || '';
+    var nameEl = tr.find('.name');
+    var supplierEl = tr.find('.supplier');
+    var specificationEl = tr.find('.specification');
+    //if (!nameEl.find(':selected').data('select2Tag') || !supplierEl.find(':selected').data('select2Tag') || !specificationEl.find(':selected').data('select2Tag')) { }
+    var nullOp = '<option></option>';
     tr.find('.category').val(categoryId).trigger('change');
     var nameOp = selectOp(_nameData[categoryId], 'Id', 'Name');
-    tr.find('.name').empty().append(nameOp).val(nameId).trigger('change');
+    nameEl.empty().append(nameOp || nullOp).val(nameId).trigger('change');
     var supplierOp = selectOp(_supplierData[nameId], 'Id', 'Supplier');
-    tr.find('.supplier').empty().append(supplierOp).val(supplierId).trigger('change');
+    supplierEl.empty().append(supplierOp || nullOp).val(supplierId).trigger('change');
     var specificationOp = selectOp(_specificationData[supplierId], 'Id', 'Specification');
-    tr.find('.specification').empty().append(specificationOp).val(specificationId).trigger('change');
+    specificationEl.empty().append(specificationOp || nullOp).val(specificationId).trigger('change');
     var siteOp = selectOp(specificationId == '' ? _siteData : _siteObj[specificationId], 'Id', 'Site');
     tr.find('.site').empty().append(siteOp).val(siteId).trigger('change');
     var priceOp = selectOp(_priceData[`${specificationId}${siteId}`], 'Price', 'Price');
-    tr.find('.price').empty().append(priceOp).val(d.Price || 0).trigger('change');
+    tr.find('.price').empty().append(priceOp || nullOp).val(d.Price || 0).trigger('change');
     TrNoEqual(e, tr, d);
 }
 
@@ -880,29 +885,32 @@ function codeNoGanged(e, type) {
     var specificationId = specificationEl.val() || '';
     var siteId = siteEl.val() || '';
     var codeId = tr.find('.code').val();
+    var nullOp = '<option></option>';
     switch (e) {
         case 0:
             var categoryId = tr.find('.category').val() || '';
             var nameOp = selectOp(_nameData[categoryId], 'Id', 'Name');
-            nameEl.empty().append(nameOp);
+            nameEl.empty().append(nameOp || nullOp);
         case 1:
             var nameId = nameEl.val() || '';
             var supplierOp = selectOp(_supplierData[nameId], 'Id', 'Supplier');
-            supplierEl.empty().append(supplierOp);
+            supplierEl.empty().append(supplierOp || nullOp);
         case 2:
             var supplierId = supplierEl.val() || '';
             var specificationOp = selectOp(_specificationData[supplierId], 'Id', 'Specification');
-            specificationEl.empty().append(specificationOp);
+            specificationEl.empty().append(specificationOp || nullOp);
         case 3:
             specificationId = specificationEl.val() || '';
             var siteOp = tagTf || !codeId
                 ? selectOp(_siteData, 'Id', 'Site')
-                : selectOp(specificationId == '' ? _siteData : _siteObj[specificationId], 'Id', 'Site');
+                : selectOp(_siteObj[specificationId] ? _siteObj[specificationId] : _siteData, 'Id', 'Site');
             siteEl.empty().append(siteOp);
         case 4:
-            siteId = siteEl.val() || '';
-            var priceOp = tagTf ? '' : selectOp(_priceData[`${specificationId}${siteId}`], 'Price', 'Price');
-            priceEl.empty().append(priceOp);
+            if (!priceEl.find(':selected').data('select2Tag')) {
+                siteId = siteEl.val() || '';
+                var priceOp = tagTf ? '' : selectOp(_priceData[`${specificationId}${siteId}`], 'Price', 'Price');
+                priceEl.empty().append(priceOp || nullOp);
+            }
         case 5:
             var price = priceEl.val() || '';
             price = price.replace('tag', '');
@@ -922,13 +930,27 @@ function codeNoGanged(e, type) {
                 if (!isStrEmptyOrUndefined(name) && !isStrEmptyOrUndefined(supplier) && !isStrEmptyOrUndefined(specification)) {
                     specification = specification.replace(/[&\|\\\*^%$#@\-]/g, '');
                     var newCode = `${name.toPinYin()}${supplier.toPinYin()}${specification.toPinYin()}`;
-                    var flag = 0;
-                    while (_codeNameData[newCode]) {
-                        flag++;
-                        newCode += flag + '';
+                    var codeArr = {}, codeEl;
+                    if (type == 0) {
+                        codeEl = $('#increaseList .code :selected');
+                    } else if (type == 4) {
+                        codeEl = $('#fastIncreaseList .code :selected');
                     }
-                    var op = `<option value="tag${newCode}" data-select2-tag="true">${newCode}</option>`;
-                    tr.find('.code').append(op).val(`tag${newCode}`).trigger('change');
+                    for (var i = 0, len = codeEl.length; i < len; i++) {
+                        var d = codeEl.eq(i);
+                        var codeText = d.text();
+                        if (d.data('select2Tag') && tr.find('.code :selected').text() != codeText) {
+                            codeArr[codeText] = 1;
+                        }
+                    }
+                    var codeNameObj = { ...codeArr, ..._codeNameData };
+                    var flag = 0, newCodeFlag = newCode;
+                    while (codeNameObj[newCodeFlag]) {
+                        flag++;
+                        newCodeFlag = `${newCode}${flag}`;
+                    }
+                    var op = `<option value="tag${newCodeFlag}" data-select2-tag="true">${newCodeFlag}</option>`;
+                    tr.find('.code').append(op).val(`tag${newCodeFlag}`).trigger('change');
                 }
             }
             TrNoEqual(type, tr, codeData);
@@ -992,8 +1014,8 @@ function showIncreaseModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#increaseList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $('#addIncreaseListBtn').attr('disabled', false);
-        $('#increaseModal').modal('show');
     });
+    $('#increaseModal').modal('show');
 }
 
 /////////////////////////////////////////////快捷入库////////////////////////////////////////////
@@ -1010,8 +1032,8 @@ function showFastIncreaseModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#fastIncreaseList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $('#addFastIncreaseListBtn').attr('disabled', false);
-        $('#fastIncreaseModal').modal('show');
     });
+    $('#fastIncreaseModal').modal('show');
 }
 
 //点击入库复制
@@ -1319,8 +1341,8 @@ function showConsumeModel() {
         _gangedPlanTr = addTr.format('<td class="planConsume"></td><td class="actualConsume"></td>', '#consumePlanList');
         _gangedOtherTr = addTr.format('', '#consumeOtherList');
         $('#addConsumeOtherListBtn').attr('disabled', false);
-        $('#consumeModal').modal('show');
     });
+    $('#consumeModal').modal('show');
 }
 
 //领用刷新库存
@@ -1568,8 +1590,8 @@ function showReversalModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#reversalList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $("#addReversalListBtn").attr('disabled', false);
-        $("#reversalModal").modal("show");
     });
+    $("#reversalModal").modal("show");
 }
 
 var _reversalConList = null;
