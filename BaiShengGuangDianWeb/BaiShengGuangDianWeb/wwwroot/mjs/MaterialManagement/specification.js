@@ -5,7 +5,7 @@ function pageReady() {
     _permissionList[578] = { uIds: ['batchAddModalBtn'] };
     _permissionList[579] = { uIds: ['delSpecificationBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     var categoryId, nameId;
     new Promise(function (resolve, reject) {
         categorySelect(resolve);
@@ -52,7 +52,7 @@ function pageReady() {
         getSpecificationList();
     });
     //表格
-    $('#specificationList').on('change', '.category', function () {
+    $('#specificationList').on('select2:select', '.category', function () {
         var tr = $(this).parents('tr');
         categoryId = $(this).val();
         new Promise(function (resolve, reject) {
@@ -72,7 +72,7 @@ function pageReady() {
             tr.find('.supplier').append(e);
         });
     });
-    $('#specificationList').on('change', '.name', function () {
+    $('#specificationList').on('select2:select', '.name', function () {
         var tr = $(this).parents('tr');
         categoryId = tr.find('.category').val();
         nameId = $(this).val();
@@ -138,7 +138,7 @@ function categorySelect(resolve) {
             $('#categorySelect').append(option.format(0, '所有类别'));
         }
         $('.categorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
+        _categorySelect = `<select class="ms2 form-control category">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(nameSelect);
         }
@@ -275,13 +275,13 @@ function getSpecificationList() {
             return ++d.row;
         }
         var category = function (data) {
-            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
+            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span><div class="textIn hidden">${_categorySelect}</div>`;
         }
         var name = function (data) {
-            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><select class="form-control textIn name hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><div class="textIn hidden"><select class="ms2 form-control name"></select></div>`;
         }
         var supplier = function (data) {
-            return `<span class="textOn" id=${data.SupplierId}>${data.Supplier}</span><select class="form-control textIn supplier hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.SupplierId}>${data.Supplier}</span><div class="textIn hidden"><select class="ms2 form-control supplier"></select></div>`;
         }
         var specification = function (data) {
             return `<span class="textOn specificationOld">${data}</span><input type="text" class="form-control text-center textIn specification hidden" maxlength="20" style="width:120px" value=${data}>`;
@@ -321,6 +321,7 @@ function getSpecificationList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
+                    $(this).find('.ms2').select2({ width: '120px', matcher });
                     $('#specificationList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();
@@ -334,15 +335,13 @@ function getSpecificationList() {
                             new Promise(function (resolve, reject) {
                                 nameSelect(resolve, categoryName, true);
                             }).then(function (e) {
-                                tr.find('.name').empty();
-                                tr.find('.name').append(e);
+                                tr.find('.name').empty().append(e);
                                 nameName = textOn.eq(1).attr('id');
                                 return new Promise(function (resolve, reject) {
                                     supplierSelect(resolve, categoryName, nameName, true);
                                 });
                             }).then(function (e) {
-                                tr.find('.supplier').empty();
-                                tr.find('.supplier').append(e);
+                                tr.find('.supplier').empty().append(e);
                                 var supplierName = textOn.eq(2).attr('id');
                                 var specificationName = textOn.eq(3).text();
                                 var remarkName = textOn.eq(4).attr("title");
@@ -698,7 +697,8 @@ function addOneBatchAddList(categoryId = 0, nameId = 0, supplierId = 0, specific
 
         $("#batchAdd" + xh).find(".ms2").css("width", "100%");
         $("#batchAdd" + xh).find(".ms2").select2({
-            width: "120px"
+            width: "120px",
+            matcher
         });
     }
 }

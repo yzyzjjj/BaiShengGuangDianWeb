@@ -6,7 +6,7 @@ function pageReady() {
     _permissionList[548] = { uIds: ['delMaterialBtn'] };
     _permissionList[549] = { uIds: ['updateImgBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     $('.msTag2').select2({
         tags: true,
         createTag: params => {
@@ -14,7 +14,8 @@ function pageReady() {
                 id: `tag${params.term}`,
                 text: params.term
             }
-        }
+        },
+        matcher
     });
     siteSelect();
     var categoryId, nameId, supplierId;
@@ -97,7 +98,7 @@ function pageReady() {
         getMaterialList();
     });
     //表格
-    $('#MaterialList').on('change', '.category', function () {
+    $('#MaterialList').on('select2:select', '.category', function () {
         var tr = $(this).parents('tr');
         categoryId = $(this).val();
         new Promise(function (resolve, reject) {
@@ -128,7 +129,7 @@ function pageReady() {
             tr.find('.specification').append(e);
         });
     });
-    $('#MaterialList').on('change', '.name', function () {
+    $('#MaterialList').on('select2:select', '.name', function () {
         var tr = $(this).parents('tr');
         categoryId = tr.find('.category').val();
         nameId = $(this).val();
@@ -149,7 +150,7 @@ function pageReady() {
             tr.find('.specification').append(e);
         });
     });
-    $('#MaterialList').on('change', '.supplier', function () {
+    $('#MaterialList').on('select2:select', '.supplier', function () {
         categoryId = tr.find('.category').val();
         nameId = tr.find('.name').val();
         supplierId = $(this).val();
@@ -256,7 +257,7 @@ function categorySelect(resolve) {
         $('#categorySelect').append(option.format(0, '所有类别'));
         //}
         $('.categorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
+        _categorySelect = `<select class="ms2 form-control category">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(nameSelect);
         }
@@ -424,7 +425,7 @@ function siteSelect(resolve) {
         $('#siteSelect').empty();
         $('#siteSelect').append(option.format(0, '所有位置'));
         $('#siteSelect').append(options);
-        _siteSelect = `<select class="form-control textIn site hidden" style="width:100px">${options}</select>`;
+        _siteSelect = `<select class="ms2 form-control site">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve('success');
         }
@@ -496,22 +497,22 @@ function getMaterialList() {
             return `<span class="textOn codeOld">${data}</span><input type="text" class="form-control text-center textIn code hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var category = function (data) {
-            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
+            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span><div class="hidden textIn">${_categorySelect}</div>`;
         }
         var name = function (data) {
-            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><select class="form-control textIn name hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><div class="hidden textIn"><select class="ms2 form-control name"></select></div>`;
         }
         var supplier = function (data) {
-            return `<span class="textOn" id=${data.SupplierId}>${data.Supplier}</span><select class="form-control textIn supplier hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.SupplierId}>${data.Supplier}</span><div class="hidden textIn"><select class="ms2 form-control supplier"></select></div>`;
         }
         var specification = function (data) {
-            return `<span class="textOn" id=${data.SpecificationId}>${data.Specification}</span><select class="form-control textIn specification hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.SpecificationId}>${data.Specification}</span><div class="hidden textIn"><select class="ms2 form-control specification"></select></div>`;
         }
         var unit = function (data) {
             return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn unit hidden" maxlength="20" style="width:80px" value=${data}>`;
         }
         var site = function (data) {
-            return `<span class="textOn" id=${data.SiteId}>${data.Site}</span>${_siteSelect}`;
+            return `<span class="textOn" id=${data.SiteId}>${data.Site}</span><div class="hidden textIn">${_siteSelect}</div>`;
         }
         var materialImg = function (data) {
             var op = '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({0},\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',\'{6}\',\'{7}\')">查看</button>';
@@ -566,6 +567,7 @@ function getMaterialList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
+                    $(this).find('.ms2').select2({ width: '120px', matcher });
                     $('#MaterialList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();
@@ -1206,7 +1208,8 @@ function addOneBatchAddList(categoryId = 0, nameId = 0, supplierId = 0, specific
                     id: `tag${params.term}`,
                     text: params.term
                 }
-            }
+            },
+            matcher
         });
     }
 }

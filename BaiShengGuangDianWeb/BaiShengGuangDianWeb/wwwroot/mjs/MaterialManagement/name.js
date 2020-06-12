@@ -4,7 +4,7 @@ function pageReady() {
     _permissionList[562] = { uIds: ['addNameModalBtn'] };
     _permissionList[563] = { uIds: ['delNameBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     surveyor();
     $('#categorySelect').on('select2:select', function () {
         getNameList();
@@ -33,9 +33,9 @@ function surveyor() {
         if (len) {
             $('#categorySelect').append(option.format(0, '所有类别'));
         }
-        $('#categorySelect').append(options); 
+        $('#categorySelect').append(options);
         $('#addCategorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
+        _categorySelect = `<select class="ms2 form-control category">${options}</select>`;
         getNameList();
     });
 }
@@ -65,19 +65,19 @@ function getNameList() {
         var isEnable = function (data) {
             return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
         }
-        var order = function (a,b,c,d) {
+        var order = function (a, b, c, d) {
             return ++d.row;
         }
         var category = function (data) {
-            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
+            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span><div class="textIn hidden">${_categorySelect}</div>`;
         }
         var name = function (data) {
             return `<span class="textOn nameOld">${data}</span><input type="text" class="form-control text-center textIn name hidden" maxlength="20" style="width:120px" value=${data}>`;
         }
         var remark = function (data) {
             return (data.length > tdShowLength
-                    ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
-                    : `<span title = "${data}" class="textOn">${data}</span>`)
+                ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
+                : `<span title = "${data}" class="textOn">${data}</span>`)
                 + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
         var tf = _permissionList[561].have || _permissionList[563].have;
@@ -93,7 +93,7 @@ function getNameList() {
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf},
+                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false, "visible": tf },
                     { "data": null, "title": "序号", "render": order },
                     { "data": null, "title": "类别", "render": category },
                     { "data": "Name", "title": "名称", "render": name },
@@ -107,6 +107,7 @@ function getNameList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
+                    $(this).find('.ms2').select2({ width: '120px', matcher });
                     $('#nameList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();

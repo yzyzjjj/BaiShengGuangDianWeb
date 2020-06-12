@@ -4,7 +4,7 @@ function pageReady() {
     _permissionList[569] = { uIds: ['addSupplierModalBtn'] };
     _permissionList[570] = { uIds: ['delSupplierBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     var one = new Promise(function (resolve, reject) {
         categorySelect(resolve);
     });
@@ -64,7 +64,7 @@ function categorySelect(resolve) {
             $('#categorySelect').append(option.format(0, '所有类别'));
         }
         $('.categorySelect').append(options);
-        _categorySelect = `<select class="form-control textIn category hidden" style="width:100px">${options}</select>`;
+        _categorySelect = `<select class="ms2 form-control category">${options}</select>`;
         if (!isStrEmptyOrUndefined(resolve)) {
             resolve(nameSelect);
         }
@@ -176,10 +176,10 @@ function getSupplierList() {
             return ++d.row;
         }
         var category = function (data) {
-            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span>${_categorySelect}`;
+            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span><div class="textIn hidden">${_categorySelect}</div>`;
         }
         var name = function (data) {
-            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><select class="form-control textIn name hidden" style="width:100px"></select>`;
+            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><div class="textIn hidden"><select class="ms2 form-control name"></select></div>`;
         }
         var supplier = function (data) {
             return `<span class="textOn supplierOld">${data}</span><input type="text" class="form-control text-center textIn supplier hidden" maxlength="20" style="width:120px" value=${data}>`;
@@ -218,6 +218,7 @@ function getSupplierList() {
                         radioClass: 'iradio_minimal-blue',
                         increaseArea: '20%'
                     });
+                    $(this).find('.ms2').select2({ width: '120px', matcher });
                     $('#supplierList .isEnable').on('ifChanged', function () {
                         var tr = $(this).parents('tr');
                         var id = $(this).val();
