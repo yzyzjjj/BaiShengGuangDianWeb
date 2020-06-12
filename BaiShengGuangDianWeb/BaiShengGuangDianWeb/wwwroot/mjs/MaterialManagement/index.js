@@ -11,7 +11,7 @@ function pageReady() {
     if (!_permissionList[535].have) {
         $('.fastIncreaseModelBtn').addClass('hidden');
     }
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     var categoryFunc = new Promise(resolve => categorySelect(resolve));
     var nameFunc = new Promise(resolve => nameSelect(resolve, true, 'Select'));
     var supplierFunc = new Promise(resolve => supplierSelect(resolve, true, 'Select'));
