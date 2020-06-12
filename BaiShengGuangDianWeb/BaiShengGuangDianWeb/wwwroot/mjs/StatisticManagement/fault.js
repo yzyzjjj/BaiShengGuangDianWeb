@@ -332,7 +332,6 @@ function getFaultChart() {
                                         params[p].seriesName == "上报故障故障率" && typeof (params[p].value) == "number"
                                             ? ((params[p].value) * 100).toFixed(2) + "%"
                                             : params[p].value);
-
                                 }
                                 return xName + "<br/>" + formatter;
                             }

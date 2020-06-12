@@ -1039,7 +1039,16 @@ function getProductionChart() {
             }
             var option = {
                 tooltip: {
-                    trigger: 'axis'
+                    trigger: 'axis',
+                    formatter:  params => {
+                        var formatter = '';
+                        for (i = 0, len = params.length; i < len; i++) {
+                            d = params[i];
+                            var seriesName = d.seriesName;
+                            formatter += `${d.marker}${seriesName}：${seriesName == '合格率' ? (d.value * 100) + '%' : d.value}<br>`;
+                        }
+                        return `${params[0].name}<br>${formatter}`;
+                    }
                 },
                 legend: {
                     data: legendData
