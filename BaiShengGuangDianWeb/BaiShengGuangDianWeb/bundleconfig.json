@@ -6,21 +6,9 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/lib/utils/util.min.js",
-    "inputFiles": [
-      "wwwroot/lib/utils/util.js"
-    ]
-  },
-  {
     "outputFileName": "wwwroot/lib/utils/date.min.js",
     "inputFiles": [
       "wwwroot/lib/utils/date.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/lib/utils/tpl.min.js",
-    "inputFiles": [
-      "wwwroot/lib/utils/tpl.js"
     ]
   },
   {
@@ -30,9 +18,15 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/Account/login.min.js",
+    "outputFileName": "wwwroot/lib/utils/tpl.min.js",
     "inputFiles": [
-      "wwwroot/mjs/Account/login.js"
+      "wwwroot/lib/utils/tpl.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/lib/utils/util.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/util.js"
     ]
   },
   {
@@ -42,9 +36,9 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/AccountManagement/Index.min.js",
+    "outputFileName": "wwwroot/mminjs/AccountManagement/index.min.js",
     "inputFiles": [
-      "wwwroot/mjs/AccountManagement/Index.js"
+      "wwwroot/mjs/AccountManagement/index.js"
     ]
   },
   {
@@ -126,9 +120,9 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/DeviceSpotCheck.min.js",
+    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/deviceSpotCheck.min.js",
     "inputFiles": [
-      "wwwroot/mjs/DeviceSpotCheck/DeviceSpotCheck.js"
+      "wwwroot/mjs/DeviceSpotCheck/deviceSpotCheck.js"
     ]
   },
   {
@@ -138,15 +132,15 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/SpotCheckLog.min.js",
+    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/spotCheckLog.min.js",
     "inputFiles": [
-      "wwwroot/mjs/DeviceSpotCheck/SpotCheckLog.js"
+      "wwwroot/mjs/DeviceSpotCheck/spotCheckLog.js"
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/SpotCheckPlan.min.js",
+    "outputFileName": "wwwroot/mminjs/DeviceSpotCheck/spotCheckPlan.min.js",
     "inputFiles": [
-      "wwwroot/mjs/DeviceSpotCheck/SpotCheckPlan.js"
+      "wwwroot/mjs/DeviceSpotCheck/spotCheckPlan.js"
     ]
   },
   {
@@ -165,6 +159,54 @@
     "outputFileName": "wwwroot/mminjs/Home/workSpace.min.js",
     "inputFiles": [
       "wwwroot/mjs/Home/workSpace.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/check.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/check.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/checkWorkSpace.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/checkWorkSpace.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/management.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/management.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/plan.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/plan.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/processor.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/processor.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/statistic.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/statistic.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/task.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/task.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/ManufactureManagement/taskWorkSpace.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/ManufactureManagement/taskWorkSpace.js"
     ]
   },
   {
@@ -192,9 +234,9 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/MaterialManagement/Site.min.js",
+    "outputFileName": "wwwroot/mminjs/MaterialManagement/site.min.js",
     "inputFiles": [
-      "wwwroot/mjs/MaterialManagement/Site.js"
+      "wwwroot/mjs/MaterialManagement/site.js"
     ]
   },
   {
@@ -246,9 +288,9 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/Setting/UploadApiTest.min.js",
+    "outputFileName": "wwwroot/mminjs/Setting/uploadApiTest.min.js",
     "inputFiles": [
-      "wwwroot/mjs/Setting/UploadApiTest.js"
+      "wwwroot/mjs/Setting/uploadApiTest.js"
     ]
   },
   {
@@ -270,15 +312,15 @@
     ]
   },
   {
-    "outputFileName": "wwwroot/mminjs/StatisticManagement/trend.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/StatisticManagement/trend.js"
-    ]
-  },
-  {
     "outputFileName": "wwwroot/mminjs/StatisticManagement/monitor.min.js",
     "inputFiles": [
       "wwwroot/mjs/StatisticManagement/monitor.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/mminjs/StatisticManagement/trend.min.js",
+    "inputFiles": [
+      "wwwroot/mjs/StatisticManagement/trend.js"
     ]
   },
   {
@@ -297,54 +339,6 @@
     "outputFileName": "wwwroot/mminjs/_6sManagement/set.min.js",
     "inputFiles": [
       "wwwroot/mjs/_6sManagement/set.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Check.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Check.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/CheckWorkSpace.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/CheckWorkSpace.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Management.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Management.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Plan.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Plan.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Processor.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Processor.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Statistic.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Statistic.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/Task.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/Task.js"
-    ]
-  },
-  {
-    "outputFileName": "wwwroot/mminjs/ManufactureManagement/TaskWorkSpace.min.js",
-    "inputFiles": [
-      "wwwroot/mjs/ManufactureManagement/TaskWorkSpace.js"
     ]
   }
 ]
