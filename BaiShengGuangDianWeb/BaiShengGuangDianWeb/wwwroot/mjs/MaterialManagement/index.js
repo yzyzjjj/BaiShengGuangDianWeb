@@ -943,7 +943,7 @@ function codeNoGanged(e, type) {
                             codeArr[codeText] = 1;
                         }
                     }
-                    var codeNameObj = { ...codeArr, ..._codeNameData };
+                    var codeNameObj = $.extend(true, {}, codeArr, _codeNameData);
                     var flag = 0, newCodeFlag = newCode;
                     while (codeNameObj[newCodeFlag]) {
                         flag++;
