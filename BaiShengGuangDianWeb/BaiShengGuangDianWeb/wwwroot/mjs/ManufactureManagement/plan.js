@@ -78,24 +78,7 @@ function pageReady() {
         var data = $('#showPlanModal').is(':hidden') ? _planTaskItem[v] : _reusePlanTaskItem[v];
         if ($(this).is(':checked')) {
             tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
-            var groupId = data.GroupId;
-            tr.find('.group').val(groupId).trigger('change');
-            var processorEl = tr.find('.processor');
-            setProcessorSelect(groupId, processorEl);
-            processorEl.val(data.Person).trigger('change');
-            tr.find('.module').val(data.ModuleId).trigger('change');
-            if (data.IsCheck) {
-                tr.find('.taskName').addClass('hidden').siblings().removeClass('hidden');
-                tr.find('.taskNameSelect').val(data.CheckId).trigger('change');
-            } else {
-                tr.find('.taskNameSelect').parent().addClass('hidden').siblings().removeClass('hidden');
-            }
-            tr.find('.taskName').val(data.Item);
-            tr.find('.hour').val(data.EstimatedHour);
-            tr.find('.minute').val(data.EstimatedMin);
-            tr.find('.score').val(data.Score);
-            tr.find('.desc').val(data.Desc);
-            tr.find('.relation').val(tr.find('.relationText').text());
+            dataSetTr(tr, data);
         } else {
             tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
         }
@@ -148,8 +131,12 @@ function pageReady() {
             }
         }
         var upTr = tr.prev();
+        if (upTr.find('.taskState').text() == '已下发') {
+            layer.msg('不能上移到已下发任务前');
+            return;
+        }
         upTr.before(tr);
-        setTableStyle(`#${bodyIdName}`);
+        setTableStyle(`#${bodyIdName}`,true);
     });
     $('#planItemList,#addPlanTaskList').on('input', '.relation', function () {
         var v = $(this).val();
@@ -177,7 +164,7 @@ function pageReady() {
             }
         }
         tr.remove();
-        setTableStyle(`#${bodyIdName}`);
+        setTableStyle(`#${bodyIdName}`,true);
     });
     $("#planReuse").on("click", function () {
         var planId = $("#planSelect").val();
@@ -197,7 +184,7 @@ function pageReady() {
     });
     $('#taskConfig').on('change', function () {
         var v = $(this).val();
-        isStrEmptyOrUndefined(v) ? $('#addPlanTaskList').empty() : getTaskConfigItem(v,'#addPlanTaskList',1);
+        isStrEmptyOrUndefined(v) ? $('#addPlanTaskList').empty() : getTaskConfigItem(v, '#addPlanTaskList', 1);
     });
     $('#planConfigList').on('input', '.minute,.hour', function () {
         var tr = $(this).parents('tr');
@@ -220,6 +207,20 @@ function pageReady() {
     $('#addPlanTaskList').on('click', '.delPlanItem', function () {
         getTotalTime();
         planEndTimeCount($('#planTime'));
+    });
+    $('#taskState').on('change', function () {
+        var v = $(this).val();
+        var trs = $('#planItemList tr');
+        if (v == 0) {
+            trs.removeClass('hidden');
+        } else {
+            for (var i = 0, len = trs.length; i < len; i++) {
+                var tr = trs.eq(i);
+                tr.find('.taskState').text() == v ? tr.removeClass('hidden') : tr.addClass('hidden');
+            }
+        }
+        $('#planItemList .moveUp').removeClass('hidden');
+        $('#planItemList tr:not(.hidden):first .moveUp').addClass('hidden');
     });
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
@@ -360,7 +361,7 @@ function getTaskConfig() {
 }
 
 //获取任务配置项Tr
-function getTaskConfigItem(taskId,el,isAdd) {
+function getTaskConfigItem(taskId, el, isAdd) {
     _isUpMove = true;
     var data = {}
     data.opType = 1055;
@@ -377,7 +378,7 @@ function getTaskConfigItem(taskId,el,isAdd) {
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             list[d.Id] = d;
-            ops += _planTaskTr.format(d.Id,0, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
+            ops += _planTaskTr.format(d.Id, 0, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation);
         }
         $(el).append(ops);
         setTableStyle(el);
@@ -470,12 +471,10 @@ function getPlanConfig() {
             return d.State == 1 ? `<span class="textOn">${d.Task}</span><div class="textIn hidden" style="width:120px;margin:auto"><select class="form-control taskConfig">${_taskConfigOp}</select></div>` : d.Task;
 
         }
-        var carryBtn = function (data) {
-            return data.State == 1 && per422 ? `<button type="button" class="btn btn-info btn-sm" onclick="issuePlan(${data.Id})">下发</button>` : '';
-        }
         var colors = ['', '#838a9d', 'black', '#6ee66e', 'green'];
-        var stateDesc = function(d) {
-            return `<span style="color:${colors[d.State]}">${d.StateDesc}</span>`;
+        var stateDesc = function (d) {
+            var btn = d.State == 1 && per422 ? `<button type="button" class="btn btn-info btn-sm" onclick="issuePlan(${d.Id})">下发</button>` : '';
+            return `<span style="padding-right:5px;vertical-align:middle;color:${colors[d.State]}">${d.StateDesc}</span>${btn}`;
         }
         var detailBtn = function (data) {
             return `<button type="button" class="btn btn-primary btn-sm" onclick="planTaskDetail(${data.Id},\'${data.Plan}\')">查看任务</button>`;
@@ -494,14 +493,13 @@ function getPlanConfig() {
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "选择", "render": isEnable, "orderable": false, "visible": isEnablePer},
+                { "data": null, "title": "选择", "render": isEnable, "orderable": false, "visible": isEnablePer },
                 { "data": null, "title": "序号", "render": order },
                 { "data": null, "title": "计划号", "render": planName },
                 { "data": null, "title": "开始时间", "render": sTime },
                 { "data": null, "title": "结束时间", "render": eTime },
                 { "data": null, "title": "预计用时", "render": predictTime },
                 { "data": null, "title": "任务配置", "render": taskConfig },
-                { "data": null, "title": "实施", "render": carryBtn, "visible": per422},
                 { "data": null, "title": "状态", "render": stateDesc },
                 { "data": null, "title": "详情", "render": detailBtn, "orderable": false },
                 { "data": null, "title": "日志", "render": logBtn, "orderable": false, "visible": per423 }
@@ -531,13 +529,16 @@ function issuePlan(planId) {
         var data = {}
         data.opType = 1041;
         data.opData = JSON.stringify({
-            id: planId
+            PlanId: planId
         });
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     getPlanConfig();
+                    if (!$('#planItem').is(':hidden') && $('#planText').attr('planid') == planId) {
+                        resetPlanItemList();
+                    }
                 }
             });
     }
@@ -647,19 +648,40 @@ function getTaskName(resolve) {
 
 //计划任务Tr
 function planTaskTr(resolve, isAdd) {
-    var groupSelect = new Promise(function (resolve) {
-        getGroup(resolve);
-    });
-    var processorSelect = new Promise(function (resolve) {
-        getProcessor(resolve);
-    });
-    var moduleSelect = new Promise(function (resolve) {
-        getModule(resolve);
-    });
-    var taskNameSelect = new Promise(function (resolve) {
-        getTaskName(resolve);
-    });
+    var groupSelect = new Promise(resolve => getGroup(resolve));
+    var processorSelect = new Promise(resolve => getProcessor(resolve));
+    var moduleSelect = new Promise(resolve => getModule(resolve));
+    var taskNameSelect = new Promise(resolve => getTaskName(resolve));
     Promise.all([groupSelect, processorSelect, moduleSelect, taskNameSelect]).then(function (results) {
+        _planTaskDetailTr = `<tr>
+            <td><input type="checkbox" class="icb_minimal isEnable" value={0} trid={0}></td>
+            <td class="num"></td>
+            <td><span class="textOn">{1}</span><div class="textIn hidden" style="width: 120px;margin:auto"><input type="text" class="form-control text-center taskName" maxlength="10"><div>${results[3]}</div></div></td>
+            <td>
+            <span class="textOn">{2}</span>
+            <div class="flexStyle textIn hidden" style="width: 240px;margin:auto"><select class="ms2 form-control group">${results[0]}</select><select class="ms2 form-control processor">${results[1]}</select></div>
+            </td>
+            <td><span class="textOn">{3}</span><div class="textIn hidden" style="width: 120px;margin:auto"><select class="ms2 form-control module">${results[2]}</select></div></td>
+            <td>
+                <span class="textOn">{4}</span>
+                <div class="flexStyle textIn hidden" style="width:140px;margin:auto">
+                    <input type="text" class="form-control text-center hour toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)">
+                    <label class="control-label" style="white-space: nowrap; margin: 0">小时</label>
+                    <input type="text" class="form-control text-center minute toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)">
+                    <label class="control-label" style="white-space: nowrap; margin: 0">分</label>
+                </div>
+            </td>
+            <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" oninput="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
+            <td class="no-padding"><span class="textOn">{6}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
+            <td class="taskState">{7}</td>
+            <td><span class="textOn relationText">{8}</span><input type="text" class="form-control text-center textIn hidden relation toZero" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
+            <td><button type="button" class="btn btn-primary btn-sm moveUp isAdd">上移</button></td>
+            <td>
+                <button class="btn btn-primary btn-sm copy isAdd" onclick="copyTr.call(this)" title="复制"><i class="fa fa-copy"></i></button>
+                <button class="btn btn-success btn-sm showLogModel isAdd" onclick="showLogModel({9},{0})">日志</button>
+                <button class="btn btn-danger btn-sm delPlanItem"><i class="fa fa-minus"></i></button>
+            </td>
+            </tr>`;
         _planTaskTr = `<tr>
             <td class="isIssue"><input type="checkbox" class="icb_minimal isEnable" value={0} trid={1}></td>
             <td class="num"></td>
@@ -711,13 +733,59 @@ function planTaskTr(resolve, isAdd) {
     });
 }
 
+//计划任务详情复制
+function copyTr() {
+    $('#planItemList').append(_planTaskDetailTr);
+    var tr = $(this).parents('tr');
+    var downTr = $('#planItemList tr:last');
+    setPlanTaskTr(downTr);
+    var data = tr.find('.isEnable').is(':checked')
+        ? {
+            GroupId: tr.find('.group').val(),
+            Person: tr.find('.processor').val(),
+            ModuleId: tr.find('.module').val(),
+            IsCheck: tr.find('.module :selected').attr('ischeck') >> 0,
+            CheckId: tr.find('.taskNameSelect').val(),
+            Item: tr.find('.taskName').val().trim(),
+            EstimatedHour: tr.find('.hour').val().trim(),
+            EstimatedMin: tr.find('.minute').val().trim(),
+            Score: tr.find('.score').val().trim(),
+            Desc: tr.find('.desc').val().trim(),
+            Relation: tr.find('.relation').val().trim()
+        }
+        : _planTaskItem[tr.find('.isEnable').val()];
+    dataSetTr(downTr, data);
+}
+
+//计划任务tr根据数据设置
+function dataSetTr(tr, data) {
+    var groupId = data.GroupId;
+    tr.find('.group').val(groupId).trigger('change');
+    var processorEl = tr.find('.processor');
+    setProcessorSelect(groupId, processorEl);
+    processorEl.val(data.Person).trigger('change');
+    tr.find('.module').val(data.ModuleId).trigger('change');
+    if (data.IsCheck) {
+        tr.find('.taskName').addClass('hidden').siblings().removeClass('hidden');
+        tr.find('.taskNameSelect').val(data.CheckId).trigger('change');
+    } else {
+        tr.find('.taskNameSelect').parent().addClass('hidden').siblings().removeClass('hidden');
+    }
+    tr.find('.taskName').val(data.Item);
+    tr.find('.hour').val(data.EstimatedHour);
+    tr.find('.minute').val(data.EstimatedMin);
+    tr.find('.score').val(data.Score);
+    tr.find('.desc').val(data.Desc);
+    tr.find('.relation').val(data.Relation || '');
+}
+
+var _planTaskDetailTr = null;
 var _planTaskTr = null;
 var _planTaskItem = null;
 //计划任务详情
 function planTaskDetail(planId, planName) {
     _isUpMove = true;
-    $('#planText').text(planName);
-    $('#planText').attr('planid', planId);
+    $('#planText').text(planName).attr('planid', planId);
     var data = {}
     data.opType = 1040;
     data.opData = JSON.stringify({
@@ -735,16 +803,25 @@ function planTaskDetail(planId, planName) {
             $('#planItemList').empty();
             _planTaskItem = {};
             var ops = '';
-            for (var i = 0, len = rData.length; i < len; i++) {
+            var i, len;
+            for (i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 _planTaskItem[d.Id] = d;
-                ops += _planTaskTr.format(d.Id, d.Id, d.Processor, d.Module, d.Item, d.EstimatedTime, d.Score, d.Desc, d.Relation == 0 ? '' : d.Relation, d.PlanId);
+                var color = d.State == -1 ? '#ff9900d8' : 'black';
+                ops += _planTaskDetailTr.format(d.Id, d.Item, d.Processor, d.Module, d.EstimatedTime, d.Score, d.Desc, `<span style="color:${color}">${d.StateDesc}</span>`, d.Relation == 0 ? '' : d.Relation, d.PlanId);
             }
             $('#planItemList').append(ops);
             setTableStyle('#planItemList');
-            _planConfigData[planId].State != 1
-                ? $('#planItem .isIssue').addClass('hidden')
-                : $('#planItem .isIssue').removeClass('hidden');
+            var checkbox = $('#planItemList .isEnable');
+            var upMoveBtn = $('#planItemList .moveUp');
+            var delBtn = $('#planItemList .delPlanItem');
+            for (i = 0, len = checkbox.length; i < len; i++) {
+                if (rData[i].State != -1) {
+                    checkbox.eq(i).parent().addClass('hidden');
+                    upMoveBtn.eq(i).remove();
+                    delBtn.eq(i).remove();
+                }
+            }
             $('#planItem').removeClass('hidden');
         });
     });
@@ -759,13 +836,22 @@ function resetPlanItemList() {
 var _addPlanTaskTr = null;
 //新增任务行
 function addPlanTaskTr() {
-    $('#planItemList').append(_addPlanTaskTr);
+    $('#planItemList').append(_planTaskDetailTr);
     var lastEl = $('#planItemList tr:last');
     var isCheckout = lastEl.find('.module option:selected').attr('ischeck');
     parseInt(isCheckout) ? lastEl.find('.taskName').addClass('hidden').siblings().removeClass('hidden') : lastEl.find('.taskName').removeClass('hidden').siblings().addClass('hidden');
-    setTableStyle('#planItemList');
-    lastEl.find('.group').trigger('select2:select');
+    setPlanTaskTr(lastEl);
     $('#planItemTable').scrollTop($('#planItemTable')[0].scrollHeight);
+}
+
+//设置添加任务行
+function setPlanTaskTr(tr) {
+    setTableStyle('#planItemList', true);
+    tr.find('.group').trigger('select2:select');
+    tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
+    tr.find('.taskState').html('<span style="color:#ff9900d8">待下发</span>');
+    tr.find('.isAdd').remove().end().find('.delPlanItem').removeClass('hidden');
+    tr.find('.isEnable').remove();
 }
 
 //计划详情update add数据
@@ -789,7 +875,7 @@ function planTaskData(el, isUp) {
             id = 0;
         }
         //  操作员id  操作员名字    模块名    是否检验 检验单   任务名 小时 分钟    绩效   描述  关联
-        var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc, relation;
+        var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc,taskState, relation;
         if (!isEnableEl.length || isEnableEl.is(':checked')) {
             var personEl = tr.find('.processor');
             personId = personEl.val();
@@ -836,6 +922,9 @@ function planTaskData(el, isUp) {
             }
             score = parseInt(score);
             desc = tr.find('.desc').val();
+            if (isUp) {
+                taskState = tr.find('.taskState').text() == '已下发' ? 0 : -1;
+            }
             relation = tr.find('.relation').val();
             if (relation >> 0 == 0 && isCheck) {
                 layer.msg(`序列${i + 1}：检验单需先关联任务`);
@@ -854,13 +943,16 @@ function planTaskData(el, isUp) {
             minute = d.EstimatedMin;
             score = d.Score;
             desc = d.Desc;
+            if (isUp) {
+                taskState = d.State;
+            }
             relation = tr.find('.relationText').text();
         }
         if (isStrEmptyOrUndefined(relation)) {
             relation = 0;
         }
         relation = parseInt(relation);
-        list.push({
+        var obj = {
             Order: i + 1,
             Person: personId,
             Processor: personName,
@@ -874,7 +966,11 @@ function planTaskData(el, isUp) {
             Desc: desc,
             Relation: relation,
             Id: id
-        });
+        };
+        if (isUp) {
+            obj.State = taskState;
+        }
+        list.push(obj);
     }
     return list;
 }
@@ -908,23 +1004,66 @@ function updatePlanTaskItem() {
                 }
             });
     }
-    showConfirm("保存", doSth);
+    showConfirm('保存', doSth);
+}
+
+//下发任务
+function issuePlanTask() {
+    var planId = $('#planText').attr('planid');
+    var checkbox = $('#planItemList .isEnable');
+    var taskArr = [];
+    var isRelation = [];
+    for (var i = 0, len = checkbox.length; i < len; i++) {
+        var checkEl = checkbox.eq(i);
+        var v = checkEl.val();
+        var d = _planTaskItem[v];
+        if (checkEl.is(':checked')) {
+            taskArr.push(v);
+            if (d.IsCheck) {
+                isRelation.push(d.Order);
+            }
+        } else {
+            if (isRelation.indexOf(d.Relation) != -1) {
+                layer.msg('请选择关联任务一起下发');
+                return;
+            }
+        }
+    }
+    if (!taskArr.length) {
+        layer.msg('请选择需要下发的任务');
+        return;
+    }
+    var data = {}
+    data.opType = 1041;
+    data.opData = JSON.stringify({
+        PlanId: planId,
+        TaskIds: taskArr.join()
+    });
+    ajaxPost("/Relay/Post", data, ret => {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            resetPlanItemList();
+            getPlanConfig();
+        }
+    });
 }
 
 //表格设置
-function setTableStyle(el) {
+function setTableStyle(el, isEnable) {
+    if (!isEnable) {
+        $(el).find('.isEnable').iCheck({
+            handle: 'checkbox',
+            checkboxClass: 'icheckbox_minimal-blue',
+            increaseArea: '20%'
+        });
+    }
     var trs = $(`${el} tr .num`);
     for (var i = 0, len = trs.length; i < len; i++) {
         trs.eq(i).text(i + 1);
     }
-    $(el).find('.isEnable').iCheck({
-        handle: 'checkbox',
-        checkboxClass: 'icheckbox_minimal-blue',
-        increaseArea: '20%'
-    });
     $(el).find('.ms2').select2();
     $(`${el} .moveUp`).removeClass('hidden');
-    $(`${el} .moveUp`).eq(0).addClass('hidden');
+    $(`${el} tr:not(.hidden):first .moveUp`).addClass('hidden');
 }
 
 //计划日志弹窗
