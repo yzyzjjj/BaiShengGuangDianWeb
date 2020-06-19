@@ -40,7 +40,7 @@ function pageReady() {
             tr.find('.eTime').val(eTime).datepicker('update');
             tr.find('.hour').val(d.EstimatedHour);
             tr.find('.minute').val(d.EstimatedMin);
-            tr.find('.taskConfig').val(d.TaskId).trigger('change');
+            tr.find('.taskConfig').val(d.TaskId);
             tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
         } else {
             _planIdData.splice(_planIdData.indexOf(v), 1);
@@ -136,7 +136,7 @@ function pageReady() {
             return;
         }
         upTr.before(tr);
-        setTableStyle(`#${bodyIdName}`,true);
+        setTableStyle(`#${bodyIdName}`, true);
     });
     $('#planItemList,#addPlanTaskList').on('input', '.relation', function () {
         var v = $(this).val();
@@ -164,7 +164,7 @@ function pageReady() {
             }
         }
         tr.remove();
-        setTableStyle(`#${bodyIdName}`,true);
+        setTableStyle(`#${bodyIdName}`, true);
     });
     $("#planReuse").on("click", function () {
         var planId = $("#planSelect").val();
@@ -519,6 +519,10 @@ function getPlanConfig() {
                 });
             }
         });
+        if (!$('#planItem').is(':hidden')) {
+            $('#planItemList').empty();
+            $('#planItem').addClass('hidden');
+        }
     });
 }
 
@@ -739,8 +743,9 @@ function copyTr() {
     var tr = $(this).parents('tr');
     var downTr = $('#planItemList tr:last');
     setPlanTaskTr(downTr);
-    var data = tr.find('.isEnable').is(':checked')
-        ? {
+    var data, r;
+    if (tr.find('.isEnable').is(':checked')) {
+        data = {
             GroupId: tr.find('.group').val(),
             Person: tr.find('.processor').val(),
             ModuleId: tr.find('.module').val(),
@@ -750,15 +755,18 @@ function copyTr() {
             EstimatedHour: tr.find('.hour').val().trim(),
             EstimatedMin: tr.find('.minute').val().trim(),
             Score: tr.find('.score').val().trim(),
-            Desc: tr.find('.desc').val().trim(),
-            Relation: tr.find('.relation').val().trim()
-        }
-        : _planTaskItem[tr.find('.isEnable').val()];
-    dataSetTr(downTr, data);
+            Desc: tr.find('.desc').val().trim()
+        };
+        r = tr.find('.relation').val().trim();
+    } else {
+        data = _planTaskItem[tr.find('.isEnable').val()];
+        r = tr.find('.relationText').text();
+    }
+    dataSetTr(downTr, data, r);
 }
 
 //计划任务tr根据数据设置
-function dataSetTr(tr, data) {
+function dataSetTr(tr, data, r) {
     var groupId = data.GroupId;
     tr.find('.group').val(groupId).trigger('change');
     var processorEl = tr.find('.processor');
@@ -776,7 +784,7 @@ function dataSetTr(tr, data) {
     tr.find('.minute').val(data.EstimatedMin);
     tr.find('.score').val(data.Score);
     tr.find('.desc').val(data.Desc);
-    tr.find('.relation').val(data.Relation || '');
+    tr.find('.relation').val(tr.find('.relationText').text() || r);
 }
 
 var _planTaskDetailTr = null;
@@ -852,6 +860,7 @@ function setPlanTaskTr(tr) {
     tr.find('.taskState').html('<span style="color:#ff9900d8">待下发</span>');
     tr.find('.isAdd').remove().end().find('.delPlanItem').removeClass('hidden');
     tr.find('.isEnable').remove();
+    tr.find('.textOn').remove();
 }
 
 //计划详情update add数据
@@ -875,7 +884,7 @@ function planTaskData(el, isUp) {
             id = 0;
         }
         //  操作员id  操作员名字    模块名    是否检验 检验单   任务名 小时 分钟    绩效   描述  关联
-        var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc,taskState, relation;
+        var personId, personName, moduleId, isCheck, checkId, item, hour, minute, score, desc, taskState, relation;
         if (!isEnableEl.length || isEnableEl.is(':checked')) {
             var personEl = tr.find('.processor');
             personId = personEl.val();
@@ -979,10 +988,14 @@ var _isUpMove = true;
 //计划任务项保存
 function updatePlanTaskItem() {
     var planId = $('#planText').attr('planid');
-    var taskId = _planConfigData[planId].TaskId;
+    var d = _planConfigData[planId];
     var list = {
         Id: planId,
-        TaskId: taskId
+        TaskId: d.TaskId,
+        State: d.State,
+        Plan: d.Plan,
+        PlannedStartTime: d.PlannedStartTime,
+        PlannedEndTime: d.PlannedEndTime
     };
     var items = planTaskData('#planItemList', true);
     if (items === 1) {
@@ -1142,6 +1155,10 @@ function delPlanConfig() {
         ajaxPost("/Relay/Post", data, function (ret) {
             layer.msg(ret.errmsg);
             if (ret.errno == 0) {
+                if (!$('#planItem').is(':hidden') && _planIdData.indexOf($('#planText').attr('planid')) != -1) {
+                    $('#planItemList').empty();
+                    $('#planItem').addClass('hidden');
+                }
                 getPlanConfig();
             }
         });
