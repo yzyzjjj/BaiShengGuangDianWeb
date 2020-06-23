@@ -353,3 +353,14 @@ select, .pointer {
 .dropdown-menu {
     min-width: 92px
 }
+.panel-fullscreen { 
+    display: block; 
+    z-index: 9999; 
+    position: fixed; 
+    width: 100%; 
+    height: 100%; 
+    top: 0; 
+    right: 0; 
+    left: 0; 
+    bottom: 0; 
+}
