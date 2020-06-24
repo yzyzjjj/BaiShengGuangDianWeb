@@ -14,20 +14,55 @@
         });
         kanBanChange();
     });
+    var time = 0;
     $('#navUl').on('click', '.kanBan', function () {
+        $('#fullScreenBtn').removeClass('hidden');
         var flag = $(this).attr('href');
-        var id = flag.replace('kanBan', '');
+        var id = flag.replace('#kanBan', '');
         setChart(flag, id);
+        clearInterval(time);
+        time = setInterval(() => setChart(flag, id), 5000);
     });
-    $('#fullScreenBtn').on('click', function() {
+    $('#fullScreenBtn').on('click', function () {
         $('#tabBox').toggleClass('panel-fullscreen');
         var isShow = $('#tabBox').hasClass('panel-fullscreen');
         $(this).toggleClass('glyphicon-fullscreen glyphicon-repeat').prop('title', isShow ? '还原' : '全屏放大');
         isShow ? $('#firstNavLi').addClass('hidden') : $('#firstNavLi').removeClass('hidden');
         fullScreen(isShow);
     });
-    $('#firstNavLi').on('click', function() {
+    $('#firstNavLi').on('click', function () {
+        clearInterval(time);
         $('#fullScreenBtn').addClass('hidden');
+    });
+}
+
+//全屏轮播
+function fullScreenCarousel() {
+    $('#fullScreenCarousel').empty().append(_carouselBox).animate({
+        top: 0,
+        opacity: 1
+    }, 1000, 'linear', () => fullScreen(true));
+    setFullScreenCarousel($('#carouselInner .item:first').attr('id'));
+    $('#carousel-example-generic').carousel({
+        interval: 5000
+    }).on('slide.bs.carousel', e => setFullScreenCarousel(e.relatedTarget.id));
+}
+
+//轮播图设置
+function setFullScreenCarousel(elId) {
+    var id = elId.replace('carousel_kanBan', '');
+    setChart(`#${elId}`, id);
+}
+
+//取消轮播
+function cancelFullScreenCarousel() {
+    $('#carousel-example-generic').carousel('pause').off('slide.bs.carousel');
+    $('#fullScreenCarousel').animate({
+        top: '-100%',
+        opacity: 0
+    }, 1000, 'linear', function() {
+        $(this).empty();
+        fullScreen(false);
     });
 }
 
@@ -42,7 +77,6 @@ function setChart(flag, id) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#fullScreenBtn').removeClass('hidden');
         var d = ret.data;
         //设备详情
         var allRateScale = setPieChart(`${flag}_detail`, 'Rate', d.AllProcessRate, '#0099ff');
@@ -152,17 +186,16 @@ function setChart(flag, id) {
             }]
         };
         echarts.init($(`${flag}_bar`)[0]).setOption(option, true);
-        var time = 0;
         $(flag).off('resize').on('resize', function () {
-            clearTimeout(time);
-            time = setTimeout(() => {
+            clearTimeout(this.time);
+            this.time = setTimeout(() => {
                 var charts = $(this).find('.chart');
                 for (var i = 0, len = charts.length; i < len; i++) {
                     echarts.init(charts[i]).resize();
                 }
             }, 200);
         });
-    });
+    }, 0);
 }
 
 //环形图设置
@@ -221,6 +254,7 @@ function kanBanChange() {
     });
 }
 
+var _carouselBox;
 //获取看板列表
 function getKanBanList(resolve) {
     var data = {
@@ -232,96 +266,115 @@ function getKanBanList(resolve) {
             layer.msg(ret.errmsg);
             return;
         }
-        var tabOp = `<div class="tab-pane fade in" id="{0}">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="box box-info">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">设备详情</h3>
-                                </div>
-                                <div class="box-body">
-                                    <div class="flexStyle">
-                                        <div id="{0}_detail" class="chart" style="width: 40%; height: 140px"></div>
-                                        <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                            <label class="control-label textOverTop">运行时间：<span class="spanStyle" id="{0}_yxTime"></span></label>
-                                            <label class="control-label textOverTop">加工时间：<span class="spanStyle" id="{0}_jgTime"></span></label>
-                                            <label class="control-label textOverTop">闲置时间：<span class="spanStyle" id="{0}_xzTime"></span></label>
-                                            <label class="control-label textOverTop">所有利用率：<span class="spanStyle" id="{0}_lly"></span></label>
-                                        </div>
-                                    </div>
-                                </div>
+        var op = `<div class="row">
+                    <div class="col-md-4">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">设备详情</h3>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="box box-warning">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">日最大使用率</h3>
-                                </div>
-                                <div class="box-body">
-                                    <div class="flexStyle">
-                                        <div id="{0}_max" class="chart" style="width: 40%; height: 140px"></div>
-                                        <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                            <label class="control-label textOverTop">日最大同时使用台数：<span class="spanStyle" id="{0}_maxTs"></span></label>
-                                            <label class="control-label textOverTop">日最大使用台数：<span class="spanStyle" id="{0}_maxTNum"></span></label>
-                                            <label class="control-label textOverTop">日最大使用率：<span class="spanStyle" id="{0}_maxSyl"></span></label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="box box-warning">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">日最小使用率</h3>
-                                </div>
-                                <div class="box-body">
-                                    <div class="flexStyle">
-                                        <div id="{0}_min" class="chart" style="width: 40%; height: 140px"></div>
-                                        <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                            <label class="control-label textOverTop">日最小同时使用台数：<span class="spanStyle" id="{0}_minTs"></span></label>
-                                            <label class="control-label textOverTop">日最小使用台数：<span class="spanStyle" id="{0}_minTNum"></span></label>
-                                            <label class="control-label textOverTop">日最小使用率：<span class="spanStyle" id="{0}_minSyl"></span></label>
-                                        </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_detail" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">运行时间：<span class="spanStyle" id="{0}_yxTime"></span></label>
+                                        <label class="control-label textOverTop">加工时间：<span class="spanStyle" id="{0}_jgTime"></span></label>
+                                        <label class="control-label textOverTop">闲置时间：<span class="spanStyle" id="{0}_xzTime"></span></label>
+                                        <label class="control-label textOverTop">所有利用率：<span class="spanStyle" id="{0}_lly"></span></label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="box box-info">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">设备状态</h3>
-                                </div>
-                                <div class="box-body">
-                                    <div style="width: 100%;display:flex;flex-wrap:wrap">
-                                        <div id="{0}_state_all" class="chart" style="height:180px;width:33.33%"></div>
-                                        <div id="{0}_state_normal" class="chart" style="height:180px;width:33.33%"></div>
-                                        <div id="{0}_state_process" class="chart" style="height:180px;width:33.33%"></div>
-                                        <div id="{0}_state_idle" class="chart" style="height:180px;width:33.33%"></div>
-                                        <div id="{0}_state_fault" class="chart" style="height:180px;width:33.33%"></div>
-                                        <div id="{0}_state_error" class="chart" style="height:180px;width:33.33%"></div>
+                    <div class="col-md-4">
+                        <div class="box box-warning">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">日最大使用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_max" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">日最大同时使用台数：<span class="spanStyle" id="{0}_maxTs"></span></label>
+                                        <label class="control-label textOverTop">日最大使用台数：<span class="spanStyle" id="{0}_maxTNum"></span></label>
+                                        <label class="control-label textOverTop">日最大使用率：<span class="spanStyle" id="{0}_maxSyl"></span></label>
                                     </div>
-                                    <label class="control-label textOverTop">当前加工设备：</label>
-                                    <div id="{0}_dev" style="width: 100%;display:flex;flex-wrap:wrap"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="box box-success">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">单台加工利用率</h3>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box box-warning">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">日最小使用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_min" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">日最小同时使用台数：<span class="spanStyle" id="{0}_minTs"></span></label>
+                                        <label class="control-label textOverTop">日最小使用台数：<span class="spanStyle" id="{0}_minTNum"></span></label>
+                                        <label class="control-label textOverTop">日最小使用率：<span class="spanStyle" id="{0}_minSyl"></span></label>
+                                    </div>
                                 </div>
-                                <div class="box-body">
-                                    <div id="{0}_bar" class="chart" style="width: 100%; height: 480px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">设备状态</h3>
+                            </div>
+                            <div class="box-body">
+                                <div style="width: 100%;display:flex;flex-wrap:wrap">
+                                    <div id="{0}_state_all" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_normal" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_process" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_idle" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_fault" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_error" class="chart" style="height:180px;width:33.33%"></div>
                                 </div>
+                                <label class="control-label textOverTop">当前加工设备：</label>
+                                <div id="{0}_dev" style="width: 100%;display:flex;flex-wrap:wrap"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="box box-success">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">单台加工利用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div id="{0}_bar" class="chart" style="width: 100%; height: 480px"></div>
                             </div>
                         </div>
                     </div>
                 </div>`;
+        var tabOp = `<div class="tab-pane fade in" id="{0}">${op}</div>`;
+        var carouselOp = `<div class="item {2}" id="{0}">${op}<div class="carousel-caption text-primary"><h3 class="text-primary">{1}</h3></div></div>`;
+        var carousel = `<div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title" style="margin-top:8px">看板轮播</h3>
+                            <button class="btn btn-primary pull-right" onclick="cancelFullScreenCarousel()">取消轮播</button>
+                        </div>
+                        <div class="box-body">
+                            <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">{0}</ol>
+                                <div class="carousel-inner" id="carouselInner">{1}</div>
+                                <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+                                    <span class="glyphicon glyphicon-chevron-left text-primary" aria-hidden="true"></span>
+                                </a>
+                                <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+                                    <span class="glyphicon glyphicon-chevron-right text-primary" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>`;
         var rData = ret.data;
-        var ops = '', lis = '', tabs = '';
+        var ops = '', lis = '', tabs = '', carouselLis = '', carouselTabs = '';
         var obj = {};
+        var carouselIndex = 0;
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             obj[d.Id] = d;
@@ -329,13 +382,17 @@ function getKanBanList(resolve) {
             ops += `<option value=${d.Id} order=${d.Order}>${name}</option>`;
             if (d.IsShow) {
                 var flag = `kanBan${d.Id}`;
+                var active = carouselIndex ? '' : 'active';
                 lis += `<li><a href="#${flag}" class="kanBan" data-toggle="tab" aria-expanded="false">${d.Name}</a></li>`;
                 tabs += tabOp.format(flag);
+                carouselLis += `<li data-target="#carousel-example-generic" data-slide-to=${carouselIndex++} class=${active}></li>`;
+                carouselTabs += carouselOp.format(`carousel_${flag}`, d.Name, active);
             }
         }
         $('#kanBanList').empty().append(ops);
         $('#firstNavLi').nextAll().remove().end().after(lis);
         $('#setKanBan').nextAll().remove().end().after(tabs);
+        _carouselBox = carousel.format(carouselLis, carouselTabs);
         resolve(obj);
     });
 }
@@ -354,14 +411,14 @@ function fullScreen(isShow) {
             main.msRequestFullscreen();
         }
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
+        if (document.mozCancelFullScreen) {
             document.mozCancelFullScreen();
         } else if (document.webkitCancelFullScreen) {
             document.webkitCancelFullScreen();
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
         }
     }
 }

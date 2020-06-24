@@ -1629,3 +1629,33 @@ function matcher(params, data) {
     }
     return null;
 }
+
+//假进度条
+function addFakeProgress() {
+    var op = `<div class="alert alert-info alert-dismissible" style="width: 300px; position: fixed; top: 40%; left: 50%;transform: translateX(-50%);z-index:999999" id="progress_wrap">
+                <label class="control-label">正在升级中...</label>
+                <div class="progress progress-sm active no-margin">
+                    <div id="progress_box" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="transition:all 0s">
+                        <label style="position: absolute; right: 5px;bottom:5px" id="progress_text"></label>
+                    </div>
+                </div>
+            </div>`;
+    $('body').append(op);
+    var progressText = 0;
+    var time = setInterval(() => {
+        var flag = `${++progressText}%`;
+        $('#progress_text').text(flag);
+        $('#progress_box').css('width', flag);
+        if (progressText == 95) {
+            clearInterval(time);
+        }
+    }, 100);
+    return () => {
+        clearInterval(time);
+        $('#progress_text').text('100%');
+        $('#progress_box').css('width', '100%');
+        setTimeout(() => {
+            $('#progress_wrap').remove();
+        }, 200);
+    }
+}

@@ -30,7 +30,7 @@
                 <div class="tab-pane active in" id="setKanBan">
                     <div class="box box-primary">
                         <div class="box-body">
-                            <button class="btn btn-primary pull-right" onclick="">轮播</button>
+                            <button class="btn btn-primary pull-right" onclick="fullScreenCarousel()">轮播</button>
                             <div class="form-group">
                                 <label class="control-label">看板列表：</label>
                                 <div class="form-group no-margin" style="display: -webkit-inline-box">
@@ -61,34 +61,6 @@
                 </div>
             </div>
         </div>
-        <div id="myCarousel" class="carousel slide">
-            <!-- 轮播（Carousel）指标 -->
-            <ol class="carousel-indicators">
-                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                <li data-target="#myCarousel" data-slide-to="1"></li>
-                <li data-target="#myCarousel" data-slide-to="2"></li>
-            </ol>   
-            <!-- 轮播（Carousel）项目 -->
-            <div class="carousel-inner">
-                <div class="item active">
-                    <div style="height: 500px;background:#bfa">1</div>
-                </div>
-                <div class="item">
-                    <div style="height: 500px;background:yellow">2</div>
-                </div>
-                <div class="item">
-                    <div style="height: 500px;background:green">3</div>
-                </div>
-            </div>
-            <!-- 轮播（Carousel）导航 -->
-            <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        </div> 
     </div>
 </section>
+<section class="panel-fullscreen" id="fullScreenCarousel" style="top:-100%; opacity: 0;background:white"></section>
