@@ -192,18 +192,15 @@
 @*<body class="hold-transition skin-blue sidebar-mini fixed sidebar-collapse">*@
 <body class="hold-transition skin-blue sidebar-mini fixed">
     <div class="wrapper">
-        @await Html.PartialAsync("~/Views/Shared/_LayoutHeader.cshtml");
-
+        @await Html.PartialAsync("~/Views/Shared/_LayoutHeader.cshtml")
         <!-- Left side column. contains the logo and sidebar -->
-        @await Html.PartialAsync("~/Views/Shared/_LayoutLeftNavigation.cshtml");
-
+        @await Html.PartialAsync("~/Views/Shared/_LayoutLeftNavigation.cshtml")
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             @RenderBody() <!-- Handle each AdminLTE page in a razor view -->
         </div>
         <!-- /.content-wrapper -->
-        @await Html.PartialAsync("~/Views/Shared/_LayoutFooter.cshtml");
-
+        @await Html.PartialAsync("~/Views/Shared/_LayoutFooter.cshtml")
         <!-- Control Sidebar -->
         <aside class="control-sidebar control-sidebar-dark">
             <!-- Create the tabs -->

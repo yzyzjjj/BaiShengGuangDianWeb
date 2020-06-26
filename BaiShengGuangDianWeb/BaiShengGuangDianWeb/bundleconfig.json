@@ -150,9 +150,9 @@
 "wwwroot/mjs/ManufactureManagement/management.js"]
 },
 {
-"outputFileName":"wwwroot/mminjs/ManufactureManagement/Plan.min.js",
+"outputFileName":"wwwroot/mminjs/ManufactureManagement/plan.min.js",
 "inputFiles":[
-"wwwroot/mjs/ManufactureManagement/Plan.js"]
+"wwwroot/mjs/ManufactureManagement/plan.js"]
 },
 {
 "outputFileName":"wwwroot/mminjs/ManufactureManagement/processor.min.js",

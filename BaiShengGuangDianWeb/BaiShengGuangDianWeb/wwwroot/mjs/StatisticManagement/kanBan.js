@@ -1,362 +1,510 @@
 ﻿function pageReady() {
-    getBoardData();
+    $('#kanBanList').select2();
+    $('#deviceSelect').select2({
+        allowClear: true,
+        placeholder: '请选择',
+        multiple: true
+    });
+    new Promise(resolve => getDevice(resolve)).then(e => {
+        $('#deviceSelect').on('select2:select', function () {
+            var v = $(this).val();
+            if (v.indexOf('0') != -1) {
+                $(this).val(e).trigger('change');
+            }
+        });
+        kanBanChange();
+    });
+    var time = 0;
+    $('#navUl').on('click', '.kanBan', function () {
+        $('#fullScreenBtn').removeClass('hidden');
+        var flag = $(this).attr('href');
+        var id = flag.replace('#kanBan', '');
+        setChart(flag, id);
+        clearInterval(time);
+        time = setInterval(() => setChart(flag, id), 5000);
+    });
+    $('#fullScreenBtn').on('click', function () {
+        $('#tabBox').toggleClass('panel-fullscreen');
+        var isShow = $('#tabBox').hasClass('panel-fullscreen');
+        $(this).toggleClass('glyphicon-fullscreen glyphicon-repeat').prop('title', isShow ? '还原' : '全屏放大');
+        isShow ? $('#firstNavLi').addClass('hidden') : $('#firstNavLi').removeClass('hidden');
+        fullScreen(isShow);
+    });
+    $('#firstNavLi').on('click', function () {
+        clearInterval(time);
+        $('#fullScreenBtn').addClass('hidden');
+    });
 }
 
-function getBoardData() {
-    var data = {};
-    data.opType = 504;
-    ajaxPost("/Relay/Post",
-        data,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            if (isStrEmptyOrUndefined(ret.data)) {
-                return;
-            }
+//全屏轮播
+function fullScreenCarousel() {
+    $('#fullScreenCarousel').empty().append(_carouselBox).animate({
+        top: 0,
+        opacity: 1
+    }, 1000, 'linear', () => fullScreen(true));
+    setFullScreenCarousel($('#carouselInner .item:first').attr('id'));
+    $('#carousel-example-generic').carousel({
+        interval: 5000
+    }).on('slide.bs.carousel', e => setFullScreenCarousel(e.relatedTarget.id));
+}
 
-            var deviceSum = [];
-            var deviceSums = [];
-            //总设备
-            var allDevice = ret.data.AllDevice + ",总设备";
-            deviceSum.push(allDevice);
-            //正常运行
-            var normalDevice = ret.data.NormalDevice + ",正常运行";
-            deviceSum.push(normalDevice);
-            //加工中
-            var processDevice = ret.data.ProcessDevice + ",加工中";
-            deviceSum.push(processDevice);
-            //闲置
-            var idleDevice = ret.data.IdleDevice + ",闲置中";
-            deviceSum.push(idleDevice);
-            //故障
-            var faultDevice = ret.data.FaultDevice + ",故障中";
-            deviceSum.push(faultDevice);
-            //连接异常
-            var connectErrorDevice = ret.data.ConnectErrorDevice + ",连接异常";
-            deviceSum.push(connectErrorDevice);
-            $("#deviceChart").empty();
-            var colors = ["green", "blue", "#0099ff", "#cc33ff", "red", "#ff00cc"];
-            for (var i = 0; i < deviceSum.length; i++) {
-                $("#deviceChart").append('<div class="col-sm-2" style="width: 32%; height: 170px; display: -webkit-inline-box; margin: 0; padding: 0;" id="deviceChart' + i + '"></div>');
-                deviceSums[i] = { value: deviceSum[i].slice(0, deviceSum[i].indexOf(",")), name: deviceSum[i].slice(deviceSum[i].indexOf(",") + 1) };
-                var myChart = echarts.init(document.getElementById("deviceChart" + i));
-                var option = {
-                    title: {
-                        text: deviceSums[i]["name"],
-                        left: "center",
-                        textStyle: {
-                            color: colors[i],
-                            fontSize: 16
-                        }
-                    },
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: "{a}<br/>{b} : {c}台 ({d}%)"
-                    },
-                    color: ["#cdcdcd", colors[i]],
-                    series: [{
-                        name: '设备状态',
-                        type: 'pie',
-                        radius: ['57%', '85%'],
-                        center: ['50%', '57%'],
-                        animationDuration: 0,
-                        hoverAnimation: false,
-                        silent: true,
-                        label: {
-                            normal: {
-                                show: true,
-                                position: "center",
-                                formatter: deviceSums[i]["value"] + "台" + "\n" + ((deviceSums[i]["value"] / ret.data.AllDevice) * 100).toFixed(2) + "%",
-                                textStyle: {    //图例文字的样式
-                                    color: colors[i],  //文字颜色
-                                    fontSize: 18,    //文字大小
-                                    fontWeight: 700
-                                }
-                            }
-                        },
-                        data: [{ value: ret.data.AllDevice - parseInt(deviceSum[i].slice(0, deviceSum[i].indexOf(","))), name: "其他台数" }, deviceSums[i]]
-                    }]
-                };
-                myChart.setOption(option, true);
-            }
-            var singleProcessRateData = ret.data.SingleProcessRate;
-            singleProcessRateData.sort(function (a, b) {
-                return a.Id > b.Id ? 1 : -1;
-            });
-            //单台利用率
-            var code = [];
-            var codeRate = [];
-            $.each(singleProcessRateData, function (index, e) {
-                code.push(e["Code"]);
-                codeRate.push((e["Rate"] * 100).toFixed(2));
-            });
-            //for (var k = 1; k < 108; k++) {
-            //    code.push(k + "号机");
-            //    codeRate.push(parseInt(Math.random() * 100));
-            //}
-            $("#codeRateChart").empty();
-            $("#codeRateChart").append('<div style="width: 100%; height: 488px" id="codeRate"></div>');
-            var myChart1 = echarts.init(document.getElementById("codeRate"));
-            var option1 = {
-                title: {
-                    text: "单台加工利用率"
-                },
-                tooltip: {
-                    trigger: "axis",
-                    formatter: "{a}<br/>{b} : {c}%"
-                },
-                xAxis: {
-                    type: 'category',
-                    axisLabel: {
-                        //间隔为0
-                        //interval: 0,
-                        rotate: 40,
-                        textStyle: {
-                            fontSize: 12
-                        }
-                    },
-                    axisLine: {
-                        onZero: false
-                    },
-                    data: (function () {
-                        var res = [];
-                        for (var j = 0; j < code.length; j++) {
-                            if (res.length != 20) {
-                                res.push(code[j]);
-                            } else {
-                                break;
-                            }
-                        }
-                        return res;
-                    })()
-                },
-                yAxis: {
-                    name: '百分比',
-                    type: 'value',
-                    scale: true,
-                    axisLabel: {
-                        show: true,
-                        formatter: '{value} %'
-                    }
-                },
-                series: [{
-                    name: "利用率",
-                    type: "bar",
-                    areaStyle: { normal: {} },
-                    label: {
-                        normal: {
-                            show: true,
-                            position: 'top',
-                            formatter: "{c}%"
-                        }
-                    },
-                    itemStyle: {
-                        normal: {
-                            // 定制显示
-                            color: function (params) {
-                                return params.data < 30 ? "red" : "green";
-                            }
-                        }
-                    },
-                    data: (function () {
-                        var res = [];
-                        for (var j = 0; j < codeRate.length; j++) {
-                            if (res.length != 20) {
-                                res.push(codeRate[j]);
-                            } else {
-                                break;
-                            }
-                        }
-                        return res;
-                    })()
-                }]
-            };
-            myChart1.setOption(option1, true);
-            var setRate;
-            if (code.length > 20) {
-                var yIndex = 19;
-                var xIndex = 19;
-                setRate = setInterval(function () {
-                    var yData = option1.series[0].data;
-                    for (var y = 0; y < 20; y++) {
-                        yData.shift();
-                        yIndex++;
-                        if (!isStrEmptyOrUndefined(codeRate[yIndex]) || codeRate[yIndex] == 0) {
-                            yData.push(codeRate[yIndex]);
-                        } else {
-                            yData.push("");
-                        }
-                    }
-                    var xData = option1.xAxis.data;
-                    for (var x = 0; x < 20; x++) {
-                        xData.shift();
-                        xIndex++;
-                        if (!isStrEmptyOrUndefined(code[xIndex])) {
-                            xData.push(code[xIndex]);
-                        } else {
-                            xData.push("");
-                        }
-                    }
-                    myChart1.setOption(option1, true);
-                    if (xData[xData.length - 1] == code[code.length - 1] || isStrEmptyOrUndefined(xData[xData.length - 1])) {
-                        clearInterval(setRate);
-                        setTimeout(getBoardData, 4000);
-                    }
-                }, 5000);
-            }
-            if (code.length <= 20) {
-                clearInterval(setRate);
-                setTimeout(getBoardData, 4000);
-            }
-            //当前加工设备
-            var useCodeList = ret.data.UseCodeList;
-            $("#codeRateChart").append('<div style="width:100%;height:77px"><span style="font-size:18px;font-weight:bold;margin-left:5px">当前加工设备：</span><br><pre id="useList" style="font-size:18px;font-weight:bold;color:blue;""></pre></div>');
-            $.each(useCodeList, function (i, e) {
-                $("#useList").append("<span style='margin-left:10px'>" + e + "</span>");
-            });
-            //所有利用率
-            var allProcessRate = ret.data.AllProcessRate;
-            $("#codeTimeList").empty();
-            $("#codeTimeList").append('<div id="codeRates" style="float: left;width: 40%;height: 140px;"></div>' +
-                '<pre id = "codeTime" style = "width: 60%; float: left;font-size: 15px;line-height: 25px;font-weight:bold;font-family:"微软雅黑""></pre>');
-            var codeRatesChart = echarts.init(document.getElementById("codeRates"));
-            var codeRatesOption = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: "{a}<br/>{b} : {c}台 ({d}%)"
-                },
-                color: ["#cdcdcd", "#0099ff"],
-                series: [{
-                    name: "总利用率",
-                    type: "pie",
-                    center: ['50%', '50%'],
-                    radius: ['65%', '98%'],
-                    hoverAnimation: false,
-                    animation: false,
-                    silent: true,
-                    label: {
-                        normal: {
-                            show: true,
-                            position: "center",
-                            formatter: "Rate" + "\n" + (allProcessRate * 100).toFixed(2) + "%",
-                            textStyle: {    //图例文字的样式
-                                color: "#0099ff",  //文字颜色
-                                fontSize: 18,    //文字大小
-                                fontWeight: 700
-                            }
-                        }
-                    },
-                    data: [{ value: (1 - allProcessRate), name: "其他利用率" }, { value: allProcessRate, name: "所有利用率" }]
-                }]
-            }
-            codeRatesChart.setOption(codeRatesOption, true);
-            //设备详情
-            $("#codeTime").empty();
-            var runtime = codeTime(ret.data.RunTime);
-            var processTime = codeTime(ret.data.ProcessTime);
-            var idleTime = codeTime(ret.data.IdleTime);
-            var timeOps = `<div>运行时间：<span class='par'>${runtime.indexOf('小时') == -1 ? runtime : runtime.slice(0, runtime.indexOf('小时')+2)}</span></div><div>加工时间：<span class='par'>${processTime.indexOf('小时') == -1 ? processTime : processTime.slice(0, processTime.indexOf('小时') + 2)}</span></div><div>闲置时间：<span class='par'>${idleTime.indexOf('小时') == -1 ? idleTime : idleTime.slice(0, idleTime.indexOf('小时') + 2)}</span></div><div>所有利用率：<span class='par'>${(allProcessRate * 100).toFixed(2)}%</span></div>`;
-            $("#codeTime").append(timeOps);
-            $("#maxList").empty();
-            $("#maxList").append('<div id="maxChart" style="float: left;width: 40%;height: 140px;"></div>' +
-                '<pre id = "maxDevice" style = "width: 60%; float: left;font-size: 15px;line-height: 40px;font-weight:bold;margin-top:-3px;font-family:"微软雅黑""></pre>');
-            //日最大同时使用台数
-            $("#maxDevice").empty();
-            var maxSimultaneousUseRate = ret.data.MaxSimultaneousUseRate;
-            $("#maxDevice").append("<div>日最大同时使用台数：<span class='par'>" + maxSimultaneousUseRate + "台</span></div>");
-            //日最大使用台数
-            var maxUse = ret.data.MaxUse;
-            $("#maxDevice").append("<div>日最大使用台数：<span class='par'>" + maxUse + "台</span></div>");
-            //日最大使用率
-            var maxUseRate = ret.data.MaxUseRate;
-            $("#maxDevice").append("<div>日最大使用率：<span class='par'>" + (maxUseRate * 100).toFixed(2) + "%</span></div>");
-            var maxChart = echarts.init(document.getElementById("maxChart"));
-            var maxOption = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: "{a}<br/>{b} : {c}台 ({d}%)"
-                },
-                color: ["#cdcdcd", "#0099ff"],
-                series: [{
-                    name: '设备状态',
-                    type: 'pie',
-                    radius: ['67%', '100%'],
-                    center: ['50%', '50%'],
-                    animationDuration: 0,
-                    hoverAnimation: false,
-                    silent: true,
-                    label: {
-                        normal: {
-                            show: true,
-                            position: "center",
-                            formatter: "Max" + "\n" + maxUse + "台" + "\n" + (maxUseRate * 100).toFixed(2) + "%",
-                            textStyle: {    //图例文字的样式
-                                color: "#0099ff",  //文字颜色
-                                fontSize: 13    //文字大小
-                            }
-                        }
-                    },
-                    data: [{ value: ret.data.AllDevice - maxUse, name: "其他台数" }, { value: maxUse, name: "日最大使用台数" }]
-                }]
-            };
-            maxChart.setOption(maxOption, true);
+//轮播图设置
+function setFullScreenCarousel(elId) {
+    var id = elId.replace('carousel_kanBan', '');
+    setChart(`#${elId}`, id);
+}
 
-            $("#minList").empty();
-            $("#minList").append('<div id="minChart" style="float: left;width: 40%;height: 140px;"></div>' +
-                '<pre id = "minDevice" style = "width: 60%; float: left;font-size: 15px;line-height: 40px;font-weight:bold;margin-top:-3px;font-family:"微软雅黑""></pre>');
-            $("pre").css("backgroundColor", "white").css("border", 0);
-            //日最小同时使用台数
-            $("#minDevice").empty();
-            var minSimultaneousUseRate = ret.data.MinSimultaneousUseRate;
-            $("#minDevice").append(`<div>日最小同时使用台数：<span class='par'>${minSimultaneousUseRate}台</span></div>`);
-            //日最小使用台数
-            var minUse = ret.data.MinUse;
-            $("#minDevice").append(`<div>日最小使用台数：<span class='par'>${minUse}台</span></div>`);
-            //日最小使用率
-            var minUseRate = ret.data.MinUseRate;
-            $("#minDevice").append(`<div>日最小使用率：<span class='par'>${(minUseRate * 100).toFixed(2)}%</span></div>`);
-            $(".par").css("fontSize", 24).css("color", "blue");
-            var minChart = echarts.init(document.getElementById("minChart"));
-            var minOption = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: "{a}<br/>{b} : {c}台 ({d}%)"
-                },
-                color: ["#cdcdcd", "#0099ff"],
-                series: [{
-                    name: '设备状态',
-                    type: 'pie',
-                    radius: ['67%', '100%'],
-                    center: ['50%', '50%'],
-                    animationDuration: 0,
-                    hoverAnimation: false,
-                    silent: true,
-                    label: {
-                        normal: {
-                            show: true,
-                            position: "center",
-                            formatter: "Min" + "\n" + minUse + "台" + "\n" + (minUseRate * 100).toFixed(2) + "%",
-                            textStyle: {    //图例文字的样式
-                                color: "#0099ff",  //文字颜色
-                                fontSize: 13    //文字大小
-                            }
-                        }
-                    },
-                    data: [{ value: ret.data.AllDevice - minUse, name: "其他台数" }, { value: minUse, name: "日最小使用台数" }]
-                }]
-            };
-            minChart.setOption(minOption, true);
-            $("section").off('resize').on('resize',function () {
-                for (var j = 0; j < deviceSum.length; j++) {
-                    echarts.init(document.getElementById("deviceChart" + j)).resize();
+//取消轮播
+function cancelFullScreenCarousel() {
+    $('#carousel-example-generic').carousel('pause').off('slide.bs.carousel');
+    $('#fullScreenCarousel').animate({
+        top: '-100%',
+        opacity: 0
+    }, 1000, 'linear', function() {
+        $(this).empty();
+        fullScreen(false);
+    });
+}
+
+//图表设置
+function setChart(flag, id) {
+    var data = {
+        opType: 509,
+        opData: JSON.stringify({ type: id })
+    };
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var d = ret.data;
+        //设备详情
+        var allRateScale = setPieChart(`${flag}_detail`, 'Rate', d.AllProcessRate, '#0099ff');
+        $(`${flag}_yxTime`).text(codeTime(d.RunTime));
+        $(`${flag}_jgTime`).text(codeTime(d.ProcessTime));
+        $(`${flag}_xzTime`).text(codeTime(d.IdleTime));
+        $(`${flag}_lly`).text(allRateScale);
+        //日最大使用率
+        var maxUse = `${d.MaxUse}台`;
+        var maxRateScale = setPieChart(`${flag}_max`, `Max\n${maxUse}`, d.MaxUseRate, '#00a65a');
+        $(`${flag}_maxTs`).text(`${d.MaxSimultaneousUseRate}台`);
+        $(`${flag}_maxTNum`).text(maxUse);
+        $(`${flag}_maxSyl`).text(maxRateScale);
+        //日最小使用率
+        var minUse = `${d.MinUse}台`;
+        var minRateScale = setPieChart(`${flag}_min`, `Min\n${minUse}`, d.MinUseRate, '#f39c12');
+        $(`${flag}_minTs`).text(`${d.MinSimultaneousUseRate}台`);
+        $(`${flag}_minTNum`).text(minUse);
+        $(`${flag}_minSyl`).text(minRateScale);
+        //设备状态
+        var allDevice = d.AllDevice;
+        var normalDevice = d.NormalDevice;
+        var processDevice = d.ProcessDevice;
+        var idleDevice = d.IdleDevice;
+        var faultDevice = d.FaultDevice;
+        var errorDevice = d.ConnectErrorDevice;
+        setPieChart(`${flag}_state_all`, `${allDevice}台`, allDevice / allDevice, 'green', '总设备');
+        setPieChart(`${flag}_state_normal`, `${normalDevice}台`, normalDevice / allDevice, 'blue', '正常运行');
+        setPieChart(`${flag}_state_process`, `${processDevice}台`, processDevice / allDevice, '#0099ff', '加工中');
+        setPieChart(`${flag}_state_idle`, `${idleDevice}台`, idleDevice / allDevice, '#cc33ff', '闲置中');
+        setPieChart(`${flag}_state_fault`, `${faultDevice}台`, faultDevice / allDevice, 'red', '故障中');
+        setPieChart(`${flag}_state_error`, `${errorDevice}台`, errorDevice / allDevice, '#ff00cc', '连接异常');
+        //当前加工设备
+        var i, len;
+        var useCodeList = d.UseCodeList || [];
+        var ops = '';
+        for (i = 0, len = useCodeList.length; i < len; i++) {
+            ops += `<div style="border:1px solid;padding:5px 10px;margin:3px;border-radius:20%;background:#bfa;font-weight:bold">${useCodeList[i]}</div>`;
+        }
+        $(`${flag}_dev`).empty().append(ops || '<label style="color:red;font-size:18px">无</label>');
+        //利用率
+        var oddRate = d.SingleProcessRate;
+        var xData = [], yData = [];
+        for (i = 0, len = oddRate.length; i < len; i++) {
+            var oddData = oddRate[i];
+            xData.push(oddData.Code);
+            yData.push((oddData.Rate * 100).toFixed(2));
+        }
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                formatter: '{a}<br/>{b} : {c}%',
+                axisPointer: {
+                    type: 'shadow'
                 }
-                myChart1.resize();
-                codeRatesChart.resize();
-                maxChart.resize();
-                minChart.resize();
-            });
-        }, 0);
+            },
+            grid: {
+                left: '3%',
+                right: '3%',
+                top: '6%',
+                bottom: '8%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                axisLine: {
+                    onZero: false
+                },
+                data: xData
+            },
+            yAxis: {
+                name: '百分比',
+                type: 'value',
+                scale: true,
+                axisLabel: {
+                    show: true,
+                    formatter: '{value}%'
+                }
+            },
+            series: {
+                name: "利用率",
+                type: 'bar',
+                areaStyle: { normal: {} },
+                barWidth: '60%',
+                label: {
+                    show: true,
+                    position: 'top',
+                    formatter: "{c}%"
+                },
+                itemStyle: {
+                    color: params => params.value < 30 ? 'red' : 'green'
+                },
+                data: yData
+            },
+            dataZoom: [{
+                type: 'inside'
+            }, {
+                handleIcon: _handleIcon,
+                handleSize: '80%',
+                handleStyle: {
+                    color: '#fff',
+                    shadowBlur: 3,
+                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            }]
+        };
+        echarts.init($(`${flag}_bar`)[0]).setOption(option, true);
+        $(flag).off('resize').on('resize', function () {
+            clearTimeout(this.time);
+            this.time = setTimeout(() => {
+                var charts = $(this).find('.chart');
+                for (var i = 0, len = charts.length; i < len; i++) {
+                    echarts.init(charts[i]).resize();
+                }
+            }, 200);
+        });
+    }, 0);
 }
 
+//环形图设置
+function setPieChart(el, formatter, rate, color, text) {
+    rate = rate || 0;
+    var rateScale = `${(rate * 100).toFixed(2)}%`;
+    var option = {
+        color: ['#cdcdcd', color],
+        series: {
+            type: 'pie',
+            center: ['50%', '50%'],
+            radius: ['65%', '100%'],
+            hoverAnimation: false,
+            animation: false,
+            silent: true,
+            label: {
+                show: true,
+                position: 'center',
+                formatter: `${formatter}\n${rateScale}`,
+                textStyle: {
+                    color: color,
+                    fontSize: 18,
+                    fontWeight: 700
+                }
+            },
+            data: [1 - rate, rate]
+        }
+    };
+    if (text) {
+        option.title = {
+            text: text,
+            left: 'center',
+            textStyle: {
+                color: color,
+                fontSize: 16
+            }
+        };
+        option.series.center = ['50%', '57%'];
+        option.series.radius = ['57%', '85%'];
+    }
+    echarts.init($(el)[0]).setOption(option, true);
+    return rateScale;
+}
+
+//看板列表改变
+function kanBanChange() {
+    new Promise(resolve => getKanBanList(resolve)).then(e => {
+        $('#kanBanList').off('select2:select').on('select2:select', function () {
+            var id = $(this).val();
+            var d = e[id];
+            $('#kanBanName').val(d.Name);
+            $('#deviceSelect').val(d.DeviceIdList).trigger('change');
+            $('#isShow').iCheck(d.IsShow ? 'check' : 'uncheck');
+        });
+        $('#kanBanList').trigger('select2:select');
+    });
+}
+
+var _carouselBox;
+//获取看板列表
+function getKanBanList(resolve) {
+    var data = {
+        opType: 509,
+        opData: JSON.stringify({ type: -1 })
+    };
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var op = `<div class="row">
+                    <div class="col-md-4">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">设备详情</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_detail" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">运行时间：<span class="spanStyle" id="{0}_yxTime"></span></label>
+                                        <label class="control-label textOverTop">加工时间：<span class="spanStyle" id="{0}_jgTime"></span></label>
+                                        <label class="control-label textOverTop">闲置时间：<span class="spanStyle" id="{0}_xzTime"></span></label>
+                                        <label class="control-label textOverTop">所有利用率：<span class="spanStyle" id="{0}_lly"></span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box box-warning">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">日最大使用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_max" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">日最大同时使用台数：<span class="spanStyle" id="{0}_maxTs"></span></label>
+                                        <label class="control-label textOverTop">日最大使用台数：<span class="spanStyle" id="{0}_maxTNum"></span></label>
+                                        <label class="control-label textOverTop">日最大使用率：<span class="spanStyle" id="{0}_maxSyl"></span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box box-warning">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">日最小使用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="flexStyle">
+                                    <div id="{0}_min" class="chart" style="width: 40%; height: 140px"></div>
+                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                        <label class="control-label textOverTop">日最小同时使用台数：<span class="spanStyle" id="{0}_minTs"></span></label>
+                                        <label class="control-label textOverTop">日最小使用台数：<span class="spanStyle" id="{0}_minTNum"></span></label>
+                                        <label class="control-label textOverTop">日最小使用率：<span class="spanStyle" id="{0}_minSyl"></span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="box box-info">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">设备状态</h3>
+                            </div>
+                            <div class="box-body">
+                                <div style="width: 100%;display:flex;flex-wrap:wrap">
+                                    <div id="{0}_state_all" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_normal" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_process" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_idle" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_fault" class="chart" style="height:180px;width:33.33%"></div>
+                                    <div id="{0}_state_error" class="chart" style="height:180px;width:33.33%"></div>
+                                </div>
+                                <label class="control-label textOverTop">当前加工设备：</label>
+                                <div id="{0}_dev" style="width: 100%;display:flex;flex-wrap:wrap"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="box box-success">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">单台加工利用率</h3>
+                            </div>
+                            <div class="box-body">
+                                <div id="{0}_bar" class="chart" style="width: 100%; height: 480px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        var tabOp = `<div class="tab-pane fade in" id="{0}">${op}</div>`;
+        var carouselOp = `<div class="item {2}" id="{0}">${op}<div class="carousel-caption text-primary"><h3 class="text-primary">{1}</h3></div></div>`;
+        var carousel = `<div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title" style="margin-top:8px">看板轮播</h3>
+                            <button class="btn btn-primary pull-right" onclick="cancelFullScreenCarousel()">取消轮播</button>
+                        </div>
+                        <div class="box-body">
+                            <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">{0}</ol>
+                                <div class="carousel-inner" id="carouselInner">{1}</div>
+                                <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+                                    <span class="glyphicon glyphicon-chevron-left text-primary" aria-hidden="true"></span>
+                                </a>
+                                <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+                                    <span class="glyphicon glyphicon-chevron-right text-primary" aria-hidden="true"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>`;
+        var rData = ret.data;
+        var ops = '', lis = '', tabs = '', carouselLis = '', carouselTabs = '';
+        var obj = {};
+        var carouselIndex = 0;
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            obj[d.Id] = d;
+            var name = `${d.Order}-${d.Name}`;
+            ops += `<option value=${d.Id} order=${d.Order}>${name}</option>`;
+            if (d.IsShow) {
+                var flag = `kanBan${d.Id}`;
+                var active = carouselIndex ? '' : 'active';
+                lis += `<li><a href="#${flag}" class="kanBan" data-toggle="tab" aria-expanded="false">${d.Name}</a></li>`;
+                tabs += tabOp.format(flag);
+                carouselLis += `<li data-target="#carousel-example-generic" data-slide-to=${carouselIndex++} class=${active}></li>`;
+                carouselTabs += carouselOp.format(`carousel_${flag}`, d.Name, active);
+            }
+        }
+        $('#kanBanList').empty().append(ops);
+        $('#firstNavLi').nextAll().remove().end().after(lis);
+        $('#setKanBan').nextAll().remove().end().after(tabs);
+        _carouselBox = carousel.format(carouselLis, carouselTabs);
+        resolve(obj);
+    });
+}
+
+//浏览器全屏放大
+function fullScreen(isShow) {
+    if (isShow) {
+        var main = document.body;
+        if (main.requestFullscreen) {
+            main.requestFullscreen();
+        } else if (main.mozRequestFullScreen) {
+            main.mozRequestFullScreen();
+        } else if (main.webkitRequestFullScreen) {
+            main.webkitRequestFullScreen();
+        } else if (main.msRequestFullscreen) {
+            main.msRequestFullscreen();
+        }
+    } else {
+        if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+//获取机台号
+function getDevice(resolve) {
+    var data = {
+        opType: 100
+    };
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var rData = ret.datas;
+        var ops = '<option value="0">全部</option>';
+        var arr = [];
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            var id = d.Id;
+            ops += `<option value=${id}>${d.DeviceName}</option>`;
+            arr.push(id);
+        }
+        $('#deviceSelect').empty().append(ops);
+        resolve(arr);
+    });
+}
+
+//删除看板
+function delKanBanList() {
+    var id = $('#kanBanList').val();
+    if (isStrEmptyOrUndefined(id)) {
+        layer.msg('请选择需要删除的看板');
+        return;
+    }
+    var doSth = () => {
+        var data = {
+            opType: 512,
+            opData: JSON.stringify({ id })
+        }
+        ajaxPost('/Relay/Post', data, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                kanBanChange();
+            }
+        });
+    }
+    showConfirm(`删除：${$('#kanBanList :selected').text()}`, doSth);
+}
+
+//设置添加看板
+function setAddKanBan(isAdd) {
+    var order = isAdd ? ++$('#kanBanList').children().length : $('#kanBanList :selected').attr('order');
+    var name = $('#kanBanName').val().trim();
+    if (isStrEmptyOrUndefined(name)) {
+        layer.msg('看板名称不能为空');
+        return;
+    }
+    var deviceId = $('#deviceSelect').val();
+    if (isStrEmptyOrUndefined(deviceId)) {
+        layer.msg('请选择设备');
+        return;
+    }
+    var isShow = $('#isShow').is(':checked');
+    var list = {
+        Name: name,
+        DeviceIds: deviceId.join(','),
+        Order: order >> 0,
+        IsShow: isShow
+    };
+    if (!isAdd) {
+        var id = $('#kanBanList').val();
+        if (isStrEmptyOrUndefined(id)) {
+            layer.msg('请选择需要设置的看板');
+            return;
+        }
+        list.Id = id >> 0;
+    }
+    var data = {
+        opType: isAdd ? 510 : 511,
+        opData: JSON.stringify(list)
+    }
+    ajaxPost('/Relay/Post', data, ret => {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            kanBanChange();
+        }
+    });
+}

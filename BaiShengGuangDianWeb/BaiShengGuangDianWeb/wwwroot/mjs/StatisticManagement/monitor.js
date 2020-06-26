@@ -225,6 +225,10 @@ function getHistoryData() {
     time = time.split(' 至 ');
     var sTime = time[0];
     var eTime = time[1];
+    if (new Date(eTime) - new Date(sTime) > 3600000) {
+        layer.msg('时间不能超过一小时');
+        return;
+    }
     var resData = { vals: [], ins: [], outs: [] };
     var tableData = Object.values(_tableType);
     var key, i, len;

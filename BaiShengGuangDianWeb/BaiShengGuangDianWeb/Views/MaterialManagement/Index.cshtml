@@ -60,7 +60,7 @@
             </div>
             <div style="padding-top:5px">
                 <label class="control-label textOverTop">货品数量：<span id="codeCount" style="color: green;font-size:20px"></span></label>
-                <label class="control-label textOverTop" style="margin-left:20px">总价格：<span  style="color: red"><span id="codeSum" style="font-size:20px"></span>元</span></label>
+                <label class="control-label textOverTop" style="margin-left:20px">总价格：<span style="color: red"><span id="codeSum" style="font-size:20px"></span>元</span></label>
             </div>
             <div class="table-responsive mailbox-messages">
                 <table class="table table-hover table-striped" id="materialList"></table>
@@ -111,7 +111,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning" id="copyBtn" onclick="copyTable('#increaseList')">拷贝</button>
                     <button type="button" class="btn btn-info" id="exportBtn" onclick="exportExcel('#increaseList')" title="导出Excel">导出</button>
-                    <button type="button" class="btn btn-primary" onclick="increase(false)">入库</button>
+                    <button type="button" class="btn btn-primary" id="increaseBtn" onclick="increase.call(this,false)">入库</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-warning" id="fastCopyBtn" onclick="copyTable('#fastIncreaseList')">拷贝</button>
                     <button type="button" class="btn btn-info" id="fastExportBtn" onclick="exportExcel('#fastIncreaseList')" title="导出Excel">导出</button>
-                    <button type="button" class="btn btn-primary" onclick="increase(true)">入库</button>
+                    <button type="button" class="btn btn-primary" id="fastIncreaseBtn" onclick="increase.call(this,true)">入库</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -185,7 +185,7 @@
                                 <div class="tab-pane active in" id="planConsume">
                                     <div class="box box-primary">
                                         <div class="box-body">
-                                            <div class="flexStyle"  style="justify-content: space-between">
+                                            <div class="flexStyle" style="justify-content: space-between">
                                                 <div class="form-group">
                                                     <label class="control-label" for="consumePlanSelect">计划：</label>
                                                     <div class="form-group no-margin" style="display: -webkit-inline-box">
@@ -223,24 +223,24 @@
                                             <div class="form-group maxHeight" id="consumePlanListTable" style="overflow: auto">
                                                 <table class="table table-hover table-striped">
                                                     <thead>
-                                                    <tr>
-                                                        <th>序号</th>
-                                                        <th class="text-blue">货品编号</th>
-                                                        <th class="text-info">货品类别</th>
-                                                        <th class="text-info">货品名称</th>
-                                                        <th class="text-info">供应商</th>
-                                                        <th class="text-info">规格型号</th>
-                                                        <th class="text-info">单价</th>
-                                                        <th class="text-info">位置</th>
-                                                        <th>领用数量</th>
-                                                        <th>计划用量</th>
-                                                        <th>实际用量</th>
-                                                        <th class="text-red">剩余库存</th>
-                                                        <th>领用人</th>
-                                                        <th>货品详情</th>
-                                                        <th>日志</th>
-                                                        <th>删除</th>
-                                                    </tr>
+                                                        <tr>
+                                                            <th>序号</th>
+                                                            <th class="text-blue">货品编号</th>
+                                                            <th class="text-info">货品类别</th>
+                                                            <th class="text-info">货品名称</th>
+                                                            <th class="text-info">供应商</th>
+                                                            <th class="text-info">规格型号</th>
+                                                            <th class="text-info">单价</th>
+                                                            <th class="text-info">位置</th>
+                                                            <th>领用数量</th>
+                                                            <th>计划用量</th>
+                                                            <th>实际用量</th>
+                                                            <th class="text-red">剩余库存</th>
+                                                            <th>领用人</th>
+                                                            <th>货品详情</th>
+                                                            <th>日志</th>
+                                                            <th>删除</th>
+                                                        </tr>
                                                     </thead>
                                                     <tbody id="consumePlanList" data-index="1"></tbody>
                                                 </table>

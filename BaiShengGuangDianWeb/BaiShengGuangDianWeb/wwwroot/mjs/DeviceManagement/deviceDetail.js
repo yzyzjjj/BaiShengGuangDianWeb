@@ -222,7 +222,10 @@ function deviceUpgrade(type = 0) {
                     DeviceId: codeId
                 }]
             });
+            var progress = addFakeProgress();
             ajaxPost("/Relay/Post", data, ret => {
+                progress();
+                progress = null;
                 var d = ret.datas[0];
                 layer.msg(d.errmsg);
                 if (d.errno == 0) {

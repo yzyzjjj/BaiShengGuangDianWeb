@@ -21,60 +21,46 @@
 </section>
 <section class="content">
     <div class="row">
-        <div class="col-md-4">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">设备状态</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        <div class="nav-tabs-custom" id="tabBox">
+            <ul class="nav nav-tabs ui-sortable-handle" id="navUl">
+                <li class="active" id="firstNavLi"><a href="#setKanBan" data-toggle="tab" aria-expanded="true">设置</a></li>
+            </ul>
+            <div class="tab-content no-padding" style="position: relative">
+                <span class="glyphicon glyphicon-fullscreen pointer hidden" id="fullScreenBtn" style="position: absolute; right: 15px; top: 15px; font-size: 20px;z-index:1" title="全屏放大" aria-hidden="true"></span>
+                <div class="tab-pane active in" id="setKanBan">
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            <button class="btn btn-primary pull-right" onclick="fullScreenCarousel()">轮播</button>
+                            <div class="form-group">
+                                <label class="control-label">看板列表：</label>
+                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                    <select class="form-control" id="kanBanList" style="width: 140px"></select>
+                                </div>
+                                <button class="btn btn-danger" onclick="delKanBanList()">删除</button>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">看板名称：</label>
+                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                    <input class="form-control" id="kanBanName" maxlength="40" style="width: 200px">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">选择设备：</label>
+                                <select class="form-control" id="deviceSelect" style="width: 100%"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label no-margin" style="vertical-align: middle">是否启用：</label>
+                                <input type="checkbox" id="isShow" class="icb_minimal">
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-primary btn-flat" onclick="setAddKanBan(0)" style="width: 80px">设置</button>
+                                <button class="btn btn-success btn-flat" onclick="setAddKanBan(1)" style="width: 80px">添加</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="box-body" id="deviceChart"></div>
-            </div>
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">设备详情</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="box-body" id="codeTimeList"></div>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">利用率</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="box-body" id="codeRateChart"></div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">日最大使用率</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="box-body" id="maxList"></div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">日最小使用率</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    </div>
-                </div>
-                <div class="box-body" id="minList"></div>
             </div>
         </div>
     </div>
 </section>
+<section class="panel-fullscreen" id="fullScreenCarousel" style="top:-100%; opacity: 0;background:white"></section>

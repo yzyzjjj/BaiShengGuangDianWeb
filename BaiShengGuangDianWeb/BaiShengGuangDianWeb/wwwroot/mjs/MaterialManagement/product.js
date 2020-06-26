@@ -432,10 +432,12 @@ function siteSelect(resolve) {
     });
 }
 
+var _codeData = null;
 //货品管理列表
 function getMaterialList() {
     _materialIdData = [];
     _materialNameData = [];
+    _codeData = {};
     var list = {};
     var categoryId = $('#categorySelect').val();
     if (isStrEmptyOrUndefined(categoryId)) {
@@ -487,143 +489,103 @@ function getMaterialList() {
             return;
         }
         var rData = ret.datas;
-        var isEnable = function (data) {
-            return `<input type="checkbox" class="icb_minimal isEnable" value=${data}>`;
+        for (var i = 0, len = rData.length; i < len; i++) {
+            var d = rData[i];
+            _codeData[d.Id] = d;
         }
-        var order = function (a, b, c, d) {
-            return ++d.row;
-        }
-        var code = function (data) {
-            return `<span class="textOn codeOld">${data}</span><input type="text" class="form-control text-center textIn code hidden" maxlength="20" style="width:120px" value=${data}>`;
-        }
-        var category = function (data) {
-            return `<span class="textOn" id=${data.CategoryId}>${data.Category}</span><div class="hidden textIn">${_categorySelect}</div>`;
-        }
-        var name = function (data) {
-            return `<span class="textOn" id=${data.NameId}>${data.Name}</span><div class="hidden textIn"><select class="ms2 form-control name"></select></div>`;
-        }
-        var supplier = function (data) {
-            return `<span class="textOn" id=${data.SupplierId}>${data.Supplier}</span><div class="hidden textIn"><select class="ms2 form-control supplier"></select></div>`;
-        }
-        var specification = function (data) {
-            return `<span class="textOn" id=${data.SpecificationId}>${data.Specification}</span><div class="hidden textIn"><select class="ms2 form-control specification"></select></div>`;
-        }
-        var unit = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn unit hidden" maxlength="20" style="width:80px" value=${data}>`;
-        }
-        var site = function (data) {
-            return `<span class="textOn" id=${data.SiteId}>${data.Site}</span><div class="hidden textIn">${_siteSelect}</div>`;
-        }
-        var materialImg = function (data) {
-            var op = '<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel({0},\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',\'{6}\',\'{7}\')">查看</button>';
-            return op.format(data.Id, escape(data.Code), escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.ImageList), escape(data.Site));
-        }
-        var price = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn price hidden" onkeyup="onInput(this, 8, 4)" onblur="onInputEnd(this)" style="width:80px" value=${data}>`;
-        }
-        var stock = function (data) {
-            return `<span class="textOn">${data}</span><input type="text" class="form-control text-center textIn stock hidden" maxlength="10" style="width:80px" value=${data}>`;
-        }
-        var remark = function (data) {
-            if (data == null) {
-                data = "";
-            }
-            return (data.length > tdShowLength
-                ? `<span title = "${data}" class="textOn" onclick = "showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
-                : `<span title = "${data}" class="textOn">${data}</span>`)
+        var isEnable = d => `<input type="checkbox" class="icb_minimal isEnable" value=${d}>`;
+        var code = d => `<span class="textOn codeOld">${d}</span><input type="text" class="form-control text-center textIn code hidden" maxlength="20" style="width:120px">`;
+        var category = d => `<span class="textOn">${d}</span><div class="hidden textIn">${_categorySelect}</div>`;
+        var name = d => `<span class="textOn">${d}</span><div class="hidden textIn"><select class="ms2 form-control name"></select></div>`;
+        var supplier = d => `<span class="textOn">${d}</span><div class="hidden textIn"><select class="ms2 form-control supplier"></select></div>`;
+        var specification = d => `<span class="textOn">${d}</span><div class="hidden textIn"><select class="ms2 form-control specification"></select></div>`;
+        var unit = d => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn unit hidden" maxlength="20" style="width:80px">`;
+        var site = d => `<span class="textOn">${d}</span><div class="hidden textIn">${_siteSelect}</div>`;
+        var materialImg = d => `<button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${escape(d.Code)}\',\'${escape(d.Category)}\',\'${escape(d.Name)}\',\'${escape(d.Supplier)}\',\'${escape(d.Specification)}\',\'${escape(d.ImageList)}\',\'${escape(d.Site)}\')">查看</button>`;
+        var price = d => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn price hidden" onkeyup="onInput(this, 8, 4)" onblur="onInputEnd(this)" style="width:80px">`;
+        var stock = d => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn stock hidden" maxlength="10" style="width:80px">`;
+        var remark = d => {
+            d = d || '';
+            return (d.length > tdShowLength
+                ? `<span title = "${d}" class="textOn" onclick = "showAllContent('${escape(d)}')">${d.substring(0, tdShowLength)}...</span>`
+                : `<span title = "${d}" class="textOn">${d}</span>`)
                 + '<textarea class="form-control textIn remark hidden" maxlength = "500" style = "resize: vertical;width:250px;margin:auto"></textarea>';
         }
-        $("#MaterialList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                "destroy": true,
-                "paging": true,
-                "searching": true,
-                "language": oLanguage,
-                "data": rData,
-                "aaSorting": [[1, "asc"]],
-                "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                "iDisplayLength": 20, //默认显示的记录数
-                "columns": [
-                    { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Code", "title": "货品编号", "render": code },
-                    { "data": null, "title": "类别", "render": category },
-                    { "data": null, "title": "名称", "render": name },
-                    { "data": null, "title": "供应商", "render": supplier },
-                    { "data": null, "title": "规格", "render": specification },
-                    { "data": "Unit", "title": "单位", "render": unit },
-                    { "data": null, "title": "位置", "render": site },
-                    { "data": null, "title": "货品图片", "render": materialImg },
-                    { "data": "Price", "title": "参考价格", "render": price },
-                    { "data": "Stock", "title": "最低库存", "render": stock },
-                    { "data": "Remark", "title": "备注", "render": remark }
-                ],
-                "drawCallback": function (settings, json) {
-                    $(this).find('.icb_minimal').iCheck({
-                        labelHover: false,
-                        cursor: true,
-                        checkboxClass: 'icheckbox_minimal-blue',
-                        radioClass: 'iradio_minimal-blue',
-                        increaseArea: '20%'
-                    });
-                    $(this).find('.ms2').select2({ width: '120px', matcher });
-                    $('#MaterialList .isEnable').on('ifChanged', function () {
-                        var tr = $(this).parents('tr');
-                        var id = $(this).val();
-                        var n = tr.find('.codeOld').text();
-                        if ($(this).is(':checked')) {
-                            _materialIdData.push(id);
-                            _materialNameData.push(n);
-                            var textOn = tr.find('.textOn');
-                            var codeName = textOn.eq(0).text();
-                            var categoryName = textOn.eq(1).attr('id');
-                            var nameName, supplierName;
-                            new Promise(function (resolve, reject) {
-                                nameSelect(resolve, categoryName, true);
-                            }).then(function (e) {
-                                tr.find('.name').empty();
-                                tr.find('.name').append(e);
-                                nameName = textOn.eq(2).attr('id');
-                                return new Promise(function (resolve, reject) {
-                                    supplierSelect(resolve, categoryName, nameName, true);
-                                });
-                            }).then(function (e) {
-                                tr.find('.supplier').empty();
-                                tr.find('.supplier').append(e);
-                                supplierName = textOn.eq(3).attr('id');
-                                return new Promise(function (resolve, reject) {
-                                    specificationSelect(resolve, categoryName, nameName, supplierName, true);
-                                });
-                            }).then(function (e) {
-                                tr.find('.specification').empty();
-                                tr.find('.specification').append(e);
-                                var specificationName = textOn.eq(4).attr('id');
-                                var unitName = textOn.eq(5).text();
-                                var siteName = textOn.eq(6).attr('id');
-                                var priceName = textOn.eq(7).text();
-                                var stockName = textOn.eq(8).text();
-                                var remarkName = textOn.eq(9).attr("title");
-                                tr.find('.code').val(codeName);
-                                tr.find('.category').val(categoryName);
-                                tr.find('.name').val(nameName);
-                                tr.find('.supplier').val(supplierName);
-                                tr.find('.specification').val(specificationName);
-                                tr.find('.unit').val(unitName);
-                                tr.find('.site').val(siteName);
-                                tr.find('.price').val(priceName);
-                                tr.find('.stock').val(stockName);
-                                tr.find('.remark').val(remarkName);
-                                tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
-                            });
-                        } else {
-                            _materialIdData.splice(_materialIdData.indexOf(id), 1);
-                            _materialNameData.splice(_materialNameData.indexOf(n), 1);
-                            tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
-                        }
-                    });
-                }
-            });
+        $("#MaterialList").DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+            "destroy": true,
+            "paging": true,
+            "searching": true,
+            "language": oLanguage,
+            "data": rData,
+            "aaSorting": [[1, "asc"]],
+            "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
+            "iDisplayLength": 20, //默认显示的记录数
+            "columns": [
+                { "data": "Id", "title": "选择", "render": isEnable, "orderable": false },
+                { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
+                { "data": "Code", "title": "货品编号", "render": code },
+                { "data": "Category", "title": "类别", "render": category },
+                { "data": "Name", "title": "名称", "render": name },
+                { "data": "Supplier", "title": "供应商", "render": supplier },
+                { "data": "Specification", "title": "规格", "render": specification },
+                { "data": "Unit", "title": "单位", "render": unit },
+                { "data": "Site", "title": "位置", "render": site },
+                { "data": null, "title": "货品图片", "render": materialImg },
+                { "data": "Price", "title": "参考价格", "render": price },
+                { "data": "Stock", "title": "最低库存", "render": stock },
+                { "data": "Remark", "title": "备注", "render": remark }
+            ],
+            "drawCallback": function (settings, json) {
+                $(this).find('.icb_minimal').iCheck({
+                    labelHover: false,
+                    cursor: true,
+                    checkboxClass: 'icheckbox_minimal-blue',
+                    radioClass: 'iradio_minimal-blue',
+                    increaseArea: '20%'
+                });
+                $(this).find('.ms2').select2({ width: '120px', matcher });
+                $('#MaterialList .isEnable').on('ifChanged', function () {
+                    var tr = $(this).parents('tr');
+                    var id = $(this).val();
+                    var n = tr.find('.codeOld').text();
+                    if ($(this).is(':checked')) {
+                        _materialIdData.push(id);
+                        _materialNameData.push(n);
+                        var codeData = _codeData[id];
+                        var codeName = codeData.Code;
+                        var categoryName = codeData.CategoryId;
+                        var nameName, supplierName;
+                        new Promise(resolve => nameSelect(resolve, categoryName, true)).then(e => {
+                            tr.find('.name').empty().append(e);
+                            nameName = codeData.NameId;
+                            return new Promise(resolve => supplierSelect(resolve, categoryName, nameName, true));
+                        }).then(e => {
+                            tr.find('.supplier').empty().append(e);
+                            supplierName = codeData.SupplierId;
+                            return new Promise(resolve => specificationSelect(resolve, categoryName, nameName, supplierName, true));
+                        }).then(e => {
+                            tr.find('.specification').empty().append(e);
+                            tr.find('.code').val(codeName);
+                            tr.find('.category').val(categoryName).trigger('change');
+                            tr.find('.name').val(nameName).trigger('change');
+                            tr.find('.supplier').val(supplierName).trigger('change');
+                            tr.find('.specification').val(codeData.SpecificationId).trigger('change');
+                            tr.find('.unit').val(codeData.Unit);
+                            tr.find('.site').val(codeData.SiteId).trigger('change');
+                            tr.find('.price').val(codeData.Price);
+                            tr.find('.stock').val(codeData.Stock);
+                            tr.find('.remark').val(codeData.Remark);
+                            tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
+                        });
+                    } else {
+                        _materialIdData.splice(_materialIdData.indexOf(id), 1);
+                        _materialNameData.splice(_materialNameData.indexOf(n), 1);
+                        tr.find('.textOn').removeClass('hidden').siblings('.textIn').addClass('hidden');
+                    }
+                });
+            }
+        });
     });
 }
 

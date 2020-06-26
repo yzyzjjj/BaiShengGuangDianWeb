@@ -397,7 +397,7 @@ function getTaskConfigItem(taskId, el, isAdd) {
 var _planConfigData = null;
 var _planConfigTab = null;
 //计划配置项
-function getPlanConfig() {
+function getPlanConfig(isUp) {
     _planIdData = [];
     var stateId = $('#selectState').val();
     if (isStrEmptyOrUndefined(stateId)) {
@@ -504,7 +504,7 @@ function getPlanConfig() {
                 { "data": null, "title": "详情", "render": detailBtn, "orderable": false },
                 { "data": null, "title": "日志", "render": logBtn, "orderable": false, "visible": per423 }
             ],
-            "drawCallback": function (settings, json) {
+            "drawCallback": function () {
                 $(this).find('.isEnable').iCheck({
                     handle: 'checkbox',
                     checkboxClass: 'icheckbox_minimal-blue',
@@ -519,7 +519,7 @@ function getPlanConfig() {
                 });
             }
         });
-        if (!$('#planItem').is(':hidden')) {
+        if (!$('#planItem').is(':hidden') && !isUp) {
             $('#planItemList').empty();
             $('#planItem').addClass('hidden');
         }
@@ -993,31 +993,34 @@ function updatePlanTaskItem() {
         Id: planId,
         TaskId: d.TaskId,
         State: d.State,
-        Plan: d.Plan,
-        PlannedStartTime: d.PlannedStartTime,
-        PlannedEndTime: d.PlannedEndTime
+        Plan: d.Plan
     };
     var items = planTaskData('#planItemList', true);
-    if (items === 1) {
-        return;
-    } else {
-        if (items.length) {
-            list.Items = items;
+    if (items.length) {
+        list.Items = items;
+        var hour = 0, minute = 0;
+        for (var i = 0, len = items.length; i < len; i++) {
+            var item = items[i];
+            hour += item.EstimatedHour;
+            minute += item.EstimatedMin;
         }
+        list.EstimatedHour = hour + Math.floor(minute / 60);
+        list.EstimatedMin = minute % 60;
+        var doSth = function () {
+            var data = {}
+            data.opType = 1042;
+            data.opData = JSON.stringify([list]);
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        planTaskDetail(planId, $('#planText').text());
+                        getPlanConfig(true);
+                    }
+                });
+        }
+        showConfirm('保存', doSth);
     }
-    var doSth = function () {
-        var data = {}
-        data.opType = 1042;
-        data.opData = JSON.stringify([list]);
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    planTaskDetail(planId, $('#planText').text());
-                }
-            });
-    }
-    showConfirm('保存', doSth);
 }
 
 //下发任务
@@ -1354,7 +1357,7 @@ function addPlan() {
         layer.msg("请选择结束时间");
         return;
     }
-    if (comTimeDay(sTime, eTime)) {
+    if (compareDate(sTime, eTime)) {
         return;
     }
     var hour = $('#planHour').val();

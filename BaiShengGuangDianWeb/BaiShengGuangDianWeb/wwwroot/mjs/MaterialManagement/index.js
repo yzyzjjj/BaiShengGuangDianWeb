@@ -230,6 +230,7 @@ function pageReady() {
     if (!pcAndroid()) {
         $(".icon-saoyisao").addClass('hidden');
     }
+    $('#fastIncreaseModal,#increaseModal').on('hidden.bs.modal', () => $('#increaseBtn,#fastIncreaseBtn').attr('disabled', false));
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
 
@@ -1206,14 +1207,15 @@ function increase(isFast) {
         data.opData = JSON.stringify({
             Bill: bill
         });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    isFast ? $('#fastCopyBtn,#fastExportBtn').attr('disabled', false) : $('#copyBtn,#exportBtn').attr('disabled', false);
-                    getMaterialList('Select');
-                }
-            });
+        ajaxPost("/Relay/Post", data, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                isFast ? $('#fastCopyBtn,#fastExportBtn').attr('disabled', false) : $('#copyBtn,#exportBtn').attr('disabled', false);
+                $(this).attr('disabled', true);
+                setTimeout(() => $(this).attr('disabled', false),10000);
+                getMaterialList('Select');
+            }
+        });
     }
     showConfirm('入库', doSth);
 }
