@@ -8,6 +8,18 @@ namespace BaiShengGuangDianWeb.Controllers.Page.MaterialManagement
 {
     public class MaterialManagementController : Controller
     {
+        /// <summary>
+        /// 请购管理
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Purchase()
+        {
+            return View();
+        }
+        /// <summary>
+        /// 物料管理
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             return View();
