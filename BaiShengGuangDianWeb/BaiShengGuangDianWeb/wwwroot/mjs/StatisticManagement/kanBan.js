@@ -44,8 +44,8 @@ function fullScreenCarousel() {
     }, 1000, 'linear', () => fullScreen(true));
     setFullScreenCarousel($('#carouselInner .item:first').attr('id'));
     $('#carousel-example-generic').carousel({
-        interval: 5000
-    }).on('slide.bs.carousel', e => setFullScreenCarousel(e.relatedTarget.id));
+        interval: 10000
+    }).on('slide.bs.carousel', e => setFullScreenCarousel(e.relatedTarget.id)).on('mouseenter', () => $('#carousel-example-generic .isShow').removeClass('hidden')).on('mouseleave', () => $('#carousel-example-generic .isShow').addClass('hidden'));
 }
 
 //轮播图设置
@@ -56,11 +56,11 @@ function setFullScreenCarousel(elId) {
 
 //取消轮播
 function cancelFullScreenCarousel() {
-    $('#carousel-example-generic').carousel('pause').off('slide.bs.carousel');
+    $('#carousel-example-generic').carousel('pause').off('slide.bs.carousel mouseenter mouseleave');
     $('#fullScreenCarousel').animate({
         top: '-100%',
         opacity: 0
-    }, 1000, 'linear', function() {
+    }, 1000, 'linear', function () {
         $(this).empty();
         fullScreen(false);
     });
@@ -352,7 +352,7 @@ function getKanBanList(resolve) {
                     </div>
                 </div>`;
         var tabOp = `<div class="tab-pane fade in" id="{0}">${op}</div>`;
-        var carouselOp = `<div class="item {2}" id="{0}">${op}<div class="carousel-caption text-primary"><h3 class="text-primary">{1}</h3></div></div>`;
+        var carouselOp = `<div class="item" id="{0}">${op}<div class="carousel-caption text-primary"><h3 class="text-primary isShow hidden">{1}</h3></div></div>`;
         var carousel = `<div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title" style="margin-top:8px">看板轮播</h3>
@@ -360,39 +360,39 @@ function getKanBanList(resolve) {
                         </div>
                         <div class="box-body">
                             <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
-                                <ol class="carousel-indicators">{0}</ol>
+                                <ol class="carousel-indicators isShow hidden">{0}</ol>
                                 <div class="carousel-inner" id="carouselInner">{1}</div>
-                                <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+                                <a class="left carousel-control isShow hidden" href="#carousel-example-generic" data-slide="prev">
                                     <span class="glyphicon glyphicon-chevron-left text-primary" aria-hidden="true"></span>
                                 </a>
-                                <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+                                <a class="right carousel-control isShow hidden" href="#carousel-example-generic" data-slide="next">
                                     <span class="glyphicon glyphicon-chevron-right text-primary" aria-hidden="true"></span>
                                 </a>
                             </div>
                         </div>
                     </div>`;
         var rData = ret.data;
-        var ops = '', lis = '', tabs = '', carouselLis = '', carouselTabs = '';
+        rData.sort((a, b) => a.Order - b.Order);
+        var ops = '', lis = '<li><a href="#kanBan0" class="kanBan" data-toggle="tab" aria-expanded="false">所有设备</a></li>', tabs = '', carouselLis = '<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>', carouselTabs = '';
         var obj = {};
         var carouselIndex = 0;
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             obj[d.Id] = d;
-            var name = `${d.Order}-${d.Name}`;
+            var name = `${i + 1}-${d.Name}`;
             ops += `<option value=${d.Id} order=${d.Order}>${name}</option>`;
             if (d.IsShow) {
                 var flag = `kanBan${d.Id}`;
-                var active = carouselIndex ? '' : 'active';
                 lis += `<li><a href="#${flag}" class="kanBan" data-toggle="tab" aria-expanded="false">${d.Name}</a></li>`;
                 tabs += tabOp.format(flag);
-                carouselLis += `<li data-target="#carousel-example-generic" data-slide-to=${carouselIndex++} class=${active}></li>`;
-                carouselTabs += carouselOp.format(`carousel_${flag}`, d.Name, active);
+                carouselLis += `<li data-target="#carousel-example-generic" data-slide-to=${++carouselIndex}></li>`;
+                carouselTabs += carouselOp.format(`carousel_${flag}`, d.Name);
             }
         }
         $('#kanBanList').empty().append(ops);
         $('#firstNavLi').nextAll().remove().end().after(lis);
-        $('#setKanBan').nextAll().remove().end().after(tabs);
-        _carouselBox = carousel.format(carouselLis, carouselTabs);
+        $('#setKanBan').nextAll().remove().end().after(`${tabOp.format('kanBan0')}${tabs}`);
+        _carouselBox = carousel.format(carouselLis, `<div class="item active" id="carousel_kanBan0">${op.format('carousel_kanBan0')}<div class="carousel-caption text-primary"><h3 class="text-primary isShow hidden">所有设备</h3></div></div>${carouselTabs}`);
         resolve(obj);
     });
 }
@@ -439,7 +439,7 @@ function getDevice(resolve) {
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             var id = d.Id;
-            ops += `<option value=${id}>${d.DeviceName}</option>`;
+            ops += `<option value=${id}>${d.Code}</option>`;
             arr.push(id);
         }
         $('#deviceSelect').empty().append(ops);
@@ -471,7 +471,7 @@ function delKanBanList() {
 
 //设置添加看板
 function setAddKanBan(isAdd) {
-    var order = isAdd ? ++$('#kanBanList').children().length : $('#kanBanList :selected').attr('order');
+    var order = isAdd ? ($('#kanBanList option:last').attr('order') >> 0) + 1 : $('#kanBanList :selected').attr('order');
     var name = $('#kanBanName').val().trim();
     if (isStrEmptyOrUndefined(name)) {
         layer.msg('看板名称不能为空');

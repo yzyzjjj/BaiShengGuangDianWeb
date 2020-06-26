@@ -137,6 +137,14 @@ function pageReady() {
             case 3:
                 break;
         }
+        tr.find('.result').empty();
+    });
+    $('#batchUpgradeModel').on('hidden.bs.modal', () => {
+        clearInterval($('#scriptList')[0].time);
+        clearInterval($('#firmwareList')[0].time);
+        //clearInterval($('#hardwareList')[0].time);
+        //clearInterval($('#applicationList')[0].time);
+        getDeviceList();
     });
     $('#script_nav_table,#firmware_nav_table').css('maxHeight', innerHeight * 0.7);
 }
@@ -254,9 +262,6 @@ function getDeviceList(resolve, isUpgrade) {
                         { "data": null, "title": "操作", "render": op, "orderable": false, "visible": per148 || per147 || per162 || per164 || per163 }
                     ]
                 });
-            if (!isStrEmptyOrUndefined(resolve) && !isUpgrade) {
-                resolve('success');
-            }
         });
 }
 
@@ -872,6 +877,7 @@ function deviceUpgrade(type = 0) {
                 }]
             });
             var progress = addFakeProgress();
+            setTimeout(() => $('.spinner').addClass('hidden'), 50);
             ajaxPost("/Relay/Post", data, ret => {
                 progress();
                 progress = null;
@@ -918,7 +924,7 @@ function addBatchUpgradeTr(e, el) {
     $(`#${el}List`).append(tr).find('.ms2').select2();
     batchUpgradeSort(el);
     $(`#${el}List .code:last`).trigger('select2:select');
-    if (_deviceData.state == _batchCodeData[e].length) {
+    if (_deviceData.state == _batchCodeData[e].length - (_deviceData.batchState || 0)) {
         $(`#add${el[0].toUpperCase() + el.slice(1)}ListBtn`).attr('disabled', true);
     }
     $(`#${el}_nav_table`).scrollTop($(`#${el}_nav_table`)[0].scrollHeight);
@@ -935,13 +941,20 @@ function batchUpgradeSort(el) {
 //批量升级删除tr
 function delBatchUpgradeTr(e, el) {
     var tr = $(this).parents('tr');
+    var flag = true;
+    if (tr.find('.devState').text() != '待加工') {
+        _deviceData.batchState--;
+        flag = false;
+    }
     tr.remove();
     batchUpgradeSort(el);
     var v = $(this).val();
     _batchCodeData[e].splice(_batchCodeData[e].indexOf(v), 1);
-    $(`#${el}List .code option[value=${v}]`).prop('disabled', false);
-    $(`#add${el[0].toUpperCase() + el.slice(1)}ListBtn`).attr('disabled', false);
-    $(`#${el}List .code`).select2();
+    if (flag) {
+        $(`#${el}List .code option[value=${v}]`).prop('disabled', false);
+        $(`#add${el[0].toUpperCase() + el.slice(1)}ListBtn`).attr('disabled', false);
+        $(`#${el}List .code`).select2();
+    }
 }
 
 //批量升级刷新
@@ -959,12 +972,18 @@ function batchRefresh(e, el) {
         for (; i < len; i++) {
             d = list[i];
             data[d.Id] = d;
+            var str = d.DeviceStateStr;
+            if (str != _deviceData[d.Id].DeviceStateStr) {
+                str == '待加工' ? _deviceData.state++ : _deviceData.state--;
+            }
+            _deviceData[d.Id] = d;
         }
+        _deviceData.batchState = 0;
+        var delTrEls = $(`#${el}List .delTr`);
         var devStateEl = $(`#${el}List .devState`);
-        var devData = _batchCodeData[e];
-        for (i = 0, len = devData.length; i < len; i++) {
-            d = data[devData[i]];
-            var state = d.DeviceStateStr;
+        for (i = 0, len = delTrEls.length; i < len; i++) {
+            var codeId = delTrEls.eq(i).val();
+            var state = _deviceData[codeId].DeviceStateStr;
             var stateClass;
             switch (state) {
                 case '待加工':
@@ -972,19 +991,23 @@ function batchRefresh(e, el) {
                     break;
                 case '加工中':
                     stateClass = 'success';
+                    _deviceData.batchState++;
                     break;
                 case '已确认':
                     stateClass = 'warning';
+                    _deviceData.batchState++;
                     break;
                 case '维修中':
                     stateClass = 'info';
+                    _deviceData.batchState++;
                     break;
                 default:
                     stateClass = 'red';
+                    _deviceData.batchState++;
             }
             devStateEl.eq(i).html(`<span class="text-${stateClass}">${state}</span>`);
         }
-    });
+    }, 0);
 }
 
 //批量升级
@@ -1014,6 +1037,8 @@ function batchUpgrade(e, el) {
         info.fileId.push(fileId);
         info.filePath.push(filePath);
     }
+    clearInterval($(`#${el}List`)[0].time);
+    $(`#${el}List .result`).text('');
     var fileType = null, hintText = '';
     switch (e) {
         case 0:
@@ -1063,6 +1088,7 @@ function batchUpgrade(e, el) {
                 Infos: infos
             });
             var progress = addFakeProgress();
+            setTimeout(() => $('.spinner').addClass('hidden'),50);
             ajaxPost("/Relay/Post", data, ret => {
                 progress();
                 progress = null;
@@ -1075,6 +1101,9 @@ function batchUpgrade(e, el) {
                     resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
                 }
                 batchRefresh(e, el);
+                $(`#${el}List`)[0].time = setInterval(() => {
+                    batchRefresh(e, el);
+                }, 5000);
             });
         }, 0);
     }
