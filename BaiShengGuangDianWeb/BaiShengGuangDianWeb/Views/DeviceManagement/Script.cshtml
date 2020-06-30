@@ -32,6 +32,7 @@
                 <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyDictionaryTypeModel()" id="showUsuallyDictionaryTypeModelBtn">设置常用变量</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="showUsuallyVariableTypeModel()" id="showUsuallyVariableTypeModelBtn">常用变量类型</button>
                 <button type="button" class="btn btn-primary btn-sm" id="showAddModel" onclick="showAddModel()">添加脚本数据</button>
+                <button type="button" class="btn btn-success btn-sm" id="showScriptSetBtn" onclick="showScriptSetModel()">脚本小数位设置</button>
             </div>
         </div>
         <div class="box-body">
@@ -395,6 +396,84 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="updateVariableType()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 脚本小数位设置模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="showScriptSetModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">脚本小数位设置</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-inline">
+                        <div class="form-group">
+                            <label class="control-label">请选择设备型号：</label>
+                            <select class="ms2 form-control" id="scriptModel" style="width: 200px"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">请选择脚本版本：</label>
+                            <select class="ms2 form-control" id="scriptType" style="width: 200px"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">请选择配置项：</label>
+                            <select class="form-control" id="scriptConfig">
+                                <option value="0">全部</option>
+                                <option value="1">变量</option>
+                                <option value="2">输入口</option>
+                                <option value="3">输出口</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="getScriptDecimals()">查询</button>
+                    </div>
+                    <div class="form-group text-right">
+                        <button class="btn btn-default" onclick="getScriptDecimals()">重置</button>
+                        <button class="btn btn-primary" onclick="updateScriptPrecision()">保存</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 hidden" id="scriptVarBox">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">变量：</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="scriptVarList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 hidden" id="scriptInBox">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">输入口：</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="scriptInList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 hidden" id="scriptOutBox">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">输出口：</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="scriptOutList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

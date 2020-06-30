@@ -223,7 +223,6 @@ function deviceUpgrade(type = 0) {
                 }]
             });
             var progress = addFakeProgress();
-            setTimeout(() => $('.spinner').addClass('hidden'), 50);
             ajaxPost("/Relay/Post", data, ret => {
                 progress();
                 progress = null;

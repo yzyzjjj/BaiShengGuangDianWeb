@@ -11,8 +11,10 @@ function pageReady() {
     _permissionList[243] = { uIds: [] };
     _permissionList[203] = { uIds: ['showAddModel'] };
     _permissionList[204] = { uIds: [] };
+    //_permissionList[167] = { uIds: ['showScriptSetBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     $(".ads").css('width', '100%').select2();
+    $('.ms2').select2();
     getDataTypeList();
     getDeviceModelList();
     $("#fScriptVersion").change(function () {
@@ -43,7 +45,7 @@ function pageReady() {
         var name = $("#jScriptVersion").val();
         $("#jsonName").val(name);
     });
-    $("#aDataType").on("select2:select",function (e) {
+    $("#aDataType").on("select2:select", function (e) {
         var fScriptVersion = $("#fScriptVersion").val();
         if (fScriptVersion == 1) {
             $("#jsonFile").val("");
@@ -161,7 +163,19 @@ function pageReady() {
     $("#udtScriptVersion").on("select2:select", function (e) {
         showUsuallyDictionaryTypeModel(true);
     });
+    $('#scriptModel').on('select2:select', () => getScriptType(false));
+    $('#showScriptSetModel').on('focus', '.precision', function () {
+        if ($(this).val() == 0) {
+            $(this).val('');
+        }
+    });
+    $('#showScriptSetModel').on('blur', '.precision', function () {
+        if (isStrEmptyOrUndefined($(this).val())) {
+            $(this).val(0);
+        }
+    });
 }
+
 var jsonData = null;
 var scriptData = null;
 function getScriptVersionAllList(type) {
@@ -1148,4 +1162,165 @@ function updateVariableType() {
             });
     }
     showConfirm("修改", doSth);
+}
+
+//脚本脚本版本
+function getScriptType(isShow) {
+    const data = {}
+    data.opType = 113;
+    data.opData = JSON.stringify({
+        deviceModelId: $('#scriptModel').val()
+    });
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const list = ret.datas;
+        const op = '<option value="{0}">{1}</option>';
+        let ops = '';
+        for (let i = 0, len = list.length; i < len; i++) {
+            const d = ret.datas[i];
+            ops += op.format(d.Id, d.ScriptName);
+        }
+        $('#scriptType').empty().append(ops);
+        if (isShow) {
+            getScriptDecimals();
+        }
+    },0);
+}
+
+//脚本小数位设置弹窗
+function showScriptSetModel() {
+    ajaxPost("/Relay/Post", { opType: 120 }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const list = ret.datas;
+        const op = '<option value="{0}">{1}</option>';
+        let ops = '';
+        for (let i = 0, len = list.length; i < len; i++) {
+            const d = ret.datas[i];
+            ops += op.format(d.Id, `${d.CategoryName}-${d.ModelName}`);
+        }
+        $('#scriptModel').empty().append(ops);
+        getScriptType(true);
+    });
+    $('#showScriptSetModel').modal('show');
+}
+
+//脚本小数位查询
+function getScriptDecimals() {
+    const id = $('#scriptType').val();
+    if (isStrEmptyOrUndefined(id)) {
+        layer.msg('请选择脚本版本');
+        return;
+    }
+    const data = {};
+    data.opType = 106;
+    data.opData = JSON.stringify({ id });
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#scriptVarBox,#scriptInBox,#scriptOutBox').addClass('hidden');
+        const rData = ret.datas;
+        const scriptData = { 1: [], 2: [], 3: [] };
+        for (let i = 0, len = rData.length; i < len; i++) {
+            const d = rData[i];
+            scriptData[d.VariableTypeId].push(d);
+        }
+        _scriptPrecision = [];
+        const isEnable = d => `<input type="checkbox" class="icb_minimal isEnable" value=${d}>`;
+        const precision = d => `<span class="precisionText">${d}</span><input type="text" class="form-control text-center precision hidden" maxlength="10" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="min-width:100px">`;
+        const tablesConfig = {
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
+            pagingType: "full",
+            destroy: true,
+            paging: true,
+            deferRender: false,
+            bLengthChange: false,
+            info: false,
+            searching: true,
+            autoWidth: true,
+            language: oLanguage,
+            aaSorting: [[1, 'asc']],
+            iDisplayLength: 20,
+            columns: [
+                { data: 'Id', title: '选择', render: isEnable, orderable: false },
+                { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
+                { data: 'VariableName', title: '名称' },
+                { data: 'Precision', title: '小数位', render: precision }
+            ],
+            drawCallback: function () {
+                $(this).find('.icb_minimal').iCheck({
+                    labelHover: false,
+                    cursor: true,
+                    checkboxClass: 'icheckbox_minimal-blue',
+                    radioClass: 'iradio_minimal-blue',
+                    increaseArea: '20%'
+                }).on('ifChanged', function () {
+                    const tr = $(this).parents('tr');
+                    if ($(this).is(':checked')) {
+                        _scriptPrecision.push(tr);
+                        tr.find('.precision').removeClass('hidden').val(tr.find('.precisionText').addClass('hidden').text());
+                    } else {
+                        _scriptPrecision.splice(_scriptPrecision.indexOf(tr), 1);
+                        tr.find('.precisionText').removeClass('hidden').siblings('.precision').addClass('hidden');
+                    }
+                });
+            }
+        };
+        const scriptConfig = $('#scriptConfig').val();
+        switch (scriptConfig) {
+            case '0':
+                $('#scriptVarBox,#scriptInBox,#scriptOutBox').removeClass('hidden');
+                $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+                $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+                $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+                break;
+            case '1':
+                $('#scriptVarBox').removeClass('hidden');
+                $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+                break;
+            case '2':
+                $('#scriptInBox').removeClass('hidden');
+                $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+                break;
+            case '3':
+                $('#scriptOutBox').removeClass('hidden');
+                $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+                break;
+        }
+    });
+}
+
+let _scriptPrecision = null;
+
+//小数位保存
+function updateScriptPrecision() {
+    const len = _scriptPrecision.length;
+    if (!len) {
+        layer.msg('请先设置小数位');
+        return;
+    }
+    const list = [];
+    for (let i = 0; i < len; i++) {
+        const tr = _scriptPrecision[i];
+        list.push({
+            id: tr.find('.isEnable').val(),
+            Precision: tr.find('.precision').val().trim()
+        });
+    }
+    const data = {};
+    data.opType = 167;
+    data.opData = JSON.stringify(list);
+    ajaxPost('/Relay/Post', data, ret => {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            getScriptDecimals();
+        }
+    });
 }

@@ -1,14 +1,96 @@
 ﻿@model object
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+@{
+    ViewBag.Title = "请购管理";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/purchase.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/purchase.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>物料管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">请购流程</h3>
+            <div class="box-tools pull-right">
+                <button class="btn btn-primary" onclick="">数据保存</button>
+                <button class="btn btn-primary" onclick="">设置</button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="box box-info">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">请购单状态</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group flexStyle" style="justify-content: flex-end">
+                                <select class="ms2 form-control" id="groupSelect" style="width: 140px"></select>
+                                <select class="ms2 form-control" id="qgProcessor" style="width: 100px"></select>
+                                <select class="ms2 form-control" id="cgProcessor" style="width: 100px"></select>
+                                <select class="form-control" id="formState" style="width: 110px">
+                                    <option value="0">申请完成</option>
+                                    <option value="1">仓库到货</option>
+                                    <option value="2">订单完成</option>
+                                </select>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="stateList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="box box-success">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">请购单入库</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="inWareList"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box box-success">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">采购订单</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-primary" onclick="">生成采购订单</button>
+                                <button class="btn btn-primary" onclick="">引用请购单</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group flexStyle" style="justify-content: space-between">
+                                <div class="flexStyle" style="flex-wrap: wrap">
+                                    <label class="control-label text-nowrap">订单编号：</label>
+                                    <input class="form-control" maxlength="20" style="flex: 1 1 140px">
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap">
+                                    <label class="control-label text-nowrap">供应商：</label>
+                                    <input class="form-control" maxlength="20" style="flex: 1 1 140px">
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap">
+                                    <label class="control-label text-nowrap">日期：</label>
+                                    <input type="text" class="form_date form-control pointer text-center" id="cgTime" style="flex: 1 1 140px;min-width: 100px">
+                                </div>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="purchaseList"></table>
+                            </div>
+                            <button class="btn btn-info pull-right" onclick="">订单打印</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

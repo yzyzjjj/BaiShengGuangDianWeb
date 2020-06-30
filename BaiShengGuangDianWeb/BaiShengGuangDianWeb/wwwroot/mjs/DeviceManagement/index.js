@@ -877,7 +877,6 @@ function deviceUpgrade(type = 0) {
                 }]
             });
             var progress = addFakeProgress();
-            setTimeout(() => $('.spinner').addClass('hidden'), 50);
             ajaxPost("/Relay/Post", data, ret => {
                 progress();
                 progress = null;
@@ -1088,7 +1087,6 @@ function batchUpgrade(e, el) {
                 Infos: infos
             });
             var progress = addFakeProgress();
-            setTimeout(() => $('.spinner').addClass('hidden'),50);
             ajaxPost("/Relay/Post", data, ret => {
                 progress();
                 progress = null;
@@ -1099,7 +1097,7 @@ function batchUpgrade(e, el) {
                     var result = results[i];
                     var color = result.errno == 0 ? 'success' : 'red';
                     resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
-                }
+                }  
                 batchRefresh(e, el);
                 $(`#${el}List`)[0].time = setInterval(() => {
                     batchRefresh(e, el);
