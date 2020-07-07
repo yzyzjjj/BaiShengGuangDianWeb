@@ -311,6 +311,12 @@ select, .pointer {
     align-items: center;
 }
 
+.table-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .spanStyle {
     color: blue;
     text-decoration: underline;
@@ -362,6 +368,6 @@ select, .pointer {
     top: 0; 
     right: 0; 
     left: 0; 
-    bottom: 0; 
-    overflow:auto
+    bottom: 0;
+    overflow: auto;
 }

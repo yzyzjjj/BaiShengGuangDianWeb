@@ -178,7 +178,7 @@ function pageReady() {
         placeholder: "请选择"
     });
     $("#serLogWorkshop").on("change", function (e) {
-        setWorkSiteSelect('#serLogWorkshop','#serLogDevSite');
+        setWorkSiteSelect('#serLogWorkshop', '#serLogDevSite');
     });
     $("#workshop").on("change", function (e) {
         setWorkSiteSelect('#workshop', '#devSite');
@@ -267,7 +267,7 @@ function setTable() {
         },
         imgBtn: d => {
             var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
-                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(${d.Id},\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
             return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
         },
         serIsEnable: d => {
@@ -276,7 +276,7 @@ function setTable() {
         },
         upServiceLog: (isLook, isStatistics, id) => `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${id},${isLook},${isStatistics})">查看</button>`,
         serviceName: d => d == '' ? '未指派' : d,
-        detailBtn: d => `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority},${d.Grade})">查看</button>`
+        detailBtn: d => `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority},${d.Grade},\'${d.ImageList}\')">查看</button>`
     }
 }
 
@@ -348,7 +348,7 @@ function getFaultDeviceList() {
         var service = function (d) {
             var state = d.State;
             var btn = '<button type="button" class="btn btn-{0} btn-xs" onclick="{1}" {3}>{2}</button>';
-            var attr = '', text = '', click = '',isDisabled = '';
+            var attr = '', text = '', click = '', isDisabled = '';
             switch (state) {
                 case 0:
                     attr = 'danger';
@@ -668,14 +668,15 @@ function designate() {
 }
 
 //故障详情弹窗
-function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescription, priority, grade) {
+function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescription, priority, grade, img) {
     var data = {}
     data.opType = 406;
     data.opData = JSON.stringify({
         qId: id,
         menu: true
     });
-    ajaxPost("/Relay/Post", data, function (ret) {
+    getImg('#faultDetailImgList', img);
+    ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -808,7 +809,7 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
         var setRow = setTable();
         //删除
         var per416 = _permissionList[79].have;
-        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,15];
+        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         var titleColumns = [12, 15];
         var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
         el.DataTable({
@@ -935,22 +936,21 @@ function getStatisticsList() {
     });
 }
 
-//故障图片查看
-function showImgModel(id, faultType, img) {
-    $('#FaultImgName').text(faultType);
-    $("#faultImgList").empty();
+//获取图片
+function getImg(el, img) {
+    $(el).empty();
     if (!isStrEmptyOrUndefined(img)) {
         img = img.split(",");
         var data = {
             type: fileEnum.FaultDevice,
             files: JSON.stringify(img)
         };
-        ajaxPost("/Upload/Path", data, function (ret) {
+        ajaxPost('/Upload/Path', data, ret => {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var imgOps = "";
+            var imgOps = '';
             for (var i = 0; i < ret.data.length; i++) {
                 imgOps += `<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
                 <div class="thumbnail">
@@ -958,9 +958,15 @@ function showImgModel(id, faultType, img) {
                 </div>
                 </div>`;
             }
-            $("#faultImgList").append(imgOps);
+            $(el).append(imgOps);
         });
     }
+}
+
+//故障图片查看
+function showImgModel(faultType, img) {
+    $('#FaultImgName').text(faultType);
+    getImg('#faultImgList', img);
     $("#showFaultImgModel").modal('show');
 }
 
@@ -1055,7 +1061,7 @@ function getSite(workEl, siteEl) {
 }
 
 //车间对应场地
-function setWorkSiteSelect(workEl,siteEl) {
+function setWorkSiteSelect(workEl, siteEl) {
     $(siteEl).empty();
     var workshop = $(workEl).val();
     if (isStrEmptyOrUndefined(workshop)) {
@@ -1078,6 +1084,7 @@ function showServiceLogModal(id, isDel, isStatistics) {
     $('#serviceLogTitle').text(id ? '维修记录详情' : '添加维修记录');
     if (id) {
         $('#showServiceLogModal .isText').removeClass('hidden');
+        $('#showServiceLogModal .evaluate').removeClass('hidden');
         $('#showServiceLogModal .noText').addClass('hidden');
         var data = {}
         data.opType = opType;
@@ -1088,12 +1095,17 @@ function showServiceLogModal(id, isDel, isStatistics) {
                 return;
             }
             var d = ret.datas[0];
+            if (isStrEmptyOrUndefined(d.Comment)) {
+                $('#showServiceLogModal .evaluate').eq(1).addClass('hidden');
+            }
             $('#serLogCodeText').text(d.DeviceCode);
             $('#serLogProposerText').text(d.Proposer);
             $('#serLogFaultTimeText').text(d.FaultTime);
             $('#serLogFaultTypeText').text(d.FaultTypeName);
-            $("#serLogFaultDesc").val(_faultTypeData[d.FaultTypeId].FaultDescription);
-            $("#serLogFaultSup").val(d.FaultDescription);
+            $('#serLogFaultDesc').val(_faultTypeData[d.FaultTypeId].FaultDescription);
+            $('#serLogFaultSup').val(d.FaultDescription);
+            $('#serLogScore').text(d.Score);
+            $('#serLogComment').val(d.Comment);
             var priority = d.Priority;
             var str = '', color = '';
             switch (priority) {
@@ -1153,7 +1165,9 @@ function showServiceLogModal(id, isDel, isStatistics) {
             $("#serLogSolvePlan").val(d.SolvePlan);
         });
     } else {
+        $('#updateServiceLogBtn').addClass('hidden');
         $('#showServiceLogModal .isText').addClass('hidden');
+        $('#showServiceLogModal .evaluate').addClass('hidden');
         $('#showServiceLogModal .noText').removeClass('hidden');
         $("#serLogSolvePlan").prop('disabled', false);
         $('#serLogCodeOther,#serLogFaultSup,#serLogSolvePlan').val('');
@@ -1194,7 +1208,7 @@ function showFaultModel() {
         $("#faultCode").append(e[0]);
         $("#faultCode").val("").trigger("change");
         $("#workshop").append(e[1]);
-        getSite('#workshop','#devSite');
+        getSite('#workshop', '#devSite');
     });
     $('#faultType').empty().append(_faultType).trigger('change');
     $("#faultOther").val("");
@@ -2110,7 +2124,7 @@ function showMaintainerModel(cover = 1, show = true) {
             ];
             if (_permissionList[46].have || _permissionList[47].have) {
                 columns.unshift({ "data": "Id", "title": "选择", "render": chose, "sWidth": "80px", "orderable": false });
-                excelColumns = [1, 2, 3,4];
+                excelColumns = [1, 2, 3, 4];
                 titleColumns = [4];
             }
             $("#maintainerList")
@@ -2296,22 +2310,17 @@ function addMaintainer() {
         var acc = $("#addUser" + v).find("option:checked").val();
         var phone = $("#addPhone" + v).val();
         var remark = $("#addRk" + v).val();
-
         if (isStrEmptyOrUndefined(name)) {
-            layer.msg("请输入姓名");
+            layer.msg(`序列${xh}：请输入姓名`);
             return;
         }
         if (isStrEmptyOrUndefined(acc)) {
             return;
         }
-        //if (isStrEmptyOrUndefined(phone)) {
-        //    layer.msg("请输入手机号");
-        //    return;
-        //} else if (!isPhone(phone)) {
-        //    layer.msg("手机号错误");
-        //    return;
-        //}
-
+        if (!isStrEmptyOrUndefined(phone) && !isPhone(phone)) {
+            layer.msg(`序列${xh}：手机号格式不正确`);
+            return;
+        }
         list.push({
             Name: name,
             Account: acc,
@@ -2355,13 +2364,10 @@ function updateMaintainer() {
     for (var key in choseMaintainer) {
         var maintainer = choseMaintainer[key];
         if (maintainers && maintainers[key] && (maintainers[key].Phone != maintainer.Phone || maintainers[key].Remark != maintainer.Remark)) {
-            //if (isStrEmptyOrUndefined(maintainer.Phone)) {
-            //    layer.msg("请输入手机号");
-            //    return;
-            //} else if (!isPhone(maintainer.Phone)) {
-            //    layer.msg("手机号错误");
-            //    return;
-            //}
+            if (!isStrEmptyOrUndefined(maintainer.Phone) && !isPhone(maintainer.Phone)) {
+                layer.msg('手机号格式不正确');
+                return;
+            }
             maintainer.Account = maintainers[key].Account;
             maintainer.Name = maintainers[key].Name;
             list.push(maintainer);

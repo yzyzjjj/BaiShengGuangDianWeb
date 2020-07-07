@@ -1,10 +1,10 @@
 ﻿function isPhone(phoneNum) {
-    var res = false
+    var res = false;
     //简单判断下是否是数字
     if (isNaN(phoneNum)) {
-        return res
+        return res;
     }
-    res = /^1[0-9]{10}$/i.test(phoneNum)
+    res = /^[1][3,4,5,7,8,9][0-9]{9}$/g.test(phoneNum);
     return res;
 }
 
@@ -1536,31 +1536,21 @@ function showBigImg(url) {
 }
 
 //打印
-function printCode(contentId, iframe, hiddenId) {
+function printCode(contentId, hiddenId) {
     var userAgent = navigator.userAgent.toLowerCase(); //取得浏览器的userAgent字符串
-    if (userAgent.indexOf("trident") > -1) {
-        alert("请使用google或者360浏览器打印");
-        return;
-    } else if (userAgent.indexOf('msie') > -1) {
-        var onlyChoseAlert = simpleAlert({
-            "content": "请使用Google或者360浏览器打印",
-            "buttons": {
-                "确定": function () {
-                    onlyChoseAlert.close();
-                }
-            }
-        });
-        alert("请使用google或者360浏览器打印");
-        return;
+    if (~userAgent.indexOf('trident') || ~userAgent.indexOf('msie')) {
+        alert('请使用google或者360浏览器打印');
     } else {//其它浏览器使用lodop
-        var printData = document.getElementById(contentId).innerHTML;
-        var iframeDom = document.getElementById(iframe).contentDocument;
+        var printData = $(contentId).prop('outerHTML');
+        $('body').append('<iframe id="iframe" class="hidden" name="iframe"></iframe>');
+        var iframeDom = $('#iframe')[0].contentDocument;
         iframeDom.body.innerHTML = printData;
         //需要隐藏的内容
         if (hiddenId) {
             iframeDom.getElementById(hiddenId).style.display = 'none';
         }
-        window.frames[iframe].print();
+        window.frames['iframe'].print();
+        $('#iframe').remove();
     }
 }
 

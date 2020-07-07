@@ -394,12 +394,11 @@
                                 <button type="button" class="btn btn-warning btn-sm" onclick="getQrList()">
                                     <span class="glyphicon glyphicon-qrcode"></span>&nbsp;<span>生成</span>
                                 </button>
-                                <button type="button" class="btn btn-primary btn-sm" onclick="printCode('qrCodeList', 'iframe')">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="printCode('#qrCodeList')">
                                     <span class="glyphicon glyphicon-print"></span>&nbsp;<span>打印</span>
                                 </button>
                             </div>
                             <div id="qrCodeList" style="display: flex; flex-wrap: wrap"></div>
-                            <iframe id="iframe" name="iframe" class="hidden"></iframe>
                         </div>
                     </div>
                     <div class="modal-footer">

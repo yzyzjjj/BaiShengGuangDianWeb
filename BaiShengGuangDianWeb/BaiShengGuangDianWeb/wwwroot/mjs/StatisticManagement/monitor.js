@@ -10,6 +10,7 @@
         $('#tableChart').off('resize');
     });
     $('#historyPage').one('click', () => getHistoryScript());
+    $('#sDate,#eDate').val(getDate()).datepicker('update');
     $(window).on('scroll', () => $(document).scrollTop() > 900 ? $("#backTop").fadeIn() : $("#backTop").fadeOut());
     $("#backTop").on('click', () => {
         $("html,body").stop().animate({
@@ -95,21 +96,19 @@ function getCodeDetail() {
 }
 
 var _tablesConfig = {
-    dom: '<"pull-left"l><"pull-right hidden"f>rt<"col-sm-0"i><"col-sm-12"p>',
-    "pagingType": "full",
-    "destroy": true,
-    "paging": true,
-    "deferRender": false,
-    "bLengthChange": false,
-    "sort": true,
-    "info": false,
-    "searching": true,
-    "autoWidth": true,
-    "language": oLanguage,
-    "columns": [
-        { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
-        { "data": "VariableName", "title": "名称" },
-        { "data": "PointerAddress", "title": "地址" }
+    dom: '<"pull-left"l><"pull-right hidden"f>rt<"text-center"i><"table-flex"p>',
+    destroy: true,
+    paging: true,
+    deferRender: false,
+    bLengthChange: false,
+    sort: true,
+    searching: true,
+    autoWidth: true,
+    language: oLanguage,
+    columns: [
+        { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
+        { data: 'VariableName', title: '名称' },
+        { data: 'PointerAddress', title: '地址' }
     ]
 };
 //获取脚本值
@@ -186,9 +185,9 @@ function getHistoryScript() {
             var d = rData[i];
             var typeId = d.VariableTypeId;
             scriptData[typeId].push(d);
-            _historyData[d.PointerAddress] = d;
+            _historyData[d.Id] = d;
         }
-        var addVar = (type, d) => `<button type="button" class="btn btn-success btn-xs" onclick="addVar(\'${type}\',${d.PointerAddress})"><i class="fa fa-plus"></i></button>`;
+        var addVar = (type, d) => `<button type="button" class="btn btn-success btn-xs" onclick="addVar(\'${type}\',${d.Id})"><i class="fa fa-plus"></i></button>`;
         var tablesConfig = $.extend(true, {}, _tablesConfig);
         tablesConfig.iDisplayLength = 10;
         tablesConfig.columns[3] = { "data": null, "title": "添加", "orderable": false };
@@ -217,25 +216,42 @@ function getHistoryData() {
         layer.msg('请选择设备');
         return;
     }
-    var time = $('#reservationTime').val();
-    if (isStrEmptyOrUndefined(time)) {
+    var sDate = $('#sDate').val().trim();
+    var sTime = $('#sTime').val().trim();
+    var eDate = $('#eDate').val().trim();
+    var eTime = $('#eTime').val().trim();
+    if (isStrEmptyOrUndefined(sDate) ||
+        isStrEmptyOrUndefined(sTime) ||
+        isStrEmptyOrUndefined(eDate) ||
+        isStrEmptyOrUndefined(eTime)) {
         layer.msg('请选择时间');
         return;
     }
-    time = time.split(' 至 ');
-    var sTime = time[0];
-    var eTime = time[1];
+    sTime = `${sDate} ${sTime}`;
+    eTime = `${eDate} ${eTime}`;
+    if (compareDate(sTime, eTime)) {
+        layer.msg('开始时间不能大于结束时间');
+        return;
+    }
     if (new Date(eTime) - new Date(sTime) > 3600000) {
         layer.msg('时间不能超过一小时');
         return;
     }
     var resData = { vals: [], ins: [], outs: [] };
-    var tableData = Object.values(_tableType);
+    var tableData = Object.values(_tableType).flat();
     var key, i, len;
     for (i = 0, len = tableData.length; i < len; i++) {
-        var d = tableData[i].data;
-        for (key in d) {
-            resData[key] = resData[key].concat(d[key]);
+        const d = tableData[i];
+        switch (d.VariableTypeId) {
+            case 1:
+                resData.vals.push(d.PointerAddress);
+                break;
+            case 2:
+                resData.ins.push(d.PointerAddress);
+                break;
+            case 3:
+                resData.outs.push(d.PointerAddress);
+                break;
         }
     }
     for (key in resData) {
@@ -253,7 +269,7 @@ function getHistoryData() {
         DeviceId: codeId,
         DeviceData: resData
     });
-    ajaxPost("/Relay/Post", data, function (ret) {
+    ajaxPost('/Relay/Post', data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -263,29 +279,41 @@ function getHistoryData() {
         var yData = {};
         for (key in rData) {
             xAxis.push(key.replace(' ', '\n'));
-            var v = rData[key];
+            const v = rData[key];
             $.each(resData.vals, (index, item) => {
-                yData[item] ? yData[item].push(v.vals[index]) : yData[item] = [v.vals[index]];
+                yData[`vals${item}`] ? yData[item].push(v.vals[index]) : yData[item] = [v.vals[index]];
             });
             $.each(resData.ins, (index, item) => {
-                yData[item] ? yData[item].push(v.ins[index]) : yData[item] = [v.ins[index]];
+                yData[`ins${item}`] ? yData[item].push(v.ins[index]) : yData[item] = [v.ins[index]];
             });
             $.each(resData.outs, (index, item) => {
-                yData[item] ? yData[item].push(v.outs[index]) : yData[item] = [v.outs[index]];
+                yData[`outs${item}`] ? yData[item].push(v.outs[index]) : yData[item] = [v.outs[index]];
             });
         }
         for (key in _tableType) {
-            var res = _tableType[key].res;
+            data = _tableType[key];
             var legend = [];
             var series = [];
-            for (i = 0, len = res.length; i < len; i++) {
-                var r = res[i];
-                var name = _historyData[r].VariableName;
+            for (i = 0, len = data.length; i < len; i++) {
+                const d = data[i];
+                const name = d.VariableName;
                 legend.push(name);
+                let flag = '';
+                switch (d.VariableTypeId) {
+                    case 1:
+                        flag = 'vals';
+                        break;
+                    case 2:
+                        flag = 'ins';
+                        break;
+                    case 3:
+                        flag = 'outs';
+                        break;
+                }
                 series.push({
                     name: name,
                     type: 'line',
-                    data: yData[r],
+                    data: yData[`${flag}${d.PointerAddress}`],
                     showSymbol: false,
                     sampling: 'average',
                     showAllSymbol: false
@@ -293,36 +321,43 @@ function getHistoryData() {
             }
             var option = {
                 tooltip: {
-                    trigger: "axis"
+                    trigger: 'axis'
+                },
+                grid: {
+                    left: '3%',
+                    right: '3%',
+                    top: '6%',
+                    bottom: '18%',
+                    containLabel: true
                 },
                 legend: {
                     data: legend
                 },
                 xAxis: {
-                    type: "category",
+                    type: 'category',
                     data: xAxis
                 },
                 yAxis: {
-                    type: "value"
+                    type: 'value'
                 },
                 series: series,
                 dataZoom: [{
-                    type: "slider",
+                    type: 'slider',
                     start: 0,
                     end: 20,
                     bottom: 0
                 },
                 {
-                    type: "inside",
+                    type: 'inside',
                     start: 0,
                     end: 20
                 }],
                 toolbox: {
                     top: 20,
-                    left: "center",
+                    left: 'center',
                     feature: {
                         dataZoom: {
-                            yAxisIndex: "none"
+                            yAxisIndex: 'none'
                         },
                         restore: {}
                     }
@@ -349,7 +384,7 @@ function getHistoryData() {
 var _tableType = {};
 var _flag = 0;
 //历史数据添加变量
-function addVar(type, res) {
+function addVar(type, id) {
     var tableCon = `<div class="flexStyle box-header" style="justify-content: flex-end">
                         <select class="form-control thText" style="max-width:80px" onchange="searchTr.call(this,\'{0}\',\'{1}\')">
                             <option value="num">序号</option>
@@ -376,16 +411,15 @@ function addVar(type, res) {
                             <tbody id="{0}_{1}_tbody"></tbody>
                         </table>
                     </div>`;
-    var tBodyTr = '<tr><td class="num">1</td><td class="name">{0}</td><td class="res">{1}</td><td><button type="button" class="btn btn-danger btn-xs" onclick="delVarTr.call(this,{1},\'{2}\',\'{3}\')"><i class="fa fa-minus"></i></button></td></tr>';
+    var tBodyTr = '<tr><td class="num">1</td><td class="name">{0}</td><td class="res">{4}</td><td><button type="button" class="btn btn-danger btn-xs" onclick="delVarTr.call(this,{1},\'{2}\',\'{3}\')"><i class="fa fa-minus"></i></button></td></tr>';
     var table;
     var tableType = $('#chartTypeSelect').val();
-    var d = _historyData[res];
+    var d = _historyData[id];
     switch (tableType) {
         case '0':
             _flag++;
             table = `table${_flag}`;
-            _tableType[table] = { res: [res], data: {} };
-            _tableType[table].data[type] = [res];
+            _tableType[table] = [d];
             $('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
             var box = `<div class="box box-success {0}">
                         <div class="box-header with-border">
@@ -418,7 +452,7 @@ function addVar(type, res) {
                         </div>
                      </div>`;
             $('#tableChart').append(box.format(table, tableCon.format(table, 'vals'), tableCon.format(table, 'ins'), tableCon.format(table, 'outs')));
-            $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.PointerAddress, type, table));
+            $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
             $(`#${table}_${type}_li`).removeClass('hidden').find('a').click();
             break;
         case '1':
@@ -426,14 +460,13 @@ function addVar(type, res) {
             if (!isStrEmptyOrUndefined(tableNum)) {
                 table = `table${tableNum}`;
                 var arr = _tableType[table];
-                if (arr.res.indexOf(res) == -1) {
-                    arr.res.push(res);
-                    arr.data[type] ? arr.data[type].push(res) : arr.data[type] = [res];
-                    $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.PointerAddress, type, table));
+                if (arr.includes(d)) {
+                    layer.msg(`${$('#chartSelect :selected').text()}已存在名称：<span style="font-weight:bold">${d.VariableName}</span>`);
+                } else {
+                    arr.push(d);
+                    $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
                     setNumTotalOrder(`${table}_${type}_tbody`);
                     $(`#${table}_${type}_li`).removeClass('hidden');
-                } else {
-                    layer.msg(`${$('#chartSelect :selected').text()}已存在名称：<span style="font-weight:bold">${d.VariableName}</span>`);
                 }
             } else {
                 layer.msg('目前未存在相关表');
@@ -488,10 +521,9 @@ function delTableBox(tableBox) {
 }
 
 //删除表组数据
-function delVarTr(res, type, table) {
+function delVarTr(id, type, table) {
     $(this).parents('tr').remove();
-    var d = _tableType[table];
-    d.res.splice(d.res.indexOf(res), 1);
-    d.data[type].splice(d.data[type].indexOf(res), 1);
+    var arr = _tableType[table];
+    arr.splice(arr.indexOf(_historyData[id]), 1);
     setNumTotalOrder(`${table}_${type}_tbody`);
 }

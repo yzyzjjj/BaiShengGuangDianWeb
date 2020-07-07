@@ -1234,7 +1234,7 @@ function getScriptDecimals() {
         }
         _scriptPrecision = [];
         const isEnable = d => `<input type="checkbox" class="icb_minimal isEnable" value=${d}>`;
-        const precision = d => `<span class="precisionText">${d}</span><input type="text" class="form-control text-center precision hidden" maxlength="10" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="min-width:100px">`;
+        const precision = d => `<span class="precisionText">${d}</span><input type="text" class="form-control text-center precision hidden" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="min-width:100px">`;
         const tablesConfig = {
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
             pagingType: "full",
