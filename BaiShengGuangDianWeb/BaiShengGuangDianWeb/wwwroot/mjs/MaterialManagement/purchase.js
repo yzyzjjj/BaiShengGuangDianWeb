@@ -1,9 +1,11 @@
 ﻿function pageReady() {
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
-    getGroup();
+    new Promise(resolve => getValuer(resolve)).then(() => {
+        getGroup();
+    });
     $('#groupSelect').on('select2:select', () => getProcessor());
-    $('#qgProcessor,#formState').on('select2:select', () => getPurchase());
+    $('#qgProcessor,#formState,#cgProcessor').on('select2:select', () => getPurchase());
     $('#inWareList,#purchaseList').on('focus', '.zeroNum', function () {
         if ($(this).val() == 0) {
             $(this).val('');
@@ -28,8 +30,8 @@
             tax += v;
             amount += v + price * num;
         }
-        $('#purchaseAmount').text(amount.toFixed(2));
-        $('#purchaseTax').text(tax.toFixed(2));
+        $('#purchaseAmount').text(amount ? amount.toFixed(2) : 0);
+        $('#purchaseTax').text(tax ? tax.toFixed(2) : 0);
     });
     $('#purchaseList').on('paste', e => {
         if (!(e.originalEvent.clipboardData && e.originalEvent.clipboardData.items)) {
@@ -37,27 +39,56 @@
         }
         if (e.target.localName != 'input') {
             const paste = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
-            console.log([paste]);
             const data = paste.split('\n');
             const arr = [];
-            for (let i = 0, len = data.length; i < len; i++) {
-                let d = data[i];
-                if (!isStrEmptyOrUndefined(d)) {
-                    d = d.split('	');
+            if (!_pasteData) {
+                _pasteData = [];
+                for (let i = 0, len = data.length; i < len; i++) {
+                    let d = data[i];
+                    if (!isStrEmptyOrUndefined(d)) {
+                        d = d.split('	');
+                        _pasteData[i] = d;
+                        arr.push({
+                            Code: d[0] || '',
+                            Name: d[1] || '',
+                            Specification: d[2] || '',
+                            Unit: d[3] || '',
+                            Number: d[4] || '',
+                            Price: d[5] || '',
+                            TaxPrice: d[6] || '',
+                            TaxAmount: d[7] || '',
+                            TaxTate: d[8] || 0
+                        });
+                    }
+                }
+            } else {
+                for (let i = 0, len = _pasteData.length; i < len; i++) {
+                    const d = _pasteData[i];
+                    if (data[i]) {
+                        d.push(...(data[i].split('	')));
+                    } else {
+                        d.push(...new Array(data[0].split('	').length).fill(''));
+                    }
                     arr.push({
                         Code: d[0] || '',
                         Name: d[1] || '',
                         Specification: d[2] || '',
                         Unit: d[3] || '',
-                        Number: d[4] || 0,
-                        Price: d[5] || 0,
-                        TaxPrice: d[6] || 0,
-                        TaxAmount: d[7] || 0,
+                        Number: d[4] || '',
+                        Price: d[5] || '',
+                        TaxPrice: d[6] || '',
+                        TaxAmount: d[7] || '',
                         TaxTate: d[8] || 0
                     });
                 }
             }
             setPurchaseList(arr);
+            for (let i = 0, len = _pasteData.length; i < len; i++) {
+                if (_pasteData[i].length > 8) {
+                    _pasteData = null;
+                    break;
+                }
+            }
         }
         e.stopPropagation();
         e.preventDefault();
@@ -75,20 +106,22 @@
         const el = $(this).parents('.departmentLi')[0];
         if ($(this).is(':checked')) {
             _departmentItem.push(el);
-            const name = $(el).find('.departmentText').prop('title');
-            $(el).find('.departmentName').val(name).removeClass('hidden').end().find('.departmentText').addClass('hidden');
+            //const name = $(el).find('.departmentText').prop('title');
+            //$(el).find('.departmentName').val(name).removeClass('hidden').end().find('.departmentText').addClass('hidden');
             if (_departmentItem.length == $('#departmentItem').children().length) {
                 $('#departmentAll').iCheck('check');
             }
         } else {
             _departmentItem.splice(_departmentItem.indexOf(el), 1);
-            $(el).find('.departmentName').addClass('hidden').end().find('.departmentText').removeClass('hidden');
+            //$(el).find('.departmentName').addClass('hidden').end().find('.departmentText').removeClass('hidden');
             if (_departmentItem.length == $('#departmentItem').children().length - 1) {
                 $('#departmentAll').iCheck('uncheck');
             }
         }
     });
 }
+
+var _pasteData = null;
 
 //options设置
 function setOptions(data, name) {
@@ -103,7 +136,7 @@ function setOptions(data, name) {
 
 let _departmentItem = null;
 //获取请购部门
-function getGroup() {
+function getGroup(group) {
     _departmentItem = [];
     const data = {};
     data.opType = 871;
@@ -115,61 +148,63 @@ function getGroup() {
             layer.msg(ret.errmsg);
             return;
         }
-        var list = ret.datas;
-        var option = `<div class="flexStyle departmentLi">
+        const list = ret.datas;
+        const checkOp = `<div class="flexStyle departmentLi">
                         <label class="flexStyle pointer">
-                            <input type="checkbox" class="icb_minimal" value="{0}">
+                            <input type="checkbox" class="icb_minimal {2}" value="{0}">
                             <span class="textOverTop departmentText" style="margin-left: 5px" title="{1}">{1}</span>
                         </label>
                         <input class="form-control hidden departmentName" maxlength="20" style="flex-basis:150px;margin-left:5px">
                       </div>`;
-        var options = '';
-        for (var i = 0, len = list.length; i < len; i++) {
-            var d = list[i];
-            options += option.format(d.Id, d.Department);
+        const selectOp = '<option value="{0}">{1}</option>';
+        let checkOps = '',selectOps = '';
+        for (let i = 0, len = list.length; i < len; i++) {
+            const d = list[i];
+            checkOps += checkOp.format(d.Id, d.Department, d.Get ? 'isget' : '');
+            if (d.Get) {
+                selectOps += selectOp.format(d.Id, d.Department);
+            }
         }
-        $('#departmentItem').empty().append(options);
+        $('#departmentItem').empty().append(checkOps);
         $('#departmentItem .icb_minimal').iCheck({
             handle: 'checkbox',
             checkboxClass: 'icheckbox_minimal-green',
             increaseArea: '20%'
         });
-        $('#groupSelect').empty().append(setOptions(list, 'Department'));
-        getProcessor();
+        $('#departmentItem .isget').iCheck('check');
+        $('#groupSelect').empty().append(selectOps);
+        group ? $('#groupSelect').val(group).trigger('change') : getProcessor();
     });
 }
 
 //部门修改
 function updateDepartment() {
-    const len = _departmentItem.length;
-    if (!len) {
-        layer.msg('请选择需要修改的请购部门');
-        return;
-    }
     const list = [];
-    for (let i = 0;i<len;i++) {
-        const el = _departmentItem[i];
-        const id = $(el).find('.icb_minimal').val();
-        const name = $(el).find('.departmentName').val().trim();
-        if (isStrEmptyOrUndefined(name)) {
-            layer.msg('部门名不能为空');
-            return;
+    const lis = $('#departmentItem .departmentLi');
+    const group = $('#groupSelect').val();
+    let flag = false;
+    for (let i = 0, len = lis.length; i < len; i++) {
+        const el = lis.eq(i);
+        const checkEl = el.find('.icb_minimal');
+        const id = checkEl.val();
+        const isChecked = checkEl.is(':checked');
+        if (group == id && isChecked) {
+            flag = true;
         }
         list.push({
             Id: id,
-            Department:name
+            Get: isChecked,
+            Department: el.find('.departmentText').prop('title')
         });
     }
     const data = {};
     data.opType = 872;
     data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, ret => {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            getGroup(flag ? group : null);
         }
-        $('#departmentAll').iCheck('uncheck');
-        getGroup();
     });
 }
 
@@ -184,8 +219,22 @@ function getProcessor() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#qgProcessor,#cgProcessor').empty().append(setOptions(ret.datas, 'Member'));
+        $('#qgProcessor').empty().append(setOptions(ret.datas, 'Member'));
         getPurchase();
+    });
+}
+
+//获取核价人
+function getValuer(resolve) {
+    const data = {};
+    data.opType = 887;
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#cgProcessor').empty().append(setOptions(ret.datas, 'Valuer'));
+        resolve('success');
     });
 }
 
@@ -196,20 +245,22 @@ function getPurchase() {
         layer.msg('请选择请购部门');
         return;
     }
-    const name = $('#qgProcessor').val();
+    let name = $('#qgProcessor').val();
     if (isStrEmptyOrUndefined(name)) {
         layer.msg('请选择请购人');
         return;
     }
+    name = $('#qgProcessor :selected').text();
     const state = $('#formState').val();
-    const valuer = $('#qgProcessor').val();
+    let valuer = $('#cgProcessor').val();
     if (isStrEmptyOrUndefined(valuer)) {
         layer.msg('请选择核价人');
         return;
     }
+    valuer = $('#cgProcessor :selected').text();
     const data = {};
     data.opType = 855;
-    //data.opData = JSON.stringify({ dId, name, state,valuer});
+    data.opData = JSON.stringify({ dId, name, state, valuer });
     ajaxPost('/Relay/Post', data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -405,7 +456,7 @@ function citePurchaseList() {
 
 //入库单
 function setPurchaseList(arr) {
-    const taxTate = d => `<input class="form-control text-center taxTate zeroNum" onblur="onInputEnd(this)" style="width:80px" value=${d}>`;
+    const taxTate = d => `<input class="form-control text-center taxTate zeroNum" onblur="onInputEnd(this)" style="width:80px" value=${parseFloat(d) || 0}>`;
     _purchaseDataTable = $('#purchaseList').DataTable({
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         destroy: true,
@@ -423,8 +474,8 @@ function setPurchaseList(arr) {
             { data: 'Specification', title: '规格' },
             { data: 'Unit', title: '单位' },
             { data: 'Number', title: '数量' },
-            { data: 'Price', title: '税前单价', visible: false },
-            { data: 'TaxPrice', title: '单价' },
+            { data: 'Price', title: '税前单价' },
+            { data: 'TaxPrice', title: '税后单价' },
             { data: 'TaxAmount', title: '合计' },
             { data: 'TaxTate', title: '税率（%)', render: taxTate }
         ],
@@ -432,20 +483,20 @@ function setPurchaseList(arr) {
             let amount = 0, tax = 0;
             for (let i = 0, len = arr.length; i < len; i++) {
                 const d = arr[i];
-                const all = d.TaxAmount;
+                const all = parseFloat(d.TaxAmount);
                 amount += all;
-                tax += all - d.Number * d.Price;
+                tax += all - parseFloat(d.Number) * parseFloat(d.Price);
             }
             const tFoot = `<tfoot>
                                   <tr>
-                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
                                     <th>合计：</th>
-                                    <th id="purchaseAmount">${amount}</th>
+                                    <th id="purchaseAmount">${amount ? amount.toFixed(2) : 0}</th>
                                   </tr>
                                     <tr>
-                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
                                     <th>税额：</th>
-                                    <th id="purchaseTax">${tax.toFixed(2)}</th>
+                                    <th id="purchaseTax">${tax ? tax.toFixed(2) : 0}</th>
                                   </tr>
                                </tfoot>`;
             this.find('tfoot').remove();
@@ -459,9 +510,8 @@ function setPurchaseList(arr) {
 function resetPurchaseList() {
     $('#purchaseCode').val('');
     if (_purchaseDataTable) {
-        _purchaseDataTable.destroy();
-        _purchaseDataTable = null;
-        $('#purchaseList').empty();
+        _pasteData = null;
+        setPurchaseList([]);
     }
 }
 
@@ -471,7 +521,7 @@ function printPurchaseList() {
         layer.msg('入库单为空');
         return;
     }
-    const thead = '<thead><tr><th>序号</th><th>物料编码</th><th>物料名称</th><th>规格</th><th>单位</th><th>数量</th><th>单价</th><th>合计</th><th>税率（%)</th></tr></thead>';
+    const thead = '<thead><tr><th>序号</th><th>物料编码</th><th>物料名称</th><th>规格</th><th>单位</th><th>数量</th><th>税前单价</th><th>税后单价</th><th>合计</th><th>税率（%)</th></tr></thead>';
     const tFoot = $('#purchaseList tfoot').prop('outerHTML');
     let tbodyTrs = '';
     const data = _purchaseDataTable.context[0].aoData;
@@ -481,9 +531,6 @@ function printPurchaseList() {
         const other = d._aFilterData;
         let td = '';
         for (let j = 0, len2 = other.length - 1; j < len2; j++) {
-            if (j === 6) {
-                j++;
-            }
             td += `<td>${other[j]}</td>`;
         }
         tbodyTrs += `<tr>${td}<td>${taxTate}</td></tr>`;
