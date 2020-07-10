@@ -95,6 +95,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Pages\" />
     <Folder Include="wwwroot\mminjs\" />
   </ItemGroup>
 
