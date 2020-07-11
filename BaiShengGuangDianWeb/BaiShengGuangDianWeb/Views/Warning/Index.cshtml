@@ -1,8 +1,18 @@
 ﻿@model object
-
 @{
-    ViewBag.Title = "title";
+    ViewBag.Title = "预警记录";
     Layout = "_Layout";
 }
-
-<h2>title</h2>
+<environment include="Development">
+    <script src="~/mjs/Warning/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Warning/index.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>预警管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>

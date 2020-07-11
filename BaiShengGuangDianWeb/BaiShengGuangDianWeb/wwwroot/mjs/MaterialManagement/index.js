@@ -836,7 +836,7 @@ function TrNoEqual(e, tr, d) {
             d == ''
                 ? tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden')
                 : tr.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
-            var actual = $(this).find(':selected').attr('actual');
+            var actual = tr.find('.code :selected').attr('actual');
             if (actual) {
                 tr.find('.stockNum').prop('placeholder', `货品领用数量：${actual}`);
             }
@@ -907,12 +907,15 @@ function codeNoGanged(e, type) {
                 : selectOp(_siteObj[specificationId] ? _siteObj[specificationId] : _siteData, 'Id', 'Site');
             siteEl.empty().append(siteOp);
         case 4:
-            if (!priceEl.find(':selected').data('select2Tag')) {
+            if (!priceEl.find(':selected').data('select2Tag') && !siteEl.find(':selected').data('select2Tag')) {
                 siteId = siteEl.val() || '';
                 var priceOp = tagTf ? '' : selectOp(_priceData[`${specificationId}${siteId}`], 'Price', 'Price');
                 priceEl.empty().append(priceOp || nullOp);
             }
         case 5:
+            if (priceEl.find(':selected').data('select2Tag')) {
+                siteEl.empty().append(selectOp(_siteData, 'Id', 'Site'));
+            }
             var price = priceEl.val() || '';
             price = price.replace('tag', '');
             var codeData = _codeData[`${specificationId}${siteId}${price}`] || '';
@@ -1042,10 +1045,9 @@ function copyTr(e) {
     var tr = $(this).parents('tr');
     addListTr(e, null, tr);
     var downTr = tr.next();
-    var stockNum = tr.find('.stockNum').val().trim();
     var purchase = tr.find('.purchase').val().trim();
-    downTr.find('.stockNum').val(stockNum);
     downTr.find('.purchase').val(purchase);
+    downTr.find('.stockNum').replaceWith(tr.find('.stockNum').clone(true));
     //入库复制变动
     var copyTrChange = (selectEl, downSelectEl) => downSelectEl.empty().append(selectEl.html()).val(selectEl.val()).trigger('change');
     if (e === 0) {

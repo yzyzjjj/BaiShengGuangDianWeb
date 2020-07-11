@@ -1,8 +1,32 @@
 ﻿@model object
-
 @{
-    ViewBag.Title = "title";
+    ViewBag.Title = "预警设置";
     Layout = "_Layout";
 }
-
-<h2>设置</h2>
+<environment include="Development">
+    <script src="~/mjs/Warning/set.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Warning/set.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>预警管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#device" data-toggle="tab" aria-expanded="true">设备</a></li>
+                <li><a href="#other" data-toggle="tab" aria-expanded="false">其他</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="device"></div>
+                <div class="tab-pane fade in" id="other"></div>
+            </div>
+        </div>
+    </div>
+</section>

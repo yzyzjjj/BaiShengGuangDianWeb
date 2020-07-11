@@ -275,6 +275,16 @@
 "wwwroot/mjs/StatisticManagement/trend.js"]
 },
 {
+"outputFileName":"wwwroot/mminjs/Warning/index.min.js",
+"inputFiles":[
+"wwwroot/mjs/Warning/index.js"]
+},
+{
+"outputFileName":"wwwroot/mminjs/Warning/set.min.js",
+"inputFiles":[
+"wwwroot/mjs/Warning/set.js"]
+},
+{
 "outputFileName":"wwwroot/mminjs/_6sManagement/index.min.js",
 "inputFiles":[
 "wwwroot/mjs/_6sManagement/index.js"]

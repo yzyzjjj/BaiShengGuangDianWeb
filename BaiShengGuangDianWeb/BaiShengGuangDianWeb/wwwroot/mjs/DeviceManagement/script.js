@@ -11,7 +11,7 @@ function pageReady() {
     _permissionList[243] = { uIds: [] };
     _permissionList[203] = { uIds: ['showAddModel'] };
     _permissionList[204] = { uIds: [] };
-    //_permissionList[167] = { uIds: ['showScriptSetBtn'] };
+    _permissionList[205] = { uIds: ['showScriptSetBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     $(".ads").css('width', '100%').select2();
     $('.ms2').select2();
@@ -1234,7 +1234,7 @@ function getScriptDecimals() {
         }
         _scriptPrecision = [];
         const isEnable = d => `<input type="checkbox" class="icb_minimal isEnable" value=${d}>`;
-        const precision = d => `<span class="precisionText">${d}</span><input type="text" class="form-control text-center precision hidden" oninput="onInput(this, 10, 0)" onblur="onInputEnd(this)" style="min-width:100px">`;
+        const precision = d => `<span class="precisionText">${d}</span><input type="text" class="form-control text-center precision hidden" oninput="onInput(this, 1, 0)" onblur="onInputEnd(this)" style="min-width:100px">`;
         const tablesConfig = {
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-0"i><"col-sm-12"p>',
             pagingType: "full",
@@ -1309,9 +1309,14 @@ function updateScriptPrecision() {
     const list = [];
     for (let i = 0; i < len; i++) {
         const tr = _scriptPrecision[i];
+        const pre = tr.find('.precision').val().trim() >> 0;
+        if (pre > 4) {
+            layer.msg('小数最多设置4位');
+            return;
+        }
         list.push({
             id: tr.find('.isEnable').val(),
-            Precision: tr.find('.precision').val().trim()
+            Precision: pre
         });
     }
     const data = {};

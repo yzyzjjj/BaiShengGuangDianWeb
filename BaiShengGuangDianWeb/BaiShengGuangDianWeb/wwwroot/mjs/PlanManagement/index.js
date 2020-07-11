@@ -1099,7 +1099,7 @@ function getLogList() {
         startTime: startTime,
         endTime: endTime,
         isPlan: 1,
-        type: 2
+        type: $('#logPlanType').val()
     }
     var planId = $('#logPlanSelect').val();
     if (isStrEmptyOrUndefined(planId)) {
@@ -1135,16 +1135,15 @@ function getLogList() {
             return;
         }
         var rData = ret.datas;
-        var type = $('#logPlanType').val();
-        if (type == 0 || type == 1) {
-            for (var i = 0, len = rData.length; i < len; i++) {
-                if (rData[i].Mode != type) {
-                    rData.splice(i, 1);
-                    i--;
-                    len--;
-                }
+        var mode = d => {
+            if (d === 1) {
+                return '<span style="color:red">退回</span>';
+            } else if (d === 2) {
+                return '<span style="color:green">领用</span>';
+            } else {
+                return '';
             }
-        }
+        };
         $("#logList")
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -1159,7 +1158,7 @@ function getLogList() {
                 "columns": [
                     { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
                     { "data": "Time", "title": "时间" },
-                    { "data": "Mode", "title": "类型", "render": a => a == 0 ? '<span style="color:red">退回</span>' : '<span style="color:green">领用</span>' },
+                    { "data": "Type", "title": "类型", "render": mode },
                     { "data": "Purpose", "title": "计划号" },
                     { "data": "Code", "title": "货品编号" },
                     { "data": "Category", "title": "类别" },

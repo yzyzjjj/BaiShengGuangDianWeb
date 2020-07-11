@@ -10,7 +10,12 @@
         $('#tableChart').off('resize');
     });
     $('#historyPage').one('click', () => getHistoryScript());
-    $('#sDate,#eDate').val(getDate()).datepicker('update');
+    var sTime = getHourAgo().split(' ');
+    var eTime = getFullTime().split(' ');
+    $('#sDate').val(sTime[0]).datepicker('update');
+    $('#sTime').timepicker('setTime', sTime[1]);
+    $('#eDate').val(eTime[0]).datepicker('update');
+    $('#eTime').timepicker('setTime', eTime[1]);
     $(window).on('scroll', () => $(document).scrollTop() > 900 ? $("#backTop").fadeIn() : $("#backTop").fadeOut());
     $("#backTop").on('click', () => {
         $("html,body").stop().animate({
@@ -133,7 +138,7 @@ function getScriptValue() {
         var valData = rData['vals'] || [];
         var insData = rData['ins'] || [];
         var outData = rData['outs'] || [];
-        var valueFn = (arr, a, b, c, d) => arr[d.row] || 0;
+        var valueFn = (arr, a, b, c, d) => toNonExponential(arr[d.row]);
         var tablesConfig = $.extend(true, {}, _tablesConfig);
         tablesConfig.iDisplayLength = 20;
         tablesConfig.columns[3] = { "data": null, "title": "值" };
@@ -327,7 +332,7 @@ function getHistoryData() {
                     left: '3%',
                     right: '3%',
                     top: '6%',
-                    bottom: '18%',
+                    bottom: '8%',
                     containLabel: true
                 },
                 legend: {
@@ -417,11 +422,39 @@ function addVar(type, id) {
     var d = _historyData[id];
     switch (tableType) {
         case '0':
-            _flag++;
-            table = `table${_flag}`;
-            _tableType[table] = [d];
-            $('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
-            var box = `<div class="box box-success {0}">
+            firstChart(`table${_flag + 1}`, d, tableCon, tBodyTr, type);
+            if (_flag != 1) {
+                $('#chartSelect').append(`<option value=${_flag}>表${_flag}</option>`);
+            }
+            break;
+        case '1':
+            var tableNum = $('#chartSelect').val();
+            if (!isStrEmptyOrUndefined(tableNum)) {
+                table = `table${tableNum}`;
+                var arr = _tableType[table];
+                if (arr) {
+                    if (arr.includes(d)) {
+                        layer.msg(`${$('#chartSelect :selected').text()}已存在名称：<span style="font-weight:bold">${d.VariableName}</span>`);
+                    } else {
+                        arr.push(d);
+                        $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
+                        setNumTotalOrder(`${table}_${type}_tbody`);
+                        $(`#${table}_${type}_li`).removeClass('hidden');
+                    }
+                } else {
+                    firstChart(table, d, tableCon, tBodyTr, type);
+                }
+            } else {
+                layer.msg('目前未存在相关表');
+            }
+            break;
+    }
+}
+
+//默认表一
+function firstChart(table, d, tableCon, tBodyTr, type) {
+    _flag++;
+    var box = `<div class="box box-success {0}">
                         <div class="box-header with-border">
                             <h3 class="box-title">表${_flag}</h3>
                             <div class="box-tools pull-right">
@@ -451,28 +484,10 @@ function addVar(type, id) {
                             </div>
                         </div>
                      </div>`;
-            $('#tableChart').append(box.format(table, tableCon.format(table, 'vals'), tableCon.format(table, 'ins'), tableCon.format(table, 'outs')));
-            $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
-            $(`#${table}_${type}_li`).removeClass('hidden').find('a').click();
-            break;
-        case '1':
-            var tableNum = $('#chartSelect').val();
-            if (!isStrEmptyOrUndefined(tableNum)) {
-                table = `table${tableNum}`;
-                var arr = _tableType[table];
-                if (arr.includes(d)) {
-                    layer.msg(`${$('#chartSelect :selected').text()}已存在名称：<span style="font-weight:bold">${d.VariableName}</span>`);
-                } else {
-                    arr.push(d);
-                    $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
-                    setNumTotalOrder(`${table}_${type}_tbody`);
-                    $(`#${table}_${type}_li`).removeClass('hidden');
-                }
-            } else {
-                layer.msg('目前未存在相关表');
-            }
-            break;
-    }
+    _tableType[table] = [d];
+    $('#tableChart').append(box.format(table, tableCon.format(table, 'vals'), tableCon.format(table, 'ins'), tableCon.format(table, 'outs')));
+    $(`#${table}_${type}_tbody`).append(tBodyTr.format(d.VariableName, d.Id, type, table, d.PointerAddress));
+    $(`#${table}_${type}_li`).removeClass('hidden').find('a').click();
 }
 
 //表格tr搜索

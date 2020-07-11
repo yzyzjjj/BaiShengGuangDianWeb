@@ -248,6 +248,7 @@ function showPermissions(uiName, list) {
                                 </label>
                             </div>
                         </div></li>`;
+    list.sort((a, b) => a.order - b.order);
     var opObj = { parent: [] };
     for (var i = 0, len = list.length; i < len; i++) {
         var d = list[i];
@@ -255,7 +256,6 @@ function showPermissions(uiName, list) {
         par == 0 ? opObj.parent.push(d) : opObj[par] ? opObj[par].push(d) : opObj[par] = [d];
     }
     var childTree = arr => {
-        arr.sort((a, b) => a.order - b.order);
         return arr.map(item => {
             var obj = '';
             obj += opObj[item.id]

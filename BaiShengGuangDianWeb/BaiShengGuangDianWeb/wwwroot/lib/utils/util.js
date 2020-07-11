@@ -1649,3 +1649,10 @@ function addFakeProgress() {
         }, 200);
     }
 }
+
+//科学计数法
+function toNonExponential(num) {
+    num = num || 0;
+    var m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/);
+    return num.toFixed(Math.max(0, (m[1] || '').length - m[2]));
+}

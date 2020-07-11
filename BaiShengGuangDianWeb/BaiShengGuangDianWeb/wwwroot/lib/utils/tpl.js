@@ -72,6 +72,7 @@ var commonfunc = function () {
             var selectOps = '', liOps = '';
             var childrenLi = { parent: [] };
             var rData = ret.datas;
+            rData.sort((a, b) => a.order - b.order);
             $.each(rData, (index, item) => {
                 if (!isStrEmptyOrUndefined(item.url)) {
                     selectOps += select.format(item.url, item.name.trim());

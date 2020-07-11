@@ -22,6 +22,14 @@ Date.prototype.format = function (format) {
     }
     return format;
 }
+
+//获取几小时前的时间
+function getHourAgo(n = 1) {
+    var now = new Date();
+    now.setMinutes(now.getMinutes() - 60 * n);
+    return now.format("yyyy-MM-dd hh:mm:ss");
+}
+
 //获得今日日期
 function getDate() {
     return new Date().format("yyyy-MM-dd");

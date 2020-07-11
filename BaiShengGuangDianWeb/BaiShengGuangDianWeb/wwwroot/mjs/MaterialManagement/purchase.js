@@ -1,4 +1,10 @@
-﻿function pageReady() {
+﻿var _permissionList = [];
+function pageReady() {
+    _permissionList[589] = { uIds: ['updateDepartmentBtn'] };
+    _permissionList[590] = { uIds: ['finishInWareListBtn'] };
+    _permissionList[591] = { uIds: ['citePurchaseListBtn'] };
+    _permissionList[592] = { uIds: ['printPurchaseListBtn'] };
+    _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
     new Promise(resolve => getValuer(resolve)).then(() => {
@@ -157,7 +163,7 @@ function getGroup(group) {
                         <input class="form-control hidden departmentName" maxlength="20" style="flex-basis:150px;margin-left:5px">
                       </div>`;
         const selectOp = '<option value="{0}">{1}</option>';
-        let checkOps = '',selectOps = '';
+        let checkOps = '', selectOps = '';
         for (let i = 0, len = list.length; i < len; i++) {
             const d = list[i];
             checkOps += checkOp.format(d.Id, d.Department, d.Get ? 'isget' : '');
@@ -219,7 +225,7 @@ function getProcessor() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#qgProcessor').empty().append(setOptions(ret.datas, 'Member'));
+        $('#qgProcessor').empty().append(`<option value="-1">全部</option>${setOptions(ret.datas, 'Member')}`);
         getPurchase();
     });
 }
@@ -233,7 +239,7 @@ function getValuer(resolve) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#cgProcessor').empty().append(setOptions(ret.datas, 'Valuer'));
+        $('#cgProcessor').empty().append(`<option value="-1">全部</option>${setOptions(ret.datas, 'Valuer')}`);
         resolve('success');
     });
 }
@@ -245,22 +251,30 @@ function getPurchase() {
         layer.msg('请选择请购部门');
         return;
     }
-    let name = $('#qgProcessor').val();
+    const list = { dId };
+    const name = $('#qgProcessor').val();
     if (isStrEmptyOrUndefined(name)) {
         layer.msg('请选择请购人');
         return;
     }
-    name = $('#qgProcessor :selected').text();
+    if (~name) {
+        list.name = $('#qgProcessor :selected').text();
+    }
     const state = $('#formState').val();
-    let valuer = $('#cgProcessor').val();
+    if (~state) {
+        list.state = state;
+    }
+    const valuer = $('#cgProcessor').val();
     if (isStrEmptyOrUndefined(valuer)) {
         layer.msg('请选择核价人');
         return;
     }
-    valuer = $('#cgProcessor :selected').text();
+    if (~valuer) {
+        list.valuer = $('#cgProcessor :selected').text();
+    }
     const data = {};
     data.opType = 855;
-    data.opData = JSON.stringify({ dId, name, state, valuer });
+    data.opData = JSON.stringify(list);
     ajaxPost('/Relay/Post', data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
