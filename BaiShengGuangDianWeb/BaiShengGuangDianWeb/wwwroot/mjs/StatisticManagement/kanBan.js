@@ -8,7 +8,7 @@
     new Promise(resolve => getDevice(resolve)).then(e => {
         $('#deviceSelect').on('select2:select', function () {
             var v = $(this).val();
-            if (v.indexOf('0') != -1) {
+            if (~v.indexOf('0')) {
                 $(this).val(e).trigger('change');
             }
         });

@@ -9,12 +9,12 @@
 <environment include="Staging,Production">
     <script src="~/mminjs/Warning/set.min.js"></script>
 </environment>
-<section class="content-header">
+<section class="content-header flexStyle" style="justify-content: space-between;flex-wrap: wrap">
     <h1>@ViewBag.Title</h1>
-    <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i>预警管理</a></li>
-        <li class="active">@ViewBag.Title</li>
-    </ol>
+    <div class="flexStyle hidden">
+        <button type="button" class="btn btn-success btn-sm" style="margin: 0 5px" onclick="">设置</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="">添加</button>
+    </div>
 </section>
 <section class="content">
     <div class="row">
@@ -24,7 +24,73 @@
                 <li><a href="#other" data-toggle="tab" aria-expanded="false">其他</a></li>
             </ul>
             <div class="tab-content no-padding">
-                <div class="tab-pane active in" id="device"></div>
+                <div class="tab-pane active in" id="device">
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label no-margin pointer middle" for="isStart">是否启用：</label>
+                                <input type="checkbox" class="icb_minimal" id="isStart">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label no-margin middle">设备分类：</label>
+                                <select class="ms2 form-control" id="deviceType" style="width: 160px"></select>
+                            </div>
+                            <div class="form-group">
+                                <div class="nav-tabs-custom">
+                                    <ul class="nav nav-tabs ui-sortable-handle">
+                                        <li class="active"><a href="#npcData" data-toggle="tab" aria-expanded="true">npc数据</a></li>
+                                        <li><a href="#proData" data-toggle="tab" aria-expanded="false">生产数据</a></li>
+                                    </ul>
+                                    <div class="tab-content no-padding">
+                                        <div class="tab-pane active in" id="npcData">
+                                            <div class="box-body">
+                                                <div class="form-group">
+                                                    <label class="control-label no-margin middle">选择脚本：</label>
+                                                    <select class="ms2 form-control" id="scriptSelect" style="width: 180px"></select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label">选择设备：</label>
+                                                    <select class="form-control" id="deviceSelect"></select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="text-right">
+                                                        <button class="btn btn-warning" onclick="">重置</button>
+                                                        <button class="btn btn-primary" onclick="">保存</button>
+                                                    </div>
+                                                    <div class="nav-tabs-custom">
+                                                        <ul class="nav nav-tabs ui-sortable-handle">
+                                                            <li class="active"><a href="#npcVar" data-toggle="tab" aria-expanded="true">变量</a></li>
+                                                            <li><a href="#npcIns" data-toggle="tab" aria-expanded="false">输入</a></li>
+                                                            <li><a href="#npcOut" data-toggle="tab" aria-expanded="false">输出</a></li>
+                                                        </ul>
+                                                        <div class="tab-content no-padding">
+                                                            <div class="tab-pane active in" id="npcVar">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover table-striped" id="npcVarList"></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade in" id="npcIns">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover table-striped" id="npcInsList"></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane fade in" id="npcOut">
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover table-striped" id="npcOutList"></table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade in" id="proData"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="tab-pane fade in" id="other"></div>
             </div>
         </div>

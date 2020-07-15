@@ -1656,3 +1656,14 @@ function toNonExponential(num) {
     var m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/);
     return num.toFixed(Math.max(0, (m[1] || '').length - m[2]));
 }
+
+//options设置
+function setOptions(data, name) {
+    const op = '<option value="{0}">{1}</option>';
+    let ops = '';
+    for (let i = 0, len = data.length; i < len; i++) {
+        const d = data[i];
+        ops += op.format(d.Id, d[name]);
+    }
+    return ops;
+}
