@@ -299,9 +299,32 @@ function getPurchase() {
             layer.msg(ret.errmsg);
             return;
         }
-        var rData = ret.datas;
+        const rData = ret.datas;
+        const state = d => {
+            let color = '';
+            switch (d.State) {
+                case 1:
+                    color = '#C9C9C9';
+                    break;
+                case 2:
+                    color = '#1890FF';
+                    break;
+                case 3:
+                    color = '#f00';
+                    break;
+                case 4:
+                    color = '#f90';
+                    break;
+                case 5:
+                    color = '#008000';
+                    break;
+            }
+            return `<span style="color:${color}">${d.StateStr}</span>`;
+        };
+        const purchase = d => d.length > 6 ? `<span title="${d}">${d.slice(0, 6)}...</span>` : d;
         _stateDataTable = $('#stateList').DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"text-center"i><"table-flex"p>',
+            bAutoWidth: false,
             destroy: true,
             paging: true,
             searching: true,
@@ -311,16 +334,14 @@ function getPurchase() {
             aLengthMenu: [20, 40, 60],
             iDisplayLength: 20,
             columns: [
-                { data: null, title: '序号' },
-                { data: 'ErpId', title: '编号' },
-                { data: 'Purchase', title: '名称' },
-                { data: 'Name', title: '请购人' },
-                { data: 'Valuer', title: '核价人' },
-                { data: 'StateStr', title: '状态' }
+                { data: null, title: '序号', sWidth: '20px', render: (a, b, c, d) => ++d.row },
+                { data: 'ErpId', title: '编号', sWidth: '20px' },
+                { data: 'Purchase', title: '名称', sWidth: '100px', render: purchase },
+                { data: 'Name', title: '请购人', sWidth: '20px' },
+                { data: 'Valuer', title: '核价人', sWidth: '20px' },
+                { data: null, title: '状态', sWidth: '20px', render: state }
             ],
             drawCallback: function (settings) {
-                const api = this.api();
-                api.column(0).nodes().each((cell, i) => $(cell).text(i + 1));
                 if (settings.aoData.length) {
                     const trs = $(settings.nTBody).find('tr');
                     trs.addClass('pointer').off('click').on('click', function () {
@@ -596,7 +617,14 @@ function finishInWareList() {
                     if (id == _Purchase.Id) {
                         const tr = data[i].nTr;
                         if (~$('#formState').val()) {
+                            const xh = $(tr).find('td:first').text() >> 0;
                             _stateDataTable.row(tr).remove().draw(false);
+                            _stateDataTable.column(0).nodes().each(cell => {
+                                const flag = $(cell).text() >> 0;
+                                if (flag > xh) {
+                                    $(cell).text(flag - 1);
+                                }
+                            });
                         } else {
                             $(tr).find('td:last').text('订单完成');
                             data[i]._aData.State = 5;
@@ -656,7 +684,7 @@ function setPurchaseList(arr, isQuote) {
         aLengthMenu: [20, 40, 60],
         iDisplayLength: 20,
         columns: [
-            { data: null, title: '序号' },
+            { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
             { data: 'Code', title: '物料编码' },
             { data: 'Name', title: '物料名称' },
             { data: 'Specification', title: '规格' },
@@ -669,8 +697,6 @@ function setPurchaseList(arr, isQuote) {
             { data: null, title: '删除', render: deBtn, visible: !!isQuote }
         ],
         drawCallback: function () {
-            const api = this.api();
-            api.column(0).nodes().each((cell, i) => $(cell).text(i + 1));
             if (isQuote) {
                 $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(10),:nth-child(11))').prop('contenteditable', true);
             }
@@ -723,7 +749,14 @@ function addPurchaseTr() {
 //删除入库单tr
 function delPurchaseTr() {
     const tr = $(this).parents('tr')[0];
+    const xh = $(tr).find('td:first').text() >> 0;
     _purchaseDataTable.row(tr).remove().draw(false);
+    _purchaseDataTable.column(0).nodes().each(cell => {
+        const flag = $(cell).text() >> 0;
+        if (flag > xh) {
+            $(cell).text(flag - 1);
+        }
+    });
     tFootCount();
 }
 
