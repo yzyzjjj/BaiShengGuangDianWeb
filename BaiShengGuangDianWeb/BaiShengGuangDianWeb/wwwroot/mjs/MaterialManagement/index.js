@@ -47,7 +47,6 @@ function pageReady() {
         Promise.all([supplierFunc, specificationFunc])
             .then((result) => {
                 getMaterialList('Select');
-                qrSiteSet('Select');
             });
     });
     $('#supplierSelect').on('select2:select', function () {
@@ -57,12 +56,10 @@ function pageReady() {
         Promise.all([specificationFunc])
             .then((result) => {
                 getMaterialList('Select');
-                qrSiteSet('Select');
             });
     });
     $('#specificationSelect').on('select2:select', function () {
         getMaterialList('Select');
-        qrSiteSet('Select');
     });
     $('#siteSelect').on('select2:select', function () {
         getMaterialList('Select');
@@ -913,7 +910,7 @@ function codeNoGanged(e, type) {
                 priceEl.empty().append(priceOp || nullOp);
             }
         case 5:
-            if (priceEl.find(':selected').data('select2Tag')) {
+            if (priceEl.find(':selected').data('select2Tag') && e === 5) {
                 siteEl.empty().append(selectOp(_siteData, 'Id', 'Site'));
             }
             var price = priceEl.val() || '';

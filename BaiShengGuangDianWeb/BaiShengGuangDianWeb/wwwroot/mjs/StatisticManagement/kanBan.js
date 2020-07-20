@@ -12,8 +12,8 @@
                 $(this).val(e).trigger('change');
             }
         });
-        kanBanChange();
-    });
+        return new Promise(resolve => kanBanChange(resolve));
+    }).then(() => $('#navUl .kanBan:first').click());
     var time = 0;
     $('#navUl').on('click', '.kanBan', function () {
         $('#fullScreenBtn').removeClass('hidden');
@@ -241,7 +241,7 @@ function setPieChart(el, formatter, rate, color, text) {
 }
 
 //看板列表改变
-function kanBanChange() {
+function kanBanChange(resolve) {
     new Promise(resolve => getKanBanList(resolve)).then(e => {
         $('#kanBanList').off('select2:select').on('select2:select', function () {
             var id = $(this).val();
@@ -251,6 +251,9 @@ function kanBanChange() {
             $('#isShow').iCheck(d.IsShow ? 'check' : 'uncheck');
         });
         $('#kanBanList').trigger('select2:select');
+        if (resolve) {
+            resolve();
+        }
     });
 }
 
