@@ -8,9 +8,14 @@
     });
     const getWarnSetFn = new Promise(resolve => getWarnSet(resolve));
     const getClassFn = new Promise(resolve => getClass(resolve));
-    const getScriptDeviceFn = new Promise(resolve => getScript(resolve)).then(() => new Promise(resolve => getDevice(resolve)));
+    const getScriptDeviceFn = new Promise(resolve => getScript(resolve));
     Promise.all([getWarnSetFn, getClassFn, getScriptDeviceFn]).then(result => {
-        result[0].length ? getAppointWarnSet() : getScriptItem();
+        if (result[0].length) {
+            showAppointWarnSet(result[0][0]);
+        } else {
+            getDevice();
+            getScriptItem();
+        }
     });
     $('#deviceWarn').on('select2:select', () => getAppointWarnSet());
     $('#scriptSelect').on('select2:select', () => {
@@ -43,7 +48,8 @@
 
 //获取预警设置
 function getWarnSet(resolve) {
-    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: false }) }, ret => {
+    const type = $('#navUl li.active').val();
+    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: true, type }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -59,30 +65,31 @@ function getAppointWarnSet() {
     _scriptTrData = [];
     const qId = $('#deviceWarn').val();
     if (isStrEmptyOrUndefined(qId)) {
-        layer.msg('请选择设备预警');
+        layer.msg('请选择预警名');
         return;
     }
-    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ qId, first: true }) }, ret => {
+    const type = $('#navUl li.active').val();
+    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ qId, first: true, type }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
         const rData = ret.datas[0];
-        setThreeTable(rData.Items, false);
-        $('#warnName').val(rData.Name);
-        $('#isStart').iCheck(rData.Enable ? 'check' : 'uncheck');
-        $('#deviceType').val(rData.ClassId).trigger('change');
-        const scriptId = rData.ScriptId;
-        const devList = rData.DeviceList;
-        if (scriptId == $('#scriptSelect').val()) {
-            $('#deviceSelect').val(devList).trigger('change');
-        } else {
-            $('#scriptSelect').val(scriptId).trigger('change');
-            new Promise(resolve => getDevice(resolve)).then(() => $('#deviceSelect').val(devList).trigger('change'));
-        }
+        showAppointWarnSet(rData);
     });
 }
 
+//显示预警信息
+function showAppointWarnSet(rData) {
+    setThreeTable(rData.Items, false);
+    $('#warnName').val(rData.Name);
+    $('#isStart').iCheck(rData.Enable ? 'check' : 'uncheck');
+    $('#deviceType').val(rData.ClassId).trigger('change');
+    $('#scriptSelect').val(rData.ScriptId).trigger('change');
+    new Promise(resolve => getDevice(resolve)).then(() => $('#deviceSelect').val(rData.DeviceList).trigger('change'));
+}
+
+//重置
 function resetTable() {
     $('#deviceWarn').val() ? getAppointWarnSet() : getScriptItem();
 }
@@ -149,7 +156,7 @@ function getScriptItem() {
             return;
         }
         const rData = ret.datas;
-        setThreeTable(rData,true);
+        setThreeTable(rData, true);
     });
 }
 
@@ -161,36 +168,12 @@ function setThreeTable(arr, isNew) {
         scriptItem[d.VariableTypeId].push(d);
     }
     const frequencyFn = d => {
-        const interval = d.Interval;
         const frequency = d.Frequency;
         const count = d.Count;
         let text = '';
         if (!isNew && frequency && count) {
-            let frequencyText = '';
-            switch (interval) {
-                case 1:
-                    frequencyText = '秒';
-                    break;
-                case 2:
-                    frequencyText = '分';
-                    break;
-                case 3:
-                    frequencyText = '小时';
-                    break;
-                case 4:
-                    frequencyText = '天';
-                    break;
-                case 5:
-                    frequencyText = '周';
-                    break;
-                case 6:
-                    frequencyText = '月';
-                    break;
-                case 7:
-                    frequencyText = '年';
-                    break;
-            }
-            text = `<span class="textOn">${frequency}${frequencyText}${count}次</span>`;
+            const arr = ['', '秒', '分', '小时', '天', '周', '月', '年'];
+            text = `<span class="textOn">${frequency}${arr[d.Interval]}${count}次</span>`;
         }
         const template = `${text}<div class="flexStyle hidden textIn" style="justify-content:center">
                                 <input class="form-control text-center zeroNum frequency" style="min-width:80px" oninput="onInput(this, 4, 0)" value=${frequency}>
@@ -213,22 +196,8 @@ function setThreeTable(arr, isNew) {
     const condition = (n, d) => {
         let text = '';
         if (!isNew && d) {
-            let conditionText = '';
-            switch (d) {
-                case 1:
-                    conditionText = '大于';
-                    break;
-                case 2:
-                    conditionText = '大于等于';
-                    break;
-                case 3:
-                    conditionText = '小于';
-                    break;
-                case 4:
-                    conditionText = '小于等于';
-                    break;
-            }
-            text = `<span class="textOn">${conditionText}</span>`;
+            const arr = ['', '大于', '大于等于', '小于', '小于等于'];
+            text = `<span class="textOn">${arr[d]}</span>`;
         }
         const template = `${text}<select class="form-control hidden textIn condition${n}" style="min-width:90px">
                                   ${n === 2 ? '<option value="0">不设置</option>' : ''}
@@ -239,20 +208,22 @@ function setThreeTable(arr, isNew) {
                               </select>`;
         return template;
     };
-    const value = (n, d) => `${!isNew && d ? '<span class="textOn">' + d + '</span>' : ''}<input class="form-control text-center textIn zeroNum hidden value${n}" style="min-width:80px" oninput="onInput(this, 4, 4)" value=${d}>`;
+    const value = (n, d) => {
+        const v = d[`Value${n}`];
+        let text = '';
+        if (!isNew) {
+            text = `<span class="textOn">${v}</span>`;
+            if (n === 2 && !d.Condition2) {
+                text = '';
+            }
+        }
+        return `${text}<input class="form-control text-center textIn zeroNum hidden value${n}" style="min-width:80px" oninput="onInput(this, 4, 4)" value=${v}>`;
+    };
     const logic = d => {
         let text = '';
         if (!isNew && d) {
-            let logicText = '';
-            switch (d) {
-                case 1:
-                    logicText = '并且';
-                    break;
-                case 2:
-                    logicText = '或者';
-                    break;
-            }
-            text = `<span class="textOn">${logicText}</span>`;
+            const arr = ['', '并且', '或者'];
+            text = `<span class="textOn">${arr[d]}</span>`;
         }
         const template = `${text}<select class="form-control hidden textIn logic" style="min-width:70px">
                                   <option value="0">不设置</option>
@@ -276,10 +247,10 @@ function setThreeTable(arr, isNew) {
             { data: 'VariableName', title: '名称' },
             { data: null, title: '出现频率', render: frequencyFn },
             { data: 'Condition1', title: '条件1', render: condition.bind(null, 1) },
-            { data: 'Value1', title: '数值', render: value.bind(null, 1) },
-            { data: 'Logic', title: '逻辑', render: logic},
+            { data: null, title: '数值', render: value.bind(null, 1) },
+            { data: 'Logic', title: '逻辑', render: logic },
             { data: 'Condition2', title: '条件2', render: condition.bind(null, 2) },
-            { data: 'Value2', title: '数值', render: value.bind(null, 2) }
+            { data: null, title: '数值', render: value.bind(null, 2) }
         ],
         drawCallback: function () {
             const dataTable = this.api();
@@ -358,7 +329,7 @@ function addUpDeviceWarning(isUp) {
     if (isUp) {
         const warnId = $('#deviceWarn').val();
         if (isStrEmptyOrUndefined(warnId)) {
-            layer.msg('请选择设备预警');
+            layer.msg('请选择预警名');
             return;
         }
         list.Id = warnId;
@@ -395,7 +366,7 @@ function addUpDeviceWarning(isUp) {
         const value2 = tr.find('.value2').val();
         const checkBox = tr.find('.isEnable');
         const dictionaryId = checkBox.attr('dictionary');
-        const id = checkBox.val();
+        const id = isUp ? checkBox.val() : 0;
         items.push({
             DataType: dataType,
             Frequency: frequency,
@@ -418,17 +389,7 @@ function addUpDeviceWarning(isUp) {
         ajaxPost('/Relay/Post', data, ret => {
             layer.msg(ret.errmsg);
             if (ret.errno == 0) {
-                const deviceWarn = $('#deviceWarn').val();
-                if (isUp) {
-                    getAppointWarnSet();
-                } else {
-                    new Promise(resolve => getWarnSet(resolve)).then(() => {
-                        if (deviceWarn) {
-                            $('#deviceWarn').val(deviceWarn).trigger('change');
-                        }
-                        getAppointWarnSet();
-                    });
-                }
+                isUp ? getAppointWarnSet() : new Promise(resolve => getWarnSet(resolve)).then(result => showAppointWarnSet(result[0]));
             }
         });
     }

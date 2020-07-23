@@ -16,3 +16,86 @@
         <li class="active">@ViewBag.Title</li>
     </ol>
 </section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle" id="navUl">
+                <li class="active"><a href="#record" data-toggle="tab" aria-expanded="true">记录</a></li>
+                <li id="currentLi"><a href="#current" data-toggle="tab" aria-expanded="false">当前</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="record">
+                    <div class="box box-primary">
+                        <div class="box-header with-border" style="padding-bottom: 5px">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                    <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                    <select class="ms2 form-control" id="deviceWarn" style="width: 160px"></select>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                    <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                    <div class="flexStyle">
+                                        <input type="text" id="sTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                        <label class="control-label" style="margin: 5px">-</label>
+                                        <input type="text" id="eTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle hidden form-group" style="flex-wrap: wrap" id="warnLogInfo">
+                                <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="warnType"></span></label>
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="warnScript"></span></label>
+                                <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="warnDevice"></span></label>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="warnLogList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="current">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                <select class="ms2 form-control" id="currentDeviceWarn" style="width: 160px"></select>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle hidden" style="flex-wrap: wrap" id="warnLogInfoCurrent">
+                                <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="warnTypeCurrent"></span></label>
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="warnScriptCurrent"></span></label>
+                                <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="warnDeviceCurrent"></span></label>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="currentWarnLogList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--预警记录详情弹窗-->
+    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">预警记录详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="warnLogDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
