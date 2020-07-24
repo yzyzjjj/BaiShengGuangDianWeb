@@ -33,16 +33,18 @@
                     <div class="box box-primary">
                         <div class="box-header with-border no-padding-bottom">
                             <div class="flexStyle" style="flex-wrap: wrap">
-                                <div class="flexStyle" style="padding-bottom: 10px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px">
                                     <label class="control-label text-nowrap">故障时间：</label>
-                                    <input type="text" class="form_date form-control text-center" id="faultSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                                    <label class="control-label" style="margin: 5px">至</label>
-                                    <input type="text" class="form_date form-control text-center" id="faultETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <div class="flexStyle">
+                                        <input type="text" class="form_date form-control text-center" id="faultSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                        <label class="control-label" style="margin: 5px">至</label>
+                                        <input type="text" class="form_date form-control text-center" id="faultETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    </div>
                                 </div>
-                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="faultQuery">
-                                    <div class="flexStyle" style="flex-basis: 520px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px; flex: 1; justify-content: space-between" id="faultQuery">
+                                    <div class="flexStyle warp" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="form-control" id="faultDevicePro" style="width: 100%">
+                                            <select class="form-control" id="faultDevicePro" style="width: 100%;min-width:100px">
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
@@ -56,7 +58,7 @@
                                             <option value="0">等于</option>
                                             <option value="1">不等于</option>
                                         </select>
-                                        <input type="text" class="form-control faultDeviceAttr" id="faultDeviceInput" placeholder="搜索" style="flex: 2">
+                                        <input type="text" class="form-control faultDeviceAttr" id="faultDeviceInput" placeholder="搜索" style="flex: 2;min-width:100px">
                                         <div class="faultDeviceAttr hidden" style="flex: 2" id="faultDeviceAttrSelect">
                                             <select class="form-control" id="faultDeviceAttr" style="width: 100%"></select>
                                         </div>
@@ -68,7 +70,7 @@
                                         <button type="button" class="btn btn-primary" onclick="getFaultDeviceList()" id="getFaultDeviceListBtn" style="margin-left: 2px">查询</button>
                                     </div>
                                     <div class="flexStyle" style="margin-left: 2px">
-                                        <button type="button" class="btn btn-primary" onclick="showBatchAssignModal()" id="showBatchAssignModalBtn" style="margin-left:2px">批量指派</button>
+                                        <button type="button" class="btn btn-primary" onclick="showBatchAssignModal()" id="showBatchAssignModalBtn">批量指派</button>
                                         <button type="button" class="btn btn-danger" onclick="delChange()" id="delChangeBtn" style="margin-left: 2px">删除</button>
                                     </div>
                                 </div>
@@ -85,16 +87,18 @@
                     <div class="box box-primary">
                         <div class="box-header with-border no-padding-bottom">
                             <div class="flexStyle" style="flex-wrap: wrap">
-                                <div class="flexStyle" style="padding-bottom: 10px;">
+                                <div class="flexStyle warp" style="padding-bottom: 10px;">
                                     <label class="control-label text-nowrap">解决时间：</label>
-                                    <input type="text" class="form_date form-control text-center" id="serviceLogSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                                    <label class="control-label" style="margin: 5px">至</label>
-                                    <input type="text" class="form_date form-control text-center" id="serviceLogETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <div class="flexStyle">
+                                        <input type="text" class="form_date form-control text-center" id="serviceLogSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                        <label class="control-label" style="margin: 5px">至</label>
+                                        <input type="text" class="form_date form-control text-center" id="serviceLogETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    </div>
                                 </div>
-                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="serviceLogQuery">
-                                    <div class="flexStyle" style="flex-basis: 520px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="serviceLogQuery">
+                                    <div class="flexStyle warp" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="form-control" id="serviceLogPro" style="width: 100%">
+                                            <select class="form-control" id="serviceLogPro" style="width: 100%;min-width:100px">
                                                 <option value="code">机台号</option>
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
@@ -108,7 +112,7 @@
                                             <option value="0">等于</option>
                                             <option value="1">不等于</option>
                                         </select>
-                                        <input type="text" class="form-control serviceAttr" id="serviceInput" placeholder="搜索" style="flex: 2">
+                                        <input type="text" class="form-control serviceAttr" id="serviceInput" placeholder="搜索" style="flex: 2;min-width:100px">
                                         <div class="serviceAttr hidden" style="flex: 2" id="serviceAttrSelect">
                                             <select class="form-control" id="serviceAttr" style="width: 100%"></select>
                                         </div>
@@ -138,16 +142,18 @@
                     <div class="box box-primary">
                         <div class="box-header with-border no-padding-bottom">
                             <div class="flexStyle" style="flex-wrap: wrap">
-                                <div class="flexStyle" style="padding-bottom: 10px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px">
                                     <label class="control-label text-nowrap">故障时间：</label>
-                                    <input type="text" class="form_date form-control text-center" id="delFSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                                    <label class="control-label" style="margin: 5px">至</label>
-                                    <input type="text" class="form_date form-control text-center" id="delFETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <div class="flexStyle">
+                                        <input type="text" class="form_date form-control text-center" id="delFSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                        <label class="control-label" style="margin: 5px">至</label>
+                                        <input type="text" class="form_date form-control text-center" id="delFETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    </div>
                                 </div>
-                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delFQuery">
-                                    <div class="flexStyle" style="flex-basis: 520px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delFQuery">
+                                    <div class="flexStyle warp" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="form-control" id="delFPro" style="width: 100%">
+                                            <select class="form-control" id="delFPro" style="width: 100%;min-width:100px">
                                                 <option value="code">机台号</option>
                                                 <option value="faultType">故障类型</option>
                                                 <option value="priority">优先级</option>
@@ -161,7 +167,7 @@
                                             <option value="0">等于</option>
                                             <option value="1">不等于</option>
                                         </select>
-                                        <input type="text" class="form-control delFAttr" id="delFInput" placeholder="搜索" style="flex: 2">
+                                        <input type="text" class="form-control delFAttr" id="delFInput" placeholder="搜索" style="flex: 2;min-width:100px">
                                         <div class="delFAttr hidden" style="flex: 2" id="delFAttrSelect">
                                             <select class="form-control" id="delFAttr" style="width: 100%"></select>
                                         </div>
@@ -187,16 +193,18 @@
                     <div class="box box-primary">
                         <div class="box-header with-border no-padding-bottom">
                             <div class="flexStyle" style="flex-wrap: wrap">
-                                <div class="flexStyle" style="padding-bottom: 10px;">
+                                <div class="flexStyle warp" style="padding-bottom: 10px;">
                                     <label class="control-label text-nowrap">解决时间：</label>
-                                    <input type="text" class="form_date form-control text-center" id="delRepairSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
-                                    <label class="control-label" style="margin: 5px">至</label>
-                                    <input type="text" class="form_date form-control text-center" id="delRepairETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    <div class="flexStyle">
+                                        <input type="text" class="form_date form-control text-center" id="delRepairSTime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                        <label class="control-label" style="margin: 5px">至</label>
+                                        <input type="text" class="form_date form-control text-center" id="delRepairETime" style="cursor: pointer; flex-basis: 140px; min-width: 100px">
+                                    </div>
                                 </div>
-                                <div class="flexStyle" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delRepairQuery">
-                                    <div class="flexStyle" style="flex-basis: 520px">
+                                <div class="flexStyle warp" style="padding-bottom: 10px; flex: 1;justify-content: space-between" id="delRepairQuery">
+                                    <div class="flexStyle warp" style="flex-basis: 520px">
                                         <div style="flex: 2">
-                                            <select class="form-control" id="delRepairPro" style="width: 100%">
+                                            <select class="form-control" id="delRepairPro" style="width: 100%;min-width:100px">
                                                 <option value="code">机台号</option>
                                                 <option value="faultTime">故障时间</option>
                                                 <option value="faultType">故障类型</option>
@@ -210,7 +218,7 @@
                                             <option value="0">等于</option>
                                             <option value="1">不等于</option>
                                         </select>
-                                        <input type="text" class="form-control delRepairAttr" id="delRepairInput" placeholder="搜索" style="flex: 2">
+                                        <input type="text" class="form-control delRepairAttr" id="delRepairInput" placeholder="搜索" style="flex: 2;min-width:100px">
                                         <div class="delRepairAttr hidden" style="flex: 2" id="delRepairAttrSelect">
                                             <select class="form-control" id="delRepairAttr" style="width: 100%"></select>
                                         </div>

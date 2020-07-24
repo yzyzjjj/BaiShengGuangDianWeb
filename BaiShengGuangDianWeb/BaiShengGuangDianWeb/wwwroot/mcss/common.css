@@ -378,3 +378,9 @@ select, .pointer {
 .middle {
     vertical-align: middle;
 }
+
+@media screen and (max-width:570px){
+    .warp {
+        flex-wrap: wrap;
+    }
+}

@@ -12,16 +12,7 @@ function pageReady() {
         $('.fastIncreaseModelBtn').addClass('hidden');
     }
     $('.ms2').select2({ matcher });
-    var categoryFunc = new Promise(resolve => categorySelect(resolve));
-    var nameFunc = new Promise(resolve => nameSelect(resolve, true, 'Select'));
-    var supplierFunc = new Promise(resolve => supplierSelect(resolve, true, 'Select'));
-    var specificationFunc = new Promise(resolve => specificationSelect(resolve, true, 'Select'));
-    var siteFunc = new Promise(resolve => siteSelect(resolve));
-    Promise.all([categoryFunc, nameFunc, supplierFunc, specificationFunc, siteFunc])
-        .then((result) => {
-            getMaterialList('Select');
-        });
-
+    new Promise(resolve => getAllSelect(resolve)).then(() => getMaterialList('Select'));
     $('#categorySelect').on('select2:select', function () {
         var nameFunc = new Promise(function (resolve, reject) {
             nameSelect(resolve, false, 'Select');
@@ -160,16 +151,25 @@ function pageReady() {
         });
     });
     $('#increaseList').on('input', '.stockNum', function () {
+        onInput(this, 8, 1);
         var v = $(this).val();
         var tr = $(this).parents('tr');
         var actual = tr.find('.code :selected').attr('actual');
         if (!!actual && parseFloat(v) > parseFloat(actual)) {
             layer.msg('入库数量大于货品领用数量');
         }
+        increasePrice('#increaseList', '#increasePrice');
+    });
+    //快捷入库事件
+    $('#fastIncreaseList').on('input', '.stockNum', function () {
+        onInput(this, 8, 1);
+        increasePrice('#fastIncreaseList', '#fastIncreasePrice');
     });
     //计划领用事件
     $('#consumePlanSelect').on('select2:select', function () {
-        $('#consumePlanList').empty();
+        if (!_materialCheckbox.length) {
+            $('#consumePlanList').empty();
+        }
         $("#consumePlanCondition").val('');
         getPlanCode();
     });
@@ -229,6 +229,24 @@ function pageReady() {
     }
     $('#fastIncreaseModal,#increaseModal').on('hidden.bs.modal', () => $('#increaseBtn,#fastIncreaseBtn').attr('disabled', false));
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
+}
+
+//获取物料相关选项
+function getAllSelect(resolve) {
+    var data = {}
+    data.opType = 805;
+    ajaxPost('/Relay/Post', data, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        $('#categorySelect').empty().append(`<option value="0">所有类别</option>${setOptions(ret.Categories, 'Category')}`);
+        $('#nameSelect').empty().append(`<option value="0">所有名称</option>${setOptions(ret.Names, 'Name')}`);
+        $('#supplierSelect').empty().append(`<option value="0">所有供应商</option>${setOptions(ret.Suppliers, 'Supplier')}`);
+        $('#specificationSelect').empty().append(`<option value="0">所有规格</option>${setOptions(ret.Specifications, 'Specification')}`);
+        $('#siteSelect').empty().append(`<option value="0">所有位置</option>${setOptions(ret.Sites, 'Site')}`);
+        resolve();
+    });
 }
 
 //扫描添加
@@ -484,8 +502,10 @@ function siteSelect(resolve) {
     });
 }
 
+let _materialCheckbox = null;
 //获取物料信息
 function getMaterialList(el, resolve) {
+    _materialCheckbox = [];
     var list = {};
     var categoryId = $(`#category${el}`).val();
     if (isStrEmptyOrUndefined(categoryId)) {
@@ -576,7 +596,7 @@ function getMaterialList(el, resolve) {
                     ${per539 ? '<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(2, {0})">领用</button>' : ''}`;
             return op.format(data.Id);
         }
-        $("#materialList")
+        $('#materialList')
             .DataTable({
                 dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                 buttons: [{
@@ -588,32 +608,45 @@ function getMaterialList(el, resolve) {
                         columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
                     }
                 }],
-                "destroy": true,
-                "paging": true,
-                "searching": true,
-                "language": oLanguage,
-                "data": ret.datas,
-                "aaSorting": [[0, "asc"]],
-                "aLengthMenu": [50, 100, 150, 200], //更改显示记录数选项  
-                "iDisplayLength": 50, //默认显示的记录数
-                "columns": [
-                    { "data": null, "title": "序号", "render": (a, b, c, d) => ++d.row },
-                    { "data": "Code", "title": "货品编号" },
-                    { "data": "Category", "title": "类别" },
-                    { "data": "Name", "title": "名称" },
-                    { "data": null, "title": "库存数量", "render": number },
-                    { "data": "Supplier", "title": "供应商" },
-                    { "data": "Specification", "title": "规格" },
-                    { "data": "Site", "title": "位置" },
-                    { "data": "Unit", "title": "单位" },
-                    { "data": "Price", "title": "价格" },
-                    { "data": "Stock", "title": "最低库存", "sClass": "text-blue" },
-                    { "data": "InTime", "title": "上次入库", "render": inTime },
-                    { "data": "OutTime", "title": "上次领用", "render": outTime },
-                    { "data": "Remark", "title": "备注", "render": remark },
-                    { "data": "Id", "title": "详情", "render": detail, "orderable": false },
-                    { "data": null, "title": "日志", "render": log, "orderable": false, "visible": per538 || per539 }
-                ]
+                destroy: true,
+                paging: true,
+                searching: true,
+                language: oLanguage,
+                data: ret.datas,
+                aaSorting: [[1, 'asc']],
+                aLengthMenu: [50, 100, 150, 200], //更改显示记录数选项  
+                iDisplayLength: 50, //默认显示的记录数
+                columns: [
+                    { data: null, title: "选择", render: d => `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id}>`, orderable: false },
+                    { data: null, title: "序号", render: (a, b, c, d) => ++d.row },
+                    { data: "Code", title: "货品编号" },
+                    { data: "Category", title: "类别" },
+                    { data: "Name", title: "名称" },
+                    { data: null, title: "库存数量", render: number },
+                    { data: "Supplier", title: "供应商" },
+                    { data: "Specification", title: "规格" },
+                    { data: "Site", title: "位置" },
+                    { data: "Unit", title: "单位" },
+                    { data: "Price", title: "价格" },
+                    { data: "Stock", title: "最低库存", sClass: "text-blue" },
+                    { data: "InTime", title: "上次入库", render: inTime },
+                    { data: "OutTime", title: "上次领用", render: outTime },
+                    { data: "Remark", title: "备注", render: remark },
+                    { data: "Id", title: "详情", render: detail, orderable: false },
+                    { data: null, title: "日志", render: log, orderable: false, visible: per538 || per539 }
+                ],
+                drawCallback: function () {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    }).on('ifChanged', function () {
+                        const id = $(this).val();
+                        $(this).is(':checked')
+                            ? _materialCheckbox.push(id)
+                            : _materialCheckbox.splice(_materialCheckbox.indexOf(id), 1);
+                    });
+                }
             });
     });
 }
@@ -672,8 +705,10 @@ function resetList(el, isIncrease) {
     $(el).empty();
     if (isIncrease == 0) {
         $('#copyBtn,#exportBtn').attr('disabled', true);
+        increasePrice(el, '#increasePrice');
     } else if (isIncrease == 4) {
         $('#fastCopyBtn,#fastExportBtn').attr('disabled', true);
+        increasePrice(el, '#fastIncreasePrice');
     }
 }
 
@@ -736,8 +771,13 @@ function delTr(el) {
     var tr = $(this).parents('tr');
     tr.remove();
     setTableTr(el);
-    if (el != '#increaseList') {
+    if (el == '#increaseList') {
+        increasePrice(el, '#increasePrice');
+    } else {
         consumePlanDittoAuto(el);
+        if (el == '#fastIncreaseList') {
+            increasePrice(el, '#fastIncreasePrice');
+        }
     }
 }
 
@@ -837,6 +877,7 @@ function TrNoEqual(e, tr, d) {
             if (actual) {
                 tr.find('.stockNum').prop('placeholder', `货品领用数量：${actual}`);
             }
+            increasePrice('#increaseList', '#increasePrice');
             break;
         case 1://计划领用
             var planId = $('#consumePlanSelect').val();
@@ -863,6 +904,7 @@ function TrNoEqual(e, tr, d) {
             d == ''
                 ? tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden')
                 : tr.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            increasePrice('#fastIncreaseList', '#fastIncreasePrice');
             break;
     }
     if (e != 0 && e != 4) {
@@ -910,8 +952,11 @@ function codeNoGanged(e, type) {
                 priceEl.empty().append(priceOp || nullOp);
             }
         case 5:
-            if (priceEl.find(':selected').data('select2Tag') && e === 5) {
+            if (priceEl.find(':selected').data('select2Tag') && e == 5) {
                 siteEl.empty().append(selectOp(_siteData, 'Id', 'Site'));
+                if (!siteEl.find(':selected').data('select2Tag')) {
+                    siteEl.val(siteId).trigger('change');
+                }
             }
             var price = priceEl.val() || '';
             price = price.replace('tag', '');
@@ -958,6 +1003,13 @@ function codeNoGanged(e, type) {
     }
 }
 
+//生成勾选物料信息
+function setCheckboxCode(n) {
+    for (let i = 0, len = _materialCheckbox.length; i < len; i++) {
+        addListTr(n, _materialCheckbox[i]);
+    }
+}
+
 //货品相关编号外下拉框
 var _noCodeTds = `<td><select class="ms2 form-control category" data-flag="0">{0}</select></td>
     <td><select class="ms2 form-control name" data-flag="1"></select></td>
@@ -967,7 +1019,7 @@ var _noCodeTds = `<td><select class="ms2 form-control category" data-flag="0">{0
     <td><select class="ms2 form-control site" data-flag="4"></select></td>`;
 
 //入库相同处
-var _increaseEqualTds = `<td><input class="form-control text-center stockNum zeroNum" type="tel" value="0" onkeyup="onInput(this, 8, 1)" onblur="onInputEnd(this)" style="width:140px;margin:auto"></td>
+var _increaseEqualTds = `<td><input class="form-control text-center stockNum zeroNum" type="tel" value="0" style="width:140px;margin:auto"></td>
             <td class="unit"><label class="control-label textIn"></label><input class="form-control text-center hidden textOn" maxlength="4" style="min-width:70px"></td>
             <td>
                <div class="flexStyle" style="width:160px">
@@ -995,6 +1047,7 @@ var _gangedTr = null;
 function showIncreaseModel() {
     $('#addIncreaseListBtn,#copyBtn,#exportBtn').attr('disabled', true);
     $("#increaseList").empty();
+    $('#increasePrice').text('0元');
     new Promise(resolve => initGangedData(resolve)).then(e => {
         getCodeName();
         _gangedTr = `<tr>
@@ -1015,8 +1068,22 @@ function showIncreaseModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#increaseList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $('#addIncreaseListBtn').attr('disabled', false);
+        setCheckboxCode(0);
     });
     $('#increaseModal').modal('show');
+}
+
+//入库总价计算
+function increasePrice(tableEl, priceEl) {
+    const price = $(tableEl).find('.price');
+    const stockNum = $(tableEl).find('.stockNum');
+    let count = 0;
+    for (let i = 0, len = price.length; i < len; i++) {
+        const p = parseFloat(price.eq(i).val().replace('tag', '')) || 0;
+        const s = parseFloat(stockNum.eq(i).val().trim()) || 0;
+        count += p * s;
+    }
+    $(priceEl).text(`${count}元`);
 }
 
 /////////////////////////////////////////////快捷入库////////////////////////////////////////////
@@ -1025,6 +1092,7 @@ var _gangedFastTr = null;
 function showFastIncreaseModel() {
     $('#addFastIncreaseListBtn,#fastCopyBtn,#fastExportBtn').attr('disabled', true);
     $("#fastIncreaseList").empty();
+    $('#fastIncreasePrice').text('0元');
     new Promise(resolve => initGangedData(resolve)).then(e => {
         getCodeName();
         _gangedFastTr = `<tr>
@@ -1033,6 +1101,7 @@ function showFastIncreaseModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#fastIncreaseList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $('#addFastIncreaseListBtn').attr('disabled', false);
+        setCheckboxCode(4);
     });
     $('#fastIncreaseModal').modal('show');
 }
@@ -1211,7 +1280,7 @@ function increase(isFast) {
             if (ret.errno == 0) {
                 isFast ? $('#fastCopyBtn,#fastExportBtn').attr('disabled', false) : $('#copyBtn,#exportBtn').attr('disabled', false);
                 $(this).attr('disabled', true);
-                setTimeout(() => $(this).attr('disabled', false),10000);
+                setTimeout(() => $(this).attr('disabled', false), 10000);
                 getMaterialList('Select');
             }
         });
@@ -1342,6 +1411,8 @@ function showConsumeModel() {
         _gangedPlanTr = addTr.format('<td class="planConsume"></td><td class="actualConsume"></td>', '#consumePlanList');
         _gangedOtherTr = addTr.format('', '#consumeOtherList');
         $('#addConsumeOtherListBtn').attr('disabled', false);
+        setCheckboxCode(1);
+        setCheckboxCode(2);
     });
     $('#consumeModal').modal('show');
 }
@@ -1591,6 +1662,7 @@ function showReversalModel() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delTr.call(this,'#reversalList')"><i class="fa fa-minus"></i></button></td>
             </tr>`;
         $("#addReversalListBtn").attr('disabled', false);
+        setCheckboxCode(3);
     });
     $("#reversalModal").modal("show");
 }

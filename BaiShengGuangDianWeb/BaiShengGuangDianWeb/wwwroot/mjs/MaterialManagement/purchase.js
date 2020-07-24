@@ -8,9 +8,7 @@ function pageReady() {
     _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
-    new Promise(resolve => getValuer(resolve)).then(() => {
-        getGroup();
-    });
+    new Promise(resolve => getValuer(resolve)).then(() => getGroup());
     $('#groupSelect').on('select2:select', () => getProcessor());
     $('#qgProcessor,#formState,#cgProcessor').on('select2:select', () => getPurchase());
     $('#inWareList,#purchaseList').on('focus', '.zeroNum', function () {
@@ -23,10 +21,6 @@ function pageReady() {
             $(this).val(0);
         }
     });
-    $('#purchaseList').on('input', '.taxTate', function () {
-        onInput(this, 2, 2);
-        tFootCount();
-    });
     $('#purchaseList').on('focus', '.numZero', function () {
         if ($(this).text().trim() == 0) {
             $(this).text('');
@@ -37,7 +31,13 @@ function pageReady() {
             $(this).text(0);
         }
     });
-    $('#purchaseList').on('input', '.numZero', () => tFootCount());
+    $('#purchaseList').on('input', '.taxTate', function () {
+        onInput(this, 2, 2);
+        tFootTrCount.call(this);
+    });
+    $('#purchaseList').on('input', '.numZero', function () {
+        tFootTrCount.call(this);
+    });
     $('#departmentAll').on('ifChanged', function () {
         if ($(this).is(':checked')) {
             $('#departmentItem .icb_minimal').iCheck('check');
@@ -66,22 +66,33 @@ function pageReady() {
     });
 }
 
+//入库税后单价合计计算
+function tFootTrCount() {
+    const tr = $(this).parents('tr');
+    const number = parseFloat(tr.find('.number').text()) || 0;
+    const price = parseFloat(tr.find('.price').text()) || 0;
+    const taxTate = parseFloat(tr.find('.taxTate').val()) || 0;
+    const taxPrice = parseFloat((price * (1 + taxTate / 100)).toFixed(5));
+    const taxAmount = parseFloat((number * taxPrice).toFixed(5));
+    tr.find('.tax-price').text(taxPrice);
+    tr.find('.tax-amount').text(taxAmount);
+    tFootCount();
+}
+
 //入库单页脚计算
 function tFootCount() {
     const numArr = _purchaseDataTable.columns(5).nodes()[0].map(item => $(item).text());
     const priceArr = _purchaseDataTable.columns(6).nodes()[0].map(item => $(item).text());
-    const taxTateArr = _purchaseDataTable.columns(9).nodes()[0];
-    let amount = 0, tax = 0;
-    for (let i = 0, len = taxTateArr.length; i < len; i++) {
-        const taxTate = parseFloat($(taxTateArr[i]).find('.taxTate').val().trim() || 0) / 100;
-        const price = priceArr[i];
-        const num = numArr[i];
-        const v = price * taxTate * num;
-        tax += v;
-        amount += v + price * num;
+    const taxAmountArr = _purchaseDataTable.columns(8).nodes()[0].map(item => $(item).text());
+    const arr = [];
+    for (let i = 0, len = numArr.length; i < len; i++) {
+        arr[i] = {
+            Number: numArr[i],
+            Price: priceArr[i],
+            TaxAmount: taxAmountArr[i]
+        }
     }
-    $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(5)) : 0);
-    $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(5)) : 0);
+    computePrice(arr);
 }
 
 //paste
@@ -689,44 +700,51 @@ function setPurchaseList(arr, isQuote) {
             { data: 'Name', title: '物料名称' },
             { data: 'Specification', title: '规格' },
             { data: 'Unit', title: '单位' },
-            { data: 'Number', title: '数量', sClass: 'numZero' },
-            { data: 'Price', title: '税前单价', sClass: 'numZero' },
-            { data: 'TaxPrice', title: '税后单价', sClass: 'numZero' },
-            { data: 'TaxAmount', title: '合计', sClass: 'numZero' },
+            { data: 'Number', title: '数量', sClass: 'numZero number' },
+            { data: 'Price', title: '税前单价', sClass: 'numZero price' },
+            { data: 'TaxPrice', title: '税后单价', sClass: 'tax-price' },
+            { data: 'TaxAmount', title: '合计', sClass: 'tax-amount' },
             { data: isQuote ? 'Tax' : 'TaxTate', title: '税率（%)', render: taxTate },
             { data: null, title: '删除', render: deBtn, visible: !!isQuote }
         ],
         drawCallback: function () {
             if (isQuote) {
-                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(10),:nth-child(11))').prop('contenteditable', true);
+                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(10),:nth-child(11),:nth-child(9),:nth-child(8))').prop('contenteditable', true);
             }
         },
         initComplete: function () {
             isQuote ? $('#purchaseList').off('paste') : $('#purchaseList').off('paste').on('paste', pasteTable);
-            let amount = 0, tax = 0;
-            for (let i = 0, len = arr.length; i < len; i++) {
-                const d = arr[i];
-                const all = parseFloat(d.TaxAmount);
-                amount += all;
-                tax += all - parseFloat(d.Number) * parseFloat(d.Price);
-            }
             const tFoot = `<tfoot>
-                                  <tr>
-                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
-                                    <th>合计：</th>
-                                    <th id="purchaseAmount">${amount ? parseFloat(amount.toFixed(5)) : 0}</th>
-                                  </tr>
-                                    <tr>
-                                    <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
-                                    <th>税额：</th>
-                                    <th id="purchaseTax">${tax ? parseFloat(tax.toFixed(5)) : 0}</th>
-                                  </tr>
-                               </tfoot>`;
+                              <tr>
+                                <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                                <th>合计：</th>
+                                <th id="purchaseAmount"></th>
+                              </tr>
+                                <tr>
+                                <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                                <th>税额：</th>
+                                <th id="purchaseTax"></th>
+                              </tr>
+                           </tfoot>`;
             this.find('tfoot').remove();
             this.append(tFoot);
+            computePrice(arr);
             this.find('tfoot tr:last th').css('borderTop', 0);
         }
     });
+}
+
+//合计税额
+function computePrice(data) {
+    let amount = 0, tax = 0;
+    for (let i = 0, len = data.length; i < len; i++) {
+        const d = data[i];
+        const all = parseFloat(d.TaxAmount);
+        amount += all;
+        tax += all - parseFloat(d.Number) * parseFloat(d.Price);
+    }
+    $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(5)) : 0);
+    $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(5)) : 0);
 }
 
 //添加入库单tr

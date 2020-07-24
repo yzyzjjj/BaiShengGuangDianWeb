@@ -76,8 +76,11 @@
                     <h4 class="modal-title">入库</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group text-right">
+                    <div class="text-right">
                         <button type="button" class="btn btn-default btn-sm" onclick="resetList('#increaseList',0)"><i class="fa fa-refresh"></i> 重置</button>
+                    </div>
+                    <div class="text-right">
+                        <label class="control-label textOverTop">当前总价为：<span id="increasePrice" style="color: red; font-size: 20px">0元</span></label>
                     </div>
                     <div class="form-group maxHeight" id="increaseListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
@@ -126,8 +129,11 @@
                     <h4 class="modal-title">快捷入库</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group text-right">
-                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList',4)"><i class="fa fa-refresh"></i> 重置</button>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList', 4)"><i class="fa fa-refresh"></i> 重置</button>
+                    </div>
+                    <div class="text-right">
+                        <label class="control-label textOverTop">当前总价为：<span id="fastIncreasePrice" style="color: red; font-size: 20px">0元</span></label>
                     </div>
                     <div class="form-group maxHeight" id="fastIncreaseListTable" style="overflow: auto">
                         <table class="table table-hover table-striped">
