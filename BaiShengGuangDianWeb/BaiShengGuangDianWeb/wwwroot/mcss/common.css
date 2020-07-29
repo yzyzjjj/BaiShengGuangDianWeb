@@ -384,3 +384,7 @@ select, .pointer {
         flex-wrap: wrap;
     }
 }
+
+.table-td > tbody td {
+    padding: 8px 15px
+}

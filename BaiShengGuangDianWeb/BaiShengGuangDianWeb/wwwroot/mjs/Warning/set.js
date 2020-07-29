@@ -48,8 +48,9 @@
 
 //获取预警设置
 function getWarnSet(resolve) {
-    const type = $('#navUl li.active').val();
-    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: true, type }) }, ret => {
+    const dataType = $('#navUl li.active').val();
+    const type = dataType === 1 ? 1 : 2;
+    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: true, dataType, type }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -68,8 +69,9 @@ function getAppointWarnSet() {
         layer.msg('请选择预警名');
         return;
     }
-    const type = $('#navUl li.active').val();
-    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ qId, first: true, type }) }, ret => {
+    const dataType = $('#navUl li.active').val();
+    const type = dataType === 1 ? 1 : 2;
+    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ qId, first: true, dataType, type }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -144,13 +146,13 @@ function getDevice(resolve) {
 
 //获取脚本item
 function getScriptItem() {
-    _scriptTrData = [];
     const sId = $('#scriptSelect').val();
     if (isStrEmptyOrUndefined(sId)) {
         layer.msg('请选择脚本');
         return;
     }
-    ajaxPost('/Relay/Post', { opType: 1204, opData: JSON.stringify({ sId, isNew: true }) }, ret => {
+    const dataType = $('#navUl li.active').val();
+    ajaxPost('/Relay/Post', { opType: 1204, opData: JSON.stringify({ sId, isNew: true, dataType }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -162,6 +164,7 @@ function getScriptItem() {
 
 //变量/输出/输入表格设置
 function setThreeTable(arr, isNew) {
+    _scriptTrData = [];
     const scriptItem = { 1: [], 2: [], 3: [] };
     for (let i = 0, len = arr.length; i < len; i++) {
         const d = arr[i];
@@ -316,9 +319,11 @@ function addUpDeviceWarning(isUp) {
         return;
     }
     deviceIds = deviceIds.toString();
-    const type = $('#navUl li.active').val();
+    const dataType = $('#navUl li.active').val();
+    const type = dataType === 1 ? 1 : 2;
     const list = {
         Type: type,
+        DataType: dataType,
         Name: name,
         Enable: isEnable,
         ClassId: classId,
@@ -344,7 +349,7 @@ function addUpDeviceWarning(isUp) {
         return;
     }
     const items = [];
-    const dataType = $('#navChildUl li.active').val();
+    const dataTypeItem = $('#navChildUl li.active').val();
     for (let i = 0, len = _scriptTrData.length; i < len; i++) {
         const tr = $(_scriptTrData[i]);
         const xh = tr.find('td:nth-child(2)').text();
@@ -368,7 +373,7 @@ function addUpDeviceWarning(isUp) {
         const dictionaryId = checkBox.attr('dictionary');
         const id = isUp ? checkBox.val() : 0;
         items.push({
-            DataType: dataType,
+            DataType: dataTypeItem,
             Frequency: frequency,
             Interval: interval,
             Count: count,
@@ -381,7 +386,7 @@ function addUpDeviceWarning(isUp) {
             Id: id >> 0
         });
     }
-    list.Items = items;
+    items.length && (list.Items = items);
     const doSth = () => {
         const data = {}
         data.opType = opType;
@@ -389,7 +394,14 @@ function addUpDeviceWarning(isUp) {
         ajaxPost('/Relay/Post', data, ret => {
             layer.msg(ret.errmsg);
             if (ret.errno == 0) {
-                isUp ? getAppointWarnSet() : new Promise(resolve => getWarnSet(resolve)).then(result => showAppointWarnSet(result[0]));
+                new Promise(resolve => getWarnSet(resolve)).then(result => {
+                    if (isUp) {
+                        $('#deviceWarn').val(list.Id).trigger('change');
+                        getAppointWarnSet();
+                    } else {
+                        showAppointWarnSet(result[0]);
+                    }
+                });
             }
         });
     }

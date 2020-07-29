@@ -1,10 +1,11 @@
 ﻿function pageReady() {
     $('.ms2').select2();
-    $('#sTime,#eTime').val(getDate()).datepicker('update').on('changeDate', () => getWarnLogList());
-    new Promise(resolve => getWarnSet(resolve)).then(() => getWarnLogList());
+    $('.form_date').val(getDate()).datepicker('update').on('changeDate', () => getWarnLogList());
+
+    new Promise(resolve => getWarnSet(resolve)).then(() => getWarnLogList('device'));
     $('#deviceWarn').on('select2:select', () => getWarnLogList());
     $('#currentDeviceWarn').on('select2:select', () => getCurrentWarnLogList());
-    $('#currentLi').one('click', () => getCurrentWarnLogList());
+    $('#devCurrentLi').one('click', () => getCurrentWarnLogList());
 }
 
 //获取所有设备预警
@@ -14,19 +15,19 @@ function getWarnSet(resolve) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#deviceWarn,#currentDeviceWarn').empty().append(`<option value="0">全部</option>${setOptions(ret.datas, 'Name')}`);
+        $('.warn-type').empty().append(`<option value="0">全部</option>${setOptions(ret.datas, 'Name')}`);
         resolve();
     });
 }
 
 //获取指定设备预警
-function getAppointWarnSet(qId, flag) {
-    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: false, type: 1, qId }) }, ret => {
+function getAppointWarnSet(qId, flag, type) {
+    ajaxPost('/Relay/Post', { opType: 1200, opData: JSON.stringify({ first: false, type, qId }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $(`#warnLogInfo${flag}`).removeClass('hidden');
+        $(`#deviceInfo${flag}`).removeClass('hidden');
         const d = ret.datas[0];
         $(`#warnType${flag}`).text(d.Class);
         $(`#warnScript${flag}`).text(d.Script);
@@ -35,18 +36,18 @@ function getAppointWarnSet(qId, flag) {
 }
 
 //获取预计记录
-function getWarnLogList() {
-    const sId = $('#deviceWarn').val();
+function getWarnLogList(el) {
+    const sId = $(`#${el}Warn`).val();
     if (isStrEmptyOrUndefined(sId)) {
         layer.msg('请选择预警名');
         return;
     }
-    let startTime = $('#sTime').val().trim();
+    let startTime = $(`#${el}STime`).val().trim();
     if (isStrEmptyOrUndefined(startTime)) {
         layer.msg('请选择开始时间');
         return;
     }
-    let endTime = $('#eTime').val().trim();
+    let endTime = $(`#${el}ETime`).val().trim();
     if (isStrEmptyOrUndefined(endTime)) {
         layer.msg('请选择结束时间');
         return;
@@ -59,21 +60,21 @@ function getWarnLogList() {
     endTime += ' 23:59:59';
     const data = {}
     data.opType = 1206;
-    data.opData = JSON.stringify({ sId, startTime, endTime, type: 1 });
+    data.opData = JSON.stringify({ sId, startTime, endTime, type:1});
     ajaxPost('/Relay/Post', data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        sId == 0 ? $('#warnLogInfo').addClass('hidden') : getAppointWarnSet(sId, '');
-        setWarnLogList('#warnLogList', ret.datas, false);
+        sId == 0 ? $(`#${el}Info`).addClass('hidden') : getAppointWarnSet(sId, '');
+        setWarnLogList(`#${el}List`, ret.datas, false);
     });
 }
 
 
 //获取当前预警记录
-function getCurrentWarnLogList() {
-    const sId = $('#currentDeviceWarn').val();
+function getCurrentWarnLogList(el) {
+    const sId = $(`#${el}WarnCurrent`).val();
     if (isStrEmptyOrUndefined(sId)) {
         layer.msg('请选择预警名');
         return;
@@ -86,14 +87,13 @@ function getCurrentWarnLogList() {
             layer.msg(ret.errmsg);
             return;
         }
-        sId == 0 ? $('#warnLogInfoCurrent').addClass('hidden') : getAppointWarnSet(sId, 'Current');
-        setWarnLogList('#currentWarnLogList', ret.datas, true);
+        sId == 0 ? $(`#${el}InfoCurrent`).addClass('hidden') : getAppointWarnSet(sId, 'Current');
+        setWarnLogList(`#${el}ListCurrent`, ret.datas, true);
     });
 }
 
 //预警记录表格设置
 function setWarnLogList(el, data, isCurrent) {
-    const type = d => d === 1 ? '设备数据' : '生产数据';
     const isWarning = d => d ? '是' : '否';
     const time = d => `${d.StartTime}至${d.EndTime}`;
     const frequency = d => {
@@ -115,7 +115,6 @@ function setWarnLogList(el, data, isCurrent) {
     const arr1 = [
         { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
         { data: 'SetName', title: '预警名' },
-        { data: 'Type', title: '数据类型', render: type },
         { data: 'Code', title: '机台号' },
         { data: 'VariableName', title: '名称' },
         { data: 'CurrentTime', title: '出现时间', sClass: 'text-danger' },

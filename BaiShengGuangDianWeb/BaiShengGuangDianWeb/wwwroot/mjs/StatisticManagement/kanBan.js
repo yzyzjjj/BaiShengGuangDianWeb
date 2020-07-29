@@ -78,6 +78,8 @@ function setChart(flag, id) {
             return;
         }
         var d = ret.data;
+        //时间信息
+        $(`${flag}_time`).text(d.Time);
         //设备详情
         var allRateScale = setPieChart(`${flag}_detail`, 'Rate', d.AllProcessRate, '#0099ff');
         $(`${flag}_yxTime`).text(codeTime(d.RunTime));
@@ -195,6 +197,27 @@ function setChart(flag, id) {
                 }
             }, 200);
         });
+        //生产数据
+        var pData = d.ProductionData;
+        var devOps = '', proOps = '', heGeOps = '', liePianOps = '', rateOps = '';
+        for (i = 0, len = pData.length; i < len; i++) {
+            const pd = pData[i];
+            devOps += `<td class="text-blue">${pd.Code}</td>`;
+            proOps += `<td>${pd.FaChu}</td>`;
+            heGeOps += `<td>${pd.HeGe}</td>`;
+            liePianOps += `<td>${pd.LiePian}</td>`;
+            rateOps += `<td>${(pd.Rate * 100).toFixed(2)}%</td>`;
+        }
+        $(`${flag}_devs`).text(processDevice);
+        $(`${flag}_pros`).text(d.FaChu);
+        $(`${flag}_heGes`).text(d.HeGe);
+        $(`${flag}_liePians`).text(d.LiePian);
+        $(`${flag}_rates`).text(`${(d.Rate * 100).toFixed(2)}%`);
+        $(`${flag}_devOps`).find('td:not(:first)').remove().end().append(devOps);
+        $(`${flag}_proOps`).find('td:not(:first)').remove().end().append(proOps);
+        $(`${flag}_heGeOps`).find('td:not(:first)').remove().end().append(heGeOps);
+        $(`${flag}_liePianOps`).find('td:not(:first)').remove().end().append(liePianOps);
+        $(`${flag}_rateOps`).find('td:not(:first)').remove().end().append(rateOps);
     }, 0);
 }
 
@@ -251,9 +274,7 @@ function kanBanChange(resolve) {
             $('#isShow').iCheck(d.IsShow ? 'check' : 'uncheck');
         });
         $('#kanBanList').trigger('select2:select');
-        if (resolve) {
-            resolve();
-        }
+        resolve && resolve();
     });
 }
 
@@ -269,87 +290,129 @@ function getKanBanList(resolve) {
             layer.msg(ret.errmsg);
             return;
         }
-        var op = `<div class="row">
-                    <div class="col-md-4">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">设备详情</h3>
+        var op = `<div class="box box-primary">
+                    <div class="box-header with-border">
+                        <label class="control-label textOverTop no-margin middle">时间信息：<span id="{0}_time"></span></label>
+                    </div>
+                    <div>
+                         <div class="row">
+                            <div class="col-md-4">
+                                <div class="box box-info">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">设备详情</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle">
+                                            <div id="{0}_detail" class="chart" style="width: 40%; height: 140px"></div>
+                                            <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                                <label class="control-label textOverTop">运行时间：<span class="spanStyle" id="{0}_yxTime"></span></label>
+                                                <label class="control-label textOverTop">加工时间：<span class="spanStyle" id="{0}_jgTime"></span></label>
+                                                <label class="control-label textOverTop">闲置时间：<span class="spanStyle" id="{0}_xzTime"></span></label>
+                                                <label class="control-label textOverTop">所有利用率：<span class="spanStyle" id="{0}_lly"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="box-body">
-                                <div class="flexStyle">
-                                    <div id="{0}_detail" class="chart" style="width: 40%; height: 140px"></div>
-                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                        <label class="control-label textOverTop">运行时间：<span class="spanStyle" id="{0}_yxTime"></span></label>
-                                        <label class="control-label textOverTop">加工时间：<span class="spanStyle" id="{0}_jgTime"></span></label>
-                                        <label class="control-label textOverTop">闲置时间：<span class="spanStyle" id="{0}_xzTime"></span></label>
-                                        <label class="control-label textOverTop">所有利用率：<span class="spanStyle" id="{0}_lly"></span></label>
+                            <div class="col-md-4">
+                                <div class="box box-warning">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">日最大使用率</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle">
+                                            <div id="{0}_max" class="chart" style="width: 40%; height: 140px"></div>
+                                            <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                                <label class="control-label textOverTop">日最大同时使用台数：<span class="spanStyle" id="{0}_maxTs"></span></label>
+                                                <label class="control-label textOverTop">日最大使用台数：<span class="spanStyle" id="{0}_maxTNum"></span></label>
+                                                <label class="control-label textOverTop">日最大使用率：<span class="spanStyle" id="{0}_maxSyl"></span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="box box-warning">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">日最小使用率</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle">
+                                            <div id="{0}_min" class="chart" style="width: 40%; height: 140px"></div>
+                                            <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
+                                                <label class="control-label textOverTop">日最小同时使用台数：<span class="spanStyle" id="{0}_minTs"></span></label>
+                                                <label class="control-label textOverTop">日最小使用台数：<span class="spanStyle" id="{0}_minTNum"></span></label>
+                                                <label class="control-label textOverTop">日最小使用率：<span class="spanStyle" id="{0}_minSyl"></span></label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="box box-warning">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">日最大使用率</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="box box-info">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">设备状态</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div style="width: 100%;display:flex;flex-wrap:wrap">
+                                            <div id="{0}_state_all" class="chart" style="height:180px;width:33.33%"></div>
+                                            <div id="{0}_state_normal" class="chart" style="height:180px;width:33.33%"></div>
+                                            <div id="{0}_state_process" class="chart" style="height:180px;width:33.33%"></div>
+                                            <div id="{0}_state_idle" class="chart" style="height:180px;width:33.33%"></div>
+                                            <div id="{0}_state_fault" class="chart" style="height:180px;width:33.33%"></div>
+                                            <div id="{0}_state_error" class="chart" style="height:180px;width:33.33%"></div>
+                                        </div>
+                                        <label class="control-label textOverTop">当前加工设备：</label>
+                                        <div id="{0}_dev" style="width: 100%;display:flex;flex-wrap:wrap"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="box-body">
-                                <div class="flexStyle">
-                                    <div id="{0}_max" class="chart" style="width: 40%; height: 140px"></div>
-                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                        <label class="control-label textOverTop">日最大同时使用台数：<span class="spanStyle" id="{0}_maxTs"></span></label>
-                                        <label class="control-label textOverTop">日最大使用台数：<span class="spanStyle" id="{0}_maxTNum"></span></label>
-                                        <label class="control-label textOverTop">日最大使用率：<span class="spanStyle" id="{0}_maxSyl"></span></label>
+                            <div class="col-md-8">
+                                <div class="box box-success">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">单台加工利用率</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div id="{0}_bar" class="chart" style="width: 100%; height: 480px"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="box box-warning">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">日最小使用率</h3>
-                            </div>
-                            <div class="box-body">
-                                <div class="flexStyle">
-                                    <div id="{0}_min" class="chart" style="width: 40%; height: 140px"></div>
-                                    <div class="flexStyle" style="width: 60%;height: 150px;flex-flow: column;justify-content: space-around; align-items: flex-start;padding-left:5%">
-                                        <label class="control-label textOverTop">日最小同时使用台数：<span class="spanStyle" id="{0}_minTs"></span></label>
-                                        <label class="control-label textOverTop">日最小使用台数：<span class="spanStyle" id="{0}_minTNum"></span></label>
-                                        <label class="control-label textOverTop">日最小使用率：<span class="spanStyle" id="{0}_minSyl"></span></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="box box-info">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">设备状态</h3>
-                            </div>
-                            <div class="box-body">
-                                <div style="width: 100%;display:flex;flex-wrap:wrap">
-                                    <div id="{0}_state_all" class="chart" style="height:180px;width:33.33%"></div>
-                                    <div id="{0}_state_normal" class="chart" style="height:180px;width:33.33%"></div>
-                                    <div id="{0}_state_process" class="chart" style="height:180px;width:33.33%"></div>
-                                    <div id="{0}_state_idle" class="chart" style="height:180px;width:33.33%"></div>
-                                    <div id="{0}_state_fault" class="chart" style="height:180px;width:33.33%"></div>
-                                    <div id="{0}_state_error" class="chart" style="height:180px;width:33.33%"></div>
-                                </div>
-                                <label class="control-label textOverTop">当前加工设备：</label>
-                                <div id="{0}_dev" style="width: 100%;display:flex;flex-wrap:wrap"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
                         <div class="box box-success">
                             <div class="box-header with-border">
-                                <h3 class="box-title">单台加工利用率</h3>
+                                <h3 class="box-title">生产数据</h3>
                             </div>
                             <div class="box-body">
-                                <div id="{0}_bar" class="chart" style="width: 100%; height: 480px"></div>
+                                <div>
+                                    <label class="control-label textOverTop"><span class="text-red">加工设备数：</span><span class="spanStyle" id="{0}_devs"></span></label>
+                                    <label class="control-label textOverTop"><span class="text-red">加工数：</span><span class="spanStyle" id="{0}_pros"></span></label>
+                                    <label class="control-label textOverTop"><span class="text-red">合格数：</span><span class="spanStyle" id="{0}_heGes"></span></label>
+                                    <label class="control-label textOverTop"><span class="text-red">裂片数：</span><span class="spanStyle" id="{0}_liePians"></span></label>
+                                    <label class="control-label textOverTop"><span class="text-red">合格率：</span><span class="spanStyle" id="{0}_rates"></span></label>
+                                </div>
+                                <div style="overflow-y: auto">
+                                    <table border="1" class="table-td">
+                                        <tbody>
+                                            <tr id="{0}_devOps">
+                                                <td class="text-red bg-info">机台号</td>
+                                            </tr>
+                                            <tr id="{0}_proOps">
+                                                <td class="text-red bg-info">加工数</td>
+                                            </tr>
+                                            <tr id="{0}_heGeOps">
+                                                <td class="text-red bg-info">合格数</td>
+                                            </tr>
+                                            <tr id="{0}_liePianOps">
+                                                <td class="text-red bg-info">裂片数</td>
+                                            </tr>
+                                            <tr id="{0}_rateOps">
+                                                <td class="text-red bg-info">合格率</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

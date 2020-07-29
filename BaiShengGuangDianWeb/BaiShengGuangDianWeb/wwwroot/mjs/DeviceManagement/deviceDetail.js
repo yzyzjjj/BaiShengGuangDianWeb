@@ -62,6 +62,7 @@ function getAssignDevice(id) {
         $('#detailScript').empty();
         new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => $("#detailScript").append(e).val(d.ScriptId).trigger('change'));
         $('#detailDeviceName').val(d.DeviceName);
+        $('#detailClass').val(d.Class);
         $('#detailMacAddress').val(d.MacAddress);
         $('#detailIp').val(d.Ip);
         $('#detailPort').val(d.Port);

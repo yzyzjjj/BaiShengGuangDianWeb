@@ -253,6 +253,7 @@ function getDeviceList(resolve, isUpgrade) {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Code", "title": "机台号", "type": "html-percent" },
+                        { "data": "Class", "title": "设备分类"},
                         { "data": null, "title": "设备型号", "render": modelName },
                         { "data": null, "title": "摆放位置", "render": rModal },
                         { "data": null, "title": "IP地址", "render": ip },

@@ -870,7 +870,7 @@ function TrNoEqual(e, tr, d) {
         case 0://入库
             tr.find('.unit label').text(d.Unit || '');
             tr.find('.number label').text(d.Number || 0);
-            d == ''
+            d == '' && tr.find('.source').val() === '采购'
                 ? tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden')
                 : tr.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
             var actual = tr.find('.code :selected').attr('actual');
@@ -969,7 +969,7 @@ function codeNoGanged(e, type) {
             } else {
                 tr.find('.code').val(codeData.Id || '').trigger('change');
             }
-            if (!codeData.Id) {
+            if (!codeData.Id && (tr.find('.source').val() === '采购' || type === 4)) {
                 var name = tr.find('.name :selected').text();
                 var supplier = tr.find('.supplier :selected').text();
                 var specification = tr.find('.specification :selected').text();
@@ -1079,7 +1079,8 @@ function increasePrice(tableEl, priceEl) {
     const stockNum = $(tableEl).find('.stockNum');
     let count = 0;
     for (let i = 0, len = price.length; i < len; i++) {
-        const p = parseFloat(price.eq(i).val().replace('tag', '')) || 0;
+        const onePrice = price.eq(i).val() || '';
+        const p = parseFloat(onePrice.replace('tag', '')) || 0;
         const s = parseFloat(stockNum.eq(i).val().trim()) || 0;
         count += p * s;
     }
