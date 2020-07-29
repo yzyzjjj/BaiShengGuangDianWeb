@@ -52,49 +52,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 
             var url = managementServer.Host + permission.Url;
             //url = "http://192.168.1.184:62101" + permission.Url;
-            //设备升级
-            //if (opType == 108)
-            //{
-            //    try
-            //    {
-            //        //Type: fileEnum.FirmwareLibrary,
-            //        //DeviceId: $("#detailCode2").val(),
-            //        //FirmwareId: $("#detailFirmware").val(),
-            //        //Path: $("#detailFirmware").attr("path")
-            //        var data = JObject.Parse(opData);
-            //        if (!EnumHelper.TryParseStr(data["Type"].ToString(), out FileEnum fileEnum))
-            //        {
-            //            return Result.GenError<Result>(Error.ParamError);
-            //        }
-
-            //        var path = data["Path"].ToString();
-            //        if (path.IsNullOrEmpty())
-            //        {
-            //            return Result.GenError<Result>(Error.ParamError);
-            //        }
-            //        switch (fileEnum)
-            //        {
-            //            case FileEnum.FirmwareLibrary:
-            //                var filePath = FilePath.GetFullPath(fileEnum, path);
-            //                var bin = FileHelper.LocalFileTo16String(filePath);
-            //                var d = new
-            //                {
-            //                    DeviceId = data["DeviceId"].ToString(),
-            //                    FirmwareId = data["FirmwareId"].ToString(),
-            //                    FirmwareFile = bin,
-            //                };
-
-            //                opData = d.ToJSON();
-            //                break;
-            //            default: Result.GenError<Result>(Error.Fail); break;
-            //        }
-            //    }
-            //    catch (Exception)
-            //    {
-            //        return Result.GenError<Result>(Error.ParamError);
-            //    }
-            //}
-
             var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")
             {
