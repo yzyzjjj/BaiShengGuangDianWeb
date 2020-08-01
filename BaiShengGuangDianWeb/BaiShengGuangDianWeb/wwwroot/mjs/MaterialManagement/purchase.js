@@ -675,6 +675,7 @@ function citePurchaseList() {
             rData[i].ItemId = rData[i].Id;
             rData[i].Id = 0;
         }
+        _pasteData = null;
         setPurchaseList(rData);
     });
 }

@@ -21,7 +21,7 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li class="active"><a href="#deviceData" data-toggle="tab" aria-expanded="true">设备数据</a></li>
-                <li><a href="#productionData" data-toggle="tab" aria-expanded="false">生产数据</a></li>
+                <li id="productionBox"><a href="#productionData" data-toggle="tab" aria-expanded="false">生产数据</a></li>
                 <li><a href="#faultData" data-toggle="tab" aria-expanded="false">故障数据</a></li>
                 <li><a href="#otherData" data-toggle="tab" aria-expanded="false">其他数据</a></li>
             </ul>
@@ -39,7 +39,7 @@
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
                                                 <label class="control-label no-margin middle text-nowrap">预警名：</label>
-                                                <select class="ms2 form-control warn-type" id="deviceWarn" style="width: 160px"></select>
+                                                <select class="ms2 form-control device-warn" id="deviceWarn" style="width: 160px"></select>
                                             </div>
                                             <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
                                                 <label class="control-label no-margin middle text-nowrap">时间范围：</label>
@@ -68,7 +68,7 @@
                                     <div class="box-header with-border">
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <label class="control-label no-margin middle text-nowrap">预警名：</label>
-                                            <select class="ms2 form-control warn-type" id="deviceWarnCurrent" style="width: 160px"></select>
+                                            <select class="ms2 form-control device-warn" id="deviceWarnCurrent" style="width: 160px"></select>
                                         </div>
                                     </div>
                                     <div class="box-body">
@@ -99,7 +99,7 @@
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
                                                 <label class="control-label no-margin middle text-nowrap">预警名：</label>
-                                                <select class="ms2 form-control warn-type" id="productionWarn" style="width: 160px"></select>
+                                                <select class="ms2 form-control production-warn" id="productionWarn" style="width: 160px"></select>
                                             </div>
                                             <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
                                                 <label class="control-label no-margin middle text-nowrap">时间范围：</label>
@@ -114,7 +114,7 @@
                                     <div class="box-body">
                                         <div class="flexStyle hidden form-group" style="flex-wrap: wrap" id="productionInfo">
                                             <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="productionWarnType"></span></label>
-                                            <label class="control-label textOverTop">脚本：<span class="spanStyle" id="productionWarnScript"></span></label>
+                                            <label class="control-label textOverTop">设备类型：<span class="spanStyle" id="productionWarnCategory"></span></label>
                                             <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="productionWarnDevice"></span></label>
                                         </div>
                                         <div class="table-responsive mailbox-messages">
@@ -128,13 +128,13 @@
                                     <div class="box-header with-border">
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <label class="control-label no-margin middle text-nowrap">预警名：</label>
-                                            <select class="ms2 form-control warn-type" id="productionWarnCurrent" style="width: 160px"></select>
+                                            <select class="ms2 form-control production-warn" id="productionWarnCurrent" style="width: 160px"></select>
                                         </div>
                                     </div>
                                     <div class="box-body">
                                         <div class="flexStyle hidden" style="flex-wrap: wrap" id="productionInfoCurrent">
                                             <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="productionWarnTypeCurrent"></span></label>
-                                            <label class="control-label textOverTop">脚本：<span class="spanStyle" id="productionWarnScriptCurrent"></span></label>
+                                            <label class="control-label textOverTop">设备类型：<span class="spanStyle" id="productionWarnCategoryCurrent"></span></label>
                                             <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="productionWarnDeviceCurrent"></span></label>
                                         </div>
                                         <div class="table-responsive mailbox-messages">

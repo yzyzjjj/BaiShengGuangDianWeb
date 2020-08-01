@@ -260,10 +260,10 @@ function setTable() {
         setTime: d => d == '0001-01-01 00:00:00' ? '' : d.slice(0, d.lastIndexOf(':')),
         rState: d => d.State == 0 ? '<span class="text-red">未确认</span>' : d.State == 1 ? '<span class="text-warning">已确认</span>' : '<span class="text-success">维修中</span>',
         priority: d => d.Priority == 0 ? '低' : d.Priority == 1 ? '<span class="text-warning">中</span>' : '<span class="text-red">高</span>',
-        remark: d => d == '' || d.length < tdShowLength ? d : `<span title = "${d}" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`,
+        remark: d => d == '' || d.length < tdShowLength ? d : `<span title = "${d}" class="pointer" onclick="showAllContent('${escape(d)}', '维修备注')">${d.substring(0, tdShowLength) + "..."}</span>`,
         rDesc: d => {
             var data = d.FaultDescription;
-            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${d.FaultTypeId}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) : data}...</span>`;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${d.FaultTypeId}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + '...' : data}</span>`;
         },
         imgBtn: d => {
             var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
@@ -1892,17 +1892,17 @@ function getFaultTypeList() {
                 '<ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
                 '</ul>' +
                 '</div>';
-
             var op = function (data, type, row) {
                 var updateLi = '<li><a onclick="showUpdateFaultTypeModel({0})">修改</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteFaultType({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.FaultTypeName));
                 return html.format(_permissionList[53].have ? updateLi : "", _permissionList[54].have ? deleteLi : "");;
             }
+            var faultDescription = d => d.length > tdShowLength ? `<span title="${d}" class="pointer" onclick="showAllContent(\'${escape(d)}\',\'故障类型描述\')">${d.substring(0, tdShowLength)}...</span>` : d;
             var columns = [
                 { "data": null, "title": "序号", "render": setRow.order },
                 { "data": "Id", "title": "Id", "bVisible": false },
                 { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障类型描述", "render": setRow.rDesc }
+                { "data": "FaultDescription", "title": "故障类型描述", "render": faultDescription }
             ];
             if (_permissionList[53].have || _permissionList[54].have) {
                 columns.push({ "data": null, "title": "操作", "render": op, "orderable": false });

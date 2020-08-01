@@ -19,6 +19,7 @@ function pageReady() {
     new Promise(resolve => getPlan(resolve)).then(() => getGroup());
     getState();
     $('#groupSelect').on('select2:select', function () {
+        $('#processorAll').iCheck('uncheck');
         getProcessor();
     });
     $('#updateTask').on('click', function () {
