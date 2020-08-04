@@ -234,8 +234,8 @@ function getFaultChart() {
     var compare = 0;
     var startTime = $("#startDate").val();
     var endTime = $("#endDate").val();
-    if (exceedTime(startTime) || exceedTime(endTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(startTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     if (compareDate(startTime, endTime)) {
@@ -778,8 +778,8 @@ function dayChart() {
     }
     var oneTime = $("#selectDay").val();
     var twoTime = $("#conDay").val();
-    if (exceedTime(oneTime) || exceedTime(twoTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(oneTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     var data = {}
@@ -1050,8 +1050,8 @@ function weekChart() {
     }
     var oneTime = weekTimeOne;
     var twoTime = weekTimeTwo;
-    if (exceedTime(oneTime) || exceedTime(twoTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(oneTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     var data = {}
@@ -1322,8 +1322,8 @@ function monthChart() {
     }
     var oneTime = $("#selectMonth").val();
     var twoTime = $("#conMonth").val();
-    if (exceedTime(oneTime) || exceedTime(twoTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(oneTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     var data = {}
@@ -1603,8 +1603,8 @@ function shopChart() {
     }
     var startTime = $("#startDate1").val();
     var endTime = $("#endDate1").val();
-    if (exceedTime(startTime) || exceedTime(endTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(startTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     if (compareDate(startTime, endTime)) {
@@ -2039,8 +2039,8 @@ function devChart() {
     }
     var startTime = $("#startDateDev").val();
     var endTime = $("#endDateDev").val();
-    if (exceedTime(startTime) || exceedTime(endTime)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(startTime)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     if (compareDate(startTime, endTime)) {
@@ -2340,8 +2340,8 @@ function getFaultTimeChart() {
     }
     var startDay = $("#startDayTime").val();
     var endDay = $("#endDayTime").val();
-    if (exceedTime(startDay) || exceedTime(endDay)) {
-        layer.msg("所选时间不能大于当前时间");
+    if (exceedTime(startDay)) {
+        layer.msg("开始时间不能大于当前时间");
         return;
     }
     if (compareDate(startDay, endDay)) {

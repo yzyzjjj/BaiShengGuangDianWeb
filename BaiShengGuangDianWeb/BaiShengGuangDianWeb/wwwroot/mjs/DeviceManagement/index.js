@@ -192,9 +192,9 @@ function getDeviceList(resolve, isUpgrade) {
                     '</div>';
                 var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
-                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15})">修改</a></li>'
+                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15},{16})">修改</a></li>'
                     .format(data.Id, escape(data.DeviceName), escape(data.Code), escape(data.MacAddress), escape(data.Ip), escape(data.Port), escape(data.Identifier), escape(data.DeviceModelId), escape(data.ScriptId),
-                        escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId));
+                    escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId) ,escape(data.ClassId));
                 var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.Code));
                 html = html.format(
@@ -293,10 +293,7 @@ function initAddSelect() {
     //    return;var categories, models, scripts;
     var i;
     var data;
-    for (i = 0; i < categories.length; i++) {
-        data = categories[i];
-        $("#addDeviceCategory").append(option.format(data.Id, data.CategoryName));
-    }
+    $('#addDeviceCategory').append(setOptions(categories, 'CategoryName'));
     var categoryId = categories[0].Id;
     var modelId = 0;
     for (i = 0; i < models.length; i++) {
@@ -325,58 +322,33 @@ function showAddModel() {
                 layer.msg(ret.errmsg);
                 return;
             };
-            $("#addModel .ads").empty();
-            $("#addCode").val("");
-            $("#addDeviceName").val("");
-            $("#addMacAddress").val("");
-            $("#addIp").val("");
-            $("#addPort").val("60000");
-            $("#addIdentifier").val("");
-            $("#addAdministrator").val("");
-            $("#addRemark").val("");
+            $('#addModel .ads').empty();
+            $('#addCode,#addDeviceName,#addMacAddress,#addIp,#addIdentifier,#addAdministrator,#addRemark').val('');
+            $('#addPort').val('60000');
+            $('#addDeviceClass').append(setOptions(ret.classes, 'Class'));
+            $('#addFirmware').append(setOptions(ret.firmwareLibraries, 'FirmwareName'));
+            $('#addApplication').append(setOptions(ret.applicationLibraries, 'ApplicationName'));
+            $('#addHardware').append(setOptions(ret.hardwareLibraries, 'HardwareName'));
             var i;
             var data;
-            var html = "";
-            for (i = 0; i < ret.firmwareLibraries.length; i++) {
-                data = ret.firmwareLibraries[i];
-                html += option.format(data.Id, data.FirmwareName);
-                $("#addFirmware").append(option.format(data.Id, data.FirmwareName));
-            }
-            $("#addFirmware").append(html);
-            html = "";
-            for (i = 0; i < ret.applicationLibraries.length; i++) {
-                data = ret.applicationLibraries[i];
-                html += option.format(data.Id, data.ApplicationName);
-                $("#addApplication").append(option.format(data.Id, data.ApplicationName));
-            }
-            $("#addApplication").append(html);
-            html = "";
-            for (i = 0; i < ret.hardwareLibraries.length; i++) {
-                data = ret.hardwareLibraries[i];
-                html += option.format(data.Id, data.HardwareName);
-                $("#addHardware").append(option.format(data.Id, data.HardwareName));
-            }
-            $("#addHardware").append(html);
-            html = "";
+            var html = '';
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
                 html += option.format(data.Id, data.SiteName + data.RegionDescription);
-                $("#addSite").append(option.format(data.Id, data.SiteName + data.RegionDescription));
             }
-            $("#addSite").append(html);
+            $('#addSite').append(html);
             html = "";
             for (i = 0; i < ret.maintainers.length; i++) {
                 data = ret.maintainers[i];
                 html += option.format(data.Account, data.Name);
             }
             $("#addAdministrator").append(html);
-
             categories = ret.deviceCategories;
             models = ret.deviceModels;
             scripts = ret.scriptVersions;
             initAddSelect();
-            hideClassTip("adt");
-            $("#addModel").modal("show");
+            hideClassTip('adt');
+            $('#addModel').modal('show');
         });
 }
 
@@ -414,6 +386,12 @@ function addDevice() {
     }
     //识别码
     var identifier = $("#addIdentifier").val();
+    //设备分类
+    var deviceClassId = $("#addDeviceClass").val();
+    if (isStrEmptyOrUndefined(deviceClassId)) {
+        showTip("addDeviceClassTip", "设备分类错误");
+        add = false;
+    }
     //设备类型
     var deviceCategoryId = $("#addDeviceCategory").val();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
@@ -466,8 +444,6 @@ function addDevice() {
     if (!add)
         return;
     var doSth = function () {
-        $("#addModel").modal("hide");
-
         var data = {}
         data.opType = 103;
         data.opData = JSON.stringify({
@@ -483,6 +459,8 @@ function addDevice() {
             Port: port,
             //识别码
             Identifier: identifier,
+            //设备分类
+            ClassId: deviceClassId,
             //设备型号编号
             DeviceModelId: deviceModelId,
             //设备流程脚本版本编号
@@ -504,6 +482,7 @@ function addDevice() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    $("#addModel").modal("hide");
                     getDeviceList();
                 }
             });
@@ -512,28 +491,24 @@ function addDevice() {
 }
 
 function initUpdateSelect(categoryId, modelId, scriptId) {
+    $('#updateDeviceCategory').append(setOptions(categories, 'CategoryName')).val(categoryId).trigger('change');
     var i;
     var data;
-    for (i = 0; i < categories.length; i++) {
-        data = categories[i];
-        $("#updateDeviceCategory").append(option.format(data.Id, data.CategoryName));
-    }
-    $("#updateDeviceCategory").val(categoryId);
     for (i = 0; i < models.length; i++) {
         data = models[i];
         if (data.DeviceCategoryId == categoryId)
             $("#updateDeviceModel").append(option.format(data.Id, data.ModelName));
     }
-    $("#updateDeviceModel").val(modelId);
+    $("#updateDeviceModel").val(modelId).trigger('change');
     for (i = 0; i < scripts.length; i++) {
         data = scripts[i];
         if (data.DeviceModelId.indexOf(modelId) != -1)
             $("#updateScript").append(option.format(data.Id, data.ScriptName));
     }
-    $("#updateScript").val(scriptId);
+    $("#updateScript").val(scriptId).trigger('change');
 }
 
-function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, scriptId, firmwareId, applicationId, hardwareId, siteId, administrator, remark, categoryId) {
+function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, scriptId, firmwareId, applicationId, hardwareId, siteId, administrator, remark, categoryId,classId) {
     deviceName = unescape(deviceName);
     code = unescape(code);
     macAddress = unescape(macAddress);
@@ -548,6 +523,7 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
     administrator = unescape(administrator);
     remark = unescape(remark);
     categoryId = unescape(categoryId);
+    classId = unescape(classId);
     var data = {}
     data.opType = 107;
     ajaxPost("/Relay/Post", data,
@@ -556,47 +532,31 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
                 layer.msg(ret.errmsg);
                 return;
             };
-
-            $("#updateModel .ads").empty();
+            $('#updateModel .ads').empty();
+            $('#updateDeviceClass').append(setOptions(ret.classes, 'Class')).val(classId).trigger('change');
+            $('#updateFirmware').append(setOptions(ret.firmwareLibraries, 'FirmwareName')).val(firmwareId).trigger('change');
+            $('#updateApplication').append(setOptions(ret.applicationLibraries, 'ApplicationName')).val(applicationId).trigger('change');
+            $('#updateHardware').append(setOptions(ret.hardwareLibraries, 'HardwareName')).val(hardwareId).trigger('change');
             var i;
             var data;
-            var html = "";
-            for (i = 0; i < ret.firmwareLibraries.length; i++) {
-                data = ret.firmwareLibraries[i];
-                html += option.format(data.Id, data.FirmwareName);
-            }
-            $("#updateFirmware").append(html);
-            html = "";
-            for (i = 0; i < ret.applicationLibraries.length; i++) {
-                data = ret.applicationLibraries[i];
-                html += option.format(data.Id, data.ApplicationName);
-            }
-            $("#updateApplication").append(html);
-            html = "";
-            for (i = 0; i < ret.hardwareLibraries.length; i++) {
-                data = ret.hardwareLibraries[i];
-                html += option.format(data.Id, data.HardwareName);
-            }
-            $("#updateHardware").append(html);
-            html = "";
+            var html = '';
             for (i = 0; i < ret.sites.length; i++) {
                 data = ret.sites[i];
                 html += option.format(data.Id, data.SiteName + data.RegionDescription);
             }
-            $("#updateSite").append(html);
-            html = "";
+            $('#updateSite').append(html);
+            html = '';
             for (i = 0; i < ret.maintainers.length; i++) {
                 data = ret.maintainers[i];
                 html += option.format(data.Account, data.Name);
             }
-            $("#updateAdministrator").append(html);
+            $('#updateAdministrator').append(html);
             html = "";
             categories = ret.deviceCategories;
             models = ret.deviceModels;
             scripts = ret.scriptVersions;
             initUpdateSelect(categoryId, deviceModelId, scriptId);
             hideClassTip("adt");
-
             $("#updateId").html(id);
             $("#updateDeviceName").val(deviceName);
             $("#updateCode").val(code);
@@ -606,13 +566,9 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             $("#updateIdentifier").val(identifier);
             $("#updateDeviceModel").val(deviceModelId);
             $("#updateScript").val(scriptId);
-            $("#updateFirmware").val(firmwareId);
-            $("#updateHardware").val(hardwareId);
-            $("#updateApplication").val(applicationId);
             $("#updateSite").val(siteId);
             $("#updateAdministrator").val(administrator);
             $("#updateRemark").val(remark);
-
             $("#updateModel").modal("show");
         });
 }
@@ -652,6 +608,12 @@ function updateDevice() {
     }
     //识别码
     var identifier = $("#updateIdentifier").val();
+    //设备分类
+    var deviceClassId = $("#updateDeviceClass").val();
+    if (isStrEmptyOrUndefined(deviceClassId)) {
+        showTip("updateDeviceClassTip", "设备分类错误");
+        update = false;
+    }
     //设备类型
     var deviceCategoryId = $("#updateDeviceCategory").val();
     if (isStrEmptyOrUndefined(deviceCategoryId)) {
@@ -722,6 +684,8 @@ function updateDevice() {
             Port: port,
             //识别码
             Identifier: identifier,
+            //设备分类
+            ClassId: deviceClassId,
             //设备型号编号
             DeviceModelId: deviceModelId,
             //设备流程脚本版本编号

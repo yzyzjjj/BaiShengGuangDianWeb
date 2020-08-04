@@ -220,7 +220,7 @@ function queryFlowCard() {
                 return;
             }
             $("#fcBody").removeClass("hidden");
-            var head ='<div class="form-group border-left">' +
+            var head = '<div class="form-group border-left">' +
                 '<label for="isDifference" class="text-danger">是否微调：</label>' +
                 '<input type="checkbox" id="isDifference" class="icb_minimal">' +
                 '</div>' +
@@ -1337,7 +1337,7 @@ function getLogList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var account = getCookieTokenInfo().account;
+            var account = getCookieTokenInfo().name;
             var order = function (a, b, c, d) {
                 return d.row + 1;
             }
@@ -1387,7 +1387,7 @@ function getLogList() {
             }
             var detailBtn = function (d) {
                 var op = '<button type="button" class="btn btn-{0} btn-sm" onclick="showLogDetailModel({2},{3})"}>{1}</button>';
-                return _permissionList[13].have && d.State == 3 && d.Score == 0 && d.Account == account ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
+                return _permissionList[13].have && d.State == 3 && d.Score == 0 && d.Proposer == account ? op.format('primary', '评价', d.Id, 0) : op.format('success', '查看', d.Id, 1);
             }
             $("#logList")
                 .DataTable({
@@ -1419,7 +1419,7 @@ function getLogList() {
 }
 
 //报修记录详情弹窗
-function showLogDetailModel(logId, isLook) {
+function showLogDetailModel(logId, isLook, isShow) {
     var data = {}
     data.opType = 438;
     data.opData = JSON.stringify({
@@ -1503,7 +1503,7 @@ function showLogDetailModel(logId, isLook) {
             });
         }
     });
-    $('#showLogDetailModel').modal('show');
+    isShow || $('#showLogDetailModel').modal('show');
 }
 
 //保存报修记录评价
@@ -1526,10 +1526,10 @@ function updateComment() {
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         layer.msg(ret.errmsg);
-        $('#showLogDetailModel').modal('hide');
         if (ret.errno == 0) {
+            $('#showLogDetailModel').modal('hide');
             getLogList();
-            showLogDetailModel(id, score);
+            showLogDetailModel(id, score, true);
         }
     });
 }

@@ -141,6 +141,7 @@ function pageReady() {
     });
     $('#updatePlanSelect').on('select2:select', function () {
         var id = $(this).val();
+        $('#addPlanBody').empty();
         addUpPlanTable(id, true);
     });
     $('#logPlanSelect,#logBillSelect').on('select2:select', () => getLogList());
@@ -227,9 +228,9 @@ function addUpPlanTable(planId, isUp) {
             }
             $('#addPlanBody').append(ops);
             setTableStyle();
-            getPriceSum();
             setTableTrCount($("#addPlanBody"), _planTrCount);
         }
+        getPriceSum();
         $('#addPlanTableBtn').attr('disabled', false);
     });
 }
@@ -402,7 +403,7 @@ function getPriceSum() {
         if (isStrEmptyOrUndefined(plannedConsumption)) {
             plannedConsumption = 0;
         }
-        priceSum += (price >> 0) * (plannedConsumption >> 0);
+        priceSum += parseFloat(price) * parseFloat(plannedConsumption);
     }
     $('#planCost').text(priceSum.toFixed(2));
 }
