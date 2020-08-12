@@ -423,44 +423,92 @@
                     <h4 class="modal-title">冲正</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group flexStyle" style="justify-content:space-between">
-                        <label class="control-label" style="white-space: nowrap">清单：</label>
-                        <div>
-                            <button type="button" class="btn btn-default btn-sm" onclick="resetList('#reversalList')"><i class="fa fa-refresh"></i> 重置</button>
-                            <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active" id="reversalAllLi"><a href="#reversalAll" data-toggle="tab" aria-expanded="true">冲正</a></li>
+                            <li id="reversalEntryLi"><a href="#reversalEntry" data-toggle="tab" aria-expanded="false">入库修正</a></li>
+                            <li id="reversalConsumeLi"><a href="#reversalConsume" data-toggle="tab" aria-expanded="false">领用修正</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active in" id="reversalAll">
+                                <div class="text-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#reversalList')"><i class="fa fa-refresh"></i> 重置</button>
+                                    <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                                </div>
+                                <div class="form-group maxHeight" id="reversalListTable" style="overflow: auto">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>货品编号</th>
+                                                <th>类别</th>
+                                                <th>名称</th>
+                                                <th>供应商</th>
+                                                <th>规格</th>
+                                                <th>单价</th>
+                                                <th>位置</th>
+                                                <th>单位</th>
+                                                <th class="text-red">剩余库存</th>
+                                                <th class="text-info">库存修改</th>
+                                                <th>备注</th>
+                                                <th>货品详情</th>
+                                                <th>日志</th>
+                                                <th>删除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reversalList" data-index="3"></tbody>
+                                    </table>
+                                </div>
+                                <div class="flexStyle" style="justify-content: center;padding-bottom:10px">
+                                    <span class="iconfont icon-saoyisao" onclick="scanAdd(3)" style="font-size: 30px; cursor: pointer"></span>
+                                    <button type="button" class="btn btn-default btn-sm" id="addReversalListBtn" onclick="addListTr(3)"><i class="fa fa-plus"></i> 添加新项</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="reversalEntry">
+                                <div class="pull-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="getReversalAll(1)"><i class="fa fa-refresh"></i> 重置</button>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding: 10px 0">
+                                    <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                    <div class="flexStyle">
+                                        <input type="text" id="reversalEntrySTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                        <label class="control-label" style="margin: 5px">-</label>
+                                        <input type="text" id="reversalEntryETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                    </div>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding-bottom: 10px">
+                                    <label class="control-label no-margin middle text-nowrap">货品编号：</label>
+                                    <select class="ms2 form-control" id="reversalEntryCode" style="width: 160px"></select>
+                                </div>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="reversalEntryList"></table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="reversalConsume">
+                                <div class="pull-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="getReversalAll(2)"><i class="fa fa-refresh"></i> 重置</button>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding: 10px 0">
+                                    <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                    <div class="flexStyle">
+                                        <input type="text" id="reversalConsumeSTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                        <label class="control-label" style="margin: 5px">-</label>
+                                        <input type="text" id="reversalConsumeETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                    </div>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding-bottom: 10px">
+                                    <label class="control-label no-margin middle text-nowrap">货品编号：</label>
+                                    <select class="ms2 form-control" id="reversalConsumeCode" style="width: 160px"></select>
+                                </div>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="reversalConsumeList"></table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group maxHeight" id="reversalListTable" style="overflow: auto">
-                        <table class="table table-hover table-striped">
-                            <thead>
-                                <tr>
-                                    <th>序号</th>
-                                    <th>货品编号</th>
-                                    <th>类别</th>
-                                    <th>名称</th>
-                                    <th>供应商</th>
-                                    <th>规格</th>
-                                    <th>单价</th>
-                                    <th>位置</th>
-                                    <th>单位</th>
-                                    <th class="text-red">剩余库存</th>
-                                    <th class="text-info">库存修改</th>
-                                    <th>备注</th>
-                                    <th>货品详情</th>
-                                    <th>日志</th>
-                                    <th>删除</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reversalList" data-index="3"></tbody>
-                        </table>
-                    </div>
-                    <div class="flexStyle" style="justify-content: center">
-                        <span class="iconfont icon-saoyisao" onclick="scanAdd(3)" style="font-size: 30px; cursor: pointer"></span>
-                        <button type="button" class="btn btn-default btn-sm" id="addReversalListBtn" onclick="addListTr(3)"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="reversalConModal()">冲正</button>
+                    <button type="button" class="btn btn-primary" onclick="reversalConModal()" id="reversalBtn">冲正</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

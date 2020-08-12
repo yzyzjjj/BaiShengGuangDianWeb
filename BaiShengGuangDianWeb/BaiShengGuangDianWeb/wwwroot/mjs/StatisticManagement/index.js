@@ -227,6 +227,10 @@ function createChart(start1, end1) {
         return;
     }
     var workShop = $("#selectWorkShop").val();
+    if (isStrEmptyOrUndefined(workShop)) {
+        layer.msg('请选择车间');
+        return;
+    }
     var devEl = $('#selectDevice :selected');
     var deviceName = [];
     for (var i = 0, len = devEl.length; i < len; i++) {
@@ -277,7 +281,7 @@ function createChart(start1, end1) {
     var data = {}
     data.opType = 502;
     data.opData = JSON.stringify({
-        WorkshopName: workShop,
+        WorkshopName: workShop == '所有车间' ? '' : workShop,
         DeviceId: deviceId.join(","),
         StartTime: start,
         EndTime: end,
@@ -1040,7 +1044,7 @@ function getProductionChart() {
             var option = {
                 tooltip: {
                     trigger: 'axis',
-                    formatter:  params => {
+                    formatter: params => {
                         var formatter = '';
                         for (i = 0, len = params.length; i < len; i++) {
                             d = params[i];
@@ -1092,6 +1096,6 @@ function getProductionChart() {
                     }
                 }
             };
-            echarts.init($('#production_chart')[0]).setOption(option,true);
+            echarts.init($('#production_chart')[0]).setOption(option, true);
         });
 }

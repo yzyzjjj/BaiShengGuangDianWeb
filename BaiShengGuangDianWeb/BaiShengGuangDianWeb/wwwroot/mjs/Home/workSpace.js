@@ -1478,7 +1478,7 @@ function showLogDetailModel(logId, isLook, isShow) {
         $('#remark').text(d.Remark);
         $('#solvePlan').text(d.SolvePlan);
         $('#detailImgList').empty();
-        if (d.ImageList > 0) {
+        if (d.ImageList.length) {
             data = {
                 type: fileEnum.FaultDevice,
                 files: d.Images
@@ -1490,9 +1490,7 @@ function showLogDetailModel(logId, isLook, isShow) {
                 }
                 var imgOp = '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
-                    '<img src={0} style="height:200px">' +
-                    '<div class="caption text-center">' +
-                    '</div>' +
+                    '<img src={0}>' +
                     '</div>' +
                     '</div>';
                 var imgOps = "";

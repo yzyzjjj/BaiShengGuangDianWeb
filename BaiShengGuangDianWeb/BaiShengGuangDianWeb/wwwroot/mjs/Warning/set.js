@@ -148,12 +148,12 @@ function showProductionWarnSet(rData) {
 
 //设备数据刷新
 function deviceRefreshTable() {
-    $('#deviceWarn').val() ? getDeviceWarnSet() : getScriptItem();
+    $('#deviceWarn').val() && $('#deviceWarn :selected').text() == $('#warnName').val().trim() ? getDeviceWarnSet() : getScriptItem();
 }
 
 //生产数据刷新
 function productionRefreshTable() {
-    $('#productionWarn').val() ? getProductionWarnSet() : getProductionItem();
+    $('#productionWarn').val() && $('#productionWarn :selected').text() == $('#productionWarnName').val().trim() ? getProductionWarnSet() : getProductionItem();
 }
 
 //生产数据汇总重置

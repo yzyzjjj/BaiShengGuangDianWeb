@@ -100,13 +100,13 @@ function pageReady() {
             }
         });
     });
-    $('#increaseList,#consumePlanList,#consumeOtherList,#reversalList,#fastIncreaseList').on('focus', '.zeroNum', function () {
+    $('#increaseList,#consumePlanList,#consumeOtherList,#reversalList,#fastIncreaseList,#reversalEntryList,#reversalConsumeList').on('focus', '.zeroNum', function () {
         var v = $(this).val();
         if (v == 0) {
             $(this).val("");
         }
     });
-    $('#increaseList,#consumePlanList,#consumeOtherList,#reversalList,#fastIncreaseList').on('blur', '.zeroNum', function () {
+    $('#increaseList,#consumePlanList,#consumeOtherList,#reversalList,#fastIncreaseList,#reversalEntryList,#reversalConsumeList').on('blur', '.zeroNum', function () {
         var v = $(this).val();
         if (isStrEmptyOrUndefined(v)) {
             $(this).val("0");
@@ -213,6 +213,12 @@ function pageReady() {
             }
         };
     });
+    //冲正事件
+    $('#reversalAllLi').on('click', () => setReversalBtn('reversalConModal()', '冲正'));
+    $('#reversalEntryLi').on('click', () => setReversalBtn('updateReversalAll(1)', '入库修正'));
+    $('#reversalConsumeLi').on('click', () => setReversalBtn('updateReversalAll(2)', '领用修正'));
+    $('#reversalEntryCode').on('select2:select', () => getReversalAll(1));
+    $('#reversalConsumeCode').on('select2:select', () => getReversalAll(2));
     //日志事件
     $('#logPlanSelect').on('select2:select', function (e, codeId) {
         var planId = $(this).val();
@@ -238,6 +244,11 @@ function pageReady() {
     }
     $('#fastIncreaseModal,#increaseModal').on('hidden.bs.modal', () => $('#increaseBtn,#fastIncreaseBtn').attr('disabled', false));
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
+}
+
+//冲正按钮设置
+function setReversalBtn(fn, text) {
+    $('#reversalBtn').attr('onclick', fn).text(text);
 }
 
 //获取物料相关选项
@@ -1452,6 +1463,7 @@ var _reversalTr = null;
 //冲正弹窗
 function showReversalModel() {
     $("#addReversalListBtn").attr('disabled', true);
+    $('#reversalAllLi').hasClass('active') || $('#reversalAllLi > a').click();
     $('#reversalList').empty();
     new Promise(resolve => initGangedData(resolve)).then(e => {
         _reversalTr = `<tr>
@@ -1474,6 +1486,12 @@ function showReversalModel() {
             </tr>`;
         $("#addReversalListBtn").attr('disabled', false);
         setCheckboxCode(3);
+        $('#reversalEntryCode,#reversalConsumeCode').empty().append(`<option value="0">所有货品编号</option>${e.codeOp}`);
+        $('#reversalEntrySTime,#reversalEntryETime,#reversalConsumeSTime,#reversalConsumeETime').val(getDate()).datepicker('update');
+        $('#reversalEntrySTime,#reversalEntryETime').off('changeDate').on('changeDate', () => getReversalAll(1));
+        $('#reversalConsumeSTime,#reversalConsumeETime').off('changeDate').on('changeDate', () => getReversalAll(2));
+        $('#reversalEntryLi > a').off('click').one('click', () => getReversalAll(1));
+        $('#reversalConsumeLi > a').off('click').one('click', () => getReversalAll(2));
     });
     $("#reversalModal").modal("show");
 }
@@ -1568,6 +1586,139 @@ function reversalCon() {
         });
     }
     showConfirm('冲正', doSth);
+}
+
+let _entryTrs = null;
+let _consumeTrs = null;
+//获取入库修正&领用修正信息
+function getReversalAll(type) {
+    let el = '', arr = null, isEntry = false;
+    if (type === 1) {
+        el = 'Entry';
+        arr = _entryTrs = [];
+        isEntry = true;
+    } else if (type === 2) {
+        el = 'Consume';
+        arr = _consumeTrs = [];
+    }
+    var startTime = $(`#reversal${el}STime`).val();
+    var endTime = $(`#reversal${el}ETime`).val();
+    if (isStrEmptyOrUndefined(startTime) || isStrEmptyOrUndefined(endTime)) {
+        return;
+    }
+    startTime += ' 00:00:00';
+    endTime += ' 23:59:59';
+    if (compareDate(startTime, endTime)) {
+        layer.msg("结束时间不能小于开始时间");
+        return;
+    }
+    var list = { startTime, endTime, type };
+    var billId = $(`#reversal${el}Code`).val();
+    if (isStrEmptyOrUndefined(billId)) {
+        layer.msg('请选择货品编号');
+        return;
+    }
+    (billId == 0) || (list.billId = billId);
+    var data = {};
+    data.opType = 803;
+    data.opData = JSON.stringify(list);
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const numberFn = d => `<span class="textOn">${d}</span><input class="form-control text-center textIn hidden zeroNum number" style="min-width:80px" oninput="onInput(this, 4, 0)">`;
+        $(`#reversal${el}List`).DataTable({
+            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+            destroy: true,
+            paging: true,
+            searching: true,
+            language: oLanguage,
+            data: ret.datas,
+            aaSorting: [[1, 'asc']],
+            aLengthMenu: [20, 40, 60],
+            iDisplayLength: 20,
+            columns: [
+                { data: null, title: '选择', render: d => `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id} bill=${d.BillId}>`, orderable: false },
+                { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
+                { data: 'Time', title: '时间' },
+                { data: 'Purpose', title: isEntry ? '货品来源' : '用途' },
+                { data: 'Code', title: '货品编码' },
+                { data: 'Category', title: '类别' },
+                { data: 'Name', title: '名称' },
+                { data: 'Specification', title: '规格' },
+                { data: 'Supplier', title: '供应商' },
+                { data: 'Price', title: '单价' },
+                { data: 'Number', title: '数量', render: numberFn },
+                { data: 'RelatedPerson', title: isEntry ? '采购/退回人' : '领用人' },
+                { data: 'Manager', title: '物管员' }
+            ],
+            drawCallback: function () {
+                const dataTable = this.api();
+                $(this).find('.isEnable').iCheck({
+                    handle: 'checkbox',
+                    checkboxClass: 'icheckbox_minimal-blue',
+                    increaseArea: '20%'
+                }).on('ifChanged', function () {
+                    const tr = $(this).parents('tr');
+                    const domTr = tr[0];
+                    if ($(this).is(':checked')) {
+                        arr.push(domTr);
+                        tr.find('.textIn').removeClass('hidden').siblings('.textOn').addClass('hidden');
+                        const d = dataTable.row(domTr).data();
+                        tr.find('.number').val(d.Number);
+                    } else {
+                        arr.splice(arr.indexOf(domTr), 1);
+                        tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
+                    }
+                });
+            }
+        });
+    });
+}
+
+//入库修正&领用修正
+function updateReversalAll(type) {
+    let arr = [], opType = null, text = '';
+    if (type === 1) {
+        arr = _entryTrs;
+        opType = 806;
+        text = '入库修正';
+    } else if (type === 2) {
+        arr = _consumeTrs;
+        opType = 807;
+        text = '领用修正';
+    }
+    const len = arr.length;
+    if (!len) {
+        layer.msg('请选择需要修改的数据');
+        return;
+    }
+    const list = [];
+    for (let i = 0; i < len; i++) {
+        const tr = $(arr[i]);
+        const number = tr.find('.number').val().trim() || 0;
+        const checkBox = tr.find('.isEnable');
+        list.push({
+            Type: type,
+            Id: checkBox.val(),
+            Number: number,
+            BillId: checkBox.attr('bill')
+        });
+    }
+    var doSth = () => {
+        var data = {}
+        data.opType = opType;
+        data.opData = JSON.stringify(list);
+        ajaxPost("/Relay/Post", data, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getMaterialList('Select');
+                getReversalAll(type);
+            }
+        });
+    }
+    showConfirm(text, doSth);
 }
 
 /////////////////////////////////////////////日志////////////////////////////////////////////
