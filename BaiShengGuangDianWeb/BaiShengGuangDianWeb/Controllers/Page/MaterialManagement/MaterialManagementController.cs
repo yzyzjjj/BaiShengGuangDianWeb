@@ -72,5 +72,13 @@ namespace BaiShengGuangDianWeb.Controllers.Page.MaterialManagement
         {
             return View();
         }
+        /// <summary>
+        /// 统计报表
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Statistic()
+        {
+            return View();
+        }
     }
 }
