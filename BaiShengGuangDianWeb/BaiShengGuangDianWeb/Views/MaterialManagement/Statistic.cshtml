@@ -1,18 +1,67 @@
 ﻿@model object
-
 @{
-    Layout = null;
+    ViewBag.Title = "统计报表";
+    Layout = "_Layout";
 }
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/statistic.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/statistic.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>物料管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#materialBox" data-toggle="tab" aria-expanded="true">月度物料结存表</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="materialBox">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <button type="button" class="btn btn-primary btn-sm pull-right" onclick="getMaterialList()">刷新</button>
+                            <div class="flexStyle" style="flex-wrap: wrap">
+                                <label class="control-label no-margin middle text-nowrap">月份：</label>
+                                <input type="text" id="materialMonth" class="form_month form-control pointer text-center" style="min-width: 100px; width: 150px">
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle form-group" style="flex-wrap: wrap">
+                                <label class="control-label no-margin middle text-nowrap">筛选：</label>
+                                <div class="flexStyle" style="flex-wrap: wrap">
+                                    <div style="flex: 1; min-width: 140px">
+                                        <select class="ms2 form-control" id="materialCategory" style="width: 100%"></select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 140px">
+                                        <select class="ms2 form-control" id="materialName" style="width: 100%"></select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 140px">
+                                        <select class="ms2 form-control" id="materialSupplier" style="width: 100%"></select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 140px">
+                                        <select class="ms2 form-control" id="materialSpecification" style="width: 100%"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hidden" id="materialInfo">
+                                <label class="control-label textOverTop" style="margin-right: 20px">入库总金额：<span id="entryMoney"></span></label>
+                                <label class="control-label textOverTop" style="margin-right: 20px">领用总金额：<span id="consumeMoney"></span></label>
+                                <label class="control-label textOverTop" style="margin-right: 20px">结存总金额：<span id="cashMoney"></span></label>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="materialList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
