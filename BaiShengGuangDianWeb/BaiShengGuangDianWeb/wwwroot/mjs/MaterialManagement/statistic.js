@@ -1,5 +1,5 @@
 ﻿function pageReady() {
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     $('#materialMonth').val(getNowMonth()).datepicker('update');
     new Promise(resolve => getAllSelect(resolve)).then(e => allCodeSelect(e, 0));
     $('#materialCategory').on('select2:select', function () {
@@ -89,9 +89,9 @@ function getMaterialList() {
             consumeMoney += d.ConsumeAmount;
             cashMoney += d.CorrectAmount;
         }
-        $('#entryMoney').text(entryMoney);
-        $('#consumeMoney').text(consumeMoney);
-        $('#cashMoney').text(cashMoney);
+        $('#entryMoney').text(parseFloat(entryMoney.toFixed(5)));
+        $('#consumeMoney').text(parseFloat(consumeMoney.toFixed(5)));
+        $('#cashMoney').text(parseFloat(cashMoney.toFixed(5)));
         $('#materialInfo').removeClass('hidden');
         $('#materialList').DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -115,7 +115,7 @@ function getMaterialList() {
                 { data: 'TodayPrice', title: '价格' },
                 { data: 'Stock', title: '最低库存' },
                 { data: 'LastNumber', title: '月初数量' },
-                { data: 'LastPrice', title: '月初金额' },
+                { data: 'LastAmount', title: '月初金额' },
                 { data: 'Increase', title: '本月入库数量' },
                 { data: 'IncreaseAmount', title: '本月入库金额' },
                 { data: 'Consume', title: '本月领用数量' },

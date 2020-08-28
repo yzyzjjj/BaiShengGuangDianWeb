@@ -210,6 +210,11 @@
 "wwwroot/mjs/MaterialManagement/specification.js"]
 },
 {
+"outputFileName":"wwwroot/mminjs/MaterialManagement/statistic.min.js",
+"inputFiles":[
+"wwwroot/mjs/MaterialManagement/statistic.js"]
+},
+{
 "outputFileName":"wwwroot/mminjs/MaterialManagement/supplier.min.js",
 "inputFiles":[
 "wwwroot/mjs/MaterialManagement/supplier.js"]
