@@ -747,5 +747,5 @@ function addUpModule(isUp) {
                 }
             });
     }
-    showConfirm(`${isUp ? '修改' : '新增'}配置：${isUp ? olModuleName : newModuleName}`, doSth);
+    showConfirm(`${isUp ? '修改' : '新增'}模块：${isUp ? olModuleName : newModuleName}`, doSth);
 }

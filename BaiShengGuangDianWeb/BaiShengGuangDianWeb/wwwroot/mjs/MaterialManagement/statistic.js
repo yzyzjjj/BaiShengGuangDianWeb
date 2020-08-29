@@ -23,7 +23,7 @@
             siteId: -1
         })).then(e => allCodeSelect(e, 3));
     });
-    $('#materialSpecification').on('select2:select', () => getMaterialList());
+    $('#materialSpecification,#materialSite').on('select2:select', () => getMaterialList());
     $('#materialMonth').on('changeDate', () => getMaterialList());
 }
 
@@ -46,6 +46,7 @@ function allCodeSelect(ret, n) {
     switch (n) {
         case 0:
             $('#materialCategory').empty().append(`<option value="0">所有类别</option>${setOptions(ret.Categories, 'Category')}`);
+            $('#materialSite').empty().append(`<option value="0">所有位置</option>${setOptions(ret.Sites, 'Site')}`);
         case 1:
             $('#materialName').empty().append(`<option value="0">所有名称</option>${setOptions(ret.Names, 'Name')}`);
         case 2:
@@ -65,29 +66,54 @@ function getMaterialList() {
         return;
     }
     time += '-01';
+    const categoryId = $('#materialCategory').val();
+    if (isStrEmptyOrUndefined(categoryId)) {
+        layer.msg('请选择类别');
+        return;
+    }
+    const nameId = $('#materialName').val();
+    if (isStrEmptyOrUndefined(nameId)) {
+        layer.msg('请选择名称');
+        return;
+    }
+    const supplierId = $('#materialSupplier').val();
+    if (isStrEmptyOrUndefined(supplierId)) {
+        layer.msg('请选择供应商');
+        return;
+    }
+    const specificationId = $('#materialSpecification').val();
+    if (isStrEmptyOrUndefined(specificationId)) {
+        layer.msg('请选择规格');
+        return;
+    }
+    const siteId = $('#materialSite').val();
+    if (isStrEmptyOrUndefined(siteId)) {
+        layer.msg('请选择位置');
+        return;
+    }
     const data = {}
     data.opType = 891;
     data.opData = JSON.stringify({
         day: time,
-        interval: 3
+        interval: 3,
+        categoryId,
+        nameId,
+        supplierId,
+        specificationId,
+        siteId
     });
     ajaxPost('/Relay/Post', data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        let rData = ret.datas;
-        const categoryId = $('#materialCategory').val() >> 0;
-        const nameId = $('#materialName').val() >> 0;
-        const supplierId = $('#materialSupplier').val() >> 0;
-        const specificationId = $('#materialSpecification').val() >> 0;
-        rData = rData.filter(item => (!categoryId || item.CategoryId === categoryId) && (!nameId || item.NameId === nameId) && (!supplierId || item.SupplierId === supplierId) && (!specificationId || item.SpecificationId === specificationId));
+        const rData = ret.datas;
         let entryMoney = 0, consumeMoney = 0, cashMoney = 0;
         for (let i = 0, len = rData.length; i < len; i++) {
             const d = rData[i];
             entryMoney += d.IncreaseAmount;
             consumeMoney += d.ConsumeAmount;
-            cashMoney += d.CorrectAmount;
+            cashMoney += d.TodayAmount;
         }
         $('#entryMoney').text(parseFloat(entryMoney.toFixed(5)));
         $('#consumeMoney').text(parseFloat(consumeMoney.toFixed(5)));
@@ -120,8 +146,8 @@ function getMaterialList() {
                 { data: 'IncreaseAmount', title: '本月入库金额' },
                 { data: 'Consume', title: '本月领用数量' },
                 { data: 'ConsumeAmount', title: '本月领用金额' },
-                { data: 'Correct', title: '本月结存数量' },
-                { data: 'CorrectAmount', title: '本月结存金额' }
+                { data: 'TodayNumber', title: '本月结存数量' },
+                { data: 'TodayAmount', title: '本月结存金额' }
             ]
         });
     });
