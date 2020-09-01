@@ -1,4 +1,5 @@
 ﻿function pageReady() {
+    document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 100 + 'px';
     $('.ms2').select2();
     getDevice();
     $('#chartTypeSelect').on('change', () => $('#chartTypeSelect').val() == 0 ? $('#chartSelect').addClass('hidden') : $('#chartSelect').removeClass('hidden'));
@@ -21,6 +22,15 @@
         $("html,body").stop().animate({
             scrollTop: 0
         });
+    });
+    let time = 0;
+    $('#kanBanData').on('resize', () => {
+        clearTimeout(time);
+        time = setTimeout(() => {
+            echarts.init($('#chartmain')[0]).resize();
+            echarts.init($('#chartmain_bing')[0]).resize();
+            echarts.init($('#chartmain_zhe')[0]).resize();
+        }, 200);
     });
 }
 
