@@ -332,7 +332,10 @@ function getPurchase() {
             }
             return `<span style="color:${color}">${d.StateStr}</span>`;
         };
-        const purchase = d => d.length > 6 ? `<span title="${d}">${d.slice(0, 6)}...</span>` : d;
+        const purchase = d => {
+            d = d || '';
+            return d.length > 6 ? `<span title="${d}">${d.slice(0, 6)}...</span>` : d;
+        };
         _stateDataTable = $('#stateList').DataTable({
             dom: '<"pull-left"l><"pull-right"f>rt<"text-center"i><"table-flex"p>',
             bAutoWidth: false,

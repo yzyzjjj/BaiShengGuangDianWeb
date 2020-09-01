@@ -120,7 +120,13 @@ function getMaterialList() {
         $('#cashMoney').text(parseFloat(cashMoney.toFixed(5)));
         $('#materialInfo').removeClass('hidden');
         $('#materialList').DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+            buttons: [{
+                extend: 'excel',
+                text: '导出Excel',
+                className: 'btn-primary btn-sm',
+                filename: `月度物料结存表_${getDate()}`
+            }],
             destroy: true,
             paging: true,
             searching: true,
