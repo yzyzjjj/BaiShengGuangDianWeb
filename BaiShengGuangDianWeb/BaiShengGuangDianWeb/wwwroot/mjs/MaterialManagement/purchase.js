@@ -100,7 +100,7 @@ function pasteTable(e) {
     if (!(e.originalEvent.clipboardData && e.originalEvent.clipboardData.items)) {
         return;
     }
-    if (e.target.localName != 'input') {
+    if (e.target.localName != 'input' && $(e.target).prop('contenteditable') != 'true') {
         const paste = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
         const data = paste.split('\n');
         const arr = [];
@@ -675,8 +675,12 @@ function citePurchaseList() {
         }
         const rData = ret.datas;
         for (let i = 0, len = rData.length; i < len; i++) {
-            rData[i].ItemId = rData[i].Id;
-            rData[i].Id = 0;
+            const d = rData[i];
+            d.ItemId = d.Id;
+            d.Number = d.Stock;
+            d.TaxPrice = parseFloat((d.Price * (1 + (d.TaxTate) / 100)).toFixed(5));
+            d.TaxAmount = parseFloat((d.Number * d.TaxPrice).toFixed(5));
+            d.Id = 0;
         }
         _pasteData = null;
         setPurchaseList(rData);
@@ -714,6 +718,8 @@ function setPurchaseList(arr, isQuote) {
         drawCallback: function () {
             if (isQuote) {
                 $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(10),:nth-child(11),:nth-child(9),:nth-child(8))').prop('contenteditable', true);
+            } else {
+                $('#purchaseList tbody tr td:nth-child(6)').prop('contenteditable', true);
             }
         },
         initComplete: function () {
