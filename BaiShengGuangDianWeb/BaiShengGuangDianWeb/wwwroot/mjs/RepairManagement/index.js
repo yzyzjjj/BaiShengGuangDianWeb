@@ -2096,9 +2096,11 @@ function showMaintainerModel(cover = 1, show = true) {
                 return;
             }
             var setRow = setTable();
+            var op = '';
             for (var i = 0; i < ret.datas.length; i++) {
                 var d = ret.datas[i];
                 maintainers[d.Id] = d;
+                op += `<option value=${d.Id} phone=${d.Phone}>${d.Name}</option>`;
             }
             var chose = function (data, type, row, meta) {
                 var xh = meta.row + 1;
@@ -2120,6 +2122,8 @@ function showMaintainerModel(cover = 1, show = true) {
                 { "data": "Id", "title": "序号", "render": setRow.order, "sWidth": "80px" },
                 { "data": "Name", "title": "姓名", "sWidth": "120px" },
                 { "data": "Phone", "title": "手机号", "render": phone, "sWidth": "130px" },
+                { "data": "Name", "title": "是否排班", "sWidth": "120px" },
+                { "data": "Order", "title": "顺序", "sWidth": "120px" },
                 { "data": "Remark", "title": "备注", "render": rRemark }
             ];
             if (_permissionList[46].have || _permissionList[47].have) {
@@ -2186,9 +2190,58 @@ function showMaintainerModel(cover = 1, show = true) {
                         });
                     }
                 });
-            if (show)
-                $('#maintainerModel').modal('show');
+            show && getScheduleInfo(show, `<select class="ms2 form-control"><option value="0">未排班</option>${op}</select>`);
         }, cover);
+}
+
+//显示排班
+function getScheduleInfo(show, selectEl) {
+    ajaxPost("/Relay/Post", { opType: 434 }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const rData = ret.datas;
+        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
+        let headEl = '', bodyEl = '';
+        let index = 0;
+        let timeFn = time => {
+            time = new Date(time);
+            return {
+                m: time.getMonth() + 1,
+                d: time.getDate()
+            }
+        }
+        const today = getDate();
+        const nameArr = [];
+        rData.forEach(item => {
+            item.Name.trim() && nameArr.push(item.Name);
+            const text = item.Name ? `${item.Name} ${item.Phone}` : '未排班';
+            if (item.Night) {
+                $('#scheduleNight').text(text);
+            } else {
+                const time = timeFn(item.Time);
+                const color = today === item.Time.split(' ')[0] ? 'text-red' : '';
+                headEl += `<th class=${color}>周${headArr[index++]}(${time.m}/${time.d})</th>`;
+                bodyEl += `<td class=${color}><div class="schedule-name">${item.Name || '未排班'}</div><div class="select-ops hidden">${selectEl}</div><div class="schedule-phone">${item.Phone || ''}</div></td>`;
+            }
+        });
+        $('#scheduleTime').text(`${rData[0].Time.split(' ')[0]} 至 ${rData[rData.length - 1].Time.split(' ')[0]}`);
+        $('#scheduleHead').empty().append(`<tr>${headEl}</tr>`);
+        $('#scheduleBody').empty().append(`<tr>${bodyEl}</tr>`).find('.ms2').select2();
+        $('#scheduleBody .schedule-name').on('dblclick', function () {
+            $(this).addClass('hidden').siblings('.select-ops').removeClass('hidden');
+        });
+        $('#scheduleBody .ms2').on('select2:select', function () {
+            const op = $(this).find(':selected');
+            const name = op.text();
+            const phone = op.attr('phone');
+            const td = $(this).parents('td');
+            td.find('.schedule-name').text(name);
+            td.find('.schedule-phone').text(phone);
+        });
+        show && $('#maintainerModel').modal('show');
+    });
 }
 
 function changeMaintainer(ele, type) {

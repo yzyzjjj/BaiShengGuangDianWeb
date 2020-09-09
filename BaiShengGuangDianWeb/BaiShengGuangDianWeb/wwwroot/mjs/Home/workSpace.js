@@ -1255,8 +1255,47 @@ function addCraft() {
     showConfirm("添加", doSth);
 }
 
+//显示排班
 function showMaintainerModel() {
-    $("#maintainerList").empty();
+    ajaxPost("/Relay/Post", { opType: 434 }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const rData = ret.datas;
+        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
+        let headEl = '', bodyEl = '';
+        let index = 0;
+        let timeFn = time => {
+            time = new Date(time);
+            return {
+                m: time.getMonth() + 1,
+                d: time.getDate()
+            }
+        }
+        const today = getDate();
+        const nameArr = [];
+        rData.forEach(item => {
+            item.Name.trim() && nameArr.push(item.Name);
+            const text = item.Name ? `${item.Name}{0}${item.Phone}` : '未排班';
+            if (item.Night) {
+                $('#scheduleNight').text(text.format(' '));
+            } else {
+                const time = timeFn(item.Time);
+                const color = today === item.Time.split(' ')[0] ? 'text-red' : '';
+                headEl += `<th class=${color}>周${headArr[index++]}(${time.m}/${time.d})</th>`;
+                bodyEl += `<td class=${color}>${text.format('<br>')}</td>`;
+            }
+        });
+        $('#scheduleTime').text(`${rData[0].Time.split(' ')[0]} 至 ${rData[rData.length - 1].Time.split(' ')[0]}`);
+        $('#scheduleHead').empty().append(`<tr>${headEl}</tr>`);
+        $('#scheduleBody').empty().append(`<tr>${bodyEl}</tr>`);
+        getMaintainerList(nameArr);
+    });
+}
+
+//获取维修工名单
+function getMaintainerList(nameArr) {
     var data = {}
     data.opType = 430;
     data.opData = JSON.stringify({ menu: true });
@@ -1266,33 +1305,32 @@ function showMaintainerModel() {
                 layer.msg(ret.errmsg);
                 return;
             }
-
-            var order = function (data, type, row, meta) {
-                return meta.row + 1;
-            }
-            var remark = function (data, type, row, meta) {
+            var remark = function (data) {
                 return data.length > tdShowLength
-                    ? `<span title = "${data}" onclick = "showAllContent('${escape(data)}')">${
+                    ? `<span title = "${data}" onclick = "showAllContent('${escape(data)}')" style="color:black;font-weight:normal">${
                     data.substring(0, tdShowLength)}...</span>`
-                    : `<span title = "${data}">${data}</span>`;
+                    : `<span title = "${data}" style="color:black;font-weight:normal">${data}</span>`;
             }
             $("#maintainerList")
                 .DataTable({
                     dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "bAutoWidth": false,
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": [
-                        { "data": "Id", "title": "序号", "render": order, "sWidth": "80px" },
+                    bAutoWidth: false,
+                    destroy: true,
+                    paging: true,
+                    searching: true,
+                    language: oLanguage,
+                    data: ret.datas,
+                    aLengthMenu: [20, 40, 60], //更改显示记录数选项  
+                    iDisplayLength: 20, //默认显示的记录数  
+                    columns: [
+                        { "data": "Id", "title": "序号", "render": (a, b, c, d) => ++d.row, "sWidth": "80px" },
                         { "data": "Name", "title": "姓名", "sWidth": "120px" },
                         { "data": "Phone", "title": "手机号", "sWidth": "130px" },
                         { "data": "Remark", "title": "备注", "render": remark }
-                    ]
+                    ],
+                    createdRow: function (tr, data) {
+                        ~nameArr.indexOf(data.Name) && $(tr).css({ 'font-weight': 'bold', 'color': 'blue' });
+                    }
                 });
             $("#maintainerModel").modal("show");
         });
