@@ -47,6 +47,9 @@ function pageReady() {
         //    }
         //}
     });
+    $('#updateAccount,#addAccount').on('input', function() {
+        $(this).val($(this).val().replace(/\W/g, ''));
+    });
 }
 
 function getUsersList() {

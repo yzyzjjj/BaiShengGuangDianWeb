@@ -27,6 +27,7 @@ function pageReady() {
     _permissionList[79] = { uIds: ['delServiceLogBtn'] };
     _permissionList[39] = { uIds: ['getDelFaultDeviceListBtn'] };
     _permissionList[40] = { uIds: ['getDelServiceLogListBtn'] };
+    //_permissionList[80] = { uIds: ['updateScoreBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     var li = $("#tabs li:not(.hidden)").first();
     if (li) {
@@ -161,27 +162,39 @@ function pageReady() {
     });
     getFaultDeviceList();
     setTimeout(() => getServiceLogList(0), 2000);
-    $("#batchAssignList").on('change', '.serviceName', function () {
-        if ($(this).val() == '同上') {
-            $(this).val($(this).parents('tr').prev().find('.serviceName').val());
-        }
-        var phone = $(this).find('option:selected').attr('phone');
-        var phoneTd = $(this).parents('td').next();
-        phoneTd.text(phone);
+    $('#batchAssignList').on('select2:select', '.serviceName', function () {
+        $(this).val().includes('同上') && $(this).val($(this).parents('tr').prev().find('.serviceName').val()).trigger('change');
+        $(this).parents('td').next().text(Array.from($(this).find('option:selected')).map(item => $(item).attr('phone')).join());
+    });
+    $('#batchAssignList').on('select2:unselect', '.serviceName', function () {
+        $(this).parents('td').next().text(Array.from($(this).find('option:selected')).map(item => $(item).attr('phone')).join());
     });
     $("#serLogDevSite,#devSite").select2({
         allowClear: true,
         placeholder: "请选择(可不选)"
     });
-    $("#faultCode").select2({
+    $('#faultCode').select2({
         allowClear: true,
         placeholder: "请选择"
+    });
+    $('#designateName,#servicePro,#serLogFaultSolver,#serLogMaintainer').select2({
+        allowClear: true,
+        placeholder: "请选择",
+        matcher
     });
     $("#serLogWorkshop").on("change", function (e) {
         setWorkSiteSelect('#serLogWorkshop', '#serLogDevSite');
     });
     $("#workshop").on("change", function (e) {
         setWorkSiteSelect('#workshop', '#devSite');
+    });
+    $('#maintainerModel').on('show.bs.modal', function () {
+        const fn = () => $('#currentTime').text(getFullTime());
+        fn();
+        this.time = setInterval(fn, 1000);
+    });
+    $('#maintainerModel').on('hidden.bs.modal', function () {
+        clearInterval(this.time);
     });
 }
 
@@ -214,15 +227,9 @@ function getWorkerSelect() {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#designateName,#servicePro').empty();
-        var list = ret.datas;
         var op = '<option value="{0}" wname="{1}" phone="{2}">{1}</option>';
-        _worker = '';
-        for (var i = 0, len = list.length; i < len; i++) {
-            var d = list[i];
-            _worker += op.format(d.Account, d.Name, d.Phone);
-        }
-        $('#designateName,#servicePro').append(_worker);
+        _worker = ret.datas.reduce((total, d) => `${total}${op.format(d.Account, d.Name, d.Phone)}`, '');
+        $('#designateName,#servicePro').empty().append(_worker);
     }, 0);
 }
 
@@ -453,7 +460,7 @@ function showBatchAssignModal() {
         return `<div style="width:100%;min-width:80px;margin:auto"><select class="form-control grade" style="width: 100%">${_grade}</select></div>`;
     }
     var serviceName = function (a, b, c, d) {
-        return `<div style="width:100%;min-width:120px;margin:auto"><select class="form-control serviceName" style="width: 100%">${d.row == 0 ? '' : '<option value="同上">同上</option>'}${_worker}</select></div>`;
+        return `<div style="width:100%;min-width:120px;margin:auto"><select class="form-control serviceName" style="width: 100%" multiple="multiple">${d.row == 0 ? '' : '<option value="同上">同上</option>'}${_worker}</select></div>`;
     }
     var setRow = setTable();
     _batchAssignTable = $("#batchAssignList")
@@ -465,6 +472,7 @@ function showBatchAssignModal() {
             "language": oLanguage,
             "data": rData,
             "aaSorting": [[0, "asc"]],
+            "ordering": false,
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
@@ -482,13 +490,11 @@ function showBatchAssignModal() {
                 { "data": null, "title": "故障详情", "render": setRow.detailBtn }
             ],
             "createdRow": function (row, d) {
-                var pri = d.Priority;
-                var main = d.Maintainer;
-                var gra = d.Grade;
-                if (isStrEmptyOrUndefined(main)) {
-                    main = 0;
-                }
-                $(row).find('.priority').val(pri).end().find('.grade').val(gra).end().find('.serviceName').val(main);
+                $(row).find('.priority').val(d.Priority).end().find('.grade').val(d.Grade).end().find('.serviceName').select2({
+                    allowClear: true,
+                    placeholder: '请选择',
+                    matcher
+                }).val(d.Maintainers).trigger('change');
             }
         });
     $('#showBatchAssignModal').modal('show');
@@ -503,10 +509,10 @@ function batchAssign() {
         var tr = trsData[i].nTr;
         var priority = $(tr).find('.priority').val();
         var grade = $(tr).find('.grade').val();
-        var serviceName = $(tr).find('.serviceName').val();
+        var serviceName = $(tr).find('.serviceName').val() || [];
         list.push({
             Id: _faultDevData.Id[i] >> 0,
-            Maintainer: serviceName,
+            Maintainer: serviceName.join(),
             Priority: priority >> 0,
             Grade: grade >> 0
         });
@@ -573,18 +579,20 @@ function confirmFault(state) {
 //维修完成弹窗
 function showServiceModel(id, maintainer, time, faultTypeId) {
     $('#serviceBtn').val(id);
+    maintainer = maintainer.split(',');
     $('#servicePro').val(maintainer).trigger('change');
     time = time == '0001-01-01 00:00:00' ? getDate() : time.slice(0, time.indexOf(' '));
     $('#serviceTime').val(time).datepicker('update');
     $("#serviceHms").timepicker('setTime', getTime());
     $('#serviceFaultType').val(faultTypeId).trigger('change');
+    $('#serviceDesc').val('');
     $('#showServiceModel').modal('show');
 }
 
 //维修完成
 function service() {
     var id = $(this).val();
-    var maintainer = $('#servicePro option:selected').attr('wname');
+    var maintainer = Array.from($('#servicePro :selected')).map(item => $(item).text()).join();
     if (isStrEmptyOrUndefined(maintainer)) {
         layer.msg("请选择解决人");
         return;
@@ -624,7 +632,8 @@ function service() {
 //指派弹窗
 function showDesignateModal(id, priority, name, grade) {
     $('#designateBtn').val(id);
-    $('#designateName').val(name);
+    name = name.split(',');
+    $('#designateName').val(name).trigger('change');
     $('#designatePro').val(priority);
     $('#designateGrade').val(grade);
     $('#showDesignateModal').modal('show');
@@ -653,7 +662,7 @@ function designate() {
     data.opType = 445;
     data.opData = JSON.stringify([{
         Id: id >> 0,
-        Maintainer: name,
+        Maintainer: name.join(),
         Priority: priority >> 0,
         Grade: grade >> 0
     }]);
@@ -808,10 +817,27 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
         }
         var setRow = setTable();
         //删除
-        var per416 = _permissionList[79].have;
+        var per79 = _permissionList[79].have;
+        //修改
+        var per78 = _permissionList[78].have;
         var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         var titleColumns = [12, 15];
         var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
+        const scoreBtn = (d, a, b, index) => {
+            let scoreInfo;
+            if (per78 && !(d.FaultSolvers.length === d.Scores.length)) {
+                scoreInfo = `<button class="btn btn-primary btn-sm" onclick="showScoreModel(${index.row})">评分</button>`;
+            } else {
+                const solver = d.FaultSolver.split(',');
+                if (solver.length === 1) {
+                    scoreInfo = d.Score;
+                } else {
+                    const scores = d.Scores;
+                    scoreInfo = solver.reduce((a, b, i) => `${a},${b}-${scores[i] || 0}`, '').slice(1);
+                }
+            }
+            return scoreInfo;
+        }
         el.DataTable({
             dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             buttons: [
@@ -832,11 +858,11 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
             "searching": true,
             "language": oLanguage,
             "data": ret.datas,
-            "aaSorting": [[per416 && !name ? 1 : 0, "asc"]],
+            "aaSorting": [[per79 && !name ? 1 : 0, "asc"]],
             "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
             "iDisplayLength": 20, //默认显示的记录数
             "columns": [
-                { "data": null, "title": "", "render": setRow.serIsEnable, "visible": per416 && !name, "orderable": !per416 && name },
+                { "data": null, "title": "", "render": setRow.serIsEnable, "visible": per79 && !name, "orderable": !per79 && name },
                 { "data": null, "title": "序号", "render": setRow.order },
                 { "data": "DeviceCode", "title": "机台号" },
                 { "data": "FaultTime", "title": "故障时间", "render": setRow.setTime },
@@ -844,7 +870,8 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
                 { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                 { "data": null, "title": "优先级", "render": setRow.priority },
                 { "data": "Grade", "title": "故障等级", "render": setRow.grade },
-                { "data": "Score", "title": "评分", "sClass": "text-primary" },
+                { "data": null, "title": "评分", "sClass": "text-primary", render: scoreBtn },
+                { "data": "Id", "title": "详情", "render": setRow.upServiceLog.bind(null, 0, !!name) },
                 { "data": "FaultSolver", "title": "解决人" },
                 { "data": "Name", "title": "指派给", "render": setRow.serviceName },
                 { "data": "EstimatedTime", "title": "预计解决时间", "render": setRow.setTime },
@@ -852,11 +879,10 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
                 { "data": "Proposer", "title": "报修人" },
                 { "data": "FaultTypeName", "title": "故障类型" },
                 { "data": null, "title": "故障描述", "render": setRow.rDesc },
-                { "data": null, "title": "故障图片", "render": setRow.imgBtn },
-                { "data": "Id", "title": "详情", "render": setRow.upServiceLog.bind(null, 0, !!name) }
+                { "data": null, "title": "故障图片", "render": setRow.imgBtn }
             ],
             "drawCallback": function (settings, json) {
-                if (per416 && !name) {
+                if (per79 && !name) {
                     $(this).find('.isEnable').iCheck({
                         handle: 'checkbox',
                         checkboxClass: 'icheckbox_minimal-blue',
@@ -880,6 +906,67 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
             $('#showStatisticsDetailModel').modal('show');
         }
     }, isLoad);
+}
+
+//评分弹窗
+function showScoreModel(index) {
+    const d = $('#repairRecordList').DataTable().row(index).data();
+    $('#updateScoreBtn').val(d.Id);
+    const solver = d.FaultSolver.split(',');
+    const scores = d.Scores;
+    const data = solver.map((item, i) => ({ name: item, score: scores[i] }));
+    const scoreInput = d => `<input type="text" class="form-control text-center score" style="min-width:100px" oninput="onInput(this, 3, 0)" value=${d || ''}>`;
+    $('#scoreList').DataTable({
+        dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+        destroy: true,
+        paging: true,
+        searching: true,
+        language: oLanguage,
+        data,
+        aaSorting: [[0, 'asc']],
+        aLengthMenu: [20, 40, 60],
+        iDisplayLength: 20,
+        columns: [
+            { data: null, title: '序号', render: (a, b, c, d) => d.row + 1 },
+            { data: 'name', title: '维修工' },
+            { data: 'score', title: '评分', render: scoreInput }
+        ]
+    });
+    $('#showScoreModel').modal('show');
+}
+
+//修改评分
+function updateScore() {
+    const tableInfo = $('#scoreList').DataTable();
+    const len = tableInfo.data().length;
+    const arr = [];
+    for (let i = 0; i < len; i++) {
+        const tr = tableInfo.row(i).nodes()[0];
+        const score = $(tr).find('.score').val().trim();
+        if (isStrEmptyOrUndefined(score)) {
+            layer.msg(`序号${i + 1}：评分不能为空`);
+            return;
+        }
+        arr.push(score);
+    }
+    var data = {};
+    data.opType = 440;
+    data.opData = JSON.stringify([{
+        Id: $(this).val(),
+        Score: arr.join()
+    }]);
+    ajaxPost("/Relay/Post", data, function (ret) {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            $('#showScoreModel').modal('hide');
+            $('#showStatisticsDetailModel').is(':hidden')
+                ? getServiceLogList(1)
+                : getServiceLogList(1, _statisticsParData.name,
+                    _statisticsParData.sTime,
+                    _statisticsParData.eTime,
+                    _statisticsParData.score);
+        }
+    });
 }
 
 //统计弹窗
@@ -913,7 +1000,7 @@ function getStatisticsList() {
             return d.row + 1;
         }
         var detail = function (d) {
-            return `<button type="button" class="btn btn-primary btn-sm" onclick="getServiceLogList(1,\'${d.Account}\',\'${startTime}\',\'${endTime}\',\'${d.Score}\')">查看</button>`;
+            return `<button type="button" class="btn btn-primary btn-sm" onclick="getServiceLogList(1,\'${d.Name}\',\'${startTime}\',\'${endTime}\',\'${d.Score}\')">查看</button>`;
         }
         $("#statisticsList")
             .DataTable({
@@ -1141,10 +1228,11 @@ function showServiceLogModal(id, isDel, isStatistics) {
             } else {
                 $('#upServiceLogBox .isText').addClass('hidden');
                 $('#upServiceLogBox .noText').removeClass('hidden');
-                $("#serLogFaultSolver").empty();
-                $("#serLogFaultSolver").append(_worker);
-                var faultSolver = $(`#serLogFaultSolver option[wname=${d.FaultSolver}]`).val();
-                $('#serLogFaultSolver').val(faultSolver ? faultSolver : 0);
+                $('#serLogFaultSolver').empty().append(_worker);
+                let solver = d.FaultSolver.split(',');
+                const solver1 = [];
+                $('#serLogFaultSolver option').each((i, el) => void (solver.includes($(el).attr('wname')) && solver1.push($(el).val())));
+                $('#serLogFaultSolver').val(solver1).trigger('change');
                 if (solveTime == '0001-01-01 00:00:00') {
                     $('#serLogSolveDate').val(getDate()).datepicker('update');
                     $("#serLogSolveTime").timepicker('setTime', getTime());
@@ -1405,10 +1493,7 @@ function addUpServiceLog(isAdd) {
             layer.msg('请选择故障等级');
             return;
         }
-        var serLogMaintainer = $('#serLogMaintainer').val();
-        if (serLogMaintainer == 0) {
-            serLogMaintainer = '';
-        }
+        var serLogMaintainer = $('#serLogMaintainer').val() || [];
         list = {
             DeviceId: serLogCode,
             DeviceCode: serLogCodeOther,
@@ -1418,18 +1503,15 @@ function addUpServiceLog(isAdd) {
             FaultDescription: serLogFaultSup,
             Priority: serLogPriority,
             Grade: serLogGrade,
-            Maintainer: serLogMaintainer
+            Maintainer: serLogMaintainer.join()
         }
     } else {
         list.Id = $(this).val();
     }
-    var serLogFaultSolver = $('#serLogFaultSolver option:selected').attr('wname');
+    var serLogFaultSolver = Array.from($('#serLogFaultSolver :selected')).map(item => $(item).text()).join();
     if (isStrEmptyOrUndefined(serLogFaultSolver)) {
         layer.msg('请选择解决人');
         return;
-    }
-    if (serLogFaultSolver == 0) {
-        serLogFaultSolver = '未指派';
     }
     var serLogSolveDate = $('#serLogSolveDate').val();
     var serLogSolveTime = $('#serLogSolveTime').val();
@@ -2079,132 +2161,164 @@ function updateFaultType() {
 
 //获取维修工
 var maintainers = null;
+var _maintainerListTrs = null;
 function showMaintainerModel(cover = 1, show = true) {
+    $('#maintainerTable').css('maxHeight', innerHeight * 0.7);
     maintainers = [];
-    choseMaintainer = [];
-    $("#maintainerList").empty();
+    _maintainerListTrs = [];
     var data = {}
     data.opType = 430;
     data.opData = JSON.stringify({
         menu: true
     });
-
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var setRow = setTable();
-            var op = '';
-            for (var i = 0; i < ret.datas.length; i++) {
-                var d = ret.datas[i];
-                maintainers[d.Id] = d;
-                op += `<option value=${d.Id} phone=${d.Phone}>${d.Name}</option>`;
-            }
-            var chose = function (data, type, row, meta) {
-                var xh = meta.row + 1;
-                return `<input type="checkbox" class="icb_minimal chose" value="${xh}" id="${data}">`;
-            }
-            var phone = function (data, type, row, meta) {
-                var xh = meta.row + 1;
-                return `<span class="chose1" id="userPhone1${xh}">${data}</span >
-                        <input class="chose2 hidden form-control text-center" old="${data}" id="userPhone2${xh}" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11" onchange="changeMaintainer(this, 'Phone')">`;
-            }
-            var rRemark = function (data, type, row, meta) {
-                var xh = meta.row + 1;
-                return `<span class="chose1" title="${data}" id ="userRemark1${xh}" onclick = "showAllContent('${escape(data)}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + "..." : data}</span>
-                        <input class="chose2 hidden form-control" style="width: 100%;" old="${data}" id ="userRemark2${xh}" onchange="changeMaintainer(this, 'Remark')">`;
-            }
-            var excelColumns = [0, 1, 2, 3];
-            var titleColumns = [3];
-            var columns = [
-                { "data": "Id", "title": "序号", "render": setRow.order, "sWidth": "80px" },
-                { "data": "Name", "title": "姓名", "sWidth": "120px" },
-                { "data": "Phone", "title": "手机号", "render": phone, "sWidth": "130px" },
-                { "data": "Name", "title": "是否排班", "sWidth": "120px" },
-                { "data": "Order", "title": "顺序", "sWidth": "120px" },
-                { "data": "Remark", "title": "备注", "render": rRemark }
-            ];
-            if (_permissionList[46].have || _permissionList[47].have) {
-                columns.unshift({ "data": "Id", "title": "选择", "render": chose, "sWidth": "80px", "orderable": false });
-                excelColumns = [1, 2, 3, 4];
-                titleColumns = [4];
-            }
-            $("#maintainerList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    buttons: [
-                        {
-                            extend: 'excel',
-                            text: '导出Excel',
-                            className: 'btn-primary btn-sm',
-                            exportOptions: {
-                                columns: excelColumns,
-                                format: {
-                                    body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
-                                }
-                            }
-                        }
-                    ],
-                    "bAutoWidth": false,
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aaSorting": [[1, "asc"]],
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数
-                    "columns": columns,
-                    "createdRow": function (row, data, index) {
-                    },
-                    "drawCallback": function (settings, json) {
-                        $(this).find('.icb_minimal').iCheck({
-                            labelHover: false,
-                            cursor: true,
-                            checkboxClass: 'icheckbox_minimal-blue',
-                            radioClass: 'iradio_minimal-blue',
-                            increaseArea: '20%'
-                        });
-
-                        $(this).find('.chose').on('ifChanged', function () {
-                            var tr = $(this).parents("tr:first");
-                            var v = $(this).attr("value");
-                            var id = $(this).attr("id");
-                            if ($(this).is(":checked")) {
-                                tr.find(".chose1").addClass("hidden");
-                                tr.find(".chose2").removeClass("hidden");
-                                $("#userPhone2" + v).val($("#userPhone2" + v).attr("old"));
-                                $("#userRemark2" + v).val($("#userRemark2" + v).attr("old"));
-                                choseMaintainer[id] = {
-                                    Id: id,
-                                    Phone: $("#userPhone2" + v).val(),
-                                    Remark: $("#userRemark2" + v).val()
-                                }
-                            } else {
-                                tr.find(".chose1").removeClass("hidden");
-                                tr.find(".chose2").addClass("hidden");
-                                choseMaintainer = removeArrayObj(choseMaintainer, id);
-                            }
-                        });
-                    }
-                });
-            show && getScheduleInfo(show, `<select class="ms2 form-control"><option value="0">未排班</option>${op}</select>`);
+            var rData = ret.datas;
+            const isCheckShow = _permissionList[46].have || _permissionList[47].have;
+            const isUpdate = _permissionList[46].have;
+            const head = `<tr>${isCheckShow ? '<th>选择</th>' : ''}<th>序号</th><th>姓名</th><th>手机号</th><th>是否排班</th><th>顺序</th><th>备注</th></tr>`;
+            $('#maintainerHead').html(head);
+            let trs = '';
+            rData.forEach(item => {
+                maintainers[item.Id] = item;
+                trs += `<tr>
+                            ${isCheckShow ? '<td><input type="checkbox" class="icb_minimal isEnabled" value=' + item.Id + '></td>' : ''}
+                            <td class="num"></td>
+                            <td>${item.Name}</td>
+                            <td><span class="textIn">${item.Phone}</span><input class="textOn hidden form-control text-center phone" onkeyup="onInput(this, 11, 0)"></td>
+                            <td><input type="checkbox" class="icb_minimal isWork" work=${!!item.Order}></td>
+                            <td><span class="order">${item.Order || ''}${isUpdate ? '</span><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" onclick="upMaintainers.call(this)" title="上移"></span>' : ''}</td>
+                            <td>
+                                ${data.length > tdShowLength ? '<span class="textIn" onclick="showAllContent(' + item.Remark + ')">' + item.Remark.substring(0, tdShowLength) + '...</span>' : '<span class="textIn">' + item.Remark + '</span>'}
+                                <input class="textOn hidden form-control remark" style="width: 100%"></td>
+                        </tr>`;
+            });
+            $('#maintainerList').html(trs);
+            $('#maintainerList .isEnabled').iCheck({
+                labelHover: false,
+                cursor: true,
+                checkboxClass: 'icheckbox_minimal-blue',
+                radioClass: 'iradio_minimal-blue',
+                increaseArea: '20%'
+            }).on('ifChanged', function () {
+                const tr = $(this).parents('tr');
+                const id = $(this).val();
+                const isChecked = $(this).is(':checked');
+                if (isChecked) {
+                    tr.find('.textIn').addClass('hidden').end().find('.textOn').removeClass('hidden');
+                    tr.find('.phone').val(maintainers[id].Phone);
+                    tr.find('.remark').val(maintainers[id].Remark);
+                } else {
+                    tr.find('.textIn').removeClass('hidden').end().find('.textOn').addClass('hidden');
+                }
+                operationMaintainerListTrs(tr[0], isChecked);
+            });
+            $('#maintainerList .isWork[work=true]').iCheck('check');
+            isUpdate || $('#maintainerList .isWork').iCheck('disable');
+            $('#maintainerList .isWork').iCheck({
+                handle: 'checkbox',
+                checkboxClass: 'icheckbox_polaris',
+                increaseArea: '20%'
+            }).on('ifChanged', function () {
+                const tr = $(this).parents('tr');
+                operationMaintainerListTrs(tr[0], true);
+                setOrder();
+            });
+            setMaintainerList();
+            cover && getScheduleInfo(show);
         }, cover);
 }
 
+//顺序设置
+function setOrder() {
+    const workEls = $('#maintainerList .isWork');
+    let index = 0;
+    for (let i = 0, len = workEls.length; i < len; i++) {
+        const checkEl = workEls.eq(i);
+        const tr = checkEl.parents('tr');
+        if (checkEl.is(':checked')) {
+            tr.find('.order').text(++index);
+            i && tr.find('.upTr').removeClass('hidden');
+            operationMaintainerListTrs(tr[0], true);
+        } else {
+            tr.find('.order').text('');
+            tr.find('.upTr').addClass('hidden');
+        }
+    }
+}
+
+//导出
+function outputTable() {
+    const data = [];
+    maintainers.forEach(item => void data.push(item));
+    $('<table></table>').DataTable({
+        dom: 'B',
+        buttons: [{
+            extend: 'excel',
+            filename: `维修工名单`
+        }],
+        destroy: true,
+        data,
+        columns: [
+            { data: null, title: '序号', render: (a, b, c, d) => d.row + 1 },
+            { data: 'Name', title: '姓名' },
+            { data: 'Phone', title: '手机号' },
+            { data: 'Remark', title: '备注' }
+        ]
+    }).buttons('.buttons-excel').trigger();
+}
+
+//上移
+function upMaintainers() {
+    const tr = $(this).parents('tr');
+    const upTr = tr.prev();
+    upTr.before(tr);
+    setMaintainerList();
+    setOrder();
+}
+
+//维修工表格设置
+function setMaintainerList() {
+    const trs = $('#maintainerList tr');
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const tr = trs.eq(i);
+        tr.find('.num').text(i + 1);
+        const isWork = tr.find('.isWork').is(':checked');
+        if (i && isWork) {
+            tr.find('.upTr').removeClass('hidden');
+        } else {
+            tr.find('.upTr').addClass('hidden');
+        }
+    }
+}
+
+//获取维修工信息
+function operationMaintainerListTrs(tr, isAdd) {
+    const index = _maintainerListTrs.indexOf(tr);
+    isAdd ? ~index || _maintainerListTrs.push(tr) : _maintainerListTrs.splice(index, 1);
+}
+
+let _scheduleSelectEl = null;
 //显示排班
-function getScheduleInfo(show, selectEl) {
+function getScheduleInfo(show) {
+    _scheduleSelectEl = [];
+    var ops = '';
+    maintainers.forEach(item => {
+        ops += `<option value=${item.Id}>${item.Name}</option>`;
+    });
     ajaxPost("/Relay/Post", { opType: 434 }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        const rData = ret.datas;
-        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
-        let headEl = '', bodyEl = '';
         let index = 0;
+        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
+        let headEl = '';
+        const rData = ret.datas;
         let timeFn = time => {
             time = new Date(time);
             return {
@@ -2212,53 +2326,79 @@ function getScheduleInfo(show, selectEl) {
                 d: time.getDate()
             }
         }
+        let trs = [], nameArr = [];
         const today = getDate();
-        const nameArr = [];
-        rData.forEach(item => {
-            item.Name.trim() && nameArr.push(item.Name);
-            const text = item.Name ? `${item.Name} ${item.Phone}` : '未排班';
-            if (item.Night) {
-                $('#scheduleNight').text(text);
-            } else {
-                const time = timeFn(item.Time);
-                const color = today === item.Time.split(' ')[0] ? 'text-red' : '';
+        rData.forEach((item, i) => {
+            let names = item.Maintainers.map(item => {
+                const name = item.Name;
+                nameArr.includes(name) || nameArr.push(name);
+                return name;
+            });
+            if (i < 4) {
+                trs[i] = `<td style="font-weight:bold">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
+            }
+            const rem = i % 4;
+            const info = names.join(names.length > 1 ? '<br>' : '') || '未排班';
+            const infoId = item.Maintainers[0] ? item.Maintainers[0].Id : 0;
+            names = rem === 1 ? `<td>${info}</td>` : `<td><div class="schedule-name">${info}</div><div class="select-ops hidden"><select class="ms2 form-control" infoid="${infoId}">${ops}</select></div></td>`;
+            trs[rem] += names;
+            if (!rem) {
+                const time = timeFn(item.StartTime);
+                const color = today === item.StartTime.split(' ')[0] ? 'text-red' : '';
                 headEl += `<th class=${color}>周${headArr[index++]}(${time.m}/${time.d})</th>`;
-                bodyEl += `<td class=${color}><div class="schedule-name">${item.Name || '未排班'}</div><div class="select-ops hidden">${selectEl}</div><div class="schedule-phone">${item.Phone || ''}</div></td>`;
             }
         });
-        $('#scheduleTime').text(`${rData[0].Time.split(' ')[0]} 至 ${rData[rData.length - 1].Time.split(' ')[0]}`);
-        $('#scheduleHead').empty().append(`<tr>${headEl}</tr>`);
-        $('#scheduleBody').empty().append(`<tr>${bodyEl}</tr>`).find('.ms2').select2();
+        trs = trs.reduce((a, b) => `${a}<tr>${b}</tr>`, '');
+        $('#scheduleTime').text(`${rData[0].StartTime.split(' ')[0]} 至 ${rData[rData.length - 1].StartTime.split(' ')[0]}`);
+        $('#scheduleHead').empty().append(`<tr><th></th>${headEl}</tr>`);
+        $('#scheduleBody').empty().append(trs).find('.ms2').select2();
         $('#scheduleBody .schedule-name').on('dblclick', function () {
-            $(this).addClass('hidden').siblings('.select-ops').removeClass('hidden');
+            $('#scheduleBody .select-ops').addClass('hidden');
+            $('#scheduleBody .schedule-name').removeClass('hidden');
+            const name = $(this).text();
+            const selectEl = $(this).addClass('hidden').siblings('.select-ops').removeClass('hidden').find('select');
+            let v;
+            Array.from(selectEl.find('option')).some(item => {
+                if ($(item).text() === name) {
+                    v = $(item).val();
+                    return true;
+                }
+            });
+            selectEl.val(v).trigger('change');
+            const dom = selectEl[0];
+            _scheduleSelectEl.includes(dom) || _scheduleSelectEl.push(dom);
         });
         $('#scheduleBody .ms2').on('select2:select', function () {
-            const op = $(this).find(':selected');
-            const name = op.text();
-            const phone = op.attr('phone');
+            const name = $(this).find(':selected').text();
             const td = $(this).parents('td');
             td.find('.schedule-name').text(name);
-            td.find('.schedule-phone').text(phone);
         });
         show && $('#maintainerModel').modal('show');
     });
 }
 
-function changeMaintainer(ele, type) {
-    var tr = $(ele).parents("tr:first");
-    var v = $(tr).find(".chose").attr("value");
-    var id = $(tr).find(".chose").attr("id");
-    if ($("#" + id).is(":checked")) {
-        if (choseMaintainer[id]) {
-            choseMaintainer[id][type] = $(`#user${type}2${v}`).val();
-        } else {
-            choseMaintainer[id] = {
-                Id: id,
-                Phone: $("#userPhone2" + v).val(),
-                Remark: $("#userRemark2" + v).val()
-            }
-        }
+//修改排班
+function updateSchedule() {
+    if (!_scheduleSelectEl.length) {
+        layer.msg('请先进行修改');
+        return;
     }
+    const arr = _scheduleSelectEl.map(item => {
+        const el = $(item);
+        return {
+            Id: el.attr('infoid') >> 0 || 0,
+            MaintainerId: el.val() >> 0 || 0
+        }
+    });
+    var data = {}
+    data.opType = 435;
+    data.opData = JSON.stringify(arr);
+    ajaxPost('/Relay/Post', data, ret => {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            getScheduleInfo(false);
+        }
+    });
 }
 
 var addMax = 0;
@@ -2269,7 +2409,6 @@ function initList() {
     addMax = addMaxV = 0;
 }
 
-var choseMaintainer = null;
 var users = null;
 function showAddMaintainerModel(cover = 1) {
     initList();
@@ -2397,7 +2536,8 @@ function addMaintainer() {
                 $("#addMaintainerBtn").removeAttr("disabled");
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
-                    showMaintainerModel(0, false);
+                    showMaintainerModel(1, false);
+                    getWorkerSelect();
                     $("#addMaintainerModel").modal("hide");
                 }
             });
@@ -2410,24 +2550,37 @@ function addMaintainer() {
 
 //修改维修工信息
 function updateMaintainer() {
-    if (!choseMaintainer || choseMaintainer.length <= 0) {
+    const list = [];
+    const len = _maintainerListTrs.length;
+    if (!len) {
+        layer.msg('请先修改数据');
         return;
     }
-    var list = [];
-    for (var key in choseMaintainer) {
-        var maintainer = choseMaintainer[key];
-        if (maintainers && maintainers[key] && (maintainers[key].Phone != maintainer.Phone || maintainers[key].Remark != maintainer.Remark)) {
-            if (!isStrEmptyOrUndefined(maintainer.Phone) && !isPhone(maintainer.Phone)) {
-                layer.msg('手机号格式不正确');
-                return;
-            }
-            maintainer.Account = maintainers[key].Account;
-            maintainer.Name = maintainers[key].Name;
-            list.push(maintainer);
+    for (let i = 0; i < len; i++) {
+        const tr = $(_maintainerListTrs[i]);
+        const checkEl = tr.find('.isEnabled');
+        const id = checkEl.val();
+        const otherInfo = maintainers[id];
+        let phone, remark;
+        if (checkEl.is(':checked')) {
+            phone = tr.find('.phone').val().trim();
+            remark = tr.find('.remark').val().trim();
+        } else {
+            phone = otherInfo.Phone;
+            remark = otherInfo.Remark;
         }
-    }
-    if (!list.length) {
-        return;
+        if (!isStrEmptyOrUndefined(phone) && !isPhone(phone)) {
+            layer.msg('手机号格式不正确');
+            return;
+        }
+        list.push({
+            Id: id,
+            Name: otherInfo.Name,
+            Account: otherInfo.Account,
+            Phone: phone,
+            Remark: remark,
+            Order: tr.find('.order').text().trim() || 0
+        });
     }
     var doSth = function () {
         var data = {}
@@ -2442,41 +2595,34 @@ function updateMaintainer() {
                 $("#updateMaintainerBtn").removeAttr("disabled");
                 if (ret.errno == 0) {
                     showMaintainerModel(0, false);
+                    getWorkerSelect();
                 }
             });
         updateMaintainerTime = setTimeout(function () {
             $("#delMaintainerBtn").removeAttr("disabled");
         }, 5000);
     }
-    showConfirm("保存", doSth);
+    showConfirm('保存', doSth);
 }
 
 //删除配置
 function delMaintainer() {
-    if (!choseMaintainer || choseMaintainer.length <= 0) {
+    const ids = [], names = [];
+    $('#maintainerList .isEnabled:checked').each((i, item) => {
+        const id = $(item).val();
+        ids.push(id);
+        names.push(maintainers[id].Name);
+    });
+    if (!ids.length) {
+        layer.msg('请选择需要删除的数据');
         return;
     }
-    var names = [];
-    var delMaintainers = [];
-    if (choseMaintainer && choseMaintainer.length > 0) {
-        for (var key in choseMaintainer) {
-            if (maintainers && maintainers[key]) {
-                delMaintainers.push(key);
-            }
-        }
-        for (var i = 0; i < delMaintainers.length; i++) {
-            var key = delMaintainers[i];
-            if (maintainers && maintainers[key]) {
-                names.push(maintainers[key].Name);
-            }
-        }
-    }
     var doSth = function () {
-        $("#delMaintainerBtn").attr("disabled", "disabled");
+        $('#delMaintainerBtn').attr('disabled', 'disabled');
         var data = {}
         data.opType = 433;
         data.opData = JSON.stringify({
-            ids: delMaintainers
+            ids: ids
         });
         var delMaintainerBtnTime = null;
         ajaxPost("/Relay/Post", data,
@@ -2484,14 +2630,15 @@ function delMaintainer() {
                 layer.msg(ret.errmsg);
                 if (delMaintainerBtnTime)
                     clearTimeout(delMaintainerBtnTime);
-                $("#delMaintainerBtn").removeAttr("disabled");
+                $("#delMaintainerBtn").removeAttr('disabled');
                 if (ret.errno == 0) {
-                    showMaintainerModel(0, false);
+                    showMaintainerModel(1, false);
+                    getWorkerSelect();
                 }
             });
         delMaintainerBtnTime = setTimeout(function () {
-            $("#delMaintainerBtn").removeAttr("disabled");
+            $('#delMaintainerBtn').removeAttr('disabled');
         }, 5000);
     }
-    showConfirm("删除维修工：" + names.join(","), doSth);
+    showConfirm(`删除以下维修工：<pre style='color:red'>${names.join('<br>')}</pre>`, doSth);
 }

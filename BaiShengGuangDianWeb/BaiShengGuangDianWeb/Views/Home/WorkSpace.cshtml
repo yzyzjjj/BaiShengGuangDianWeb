@@ -316,12 +316,16 @@
                 <div class="modal-body">
                     <h4>排班：</h4>
                     <div class="form-group">
-                        <label class="control-label">本周排班：<span id="scheduleTime"></span></label>
-                        <table class="table table-hover table-striped">
-                            <thead id="scheduleHead"></thead>
-                            <tbody id="scheduleBody"></tbody>
-                        </table>
-                        <label class="control-label">本周夜班：<span id="scheduleNight"></span></label>
+                        <div class="flexStyle" style="justify-content: space-between">
+                            <label class="control-label">本周排班：<span id="scheduleTime"></span></label>
+                            <label class="control-label">当前时间：<span id="currentTime"></span></label>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead id="scheduleHead"></thead>
+                                <tbody id="scheduleBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <hr>
                     <h4>名单：</h4>

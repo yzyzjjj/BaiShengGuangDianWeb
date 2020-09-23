@@ -114,18 +114,18 @@ function pasteTable(e) {
                     arr.push({
                         Id: 0,
                         ItemId: 0,
-                        Order: $('#purchaseCode').val(),
-                        Code: d[0] || '',
-                        Name: d[1] || '',
-                        Specification: d[2] || '',
-                        Category: d[3] || '',
-                        Supplier: d[4] || '',
-                        Unit: d[5] || '',
-                        Number: d[6] || '',
-                        Price: d[7] || '',
-                        TaxPrice: d[8] || '',
-                        TaxAmount: d[9] || '',
-                        TaxTate: d[10] || 0
+                        Order: d[0] || '',
+                        Code: d[1] || '',
+                        Name: d[2] || '',
+                        Specification: d[3] || '',
+                        Class: d[4] || '',
+                        Supplier: d[5] || '',
+                        Unit: d[6] || '',
+                        Number: d[7] || '',
+                        Price: d[8] || '',
+                        TaxPrice: d[9] || '',
+                        TaxAmount: d[10] || '',
+                        TaxTate: d[11] || 0
                     });
                 }
             }
@@ -140,18 +140,18 @@ function pasteTable(e) {
                 arr.push({
                     Id: 0,
                     ItemId: 0,
-                    Order: $('#purchaseCode').val(),
-                    Code: d[0] || '',
-                    Name: d[1] || '',
-                    Specification: d[2] || '',
-                    Category: d[3] || '',
-                    Supplier: d[4] || '',
-                    Unit: d[5] || '',
-                    Number: d[6] || '',
-                    Price: d[7] || '',
-                    TaxPrice: d[8] || '',
-                    TaxAmount: d[9] || '',
-                    TaxTate: d[10] || 0
+                    Order: d[0] || '',
+                    Code: d[1] || '',
+                    Name: d[2] || '',
+                    Specification: d[3] || '',
+                    Class: d[4] || '',
+                    Supplier: d[5] || '',
+                    Unit: d[6] || '',
+                    Number: d[7] || '',
+                    Price: d[8] || '',
+                    TaxPrice: d[9] || '',
+                    TaxAmount: d[10] || '',
+                    TaxTate: d[11] || 0
                 });
             }
         }
@@ -376,16 +376,17 @@ function getPurchase() {
                                     Id: d.Id,
                                     ErpId: d.ErpId,
                                     State: d.State,
-                                    isShow: [3, 4].includes(d.State)
+                                    isShow: [3, 4].includes(d.State),
+                                    name: d.Name
                                 };
                                 $('#citePurchaseListBtn').prop('disabled', d.State != 5);
                                 if (d.IsQuote) {
-                                    new Promise(resolve => getPurchaseMaterial(resolve)).then(() => getQuoteList(true));
+                                    getQuoteList(true);
                                     $('#addPurchaseListBtn').removeClass('hidden');
                                 } else {
-                                    getPurchaseMaterial();
                                     $('#addPurchaseListBtn').addClass('hidden');
                                 }
+                                getPurchaseMaterial();
                             }
                         }
                         $(this).css('background', '#d9edf7').siblings('tr').css('background', '');
@@ -407,21 +408,20 @@ function getQuoteList(isQuote) {
             return;
         }
         const rData = ret.datas;
-        if (rData.length) {
-            //$('#purchaseCode').val(rData[0].Purchase);
-            $('#cgTime').val(rData[0].Time.split(' ')[0]).datepicker('update');
-        } else {
-            //$('#purchaseCode').val('');
-            $('#cgTime').val(getDate()).datepicker('update');
-        }
+        $('#cgTime').val(rData.length ? rData[0].Time.split(' ')[0] : getDate()).datepicker('update');
         setPurchaseList(rData, isQuote);
     });
 }
 
 //保存入库单
 function updatePurchaseList() {
-    if (!_purchaseDataTable) {
+    if (!_purchaseDataTable || !_purchaseDataTable.data().length) {
         layer.msg('入库单为空');
+        return;
+    }
+    const purchasingCompany = $('#purchasingCompany').val().trim();
+    if (isStrEmptyOrUndefined(purchasingCompany)) {
+        layer.msg('采购公司不能为空');
         return;
     }
     let time = $('#cgTime').val();
@@ -434,7 +434,6 @@ function updatePurchaseList() {
         layer.msg('入库日期大于当前时间');
         return;
     }
-    const order = $('#purchaseCode').val();
     const trs = _purchaseDataTable.rows().nodes();
     const itemArr = _purchaseDataTable.columns(0).data()[0];
     const items = [];
@@ -443,6 +442,11 @@ function updatePurchaseList() {
         const tds = $(tr).find('td');
         const d = itemArr[i];
         const xh = i + 1;
+        const order = tds.eq(1).text().trim();
+        if (isStrEmptyOrUndefined(order)) {
+            layer.msg(`序列${xh}：订单编号不能为空`);
+            return;
+        }
         const code = tds.eq(2).text().trim();
         if (isStrEmptyOrUndefined(code)) {
             layer.msg(`序列${xh}：物料编码不能为空`);
@@ -503,14 +507,15 @@ function updatePurchaseList() {
             Code: code,
             Name: name,
             Specification: specification,
-            Category: category,
+            Class: category,
             Supplier: supplier,
             Unit: unit,
             Number: number,
             Price: price,
             TaxPrice: taxPrice,
             TaxAmount: taxAmount,
-            Tax: $(tr).find('.taxTate').val().trim()
+            Tax: $(tr).find('.taxTate').val().trim(),
+            PurchasingCompany: purchasingCompany
         }
     }
     const list = {
@@ -543,7 +548,7 @@ let _stateDataTable = null;
 let _Purchase = null;
 let _inWareDataTable = null;
 //获取请购单物料
-function getPurchaseMaterial(resolve) {
+function getPurchaseMaterial() {
     _trChangeData = [];
     const data = {};
     data.opType = 863;
@@ -554,15 +559,6 @@ function getPurchaseMaterial(resolve) {
             return;
         }
         const rData = ret.datas;
-        if (!$('#citePurchaseListBtn').prop('disabled')) {
-            let ops = '';
-            rData.forEach(item => {
-                const order = item.Order;
-                ~ops.indexOf(order) || (ops += `<option value=${order}>${order}</option>`);
-            });
-            $('#purchaseCode').empty().append(ops);
-        };
-        resolve && resolve();
         $('#inWareListSaveBtn').prop('disabled', !(rData.some(item => item.ErpId !== 0) && _Purchase.isShow));
         $('#finishInWareListBtn').prop('disabled', !_Purchase.isShow);
         const count = d => `<input class="form-control text-center count zeroNum" oninput="onInput(this, 8, 0)" onblur="onInputEnd(this)" onchange="inWareListChange.call(this)" style="width:80px" value=${d.Count} wid=${d.Id} bill=${d.BillId}>`;
@@ -699,11 +695,6 @@ function citePurchaseList() {
         layer.msg('请购单为空');
         return;
     }
-    const order = $('#purchaseCode').val();
-    if (!order) {
-        layer.msg('请选择需要引入的订单号');
-        return;
-    }
     const pId = _Purchase.Id;
     const data = {};
     data.opType = 863;
@@ -714,34 +705,25 @@ function citePurchaseList() {
             return;
         }
         const rData = ret.datas;
-        const arr = [];
         for (let i = 0, len = rData.length; i < len; i++) {
             const d = rData[i];
-            if (d.Order === order) {
-                d.ItemId = d.Id;
-                d.Number = d.Stock;
-                d.TaxPrice = parseFloat((d.Price * (1 + (d.TaxTate) / 100)).toFixed(5));
-                d.TaxAmount = parseFloat((d.Number * d.TaxPrice).toFixed(5));
-                d.Id = 0;
-                arr.push(d);
-            }
+            d.ItemId = d.Id;
+            d.Number = d.Stock;
+            d.TaxPrice = parseFloat(floatObj.multiply(d.Price, floatObj.add(1, floatObj.divide(d.TaxTate, 100))).toFixed(5));
+            d.TaxAmount = parseFloat(floatObj.multiply(d.Number, d.TaxPrice).toFixed(5));
+            d.Id = 0;
         }
         _pasteData = null;
-        setPurchaseList(arr);
+        setPurchaseList(rData);
     });
 }
 
 //入库单
 function setPurchaseList(arr, isQuote) {
-    if (isQuote) {
-        $('#addPurchaseListBtn').removeClass('hidden');
-        $('#purchaseCode').val(arr[0].Order).trigger('change');
-    } else {
-        $('#addPurchaseListBtn').addClass('hidden');
-    }
+    isQuote ? $('#addPurchaseListBtn').removeClass('hidden') : $('#addPurchaseListBtn').addClass('hidden');
     const taxTate = d => `<input class="form-control text-center taxTate zeroNum" onblur="onInputEnd(this)" style="width:80px" value=${parseFloat(d) || 0}>`;
     const deBtn = () => `<button type="button" class="btn btn-danger btn-sm" onclick="delPurchaseTr.call(this)"><i class="fa fa-minus"></i></button>`;
-    $('#purchasingCompany').text(arr[0].PurchasingCompany);
+    $('#purchasingCompany').val(arr[0].PurchasingCompany || '');
     _purchaseDataTable = $('#purchaseList').DataTable({
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         destroy: true,
@@ -758,7 +740,7 @@ function setPurchaseList(arr, isQuote) {
             { data: 'Code', title: '物料编码' },
             { data: 'Name', title: '物料名称' },
             { data: 'Specification', title: '规格' },
-            { data: 'Category', title: '类别' },
+            { data: 'Class', title: '类别' },
             { data: 'Supplier', title: '供应商' },
             { data: 'Unit', title: '单位' },
             { data: 'Number', title: '数量', sClass: 'numZero number' },
@@ -770,7 +752,7 @@ function setPurchaseList(arr, isQuote) {
         ],
         drawCallback: function () {
             if (isQuote) {
-                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(2),:nth-child(11),:nth-child(12),:nth-child(13),:nth-child(14))').prop('contenteditable', true);
+                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(11),:nth-child(12),:nth-child(13),:nth-child(14))').prop('contenteditable', true);
             } else {
                 $('#purchaseList tbody tr td:nth-child(9)').prop('contenteditable', true);
             }
@@ -803,8 +785,8 @@ function computePrice(data) {
     for (let i = 0, len = data.length; i < len; i++) {
         const d = data[i];
         const all = parseFloat(d.TaxAmount);
-        amount += all;
-        tax += all - parseFloat(d.Number) * parseFloat(d.Price);
+        amount = floatObj.add(amount, all);
+        tax = floatObj.add(tax, floatObj.subtract(all, floatObj.multiply(parseFloat(d.Number), parseFloat(d.Price))));
     }
     $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(5)) : 0);
     $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(5)) : 0);
@@ -815,11 +797,11 @@ function addPurchaseTr() {
     _purchaseDataTable.row.add({
         Id: 0,
         ItemId: 0,
-        Order: $('#purchaseCode').val(),
+        Order: '',
         Code: '',
         Name: '',
         Specification: '',
-        Category: '',
+        Class: '',
         Supplier: '',
         Unit: '',
         Number: 0,
@@ -845,9 +827,8 @@ function delPurchaseTr() {
 }
 
 //入库单重置
-function resetPurchaseList(isEmpty = false) {
-    isEmpty || $('#purchaseCode').empty();
-    $('#purchasingCompany').text('');
+function resetPurchaseList() {
+    $('#purchasingCompany').val('');
     $('#addPurchaseListBtn').addClass('hidden');
     if (_purchaseDataTable) {
         _pasteData = null;
@@ -860,35 +841,84 @@ function resetPurchaseList(isEmpty = false) {
 
 //订单打印
 function printPurchaseList() {
-    if (!_purchaseDataTable) {
+    if (!_purchaseDataTable || !_purchaseDataTable.data().length) {
         layer.msg('入库单为空');
         return;
     }
-    const thead = '<thead><tr><th>编号</th><th>物料编码</th><th>名称</th><th>类别</th><th>规格</th><th>单位</th><th>入库数量</th><th>单价</th><th>金额</th></tr></thead>';
-    let tbodyTrs = '';
-    const trs = _purchaseDataTable.rows().nodes();
-    const colIndex = [0, 2, 3, 5, 4, 7, 8, 10, 11];
-    for (let i = 0, len = trs.length; i < len; i++) {
-        const tr = $(trs[i]);
-        const tds = tr.find('td');
-        let td = '';
-        for (let j = 0, len1 = colIndex.length; j < len1; j++) {
-            td += tds.eq(colIndex[j]).prop('outerHTML');
-        }
-        tbodyTrs += `<tr style="height:35px">${td}</tr>`;
+    const purchasingCompany = $('#purchasingCompany').val().trim();
+    if (isStrEmptyOrUndefined(purchasingCompany)) {
+        layer.msg('采购公司不能为空');
+        return;
     }
-    tbodyTrs += '<tr style="height:35px"><td>备注：</td><td colspan="8"></td></tr>';
-    const allPrice = $('#purchaseAmount').text().trim();
-    tbodyTrs += `<tr style="height:35px"><td colspan="7">合计金额：${convertCurrency(allPrice)}</td><td colspan="2">￥${allPrice}</td></tr>`;
-    const table = `<table border="1" style="width:100%;text-align:center;border-collapse:collapse">${thead}<tbody>${tbodyTrs}</tbody></table>`;
-    const supplier = $(_purchaseDataTable.column(6).nodes()[0]).text();
-    const time = $('#cgTime').val().trim();
-    const purchasingCompany = $('#purchasingCompany').text().trim();
-    const code = $('#purchaseCode').val();
-    const title = '<h3 style="text-align:center;margin:5px;letter-spacing:8px">采购入库单</h3>';
-    const tableTop1 = `<div><label>供应商：${supplier}</label><label style="float:right">日期：${time}</label></div>`;
-    const tableTop2 = `<div><label>采购公司：${purchasingCompany}</label><label style="float:right">订单号：${code}</label></div>`;
-    const footer = `<div style="display:flex;margin:8px 0"><label style="flex:1">主管：</label><label style="flex:1">仓库：</label><label style="flex:1">记账：</label><label style="flex:1">采购人：<span style="margin-left:20px">${_purchaseDataTable.data()[0].Purchaser || '' }</span></label></div>`;
-    const printContent = `<div style="border:1px solid;padding:0 8px 8px 8px">${title}${tableTop1}${tableTop2}${table}${footer}</div>`;
-    printCode(printContent);
+    let ops = '';
+    _purchaseDataTable.column(1).nodes().each(el => {
+        const purchaseCode = $(el).text().trim();
+        ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
+    });
+    const selectOp = `<label class="control-label text-nowrap">订单号选择：</label><select class="form-control" id="purchaseCode">${ops}</select>`;
+    layer.confirm(selectOp, {
+        btn: ['打印', '取消'],
+        success: function () {
+            this.enterEsc = function (event) {
+                if (event.keyCode === 13) {
+                    $(".layui-layer-btn0").click();
+                    return false; //阻止系统默认回车事件
+                } else if (event.keyCode == 27) {
+                    $(".layui-layer-btn1").click();
+                    return false;
+                }
+            };
+            $(document).on('keydown', this.enterEsc); //监听键盘事件，关闭层
+        },
+        end: function () {
+            $(document).off('keydown', this.enterEsc); //解除键盘关闭事件
+        }
+    }, function (index) {
+        const code = $('#purchaseCode').val();
+        if (isStrEmptyOrUndefined(code)) {
+            layer.msg('订单号不能为空');
+            return;
+        }
+        layer.close(index);
+        const thead = '<thead><tr><th>编号</th><th>物料编码</th><th>名称</th><th>类别</th><th>规格</th><th>单位</th><th>入库数量</th><th>单价</th><th>不含税金额</th><th>税额</th><th>合计金额</th><th>请购人</th></tr></thead>';
+        let tbodyTrs = '';
+        const trs = _purchaseDataTable.rows().nodes();
+        const colIndex = [2, 3, 5, 4, 7, 8, 9];
+        let num = 0, allPrice = 0;
+        for (let i = 0, len = trs.length; i < len; i++) {
+            const tr = $(trs[i]);
+            const tds = tr.find('td');
+            if (tds.eq(1).text().trim() == code) {
+                num++;
+                let td = `<td>${num}</td>`;
+                for (let j = 0, len1 = colIndex.length; j < len1; j++) {
+                    td += tds.eq(colIndex[j]).prop('outerHTML');
+                }
+                const noTaxPrice = floatObj.multiply(parseFloat(tds.eq(8).text().trim()), parseFloat(tds.eq(9).text().trim())).toFixed(2);
+                td += `<td>${noTaxPrice}</td>`;
+                const taxAmount = parseFloat(tds.eq(11).text().trim());
+                allPrice = floatObj.add(allPrice, taxAmount);
+                td += `<td>${floatObj.subtract(taxAmount, noTaxPrice).toFixed(2)}</td>`;
+                td += `<td>${taxAmount.toFixed(2)}</td>`;
+                td += `<td>${_Purchase.name}</td>`;
+                tbodyTrs += `<tr style="height:40px">${td}</tr>`;
+            }
+        }
+        tbodyTrs += '<tr style="height:40px"><td>备注：</td><td colspan="11"></td></tr>';
+        allPrice = allPrice.toFixed(2);
+        tbodyTrs += `<tr style="height:40px"><td colspan="8">合计金额：${convertCurrency(allPrice)}</td><td colspan="4">￥${allPrice}</td></tr>`;
+        const table = `<table border="1" style="width:100%;text-align:center;border-collapse:collapse">${thead}<tbody>${tbodyTrs}</tbody></table>`;
+        const supplier = $(_purchaseDataTable.column(6).nodes()[0]).text();
+        let time = $('#cgTime').val().trim();
+        const arr = ['年', '月', '日'];
+        time && (time = time.split('-').map((item, i) => `${item}${arr[i]}`).join(''));
+        const title = `<div style="text-align:center">${purchasingCompany}</div><h3 style="text-align:center;margin:5px;letter-spacing:8px">采购入库单</h3>`;
+        const tableTop1 = `<div style="text-align:right">订单号：${code}</div>`;
+        const tableTop2 = `<div style="position:absolute;right:0">供应商：${supplier}</div><div style="text-align:center;width:100%">日期：${time}</div>`;
+        const footer = `<div style="display:flex;margin:8px 0"><label style="flex:1">主管：</label><label style="flex:1">仓库：<span style="margin-left:20px">${getCookieTokenInfo().name}</span></label><label style="flex:1">记账：</label><label style="flex:1">采购人：<span style="margin-left:20px">${_purchaseDataTable.data()[0].Purchaser || ''}</span></label></div>`;
+        const printContent = `<div style="position:relative">${title}${tableTop1}${tableTop2}${table}${footer}</div>`;
+        printCode(printContent);
+    }, function (index) {
+        layer.close(index);
+    });
 }

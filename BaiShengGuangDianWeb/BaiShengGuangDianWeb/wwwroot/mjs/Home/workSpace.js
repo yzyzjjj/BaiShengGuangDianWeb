@@ -93,6 +93,14 @@ function pageReady() {
     if (!pcAndroid()) {
         $(".scanning").addClass("hidden");
     }
+    $('#maintainerModel').on('show.bs.modal', function () {
+        const fn = () => $('#currentTime').text(getFullTime());
+        fn();
+        this.time = setInterval(fn, 1000);
+    });
+    $('#maintainerModel').on('hidden.bs.modal', function () {
+        clearInterval(this.time);
+    });
 }
 
 //扫描二维码
@@ -1262,10 +1270,10 @@ function showMaintainerModel() {
             layer.msg(ret.errmsg);
             return;
         }
-        const rData = ret.datas;
-        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
-        let headEl = '', bodyEl = '';
         let index = 0;
+        const headArr = ['一', '二', '三', '四', '五', '六', '日'];
+        let headEl = '';
+        const rData = ret.datas;
         let timeFn = time => {
             time = new Date(time);
             return {
@@ -1273,23 +1281,30 @@ function showMaintainerModel() {
                 d: time.getDate()
             }
         }
+        let trs = [], nameArr = [];
         const today = getDate();
-        const nameArr = [];
-        rData.forEach(item => {
-            item.Name.trim() && nameArr.push(item.Name);
-            const text = item.Name ? `${item.Name}{0}${item.Phone}` : '未排班';
-            if (item.Night) {
-                $('#scheduleNight').text(text.format(' '));
-            } else {
-                const time = timeFn(item.Time);
-                const color = today === item.Time.split(' ')[0] ? 'text-red' : '';
+        rData.forEach((item, i) => {
+            let names = item.Maintainers.map(item => {
+                const name = item.Name;
+                nameArr.includes(name) || nameArr.push(name);
+                return name;
+            });
+            names = `<td>${names.join(names.length > 1 ? '<br>' : '') || '未排班'}</td>`;
+            if (i < 4) {
+                trs[i] = `<td style="font-weight:bold">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
+            }
+            const rem = i % 4;
+            trs[rem] += names;
+            if (!rem) {
+                const time = timeFn(item.StartTime);
+                const color = today === item.StartTime.split(' ')[0] ? 'text-red' : '';
                 headEl += `<th class=${color}>周${headArr[index++]}(${time.m}/${time.d})</th>`;
-                bodyEl += `<td class=${color}>${text.format('<br>')}</td>`;
             }
         });
-        $('#scheduleTime').text(`${rData[0].Time.split(' ')[0]} 至 ${rData[rData.length - 1].Time.split(' ')[0]}`);
-        $('#scheduleHead').empty().append(`<tr>${headEl}</tr>`);
-        $('#scheduleBody').empty().append(`<tr>${bodyEl}</tr>`);
+        trs = trs.reduce((a, b) => `${a}<tr>${b}</tr>`, '');
+        $('#scheduleTime').text(`${rData[0].StartTime.split(' ')[0]} 至 ${rData[rData.length - 1].StartTime.split(' ')[0]}`);
+        $('#scheduleHead').empty().append(`<tr><th></th>${headEl}</tr>`);
+        $('#scheduleBody').empty().append(trs);
         getMaintainerList(nameArr);
     });
 }
@@ -1332,7 +1347,7 @@ function getMaintainerList(nameArr) {
                         ~nameArr.indexOf(data.Name) && $(tr).css({ 'font-weight': 'bold', 'color': 'blue' });
                     }
                 });
-            $("#maintainerModel").modal("show");
+            $('#maintainerModel').modal('show');
         });
 }
 

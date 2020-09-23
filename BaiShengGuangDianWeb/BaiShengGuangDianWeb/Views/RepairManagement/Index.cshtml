@@ -256,9 +256,9 @@
                 <div class="modal-body">
                     <div style="margin: auto;width:230px">
                         <div class="form-group flexStyle" style="justify-content: flex-end">
-                            <label class="control-label text-nowrap">指派：</label>
+                            <label class="control-label text-nowrap">指派给：</label>
                             <div style="flex-basis: 150px">
-                                <select class="form-control" id="designateName" style="width:100%"></select>
+                                <select class="form-control" id="designateName" multiple="multiple" style="width:100%"></select>
                             </div>
                         </div>
                         <div class="form-group flexStyle" style="justify-content: flex-end">
@@ -561,26 +561,34 @@
                 <div class="modal-body no-padding-top">
                     <h4>排班：</h4>
                     <div class="form-group">
-                        <label class="control-label">本周排班：<span id="scheduleTime"></span></label>
-                        <table class="table table-hover table-striped">
-                            <thead id="scheduleHead"></thead>
-                            <tbody id="scheduleBody"></tbody>
-                        </table>
-                        <div class="flexStyle" style="justify-content:space-between">
-                            <label class="control-label">本周夜班：<span id="scheduleNight"></span></label>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="">保存</button>
+                        <div class="flexStyle" style="justify-content: space-between">
+                            <label class="control-label">本周排班：<span id="scheduleTime"></span></label>
+                            <label class="control-label">当前时间：<span id="currentTime"></span></label>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead id="scheduleHead"></thead>
+                                <tbody id="scheduleBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="updateSchedule()">保存</button>
                         </div>
                     </div>
                     <hr>
                     <h4>名单：</h4>
                     <div class="form-group">
                         <div class="form-group text-right">
+                            <button type="button" class="btn btn-info btn-sm" onclick="outputTable()">导出</button>
                             <button type="button" class="btn btn-primary btn-sm hidden" id="showAddMaintainerModelBtn" onclick="showAddMaintainerModel()">新增</button>
                             <button type="button" class="btn btn-warning btn-sm hidden" id="updateMaintainerBtn" onclick="updateMaintainer()">修改</button>
                             <button type="button" class="btn btn-danger btn-sm hidden" id="delMaintainerBtn" onclick="delMaintainer()">删除</button>
                         </div>
-                        <div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped" id="maintainerList"></table>
+                        <div id="maintainerTable" style="overflow: auto">
+                            <table class="table table-hover table-striped">
+                                <thead id="maintainerHead"></thead>
+                                <tbody id="maintainerList"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -717,7 +725,7 @@
                 <div class="modal-body">
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap">解决人：</label>
-                        <select class="ms2 form-control" id="servicePro" style="width: 150px"></select>
+                        <select class="ms2 form-control" id="servicePro" style="width: 150px" multiple="multiple"></select>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap: wrap">
                         <label class="control-label text-nowrap">解决时间：</label>
@@ -797,6 +805,30 @@
             </div>
         </div>
     </div>
+    <!-- 评分模态框 -->
+    <div class="modal fade" tabindex="-1" id="showScoreModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">维修评分</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="scoreList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="updateScore.call(this)" id="updateScoreBtn">修改</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- 添加修改维修记录模态框（Modal） -->
     <div class="modal fade" tabindex="-1" id="showServiceLogModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -863,17 +895,17 @@
                         </select>
                     </div>
                     <div class="form-group flexStyle" style="flex-wrap:wrap">
-                        <label class="control-label text-nowrap">指派人：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
-                        <div class="noText">
-                            <select class="form-control" style="width: 200px" id="serLogMaintainer"></select>
+                        <label class="control-label text-nowrap">指派给：<span class="spanStyle isText" id="serLogMaintainerText"></span></label>
+                        <div class="noText" style="flex:1">
+                            <select class="form-control" style="width: 100%" id="serLogMaintainer" multiple="multiple"></select>
                         </div>
                     </div>
                     <div class="box" id="upServiceLogBox">
                         <div class="box-body">
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
                                 <label class="control-label text-nowrap">解决人：<span class="spanStyle isText" id="serLogFaultSolverText"></span></label>
-                                <div class="noText">
-                                    <select class="form-control" style="width: 200px" id="serLogFaultSolver"></select>
+                                <div class="noText" style="flex:1">
+                                    <select class="form-control" style="width: 100%" id="serLogFaultSolver" multiple="multiple"></select>
                                 </div>
                             </div>
                             <div class="form-group flexStyle" style="flex-wrap:wrap">
