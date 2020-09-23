@@ -1289,9 +1289,13 @@ function showMaintainerModel() {
                 nameArr.includes(name) || nameArr.push(name);
                 return name;
             });
-            names = `<td>${names.join(names.length > 1 ? '<br>' : '') || '未排班'}</td>`;
+            const currentTime = new Date();
+            const border = new Date(item.StartTime) < currentTime && currentTime <= new Date(item.EndTime)
+                ? '3px solid red'
+                : '1px solid black';
+            names = `<td style="border:${border}">${names.join(names.length > 1 ? '<br>' : '') || '未排班'}</td>`;
             if (i < 4) {
-                trs[i] = `<td style="font-weight:bold">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
+                trs[i] = `<td style="font-weight:bold;border:1px solid">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
             }
             const rem = i % 4;
             trs[rem] += names;
@@ -1304,6 +1308,7 @@ function showMaintainerModel() {
         trs = trs.reduce((a, b) => `${a}<tr>${b}</tr>`, '');
         $('#scheduleTime').text(`${rData[0].StartTime.split(' ')[0]} 至 ${rData[rData.length - 1].StartTime.split(' ')[0]}`);
         $('#scheduleHead').empty().append(`<tr><th></th>${headEl}</tr>`);
+        $('#scheduleHead th').css('border', '1px solid black');
         $('#scheduleBody').empty().append(trs);
         getMaintainerList(nameArr);
     });

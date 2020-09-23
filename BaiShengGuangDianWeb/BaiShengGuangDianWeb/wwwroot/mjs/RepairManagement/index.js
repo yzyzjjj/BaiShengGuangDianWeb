@@ -2319,7 +2319,7 @@ function getScheduleInfo(show) {
         const headArr = ['一', '二', '三', '四', '五', '六', '日'];
         let headEl = '';
         const rData = ret.datas;
-        let timeFn = time => {
+        const timeFn = time => {
             time = new Date(time);
             return {
                 m: time.getMonth() + 1,
@@ -2335,12 +2335,17 @@ function getScheduleInfo(show) {
                 return name;
             });
             if (i < 4) {
-                trs[i] = `<td style="font-weight:bold">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
+                trs[i] = `<td style="font-weight:bold;border:1px solid">${parseInt(item.StartTime.split(' ')[1])}点 ~ ${parseInt(item.EndTime.split(' ')[1])}点</td>`;
             }
             const rem = i % 4;
             const info = names.join(names.length > 1 ? '<br>' : '') || '未排班';
             const infoId = item.Maintainers[0] ? item.Maintainers[0].Id : 0;
-            names = rem === 1 ? `<td>${info}</td>` : `<td><div class="schedule-name">${info}</div><div class="select-ops hidden"><select class="ms2 form-control" infoid="${infoId}">${ops}</select></div></td>`;
+            const nameText = rem === 1 ? info : `<div class="schedule-name">${info}</div><div class="select-ops hidden"><select class="ms2 form-control" infoid="${infoId}">${ops}</select></div>`;
+            const currentTime = new Date();
+            const border = new Date(item.StartTime) < currentTime && currentTime <= new Date(item.EndTime)
+                ? '3px solid red'
+                : '1px solid black';
+            names = `<td style="border:${border}">${nameText}</td>`;
             trs[rem] += names;
             if (!rem) {
                 const time = timeFn(item.StartTime);
@@ -2351,6 +2356,7 @@ function getScheduleInfo(show) {
         trs = trs.reduce((a, b) => `${a}<tr>${b}</tr>`, '');
         $('#scheduleTime').text(`${rData[0].StartTime.split(' ')[0]} 至 ${rData[rData.length - 1].StartTime.split(' ')[0]}`);
         $('#scheduleHead').empty().append(`<tr><th></th>${headEl}</tr>`);
+        $('#scheduleHead th').css('border', '1px solid black');
         $('#scheduleBody').empty().append(trs).find('.ms2').select2();
         $('#scheduleBody .schedule-name').on('dblclick', function () {
             $('#scheduleBody .select-ops').addClass('hidden');
