@@ -96,6 +96,7 @@
 
   <ItemGroup>
     <Folder Include="Pages\" />
+    <Folder Include="Views\SmartFactory\" />
     <Folder Include="wwwroot\mminjs\" />
   </ItemGroup>
 
