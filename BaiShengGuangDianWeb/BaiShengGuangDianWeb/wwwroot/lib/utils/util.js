@@ -1659,13 +1659,7 @@ function toNonExponential(num) {
 
 //options设置
 function setOptions(data, name) {
-    const op = '<option value="{0}">{1}</option>';
-    let ops = '';
-    for (let i = 0, len = data.length; i < len; i++) {
-        const d = data[i];
-        ops += op.format(d.Id, d[name]);
-    }
-    return ops;
+    return data.reduce((a, b) => `${a}<option value="${b.Id}">${b[name]}</option>`, '');
 }
 
 //将数字金额转换为大写人民币汉字

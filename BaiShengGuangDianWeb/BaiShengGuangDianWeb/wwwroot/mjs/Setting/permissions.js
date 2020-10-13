@@ -18,7 +18,7 @@ function getPermissionsList() {
             var op = function (data, type, row) {
                 return '<input type="checkbox" value="{0},{1}" name="chkItem" class="icb_minimal" onclick="">'.format(data.id, data.name);
             }
-            var order = function (a, b, c,d) {
+            var order = function (a, b, c, d) {
                 return ++d.row;
             }
             var per744 = _permissionList[744].have;
@@ -94,4 +94,13 @@ function delPermission() {
             });
     }
     isStrEmptyOrUndefined(delId) ? layer.msg('请选择要删除的数据') : showConfirm(`删除以下权限:<pre style='color:red'>${delName}</pre>`, doSth);
+}
+
+function updateAdministrator() {
+    ajaxPost("/Relay/Post", { opType: 92 }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+    });
 }

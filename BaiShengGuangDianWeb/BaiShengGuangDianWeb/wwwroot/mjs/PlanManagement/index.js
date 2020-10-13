@@ -141,6 +141,7 @@ function pageReady() {
     });
     $('#updatePlanSelect').on('select2:select', function () {
         var id = $(this).val();
+        $('#updatePlanName').val($(this).find(':selected').text());
         $('#addPlanBody').empty();
         addUpPlanTable(id, true);
     });
@@ -149,6 +150,67 @@ function pageReady() {
     $("#logEndDate").val(getDate());
     $("#logStartDate,#logEndDate").datepicker('update').on('changeDate', () => getLogList());
     $('#logPlanType').on('change', () => getLogList());
+    $('#planSelectFrom').on('select2:select', function () {
+        const id = $(this).val();
+        new Promise(resolve => {
+            getPlanList(true, resolve, id, true);
+        }).then(data => {
+            const d = data[0];
+            $('#planTransferRemark').text(d.Remark);
+            var detailBtn = data => {
+                const op = '<button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button>';
+                return op.format(escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.Site), escape(data.Code), data.Stock, escape(data.Price), escape(data.Remark), escape(data.ImageList));
+            }
+            const isEnable = data => `<input type="checkbox" class="icb_minimal isEnable checkBox" value="${data}">`;
+            $("#planTransferList").DataTable({
+                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                destroy: true,
+                paging: true,
+                searching: true,
+                language: oLanguage,
+                data: d.FirstBill,
+                aaSorting: [[1, 'asc']],
+                aLengthMenu: [20, 40, 60],
+                iDisplayLength: 20,
+                columns: [
+                    { data: 'Id', title: '<input type="checkbox" class="icb_minimal isEnable isAll"><span class="middle">全选</span>', render: isEnable, orderable: false, sWidth: '80px' },
+                    { data: null, title: '序号', render: (a, b, c, d) => d.row + 1 },
+                    { data: 'Code', title: '货品编号' },
+                    { data: 'Category', title: '货品类别' },
+                    { data: 'Name', title: '货品名称' },
+                    { data: 'Supplier', title: '供应商' },
+                    { data: 'Specification', title: '规格型号' },
+                    { data: 'Price', title: '单价' },
+                    { data: null, title: '货品详情', render: detailBtn },
+                    { data: 'ActualConsumption', title: '实际用量' }
+                ],
+                drawCallback: function () {
+                    $(this).find('.isEnable').iCheck({
+                        handle: 'checkbox',
+                        checkboxClass: 'icheckbox_minimal-blue',
+                        increaseArea: '20%'
+                    });
+                }
+            });
+        });
+    });
+    $('#planTransferList').on('ifChanged', '.isAll', function () {
+        const checkBox = $($('#planTransferList').DataTable().columns(0).nodes()[0]).find('.checkBox');
+        if ($(this).is(':checked')) {
+            checkBox.iCheck('check');
+        } else {
+            const isAllCheck = Array.from($($('#planTransferList').DataTable().columns(0).nodes()[0]).find('.checkBox')).every(item => $(item).is(':checked'));
+            if (isAllCheck) checkBox.iCheck('uncheck');
+        }
+    });
+    $('#planTransferList').on('ifChanged', '.checkBox', function () {
+        if ($(this).is(':checked')) {
+            const isAllCheck = Array.from($($('#planTransferList').DataTable().columns(0).nodes()[0]).find('.checkBox')).every(item => $(item).is(':checked'));
+            if (isAllCheck) $('#planTransferList .isAll').iCheck('check');
+        } else {
+            $('#planTransferList .isAll').iCheck('uncheck');
+        }
+    });
 }
 
 //默认货品编号选择
@@ -394,8 +456,8 @@ function getPriceSum() {
             price = tr.find('.price select').val();
             plannedConsumption = tr.find('.plannedConsumption input').val();
         } else {
-            price = tr.find('.price span').text();
-            plannedConsumption = tr.find('.plannedConsumption span').text();
+            price = tr.find('.price .textIn').text();
+            plannedConsumption = tr.find('.plannedConsumption .textIn').text();
         }
         if (isStrEmptyOrUndefined(price)) {
             price = 0;
@@ -458,13 +520,22 @@ function getPlanList(isSelect, resolve, planId, isAll) {
                     : '';
             }
             $("#planList").DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+                buttons: [{
+                    extend: 'excel',
+                    text: '导出Excel',
+                    className: 'btn-primary btn-sm',
+                    filename: `计划管理_${getDate()}`,
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6]
+                    }
+                }],
                 "destroy": true,
                 "paging": true,
                 "searching": true,
                 "language": oLanguage,
                 "data": rData,
-                "aaSorting": [[per501 ? 1 : 0, "desc"]],
+                "aaSorting": [[per501 ? 1 : 0, "asc"]],
                 "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
                 "iDisplayLength": 20, //默认显示的记录数
                 "columns": [
@@ -969,6 +1040,7 @@ function updatePlanModal(id) {
     $('#addPlanModal .updatePlan').removeClass('hidden');
     addUpPlanClass(true, id);
     $('#updatePlanSelect').val(id).trigger('change');
+    $('#updatePlanName').val($('#updatePlanSelect :selected').text());
     $('#addPlanModal .modal-title').text('修改计划');
     $('#addPlanModal').modal('show');
 }
@@ -976,7 +1048,7 @@ function updatePlanModal(id) {
 //修改计划
 function updatePlan() {
     var planId = $('#updatePlanSelect').val();
-    var plan = $('#updatePlanSelect').find(`option[value=${planId}]`).text();
+    var plan = $('#updatePlanName').val().trim();
     var remark = $('#addRemark').val().trim();
     var list = {
         id: planId,
@@ -1173,4 +1245,46 @@ function getLogList() {
                 ]
             });
     });
+}
+
+//转移计划弹窗
+function showPlanTransferModal() {
+    const firstId = $('#planSelectFrom option:first').val();
+    $('#planSelectFrom').val(firstId).trigger('change').trigger('select2:select');
+    $('#planSelectTo').val(firstId).trigger('change');
+    $('#planTransferModal').modal('show');
+}
+
+//转移计划
+function planTransfer() {
+    const fromId = $('#planSelectFrom').val();
+    if (isStrEmptyOrUndefined(fromId)) return layer.msg('请选择源计划');
+    const toId = $('#planSelectTo').val();
+    if (isStrEmptyOrUndefined(toId)) return layer.msg('请选择目标计划');
+    const bill = [];
+    $($('#planTransferList').DataTable().columns(0).nodes()[0]).find('.checkBox').each((i, item) => {
+        const checkBox = $(item);
+        if (checkBox.is(':checked')) {
+            bill.push(checkBox.val());
+        }
+    });
+    if (!bill.length) return layer.msg('请选择需要转移的数据');
+    const doSth = function () {
+        const data = {
+            opType: 705,
+            opData: JSON.stringify({
+                FromId: fromId,
+                ToId: toId,
+                Bill: bill
+            })
+        }
+        ajaxPost('/Relay/Post', data, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                $('#planTransferModal').modal('hide');
+                getPlanList(false);
+            }
+        });
+    }
+    showConfirm('转移', doSth);
 }
