@@ -156,7 +156,7 @@ function pageReady() {
             getPlanList(true, resolve, id, true);
         }).then(data => {
             const d = data[0];
-            $('#planTransferRemark').text(d.Remark);
+            $('#planSelectFromRemark').text(d.Remark);
             var detailBtn = data => {
                 const op = '<button type="button" class="btn btn-info btn-sm" onclick="productDetailModal(\'{0}\',\'{1}\',\'{2}\',\'{3}\',\'{4}\',\'{5}\',{6},\'{7}\',\'{8}\',\'{9}\')">详情</button>';
                 return op.format(escape(data.Category), escape(data.Name), escape(data.Supplier), escape(data.Specification), escape(data.Site), escape(data.Code), data.Stock, escape(data.Price), escape(data.Remark), escape(data.ImageList));
@@ -193,6 +193,12 @@ function pageReady() {
                 }
             });
         });
+    });
+    $('#planSelectTo').on('select2:select', function () {
+        const id = $(this).val();
+        new Promise(resolve => {
+            getPlanList(true, resolve, id, true);
+        }).then(data => $('#planSelectToRemark').text(data[0].Remark));
     });
     $('#planTransferList').on('ifChanged', '.isAll', function () {
         const checkBox = $($('#planTransferList').DataTable().columns(0).nodes()[0]).find('.checkBox');
@@ -1251,7 +1257,7 @@ function getLogList() {
 function showPlanTransferModal() {
     const firstId = $('#planSelectFrom option:first').val();
     $('#planSelectFrom').val(firstId).trigger('change').trigger('select2:select');
-    $('#planSelectTo').val(firstId).trigger('change');
+    $('#planSelectTo').val(firstId).trigger('change').trigger('select2:select');
     $('#planTransferModal').modal('show');
 }
 

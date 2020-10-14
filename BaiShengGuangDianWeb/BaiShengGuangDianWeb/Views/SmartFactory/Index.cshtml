@@ -16,13 +16,13 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
-                <li><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
-                <li><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
-                <li><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
-                <li><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
-                <li><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
-                <li class="active"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
-                <li><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
+                <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
+                <li id="deviceNavLi"><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
+                <li id="flowNavLi"><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
+                <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
+                <li id="taskOrderNavLi"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
+                <li id="flowCardNavLi" class="active"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane fade in" id="productionLineNav"></div>
@@ -67,7 +67,7 @@
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs ui-sortable-handle">
                             <li class="active"><a href="#processCodeNav" data-toggle="tab" aria-expanded="true">流程编号</a></li>
-                            <li><a href="#processSetNav" data-toggle="tab" aria-expanded="false">流程设置</a></li>
+                            <li id="processSetNavLi"><a href="#processSetNav" data-toggle="tab" aria-expanded="false">流程设置</a></li>
                         </ul>
                         <div class="tab-content no-padding">
                             <div class="tab-pane active in" id="processCodeNav">
@@ -144,7 +144,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane active in" id="taskOrderNav">
+                <div class="tab-pane fade in" id="taskOrderNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">任务单管理</h3>
@@ -162,7 +162,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade in" id="flowCardNav"></div>
+                <div class="tab-pane active in" id="flowCardNav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">流程卡管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-primary btn-sm" onclick="addFlowCardModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delFlowCard()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getFlowCardList()">刷新</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group form-inline">
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">发卡时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="sendCardSTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                    <label class="control-label text-nowrap no-margin">至</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="sendCardETime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">任务单：</label>
+                                    <select class="form-control" id="flowCardTaskOrderSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">流程编号：</label>
+                                    <select class="form-control" id="flowCardProcessCodeSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">计划号：</label>
+                                    <select class="form-control" id="flowCardPlanSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary" onclick="getFlowCardList()">查询</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="flowCardList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -580,6 +619,74 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加流程卡模态框*@
+    <div class="modal fade" tabindex="-1" id="addFlowCardModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加流程卡</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-inline">
+                        <div class="form-group flexStyle">
+                            <label class="control-label text-nowrap no-margin">任务单：</label>
+                            <select class="form-control" id="addFlowCardTaskOrderSelect" style="width: 150px; margin-right: 20px"></select>
+                        </div>
+                        <div class="form-group flexStyle">
+                            <label class="control-label text-nowrap no-margin">目标产量：<span id="addFlowCardTarget" style="margin-right: 20px"></span></label>
+                            <label class="control-label text-nowrap no-margin text-red">未完成：<span id="addFlowCardLeft" style="margin-right: 20px"></span></label>
+                            <label class="control-label text-nowrap no-margin text-orange">加工中：<span id="addFlowCardDoing" style="margin-right: 20px"></span></label>
+                            <label class="control-label text-nowrap no-margin text-blue">已发卡：<span id="addFlowCardIssue"></span></label>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle">
+                        <label class="control-label text-nowrap no-margin">计划号：<span id="addFlowCardPlan" style="margin-right: 20px"></span></label>
+                        <label class="control-label text-nowrap no-margin">交货日期：<span id="addFlowCardTime"></span></label>
+                    </div>
+                    <div class="form-group form-inline">
+                        <div class="form-group flexStyle">
+                            <label class="control-label text-nowrap no-margin">加工数量：</label>
+                            <input type="text" class="form-control" id="addFlowCardWorkNum">
+                        </div>
+                        <div class="form-group flexStyle">
+                            <label class="control-label text-nowrap no-margin">单卡数量：</label>
+                            <input type="text" class="form-control" id="addFlowCardCardNum">
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle">
+                        <label class="control-label text-nowrap no-margin">流程编号：</label>
+                        <select class="form-control" id="addFlowCardProcessCodeSelect" style="width: 150px;margin-right: 10px"></select>
+                        <button class="btn btn-primary">设置</button>
+                    </div>
+                    <div class="form-group flexStyle">
+                        <label class="control-label text-nowrap no-margin">类型：<span id="addFlowCardType" style="margin-right: 20px"></span></label>
+                        <label class="control-label text-nowrap no-margin">流程详情：<span id="addFlowCardProcessDetail"></span></label>
+                    </div>
+                    <div class="form-group flexStyle" style="justify-content: space-between;flex-wrap: wrap">
+                        <div class="flexStyle">
+                            <label class="control-label text-nowrap no-margin">加工人：</label>
+                            <select class="form-control" id="addFlowCardPersonSelect" style="width: 150px"></select>
+                        </div>
+                        <div>
+                            <button class="btn btn-success">生成</button>
+                            <button class="btn btn-info">打印</button>
+                            <button class="btn btn-primary">确定</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addFlowCardProcessList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addFlowCard()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

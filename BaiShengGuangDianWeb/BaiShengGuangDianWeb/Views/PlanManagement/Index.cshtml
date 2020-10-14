@@ -152,14 +152,17 @@
                 <div class="modal-body">
                     <div class="form-group flexStyle">
                         <label class="control-label no-margin text-nowrap">转移：</label>
-                        <select class="ms2 form-control planSelect" id="planSelectFrom" style="width: 180px"></select>
+                        <div style="width: 180px;margin-right: 10px">
+                            <select class="ms2 form-control planSelect" id="planSelectFrom" style="width: 100%"></select>
+                        </div>
+                        <label class="control-label no-margin text-nowrap">备注：<span id="planSelectFromRemark"></span></label>
                     </div>
                     <div class="form-group flexStyle">
                         <label class="control-label no-margin text-nowrap">至：</label>
-                        <select class="ms2 form-control planSelect" id="planSelectTo" style="width: 180px"></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">备注：<span id="planTransferRemark"></span></label>
+                        <div style="width: 180px; margin-right: 10px">
+                            <select class="ms2 form-control planSelect" id="planSelectTo" style="width: 100%"></select>
+                        </div>
+                        <label class="control-label no-margin text-nowrap">备注：<span id="planSelectToRemark"></span></label>
                     </div>
                     <div class="form-group">
                         <label class="control-label">清单：</label>

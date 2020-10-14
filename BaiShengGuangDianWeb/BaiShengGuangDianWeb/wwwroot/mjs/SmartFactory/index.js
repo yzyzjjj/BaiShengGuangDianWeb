@@ -1,11 +1,24 @@
 ﻿function pageReady() {
-    //getPersonList();
-    //getDeviceList();
-    //getProcessCodeList();
-    //getProcessOpList();
-    //getPlanList();
-    //getWorkOrderList();
-    getTaskOrderList();
+    $('#personNavLi').one('click', getPersonList);
+    $('#deviceNavLi').one('click', getDeviceList);
+    $('#flowNavLi').one('click', getProcessCodeList);
+    $('#processSetNavLi').one('click', getProcessOpList);
+    $('#planNavLi').one('click', getPlanList);
+    $('#workOrderNavLi').one('click', getWorkOrderList);
+    $('#taskOrderNavLi').one('click', getTaskOrderList);
+    $('#flowCardNavLi').on('click', () => {
+        $('#sendCardSTime,#sendCardETime').val(getDate()).datepicker('update');
+        const taskOrderFn = myPromise(5090);
+        const processCodeFn = myPromise(5040);
+        const planFn = myPromise(5060);
+        Promise.all([taskOrderFn, processCodeFn, planFn]).then(result => {
+            const all = '<option value="0">所有</option>';
+            $('#flowCardTaskOrderSelect').html(`${all}${setOptions(result[0], 'TaskOrder')}`);
+            $('#flowCardProcessCodeSelect').html(`${all}${setOptions(result[1], 'Code')}`);
+            $('#flowCardPlanSelect').html(`${all}${setOptions(result[2], 'Product')}`);
+            getFlowCardList();
+        });
+    });
     $('#addProcessCodeBody').on('click', '.upTr', function () {
         const tr = $(this).parents('tr');
         const upTr = tr.prev();
@@ -23,9 +36,8 @@
         const processId = d.List.split(',');
         const processes = d.Processes.split(',');
         const arr = processId.map((item, i) => ({ ProcessId: item, Process: processes[i], ProcessNumber: 0, ProcessCodeId: d.Id }));
-        const tableConfig = _tablesConfig(false);
+        const tableConfig = _tablesConfig(false, arr);
         const tableSet = _tableSet();
-        tableConfig.data = arr;
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程' },
             { data: null, title: '可否返工', render: tableSet.isRework },
@@ -37,9 +49,8 @@
     });
     $('#planProcessCodeList').on('click', '.browse-btn', function () {
         myPromise(5040).then(data => {
-            const tableConfig = _tablesConfig(true, 0);
+            const tableConfig = _tablesConfig(true, data, 0);
             const tableSet = _tableSet();
-            tableConfig.data = data;
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Code', title: '编号' },
                 { data: 'Category', title: '类型' },
@@ -56,9 +67,7 @@
         $('#addPlanProcessList').prop('disabled', false);
     });
     $('#planProcessCodeList').on('click', '.set-btn', function () {
-        const tableConfig = _tablesConfig(false);
-        const tableSet = _tableSet();
-        tableConfig.data = this.ProcessData ? this.ProcessData.map(item => ({
+        const data = this.ProcessData ? this.ProcessData.map(item => ({
             addPressM: item[0],
             addPressS: item[1],
             workM: item[2],
@@ -66,6 +75,8 @@
             setPress: item[4],
             rotate: item[5]
         })) : [];
+        const tableConfig = _tablesConfig(false, data);
+        const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'addPressM', title: '加压时间（M）', render: tableSet.addInput.bind(null, 'addPressM', 'auto') },
             { data: 'addPressS', title: '加压时间（S）', render: tableSet.addInput.bind(null, 'addPressS', 'auto') },
@@ -166,14 +177,15 @@ function myPromise(opType, opData, isParGet = false) {
 }
 
 //dataTable基本参数
-function _tablesConfig(isList, order = 1) {
-    return {
+function _tablesConfig(isList, data, order = 1) {
+    const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         bAutoWidth: false,
         destroy: true,
         paging: true,
         searching: isList,
         ordering: isList,
+        data: data,
         aaSorting: [[order, 'asc']],
         aLengthMenu: [20, 40, 60],
         iDisplayLength: 20,
@@ -181,7 +193,9 @@ function _tablesConfig(isList, order = 1) {
         columns: [
             { data: null, title: '序号', render: _tableSet().order, sWidth: '80px' }
         ]
-    }
+    };
+    isList && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
+    return obj;
 }
 
 //dataTable渲染标签
@@ -313,10 +327,8 @@ let _personTrs = null;
 function getPersonList() {
     myPromise(5000).then(data => {
         _personTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Account', title: '用户名', render: tableSet.input.bind(null, 'account') },
             { data: 'Number', title: '编号', render: tableSet.input.bind(null, 'number') },
@@ -366,9 +378,8 @@ function addPersonModel() {
         Name: '',
         Remark: ''
     }
-    const tableConfig = _tablesConfig(false);
+    const tableConfig = _tablesConfig(false, [trData]);
     const tableSet = _tableSet();
-    tableConfig.data = [trData];
     tableConfig.columns = tableConfig.columns.concat([
         { data: 'Account', title: '用户名', render: tableSet.addInput.bind(null, 'account', 'auto') },
         { data: 'Number', title: '编号', render: tableSet.addInput.bind(null, 'number', 'auto') },
@@ -403,10 +414,8 @@ function getDeviceList() {
     const deviceFn = myPromise(5010);
     Promise.all([deviceTypeFn, deviceFn]).then(result => {
         _deviceTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, result[1]);
         const tableSet = _tableSet();
-        tableConfig.data = result[1];
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(result[0], 'Category'), 'category') },
             { data: 'Code', title: '机台号', render: tableSet.input.bind(null, 'code') },
@@ -451,9 +460,8 @@ function addDeviceModel() {
             Code: '',
             Remark: ''
         }
-        const tableConfig = _tablesConfig(false);
+        const tableConfig = _tablesConfig(false, [trData]);
         const tableSet = _tableSet();
-        tableConfig.data = [trData];
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型', render: tableSet.addSelect.bind(null, setOptions(e, 'Category'), 'category') },
             { data: 'Code', title: '机台号', render: tableSet.addInput.bind(null, 'code', 'auto') },
@@ -491,10 +499,8 @@ let _deviceCategoryTrs = null;
 function getDeviceCategoryList() {
     myPromise(5020).then(data => {
         _deviceCategoryTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型', render: tableSet.input.bind(null, 'category') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
@@ -535,9 +541,8 @@ function addDeviceCategoryModel() {
         Category: '',
         Remark: ''
     }
-    const tableConfig = _tablesConfig(false);
+    const tableConfig = _tablesConfig(false, [trData]);
     const tableSet = _tableSet();
-    tableConfig.data = [trData];
     tableConfig.columns = tableConfig.columns.concat([
         { data: 'Category', title: '类型', render: tableSet.addInput.bind(null, 'category', 'auto') },
         { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
@@ -573,10 +578,8 @@ let _processCodeTrs = null;
 function getProcessCodeList() {
     myPromise(5040).then(data => {
         _processCodeTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Code', title: '编号' },
             { data: 'Category', title: '类型' },
@@ -597,9 +600,8 @@ function addEditProcessCodeModel(callback) {
     const getOps = myPromise(5030);
     Promise.all([getTypes, getOps]).then(result => {
         $('#addProcessCodeCategoryName').html(setOptions(result[0], 'Category'));
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(false, result[1]);
         const tableSet = _tableSet();
-        tableConfig.data = result[1];
         tableConfig.columns.unshift({ data: null, title: '', render: tableSet.addBtn.bind(null, 'addProcessOpToCode'), orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程' },
@@ -711,10 +713,8 @@ let _processCodeCategoryTrs = null;
 function getProcessCodeCategoryList() {
     myPromise(5050).then(data => {
         _processCodeCategoryTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型', render: tableSet.input.bind(null, 'category') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
@@ -752,9 +752,8 @@ function addProcessCodeCategoryModel() {
         Category: '',
         Remark: ''
     }
-    const tableConfig = _tablesConfig(false);
+    const tableConfig = _tablesConfig(false, [trData]);
     const tableSet = _tableSet();
-    tableConfig.data = [trData];
     tableConfig.columns = tableConfig.columns.concat([
         { data: 'Category', title: '类型', render: tableSet.addInput.bind(null, 'category', 'auto') },
         { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
@@ -786,10 +785,8 @@ function getProcessOpList() {
     const processOpFn = myPromise(5030);
     Promise.all([deviceTypeFn, processOpFn]).then(result => {
         _processOpTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, result[1]);
         const tableSet = _tableSet();
-        tableConfig.data = result[1];
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.input.bind(null, 'process') },
             { data: 'DeviceCategory', title: '设备类型', render: tableSet.select.bind(null, setOptions(result[0], 'Category'), 'category') },
@@ -834,9 +831,8 @@ function addProcessOpModel() {
             Process: '',
             Remark: ''
         }
-        const tableConfig = _tablesConfig(false);
+        const tableConfig = _tablesConfig(false, [trData]);
         const tableSet = _tableSet();
-        tableConfig.data = [trData];
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.addInput.bind(null, 'process', 'auto') },
             { data: 'DeviceCategory', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(e, 'Category'), 'category') },
@@ -870,10 +866,8 @@ let _planTrs = null;
 function getPlanList() {
     myPromise(5060).then(data => {
         _planTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Product', title: '计划号' },
             { data: 'ProcessCodes', title: '流程编号清单' },
@@ -1009,9 +1003,8 @@ function showUpdatePlanModel() {
                 $('#addPlanProcessList').click();
                 $('#planProcessCodeList .process-code-select:last').val(key);
                 $('#planProcessCodeList .process-code-category:last').text(`类型：${_planProcessCodeInfo[key].Category}`);
-                const tableConfig = _tablesConfig(false);
+                const tableConfig = _tablesConfig(false, processCodeObj[key]);
                 const tableSet = _tableSet();
-                tableConfig.data = processCodeObj[key];
                 tableConfig.columns = tableConfig.columns.concat([
                     { data: 'Process', title: '流程' },
                     { data: null, title: '可否返工', render: tableSet.isRework },
@@ -1044,10 +1037,8 @@ let _workOrderTrs = null;
 function getWorkOrderList() {
     myPromise(5070).then(data => {
         _workOrderTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
-        tableConfig.data = data;
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'WorkOrder', title: '工单', render: tableSet.input.bind(null, 'workOrder') },
             { data: 'StateStr', title: '状态' },
@@ -1101,9 +1092,8 @@ function addWorkOrderModel() {
         Target: 0,
         Remark: ''
     }
-    const tableConfig = _tablesConfig(false);
+    const tableConfig = _tablesConfig(false, [trData]);
     const tableSet = _tableSet();
-    tableConfig.data = [trData];
     tableConfig.columns = tableConfig.columns.concat([
         { data: 'WorkOrder', title: '工单', render: tableSet.addInput.bind(null, 'workOrder', 'auto') },
         { data: 'DeliveryTime', title: '交货日期', render: tableSet.addDay.bind(null, 'deliveryTime') },
@@ -1141,10 +1131,8 @@ function getTaskOrderList() {
     const taskOrderFn = myPromise(5090);
     Promise.all([planFn, workOrderFn, taskOrderFn]).then(result => {
         _taskOrderTrs = [];
-        const tableConfig = _tablesConfig(true);
+        const tableConfig = _tablesConfig(true, result[2]);
         const tableSet = _tableSet();
-        tableConfig.data = result[2];
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.isEnable, orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'TaskOrder', title: '任务单', render: tableSet.input.bind(null, 'taskOrder') },
             { data: 'StateStr', title: '状态' },
@@ -1227,9 +1215,8 @@ function addTaskOrderModel() {
             DeliveryTime: firstWorkOrder.DeliveryTime.split(' ')[0],
             Remark: ''
         }
-        const tableConfig = _tablesConfig(false);
+        const tableConfig = _tablesConfig(false, [trData]);
         const tableSet = _tableSet();
-        tableConfig.data = [trData];
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'TaskOrder', title: '任务单', render: tableSet.addInput.bind(null, 'taskOrder', 'auto') },
             { data: 'WorkOrderId', title: '工单', render: tableSet.addSelect.bind(null, setOptions(result[1], 'WorkOrder'), 'workOrder') },
@@ -1260,4 +1247,47 @@ function addTaskOrder() {
 //删除任务单
 function delTaskOrder() {
     delTableRow(_taskOrderTrs, 5093, getTaskOrderList);
+}
+
+//----------------------------------------流程卡管理----------------------------------------------------
+
+let _flowCardTrs = null;
+
+//获取流程卡列表
+function getFlowCardList() {
+    let startTime = $('#sendCardSTime').val().trim();
+    if (isStrEmptyOrUndefined(startTime)) return layer.msg('请选择发卡开始时间');
+    let endTime = $('#sendCardETime').val().trim();
+    if (isStrEmptyOrUndefined(endTime)) return layer.msg('请选择发卡结束时间');
+    if (compareDate(startTime, endTime)) return layer.msg('结束时间不能小于开始时间');
+    startTime += ' 00:00:00';
+    endTime += ' 23:59:59';
+    const taskOrderId = $('#flowCardTaskOrderSelect').val();
+    if (isStrEmptyOrUndefined(taskOrderId)) return layer.msg('请选择任务单');
+    const productId = $('#flowCardPlanSelect').val();
+    if (isStrEmptyOrUndefined(productId)) return layer.msg('请选择计划号');
+    myPromise(5110, { startTime, endTime, taskOrderId, productId }, true).then(data => {
+        _flowCardTrs = [];
+        const tableConfig = _tablesConfig(true, data);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'CreateTime', title: '发卡时间' },
+            { data: 'FlowCard', title: '流程卡' },
+            { data: 'ProcessCode', title: '流程编号' },
+            { data: 'TaskOrder', title: '任务单' },
+            { data: 'Product', title: '计划号' },
+            { data: 'Batch', title: '预计工时' },
+            { data: 'Id', title: '流程详情', render: tableSet.detailBtn.bind(null, 'showTaskOrderDetailModal') },
+            { data: 'Remark', title: '备注' }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _taskOrderTrs);
+        }
+        $('#flowCardList').DataTable(tableConfig);
+    });
+}
+
+//添加流程卡弹窗
+function addFlowCardModel() {
+    $('#addFlowCardModel').modal('show');
 }
