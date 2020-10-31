@@ -696,23 +696,20 @@ function getProcessDetail() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var rows = '<div class="row" id="row{0}"></div>';
-            var panel = '<div class="col-md-6">' +
-                '<div class="panel panel-primary">' +
-                '<div class="panel-heading">' +
-                '<h3 class="panel-title badge" id="code{0}" style="color:green">' +
+            var panel = '<div class="panel panel-primary">' +
+                '<div class="panel-heading flexStyle" style="justify-content:space-between;flex-wrap:wrap">' +
+                '<div><h3 class="panel-title badge" id="code{0}" style="color:green">' +
                 '</h3>' +
                 '<h3 class="panel-title badge" id="meanTime{0}">' +
+                '</h3></div>' +
+                '<div><h3 class="panel-title badge" id="num{0}">' +
                 '</h3>' +
-                '<h3 class="panel-title pull-right badge" style="cursor:pointer" onclick="rateList({0},{1},\'{2}\',\'{3}\', \'{4}\')">' + '刷新' +
-                '</h3>' +
-                '<h3 class="panel-title pull-right badge" id="num{0}">' +
-                '</h3>' +
+                '<h3 class="panel-title badge pointer" onclick="rateList({0},{1},\'{2}\',\'{3}\', \'{4}\')">刷新' +
+                '</h3></div>' +
                 '</div>' +
                 '<div class="table-responsive mailbox-messages" style="padding:10px">' +
                 '<table class="table table-hover table-striped" id="processList{0}">' +
                 '</table>' +
-                '</div>' +
                 '</div>' +
                 '</div>';
             var i, len = ret.datas.length;
@@ -741,25 +738,16 @@ function getProcessDetail() {
             var requirementMid = function (data, type, row) {
                 return data.RequirementMid == "0" ? "" : data.RequirementMid;
             }
-            var n = 0;
             var code = [];
-            var row = $(rows.format(n)).clone();
-            $("#processDetailData").append(row);
             for (i = 0; i < len; i++) {
                 var processData = ret.datas[i];
                 if (processData.ProcessLog.length != 0) {
-                    if ($(row).children().length == 2) {
-                        n++;
-                        row = $(rows.format(n)).clone();
-                        $("#processDetailData").append(row);
-                    }
                     var option = $(panel.format(i, processData.DeviceId, escape(dayDate), escape(day2Date), escape(plan))).clone();
-                    $("#row" + n).append(option);
+                    $("#processDetailData").append(option);
                     var codeName = processData.ProcessLog[0].Code;
                     code.push(codeName);
                     $("#code" + i).prepend(codeName);
                     $("#num" + i).text("每日加工次数：" + processData.ProcessCount + "次");
-                    o = 0;
                     $("#processList" + i).DataTable({
                         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                         "destroy": true,
@@ -816,7 +804,6 @@ function getProcessDetail() {
             } else {
                 $("#noProcessDetailData").addClass("hidden");
             }
-
         });
 }
 

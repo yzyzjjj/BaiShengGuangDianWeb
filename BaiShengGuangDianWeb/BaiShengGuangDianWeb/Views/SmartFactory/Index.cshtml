@@ -15,17 +15,54 @@
     <div class="row">
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
-                <li><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
+                <li class="active"><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
                 <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
                 <li id="deviceNavLi"><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
                 <li id="flowNavLi"><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
                 <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
                 <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
                 <li id="taskOrderNavLi"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
-                <li id="flowCardNavLi" class="active"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
+                <li id="flowCardNavLi"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
             </ul>
             <div class="tab-content no-padding">
-                <div class="tab-pane fade in" id="productionLineNav"></div>
+                <div class="tab-pane active in" id="productionLineNav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="flexStyle">
+                                <label class="control-label text-nowrap no-margin">显示方式：</label>
+                                <select class="form-control" id="showMode" style="width: 150px;margin-right: 5px">
+                                    <option value="0">工单</option>
+                                    <option value="1">任务单</option>
+                                    <option value="2">流程卡</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="getProductionLine()" style="margin-right:5px">刷新</button>
+                                <button class="btn btn-success" onclick="showScheduleModal()">排程</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="pull-left" style="width: 25%">
+                                <div class="form-group">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="productionLineList"></table>
+                                    </div>
+                                </div>
+                                <div id="warningBox"></div>
+                                <div id="dangerBox"></div>
+                            </div>
+                            <div class="pull-right" style="width: 75%; padding-left: 10px">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tbody id="productionLineHead"></tbody>
+                                    </table>
+                                </div>
+                                <div id="lineBox" style="margin-bottom: 20px"></div>
+                                <div id="successLineBox"></div>
+                                <div id="warningLineBox"></div>
+                                <div id="dangerLineBox"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="tab-pane fade in" id="personNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
@@ -162,7 +199,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane active in" id="flowCardNav">
+                <div class="tab-pane fade in" id="flowCardNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">流程卡管理</h3>
@@ -397,7 +434,6 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">类型管理</h3>
                             <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="updateProcessCodeCategory()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="addProcessCodeCategoryModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delProcessCodeCategory()">删除</button>
                                 <button class="btn btn-info btn-sm" onclick="getProcessCodeCategoryList()">刷新</button>
@@ -424,18 +460,57 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加设备</h4>
+                    <h4 class="modal-title" id="addEditProcessCategoryTitle"></h4>
                 </div>
                 <div class="modal-body">
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addProcessCodeCategoryList"></table>
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addProcessCodeCategoryListBtn"><i class="fa fa-plus"></i>添加新项</button>
+                    <div style="display: flex">
+                        <div style="flex: 1">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">新流程编号类型</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="flexStyle form-group">
+                                        <label class="control-label text-nowrap no-margin">类型：</label>
+                                        <input type="text" class="form-control" id="addProcessCodeCategory">
+                                    </div>
+                                    <div class="flexStyle form-group">
+                                        <label class="control-label text-nowrap no-margin">备注：</label>
+                                        <input type="text" class="form-control" id="addProcessCodeCategoryRemark">
+                                    </div>
+                                    <label class="control-label">流程：</label>
+                                    <div style="overflow: auto;max-height: 500px">
+                                        <table class="table table-hover table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>序号</th>
+                                                    <th>流程</th>
+                                                    <th>上移</th>
+                                                    <th>操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="addProcessCodeCategoryBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex: 1">
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">流程选项</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="table-responsive mailbox-messages">
+                                        <table class="table table-hover table-striped" id="addProcessCodeCategoryOpList"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addProcessCodeCategory()">添加</button>
+                    <button type="button" class="btn btn-primary" id="addEditProcessCategoryBtn"></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -654,39 +729,189 @@
                     <div class="form-group form-inline">
                         <div class="form-group flexStyle">
                             <label class="control-label text-nowrap no-margin">加工数量：</label>
-                            <input type="text" class="form-control" id="addFlowCardWorkNum">
+                            <input type="text" class="form-control text-center" id="addFlowCardWorkNum" onInput="onInput(this, 3, 0)">
                         </div>
                         <div class="form-group flexStyle">
                             <label class="control-label text-nowrap no-margin">单卡数量：</label>
-                            <input type="text" class="form-control" id="addFlowCardCardNum">
+                            <input type="text" class="form-control text-center" id="addFlowCardCardNum" onInput="onInput(this, 3, 0)">
+                        </div>
+                        <div class="form-group flexStyle">
+                            <label class="control-label text-nowrap no-margin">加工人：</label>
+                            <select class="form-control" id="addFlowCardPersonSelect" style="width: 150px"></select>
                         </div>
                     </div>
                     <div class="form-group flexStyle">
                         <label class="control-label text-nowrap no-margin">流程编号：</label>
                         <select class="form-control" id="addFlowCardProcessCodeSelect" style="width: 150px;margin-right: 10px"></select>
-                        <button class="btn btn-primary">设置</button>
+                        <button class="btn btn-primary" id="processCodeLookBtn" onclick="addFlowCardProcessCodeLook.call(this)">查看</button>
                     </div>
-                    <div class="form-group flexStyle">
+                    <div class="form-group flexStyle" style="flex-wrap:wrap">
                         <label class="control-label text-nowrap no-margin">类型：<span id="addFlowCardType" style="margin-right: 20px"></span></label>
-                        <label class="control-label text-nowrap no-margin">流程详情：<span id="addFlowCardProcessDetail"></span></label>
+                        <label class="control-label no-margin">流程详情：<span id="addFlowCardProcessDetail"></span></label>
                     </div>
-                    <div class="form-group flexStyle" style="justify-content: space-between;flex-wrap: wrap">
-                        <div class="flexStyle">
-                            <label class="control-label text-nowrap no-margin">加工人：</label>
-                            <select class="form-control" id="addFlowCardPersonSelect" style="width: 150px"></select>
-                        </div>
-                        <div>
-                            <button class="btn btn-success">生成</button>
-                            <button class="btn btn-info">打印</button>
-                            <button class="btn btn-primary">确定</button>
-                        </div>
+                    <div class="text-right">
+                        <button class="btn btn-primary" onclick="addFlowCardPreview()">预览</button>
+                        <button class="btn btn-success" onclick="addFlowCard()">生成</button>
+                        <button class="btn btn-info" onclick="flowCardPrint()">打印</button>
                     </div>
                     <div class="table-responsive mailbox-messages">
                         <table class="table table-hover table-striped" id="addFlowCardProcessList"></table>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addFlowCard()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*流程查看模态框*@
+    <div class="modal fade" tabindex="-1" id="showProcessFlowCardIdModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">流程详情查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="processFlowCardIdList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*流程编号查看模态框*@
+    <div class="modal fade" tabindex="-1" id="showProcessDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">流程详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle">
+                        <label class="control-label text-nowrap no-margin">流程编号：</label>
+                        <select class="form-control" id="processDetailCodeSelect" style="width: 150px"></select>
+                    </div>
+                    <div class="form-group">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="processDetailList"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*工艺详情模态框*@
+    <div class="modal fade" tabindex="-1" id="showCraftDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">工艺详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="craftDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*报警信息模态框*@
+    <div class="modal fade" tabindex="-1" id="showWarningDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">报警信息</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="WarningDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*任务单信息模态框*@
+    <div class="modal fade" tabindex="-1" id="showTaskDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">任务单信息</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="taskDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*任务单信息模态框*@
+    <div class="modal fade" tabindex="-1" id="showFlowDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">流程卡信息</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="flowDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*排程信息模态框*@
+    <div class="modal fade" tabindex="-1" id="showScheduleModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">排程信息</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="scheduleList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

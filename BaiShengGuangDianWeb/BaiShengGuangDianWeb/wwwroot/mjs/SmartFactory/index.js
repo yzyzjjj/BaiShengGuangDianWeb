@@ -1,4 +1,5 @@
 ﻿function pageReady() {
+    getProductionLine();
     $('#personNavLi').one('click', getPersonList);
     $('#deviceNavLi').one('click', getDeviceList);
     $('#flowNavLi').one('click', getProcessCodeList);
@@ -6,7 +7,7 @@
     $('#planNavLi').one('click', getPlanList);
     $('#workOrderNavLi').one('click', getWorkOrderList);
     $('#taskOrderNavLi').one('click', getTaskOrderList);
-    $('#flowCardNavLi').on('click', () => {
+    $('#flowCardNavLi').one('click', () => {
         $('#sendCardSTime,#sendCardETime').val(getDate()).datepicker('update');
         const taskOrderFn = myPromise(5090);
         const processCodeFn = myPromise(5040);
@@ -19,22 +20,24 @@
             getFlowCardList();
         });
     });
-    $('#addProcessCodeBody').on('click', '.upTr', function () {
+    $('#addProcessCodeBody,#addProcessCodeCategoryBody').on('click', '.upTr', function () {
         const tr = $(this).parents('tr');
+        const tbody = '#' + $(this).parents('tbody').attr('id');
         const upTr = tr.prev();
         upTr.before(tr);
-        setAddProcessOpList();
+        setAddProcessOpList(tbody);
     });
-    $('#addProcessCodeBody').on('click', '.delBtn', function () {
+    $('#addProcessCodeBody,#addProcessCodeCategoryBody').on('click', '.delBtn', function () {
+        const tbody = '#' + $(this).parents('tbody').attr('id');
         $(this).parents('tr').remove();
-        setAddProcessOpList();
+        setAddProcessOpList(tbody);
     });
     $('#planProcessCodeList').on('change', '.process-code-select', function () {
         const id = $(this).val();
         const d = _planProcessCodeInfo[id];
         $(this).siblings('.process-code-category').text(`类型：${d.Category}`);
-        const processId = d.List.split(',');
-        const processes = d.Processes.split(',');
+        const processId = d.List ? d.List.split(',') : [];
+        const processes = d.Processes ? d.Processes.split(',') : [];
         const arr = processId.map((item, i) => ({ ProcessId: item, Process: processes[i], ProcessNumber: 0, ProcessCodeId: d.Id }));
         const tableConfig = _tablesConfig(false, arr);
         const tableSet = _tableSet();
@@ -49,7 +52,7 @@
     });
     $('#planProcessCodeList').on('click', '.browse-btn', function () {
         myPromise(5040).then(data => {
-            const tableConfig = _tablesConfig(true, data, 0);
+            const tableConfig = _tablesConfig(false, data, 0);
             const tableSet = _tableSet();
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Code', title: '编号' },
@@ -84,9 +87,10 @@
             { data: 'workS', title: '工序时间（S）', render: tableSet.addInput.bind(null, 'workS', 'auto') },
             { data: 'setPress', title: '设定压力（Kg）', render: tableSet.addInput.bind(null, 'setPress', 'auto') },
             { data: 'rotate', title: '下盘速度（rpm）', render: tableSet.addInput.bind(null, 'rotate', 'auto') },
-            { data: null, title: '删除', render: tableSet.delBtn }
+            { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
         ]);
         $('#setCraftList').DataTable(tableConfig);
+        $('#addCraftTrBtn').prop('disabled', getDataTableRow('#setCraftList').length === 8);
         $('#setCraftModel').modal('show');
         $('#addCraftBtn').off('click').on('click', () => {
             const trs = getDataTableRow('#setCraftList');
@@ -109,7 +113,11 @@
             $('#setCraftModel').modal('hide');
         });
     });
-    $('#addCraftTrBtn').on('click', () => {
+    $('#setCraftList').on('click', '.del-btn', function () {
+        $('#addCraftTrBtn').prop('disabled', false);
+        delDataTableTr.call(this);
+    });
+    $('#addCraftTrBtn').on('click', function () {
         const trData = {
             addPressM: 0,
             addPressS: 0,
@@ -119,14 +127,15 @@
             rotate: 0
         }
         addDataTableTr('#setCraftList', trData);
+        if (getDataTableRow('#setCraftList').length === 8) $(this).prop('disabled', true);
     });
-    $('#setCraftList,#planProcessCodeList').on('input', 'input', function () {
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('input', 'input', function () {
         onInput(this, 3, 0);
     });
-    $('#setCraftList,#planProcessCodeList').on('focus', 'input', function () {
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('focus', 'input', function () {
         if ($(this).val().trim() == 0) $(this).val('');
     });
-    $('#setCraftList,#planProcessCodeList').on('blur', 'input', function () {
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('blur', 'input', function () {
         if (isStrEmptyOrUndefined($(this).val().trim())) $(this).val(0);
     });
     $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('input', '.target', function () {
@@ -156,10 +165,211 @@
             $('#taskOrderDoneCount').text(d.DoneCount);
         });
     });
+    $('#processDetailList').on('click', '.look-btn', function () {
+        const data = this.ProcessData.map(item => ({
+            addPressM: item[0],
+            addPressS: item[1],
+            workM: item[2],
+            workS: item[3],
+            setPress: item[4],
+            rotate: item[5]
+        }));
+        const tableConfig = _tablesConfig(false, data);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'addPressM', title: '加压时间（M）' },
+            { data: 'addPressS', title: '加压时间（S）' },
+            { data: 'workM', title: '工序时间（M）' },
+            { data: 'workS', title: '工序时间（S）' },
+            { data: 'setPress', title: '设定压力（Kg）' },
+            { data: 'rotate', title: '下盘速度（rpm）' }
+        ]);
+        $('#craftDetailList').DataTable(tableConfig);
+        $('#showCraftDetailModal').modal('show');
+    });
+    $('#addFlowCardTaskOrderSelect').on('change', function () {
+        const qId = $(this).val();
+        myPromise(5090, { qId }, true).then(e => selectTaskOrder(e[0]));
+    });
+    $('#addFlowCardProcessCodeSelect').on('change', function () {
+        const qId = $(this).val();
+        if (qId) {
+            myPromise(5040, { qId }, true).then(e => {
+                const processData = e[0];
+                $('#addFlowCardType').text(processData.Category);
+                $('#addFlowCardProcessDetail').text(processData.Processes.replace(/,/g, ' > '));
+            });
+        } else {
+            $('#addFlowCardType').text('');
+            $('#addFlowCardProcessDetail').text('');
+        }
+    });
+    $('#showMode').on('change', getProductionLine);
+    $('#productionLineList').on('click', '.show-task-btn', function (e) {
+        const workOrderId = $(this).val();
+        myPromise(5250, { workOrderId }, true).then(data => {
+            const tableConfig = _tablesConfig(false, data);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'TaskOrder', title: '任务单' },
+                { data: 'Product', title: '计划号' },
+                { data: null, title: '状态', render: tableSet.state },
+                { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
+                { data: 'Progress', title: '进度', render: tableSet.progress },
+                { data: 'Id', title: '流程卡', render: d => `<button class="btn btn-info btn-sm show-flow-btn" value="${d}">查看</button>` }
+            ]);
+            $('#taskDetailList').DataTable(tableConfig);
+            $('#showTaskDetailModal').modal('show');
+        });
+        e.stopPropagation();
+    });
+    $('#productionLineList').on('click', '.work-order', function () {
+        getLineCommon.call(this, 5201, getWorkLine);
+        const tableFn = (data, timeTitle, infoTitle) => {
+            const tableConfig = _tablesConfig(false, data);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'FaultTime', title: timeTitle },
+                { data: 'WorkOrder', title: '工单' },
+                { data: 'FlowCard', title: '流程卡' },
+                { data: 'Process', title: '工序' },
+                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+            ]);
+            return tableConfig;
+        }
+        const qId = $(this).attr('value');
+        const warningLineBox = () => {
+            myPromise(5204, { workOrderId: qId }, true).then(e => {
+                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                $('#warningLineBox .refresh').on('click', warningLineBox);
+                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+            });
+        }
+        const dangerLineBox = () => {
+            myPromise(5205, { workOrderId: qId }, true).then(e => {
+                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+            });
+        }
+        warningLineBox();
+        dangerLineBox();
+    });
+    $('#productionLineList').on('click', '.task-order', function () {
+        getLineCommon.call(this, 5251, getTaskLine);
+        const tableFn = (data, timeTitle, infoTitle) => {
+            const tableConfig = _tablesConfig(false, data);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'FaultTime', title: timeTitle },
+                { data: 'TaskOrder', title: '任务单' },
+                { data: 'FlowCard', title: '流程卡' },
+                { data: 'Process', title: '工序' },
+                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+            ]);
+            return tableConfig;
+        }
+        const qId = $(this).attr('value');
+        const workId = $(this).attr('work');
+        const successLineBox = () => {
+            myPromise(5251, { qId: workId }, true).then(e => {
+                processWarningDangerTemp('success', `标准工序（${e.length ? e[0].Processes.length : 0}）`);
+                $('#successLineBox .refresh').on('click', successLineBox);
+                const tableConfig = _tablesConfig(false, e.length ? e[0].Processes : []);
+                const tableSet = _tableSet();
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'Process', title: '工序' },
+                    { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
+                    { data: 'Progress', title: '进度', render: tableSet.progress },
+                    { data: 'Qualified', title: '加工次数' },
+                    { data: 'Before', title: '产量' }
+                ]);
+                $('#successLineBox table').DataTable(tableConfig);
+            });
+        }
+        const warningLineBox = () => {
+            myPromise(5254, { taskOrderId: qId }, true).then(e => {
+                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                $('#warningLineBox .refresh').on('click', warningLineBox);
+                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+            });
+        }
+        const dangerLineBox = () => {
+            myPromise(5255, { taskOrderId: qId }, true).then(e => {
+                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+            });
+        }
+        successLineBox();
+        warningLineBox();
+        dangerLineBox();
+    });
+    $('#productionLineList').on('click', '.flow-card', function () {
+        getLineCommon.call(this, 5301, getFlowCardLine);
+        const tableFn = (data, timeTitle, infoTitle) => {
+            const tableConfig = _tablesConfig(false, data);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'FaultTime', title: timeTitle },
+                { data: 'FlowCard', title: '流程卡' },
+                { data: 'Process', title: '工序' },
+                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+            ]);
+            return tableConfig;
+        }
+        const qId = $(this).attr('value');
+        const successLineBox = () => {
+            myPromise(5150, { flowCardId: qId }, true).then(e => {
+                processWarningDangerTemp('success', `流程卡工序（${e.length}）`);
+                $('#successLineBox .refresh').on('click', successLineBox);
+                const tableConfig = _tablesConfig(false, e);
+                const tableSet = _tableSet();
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'Process', title: '工序' },
+                    { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
+                    { data: 'Progress', title: '进度', render: tableSet.progress },
+                    { data: 'Count', title: '加工次数' },
+                    { data: 'Before', title: '产量' }
+                ]);
+                $('#successLineBox table').DataTable(tableConfig);
+            });
+        }
+        const warningLineBox = () => {
+            myPromise(5304, { flowCardId: qId }, true).then(e => {
+                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                $('#warningLineBox .refresh').on('click', warningLineBox);
+                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+            });
+        }
+        const dangerLineBox = () => {
+            myPromise(5305, { flowCardId: qId }, true).then(e => {
+                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+            });
+        }
+        successLineBox();
+        warningLineBox();
+        dangerLineBox();
+    });
+    $('#taskDetailList,#productionLineList').on('click', '.show-flow-btn', function (e) {
+        const taskOrderId = $(this).val();
+        myPromise(5300, { taskOrderId }, true).then(data => {
+            const tableConfig = _tablesConfig(false, data);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'CreateTime', title: '发出日期' },
+                { data: 'FlowCard', title: '流程卡号' },
+                { data: 'Process', title: '当前工序' },
+                { data: null, title: '状态', render: tableSet.state },
+                { data: 'Progress', title: '进度', render: tableSet.progress }
+            ]);
+            $('#flowDetailList').DataTable(tableConfig);
+            $('#showFlowDetailModal').modal('show');
+        });
+        e.stopPropagation();
+    });
 }
 
 //异步获取数据
-function myPromise(opType, opData, isParGet = false) {
+function myPromise(opType, opData, isParGet = false, isLoad = 1) {
     const data = { opType };
     opData && (data.opData = JSON.stringify(opData));
     isParGet && (opData = !opData);
@@ -167,12 +377,12 @@ function myPromise(opType, opData, isParGet = false) {
         ajaxPost('/Relay/Post', data, ret => {
             if (opData) {
                 layer.msg(ret.errmsg);
-                if (ret.errno == 0) resolve();
+                if (ret.errno == 0) resolve(ret);
             } else {
                 if (ret.errno != 0) return layer.msg(ret.errmsg);
                 resolve(ret.datas);
             }
-        });
+        }, isLoad);
     });
 }
 
@@ -191,7 +401,7 @@ function _tablesConfig(isList, data, order = 1) {
         iDisplayLength: 20,
         language: oLanguage,
         columns: [
-            { data: null, title: '序号', render: _tableSet().order, sWidth: '80px' }
+            { data: null, title: '序号', render: _tableSet().order, sWidth: '25px' }
         ]
     };
     isList && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
@@ -204,7 +414,7 @@ function _tableSet() {
         order: (a, b, c, d) => d.row + 1,
         isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value="${d.Id}">`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
-        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="min-width:120px;width:${width}", value="${d}">`,
+        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:120px;width:${width}", value="${d}">`,
         select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control hidden textIn ${className}" style="min-width:120px">${ops}</select>`,
         addSelect: (ops, className) => `<select class="form-control ${className}" style="min-width:120px">${ops}</select>`,
         updateBtn: (fn, d) => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)" value="${d}">修改</button>`,
@@ -214,8 +424,21 @@ function _tableSet() {
         detailBtn: (fn, d) => `<button class="btn btn-info btn-sm" onclick="${fn}.call(this)" value="${d}">查看</button>`,
         processDetail: d => d.replace(/,/g, ' > '),
         isRework: () => '<select class="form-control isRework" style="width:100px"><option value="0">否</option><option value="1">是</option></select>',
+        isReworkText: d => d ? '是' : '否',
         day: (className, d) => `<span class="textOn">${d.split(' ')[0]}</span><input type="text" class="pointer textIn hidden form_date form-control text-center ${className}" style="min-width: 100px">`,
-        addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d.split(' ')[0]}" style="min-width: 100px">`
+        addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d.split(' ')[0]}" style="min-width: 100px">`,
+        state: d => {
+            const colors = ['#CCCCCC', '#ff9933', '#ff33cc', 'black', 'black', '#FF0000'];
+            return `<span style="color:${colors[d.State]}">${d.StateStr}</span>`;
+        },
+        delivery: d => {
+            const threeDay = 259200000;
+            let color = 'black';
+            if (new Date(d) - new Date(getFullTime()) < threeDay) color = 'red';
+            return `<span style="color:${color}">${d.split(' ')[0]}</span>`;
+        },
+        progress: d => `${d}%`,
+        endFinishTime: d => d.State === 4 ? d.EndTime : _tableSet().state(d)
     }
 }
 
@@ -270,12 +493,12 @@ function initCheckboxAddEvent(arr, callback) {
 //删除表格数据
 function delTableRow(trs, opType, callback) {
     if (!trs.length) return layer.msg('请选择需要删除的数据');
-    const arr = [];
+    const ids = [];
     trs.forEach(item => {
         const el = $(item);
-        arr.push(el.find('.isEnable').val() >> 0);
+        ids.push(el.find('.isEnable').val() >> 0);
     });
-    myPromise(opType, { ids: arr.join() }).then(callback);
+    showConfirm('删除所选项', () => myPromise(opType, { ids }).then(callback));
 }
 
 //添加表格数据
@@ -317,6 +540,236 @@ function initDayTime(el) {
         maxViewMode: 2,
         todayBtn: 'linked',
         autoclose: true
+    });
+}
+
+//----------------------------------------生产线----------------------------------------------------
+
+//排程弹窗
+function showScheduleModal() {
+    myPromise(5401).then(data => {
+        const tableConfig = _tablesConfig(false, data);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Code', title: '设备' },
+            { data: 'FlowCard', title: '流程卡' },
+            { data: null, title: '状态', render: tableSet.state },
+            { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
+            { data: 'Progress', title: '进度', render: tableSet.progress }
+        ]);
+        $('#scheduleList').DataTable(tableConfig);
+        $('#showScheduleModal').modal('show');
+    });
+}
+
+//根据显示方式获取表格
+function getProductionLine() {
+    clearInterval($('#productionLineList')[0].time);
+    $('#lineBox,#productionLineHead,#warningBox,#dangerBox,#successLineBox,#warningLineBox,#dangerLineBox').empty();
+    const mode = $('#showMode').val();
+    const opType = [5200, 5250, 5300];
+    [workWarningList, taskWarningList, flowWarningList][mode]();
+    [workDangerList, taskDangerList, flowDangerList][mode]();
+    myPromise(opType[mode]).then(data => {
+        const tableConfig = _tablesConfig(false, data, 0);
+        const tableSet = _tableSet();
+        const workArr = [
+            { data: 'WorkOrder', title: '工单' },
+            { data: null, title: '状态', render: tableSet.state },
+            { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
+            { data: 'Progress', title: '进度', render: tableSet.progress },
+            { data: 'Id', title: '任务单', render: d => `<button class="btn btn-info btn-sm show-task-btn" value="${d}">查看</button>` },
+            { data: 'Id', title: '', visible: false }
+        ];
+        const taskArr = [
+            { data: 'TaskOrder', title: '任务单' },
+            { data: 'Product', title: '计划号' },
+            { data: null, title: '状态', render: tableSet.state },
+            { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
+            { data: 'Progress', title: '进度', render: tableSet.progress },
+            { data: 'Id', title: '流程卡', render: d => `<button class="btn btn-info btn-sm show-flow-btn" value="${d}">查看</button>` }
+        ];
+        const flowCardArr = [
+            { data: 'CreateTime', title: '发出日期' },
+            { data: 'FlowCard', title: '流程卡号' },
+            { data: 'Process', title: '当前工序' },
+            { data: null, title: '状态', render: tableSet.state },
+            { data: 'Progress', title: '进度', render: tableSet.progress },
+            { data: 'Id', title: '', visible: false }
+        ];
+        tableConfig.columns = tableConfig.columns.concat([workArr, taskArr, flowCardArr][mode]);
+        const className = ['work-order', 'task-order', 'flow-card'][mode];
+        tableConfig.createdRow = (tr, d) => {
+            $(tr).addClass(`pointer ${className}`).attr('value', d.Id);
+            if (mode == 1) $(tr).attr('work', d.WorkOrderId);
+        };
+        $('#productionLineList').DataTable(tableConfig);
+    });
+}
+
+//报警工单
+function workWarningList() {
+    myPromise(5202).then(data => {
+        const d = warningDangerCount(data, 'WorkOrder');
+        warningDangerTemp('warning', `报警工单（${d.count}）`, '<th>工单</th><th>报警次数</th>', d.tbody, 'workWarningList');
+    });
+}
+
+//中断工单
+function workDangerList() {
+    myPromise(5203).then(data => {
+        const d = warningDangerCount(data, 'WorkOrder');
+        warningDangerTemp('danger', `中断工单（${d.count}）`, '<th>工单</th><th>中断次数</th>', d.tbody, 'workDangerList');
+    });
+}
+
+//报警任务单
+function taskWarningList() {
+    myPromise(5252).then(data => {
+        const d = warningDangerCount(data, 'TaskOrder');
+        warningDangerTemp('warning', `报警任务单（${d.count}）`, '<th>任务单</th><th>报警次数</th>', d.tbody, 'taskWarningList');
+    });
+}
+
+//中断任务单
+function taskDangerList() {
+    myPromise(5253).then(data => {
+        const d = warningDangerCount(data, 'TaskOrder');
+        warningDangerTemp('danger', `中断任务单（${d.count}）`, '<th>任务单</th><th>中断次数</th>', d.tbody, 'taskDangerList');
+    });
+}
+
+//报警流程卡
+function flowWarningList() {
+    myPromise(5302).then(data => {
+        const d = warningDangerCount(data, 'FlowCard');
+        warningDangerTemp('warning', `报警流程卡（${d.count}）`, '<th>流程卡</th><th>报警次数</th>', d.tbody, 'flowWarningList');
+    });
+}
+
+//中断流程卡
+function flowDangerList() {
+    myPromise(5303).then(data => {
+        const d = warningDangerCount(data, 'FlowCard');
+        warningDangerTemp('danger', `中断流程卡（${d.count}）`, '<th>流程卡</th><th>中断次数</th>', d.tbody, 'flowDangerList');
+    });
+}
+
+//报警中断面板公共数据处理
+function warningDangerCount(data, name) {
+    let count = 0, tbody = '';
+    data.forEach(item => {
+        count += item.Count;
+        tbody += `<tr><td>${item[name]}</td><td>${item.Count}</td></tr>`;
+    });
+    return { count, tbody }
+}
+
+//报警中断面板生成
+function warningDangerTemp(attr, title, thead, tbody, callback) {
+    const temp = `<div class="panel panel-${attr}">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-refresh pull-right pointer text-bold" aria-hidden="true" title="刷新" onclick="${callback}()"></span>
+                            <h3 class="panel-title text-center">${title}</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead><tr>${thead}</tr></thead>
+                                    <tbody>${tbody}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+    $(`#${attr}Box`).html(temp);
+}
+
+//工单、任务单、流程卡（工序、报警、中断）面板生成
+function processWarningDangerTemp(attr, title) {
+    const temp = `<div class="panel panel-${attr}">
+                        <div class="panel-heading">
+                            <span class="glyphicon glyphicon-refresh pull-right pointer text-bold refresh" aria-hidden="true" title="刷新"></span>
+                            <h3 class="panel-title text-center">${title}</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped"></table>
+                            </div>
+                        </div>
+                    </div>`;
+    $(`#${attr}LineBox`).html(temp);
+}
+
+//获取生产线公共函数
+function getLineCommon(opType, callback) {
+    const trs = getDataTableRow('#productionLineList');
+    Array.from(trs).forEach(tr => $(tr).css('background', ''));
+    $(this).css('background', '#d9edf7');
+    const qId = $(this).attr('value');
+    const fn = () => {
+        callback(qId);
+        myPromise(opType, { qId }, true, 0).then(data => {
+            const colors = ['white', 'green', 'orange', 'gray', 'darkblue', '#00A9FC'];
+            let index = 0;
+            const arr = [];
+            const temp = data.reduce((a, b) => `${a}<div style="width:100%;position: relative;overflow-x:scroll;height:133px"><div class="line">
+                                ${b.Processes.reduce((a, b) => (arr.push(b.Faults), `${a}<div class="line-box">
+                                    <div class="line-box-title">
+                                        <span>${b.Process}</span>
+                                        <span class="info" style="background:${colors[b.State]}">${b.StateStr}</span>
+                                    </div>
+                                    <div class="line-box-content">
+                                        <p>进度：${b.Progress}%</p>
+                                        <p>合格数：${b.Qualified}</p>
+                                        <p>不合格数：${b.Unqualified}</p>
+                                        <p>报警列表(${b.Faults.length})：<button class="btn btn-info btn-xs show-btn" value="${index++}">查看</button></p>
+                                    </div>
+                                </div>`), '')}
+                            </div></div>`, '');
+            $('#lineBox').html(temp).off('click').on('click', '.show-btn', function () {
+                const tableConfig = _tablesConfig(false, arr[$(this).val()]);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'FaultTime', title: '时间' },
+                    { data: 'FlowCard', title: '流程卡' },
+                    { data: null, title: '信息', render: d => d.Remark || d.Fault }
+                ]);
+                $('#WarningDetailList').DataTable(tableConfig);
+                $('#showWarningDetailModal').modal('show');
+            });
+        });
+    }
+    fn();
+    clearInterval($('#productionLineList')[0].time);
+    $('#productionLineList')[0].time = setInterval(fn, 5000);
+}
+
+//获取工单生产线信息
+function getWorkLine(qId) {
+    myPromise(5070, { qId }, true, 0).then(e => {
+        const one = '<tr class="text-bold"><td>工单</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>任务单数量</td><td>已完成任务单数量</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
+        const d = e[0];
+        const two = `<tr><td>${d.WorkOrder}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Issue}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        $('#productionLineHead').html(`${one}${two}`);
+    });
+}
+
+//获取任务单生产线信息
+function getTaskLine(qId) {
+    myPromise(5090, { qId }, true, 0).then(e => {
+        const one = '<tr class="text-bold"><td>任务单</td><td>计划号</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>已发流程卡</td><td>以完成流程卡</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
+        const d = e[0];
+        const two = `<tr><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Issue}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        $('#productionLineHead').html(`${one}${two}`);
+    });
+}
+
+//获取流程卡生产线信息
+function getFlowCardLine(qId) {
+    myPromise(5110, { qId }, true, 0).then(e => {
+        const one = '<tr class="text-bold"><td>流程卡号</td><td>任务单</td><td>计划号</td><td>流程编号</td><td class="text-info">已完成</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
+        const d = e[0];
+        const two = `<tr><td>${d.FlowCard}</td><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.ProcessCode}</td><td>${d.Issue}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        $('#productionLineHead').html(`${one}${two}`);
     });
 }
 
@@ -571,6 +1024,7 @@ function delDeviceCategory() {
 }
 
 //----------------------------------------流程管理----------------------------------------------------
+//----------------------------------------流程编号----------------------------------------------------
 
 let _processCodeTrs = null;
 
@@ -639,22 +1093,27 @@ function addUpProcessCode(isAdd) {
 }
 
 //流程选项添加操作
-function addProcessOpToCode() {
+function addProcessOpTo(table, tbody) {
     const tr = $(this).parents('tr')[0];
-    const d = $('#addProcessCodeOpList').DataTable().row(tr).data();
+    const d = $(table).DataTable().row(tr).data();
     const processCodeTr = `<tr list="${d.Id}">
                              <td class="num"></td>
                              <td>${d.Process}</td>
                              <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
                              <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
                            </tr>`;
-    $('#addProcessCodeBody').append(processCodeTr);
-    setAddProcessOpList();
+    $(tbody).append(processCodeTr);
+    setAddProcessOpList(tbody);
+}
+
+//添加流程编号流程选项添加操作
+function addProcessOpToCode() {
+    addProcessOpTo.call(this, '#addProcessCodeOpList', '#addProcessCodeBody');
 }
 
 //流程表格设置
-function setAddProcessOpList() {
-    const trs = $('#addProcessCodeBody tr');
+function setAddProcessOpList(tbody) {
+    const trs = $(`${tbody} tr`);
     for (let i = 0, len = trs.length; i < len; i++) {
         const tr = trs.eq(i);
         tr.find('.num').text(i + 1);
@@ -681,8 +1140,8 @@ function showUpdateProcessCodeModel() {
         $('#addProcessCodeName').val(d.Code);
         $('#addProcessCodeCategoryName ').val(d.CategoryId);
         $('#addProcessCodeRemark').val(d.Remark);
-        const listId = d.List.split(',');
-        const processes = d.Processes.split(',');
+        const listId = d.List ? d.List.split(',') : [];
+        const processes = d.Processes ? d.Processes.split(',') : [];
         const trs = listId.reduce((a, b, i) => `${a}<tr list="${b}">
                              <td class="num"></td>
                              <td>${processes[i]}</td>
@@ -692,7 +1151,7 @@ function showUpdateProcessCodeModel() {
         $('#addProcessCodeBody').append(trs);
         $('#addEditTitle').text('修改流程编号');
         $('#addEditBtn').text('修改').val(d.Id).off('click').on('click', addUpProcessCode.bind(null, false));
-        setAddProcessOpList();
+        setAddProcessOpList('#addProcessCodeBody');
     });
 }
 
@@ -700,6 +1159,8 @@ function showUpdateProcessCodeModel() {
 function delProcessCode() {
     delTableRow(_processCodeTrs, 5043, getProcessCodeList);
 }
+
+//----------------------------------------流程编号类型----------------------------------------------------
 
 //流程编号类型弹窗
 function showProcessCodeCategoryModal() {
@@ -716,59 +1177,97 @@ function getProcessCodeCategoryList() {
         const tableConfig = _tablesConfig(true, data);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Category', title: '类型', render: tableSet.input.bind(null, 'category') },
-            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+            { data: 'Category', title: '类型' },
+            { data: 'List', title: '标准流程', render: tableSet.processDetail },
+            { data: 'Remark', title: '备注' },
+            { data: 'Id', title: '修改', render: tableSet.updateBtn.bind(null, 'showUpdateProcessCodeCategoryModel'), sWidth: '80px' }
         ]);
         tableConfig.drawCallback = function () {
-            initCheckboxAddEvent.call(this, _processCodeCategoryTrs, (tr, d) => {
-                tr.find('.category').val(d.Category);
-                tr.find('.remark').val(d.Remark);
-            });
+            initCheckboxAddEvent.call(this, _processCodeCategoryTrs);
         }
         $('#processCodeCategoryList').DataTable(tableConfig);
     });
 }
 
-//流程编号类型列表tr数据获取
-function getProcessCodeCategoryTrInfo(el, isAdd) {
-    const category = el.find('.category').val().trim();
-    if (isStrEmptyOrUndefined(category)) return void layer.msg('流程编号类型不能为空');
-    const list = {
-        Category: category,
-        Remark: el.find('.remark').val()
-    }
-    isAdd || (list.Id = el.find('.isEnable').val() >> 0);
-    return list;
+//添加修改流程编号类型模态框
+function addEditProcessCodeCategoryModel(callback) {
+    myPromise(5030).then(e => {
+        const tableConfig = _tablesConfig(false, e);
+        const tableSet = _tableSet();
+        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.addBtn.bind(null, 'addProcessOpToCodeCategory'), orderable: false, sWidth: '80px' });
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Process', title: '流程' },
+            { data: 'Remark', title: '备注' }
+        ]);
+        $('#addProcessCodeCategoryOpList').DataTable(tableConfig);
+        $('#addProcessCodeCategoryBody').empty();
+        callback();
+        $('#addProcessCodeCategoryModel').modal('show');
+    });
 }
 
-//修改流程编号类型
-function updateProcessCodeCategory() {
-    updateTableRow(_processCodeCategoryTrs, getProcessCodeCategoryTrInfo, 5051, getProcessCodeCategoryList);
+//添加修改流程编号类型
+function addUpProcessCodeCategory(isAdd) {
+    const category = $('#addProcessCodeCategory').val().trim();
+    if (isStrEmptyOrUndefined(category)) return layer.msg('类型不能为空');
+    const list = {
+        Category: category,
+        Remark: $('#addProcessCodeCategoryRemark').val().trim()
+    };
+    isAdd || (list.Id = $('#addEditProcessCategoryBtn').val());
+    const processes = Array.from($('#addProcessCodeCategoryBody tr')).map((item, i) => {
+        const obj = {
+            Order: i + 1,
+            ProcessId: $(item).attr('list')
+        }
+        const processId = $(item).attr('processid');
+        processId && (obj.Id = processId);
+        return obj;
+    });
+    if (!processes.length) return layer.msg('请设置流程');
+    list.Processes = processes;
+    const opType = isAdd ? 5052 : 5051;
+    myPromise(opType, [list]).then(() => {
+        $('#addProcessCodeCategoryModel').modal('hide');
+        getProcessCodeCategoryList();
+    });
+}
+
+//流程选项添加操作
+function addProcessOpToCodeCategory() {
+    addProcessOpTo.call(this, '#addProcessCodeCategoryOpList', '#addProcessCodeCategoryBody');
 }
 
 //添加流程编号类型模态框
 function addProcessCodeCategoryModel() {
-    const trData = {
-        Category: '',
-        Remark: ''
-    }
-    const tableConfig = _tablesConfig(false, [trData]);
-    const tableSet = _tableSet();
-    tableConfig.columns = tableConfig.columns.concat([
-        { data: 'Category', title: '类型', render: tableSet.addInput.bind(null, 'category', 'auto') },
-        { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
-        { data: null, title: '删除', render: tableSet.delBtn }
-    ]);
-    $('#addProcessCodeCategoryList').DataTable(tableConfig);
-    $('#addProcessCodeCategoryListBtn').off('click').on('click', () => addDataTableTr('#addProcessCodeCategoryList', trData));
-    $('#addProcessCodeCategoryModel').modal('show');
+    addEditProcessCodeCategoryModel(() => {
+        $('#addProcessCodeCategory').val('');
+        $('#addProcessCodeCategoryRemark').val('');
+        $('#addEditProcessCategoryTitle').text('添加流程编号类型');
+        $('#addEditProcessCategoryBtn').text('添加').val(0).off('click').on('click', addUpProcessCodeCategory.bind(null, true));
+    });
 }
 
-//添加流程编号类型
-function addProcessCodeCategory() {
-    addTableRow('#addProcessCodeCategoryList', getProcessCodeCategoryTrInfo, 5052, () => {
-        $('#addProcessCodeCategoryModel').modal('hide');
-        getProcessCodeCategoryList();
+//修改流程编号类型弹窗
+function showUpdateProcessCodeCategoryModel() {
+    const categoryId = $(this).val();
+    myPromise(5056, { categoryId }, true).then(data => {
+        addEditProcessCodeCategoryModel(() => {
+            const tr = $(this).parents('tr')[0];
+            const d = $('#processCodeCategoryList').DataTable().row(tr).data();
+            $('#addProcessCodeCategory').val(d.Category);
+            $('#addProcessCodeCategoryRemark').val(d.Remark);
+            const trs = data.reduce((a, b) => `${a}<tr list="${b.ProcessId}" processid="${b.Id}">
+                             <td class="num"></td>
+                             <td>${b.Process}</td>
+                             <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
+                             <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
+                           </tr>`, '');
+            $('#addProcessCodeCategoryBody').append(trs);
+            $('#addEditProcessCategoryTitle').text('修改流程编号类型');
+            $('#addEditProcessCategoryBtn').text('修改').val(categoryId).off('click').on('click', addUpProcessCodeCategory.bind(null, false));
+            setAddProcessOpList('#addProcessCodeCategoryBody');
+        });
     });
 }
 
@@ -776,6 +1275,8 @@ function addProcessCodeCategory() {
 function delProcessCodeCategory() {
     delTableRow(_processCodeCategoryTrs, 5053, getProcessCodeCategoryList);
 }
+
+//----------------------------------------流程设置----------------------------------------------------
 
 let _processOpTrs = null;
 
@@ -1269,7 +1770,6 @@ function getFlowCardList() {
     myPromise(5110, { startTime, endTime, taskOrderId, productId }, true).then(data => {
         _flowCardTrs = [];
         const tableConfig = _tablesConfig(true, data);
-        const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'CreateTime', title: '发卡时间' },
             { data: 'FlowCard', title: '流程卡' },
@@ -1277,17 +1777,195 @@ function getFlowCardList() {
             { data: 'TaskOrder', title: '任务单' },
             { data: 'Product', title: '计划号' },
             { data: 'Batch', title: '预计工时' },
-            { data: 'Id', title: '流程详情', render: tableSet.detailBtn.bind(null, 'showTaskOrderDetailModal') },
+            { data: 'Id', title: '流程详情', render: d => `<button class="btn btn-info btn-sm" onclick="showProcessFlowCardIdModal(${d})">查看</button>` },
             { data: 'Remark', title: '备注' }
         ]);
         tableConfig.drawCallback = function () {
-            initCheckboxAddEvent.call(this, _taskOrderTrs);
+            initCheckboxAddEvent.call(this, _flowCardTrs);
         }
         $('#flowCardList').DataTable(tableConfig);
     });
 }
 
+//流程详情弹窗
+function showProcessFlowCardIdModal(flowCardId) {
+    myPromise(5150, { flowCardId }, true).then(data => {
+        const tableConfig = _tablesConfig(false, data);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Process', title: '工序' },
+            { data: 'Processor', title: '加工人' },
+            { data: 'DeviceCode', title: '加工设备' },
+            { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
+            { data: 'Progress', title: '进度', render: tableSet.progress },
+            { data: 'Count', title: '加工次数' },
+            { data: 'Before', title: '加工前数量' },
+            { data: 'Left', title: '剩余数量' },
+            { data: 'Qualified', title: '合格数' },
+            { data: 'Unqualified', title: '不合格数' },
+            { data: 'Before', title: '产量' }
+        ]);
+        $('#processFlowCardIdList').DataTable(tableConfig);
+        $('#showProcessFlowCardIdModal').modal('show');
+    });
+}
+
+//流程编号查看弹窗
+function showProcessDetail(qId) {
+    myPromise(5060, { qId }, true).then(e => {
+        const d = e[0];
+        const productProcesses = d.ProductProcesses;
+        const processCodeObj = {}
+        productProcesses.forEach(item => {
+            const processCodeId = item.ProcessCodeId;
+            processCodeObj[processCodeId]
+                ? processCodeObj[processCodeId].push(item)
+                : processCodeObj[processCodeId] = [item];
+        });
+        $('#processDetailCodeSelect').off('change').on('change', function () {
+            const id = $(this).val();
+            const tableConfig = _tablesConfig(false, processCodeObj[id]);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'Process', title: '流程' },
+                { data: 'ProcessRepeat', title: '可否返工', render: tableSet.isReworkText },
+                { data: 'ProcessNumber', title: '单台加工数量' },
+                { data: null, title: '工艺数据', render: () => '<button class="btn btn-info btn-sm look-btn">查看</button>' }
+            ]);
+            tableConfig.createdRow = (tr, d) => $(tr).find('.look-btn')[0].ProcessData = JSON.parse(d.ProcessData);
+            $('#processDetailList').DataTable(tableConfig);
+        });
+        $('#processDetailCodeSelect').html(getPlanToProcessCodeOps(d)).trigger('change');
+        $('#showProcessDetailModal').modal('show');
+    });
+}
+
+//计划号下流程编号选项
+function getPlanToProcessCodeOps(d) {
+    const processCodeArr = d.ProcessCodes ? d.ProcessCodes.split(',') : [];
+    const processCodeIdArr = d.ProcessCodeIds ? d.ProcessCodeIds.split(',') : [];
+    const processCodes = processCodeIdArr.map((item, i) => ({ Id: item, ProcessCode: processCodeArr[i] }));
+    return setOptions(processCodes, 'ProcessCode');
+}
+
+//选择任务单
+function selectTaskOrder(d) {
+    const table = $('#addFlowCardProcessList');
+    if (table.html()) {
+        table.DataTable().destroy().clear();
+        table.empty();
+    }
+    $('#addFlowCardWorkNum').val('');
+    $('#addFlowCardCardNum').val('');
+    $('#addFlowCardTarget').text(d.Target);
+    $('#addFlowCardLeft').text(d.Left);
+    $('#addFlowCardDoing').text(d.Doing);
+    $('#addFlowCardIssue').text(d.Issue);
+    $('#addFlowCardPlan').text(d.Product);
+    $('#addFlowCardTime').text(d.DeliveryTime.split(' ')[0]);
+    $('#processCodeLookBtn').val(d.ProductId);
+    const planId = d.ProductId;
+    myPromise(5060, { qId: planId }, true).then(e => $('#addFlowCardProcessCodeSelect').html(getPlanToProcessCodeOps(e[0])).trigger('change'));
+}
+
 //添加流程卡弹窗
 function addFlowCardModel() {
+    const taskOrderFn = myPromise(5090);
+    const personFn = myPromise(5000);
+    Promise.all([taskOrderFn, personFn]).then(result => {
+        const taskOrder = result[0];
+        $('#addFlowCardTaskOrderSelect').html(setOptions(taskOrder, 'TaskOrder'));
+        $('#addFlowCardPersonSelect').html(setOptions(result[1], 'Account'));
+        selectTaskOrder(taskOrder[0]);
+    });
     $('#addFlowCardModel').modal('show');
+}
+
+//流程编号查看
+function addFlowCardProcessCodeLook() {
+    const planId = $(this).val();
+    showProcessDetail(planId);
+}
+
+//预览
+function addFlowCardPreview() {
+    let number = $('#addFlowCardWorkNum').val() >> 0;
+    if (isStrEmptyOrUndefined(number)) return layer.msg('请输入加工数量');
+    const flag = $('#addFlowCardCardNum').val() >> 0;
+    if (isStrEmptyOrUndefined(flag)) return layer.msg('请输入单卡数量');
+    const processCodeId = $('#addFlowCardProcessCodeSelect').val();
+    if (isStrEmptyOrUndefined(processCodeId)) return layer.msg('请选择流程编号');
+    const processCode = $('#addFlowCardProcessCodeSelect :selected').text();
+    const personId = $('#addFlowCardPersonSelect').val();
+    if (isStrEmptyOrUndefined(personId)) return layer.msg('请选择加个人');
+    const personOps = $('#addFlowCardPersonSelect').html();
+    const data = [];
+    do {
+        data.push({
+            FlowCard: '',
+            Number: number >= flag ? flag : number,
+            ProcessCode: processCode,
+            PersonId: personId
+        });
+    } while ((number -= flag) > 0);
+    const tableConfig = _tablesConfig(false, data);
+    const tableSet = _tableSet();
+    tableConfig.columns = tableConfig.columns.concat([
+        { data: 'FlowCard', title: '流程卡号' },
+        { data: 'Number', title: '加工数量', render: tableSet.addInput.bind(null, 'number', 'auto') },
+        { data: 'ProcessCode', title: '流程编号', render: d => `<span codeid="${processCodeId}">${d}</span>` },
+        { data: 'PersonId', title: '加工人', render: tableSet.addSelect.bind(null, personOps, 'person') }
+    ]);
+    tableConfig.createdRow = tr => $(tr).find('.person').val(personId);
+    $('#addFlowCardProcessList').DataTable(tableConfig);
+}
+
+//生成
+function addFlowCard() {
+    if (!$('#addFlowCardProcessList').html()) return layer.msg('请预览之后再生成');
+    const taskOrderId = $('#addFlowCardTaskOrderSelect').val();
+    if (isStrEmptyOrUndefined(taskOrderId)) return layer.msg('请选择任务单');
+    const personArr = [];
+    const getFlowCardTrInfo = el => {
+        const processorId = el.find('.person').val();
+        if (isStrEmptyOrUndefined(processorId)) return layer.msg('请选择加个人');
+        personArr.push(el.find('.person :selected').text());
+        const number = el.find('.number').val().trim() >> 0;
+        if (isStrEmptyOrUndefined(number)) return layer.msg('请输入加工数量');
+        const list = {
+            TaskOrderId: taskOrderId,
+            ProcessCodeId: el.find('[codeid]').attr('codeid'),
+            ProcessorId: processorId,
+            Number: number,
+            Remark: 'string'
+        }
+        return list;
+    };
+    const processCode = $('#addFlowCardProcessList [codeid]:first').text();
+    addTableRow('#addFlowCardProcessList', getFlowCardTrInfo, 5112, data => {
+        const arr = data.FlowCards.map((item, i) => ({ FlowCard: item.FlowCard, Number: item.Number, ProcessCode: processCode, PersonId: personArr[i] }));
+        const tableConfig = _tablesConfig(false, arr);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'FlowCard', title: '流程卡号' },
+            { data: 'Number', title: '加工数量' },
+            { data: 'ProcessCode', title: '流程编号' },
+            { data: 'PersonId', title: '加工人' }
+        ]);
+        $('#addFlowCardProcessList').DataTable(tableConfig);
+    });
+}
+
+//打印
+function flowCardPrint() {
+    const table = $('#addFlowCardProcessList');
+    if (!(table.html() && !table.find('input').length)) return layer.msg('生成成功后才能打印');
+    const thead = '<thead><tr><th>序号</th><th>流程卡号</th><th>加工数量</th><th>流程编号</th><th>加工人</th></tr></thead>';
+    const tbodyTrs = Array.from(getDataTableRow('#addFlowCardProcessList')).reduce((a, b) => `${a}${$(b).prop('outerHTML')}`, '');
+    const printTable = `<table border="1" style="width:100%;text-align:center;border-collapse:collapse">${thead}<tbody>${tbodyTrs}</tbody></table>`;
+    printCode(printTable);
+}
+
+//删除流程卡
+function delFlowCard() {
+    delTableRow(_flowCardTrs, 5113, getFlowCardList);
 }
