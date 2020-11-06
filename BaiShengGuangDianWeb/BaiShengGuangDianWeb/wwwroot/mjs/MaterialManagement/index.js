@@ -3,14 +3,15 @@ function pageReady() {
     _permissionList[534] = { uIds: ['createQrModalBtn'] };
     _permissionList[535] = { uIds: [] };
     _permissionList[536] = { uIds: ['showConsumeModelBtn'] };
-    _permissionList[537] = { uIds: ['showReversalModelBtn'] };
     _permissionList[538] = { uIds: ['putLogBtn'] };
     _permissionList[539] = { uIds: ['receiveLogBtn'] };
     _permissionList[540] = { uIds: ['handleLogBtn'] };
+    _permissionList[537] = { uIds: [] };
+    _permissionList[541] = { uIds: [] };
+    _permissionList[542] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
-    if (!_permissionList[535].have) {
-        $('.fastIncreaseModelBtn').addClass('hidden');
-    }
+    if (!_permissionList[535].have) $('.fastIncreaseModelBtn').addClass('hidden');
+    if (!_permissionList[537].have && !_permissionList[541].have && !_permissionList[542].have) $('#showReversalModelBtn').addClass('hidden');
     $('.ms2').select2({ matcher });
     new Promise(resolve => getAllSelect(resolve)).then(e => {
         allCodeSelect('Select', e, true, 1);
@@ -214,9 +215,15 @@ function pageReady() {
         };
     });
     //冲正事件
-    $('#reversalAllLi').on('click', () => setReversalBtn('reversalConModal()', '冲正'));
-    $('#reversalEntryLi').on('click', () => setReversalBtn('updateReversalAll(1)', '入库修正'));
-    $('#reversalConsumeLi').on('click', () => setReversalBtn('updateReversalAll(2)', '领用修正'));
+    _permissionList[537].have
+        ? $('#reversalAllLi').on('click', () => setReversalBtn('reversalConModal()', '冲正'))
+        : $('#reversalAllLi,#reversalAll').addClass('hidden');
+    _permissionList[541].have
+        ? $('#reversalEntryLi').on('click', () => setReversalBtn('updateReversalAll(1)', '入库修正'))
+        : $('#reversalEntryLi,#reversalEntry').addClass('hidden');
+    _permissionList[542].have
+        ? $('#reversalConsumeLi').on('click', () => setReversalBtn('updateReversalAll(2)', '领用修正'))
+        : $('#reversalConsumeLi,#reversalConsume').addClass('hidden');
     $('#reversalEntryCode').on('select2:select', () => getReversalAll(1));
     $('#reversalConsumeCode').on('select2:select', () => getReversalAll(2));
     //日志事件
@@ -239,9 +246,7 @@ function pageReady() {
     });
     $('#logBillSelect').on('select2:select', () => getLogList());
     //初始化
-    if (!pcAndroid()) {
-        $(".icon-saoyisao").addClass('hidden');
-    }
+    if (!pcAndroid()) $(".icon-saoyisao").addClass('hidden');
     $('#fastIncreaseModal,#increaseModal').on('hidden.bs.modal', () => $('#increaseBtn,#fastIncreaseBtn').attr('disabled', false));
     $('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
@@ -1463,7 +1468,6 @@ var _reversalTr = null;
 //冲正弹窗
 function showReversalModel() {
     $("#addReversalListBtn").attr('disabled', true);
-    $('#reversalAllLi').hasClass('active') || $('#reversalAllLi > a').click();
     $('#reversalList').empty();
     new Promise(resolve => initGangedData(resolve)).then(e => {
         _reversalTr = `<tr>
@@ -1492,6 +1496,7 @@ function showReversalModel() {
         $('#reversalConsumeSTime,#reversalConsumeETime').off('changeDate').on('changeDate', () => getReversalAll(2));
         $('#reversalEntryLi > a').off('click').one('click', () => getReversalAll(1));
         $('#reversalConsumeLi > a').off('click').one('click', () => getReversalAll(2));
+        $('#reversalUl li:not(.hidden):first > a').click();
     });
     $("#reversalModal").modal("show");
 }

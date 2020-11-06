@@ -15,17 +15,17 @@
     <div class="row">
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
-                <li class="active"><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
+                <li><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
                 <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
                 <li id="deviceNavLi"><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
                 <li id="flowNavLi"><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
-                <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li id="planNavLi" class="active"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
                 <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
                 <li id="taskOrderNavLi"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
                 <li id="flowCardNavLi"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
             </ul>
             <div class="tab-content no-padding">
-                <div class="tab-pane active in" id="productionLineNav">
+                <div class="tab-pane fade in" id="productionLineNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <div class="flexStyle">
@@ -146,11 +146,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade in" id="planNav">
+                <div class="tab-pane active in" id="planNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">计划号管理</h3>
                             <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="showCapacityModel()">产能</button>
                                 <button class="btn btn-primary btn-sm" onclick="addPlanModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delPlan()">删除</button>
                                 <button class="btn btn-info btn-sm" onclick="getPlanList()">刷新</button>
@@ -568,6 +569,74 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="addEditPlanBtn"></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*产能类型模态框*@
+    <div class="modal fade" tabindex="-1" id="showCapacityModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">产能类型管理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">产能类型管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="showAddCapacityCategoryModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="">刷新</button>
+                                <button class="btn btn-warning btn-sm" onclick="">产量</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="capacityList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加产能类型模态框*@
+    <div class="modal fade" tabindex="-1" id="showAddCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加产能类型管理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">类型：</label>
+                        <input type="text" class="form-control" id="addCapacityCategory">
+                    </div>
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">备注：</label>
+                        <input type="text" class="form-control" id="addCapacityRemark">
+                    </div>
+                    <label class="control-label">产能清单：</label>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addCapacityList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addCapacityListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

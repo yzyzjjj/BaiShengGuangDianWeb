@@ -366,6 +366,11 @@
         });
         e.stopPropagation();
     });
+    $('#addCapacityList').on('change', '.process', function () {
+        const id = $(this).val();
+        const d = _planProcessCodeInfo[id];
+        $(this).parent().next().text(d.DeviceCategory);
+    });
 }
 
 //异步获取数据
@@ -748,7 +753,7 @@ function getWorkLine(qId) {
     myPromise(5070, { qId }, true, 0).then(e => {
         const one = '<tr class="text-bold"><td>工单</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>任务单数量</td><td>已完成任务单数量</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
-        const two = `<tr><td>${d.WorkOrder}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Issue}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        const two = `<tr><td>${d.WorkOrder}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Done}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
         $('#productionLineHead').html(`${one}${two}`);
     });
 }
@@ -758,7 +763,7 @@ function getTaskLine(qId) {
     myPromise(5090, { qId }, true, 0).then(e => {
         const one = '<tr class="text-bold"><td>任务单</td><td>计划号</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>已发流程卡</td><td>以完成流程卡</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
-        const two = `<tr><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Issue}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        const two = `<tr><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Done}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
         $('#productionLineHead').html(`${one}${two}`);
     });
 }
@@ -768,7 +773,7 @@ function getFlowCardLine(qId) {
     myPromise(5110, { qId }, true, 0).then(e => {
         const one = '<tr class="text-bold"><td>流程卡号</td><td>任务单</td><td>计划号</td><td>流程编号</td><td class="text-info">已完成</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
-        const two = `<tr><td>${d.FlowCard}</td><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.ProcessCode}</td><td>${d.Issue}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
+        const two = `<tr><td>${d.FlowCard}</td><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.ProcessCode}</td><td>${d.Done}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
         $('#productionLineHead').html(`${one}${two}`);
     });
 }
@@ -1382,12 +1387,16 @@ function getPlanList() {
     });
 }
 
-//流程编号选择禁用
+//添加计划号流程编号选择禁用
 function disabledProcessCode() {
-    const ids = [];
     const selects = $('#planProcessCodeList .process-code-select');
-    const selectOps = selects.find('option');
-    selectOps.prop('disabled', false);
+    disabledProcessCodeCommon(selects);
+}
+
+//流程编号选择禁用
+function disabledProcessCodeCommon(selects) {
+    const ids = [];
+    selects.find('option').prop('disabled', false);
     selects.each((i, item) => {
         const id = $(item).val();
         if (id) ids.push(id);
@@ -1528,6 +1537,37 @@ function showUpdatePlanModel() {
 //删除计划号
 function delPlan() {
     delTableRow(_planTrs, 5063, getPlanList);
+}
+
+//产能弹窗
+function showCapacityModel() {
+    $('#showCapacityModel').modal('show');
+}
+
+//添加产能类型弹窗
+function showAddCapacityCategoryModel() {
+    _planProcessCodeInfo = {};
+    myPromise(5030).then(e => {
+        e.forEach(item => _planProcessCodeInfo[item.Id] = item);
+        const firstProcess = e[0];
+        const trData = {
+            ProcessId: firstProcess.Id,
+            DeviceCategory: firstProcess.DeviceCategory
+        }
+        const tableConfig = _tablesConfig(false, [trData]);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'ProcessId', title: '流程', render: tableSet.addSelect.bind(null, setOptions(e, 'Process'), 'process') },
+            { data: 'DeviceCategory', title: '设备类型' },
+            { data: null, title: '设备类型', render: tableSet.setBtn },
+            { data: null, title: '删除', render: tableSet.delBtn }
+        ]);
+        $('#addCapacityList').DataTable(tableConfig);
+        $('#addCapacityListBtn').off('click').on('click', () => {
+            addDataTableTr('#addCapacityList', trData);
+        });
+    });
+    $('#showAddCapacityCategoryModel').modal('show');
 }
 
 //----------------------------------------工单管理----------------------------------------------------
