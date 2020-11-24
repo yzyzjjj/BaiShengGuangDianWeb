@@ -308,6 +308,7 @@ function getPurchase() {
     if (~valuer) {
         list.valuer = $('#cgProcessor :selected').text();
     }
+    list.order = $('#cgOrder').val();
     const data = {};
     data.opType = 855;
     data.opData = JSON.stringify(list);
