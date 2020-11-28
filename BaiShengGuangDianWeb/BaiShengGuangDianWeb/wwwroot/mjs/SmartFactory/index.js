@@ -492,9 +492,18 @@
     $('#capacityList').on('click', '.look-btn', function () {
         showCapacityDetailModal.call(this);
     });
-    $('#capacityDetailList,#addPlanCapacityList').on('click', '.capacity-btn', function () {
+    $('#capacityDetailList').on('click', '.capacity-btn', function () {
+        let prop = 'qId', val = $(this).val();
+        if (!val || val == 0) {
+            prop = 'processId';
+            val = $(this).attr('process');
+        }
+        myPromise(5564, { [prop]: val }, true).then(e => devicesOperatorsTable(e, true));
+        $('#addCapacitySetBtn').addClass('hidden');
+    });
+    $('#addPlanCapacityList').on('click', '.capacity-btn', function () {
         let prop = 'qId', val = $(this).attr('list');
-        if (!val ||val == 0) {
+        if (!val || val == 0) {
             prop = 'processId';
             val = $(this).attr('process');
         }
