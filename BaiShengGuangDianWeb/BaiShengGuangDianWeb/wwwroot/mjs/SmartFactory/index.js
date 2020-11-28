@@ -2460,7 +2460,7 @@ function getNotArrangeTaskList() {
             { data: 'DeliveryTime', title: '交货时间', render: d => d.split(' ')[0] },
             { data: 'StartTime', title: '开始时间', render: tableSet.addDay.bind(null, 'startTime') },
             { data: 'EndTime', title: '截止时间', render: tableSet.addDay.bind(null, 'endTime') },
-            { data: 'EstimatedTime', title: '工期' },
+            { data: null, title: '工期', render: d => '', sClass: 'workDay' },
             { data: null, title: '删除', render: () => `<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>` }
         ]);
         tableConfig.createdRow = tr => {
@@ -2493,12 +2493,24 @@ function getNotArrangeTaskList() {
             tr.find('td').eq(2).text(d.Product);
             tr.find('td').eq(3).text(d.Target);
             tr.find('td').eq(4).text(d.DeliveryTime.split(' ')[0]);
-            tr.find('.startTime').val(d.StartTime).datepicker('update');
-            tr.find('.endTime').val(d.EndTime).datepicker('update');
-            tr.find('td').eq(7).text(d.EstimatedTime);
+            tr.find('.startTime').val(d.StartTime && d.StartTime != '0001-01-01 00:00:00' ? d.StartTime.split(' ')[0] : '').datepicker('update');
+            tr.find('.endTime').val(d.EndTime && d.EndTime != '0001-01-01 00:00:00' ? d.EndTime.split(' ')[0] : '').datepicker('update');
             disabledPmcTask();
+            setNotArrangeTaskWork($(this).closest('tr'));
+        });
+        $('#notArrangeTaskList').off('changeDate').on('changeDate', '.form_date', function () {
+            setNotArrangeTaskWork($(this).closest('tr'));
         });
     });
+}
+
+//排产工期设置
+function setNotArrangeTaskWork(tr) {
+    const startTime = tr.find('.startTime').val().trim();
+    const endTime = tr.find('.endTime').val().trim();
+    if (!startTime || !endTime) return;
+    const day = (new Date(endTime) - new Date(startTime)) / 86400000;
+    tr.find('.workDay').text(day);
 }
 
 //PMC任务单选择禁用
@@ -2507,20 +2519,30 @@ function disabledPmcTask() {
     disabledProcessCodeCommon(selects);
 }
 
+let _taskOrders = [];
 //获取待排程任务单各工序数量
 function getNotArrangeTaskProcessList() {
-    const selects = $($('#notArrangeTaskList').DataTable().columns(1).nodes()[0]).find('.taskOrder');
+    const trs = getDataTableRow('#notArrangeTaskList');
     const arr = [];
-    for (let i = 0, len = selects.length; i < len; i++) {
-        const select = selects.eq(i);
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const tr = $(trs[i]);
+        const select = tr.find('.taskOrder');
         const disabledOp = select.find('option[disabled]');
         disabledOp.prop('disabled', false);
         const id = select.val();
         disabledOp.prop('disabled', true);
         if (isStrEmptyOrUndefined(id)) return layer.msg('请选择任务单');
-        arr.push({
+        const startTime = tr.find('.startTime').val().trim();
+        const endTime = tr.find('.endTime').val().trim();
+        const o = {
             Id: id
-        });
+        }
+        if (startTime && endTime) {
+            if (compareDate(startTime, endTime)) return layer.msg('截止时间不能小于开始时间');
+            o.StartTime = startTime;
+            o.EndTime = endTime;
+        }
+        arr.push(o);
     }
     if (!arr.length) return layer.msg('请选择任务单');
     myPromise(5602, arr, true).then(ret => {
@@ -2601,9 +2623,10 @@ function getNotArrangeTaskProcessList() {
                     Stock: stockEls.eq(i++).val() >> 0
                 }))
             }));
+            _taskOrders = [];
             myPromise(5602, opData).then(ret => {
                 ret.datas.forEach(item => {
-                    _pmcPreviewParams[item.Id] = {
+                    const o = {
                         Id: item.Id,
                         Needs: item.Needs.map(item => ({
                             Order: item.Order,
@@ -2616,6 +2639,8 @@ function getNotArrangeTaskProcessList() {
                             Stock: item.Stock
                         }))
                     }
+                    _taskOrders.push(o);
+                    _pmcPreviewParams[item.Id] = o;
                 });
             });
         });
@@ -2720,6 +2745,8 @@ function getPresentSchedule(data) {
                         <button class="btn btn-primary btn-sm" id="pmcScheduleBtn">查看</button>
                     </div>`;
     $('#pmcPreviewProcessSelect').html(select);
+    const o = {};
+    data.Put.forEach(item => o[item.PId] = item);
     $('#pmcScheduleBtn').off('click').on('click', function () {
         const pid = $('#pmcScheduleSelect').val();
         if (isStrEmptyOrUndefined(pid)) return layer.msg('请选择工序');
@@ -2728,9 +2755,8 @@ function getPresentSchedule(data) {
             endTime: data.CompleteTime,
             pid
         };
-        myPromise(5606, opData, true).then(ret => {
-            const fn = (title, headTr, tbody) => {
-                return `<div class="form-group">
+        const fn = (title, headTr, tbody, total) => {
+            return `<div class="form-group">
                     <label class="control-label">${title}：</label>
                     <div class="table-responsive">
                         <table class="table table-hover table-striped table-bordered">
@@ -2740,29 +2766,80 @@ function getPresentSchedule(data) {
                                     <th>计划号</th>${headTr}
                                 </tr>
                             </thead>
-                            <tbody>${tbody}</tbody>
+                            <tbody>
+                            ${tbody}
+                            <tr><td>总计</td><td></td>${total}</tr>
+                            </tbody>
                         </table>
                     </div>
                   </div>`;
-            };
-            const d = ret.datas[0];
-            const headTr = d.Data[0].Data.reduce((a, b) => {
-                const monthDay = time => {
-                    time = time.split(' ')[0].split('-');
-                    return `${time[1]}月${time[2]}日`;
-                }
-                return `${a}<th>${monthDay(b.ProcessTime)}</th>`;
-            }, '');
-            const tbody = d.Data.reduce((a, b) => {
-                const params = b.Data.reduce((c, d) => `${c}<td>${d.Put}</td>`, '');
+        };
+        const monthDay = time => {
+            time = time.split(' ')[0].split('-');
+            return `${time[1]}月${time[2]}日`;
+        }
+        const createTable = (title, data) => {
+            const headTr = data.Data[0].Data.reduce((a, b) => `${a}<th>${monthDay(b.ProcessTime)}</th>`, '');
+            const putArr = [];
+            const tbody = data.Data.reduce((a, b, i) => {
+                const params = b.Data.reduce((c, d, i) => {
+                    const put = d.Put;
+                    putArr[i] = (putArr[i] >> 0) + put;
+                    return `${c}<td><a href="javascript:showPmcProcessPlanModal('${d.ProcessTime}',${b.ProductId},${data.PId},'${b.Product}','${data.Process}')">${put}</a></td>`;
+                }, '');
                 return `${a}<tr>
                             <td>${i + 1}</td>
                             <td>${b.Product}</td>${params}
                         </tr>`;
             }, '');
-            const temp = fn('当前排程', headTr, tbody);
-            $('#pmcPreviewProcessNew').html(temp);
+            const total = putArr.reduce((a, b) => `${a}<td>${b}</td>`, '');
+            return fn(title, headTr, tbody, total);
+        }
+        //当前排程
+        myPromise(5606, opData, true).then(ret => {
+            const d = ret.datas[0];
+            if (!d) return $('#pmcPreviewProcessNew').html('');
+            $('#pmcPreviewProcessNew').html(createTable('当前排程', d));
         });
+        //安排后
+        $('#pmcPreviewProcessLater').html(createTable('安排后', o[pid]));
+        //排产
+        $('#pmcPreviewProcessBtn').html('<button class="btn btn-primary btn-sm">排产</button>').find('button').on('click', () => {
+            if (!_taskOrders.length) return layer.msg('请先设置待排程任务单各工序数量');
+            const opData = {
+                TaskOrders: _taskOrders,
+                Schedule: data.Schedule
+            };
+            myPromise(5605, opData);
+        });
+    });
+}
+
+//预览计划详情
+function showPmcProcessPlanModal(time, productId, pId, product, process) {
+    $('#pmcProcessPlanCode').text(product);
+    $('#pmcProcessPlanProcess').text(process);
+    myPromise(5607, { time, productId, pId }, true).then(ret => {
+        const data = ret.datas;
+        const tableConfig = _tablesConfig(false, data);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'TaskOrder', title: '任务单' },
+            { data: 'Put', title: '数量' }
+        ]);
+        tableConfig.initComplete = function () {
+            this.find('tfoot').remove();
+            if (!data.length) return;
+            const tFoot = `<tfoot>
+                              <tr>
+                                <th>总计</th>
+                                <th></th>
+                                <th>${data.reduce((a, b) => a + b.Put, 0)}</th>
+                              </tr>
+                           </tfoot>`;
+            this.append(tFoot).find('tfoot tr:last th').css('borderTop', 0);
+        }
+        $('#pmcProcessPlanList').DataTable(tableConfig);
+        $('#showPmcProcessPlanModal').modal('show');
     });
 }
 

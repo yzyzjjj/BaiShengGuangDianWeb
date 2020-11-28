@@ -281,6 +281,7 @@
                                         <div class="form-group" id="pmcPreviewProcessSelect"></div>
                                         <div class="form-group" id="pmcPreviewProcessNew"></div>
                                         <div class="form-group" id="pmcPreviewProcessLater"></div>
+                                        <div class="text-center" id="pmcPreviewProcessBtn"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1326,6 +1327,37 @@
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="pmcChildPlanList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*PMC预览查看计划号模态框*@
+    <div class="modal fade" tabindex="-1" id="showPmcProcessPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">计划号详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <label class="control-label">
+                                <span style="margin-right:20px">计划号：<span id="pmcProcessPlanCode"></span></span>
+                                <span>工序：<span id="pmcProcessPlanProcess"></span></span>
+                            </label>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="pmcProcessPlanList"></table>
                             </div>
                         </div>
                     </div>
