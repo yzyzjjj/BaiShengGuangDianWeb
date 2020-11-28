@@ -1905,6 +1905,7 @@ function devicesOperatorsTable(d, isLook = false) {
         { data: 'Category', title: '设备类型' },
         { data: 'Model', title: '设备型号' },
         { data: 'Count', title: '设备数量', sClass: 'count' },
+        { data: 'Single', title: '单次数量', render: isLook ? d => d : tableSet.addInput.bind(null, 'single', 'auto') },
         { data: 'Number', title: '单台日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
@@ -1915,6 +1916,7 @@ function devicesOperatorsTable(d, isLook = false) {
     perTableConfig.columns = perTableConfig.columns.concat([
         { data: 'Level', title: '等级' },
         { data: 'Count', title: '员工数量', sClass: 'count' },
+        { data: 'Single', title: '单次数量', render: isLook ? d => d : tableSet.addInput.bind(null, 'single', 'auto') },
         { data: 'Number', title: '单人日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
@@ -1941,6 +1943,7 @@ function showCapacitySetModal() {
             this[prop] = oldData.map((item, i) => {
                 const tr = $(devTrs[i]);
                 item.Number = tr.find('.number').val() >> 0;
+                item.Single = tr.find('.single').val() >> 0;
                 item.Total = tr.find('.total').text() >> 0;
                 return item;
             });
@@ -1965,7 +1968,7 @@ function addCapacity() {
     for (let i = 0, len = btnAll.length; i < len; i++) {
         const item = btnAll[i];
         if (!item.Devices) return void layer.msg('请设置产能');
-        let deviceModel = [], deviceNumber = [], operatorLevel = [], operatorNumber = [];
+        let deviceModel = [], deviceSingle = [], deviceNumber = [], operatorLevel = [], operatorSingle = [], operatorNumber = [];
         item.Devices && item.Devices.forEach(item => {
             deviceModel.push(item.ModelId);
             deviceNumber.push(item.Number);
@@ -1973,6 +1976,7 @@ function addCapacity() {
         item.Operators && item.Operators.forEach(item => {
             operatorLevel.push(item.LevelId);
             operatorNumber.push(item.Number);
+            operatorSingle.push(item.Count);
         });
         list[i] = {
             ProcessId: $(item).val(),
@@ -2004,28 +2008,32 @@ function updateCapacityCategory() {
     for (let i = 0, len = btnAll.length; i < len; i++) {
         const item = btnAll[i];
         if (!item.Devices && !item.exist) return void layer.msg('请设置产能');
-        let deviceModel, deviceNumber, operatorLevel, operatorNumber;
+        let deviceModel, deviceSingle, deviceNumber, operatorLevel, operatorSingle, operatorNumber;
         if (item.Devices) {
-            const a = [], b = [], c = [], e = [];
+            const a = [], b = [], c = [], e = [], f = [], g = [];
             item.Devices.forEach(d => {
                 a.push(d.ModelId);
                 b.push(d.Number);
+                f.push(d.Single);
             });
             item.Operators.forEach(d => {
                 c.push(d.LevelId);
                 e.push(d.Number);
+                g.push(d.Single);
             });
-            deviceModel = a.join(), deviceNumber = b.join(), operatorLevel = c.join(), operatorNumber = e.join();
+            deviceModel = a.join(), deviceNumber = b.join(), operatorLevel = c.join(), operatorNumber = e.join(), deviceSingle = f.join(), operatorSingle = g.join();
         } else {
-            deviceModel = item.DeviceModel, deviceNumber = item.DeviceNumber, operatorLevel = item.OperatorLevel, operatorNumber = item.OperatorNumber;
+            deviceModel = item.DeviceModel, deviceNumber = item.DeviceNumber, operatorLevel = item.OperatorLevel, operatorNumber = item.OperatorNumber, deviceSingle = item.DeviceSingle, operatorSingle = item.OperatorSingle;
         }
         list[i] = {
             CapacityId: capacityId,
             ProcessId: item.exist ? $(item).attr('process') : $(item).val(),
             DeviceModel: deviceModel,
             DeviceNumber: deviceNumber,
+            DeviceSingle: deviceSingle,
             OperatorLevel: operatorLevel,
             OperatorNumber: operatorNumber,
+            OperatorSingle: operatorSingle,
             Id: item.exist ? $(item).val() : 0
         };
     }
@@ -2081,8 +2089,10 @@ function showUpdateCapacityModal() {
             const btn = $(tr).find('.set-btn')[0];
             btn.DeviceModel = d.DeviceModel;
             btn.DeviceNumber = d.DeviceNumber;
+            btn.DeviceSingle = d.DeviceSingle;
             btn.OperatorLevel = d.OperatorLevel;
             btn.OperatorNumber = d.OperatorNumber;
+            btn.OperatorSingle = d.OperatorSingle;
             btn.exist = true;
         };
         $('#updateCapacityList').DataTable(tableConfig);
