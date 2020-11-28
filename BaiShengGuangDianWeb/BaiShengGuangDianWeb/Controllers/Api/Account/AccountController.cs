@@ -169,7 +169,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
         }
 
         [HttpPost("Logout")]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public Result Logout()
         {
             var accountInfo = AccountHelper.CurrentUser;

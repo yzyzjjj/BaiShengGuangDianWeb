@@ -54,6 +54,18 @@ namespace BaiShengGuangDianWeb
                 options.Filters.Add<TokenFilterAttribute>();
                 options.Filters.Add<HttpGlobalExceptionFilter>();
             });
+
+            //跨域
+            services.AddCors(options =>
+            {
+                options.AddPolicy("default", policy =>
+                {
+                    policy.AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowAnyOrigin()
+                        .AllowCredentials();
+                });
+            });
             services.AddSignalR();
 
             //添加jwt验证：
@@ -76,6 +88,8 @@ namespace BaiShengGuangDianWeb
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+            app.UseCors("default");
+
             //添加MIME
             var provider = new FileExtensionContentTypeProvider
             {
@@ -89,7 +103,7 @@ namespace BaiShengGuangDianWeb
             {
                 ContentTypeProvider = provider
             });
-            app.UseCookiePolicy();
+            //app.UseCookiePolicy();
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
