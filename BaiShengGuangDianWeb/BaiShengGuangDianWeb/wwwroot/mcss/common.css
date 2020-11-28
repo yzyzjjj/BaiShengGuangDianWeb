@@ -72,6 +72,9 @@ th, td {
     border-radius: 10px;
 }
 
+.flat-thead th {
+    padding: 2px 8px !important;
+}
 /*遮盖层*/
 #body-cover {
     position: fixed;

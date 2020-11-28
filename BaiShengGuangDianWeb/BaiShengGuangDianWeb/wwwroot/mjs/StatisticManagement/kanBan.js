@@ -198,7 +198,7 @@ function setChart(flag, id) {
             }, 200);
         });
         //生产数据
-        var pData = d.ProductionData;
+        var pData = d.ProductionList;
         var devOps = '', proOps = '', heGeOps = '', liePianOps = '', rateOps = '';
         for (i = 0, len = pData.length; i < len; i++) {
             const pd = pData[i];

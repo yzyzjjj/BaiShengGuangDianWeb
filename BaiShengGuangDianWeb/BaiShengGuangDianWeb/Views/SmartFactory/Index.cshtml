@@ -19,9 +19,10 @@
                 <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
                 <li id="deviceNavLi"><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
                 <li id="flowNavLi"><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
-                <li id="planNavLi" class="active"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
                 <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
                 <li id="taskOrderNavLi"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
+                <li id="pmcScheduleNavLi" class="active"><a href="#pmcScheduleNav" data-toggle="tab" aria-expanded="false">PMC排程</a></li>
                 <li id="flowCardNavLi"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
             </ul>
             <div class="tab-content no-padding">
@@ -87,10 +88,11 @@
                             <h3 class="box-title">设备管理</h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateDevice()">修改</button>
-                                <button class="btn btn-primary btn-sm" onclick="addDeviceModel()">添加</button>
+                                <button class="btn btn-primary btn-sm" onclick="showAddDeviceModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delDevice()">删除</button>
                                 <button class="btn btn-info btn-sm" onclick="getDeviceList()">刷新</button>
                                 <button class="btn btn-primary btn-sm" onclick="showDeviceCategoryModal()">类型管理</button>
+                                <button class="btn btn-primary btn-sm" onclick="showDeviceModelModal()">型号管理</button>
                             </div>
                         </div>
                         <div class="box-body">
@@ -146,7 +148,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane active in" id="planNav">
+                <div class="tab-pane fade in" id="planNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
                             <h3 class="box-title">计划号管理</h3>
@@ -196,6 +198,135 @@
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="taskOrderList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane active in" id="pmcScheduleNav">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li><a href="#pmcChildNav" data-toggle="tab" aria-expanded="true">排程</a></li>
+                            <li><a href="#pmcInStoreNav" data-toggle="tab" aria-expanded="false">入库</a></li>
+                            <li class="active"><a href="#pmcExpelProNav" data-toggle="tab" aria-expanded="false">排产</a></li>
+                            <li><a href="#pmcPersonNav" data-toggle="tab" aria-expanded="false">人员</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane fade in" id="pmcChildNav">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div class="flexStyle">
+                                            <label class="control-label no-margin">时间：</label>
+                                            <div class="flexStyle">
+                                                <input type="text" class="form_date form-control text-center pointer" id="pmcChildSTime" style="min-width: 100px">
+                                                <label class="control-label" style="margin: 5px">-</label>
+                                                <input type="text" class="form_date form-control text-center pointer" id="pmcChildETime" style="min-width: 100px">
+                                            </div>
+                                            <button class="btn btn-primary" onclick="getPmcChildList()" style="margin-left:3px">查看</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="pmcChildList"></div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="pmcInStoreNav">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div class="flexStyle">
+                                            <label class="control-label no-margin">时间：</label>
+                                            <div class="flexStyle">
+                                                <input type="text" class="form_date form-control text-center pointer" id="pmcInStoreSTime" style="min-width: 100px">
+                                                <label class="control-label" style="margin: 5px">-</label>
+                                                <input type="text" class="form_date form-control text-center pointer" id="pmcInStoreETime" style="min-width: 100px">
+                                            </div>
+                                            <button class="btn btn-primary" onclick="getPmcInStoreList()" style="margin-left:3px">查看</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="pmcInStoreList"></div>
+                                </div>
+                            </div>
+                            <div class="tab-pane active in" id="pmcExpelProNav">
+                                <div class="box box-primary">
+                                    <div class="box-body">
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="notArrangeTaskList"></table>
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="button" class="btn btn-success btn-sm" id="addNotArrangeTaskListBtn"><i class="fa fa-plus"></i></button>
+                                            <button class="btn btn-primary btn-sm" onclick="getNotArrangeTaskProcessList()">查询</button>
+                                        </div>
+                                        <div class="form-group" id="notArrangeTaskProcessBox"></div>
+                                        <hr />
+                                        <div class="form-group">
+                                            <div class="flexStyle" style="justify-content:space-between">
+                                                <label class="control-label no-margin">已安排任务单：</label>
+                                                <div>
+                                                    <button class="btn btn-info btn-sm" onclick="getArrangeTaskList()">刷新</button>
+                                                    <button class="btn btn-primary btn-sm" onclick="showTaskLevelModel()">等级</button>
+                                                </div>
+                                            </div>
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="arrangeTaskList"></table>
+                                            </div>
+                                            <div class="text-center">
+                                                <button class="btn btn-primary btn-sm" onclick="setArrangeTaskList()">设置</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="form-group">
+                                            <div class="text-center">
+                                                <button class="btn btn-primary btn-sm" onclick="getPmcPreviewList()">预览</button>
+                                            </div>
+                                            <div class="form-group" id="pmcPreviewBox"></div>
+                                        </div>
+                                        <hr />
+                                        <div class="form-group" id="pmcPreviewProcessBox">
+                                            <div class="form-group flexStyle">
+                                                <label class="control-label no-margin">工序：</label>
+                                                <select class="form-control" style="width: 120px"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="pmcPersonNav">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">人员管理</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-success btn-sm" onclick="updatePmcPerson()">修改</button>
+                                            <button class="btn btn-primary btn-sm" onclick="showAddPmcPersonModel()">添加</button>
+                                            <button class="btn btn-danger btn-sm" onclick="delPmcPerson()">删除</button>
+                                            <button class="btn btn-info btn-sm" onclick="getPmcPersonList()">刷新</button>
+                                            <button class="btn btn-primary btn-sm" onclick="showPmcGradeModal()">等级</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle form-group" style="flex-wrap: wrap">
+                                            <label class="control-label text-nowrap no-margin">查询方式：</label>
+                                            <div class="flexStyle" style="margin-right:3px">
+                                                <select class="form-control" id="pmcPersonQueryMode">
+                                                    <option value="state">状态</option>
+                                                    <option value="number">编号</option>
+                                                    <option value="name">姓名</option>
+                                                    <option value="levelId">等级</option>
+                                                    <option value="processId">工序</option>
+                                                </select>
+                                                <select class="form-control" id="pmcPersonQueryTF">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">包含</option>
+                                                </select>
+                                                <select class="form-control" id="pmcPersonQuerySelect">
+                                                    <option value="1">正常</option>
+                                                    <option value="2">休息</option>
+                                                </select>
+                                                <input type="text" class="form-control hidden" id="pmcPersonQueryInput">
+                                            </div>
+                                            <button class="btn btn-primary" onclick="getPmcPersonList()">查询</button>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="pmcPersonList"></table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -347,6 +478,65 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addDeviceCategory()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*设备型号模态框*@
+    <div class="modal fade" tabindex="-1" id="showDeviceModelModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">设备型号</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">型号管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="updateDeviceModel()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="addDeviceModelModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delDeviceModel()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getDeviceModelList()">刷新</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="deviceModelList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加设备型号模态框*@
+    <div class="modal fade" tabindex="-1" id="addDeviceModelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加设备</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addDeviceModelList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addDeviceModelListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addDeviceModel()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -544,7 +734,7 @@
     </div>
     @*添加修改计划号模态框*@
     <div class="modal fade" tabindex="-1" id="addPlanModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -560,6 +750,18 @@
                     <div class="flexStyle form-group">
                         <label class="control-label text-nowrap no-margin">备注：</label>
                         <input type="text" class="form-control" id="addPlanRemark">
+                    </div>
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">流程编号类型：</label>
+                        <select class="form-control" id="addPlanProcess"></select>
+                    </div>
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">产能类型：</label>
+                        <select class="form-control" id="addPlanCapacity"></select>
+                    </div>
+                    <label class="control-label">产能清单：</label>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addPlanCapacityList"></table>
                     </div>
                     <label class="control-label">流程编号清单：</label>
                     <div class="form-group" id="planProcessCodeList"></div>
@@ -589,11 +791,10 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">产能类型管理</h3>
                             <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="">修改</button>
+                                <button class="btn btn-success btn-sm" onclick="updateCapacity()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddCapacityCategoryModel()">添加</button>
-                                <button class="btn btn-danger btn-sm" onclick="">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="">刷新</button>
-                                <button class="btn btn-warning btn-sm" onclick="">产量</button>
+                                <button class="btn btn-danger btn-sm" onclick="delCapacity()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getCapacityList()">刷新</button>
                             </div>
                         </div>
                         <div class="box-body">
@@ -628,15 +829,101 @@
                         <label class="control-label text-nowrap no-margin">备注：</label>
                         <input type="text" class="form-control" id="addCapacityRemark">
                     </div>
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">流程编号类型：</label>
+                        <select class="form-control" id="addCapacityProcess" table="#addCapacityList"></select>
+                    </div>
                     <label class="control-label">产能清单：</label>
                     <div class="table-responsive mailbox-messages">
                         <table class="table table-hover table-striped" id="addCapacityList"></table>
                     </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addCapacityListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addCapacity()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*修改产能类型模态框*@
+    <div class="modal fade" tabindex="-1" id="showUpdateCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">修改产能清单</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">流程编号类型：</label>
+                        <select class="form-control" id="updateCapacityProcess" table="#updateCapacityList"></select>
+                    </div>
+                    <label class="control-label">产能清单：</label>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="updateCapacityList"></table>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="updateCapacityCategoryBtn" onclick="updateCapacityCategory.call(this)">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*产能类型详情模态框*@
+    <div class="modal fade" tabindex="-1" id="showCapacityDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">产能清单查看</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="flexStyle form-group">
+                        <label class="control-label text-nowrap no-margin">流程编号类型：<span class="spanStyle" id="capacityDetailCode"></span></label>
+                    </div>
+                    <label class="control-label">产能清单：</label>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="capacityDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*设备&人员产能设置模态框*@
+    <div class="modal fade" tabindex="-1" id="showCapacitySetModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">产能设置</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" id="devCapacitySetBox">
+                        <label class="control-label">设备产能设置：</label>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="devCapacitySetList"></table>
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">人员产能设置：</label>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="personCapacitySetList"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addCapacitySetBtn">确定</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -981,6 +1268,181 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*PMC等级模态框*@
+    <div class="modal fade" tabindex="-1" id="showPmcGradeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">等级</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">等级管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="updatePmcGrade()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="addPmcGradeModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delPmcGrade()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getPmcGradeList()">刷新</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="pmcGradeList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*PMC排程计划号模态框*@
+    <div class="modal fade" tabindex="-1" id="showPmcChildPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">计划号详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <label class="control-label">
+                                <span class="text-red" style="margin-right:20px">时间：<span class="text-black" id="pmcChildPlanTime"></span></span>
+                                <span class="text-red" style="margin-right:20px">计划号：<span class="text-black" id="pmcChildPlanCode"></span></span>
+                                <span class="text-red">工序：<span class="text-black" id="pmcChildPlanProcess"></span></span>
+                            </label>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="pmcChildPlanList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加等级模态框*@
+    <div class="modal fade" tabindex="-1" id="addPmcGradeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加等级</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addPmcGradeList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addPmcGradeListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addPmcGrade()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加员工模态框*@
+    <div class="modal fade" tabindex="-1" id="showAddPmcPersonModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加员工</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addPmcPersonList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addPmcPersonListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addPmcPerson()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*PMC任务单等级模态框*@
+    <div class="modal fade" tabindex="-1" id="showTaskLevelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">任务单等级</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">任务单等级管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="updateTaskLevel()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="showAddTaskLevelModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delTaskLevel()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getTaskLevelList()">刷新</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="pmcTaskLevelList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加任务单等级模态框*@
+    <div class="modal fade" tabindex="-1" id="showAddTaskLevelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加任务单等级</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addTaskLevelList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addTaskLevelListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addTaskLevel()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

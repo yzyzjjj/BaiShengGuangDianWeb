@@ -1,5 +1,8 @@
 ﻿function pageReady() {
-    getProductionLine();
+    $('#sendCardSTime,#sendCardETime,#pmcChildSTime,#pmcChildETime,#pmcInStoreSTime,#pmcInStoreETime').val(getDate()).datepicker('update');
+    //getProductionLine();
+    getNotArrangeTaskList();
+    getArrangeTaskList();
     $('#personNavLi').one('click', getPersonList);
     $('#deviceNavLi').one('click', getDeviceList);
     $('#flowNavLi').one('click', getProcessCodeList);
@@ -8,15 +11,14 @@
     $('#workOrderNavLi').one('click', getWorkOrderList);
     $('#taskOrderNavLi').one('click', getTaskOrderList);
     $('#flowCardNavLi').one('click', () => {
-        $('#sendCardSTime,#sendCardETime').val(getDate()).datepicker('update');
         const taskOrderFn = myPromise(5090);
         const processCodeFn = myPromise(5040);
         const planFn = myPromise(5060);
         Promise.all([taskOrderFn, processCodeFn, planFn]).then(result => {
             const all = '<option value="0">所有</option>';
-            $('#flowCardTaskOrderSelect').html(`${all}${setOptions(result[0], 'TaskOrder')}`);
-            $('#flowCardProcessCodeSelect').html(`${all}${setOptions(result[1], 'Code')}`);
-            $('#flowCardPlanSelect').html(`${all}${setOptions(result[2], 'Product')}`);
+            $('#flowCardTaskOrderSelect').html(`${all}${setOptions(result[0].datas, 'TaskOrder')}`);
+            $('#flowCardProcessCodeSelect').html(`${all}${setOptions(result[1].datas, 'Code')}`);
+            $('#flowCardPlanSelect').html(`${all}${setOptions(result[2].datas, 'Product')}`);
             getFlowCardList();
         });
     });
@@ -31,6 +33,60 @@
         const tbody = '#' + $(this).parents('tbody').attr('id');
         $(this).parents('tr').remove();
         setAddProcessOpList(tbody);
+    });
+    $('#addPlanCapacity').on('change', function () {
+        const fn = data => {
+            const tableConfig = _tablesConfig(false, data);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'Process', title: '流程' },
+                { data: 'Category', title: '设备类型' },
+                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` },
+                { data: null, title: '合格率', render: tableSet.addInput.bind(null, 'rate', 'auto', 0) },
+                { data: null, title: '工时', render: tableSet.hms }
+            ]);
+            $('#addPlanCapacityList').DataTable(tableConfig);
+        }
+        const capacityId = $(this).val();
+        capacityId ? myPromise(5560, { capacityId }, true).then(e => fn(e.datas)) : fn([]);
+    });
+    $('#addPlanCapacityList').on('input', '.rate', function () {
+        if (($(this).val() >> 0) > 100) $(this).val(100);
+    });
+    $('#addPlanCapacityList').on('input', '.minute,.second', function () {
+        if (($(this).val() >> 0) > 59) $(this).val(59);
+    });
+    $('#addPlanProcess').on('change', function (e, callback) {
+        const categoryId = $(this).val();
+        const getCapacityFn = myPromise(5530, { categoryId, menu: true }, true);
+        const getProcessCodeFn = myPromise(5040, { categoryId }, true);
+        Promise.all([getCapacityFn, getProcessCodeFn]).then(result => {
+            const processCode = result[1].datas;
+            processCode.forEach(item => _planProcessCodeInfo[item.Id] = item);
+            const temp = `<div class="temp form-group" style="border-bottom:1px solid #eee">
+                            <div class="flexStyle form-group" style="justify-content:space-between;align-items:flex-start">
+                                <div class="flexStyle" style="flex-wrap:wrap">
+                                    <label class="control-label text-nowrap no-margin">流程编号：</label>
+                                    <select class="form-control process-code-select" style="width:150px;margin-right:15px">${setOptions(processCode, 'Code')}</select>
+                                    <button class="btn btn-info btn-sm browse-btn" style="margin-right:15px">浏览</button>
+                                    <label class="control-label text-nowrap no-margin process-code-category">类型：</label>
+                                </div>
+                                <button class="btn btn-danger btn-sm del-btn"><i class="fa fa-minus"></i></button>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped process-table"></table>
+                            </div>
+                        </div>`;
+            $('#planProcessCodeList').empty();
+            $('#addPlanProcessList').off('click').on('click', function () {
+                $('#planProcessCodeList').append(temp).find('.process-code-select:last').val('');
+                disabledProcessCode();
+                if ($('#planProcessCodeList .process-code-select:first option').length === $('#planProcessCodeList .temp').length) $(this).prop('disabled', true);
+            });
+            callback ? callback(result[0].datas) : $('#addPlanCapacity').html(setOptions(result[0].datas, 'Capacity')).trigger('change');
+            $('#addPlanProcessList').prop('disabled', !processCode.length);
+            $('#addPlanModel').modal('show');
+        });
     });
     $('#planProcessCodeList').on('change', '.process-code-select', function () {
         const id = $(this).val();
@@ -52,7 +108,7 @@
     });
     $('#planProcessCodeList').on('click', '.browse-btn', function () {
         myPromise(5040).then(data => {
-            const tableConfig = _tablesConfig(false, data, 0);
+            const tableConfig = _tablesConfig(false, data.datas, 0);
             const tableSet = _tableSet();
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Code', title: '编号' },
@@ -129,17 +185,17 @@
         addDataTableTr('#setCraftList', trData);
         if (getDataTableRow('#setCraftList').length === 8) $(this).prop('disabled', true);
     });
-    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('input', 'input', function () {
-        onInput(this, 3, 0);
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList,#addPlanCapacityList,#notArrangeTaskProcessBox').on('input', 'input', function () {
+        onInput(this, 8, 0);
     });
-    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('focus', 'input', function () {
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList,#devCapacitySetList,#personCapacitySetList,#addPlanCapacityList,#notArrangeTaskProcessBox').on('focus', 'input', function () {
         if ($(this).val().trim() == 0) $(this).val('');
     });
-    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList').on('blur', 'input', function () {
+    $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList,#devCapacitySetList,#personCapacitySetList,#addPlanCapacityList,#notArrangeTaskProcessBox').on('blur', 'input', function () {
         if (isStrEmptyOrUndefined($(this).val().trim())) $(this).val(0);
     });
     $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('input', '.target', function () {
-        onInput(this, 3, 0);
+        onInput(this, 8, 0);
     });
     $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('focus', '.target', function () {
         if ($(this).val().trim() == 0) $(this).val('');
@@ -150,14 +206,14 @@
     $('#addTaskOrderList').on('change', '.workOrder', function () {
         const qId = $(this).val();
         myPromise(5070, { qId }, true).then(data => {
-            const d = data[0];
+            const d = data.datas[0];
             $(this).closest('td').next().text(d.Target).next().text(d.Left).next().text(d.Doing).nextAll().find('.deliveryTime').val(d.DeliveryTime.split(' ')[0]).datepicker('update');
         });
     });
     $('#taskOrderSelect').on('change', function () {
         const qId = $(this).val();
         myPromise(5090, { qId }, true).then(data => {
-            const d = data[0];
+            const d = data.datas[0];
             $('#taskOrderTarget').text(d.Target);
             $('#taskOrderIssueCount').text(d.IssueCount);
             $('#taskOrderIssue').text(d.Issue);
@@ -188,13 +244,13 @@
     });
     $('#addFlowCardTaskOrderSelect').on('change', function () {
         const qId = $(this).val();
-        myPromise(5090, { qId }, true).then(e => selectTaskOrder(e[0]));
+        myPromise(5090, { qId }, true).then(e => selectTaskOrder(e.datas[0]));
     });
     $('#addFlowCardProcessCodeSelect').on('change', function () {
         const qId = $(this).val();
         if (qId) {
             myPromise(5040, { qId }, true).then(e => {
-                const processData = e[0];
+                const processData = e.datas[0];
                 $('#addFlowCardType').text(processData.Category);
                 $('#addFlowCardProcessDetail').text(processData.Processes.replace(/,/g, ' > '));
             });
@@ -207,7 +263,7 @@
     $('#productionLineList').on('click', '.show-task-btn', function (e) {
         const workOrderId = $(this).val();
         myPromise(5250, { workOrderId }, true).then(data => {
-            const tableConfig = _tablesConfig(false, data);
+            const tableConfig = _tablesConfig(false, data.datas);
             const tableSet = _tableSet();
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'TaskOrder', title: '任务单' },
@@ -238,14 +294,14 @@
         const qId = $(this).attr('value');
         const warningLineBox = () => {
             myPromise(5204, { workOrderId: qId }, true).then(e => {
-                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                processWarningDangerTemp('warning', `报警工单（${e.datas.length}）`);
                 $('#warningLineBox .refresh').on('click', warningLineBox);
                 $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
             });
         }
         const dangerLineBox = () => {
             myPromise(5205, { workOrderId: qId }, true).then(e => {
-                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                processWarningDangerTemp('danger', `中断工单（${e.datas.length}）`);
                 $('#dangerLineBox .refresh').on('click', dangerLineBox);
                 $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
             });
@@ -270,6 +326,7 @@
         const workId = $(this).attr('work');
         const successLineBox = () => {
             myPromise(5251, { qId: workId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('success', `标准工序（${e.length ? e[0].Processes.length : 0}）`);
                 $('#successLineBox .refresh').on('click', successLineBox);
                 const tableConfig = _tablesConfig(false, e.length ? e[0].Processes : []);
@@ -286,6 +343,7 @@
         }
         const warningLineBox = () => {
             myPromise(5254, { taskOrderId: qId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('warning', `报警工单（${e.length}）`);
                 $('#warningLineBox .refresh').on('click', warningLineBox);
                 $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
@@ -293,6 +351,7 @@
         }
         const dangerLineBox = () => {
             myPromise(5255, { taskOrderId: qId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('danger', `中断工单（${e.length}）`);
                 $('#dangerLineBox .refresh').on('click', dangerLineBox);
                 $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
@@ -317,6 +376,7 @@
         const qId = $(this).attr('value');
         const successLineBox = () => {
             myPromise(5150, { flowCardId: qId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('success', `流程卡工序（${e.length}）`);
                 $('#successLineBox .refresh').on('click', successLineBox);
                 const tableConfig = _tablesConfig(false, e);
@@ -333,6 +393,7 @@
         }
         const warningLineBox = () => {
             myPromise(5304, { flowCardId: qId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('warning', `报警工单（${e.length}）`);
                 $('#warningLineBox .refresh').on('click', warningLineBox);
                 $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
@@ -340,6 +401,7 @@
         }
         const dangerLineBox = () => {
             myPromise(5305, { flowCardId: qId }, true).then(e => {
+                e = e.datas;
                 processWarningDangerTemp('danger', `中断工单（${e.length}）`);
                 $('#dangerLineBox .refresh').on('click', dangerLineBox);
                 $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
@@ -352,7 +414,7 @@
     $('#taskDetailList,#productionLineList').on('click', '.show-flow-btn', function (e) {
         const taskOrderId = $(this).val();
         myPromise(5300, { taskOrderId }, true).then(data => {
-            const tableConfig = _tablesConfig(false, data);
+            const tableConfig = _tablesConfig(false, data.datas);
             const tableSet = _tableSet();
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'CreateTime', title: '发出日期' },
@@ -366,10 +428,106 @@
         });
         e.stopPropagation();
     });
-    $('#addCapacityList').on('change', '.process', function () {
-        const id = $(this).val();
-        const d = _planProcessCodeInfo[id];
-        $(this).parent().next().text(d.DeviceCategory);
+    $('#pmcPersonQueryMode').on('change', function () {
+        const v = $(this).val();
+        const fn = ops => {
+            $('#pmcPersonQuerySelect').html(ops).removeClass('hidden');
+            $('#pmcPersonQueryInput').addClass('hidden');
+        };
+        switch (v) {
+            case 'state':
+                fn(_tableSet().stateOps);
+                break;
+            case 'levelId':
+                myPromise(5510, { menu: true }, true, 0).then(e => fn(setOptions(e.datas, 'Level')));
+                break;
+            case 'processId':
+                myPromise(5030, { menu: true }, true, 0).then(e => fn(setOptions(e.datas, 'Process')));
+                break;
+            default:
+                $('#pmcPersonQueryInput').val('').removeClass('hidden');
+                $('#pmcPersonQuerySelect').addClass('hidden');
+        }
+    });
+    $('#pmcGradeList,#addPmcGradeList').on('input', '.order', function () {
+        onInput(this, 8, 0);
+    });
+    $('#addPmcPersonList').on('change', '.name', disabledPmcPerson);
+    $('#addPmcPersonList').on('click', '.del-btn', function () {
+        delDataTableTr.call(this);
+        disabledPmcPerson();
+        $('#addPmcPersonListBtn').prop('disabled', false);
+    });
+    $('#addDeviceList,#deviceList').on('change', '.category', function () {
+        const categoryId = $(this).val();
+        const tr = $(this).closest('tr');
+        myPromise(5024, { categoryId, menu: true }, true, 0).then(e => tr.find('.model').html(setOptions(e.datas, 'Model')));
+    });
+    $('#addCapacityProcess,#updateCapacityProcess').on('change', function () {
+        const categoryId = $(this).val();
+        myPromise(5560, { categoryId }, true).then(e => {
+            const tableConfig = _tablesConfig(false, e.datas);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'Process', title: '流程' },
+                { data: 'Category', title: '设备类型' },
+                { data: 'ProcessId', title: '产能', render: d => `<button class="btn btn-primary btn-sm set-btn" value="${d}">设置</button>` },
+                { data: null, title: '是否设置', render: tableSet.isFinish }
+            ]);
+            const table = $(this).attr('table');
+            $(table).DataTable(tableConfig);
+        });
+    });
+    $('#addCapacityList,#updateCapacityList').on('click', '.set-btn', function () {
+        showCapacitySetModal.call(this);
+        $('#addCapacitySetBtn').removeClass('hidden');
+    });
+    $('#devCapacitySetList,#personCapacitySetList').on('input', '.number', function () {
+        onInput(this, 8, 0);
+        const tr = $(this).closest('tr');
+        const count = tr.find('.count').text() >> 0;
+        const number = $(this).val() >> 0;
+        tr.find('.total').text(count * number);
+    });
+    $('#capacityList').on('click', '.look-btn', function () {
+        showCapacityDetailModal.call(this);
+    });
+    $('#capacityDetailList,#addPlanCapacityList').on('click', '.capacity-btn', function () {
+        let prop = 'qId', val = $(this).val();
+        if (val == 0) {
+            prop = 'processId';
+            val = $(this).attr('process');
+        }
+        myPromise(5564, { [prop]: val }, true).then(e => devicesOperatorsTable(e, true));
+        $('#addCapacitySetBtn').addClass('hidden');
+    });
+    $('#capacityList').on('click', '.update-btn', function () {
+        showUpdateCapacityModal.call(this);
+    });
+    $('#addProcessCodeCategoryName').on('change', function () {
+        const categoryId = $(this).val();
+        $('#addProcessCodeBody').empty();
+        myPromise(5056, { CategoryId: categoryId }, true).then(e => {
+            const tableConfig = _tablesConfig(false, e.datas);
+            const tableSet = _tableSet();
+            tableConfig.columns.unshift({ data: null, title: '', render: tableSet.addBtn.bind(null, 'addProcessOpToCode'), orderable: false, sWidth: '80px' });
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'Process', title: '流程' },
+                { data: 'Remark', title: '备注' }
+            ]);
+            $('#addProcessCodeOpList').DataTable(tableConfig);
+        });
+    });
+    $('#notArrangeTaskList').on('click', '.del-btn', function () {
+        const tr = $(this).closest('tr');
+        tr.find('.taskOrder option').prop('disabled', false);
+        const taskOrderId = tr.find('.taskOrder').val();
+        if (!isStrEmptyOrUndefined(taskOrderId)) {
+            delete _pmcPreviewParams[taskOrderId];
+        }
+        delDataTableTr.call(this);
+        disabledPmcTask();
+        $('#addNotArrangeTaskListBtn').prop('disabled', false);
     });
 }
 
@@ -385,7 +543,7 @@ function myPromise(opType, opData, isParGet = false, isLoad = 1) {
                 if (ret.errno == 0) resolve(ret);
             } else {
                 if (ret.errno != 0) return layer.msg(ret.errmsg);
-                resolve(ret.datas);
+                resolve(ret);
             }
         }, isLoad);
     });
@@ -416,10 +574,10 @@ function _tablesConfig(isList, data, order = 1) {
 //dataTable渲染标签
 function _tableSet() {
     return {
-        order: (a, b, c, d) => d.row + 1,
+        order: (a, b, c, d) => +d.row + 1,
         isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value="${d.Id}">`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
-        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:120px;width:${width}", value="${d}">`,
+        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:120px;width:${width}" value="${d}">`,
         select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control hidden textIn ${className}" style="min-width:120px">${ops}</select>`,
         addSelect: (ops, className) => `<select class="form-control ${className}" style="min-width:120px">${ops}</select>`,
         updateBtn: (fn, d) => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)" value="${d}">修改</button>`,
@@ -431,7 +589,7 @@ function _tableSet() {
         isRework: () => '<select class="form-control isRework" style="width:100px"><option value="0">否</option><option value="1">是</option></select>',
         isReworkText: d => d ? '是' : '否',
         day: (className, d) => `<span class="textOn">${d.split(' ')[0]}</span><input type="text" class="pointer textIn hidden form_date form-control text-center ${className}" style="min-width: 100px">`,
-        addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d.split(' ')[0]}" style="min-width: 100px">`,
+        addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d ? d.split(' ')[0] : ''}" style="min-width: 100px">`,
         state: d => {
             const colors = ['#CCCCCC', '#ff9933', '#ff33cc', 'black', 'black', '#FF0000'];
             return `<span style="color:${colors[d.State]}">${d.StateStr}</span>`;
@@ -443,7 +601,21 @@ function _tableSet() {
             return `<span style="color:${color}">${d.split(' ')[0]}</span>`;
         },
         progress: d => `${d}%`,
-        endFinishTime: d => d.State === 4 ? d.EndTime : _tableSet().state(d)
+        endFinishTime: d => d.State === 4 ? d.EndTime : _tableSet().state(d),
+        stateOps: '<option value="1">正常</option><option value="2">休息</option>',
+        DevStateOps: '<option value="1">正常</option><option value="2">故障</option><option value="3">报废</option>',
+        isFinish: d => {
+            let icon = 'remove', color = 'red';
+            if (d.Id) icon = 'ok', color = 'green';
+            return `<span class="glyphicon glyphicon-${icon} text-${color} middle" aria-hidden="true" style="font-size:25px"></span>`;
+        },
+        hms: d => {
+            return `<div class="flexStyle" style="justify-content:center">
+                        <input type="text" class="form-control text-center hour" style="width:50px" value="${d.Hour || 0}"><span style="margin:0 5px">时</span>
+                        <input type="text" class="form-control text-center minute" style="width:50px" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:50px" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
+                    </div>`;
+        }
     }
 }
 
@@ -473,7 +645,7 @@ function getDataTableRow(table) {
 }
 
 //初始化iChick并添加事件
-function initCheckboxAddEvent(arr, callback) {
+function initCheckboxAddEvent(arr, callback, fn) {
     const api = this.api();
     $(this).find('.isEnable').iCheck({
         handle: 'checkbox',
@@ -491,13 +663,14 @@ function initCheckboxAddEvent(arr, callback) {
         } else {
             arr.splice(arr.indexOf(trDom), 1);
             callback && tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
+            fn && fn(tr);
         }
     });
 }
 
 //删除表格数据
 function delTableRow(trs, opType, callback) {
-    if (!trs.length) return layer.msg('请选择需要删除的数据');
+    if (!trs || !trs.length) return layer.msg('请选择需要删除的数据');
     const ids = [];
     trs.forEach(item => {
         const el = $(item);
@@ -510,7 +683,7 @@ function delTableRow(trs, opType, callback) {
 function addTableRow(tableId, getTrInfo, opType, callback) {
     const arr = [];
     const trs = getDataTableRow(tableId);
-    if (!trs.length) {
+    if (!trs || !trs.length) {
         layer.msg('请先设置数据再添加');
         return;
     }
@@ -524,7 +697,7 @@ function addTableRow(tableId, getTrInfo, opType, callback) {
 
 //修改表格数据
 function updateTableRow(trs, getTrInfo, opType, callback) {
-    if (!trs.length) {
+    if (!trs || !trs.length) {
         layer.msg('请选择需要修改的数据');
         return;
     }
@@ -553,7 +726,7 @@ function initDayTime(el) {
 //排程弹窗
 function showScheduleModal() {
     myPromise(5401).then(data => {
-        const tableConfig = _tablesConfig(false, data);
+        const tableConfig = _tablesConfig(false, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Code', title: '设备' },
@@ -576,7 +749,7 @@ function getProductionLine() {
     [workWarningList, taskWarningList, flowWarningList][mode]();
     [workDangerList, taskDangerList, flowDangerList][mode]();
     myPromise(opType[mode]).then(data => {
-        const tableConfig = _tablesConfig(false, data, 0);
+        const tableConfig = _tablesConfig(false, data.datas, 0);
         const tableSet = _tableSet();
         const workArr = [
             { data: 'WorkOrder', title: '工单' },
@@ -615,7 +788,7 @@ function getProductionLine() {
 //报警工单
 function workWarningList() {
     myPromise(5202).then(data => {
-        const d = warningDangerCount(data, 'WorkOrder');
+        const d = warningDangerCount(data.datas, 'WorkOrder');
         warningDangerTemp('warning', `报警工单（${d.count}）`, '<th>工单</th><th>报警次数</th>', d.tbody, 'workWarningList');
     });
 }
@@ -623,7 +796,7 @@ function workWarningList() {
 //中断工单
 function workDangerList() {
     myPromise(5203).then(data => {
-        const d = warningDangerCount(data, 'WorkOrder');
+        const d = warningDangerCount(data.datas, 'WorkOrder');
         warningDangerTemp('danger', `中断工单（${d.count}）`, '<th>工单</th><th>中断次数</th>', d.tbody, 'workDangerList');
     });
 }
@@ -631,7 +804,7 @@ function workDangerList() {
 //报警任务单
 function taskWarningList() {
     myPromise(5252).then(data => {
-        const d = warningDangerCount(data, 'TaskOrder');
+        const d = warningDangerCount(data.datas, 'TaskOrder');
         warningDangerTemp('warning', `报警任务单（${d.count}）`, '<th>任务单</th><th>报警次数</th>', d.tbody, 'taskWarningList');
     });
 }
@@ -639,7 +812,7 @@ function taskWarningList() {
 //中断任务单
 function taskDangerList() {
     myPromise(5253).then(data => {
-        const d = warningDangerCount(data, 'TaskOrder');
+        const d = warningDangerCount(data.datas, 'TaskOrder');
         warningDangerTemp('danger', `中断任务单（${d.count}）`, '<th>任务单</th><th>中断次数</th>', d.tbody, 'taskDangerList');
     });
 }
@@ -647,7 +820,7 @@ function taskDangerList() {
 //报警流程卡
 function flowWarningList() {
     myPromise(5302).then(data => {
-        const d = warningDangerCount(data, 'FlowCard');
+        const d = warningDangerCount(data.datas, 'FlowCard');
         warningDangerTemp('warning', `报警流程卡（${d.count}）`, '<th>流程卡</th><th>报警次数</th>', d.tbody, 'flowWarningList');
     });
 }
@@ -655,7 +828,7 @@ function flowWarningList() {
 //中断流程卡
 function flowDangerList() {
     myPromise(5303).then(data => {
-        const d = warningDangerCount(data, 'FlowCard');
+        const d = warningDangerCount(data.datas, 'FlowCard');
         warningDangerTemp('danger', `中断流程卡（${d.count}）`, '<th>流程卡</th><th>中断次数</th>', d.tbody, 'flowDangerList');
     });
 }
@@ -717,7 +890,7 @@ function getLineCommon(opType, callback) {
             const colors = ['white', 'green', 'orange', 'gray', 'darkblue', '#00A9FC'];
             let index = 0;
             const arr = [];
-            const temp = data.reduce((a, b) => `${a}<div style="width:100%;position: relative;overflow-x:scroll;height:133px"><div class="line">
+            const temp = data.datas.reduce((a, b) => `${a}<div style="width:100%;position: relative;overflow-x:scroll;height:133px"><div class="line">
                                 ${b.Processes.reduce((a, b) => (arr.push(b.Faults), `${a}<div class="line-box">
                                     <div class="line-box-title">
                                         <span>${b.Process}</span>
@@ -751,6 +924,7 @@ function getLineCommon(opType, callback) {
 //获取工单生产线信息
 function getWorkLine(qId) {
     myPromise(5070, { qId }, true, 0).then(e => {
+        e = e.datas;
         const one = '<tr class="text-bold"><td>工单</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>任务单数量</td><td>已完成任务单数量</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
         const two = `<tr><td>${d.WorkOrder}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Done}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
@@ -761,6 +935,7 @@ function getWorkLine(qId) {
 //获取任务单生产线信息
 function getTaskLine(qId) {
     myPromise(5090, { qId }, true, 0).then(e => {
+        e = e.datas;
         const one = '<tr class="text-bold"><td>任务单</td><td>计划号</td><td class="text-blue">交货数量</td><td class="text-red">交货日期</td><td>已发流程卡</td><td>以完成流程卡</td><td class="text-info">已完成</td><td class="text-green">已交货</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
         const two = `<tr><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.Target}</td><td>${d.DeliveryTime.split(' ')[0]}</td><td>${d.IssueCount}</td><td>${d.DoneCount}</td><td>${d.Done}</td><td>${d.Delivery}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
@@ -771,6 +946,7 @@ function getTaskLine(qId) {
 //获取流程卡生产线信息
 function getFlowCardLine(qId) {
     myPromise(5110, { qId }, true, 0).then(e => {
+        e = e.datas;
         const one = '<tr class="text-bold"><td>流程卡号</td><td>任务单</td><td>计划号</td><td>流程编号</td><td class="text-info">已完成</td><td class="text-orange">未完成</td><td>已耗时</td><td>按时率</td><td>风险等级</td></tr>';
         const d = e[0];
         const two = `<tr><td>${d.FlowCard}</td><td>${d.TaskOrder}</td><td>${d.Product}</td><td>${d.ProcessCode}</td><td>${d.Done}</td><td>${d.Left}</td><td>${codeTime(d.Consume)}</td><td>${d.OnTimeRate}%</td><td>${d.RiskLevelStr}</td></tr>`;
@@ -785,7 +961,7 @@ let _personTrs = null;
 function getPersonList() {
     myPromise(5000).then(data => {
         _personTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Account', title: '用户名', render: tableSet.input.bind(null, 'account') },
@@ -864,6 +1040,7 @@ function delPerson() {
 }
 
 //----------------------------------------设备管理----------------------------------------------------
+//----------------------------------------设备列表----------------------------------------------------
 let _deviceTrs = null;
 
 //获取设备列表
@@ -872,17 +1049,21 @@ function getDeviceList() {
     const deviceFn = myPromise(5010);
     Promise.all([deviceTypeFn, deviceFn]).then(result => {
         _deviceTrs = [];
-        const tableConfig = _tablesConfig(true, result[1]);
+        const tableConfig = _tablesConfig(true, result[1].datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(result[0], 'Category'), 'category') },
+            { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.DevStateOps, 'state') },
             { data: 'Code', title: '机台号', render: tableSet.input.bind(null, 'code') },
+            { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Category'), 'category') },
+            { data: 'Model', title: '型号', render: tableSet.select.bind(null, '', 'model') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
             initCheckboxAddEvent.call(this, _deviceTrs, (tr, d) => {
-                tr.find('.category').val(d.CategoryId);
+                tr.find('.state').val(d.State);
                 tr.find('.code').val(d.Code);
+                tr.find('.category').val(d.CategoryId);
+                myPromise(5024, { categoryId: d.CategoryId, menu: true }, true, 0).then(e => tr.find('.model').html(setOptions(e.datas, 'Model')).val(d.ModelId));
                 tr.find('.remark').val(d.Remark);
             });
         }
@@ -892,14 +1073,18 @@ function getDeviceList() {
 
 //设备列表tr数据获取
 function getDeviceTrInfo(el, isAdd) {
-    const category = el.find('.category').val();
-    if (isStrEmptyOrUndefined(category)) return void layer.msg('请选择设备类型');
     const code = el.find('.code').val().trim();
     if (isStrEmptyOrUndefined(code)) return void layer.msg('机台号不能为空');
+    const category = el.find('.category').val();
+    if (isStrEmptyOrUndefined(category)) return void layer.msg('请选择设备类型');
+    const model = el.find('.model').val();
+    if (isStrEmptyOrUndefined(model)) return void layer.msg('请选择设备型号');
     const list = {
-        CategoryId: category,
         Code: code,
-        Remark: el.find('.remark').val()
+        CategoryId: category,
+        ModelId: model,
+        Remark: el.find('.remark').val(),
+        State: isAdd ? 1 : el.find('.state').val()
     }
     isAdd || (list.Id = el.find('.isEnable').val() >> 0);
     return list;
@@ -911,18 +1096,24 @@ function updateDevice() {
 }
 
 //添加设备模态框
-function addDeviceModel() {
+function showAddDeviceModel() {
+    let category;
     myPromise(5020).then(e => {
+        category = e.datas;
+        return myPromise(5024, { categoryId: category.Id, menu: true }, true, 0);
+    }).then(e => {
         const trData = {
-            Category: '',
             Code: '',
+            Category: '',
+            Model: '',
             Remark: ''
-        }
+        };
         const tableConfig = _tablesConfig(false, [trData]);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Category', title: '类型', render: tableSet.addSelect.bind(null, setOptions(e, 'Category'), 'category') },
             { data: 'Code', title: '机台号', render: tableSet.addInput.bind(null, 'code', 'auto') },
+            { data: 'Category', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(category, 'Category'), 'category') },
+            { data: 'Model', title: '设备型号', render: tableSet.addSelect.bind(null, setOptions(e.datas, 'Model'), 'model') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
             { data: null, title: '删除', render: tableSet.delBtn }
         ]);
@@ -945,6 +1136,7 @@ function delDevice() {
     delTableRow(_deviceTrs, 5013, getDeviceList);
 }
 
+//----------------------------------------设备类型----------------------------------------------------
 //设备类型弹窗
 function showDeviceCategoryModal() {
     getDeviceCategoryList();
@@ -957,7 +1149,7 @@ let _deviceCategoryTrs = null;
 function getDeviceCategoryList() {
     myPromise(5020).then(data => {
         _deviceCategoryTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型', render: tableSet.input.bind(null, 'category') },
@@ -1028,6 +1220,100 @@ function delDeviceCategory() {
     });
 }
 
+//----------------------------------------设备型号----------------------------------------------------
+//设备型号弹窗
+function showDeviceModelModal() {
+    getDeviceModelList();
+    $('#showDeviceModelModal').modal('show');
+}
+
+let _deviceModelTrs = null;
+
+//获取设备型号列表
+function getDeviceModelList() {
+    const getCategoryFn = myPromise(5020, { menu: true }, true);
+    const getModelFn = myPromise(5024);
+    Promise.all([getCategoryFn, getModelFn]).then(data => {
+        _deviceModelTrs = [];
+        const tableConfig = _tablesConfig(true, data[1].datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(data[0].datas, 'Category'), 'category') },
+            { data: 'Model', title: '型号', render: tableSet.input.bind(null, 'model') },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _deviceModelTrs, (tr, d) => {
+                tr.find('.category').val(d.CategoryId);
+                tr.find('.model').val(d.Model);
+                tr.find('.remark').val(d.Remark);
+            });
+        }
+        $('#deviceModelList').DataTable(tableConfig);
+    });
+}
+
+//设备型号列表tr数据获取
+function getDeviceModelTrInfo(el, isAdd) {
+    const category = el.find('.category').val();
+    if (isStrEmptyOrUndefined(category)) return void layer.msg('请选择设备类型');
+    const model = el.find('.model').val().trim();
+    if (isStrEmptyOrUndefined(model)) return void layer.msg('设备型号不能为空');
+    const list = {
+        CategoryId: category,
+        Model: model,
+        Remark: el.find('.remark').val()
+    }
+    isAdd || (list.Id = el.find('.isEnable').val() >> 0);
+    return list;
+}
+
+//修改设备型号
+function updateDeviceModel() {
+    updateTableRow(_deviceModelTrs, getDeviceModelTrInfo, 5025, () => {
+        getDeviceModelList();
+        getDeviceList();
+    });
+}
+
+//添加设备型号模态框
+function addDeviceModelModel() {
+    myPromise(5020).then(e => {
+        const trData = {
+            Category: '',
+            Model: '',
+            Remark: ''
+        }
+        const tableConfig = _tablesConfig(false, [trData]);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Category', title: '类型', render: tableSet.addSelect.bind(null, setOptions(e.datas, 'Category'), 'category') },
+            { data: 'Model', title: '型号', render: tableSet.addInput.bind(null, 'model', 'auto') },
+            { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+            { data: null, title: '删除', render: tableSet.delBtn }
+        ]);
+        $('#addDeviceModelList').DataTable(tableConfig);
+        $('#addDeviceModelListBtn').off('click').on('click', () => addDataTableTr('#addDeviceModelList', trData));
+        $('#addDeviceModelModel').modal('show');
+    });
+}
+
+//添加设备型号
+function addDeviceModel() {
+    addTableRow('#addDeviceModelList', getDeviceModelTrInfo, 5026, () => {
+        $('#addDeviceModelModel').modal('hide');
+        getDeviceModelList();
+        getDeviceList();
+    });
+}
+
+//删除设备类型
+function delDeviceModel() {
+    delTableRow(_deviceModelTrs, 5027, () => {
+        getDeviceModelList();
+        getDeviceList();
+    });
+}
 //----------------------------------------流程管理----------------------------------------------------
 //----------------------------------------流程编号----------------------------------------------------
 
@@ -1037,7 +1323,7 @@ let _processCodeTrs = null;
 function getProcessCodeList() {
     myPromise(5040).then(data => {
         _processCodeTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Code', title: '编号' },
@@ -1055,21 +1341,12 @@ function getProcessCodeList() {
 
 //添加修改流程编号模态框
 function addEditProcessCodeModel(callback) {
-    const getTypes = myPromise(5050);
-    const getOps = myPromise(5030);
-    Promise.all([getTypes, getOps]).then(result => {
-        $('#addProcessCodeCategoryName').html(setOptions(result[0], 'Category'));
-        const tableConfig = _tablesConfig(false, result[1]);
-        const tableSet = _tableSet();
-        tableConfig.columns.unshift({ data: null, title: '', render: tableSet.addBtn.bind(null, 'addProcessOpToCode'), orderable: false, sWidth: '80px' });
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Process', title: '流程' },
-            { data: 'Remark', title: '备注' }
-        ]);
-        $('#addProcessCodeOpList').DataTable(tableConfig);
-        $('#addProcessCodeBody').empty();
+    myPromise(5050).then(e => {
+        e = e.datas;
+        $('#addProcessCodeCategoryName').html(setOptions(e, 'Category'));
         callback();
         $('#addProcessCodeModel').modal('show');
+        return myPromise(5056, { CategoryId: e[0].Id }, true);
     });
 }
 
@@ -1129,9 +1406,8 @@ function setAddProcessOpList(tbody) {
 //添加流程编号模态框
 function addProcessCodeModel() {
     addEditProcessCodeModel(() => {
-        $('#addProcessCodeName').val('');
-        $('#addProcessCodeCategoryName ').val($('#addProcessCodeCategoryName option:first').val());
-        $('#addProcessCodeRemark').val('');
+        $('#addProcessCodeName,#addProcessCodeRemark').val('');
+        $('#addProcessCodeCategoryName').trigger('change');
         $('#addEditTitle').text('添加流程编号');
         $('#addEditBtn').text('添加').val(0).off('click').on('click', addUpProcessCode.bind(null, true));
     });
@@ -1143,7 +1419,7 @@ function showUpdateProcessCodeModel() {
     const d = $('#processCodeList').DataTable().row(tr).data();
     addEditProcessCodeModel(() => {
         $('#addProcessCodeName').val(d.Code);
-        $('#addProcessCodeCategoryName ').val(d.CategoryId);
+        $('#addProcessCodeCategoryName ').val(d.CategoryId).trigger('change');
         $('#addProcessCodeRemark').val(d.Remark);
         const listId = d.List ? d.List.split(',') : [];
         const processes = d.Processes ? d.Processes.split(',') : [];
@@ -1153,7 +1429,7 @@ function showUpdateProcessCodeModel() {
                              <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
                              <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
                            </tr>`, '');
-        $('#addProcessCodeBody').append(trs);
+        $('#addProcessCodeBody').html(trs);
         $('#addEditTitle').text('修改流程编号');
         $('#addEditBtn').text('修改').val(d.Id).off('click').on('click', addUpProcessCode.bind(null, false));
         setAddProcessOpList('#addProcessCodeBody');
@@ -1179,7 +1455,7 @@ let _processCodeCategoryTrs = null;
 function getProcessCodeCategoryList() {
     myPromise(5050).then(data => {
         _processCodeCategoryTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Category', title: '类型' },
@@ -1197,7 +1473,7 @@ function getProcessCodeCategoryList() {
 //添加修改流程编号类型模态框
 function addEditProcessCodeCategoryModel(callback) {
     myPromise(5030).then(e => {
-        const tableConfig = _tablesConfig(false, e);
+        const tableConfig = _tablesConfig(false, e.datas);
         const tableSet = _tableSet();
         tableConfig.columns.unshift({ data: null, title: '', render: tableSet.addBtn.bind(null, 'addProcessOpToCodeCategory'), orderable: false, sWidth: '80px' });
         tableConfig.columns = tableConfig.columns.concat([
@@ -1262,7 +1538,7 @@ function showUpdateProcessCodeCategoryModel() {
             const d = $('#processCodeCategoryList').DataTable().row(tr).data();
             $('#addProcessCodeCategory').val(d.Category);
             $('#addProcessCodeCategoryRemark').val(d.Remark);
-            const trs = data.reduce((a, b) => `${a}<tr list="${b.ProcessId}" processid="${b.Id}">
+            const trs = data.datas.reduce((a, b) => `${a}<tr list="${b.ProcessId}" processid="${b.Id}">
                              <td class="num"></td>
                              <td>${b.Process}</td>
                              <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
@@ -1291,11 +1567,11 @@ function getProcessOpList() {
     const processOpFn = myPromise(5030);
     Promise.all([deviceTypeFn, processOpFn]).then(result => {
         _processOpTrs = [];
-        const tableConfig = _tablesConfig(true, result[1]);
+        const tableConfig = _tablesConfig(true, result[1].datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.input.bind(null, 'process') },
-            { data: 'DeviceCategory', title: '设备类型', render: tableSet.select.bind(null, setOptions(result[0], 'Category'), 'category') },
+            { data: 'DeviceCategory', title: '设备类型', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Category'), 'category') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
@@ -1341,7 +1617,7 @@ function addProcessOpModel() {
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.addInput.bind(null, 'process', 'auto') },
-            { data: 'DeviceCategory', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(e, 'Category'), 'category') },
+            { data: 'DeviceCategory', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(e.datas, 'Category'), 'category') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
             { data: null, title: '删除', render: tableSet.delBtn }
         ]);
@@ -1372,10 +1648,13 @@ let _planTrs = null;
 function getPlanList() {
     myPromise(5060).then(data => {
         _planTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Product', title: '计划号' },
+            { data: 'Number', title: '日产能' },
+            { data: 'Category', title: '流程编号类型' },
+            { data: 'Capacity', title: '产能类型' },
             { data: 'ProcessCodes', title: '流程编号清单' },
             { data: 'Remark', title: '备注' },
             { data: 'Id', title: '修改', render: tableSet.updateBtn.bind(null, 'showUpdatePlanModel'), sWidth: '80px' }
@@ -1411,41 +1690,23 @@ function disabledProcessCodeCommon(selects) {
 let _planProcessCodeInfo = null;
 
 //添加修改计划号模态框
-function addEditPlanModel(callback) {
+function addEditPlanModel(callback, codeId) {
     _planProcessCodeInfo = {};
-    myPromise(5040).then(data => {
-        data.forEach(item => _planProcessCodeInfo[item.Id] = item);
-        const temp = `<div class="temp form-group" style="border-bottom:1px solid #eee">
-                        <div class="flexStyle form-group" style="justify-content:space-between">
-                            <div class="flexStyle">
-                                <label class="control-label text-nowrap no-margin">流程编号：</label>
-                                <select class="form-control process-code-select" style="width:150px;margin-right:15px">${setOptions(data, 'Code')}</select>
-                                <button class="btn btn-info btn-sm browse-btn" style="margin-right:15px">浏览</button>
-                                <label class="control-label text-nowrap no-margin process-code-category">类型：</label>
-                            </div>
-                            <button class="btn btn-danger btn-sm del-btn"><i class="fa fa-minus"></i></button>
-                        </div>
-                        <div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped process-table"></table>
-                        </div>
-                    </div>`;
-        $('#planProcessCodeList').empty();
-        $('#addPlanProcessList').off('click').on('click', function () {
-            $('#planProcessCodeList').append(temp).find('.process-code-select:last').val('');
-            disabledProcessCode();
-            if ($('#planProcessCodeList .process-code-select:first option').length === $('#planProcessCodeList .temp').length) $(this).prop('disabled', true);
-        });
-        callback();
-        $('#addPlanModel').modal('show');
-    });
+    myPromise(5050, { menu: true }, true).then(e => $('#addPlanProcess').html(setOptions(e.datas, 'Category')).val(codeId || e.datas[0].Id).trigger('change', callback));
 }
 
 //添加修改计划号
 function addUpPlan(isAdd) {
+    const categoryId = $('#addPlanProcess').val().trim();
+    if (isStrEmptyOrUndefined(categoryId)) return layer.msg('请选择流程编号');
+    const capacityId = $('#addPlanCapacity').val().trim();
+    if (isStrEmptyOrUndefined(capacityId)) return layer.msg('请选择产能类型');
     const product = $('#addPlanName').val().trim();
     if (isStrEmptyOrUndefined(product)) return layer.msg('计划号不能为空');
     const remark = $('#addPlanRemark').val().trim();
     const list = {
+        CategoryId: categoryId,
+        CapacityId: capacityId,
         Product: product,
         Remark: remark
     }
@@ -1456,7 +1717,32 @@ function addUpPlan(isAdd) {
         opType = 5061;
         list.Id = $('#addEditPlanBtn').val();
     }
-    const trs = [];
+    //产能清单
+    const productCapacities = [];
+    let trs = getDataTableRow('#addPlanCapacityList');
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const tr = $(trs[i]);
+        const rate = tr.find('.rate').val().trim() >> 0;
+        if (isStrEmptyOrUndefined(rate)) return layer.msg('请输入合格率');
+        const hour = tr.find('.hour').val().trim() >> 0;
+        const minute = tr.find('.minute').val().trim() >> 0;
+        const second = tr.find('.second').val().trim() >> 0;
+        if (isStrEmptyOrUndefined(hour) && isStrEmptyOrUndefined(minute) && isStrEmptyOrUndefined(second)) return layer.msg('请输入工时');
+        const o = {
+            Rate: rate,
+            Day: 0,
+            Hour: hour,
+            Min: minute,
+            Sec: second
+        }
+        const capacityBtn = tr.find('.capacity-btn');
+        const updateId = capacityBtn.attr('list');
+        !isAdd && updateId ? (o.Id = updateId) : (o.ProcessId = capacityBtn.attr('process'));
+        productCapacities[i] = o;
+    }
+    list.ProductCapacities = productCapacities;
+    //流程编号清单
+    trs = [];
     $('#planProcessCodeList .process-table').each((i, item) => trs.push(...Array.from(getDataTableRow(item))));
     list.ProductProcesses = trs.map(item => {
         const tr = $(item);
@@ -1483,11 +1769,10 @@ function addUpPlan(isAdd) {
 
 //添加计划号弹窗
 function addPlanModel() {
-    addEditPlanModel(() => {
+    addEditPlanModel(capacityData => {
+        $('#addPlanCapacity').html(setOptions(capacityData, 'Capacity')).trigger('change');
         $('#addEditPlanTitle').text('添加计划号');
-        $('#addPlanName').val('');
-        $('#addPlanRemark').val('');
-        $('#addPlanProcessList').click();
+        $('#addPlanName,#addPlanRemark').val('');
         $('#addEditPlanBtn').text('添加').val(0).off('click').on('click', addUpPlan.bind(null, true));
     });
 }
@@ -1496,11 +1781,25 @@ function addPlanModel() {
 function showUpdatePlanModel() {
     const qId = $(this).val();
     myPromise(5060, { qId }, true).then(data => {
-        const d = data[0];
-        addEditPlanModel(() => {
+        const d = data.datas[0];
+        addEditPlanModel(capacityData => {
+            $('#addPlanCapacity').html(setOptions(capacityData, 'Capacity')).val(d.CapacityId);
             $('#addEditPlanTitle').text('修改计划号');
             $('#addPlanName').val(d.Product);
             $('#addPlanRemark').val(d.Remark);
+            //产能清单
+            const productCapacities = d.ProductCapacities;
+            const tableConfig = _tablesConfig(false, productCapacities);
+            const tableSet = _tableSet();
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'Process', title: '流程' },
+                { data: 'Category', title: '设备类型' },
+                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" list="${d.Id}">查看</button>` },
+                { data: 'Rate', title: '合格率', render: tableSet.addInput.bind(null, 'rate', 'auto') },
+                { data: null, title: '工时', render: tableSet.hms }
+            ]);
+            $('#addPlanCapacityList').DataTable(tableConfig);
+            //流程编号清单
             const productProcesses = d.ProductProcesses;
             const processCodeObj = {}
             productProcesses.forEach(item => {
@@ -1530,7 +1829,7 @@ function showUpdatePlanModel() {
             }
             disabledProcessCode();
             $('#addEditPlanBtn').text('修改').val(d.Id).off('click').on('click', addUpPlan.bind(null, false));
-        });
+        }, d.CategoryId);
     });
 }
 
@@ -1539,35 +1838,256 @@ function delPlan() {
     delTableRow(_planTrs, 5063, getPlanList);
 }
 
-//产能弹窗
+//----------------------------------------产能管理----------------------------------------------------
+
+let _capacityTrs = null;
+//产能类型弹窗
 function showCapacityModel() {
+    getCapacityList();
     $('#showCapacityModel').modal('show');
+}
+
+//获取产能类型列表
+function getCapacityList() {
+    myPromise(5530).then(e => {
+        _capacityTrs = [];
+        const tableConfig = _tablesConfig(true, e.datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Capacity', title: '类型', render: tableSet.input.bind(null, 'capacity') },
+            { data: 'Category', title: '流程编号类型' },
+            { data: 'Number', title: '日产能' },
+            { data: null, title: '产能清单', render: d => `<button class="btn btn-info btn-sm look-btn look-update-btn" value="${d.Id}" categoryid="${d.CategoryId}" category="${d.Category}">查看</button>` },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _capacityTrs, (tr, d) => {
+                tr.find('.capacity').val(d.Capacity);
+                tr.find('.look-update-btn').addClass('update-btn btn-success').removeClass('btn-info look-btn').text('修改');
+                tr.find('.remark').val(d.Remark);
+            }, tr => {
+                tr.find('.look-update-btn').removeClass('update-btn btn-success').addClass('btn-info look-btn').text('查看');
+            });
+        }
+        $('#capacityList').DataTable(tableConfig);
+    });
+}
+
+//修改产能类型
+function updateCapacity() {
+    const fn = el => {
+        const capacity = el.find('.capacity').val().trim();
+        if (isStrEmptyOrUndefined(capacity)) return void layer.msg('产能类型不能为空');
+        return {
+            Capacity: capacity,
+            Remark: el.find('.remark').val(),
+            Id: el.find('.isEnable').val() >> 0
+        }
+    };
+    updateTableRow(_capacityTrs, fn, 5531, getCapacityList);
 }
 
 //添加产能类型弹窗
 function showAddCapacityCategoryModel() {
-    _planProcessCodeInfo = {};
-    myPromise(5030).then(e => {
-        e.forEach(item => _planProcessCodeInfo[item.Id] = item);
-        const firstProcess = e[0];
-        const trData = {
-            ProcessId: firstProcess.Id,
-            DeviceCategory: firstProcess.DeviceCategory
+    $('#addCapacityCategory,#addCapacityRemark').val('');
+    myPromise(5050).then(e => {
+        $('#addCapacityProcess').html(setOptions(e.datas, 'Category')).trigger('change');
+        $('#showAddCapacityCategoryModel').modal('show');
+    });
+}
+
+//设备&人员产能表格设置
+function devicesOperatorsTable(d, isLook = false) {
+    const devices = d.Devices;
+    const tableSet = _tableSet();
+    const devTableConfig = _tablesConfig(false, devices);
+    devTableConfig.columns = devTableConfig.columns.concat([
+        { data: 'Category', title: '设备类型' },
+        { data: 'Model', title: '设备型号' },
+        { data: 'Count', title: '设备数量', sClass: 'count' },
+        { data: 'Number', title: '单台日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
+        { data: 'Total', title: '日总产能', sClass: 'total' }
+    ]);
+    $('#devCapacitySetList').DataTable(devTableConfig);
+    devices.length ? $('#devCapacitySetBox').removeClass('hidden') : $('#devCapacitySetBox').addClass('hidden');
+    const operators = d.Operators;
+    const perTableConfig = _tablesConfig(false, operators);
+    perTableConfig.columns = perTableConfig.columns.concat([
+        { data: 'Level', title: '等级' },
+        { data: 'Count', title: '员工数量', sClass: 'count' },
+        { data: 'Number', title: '单人日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
+        { data: 'Total', title: '日总产能', sClass: 'total' }
+    ]);
+    $('#personCapacitySetList').DataTable(perTableConfig);
+    $('#showCapacitySetModal').modal('show');
+}
+
+//设备&人员产能设置弹窗
+function showCapacitySetModal() {
+    let prop = 'processId', val = $(this).val();
+    if (this.exist) {
+        prop = 'qId';
+        if (val == 0) {
+            prop = 'processId';
+            val = $(this).attr('process');
         }
-        const tableConfig = _tablesConfig(false, [trData]);
+    }
+    this.Devices ? devicesOperatorsTable(this) : myPromise(5564, { [prop]: val }, true).then(devicesOperatorsTable);
+    //设备&人员产能设置确定
+    $('#addCapacitySetBtn').off('click').on('click', () => {
+        const fn = (table, prop) => {
+            const oldData = Array.from($(table).DataTable().data());
+            const devTrs = Array.from(getDataTableRow(table));
+            this[prop] = oldData.map((item, i) => {
+                const tr = $(devTrs[i]);
+                item.Number = tr.find('.number').val() >> 0;
+                item.Total = tr.find('.total').text() >> 0;
+                return item;
+            });
+        }
+        fn('#devCapacitySetList', 'Devices');
+        fn('#personCapacitySetList', 'Operators');
+        layer.msg('产能设置成功');
+        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-ok text-green').removeClass('glyphicon-remove text-red');
+        $('#showCapacitySetModal').modal('hide');
+    });
+}
+
+//添加产能类型
+function addCapacity() {
+    const capacity = $('#addCapacityCategory').val().trim();
+    if (isStrEmptyOrUndefined(capacity)) return void layer.msg('产能类型不能为空');
+    const remark = $('#addCapacityRemark').val().trim();
+    const categoryId = $('#addCapacityProcess').val();
+    if (isStrEmptyOrUndefined(categoryId)) return void layer.msg('请选择流程编号');
+    const btnAll = $(getDataTableRow('#addCapacityList')).find('.set-btn');
+    const list = [];
+    for (let i = 0, len = btnAll.length; i < len; i++) {
+        const item = btnAll[i];
+        if (!item.Devices) return void layer.msg('请设置产能');
+        let deviceModel = [], deviceNumber = [], operatorLevel = [], operatorNumber = [];
+        item.Devices && item.Devices.forEach(item => {
+            deviceModel.push(item.ModelId);
+            deviceNumber.push(item.Number);
+        });
+        item.Operators && item.Operators.forEach(item => {
+            operatorLevel.push(item.LevelId);
+            operatorNumber.push(item.Number);
+        });
+        list[i] = {
+            ProcessId: $(item).val(),
+            DeviceModel: deviceModel.join(),
+            DeviceNumber: deviceNumber.join(),
+            OperatorLevel: operatorLevel.join(),
+            OperatorNumber: operatorNumber.join()
+        };
+    }
+    const opData = [{
+        Capacity: capacity,
+        CategoryId: categoryId,
+        Remark: remark,
+        List: list
+    }];
+    myPromise(5532, opData).then(() => {
+        $('#showAddCapacityCategoryModel').modal('hide');
+        getCapacityList();
+    });
+}
+
+//修改产能类型
+function updateCapacityCategory() {
+    const capacityId = $(this).val();
+    const categoryId = $('#updateCapacityProcess').val();
+    if (isStrEmptyOrUndefined(categoryId)) return void layer.msg('请选择流程编号');
+    const btnAll = $(getDataTableRow('#updateCapacityList')).find('.set-btn');
+    const list = [];
+    for (let i = 0, len = btnAll.length; i < len; i++) {
+        const item = btnAll[i];
+        if (!item.Devices && !item.exist) return void layer.msg('请设置产能');
+        let deviceModel, deviceNumber, operatorLevel, operatorNumber;
+        if (item.Devices) {
+            const a = [], b = [], c = [], e = [];
+            item.Devices.forEach(d => {
+                a.push(d.ModelId);
+                b.push(d.Number);
+            });
+            item.Operators.forEach(d => {
+                c.push(d.LevelId);
+                e.push(d.Number);
+            });
+            deviceModel = a.join(), deviceNumber = b.join(), operatorLevel = c.join(), operatorNumber = e.join();
+        } else {
+            deviceModel = item.DeviceModel, deviceNumber = item.DeviceNumber, operatorLevel = item.OperatorLevel, operatorNumber = item.OperatorNumber;
+        }
+        list[i] = {
+            CapacityId: capacityId,
+            ProcessId: item.exist ? $(item).attr('process') : $(item).val(),
+            DeviceModel: deviceModel,
+            DeviceNumber: deviceNumber,
+            OperatorLevel: operatorLevel,
+            OperatorNumber: operatorNumber,
+            Id: item.exist ? $(item).val() : 0
+        };
+    }
+    const opData = {
+        Id: capacityId,
+        CategoryId: categoryId,
+        List: list
+    };
+    myPromise(5561, opData).then(() => {
+        $('#showUpdateCapacityCategoryModel').modal('hide');
+        getCapacityList();
+    });
+}
+
+//删除产能类型
+function delCapacity() {
+    delTableRow(_capacityTrs, 5533, getCapacityList);
+}
+
+//查看产能清单
+function showCapacityDetailModal() {
+    myPromise(5560, { capacityId: $(this).val() }, true).then(e => {
+        $('#capacityDetailCode').text($(this).attr('category'));
+        const tableConfig = _tablesConfig(false, e.datas);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Process', title: '流程' },
+            { data: 'Category', title: '设备类型' },
+            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` }
+        ]);
+        $('#capacityDetailList').DataTable(tableConfig);
+        $('#showCapacityDetailModal').modal('show');
+    });
+}
+
+//修改产能清单
+function showUpdateCapacityModal() {
+    const categoryId = $(this).attr('categoryid');
+    const capacityId = $(this).val();
+    const getProcessCodeFn = myPromise(5050);
+    const getCapacityListFn = myPromise(5560, { capacityId, categoryId }, true);
+    $('#updateCapacityCategoryBtn').val(capacityId);
+    Promise.all([getProcessCodeFn, getCapacityListFn]).then(e => {
+        $('#updateCapacityProcess').html(setOptions(e[0].datas, 'Category')).val(categoryId);
+        const tableConfig = _tablesConfig(false, e[1].datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
-            { data: 'ProcessId', title: '流程', render: tableSet.addSelect.bind(null, setOptions(e, 'Process'), 'process') },
-            { data: 'DeviceCategory', title: '设备类型' },
-            { data: null, title: '设备类型', render: tableSet.setBtn },
-            { data: null, title: '删除', render: tableSet.delBtn }
+            { data: 'Process', title: '流程' },
+            { data: 'Category', title: '设备类型' },
+            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm set-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` },
+            { data: null, title: '是否设置', render: tableSet.isFinish }
         ]);
-        $('#addCapacityList').DataTable(tableConfig);
-        $('#addCapacityListBtn').off('click').on('click', () => {
-            addDataTableTr('#addCapacityList', trData);
-        });
+        tableConfig.createdRow = (tr, d) => {
+            const btn = $(tr).find('.set-btn')[0];
+            btn.DeviceModel = d.DeviceModel;
+            btn.DeviceNumber = d.DeviceNumber;
+            btn.OperatorLevel = d.OperatorLevel;
+            btn.OperatorNumber = d.OperatorNumber;
+            btn.exist = true;
+        };
+        $('#updateCapacityList').DataTable(tableConfig);
+        $('#showUpdateCapacityCategoryModel').modal('show');
     });
-    $('#showAddCapacityCategoryModel').modal('show');
 }
 
 //----------------------------------------工单管理----------------------------------------------------
@@ -1578,7 +2098,7 @@ let _workOrderTrs = null;
 function getWorkOrderList() {
     myPromise(5070).then(data => {
         _workOrderTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'WorkOrder', title: '工单', render: tableSet.input.bind(null, 'workOrder') },
@@ -1672,7 +2192,7 @@ function getTaskOrderList() {
     const taskOrderFn = myPromise(5090);
     Promise.all([planFn, workOrderFn, taskOrderFn]).then(result => {
         _taskOrderTrs = [];
-        const tableConfig = _tablesConfig(true, result[2]);
+        const tableConfig = _tablesConfig(true, result[2].datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'TaskOrder', title: '任务单', render: tableSet.input.bind(null, 'taskOrder') },
@@ -1680,8 +2200,8 @@ function getTaskOrderList() {
             { data: 'Target', title: '目标产量', render: tableSet.input.bind(null, 'target') },
             { data: 'Done', title: '已完成', sClass: 'text-green' },
             { data: 'Doing', title: '加工中', sClass: 'text-orange' },
-            { data: 'WorkOrder', title: '工单', render: tableSet.select.bind(null, setOptions(result[1], 'WorkOrder'), 'workOrder') },
-            { data: 'Product', title: '计划号', render: tableSet.select.bind(null, setOptions(result[0], 'Product'), 'product') },
+            { data: 'WorkOrder', title: '工单', render: tableSet.select.bind(null, setOptions(result[1].datas, 'WorkOrder'), 'workOrder') },
+            { data: 'Product', title: '计划号', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Product'), 'product') },
             { data: 'DeliveryTime', title: '交货日期', render: tableSet.day.bind(null, 'deliveryTime') },
             { data: 'Id', title: '详情', render: tableSet.detailBtn.bind(null, 'showTaskOrderDetailModal') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
@@ -1705,7 +2225,7 @@ function getTaskOrderList() {
 function showTaskOrderDetailModal() {
     myPromise(5090).then(data => {
         const qId = $(this).val();
-        $('#taskOrderSelect').html(setOptions(data, 'TaskOrder')).val(qId).trigger('change');
+        $('#taskOrderSelect').html(setOptions(data.datas, 'TaskOrder')).val(qId).trigger('change');
         $('#taskOrderDetailModel').modal('show');
     });
 }
@@ -1714,7 +2234,7 @@ function showTaskOrderDetailModal() {
 function getTaskOrderTrInfo(el, isAdd) {
     const taskOrder = el.find('.taskOrder').val().trim();
     if (isStrEmptyOrUndefined(taskOrder)) return void layer.msg('任务单不能为空');
-    const target = el.find('.target').val().trim().trim();
+    const target = el.find('.target').val().trim();
     if (isStrEmptyOrUndefined(target)) return void layer.msg('目标产量不能为0');
     const workOrder = el.find('.workOrder').val();
     if (isStrEmptyOrUndefined(workOrder)) return void layer.msg('请选择工单');
@@ -1744,7 +2264,7 @@ function addTaskOrderModel() {
     const planFn = myPromise(5060);
     const workOrderFn = myPromise(5070);
     Promise.all([planFn, workOrderFn]).then(result => {
-        const firstWorkOrder = result[1][0];
+        const firstWorkOrder = result[1].datas[0];
         const trData = {
             TaskOrder: '',
             WorkOrderId: '',
@@ -1760,11 +2280,11 @@ function addTaskOrderModel() {
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'TaskOrder', title: '任务单', render: tableSet.addInput.bind(null, 'taskOrder', 'auto') },
-            { data: 'WorkOrderId', title: '工单', render: tableSet.addSelect.bind(null, setOptions(result[1], 'WorkOrder'), 'workOrder') },
+            { data: 'WorkOrderId', title: '工单', render: tableSet.addSelect.bind(null, setOptions(result[1].datas, 'WorkOrder'), 'workOrder') },
             { data: 'TargetWork', title: '目标产量' },
             { data: 'Left', title: '未完成', sClass: 'text-red' },
             { data: 'Doing', title: '加工中', sClass: 'text-orange' },
-            { data: 'ProductId', title: '计划号', render: tableSet.addSelect.bind(null, setOptions(result[0], 'Product'), 'product') },
+            { data: 'ProductId', title: '计划号', render: tableSet.addSelect.bind(null, setOptions(result[0].datas, 'Product'), 'product') },
             { data: 'Target', title: '目标产量', render: tableSet.addInput.bind(null, 'target', 'auto') },
             { data: 'DeliveryTime', title: '交货日期', render: tableSet.addDay.bind(null, 'deliveryTime') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
@@ -1790,6 +2310,730 @@ function delTaskOrder() {
     delTableRow(_taskOrderTrs, 5093, getTaskOrderList);
 }
 
+//----------------------------------------PMC排程----------------------------------------------------
+//排程入库表格生成
+function pmcChildInStoreCreate(data, plan, actual, el, opType) {
+    const temps = data.reduce((a, b) => {
+        const timeData = b.Data[0].Data;
+        const time = timeData.reduce((a, b) => {
+            const monthDay = time => {
+                time = time.split(' ')[0].split('-');
+                return `${time[1]}月${time[2]}日`;
+            }
+            return `${a}<th colspan="2">${monthDay(b.ProcessTime)}</th>`;
+        }, '');
+        const putArr = [], havePutArr = [];
+        const tbody = b.Data.reduce((c, d, i) => {
+            const params = d.Data.reduce((e, f, i) => {
+                const put = f[plan], havePut = f[actual];
+                putArr[i] = (putArr[i] >> 0) + put, havePutArr[i] = (havePutArr[i]) >> 0 + havePut;
+                return `${e}<td class="bg-green"><a href="javascript:showPmcChildPlanModal('${f.ProcessTime}',${d.ProductId},${b.PId},'${d.Product}','${b.Process}',${opType})" style="color:black">${put}</a></td>
+                            <td ${havePut > put ? 'class="text-red"' : ''}>${havePut}</td>`;
+            }, '');
+            return `${c}<tr>
+                            <td>${i + 1}</td>
+                            <td>${d.Product}</td>${params}
+                        </tr>`;
+        }, '');
+        const total = putArr.reduce((a, b, i) => `${a}<td class="bg-green">${b}</td><td ${havePutArr[i] > b ? 'class="text-red"' : ''}>${havePutArr[i]}</td>`, '');
+        return `${a}<div class="form-group">
+                        <label class="control-label">${b.Process}：</label>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered">
+                                <thead class="flat-thead">
+                                    <tr>
+                                        <th rowspan="2">序号</th>
+                                        <th rowspan="2">计划号</th>${time}
+                                    </tr>
+                                    <tr>${'<th class="bg-green">计划</th><th>实际</th>'.repeat(timeData.length)}</tr>
+                                </thead>
+                                <tbody>
+                                    ${tbody}
+                                    <tr>
+                                        <td>总计</td><td></td>${total}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                     </div>`;
+    }, '');
+    $(el).html(temps);
+}
+
+//获取排程列表
+function getPmcChildList() {
+    const startTime = $('#pmcChildSTime').val();
+    if (isStrEmptyOrUndefined(startTime)) return layer.msg('请选择开始时间');
+    const endTime = $('#pmcChildETime').val();
+    if (isStrEmptyOrUndefined(endTime)) return layer.msg('请选择结束时间');
+    if (comTimeDay(startTime, endTime)) return;
+    myPromise(5606, { startTime, endTime }, true).then(ret => pmcChildInStoreCreate(ret.datas, 'Put', 'HavePut', '#pmcChildList', 5607));
+}
+
+//获取入库列表
+function getPmcInStoreList() {
+    const startTime = $('#pmcInStoreSTime').val();
+    if (isStrEmptyOrUndefined(startTime)) return layer.msg('请选择开始时间');
+    const endTime = $('#pmcInStoreETime').val();
+    if (isStrEmptyOrUndefined(endTime)) return layer.msg('请选择结束时间');
+    if (comTimeDay(startTime, endTime)) return;
+    myPromise(5608, { startTime, endTime }, true).then(ret => pmcChildInStoreCreate(ret.datas, 'Target', 'DoneTarget', '#pmcInStoreList', 5609));
+}
+
+//计划号详情弹窗
+function showPmcChildPlanModal(time, productId, pId, product, process, opType) {
+    const monthDay = time => {
+        time = time.split(' ')[0].split('-');
+        return `${time[1]}月${time[2]}日`;
+    }
+    $('#pmcChildPlanTime').text(monthDay(time));
+    $('#pmcChildPlanCode').text(product);
+    $('#pmcChildPlanProcess').text(process);
+    let a = 'Put', b = 'HavePut';
+    if (opType === 5609) {
+        a = 'Target';
+        b = 'DoneTarget';
+    }
+    myPromise(opType, { time, productId, pId }, true).then(ret => {
+        const data = ret.datas;
+        const tableConfig = _tablesConfig(false, data);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'TaskOrder', title: '任务单' },
+            { data: a, title: '计划', sClass: 'bg-green' },
+            { data: b, title: '实际' }
+        ]);
+        tableConfig.initComplete = function () {
+            this.find('tfoot').remove();
+            if (!data.length) return;
+            let c = 0, d = 0;
+            data.forEach(item => {
+                c += item[a];
+                d += item[b];
+            });
+            const tFoot = `<tfoot>
+                              <tr>
+                                <th>总计</th>
+                                <th></th>
+                                <th>${c}</th>
+                                <th>${d}</th>
+                              </tr>
+                           </tfoot>`;
+            this.append(tFoot).find('tfoot tr:last th').css('borderTop', 0);
+        }
+        $('#pmcChildPlanList').DataTable(tableConfig);
+        $('#showPmcChildPlanModal').modal('show');
+    });
+}
+
+//----------------------------------------PMC入库----------------------------------------------------
+//----------------------------------------PMC排产----------------------------------------------------
+//获取未安排任务单
+function getNotArrangeTaskList() {
+    myPromise(5601).then(data => {
+        data = data.datas;
+        const o = {};
+        data.forEach(item => o[item.Id] = item);
+        const trData = {
+            Product: '',
+            Target: '',
+            DeliveryTime: '',
+            StartTime: '',
+            EndTime: '',
+            EstimatedTime: ''
+        };
+        const tableConfig = _tablesConfig(false, []);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: null, title: '任务单', render: tableSet.addSelect.bind(null, setOptions(data, 'TaskOrder'), 'taskOrder') },
+            { data: 'Product', title: '计划号' },
+            { data: 'Target', title: '数量' },
+            { data: 'DeliveryTime', title: '交货时间', render: d => d.split(' ')[0] },
+            { data: 'StartTime', title: '开始时间', render: tableSet.addDay.bind(null, 'startTime') },
+            { data: 'EndTime', title: '截止时间', render: tableSet.addDay.bind(null, 'endTime') },
+            { data: 'EstimatedTime', title: '工期' },
+            { data: null, title: '删除', render: () => `<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>` }
+        ]);
+        tableConfig.createdRow = tr => {
+            $(tr).find('.taskOrder').val(0);
+            initDayTime(tr);
+        };
+        $('#notArrangeTaskList').DataTable(tableConfig);
+        $('#addNotArrangeTaskListBtn').off('click').on('click', function () {
+            addDataTableTr('#notArrangeTaskList', trData);
+            disabledPmcTask();
+            if (data.length === $('#notArrangeTaskList').DataTable().column(1).nodes().length) $(this).prop('disabled', true);
+        }).prop('disabled', !data.length);
+        $('#notArrangeTaskList').off('change').on('change', '.taskOrder', function () {
+            const v = $(this).val();
+            const selects = $($('#notArrangeTaskList').DataTable().columns(1).nodes()[0]).find('.taskOrder');
+            const arr = {};
+            for (let i = 0, len = selects.length; i < len; i++) {
+                const select = selects.eq(i);
+                const disabledOp = select.find('option[disabled]');
+                disabledOp.prop('disabled', false);
+                const id = select.val();
+                disabledOp.prop('disabled', true);
+                if (!isStrEmptyOrUndefined(id)) {
+                    arr[id] = _pmcPreviewParams[id] || { Id: +id }
+                }
+            }
+            _pmcPreviewParams = arr;
+            const d = o[v];
+            const tr = $(this).closest('tr');
+            tr.find('td').eq(2).text(d.Product);
+            tr.find('td').eq(3).text(d.Target);
+            tr.find('td').eq(4).text(d.DeliveryTime.split(' ')[0]);
+            tr.find('.startTime').val(d.StartTime).datepicker('update');
+            tr.find('.endTime').val(d.EndTime).datepicker('update');
+            tr.find('td').eq(7).text(d.EstimatedTime);
+            disabledPmcTask();
+        });
+    });
+}
+
+//PMC任务单选择禁用
+function disabledPmcTask() {
+    const selects = $($('#notArrangeTaskList').DataTable().columns(1).nodes()[0]).find('.taskOrder');
+    disabledProcessCodeCommon(selects);
+}
+
+//获取待排程任务单各工序数量
+function getNotArrangeTaskProcessList() {
+    const selects = $($('#notArrangeTaskList').DataTable().columns(1).nodes()[0]).find('.taskOrder');
+    const arr = [];
+    for (let i = 0, len = selects.length; i < len; i++) {
+        const select = selects.eq(i);
+        const disabledOp = select.find('option[disabled]');
+        disabledOp.prop('disabled', false);
+        const id = select.val();
+        disabledOp.prop('disabled', true);
+        if (isStrEmptyOrUndefined(id)) return layer.msg('请选择任务单');
+        arr.push({
+            Id: id
+        });
+    }
+    if (!arr.length) return layer.msg('请选择任务单');
+    myPromise(5602, arr, true).then(ret => {
+        const fn = (headTr, n, tbody) => {
+            return `<div class="form-group">
+                        <label class="control-label">待排程任务单各工序数量：</label>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered">
+                                <thead class="flat-thead">
+                                    <tr>
+                                        <th rowspan="2">序号</th>
+                                        <th rowspan="2">任务单</th>
+                                        <th rowspan="2">计划号</th>${headTr}
+                                    </tr>
+                                    <tr>${'<th class="bg-yellow">目标</th><th class="bg-green">已有</th><th>投料</th>'.repeat(n)}</tr>
+                                </thead>
+                                <tbody>${tbody}</tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-primary btn-sm" id="setNotArrangeTaskProcessBtn">确定</button>
+                        </div>
+                      </div>`;
+        };
+        const orders = ret.Orders;
+        const headTr = orders.reduce((a, b) => `${a}<th colspan="3">${b.Process}</th>`, '');
+        const data = ret.datas;
+        _pmcPreviewParams = {};
+        const tbody = data.reduce((a, b, i) => {
+            const id = b.Id;
+            _pmcPreviewParams[id] = { Id: id, Needs: [] };
+            const needs = b.Needs;
+            const o = {}, pmcPreviewParamsArr = _pmcPreviewParams[id].Needs;
+            needs.forEach(item => {
+                o[item.Order] = item;
+                pmcPreviewParamsArr.push({
+                    Order: item.Order,
+                    TaskOrderId: item.TaskOrderId,
+                    ProcessId: item.ProcessId,
+                    PId: item.PId,
+                    ProductId: item.ProductId,
+                    Target: item.Target,
+                    Put: item.Put,
+                    Stock: item.Stock
+                });
+            });
+            const tds = orders.reduce((a, b) => {
+                const d = o[b.Order];
+                return d
+                    ? `${a}<td class="bg-yellow">${d.Target}</td>
+                          <td class="bg-green">
+                             <input type="text" class="form-control text-center stock" value="${d.Stock}" style="width:80px;margin:auto">
+                          </td>
+                          <td>${d.Put}</td>`
+                    : `${a}<td class="bg-yellow"></td><td class="bg-green"></td><td></td>`;
+            }, '');
+            return `${a}<tr>
+                        <td>${i + 1}</td>
+                        <td>${b.TaskOrder}</td>
+                        <td>${b.Product}</td>${tds}
+                    </tr>`;
+        }, '');
+        const temp = fn(headTr, orders.length, tbody);
+        $('#notArrangeTaskProcessBox').html(temp);
+        $('#setNotArrangeTaskProcessBtn').off('click').on('click', () => {
+            const stockEls = $('#notArrangeTaskProcessBox .stock');
+            let i = 0;
+            const opData = data.map(item => ({
+                Id: item.Id,
+                Needs: item.Needs.map(item => ({
+                    Order: item.Order,
+                    TaskOrderId: item.TaskOrderId,
+                    ProcessId: item.ProcessId,
+                    PId: item.PId,
+                    ProductId: item.ProductId,
+                    Target: item.Target,
+                    Put: item.Put,
+                    Stock: stockEls.eq(i++).val() >> 0
+                }))
+            }));
+            myPromise(5602, opData).then(ret => {
+                ret.datas.forEach(item => {
+                    _pmcPreviewParams[item.Id] = {
+                        Id: item.Id,
+                        Needs: item.Needs.map(item => ({
+                            Order: item.Order,
+                            TaskOrderId: item.TaskOrderId,
+                            ProcessId: item.ProcessId,
+                            PId: item.PId,
+                            ProductId: item.ProductId,
+                            Target: item.Target,
+                            Put: item.Put,
+                            Stock: item.Stock
+                        }))
+                    }
+                });
+            });
+        });
+    });
+}
+
+//获取已安排任务单
+function getArrangeTaskList() {
+    const getLevelFn = myPromise(5590);
+    const getArrangeTaskFn = myPromise(5600);
+    Promise.all([getLevelFn, getArrangeTaskFn]).then(res => {
+        const tableConfig = _tablesConfig(false, res[1].datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: null, title: '等级', render: tableSet.addSelect.bind(null, setOptions(res[0].datas, 'Level'), 'level') },
+            { data: 'State', title: '状态', render: d => d ? '正常' : '异常' },
+            { data: 'TaskOrder', title: '任务单' },
+            { data: 'Product', title: '计划号' },
+            { data: 'Target', title: '数量' },
+            { data: 'DeliveryTime', title: '交货时间' },
+            { data: 'StartTime', title: '开始时间' },
+            { data: 'EndTime', title: '截止时间' },
+            { data: 'EstimatedTime', title: '工期' }
+        ]);
+        tableConfig.createdRow = (tr, d) => $(tr).find('.level').val(d.LevelId);
+        $('#arrangeTaskList').DataTable(tableConfig);
+    });
+}
+
+//设置已安排任务单
+function setArrangeTaskList() {
+    const trs = Array.from(getDataTableRow('#arrangeTaskList'));
+    const instance = $('#arrangeTaskList').DataTable();
+    const list = [];
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const tr = trs[i];
+        const d = instance.row(tr).data();
+        const levelId = $(tr).find('.level').val();
+        if (isStrEmptyOrUndefined(levelId)) return void layer.msg('请选择等级');
+        list[i] = {
+            StartTime: d.StartTime,
+            EndTime: d.EndTime,
+            LevelId: levelId,
+            Id: d.Id
+        }
+    }
+    myPromise(5603, list);
+}
+
+let _pmcPreviewParams = {};
+//预览
+function getPmcPreviewList() {
+    myPromise(5604, Object.values(_pmcPreviewParams), true).then(data => {
+        const fn = (headTr, tbody) => {
+            return `<div class="form-group">
+                        <label class="control-label">开始时间：${data.StartTime.split(' ')[0]}</label><br />
+                        <label class="control-label">产能指数：</label>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered">
+                                <thead class="flat-thead">
+                                    <tr>
+                                        <th rowspan="2">序号</th>
+                                        <th rowspan="2">任务单</th>
+                                        <th rowspan="2">计划号</th>
+                                        <th rowspan="2">开始时间</th>
+                                        <th rowspan="2">结束时间</th>
+                                        <th rowspan="2">耗时</th>
+                                        <th rowspan="2">当前最优</th>${headTr}
+                                    </tr>
+                                    <tr>${'<th class="bg-yellow">设备</th><th>人员</th>'.repeat(data.Orders.length)}</tr>
+                                </thead>
+                                <tbody>${tbody}</tbody>
+                            </table>
+                        </div>
+                      </div>`;
+        };
+        const headTr = data.Orders.reduce((a, b) => `${a}<th colspan="2">${b.Process}</th>`, '');
+        const tbody = data.Cost.reduce((a, b, i) => {
+            const tds = b.CostDays.reduce((c, d) => `${c}<td class="bg-yellow">${d.DeviceDay}</td><td>${d.OperatorDay}</td>`, '');
+            return `${a}<tr>
+                        <td>${i + 1}</td>
+                        <td>${b.TaskOrder}</td>
+                        <td>${b.Product}</td>
+                        <td>${b.EstimatedStartTime.split(' ')[0]}</td>
+                        <td>${b.EstimatedCompleteTime.split(' ')[0]}</td>
+                        <td>${b.CostDay}</td>
+                        <td>${b.Best ? '人员' : '设备'}</td>${tds}
+                    </tr>`;
+        }, '');
+        const temp = fn(headTr, tbody);
+        $('#pmcPreviewBox').html(temp);
+        getPresentSchedule(data);
+    });
+}
+
+//查看当前排程&安排后
+function getPresentSchedule(data) {
+    const fn = (headTr, tbody) => {
+        return `<div class="form-group">
+                    <div class="form-group flexStyle">
+                        <label class="control-label no-margin">工序：</label>
+                        <select class="form-control" style="width: 120px">${setOptions(data.Orders, 'Process')}</select>
+                    </div>
+                    <label class="control-label">当前排程：</label>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>计划号</th>${headTr}
+                                </tr>
+                            </thead>
+                            <tbody>${tbody}</tbody>
+                        </table>
+                    </div>
+                  </div>`;
+    };
+    const opData = {
+        startTime: data.StartTime,
+        endTime: data.CompleteTime,
+        pid: data.Orders[0].Id
+    };
+    myPromise(5606, opData, true).then(ret => {
+        console.log(ret);
+    });
+}
+
+//任务单等级弹窗
+function showTaskLevelModel() {
+    getTaskLevelList();
+    $('#showTaskLevelModel').modal('show');
+}
+
+let _pmcTaskLevelTrs = null;
+
+//获取任务单等级
+function getTaskLevelList() {
+    _pmcTaskLevelTrs = [];
+    myPromise(5590).then(data => {
+        const tableConfig = _tablesConfig(true, data.datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Level', title: '等级', render: tableSet.input.bind(null, 'level') },
+            { data: 'Order', title: '顺序', render: tableSet.input.bind(null, 'order') },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _pmcTaskLevelTrs, (tr, d) => {
+                tr.find('.level').val(d.Level);
+                tr.find('.order').val(d.Order);
+                tr.find('.remark').val(d.Remark);
+            });
+        }
+        $('#pmcTaskLevelList').DataTable(tableConfig);
+    });
+}
+
+//任务单等级列表tr数据获取
+function getTaskLevelTrInfo(el, isAdd) {
+    const level = el.find('.level').val().trim();
+    if (isStrEmptyOrUndefined(level)) return void layer.msg('等级不能为空');
+    const order = el.find('.order').val().trim().trim();
+    if (isStrEmptyOrUndefined(order)) return void layer.msg('顺序不能为空');
+    const list = {
+        Level: level,
+        Order: order,
+        Remark: el.find('.remark').val()
+    }
+    isAdd || (list.Id = el.find('.isEnable').val() >> 0);
+    return list;
+}
+
+//修改任务单等级
+function updateTaskLevel() {
+    updateTableRow(_pmcTaskLevelTrs, getTaskLevelTrInfo, 5591, getTaskLevelList);
+}
+
+//添加任务单等级等级模态框
+function showAddTaskLevelModel() {
+    const trData = {
+        Level: '',
+        Order: '',
+        Remark: ''
+    }
+    const tableConfig = _tablesConfig(false, [trData]);
+    const tableSet = _tableSet();
+    tableConfig.columns = tableConfig.columns.concat([
+        { data: 'Level', title: '等级', render: tableSet.addInput.bind(null, 'level', 'auto') },
+        { data: 'Order', title: '顺序', render: tableSet.addInput.bind(null, 'order', 'auto') },
+        { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+        { data: null, title: '删除', render: tableSet.delBtn }
+    ]);
+    tableConfig.createdRow = tr => initDayTime(tr);
+    $('#addTaskLevelList').DataTable(tableConfig);
+    $('#addTaskLevelListBtn').off('click').on('click', () => addDataTableTr('#addTaskLevelList', trData));
+    $('#showAddTaskLevelModel').modal('show');
+}
+
+//添加任务单等级
+function addTaskLevel() {
+    addTableRow('#addTaskLevelList', getTaskLevelTrInfo, 5592, () => {
+        $('#showAddTaskLevelModel').modal('hide');
+        getTaskLevelList();
+    });
+}
+
+//删除任务单等级
+function delTaskLevel() {
+    delTableRow(_pmcTaskLevelTrs, 5593, getTaskLevelList);
+}
+
+//----------------------------------------PMC排程人员----------------------------------------------------
+let _pmcPersonTrs = null;
+
+//获取人员
+function getPmcPersonList() {
+    const opData = {
+        condition: $('#pmcPersonQueryTF').val()
+    }
+    const mode = $('#pmcPersonQueryMode').val();
+    opData[mode] = ['number', 'name'].includes(mode)
+        ? $('#pmcPersonQueryInput').val().trim()
+        : $('#pmcPersonQuerySelect').val();
+    const getPmcPersonFn = myPromise(5500, opData, true);
+    const getGradeFn = myPromise(5510, { menu: true }, true);
+    const getProcessFn = myPromise(5030, { menu: true }, true);
+    Promise.all([getPmcPersonFn, getGradeFn, getProcessFn]).then(data => {
+        _pmcPersonTrs = [];
+        const tableConfig = _tablesConfig(true, data[0].datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.stateOps, 'state') },
+            { data: 'Number', title: '编号' },
+            { data: 'Name', title: '姓名' },
+            { data: 'Level', title: '等级', render: tableSet.select.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
+            { data: 'Process', title: '工序', render: tableSet.select.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _pmcPersonTrs, (tr, d) => {
+                tr.find('.state').val(d.State);
+                tr.find('.level').val(d.LevelId);
+                tr.find('.process').val(d.ProcessId);
+                tr.find('.remark').val(d.Remark);
+            });
+        }
+        $('#pmcPersonList').DataTable(tableConfig);
+    });
+}
+
+//人员列表tr数据获取
+function getPmcPersonTrInfo(el, isAdd) {
+    let list;
+    if (isAdd) {
+        const nameEl = el.find('.name');
+        const disabledName = nameEl.find('option[disabled]');
+        disabledName.prop('disabled', false);
+        const name = nameEl.val();
+        disabledName.prop('disabled', true);
+        if (isStrEmptyOrUndefined(name)) return void layer.msg('请选择员工');
+        list = {
+            UserId: name,
+            State: 1
+        }
+    } else {
+        const state = el.find('.state').val();
+        if (isStrEmptyOrUndefined(state)) return void layer.msg('请选择状态');
+        list = {
+            State: state,
+            Id: el.find('.isEnable').val() >> 0
+        }
+    }
+    const level = el.find('.level').val();
+    if (isStrEmptyOrUndefined(level)) return void layer.msg('请选择等级');
+    list.LevelId = level;
+    const process = el.find('.process').val();
+    if (isStrEmptyOrUndefined(process)) return void layer.msg('请选择工序');
+    list.ProcessId = process;
+    list.Remark = el.find('.remark').val();
+    return list;
+}
+
+//修改人员
+function updatePmcPerson() {
+    updateTableRow(_pmcPersonTrs, getPmcPersonTrInfo, 5501, getPmcPersonList);
+}
+
+//添加人员模态框
+function showAddPmcPersonModel() {
+    const getPmcPersonFn = myPromise(5500, { menu: true, add: true }, true);
+    const getLevelFn = myPromise(5510, { menu: true }, true);
+    const getProcessFn = myPromise(5030, { menu: true }, true);
+    Promise.all([getPmcPersonFn, getLevelFn, getProcessFn]).then(data => {
+        const trData = {
+            Name: '',
+            Level: '',
+            Process: '',
+            Remark: ''
+        }
+        const tableConfig = _tablesConfig(false, [trData]);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Name', title: '员工姓名', render: tableSet.addSelect.bind(null, setOptions(data[0].datas, 'Name'), 'name') },
+            { data: 'Level', title: '等级', render: tableSet.addSelect.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
+            { data: 'Process', title: '工序', render: tableSet.addSelect.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+            { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
+        ]);
+        tableConfig.createdRow = tr => $(tr).find('.name').val(0);
+        $('#addPmcPersonList').DataTable(tableConfig);
+        $('#addPmcPersonListBtn').prop('disabled', data[0].datas.length <= $('#addPmcPersonList').DataTable().column(1).nodes().length);
+        $('#addPmcPersonListBtn').off('click').on('click', function () {
+            addDataTableTr('#addPmcPersonList', trData);
+            disabledPmcPerson();
+            if (data[0].datas.length === $('#addPmcPersonList').DataTable().column(1).nodes().length) $(this).prop('disabled', true);
+        });
+        $('#showAddPmcPersonModel').modal('show');
+    });
+}
+
+//PMC添加员工选择禁用
+function disabledPmcPerson() {
+    const selects = $($('#addPmcPersonList').DataTable().columns(1).nodes()[0]).find('.name');
+    disabledProcessCodeCommon(selects);
+}
+
+//添加人员
+function addPmcPerson() {
+    addTableRow('#addPmcPersonList', getPmcPersonTrInfo, 5502, () => {
+        $('#showAddPmcPersonModel').modal('hide');
+        getPmcPersonList();
+    });
+}
+
+//删除人员
+function delPmcPerson() {
+    delTableRow(_pmcPersonTrs, 5503, getPmcPersonList);
+}
+
+
+//----------------------------------------PMC排程等级----------------------------------------------------
+
+//等级弹窗
+function showPmcGradeModal() {
+    getPmcGradeList();
+    $('#showPmcGradeModal').modal('show');
+}
+
+let _pmcGradeTrs = null;
+
+//获取等级列表
+function getPmcGradeList() {
+    myPromise(5510).then(data => {
+        _pmcGradeTrs = [];
+        const tableConfig = _tablesConfig(true, data.datas);
+        const tableSet = _tableSet();
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Level', title: '等级', render: tableSet.input.bind(null, 'level') },
+            { data: 'Order', title: '顺序', render: tableSet.input.bind(null, 'order') },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _pmcGradeTrs, (tr, d) => {
+                tr.find('.level').val(d.Level);
+                tr.find('.remark').val(d.Remark);
+            });
+        }
+        $('#pmcGradeList').DataTable(tableConfig);
+    });
+}
+
+//等级列表tr数据获取
+function getPmcGradeTrInfo(el, isAdd) {
+    const level = el.find('.level').val().trim();
+    if (isStrEmptyOrUndefined(level)) return void layer.msg('等级不能为空');
+    const order = el.find('.order').val().trim();
+    if (isStrEmptyOrUndefined(order)) return void layer.msg('顺序不能为空');
+    const list = {
+        Level: level,
+        Order: order >> 0,
+        Remark: el.find('.remark').val()
+    }
+    isAdd || (list.Id = el.find('.isEnable').val() >> 0);
+    return list;
+}
+
+//修改等级
+function updatePmcGrade() {
+    updateTableRow(_pmcGradeTrs, getPmcGradeTrInfo, 5511, getPmcGradeList);
+}
+
+//添加等级模态框
+function addPmcGradeModel() {
+    const trData = {
+        Level: '',
+        Order: '',
+        Remark: ''
+    }
+    const tableConfig = _tablesConfig(false, [trData]);
+    const tableSet = _tableSet();
+    tableConfig.columns = tableConfig.columns.concat([
+        { data: 'Level', title: '等级', render: tableSet.addInput.bind(null, 'level', 'auto') },
+        { data: 'Order', title: '顺序', render: tableSet.addInput.bind(null, 'order', 'auto') },
+        { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+        { data: null, title: '删除', render: tableSet.delBtn }
+    ]);
+    $('#addPmcGradeList').DataTable(tableConfig);
+    $('#addPmcGradeListBtn').off('click').on('click', () => addDataTableTr('#addPmcGradeList', trData));
+    $('#addPmcGradeModel').modal('show');
+}
+
+//添加等级
+function addPmcGrade() {
+    addTableRow('#addPmcGradeList', getPmcGradeTrInfo, 5512, () => {
+        $('#addPmcGradeModel').modal('hide');
+        getPmcGradeList();
+        getPmcPersonList();
+    });
+}
+
+//删除等级
+function delPmcGrade() {
+    delTableRow(_pmcGradeTrs, 5513, () => {
+        getPmcGradeList();
+        getPmcPersonList();
+    });
+}
+
 //----------------------------------------流程卡管理----------------------------------------------------
 
 let _flowCardTrs = null;
@@ -1809,7 +3053,7 @@ function getFlowCardList() {
     if (isStrEmptyOrUndefined(productId)) return layer.msg('请选择计划号');
     myPromise(5110, { startTime, endTime, taskOrderId, productId }, true).then(data => {
         _flowCardTrs = [];
-        const tableConfig = _tablesConfig(true, data);
+        const tableConfig = _tablesConfig(true, data.datas);
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'CreateTime', title: '发卡时间' },
             { data: 'FlowCard', title: '流程卡' },
@@ -1830,7 +3074,7 @@ function getFlowCardList() {
 //流程详情弹窗
 function showProcessFlowCardIdModal(flowCardId) {
     myPromise(5150, { flowCardId }, true).then(data => {
-        const tableConfig = _tablesConfig(false, data);
+        const tableConfig = _tablesConfig(false, data.datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '工序' },
@@ -1853,7 +3097,7 @@ function showProcessFlowCardIdModal(flowCardId) {
 //流程编号查看弹窗
 function showProcessDetail(qId) {
     myPromise(5060, { qId }, true).then(e => {
-        const d = e[0];
+        const d = e.datas[0];
         const productProcesses = d.ProductProcesses;
         const processCodeObj = {}
         productProcesses.forEach(item => {
@@ -1905,7 +3149,7 @@ function selectTaskOrder(d) {
     $('#addFlowCardTime').text(d.DeliveryTime.split(' ')[0]);
     $('#processCodeLookBtn').val(d.ProductId);
     const planId = d.ProductId;
-    myPromise(5060, { qId: planId }, true).then(e => $('#addFlowCardProcessCodeSelect').html(getPlanToProcessCodeOps(e[0])).trigger('change'));
+    myPromise(5060, { qId: planId }, true).then(e => $('#addFlowCardProcessCodeSelect').html(getPlanToProcessCodeOps(e.datas[0])).trigger('change'));
 }
 
 //添加流程卡弹窗
@@ -1913,9 +3157,9 @@ function addFlowCardModel() {
     const taskOrderFn = myPromise(5090);
     const personFn = myPromise(5000);
     Promise.all([taskOrderFn, personFn]).then(result => {
-        const taskOrder = result[0];
+        const taskOrder = result[0].datas;
         $('#addFlowCardTaskOrderSelect').html(setOptions(taskOrder, 'TaskOrder'));
-        $('#addFlowCardPersonSelect').html(setOptions(result[1], 'Account'));
+        $('#addFlowCardPersonSelect').html(setOptions(result[1].datas, 'Account'));
         selectTaskOrder(taskOrder[0]);
     });
     $('#addFlowCardModel').modal('show');
