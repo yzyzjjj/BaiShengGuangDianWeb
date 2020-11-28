@@ -493,8 +493,8 @@
         showCapacityDetailModal.call(this);
     });
     $('#capacityDetailList,#addPlanCapacityList').on('click', '.capacity-btn', function () {
-        let prop = 'qId', val = $(this).val();
-        if (val == 0) {
+        let prop = 'qId', val = $(this).attr('list');
+        if (!val ||val == 0) {
             prop = 'processId';
             val = $(this).attr('process');
         }
@@ -1794,7 +1794,7 @@ function showUpdatePlanModel() {
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Process', title: '流程' },
                 { data: 'Category', title: '设备类型' },
-                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" list="${d.Id}">查看</button>` },
+                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" list="${d.ListId}" process="${d.ProcessId}">查看</button>` },
                 { data: 'Rate', title: '合格率', render: tableSet.addInput.bind(null, 'rate', 'auto') },
                 { data: null, title: '工时', render: tableSet.hms }
             ]);
