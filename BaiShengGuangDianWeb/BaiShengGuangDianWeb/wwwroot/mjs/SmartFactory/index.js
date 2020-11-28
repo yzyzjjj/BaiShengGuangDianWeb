@@ -2652,6 +2652,7 @@ function setArrangeTaskList() {
             Id: d.Id
         }
     }
+    if (!list.length) return layer.msg('请设置任务单');
     myPromise(5603, list);
 }
 
@@ -2703,13 +2704,24 @@ function getPmcPreviewList() {
 
 //查看当前排程&安排后
 function getPresentSchedule(data) {
-    const fn = (headTr, tbody) => {
-        return `<div class="form-group">
-                    <div class="form-group flexStyle">
+    const select = `<div class="form-group flexStyle">
                         <label class="control-label no-margin">工序：</label>
-                        <select class="form-control" style="width: 120px">${setOptions(data.Orders, 'Process')}</select>
-                    </div>
-                    <label class="control-label">当前排程：</label>
+                        <select class="form-control" id="pmcScheduleSelect" style="width:120px;margin-right:3px">${setOptions(data.Orders, 'Process')}</select>
+                        <button class="btn btn-primary btn-sm" id="pmcScheduleBtn">查看</button>
+                    </div>`;
+    $('#pmcPreviewProcessSelect').html(select);
+    $('#pmcScheduleBtn').off('click').on('click', function () {
+        const pid = $('#pmcScheduleSelect').val();
+        if (isStrEmptyOrUndefined(pid)) return layer.msg('请选择工序');
+        const opData = {
+            startTime: data.StartTime,
+            endTime: data.CompleteTime,
+            pid
+        };
+        myPromise(5606, opData, true).then(ret => {
+            const fn = (title, headTr, tbody) => {
+                return `<div class="form-group">
+                    <label class="control-label">${title}：</label>
                     <div class="table-responsive">
                         <table class="table table-hover table-striped table-bordered">
                             <thead>
@@ -2722,14 +2734,25 @@ function getPresentSchedule(data) {
                         </table>
                     </div>
                   </div>`;
-    };
-    const opData = {
-        startTime: data.StartTime,
-        endTime: data.CompleteTime,
-        pid: data.Orders[0].Id
-    };
-    myPromise(5606, opData, true).then(ret => {
-        console.log(ret);
+            };
+            const d = ret.datas[0];
+            const headTr = d.Data[0].Data.reduce((a, b) => {
+                const monthDay = time => {
+                    time = time.split(' ')[0].split('-');
+                    return `${time[1]}月${time[2]}日`;
+                }
+                return `${a}<th>${monthDay(b.ProcessTime)}</th>`;
+            }, '');
+            const tbody = d.Data.reduce((a, b) => {
+                const params = b.Data.reduce((c, d) => `${c}<td>${d.Put}</td>`, '');
+                return `${a}<tr>
+                            <td>${i + 1}</td>
+                            <td>${b.Product}</td>${params}
+                        </tr>`;
+            }, '');
+            const temp = fn('当前排程', headTr, tbody);
+            $('#pmcPreviewProcessNew').html(temp);
+        });
     });
 }
 
