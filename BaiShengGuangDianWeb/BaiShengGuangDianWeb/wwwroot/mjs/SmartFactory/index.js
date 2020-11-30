@@ -2531,7 +2531,7 @@ function setNotArrangeTaskWork(tr) {
     const endTime = tr.find('.endTime').val().trim();
     if (!startTime || !endTime) return;
     const day = (new Date(endTime) - new Date(startTime)) / 86400000;
-    tr.find('.workDay').text(day);
+    tr.find('.workDay').text(day + 1);
 }
 
 //PMC任务单选择禁用
@@ -2714,7 +2714,7 @@ function setArrangeTaskList() {
 let _pmcPreviewParams = {};
 //预览
 function getPmcPreviewList() {
-    myPromise(5604, Object.values(_pmcPreviewParams), true).then(data => {
+    myPromise(5604, !!$('#notArrangeTaskProcessBox').html() ? Object.values(_pmcPreviewParams) : [], true).then(data => {
         const fn = (headTr, tbody) => {
             return `<div class="form-group">
                         <label class="control-label">开始时间：${data.StartTime.split(' ')[0]}</label><br />
@@ -2854,7 +2854,7 @@ function getPresentSchedule(data) {
                         </tr>`;
         }, '');
         const total = putArr.reduce((a, b) => `${a}<td>${b}</td>`, '');
-        $('#pmcPreviewProcessLater').html(fn('安排后', headTr, tbody, total)).find('.old-data').on('click', function() {
+        $('#pmcPreviewProcessLater').html(fn('安排后', headTr, tbody, total)).find('.old-data').on('click', function () {
             const index = $(this).attr('index');
             $('#pmcProcessPlanCode').text($(this).attr('product'));
             $('#pmcProcessPlanProcess').text($(this).attr('process'));
