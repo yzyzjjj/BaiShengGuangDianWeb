@@ -1,6 +1,6 @@
 ﻿function pageReady() {
     $('#sendCardSTime,#sendCardETime,#pmcChildSTime,#pmcChildETime,#pmcInStoreSTime,#pmcInStoreETime').val(getDate()).datepicker('update');
-    //getProductionLine();
+    getProductionLine();
     getNotArrangeTaskList();
     getArrangeTaskList();
     $('#personNavLi').one('click', getPersonList);
@@ -21,6 +21,10 @@
             $('#flowCardPlanSelect').html(`${all}${setOptions(result[2].datas, 'Product')}`);
             getFlowCardList();
         });
+    });
+    $('#pmcExpelProNavLi').one('click', () => {
+        getNotArrangeTaskList();
+        getArrangeTaskList();
     });
     $('#addProcessCodeBody,#addProcessCodeCategoryBody').on('click', '.upTr', function () {
         const tr = $(this).parents('tr');
@@ -624,7 +628,8 @@ function _tableSet() {
                         <input type="text" class="form-control text-center minute" style="width:50px" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
                         <input type="text" class="form-control text-center second" style="width:50px" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
                     </div>`;
-        }
+        },
+        showTime: d => d === '0001-01-01 00:00:00' ? '' : d.split(' ')[0]
     }
 }
 
@@ -2446,6 +2451,13 @@ function showPmcChildPlanModal(time, productId, pId, product, process, opType) {
 
 //----------------------------------------PMC入库----------------------------------------------------
 //----------------------------------------PMC排产----------------------------------------------------
+//刷新未安排任务单
+function getNotArrangeTaskListReset() {
+    getNotArrangeTaskList();
+    $('#notArrangeTaskProcessBox,#pmcPreviewBox,#pmcPreviewProcessSelect,#pmcPreviewProcessNew,#pmcPreviewProcessLater,#pmcPreviewProcessBtn').html('');
+    _pmcPreviewParams = {};
+}
+
 //获取未安排任务单
 function getNotArrangeTaskList() {
     myPromise(5601).then(data => {
@@ -2532,7 +2544,6 @@ let _taskOrders = [];
 //获取待排程任务单各工序数量
 function getNotArrangeTaskProcessList() {
     const trs = getDataTableRow('#notArrangeTaskList');
-    const arr = [];
     for (let i = 0, len = trs.length; i < len; i++) {
         const tr = $(trs[i]);
         const select = tr.find('.taskOrder');
@@ -2543,18 +2554,15 @@ function getNotArrangeTaskProcessList() {
         if (isStrEmptyOrUndefined(id)) return layer.msg('请选择任务单');
         const startTime = tr.find('.startTime').val().trim();
         const endTime = tr.find('.endTime').val().trim();
-        const o = {
-            Id: id
-        }
         if (startTime && endTime) {
             if (compareDate(startTime, endTime)) return layer.msg('截止时间不能小于开始时间');
-            o.StartTime = startTime;
-            o.EndTime = endTime;
+            _pmcPreviewParams[id].StartTime = startTime;
+            _pmcPreviewParams[id].EndTime = endTime;
         }
-        arr.push(o);
     }
+    const arr = Object.values(_pmcPreviewParams);
     if (!arr.length) return layer.msg('请选择任务单');
-    myPromise(5602, arr, true).then(ret => {
+    const setTable = ret => {
         const fn = (headTr, n, tbody) => {
             return `<div class="form-group">
                         <label class="control-label">待排程任务单各工序数量：</label>
@@ -2576,14 +2584,14 @@ function getNotArrangeTaskProcessList() {
                         </div>
                       </div>`;
         };
-        const orders = ret.Orders;
-        const headTr = orders.reduce((a, b) => `${a}<th colspan="3">${b.Process}</th>`, '');
+        const orders = ret.Orders.sort((a, b) => a.Order - b.Order);
+        const headTr = orders.reduce((a, b, i) => `${a}<th colspan="3" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
         const data = ret.datas;
         _pmcPreviewParams = {};
         const tbody = data.reduce((a, b, i) => {
             const id = b.Id;
             _pmcPreviewParams[id] = { Id: id, Needs: [] };
-            const needs = b.Needs;
+            const needs = b.Needs.sort((a, b) => a.Order - b.Order);
             const o = {}, pmcPreviewParamsArr = _pmcPreviewParams[id].Needs;
             needs.forEach(item => {
                 o[item.Order] = item;
@@ -2606,7 +2614,7 @@ function getNotArrangeTaskProcessList() {
                              <input type="text" class="form-control text-center stock" value="${d.Stock}" style="width:80px;margin:auto">
                           </td>
                           <td>${d.Put}</td>`
-                    : `${a}<td class="bg-yellow"></td><td class="bg-green"></td><td></td>`;
+                    : `${a}<td class="short-slab"><i></td><td class="short-slab"><i></td><td class="short-slab"><i></td>`;
             }, '');
             return `${a}<tr>
                         <td>${i + 1}</td>
@@ -2615,7 +2623,7 @@ function getNotArrangeTaskProcessList() {
                     </tr>`;
         }, '');
         const temp = fn(headTr, orders.length, tbody);
-        $('#notArrangeTaskProcessBox').html(temp);
+        $('#notArrangeTaskProcessBox').html(temp).find('th,td').css('border', '1px solid black').end().find('tbody .bg-green').css('padding', 0);
         $('#setNotArrangeTaskProcessBtn').off('click').on('click', () => {
             const stockEls = $('#notArrangeTaskProcessBox .stock');
             let i = 0;
@@ -2634,6 +2642,7 @@ function getNotArrangeTaskProcessList() {
             }));
             _taskOrders = [];
             myPromise(5602, opData).then(ret => {
+                setTable(ret);
                 ret.datas.forEach(item => {
                     const o = {
                         Id: item.Id,
@@ -2653,7 +2662,8 @@ function getNotArrangeTaskProcessList() {
                 });
             });
         });
-    });
+    }
+    myPromise(5602, arr, true).then(setTable);
 }
 
 //获取已安排任务单
@@ -2665,14 +2675,15 @@ function getArrangeTaskList() {
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: null, title: '等级', render: tableSet.addSelect.bind(null, setOptions(res[0].datas, 'Level'), 'level') },
-            { data: 'State', title: '状态', render: d => d ? '正常' : '异常' },
+            { data: 'StateStr', title: '状态' },
             { data: 'TaskOrder', title: '任务单' },
             { data: 'Product', title: '计划号' },
             { data: 'Target', title: '数量' },
-            { data: 'DeliveryTime', title: '交货时间' },
-            { data: 'StartTime', title: '开始时间' },
-            { data: 'EndTime', title: '截止时间' },
-            { data: 'EstimatedTime', title: '工期' }
+            { data: 'DoneTarget', title: '已完成' },
+            { data: 'DeliveryTime', title: '交货时间', render: tableSet.showTime },
+            { data: 'StartTime', title: '开始时间', render: tableSet.showTime },
+            { data: 'EndTime', title: '截止时间', render: tableSet.showTime },
+            { data: 'CostDay', title: '工期', render: d => d || '' }
         ]);
         tableConfig.createdRow = (tr, d) => $(tr).find('.level').val(d.LevelId);
         $('#arrangeTaskList').DataTable(tableConfig);
@@ -2727,15 +2738,30 @@ function getPmcPreviewList() {
                         </div>
                       </div>`;
         };
-        const headTr = data.Orders.reduce((a, b) => `${a}<th colspan="2">${b.Process}</th>`, '');
+        const headTr = data.Orders.sort((a, b) => a.Order - b.Order).reduce((a, b) => `${a}<th colspan="2">${b.Process}</th>`, '');
         const tbody = data.Cost.reduce((a, b, i) => {
             const tds = b.CostDays.reduce((c, d) => `${c}<td class="bg-yellow">${d.DeviceDay}</td><td>${d.OperatorDay}</td>`, '');
+            const estimatedStartTime = b.EstimatedStartTime.split(' ')[0];
+            const estimatedCompleteTime = b.EstimatedCompleteTime.split(' ')[0];
+            const trs = Array.from(getDataTableRow('#notArrangeTaskList'));
+            const tId = b.Id;
+            trs.forEach(el => {
+                el = $(el);
+                const select = el.find('.taskOrder option[disabled]');
+                select.prop('disabled', false);
+                const taskOrderId = el.find('.taskOrder').val();
+                select.prop('disabled', true);
+                if (taskOrderId == tId) {
+                    el.find('.startTime').val(estimatedStartTime).datepicker('update');
+                    el.find('.endTime').val(estimatedCompleteTime).datepicker('update');
+                }
+            });
             return `${a}<tr>
                         <td>${i + 1}</td>
                         <td>${b.TaskOrder}</td>
                         <td>${b.Product}</td>
-                        <td>${b.EstimatedStartTime.split(' ')[0]}</td>
-                        <td>${b.EstimatedCompleteTime.split(' ')[0]}</td>
+                        <td>${estimatedStartTime}</td>
+                        <td>${estimatedCompleteTime}</td>
                         <td>${b.CostDay}</td>
                         <td>${b.Best ? '人员' : '设备'}</td>${tds}
                     </tr>`;
@@ -2807,11 +2833,51 @@ function getPresentSchedule(data) {
         //当前排程
         myPromise(5606, opData, true).then(ret => {
             const d = ret.datas[0];
-            if (!d) return $('#pmcPreviewProcessNew').html('');
+            if (!d) return $('#pmcPreviewProcessNew').html('<label class="control-label">当前排程：</label>');
             $('#pmcPreviewProcessNew').html(createTable('当前排程', d));
         });
         //安排后
-        $('#pmcPreviewProcessLater').html(createTable('安排后', o[pid]));
+        const headTr = o[pid].Data[0].Data.reduce((a, b) => `${a}<th>${monthDay(b.ProcessTime)}</th>`, '');
+        const putArr = [];
+        const oldData = [];
+        let index = 0;
+        const tbody = o[pid].Data.reduce((a, b, i) => {
+            const params = b.Data.reduce((c, d, i) => {
+                const put = d.Put;
+                putArr[i] = (putArr[i] >> 0) + put;
+                oldData.push(d.Data);
+                return `${c}<td><a href="javascript:;" class="old-data" index="${index++}" product="${b.Product}" process="${o[pid].Process}">${put}</a></td>`;
+            }, '');
+            return `${a}<tr>
+                            <td>${i + 1}</td>
+                            <td>${b.Product}</td>${params}
+                        </tr>`;
+        }, '');
+        const total = putArr.reduce((a, b) => `${a}<td>${b}</td>`, '');
+        $('#pmcPreviewProcessLater').html(fn('安排后', headTr, tbody, total)).find('.old-data').on('click', function() {
+            const index = $(this).attr('index');
+            $('#pmcProcessPlanCode').text($(this).attr('product'));
+            $('#pmcProcessPlanProcess').text($(this).attr('process'));
+            const tableConfig = _tablesConfig(false, oldData[index]);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'TaskOrder', title: '任务单' },
+                { data: 'Put', title: '数量' }
+            ]);
+            tableConfig.initComplete = function () {
+                this.find('tfoot').remove();
+                if (!data.length) return;
+                const tFoot = `<tfoot>
+                              <tr>
+                                <th>总计</th>
+                                <th></th>
+                                <th>${data.reduce((a, b) => a + b.Put, 0)}</th>
+                              </tr>
+                           </tfoot>`;
+                this.append(tFoot).find('tfoot tr:last th').css('borderTop', 0);
+            }
+            $('#pmcProcessPlanList').DataTable(tableConfig);
+            $('#showPmcProcessPlanModal').modal('show');
+        });
         //排产
         $('#pmcPreviewProcessBtn').html('<button class="btn btn-primary btn-sm">排产</button>').find('button').on('click', () => {
             if (!_taskOrders.length) return layer.msg('请先设置待排程任务单各工序数量');
@@ -2822,6 +2888,7 @@ function getPresentSchedule(data) {
             myPromise(5605, opData);
         });
     });
+    $('#pmcScheduleBtn').click();
 }
 
 //预览计划详情

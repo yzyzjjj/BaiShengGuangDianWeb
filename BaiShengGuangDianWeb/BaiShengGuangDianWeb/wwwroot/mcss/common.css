@@ -247,6 +247,12 @@ select, .pointer {
     white-space: nowrap;
 }
 
+.short-slab i {
+    width: 100%;
+    display: block;
+    border: 1px solid gray;
+}
+
 .qrcode-box:after {
     -webkit-animation: rotateAnim linear 3.68s infinite;
     animation: rotateAnim linear 3.68s infinite;
