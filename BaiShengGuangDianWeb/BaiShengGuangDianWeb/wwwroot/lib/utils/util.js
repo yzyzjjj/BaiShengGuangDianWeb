@@ -1846,3 +1846,190 @@ var floatObj = function () {
         divide: divide
     }
 }();
+
+//对比两个对象是否相等
+function deepCompare(x, y) {
+    var i, l, leftChain, rightChain;
+    function compare2Objects(x, y) {
+        var p;
+
+        // remember that NaN === NaN returns false
+        // and isNaN(undefined) returns true
+        if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+            return true;
+        }
+
+        // Compare primitives and functions.     
+        // Check if both arguments link to the same object.
+        // Especially useful on the step where we compare prototypes
+        if (x === y) {
+            return true;
+        }
+
+        // Works in case when functions are created in constructor.
+        // Comparing dates is a common scenario. Another built-ins?
+        // We can even handle functions passed across iframes
+        if ((typeof x === 'function' && typeof y === 'function') ||
+            (x instanceof Date && y instanceof Date) ||
+            (x instanceof RegExp && y instanceof RegExp) ||
+            (x instanceof String && y instanceof String) ||
+            (x instanceof Number && y instanceof Number)) {
+            return x.toString() === y.toString();
+        }
+
+        // At last checking prototypes as good as we can
+        if (!(x instanceof Object && y instanceof Object)) {
+            return false;
+        }
+
+        if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+            return false;
+        }
+
+        if (x.constructor !== y.constructor) {
+            return false;
+        }
+
+        if (x.prototype !== y.prototype) {
+            return false;
+        }
+
+        // Check for infinitive linking loops
+        if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+            return false;
+        }
+
+        // Quick checking of one object being a subset of another.
+        // todo: cache the structure of arguments[0] for performance
+        for (p in y) {
+            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                return false;
+            } else if (typeof y[p] !== typeof x[p]) {
+                return false;
+            }
+        }
+
+        for (p in x) {
+            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                return false;
+            } else if (typeof y[p] !== typeof x[p]) {
+                return false;
+            }
+
+            switch (typeof (x[p])) {
+                case 'object':
+                case 'function':
+
+                    leftChain.push(x);
+                    rightChain.push(y);
+
+                    if (!compare2Objects(x[p], y[p])) {
+                        return false;
+                    }
+
+                    leftChain.pop();
+                    rightChain.pop();
+                    break;
+
+                default:
+                    if (x[p] !== y[p]) {
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        return true;
+    }
+
+    if (arguments.length < 1) {
+        return true; //Die silently? Don't know how to handle such case, please help...
+        // throw "Need two or more arguments to compare";
+    }
+    for (i = 1, l = arguments.length; i < l; i++) {
+
+        leftChain = []; //Todo: this can be cached
+        rightChain = [];
+
+        if (!compare2Objects(arguments[0], arguments[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+//判断数据类型
+function getClass(o) { 
+    return Object.prototype.toString.call(o).slice(8, -1);
+}
+//深度拷贝
+function deepCopy(obj) {
+    var result, oClass = getClass(obj);
+
+    if (oClass == "Object") result = {}; //判断传入的如果是对象，继续遍历
+    else if (oClass == "Array") result = []; //判断传入的如果是数组，继续遍历
+    else return obj; //如果是基本数据类型就直接返回
+
+    for (var i in obj) {
+        var copy = obj[i];
+
+        if (getClass(copy) == "Object") result[i] = deepCopy(copy); //递归方法 ，如果对象继续变量obj[i],下一级还是对象，就obj[i][i]
+        else if (getClass(copy) == "Array") result[i] = deepCopy(copy); //递归方法 ，如果对象继续数组obj[i],下一级还是数组，就obj[i][i]
+        else result[i] = copy; //基本数据类型则赋值给属性
+    }
+
+    return result;
+}
+
+//数据增加序号
+function addOrderData(data) {
+    for (let i = 0; i < data.length; i++) {
+        data[i].XvHao = i + 1;
+    }
+}
+
+//更新DataTable数据
+function updateTable(table, data) {
+    const newLength = data.length;
+    if (newLength == 0) {
+        table.clear().draw();
+        return;
+    }
+    const oldLength = table.data().length;
+    const trData = table.data().splice(0, oldLength);
+
+    const minLength = newLength > oldLength ? oldLength : newLength;
+    var i;
+    var newObj;
+    const updateArray = [];
+    for (i = 0; i < minLength; i++) {
+        const oldObj = trData[i];
+        newObj = data[i];
+        if (!deepCompare(oldObj, newObj)) {
+            for (var j in oldObj) {
+                if (oldObj.hasOwnProperty(j) && newObj.hasOwnProperty(j)) {
+                    table.data()[i][j] = newObj[j];
+                }
+            }
+            updateArray.push(i);
+        }
+    }
+    table.rows(updateArray).invalidate().draw();
+    if (newLength < oldLength) {
+        const deleteArray = [];
+        for (i = oldLength - 1; i >= newLength; i--) {
+            //const oldObj = trData[i];
+            //table.row.add(oldObj).draw();
+            deleteArray.push(i);
+        }
+        table.rows(deleteArray).remove().draw();
+    } else {
+        const addArray = [];
+        for (i = oldLength; i < newLength; i++) {
+            newObj = data[i];
+            //newObj.XvHao = i + 1;
+            addArray.push(newObj);
+        }
+        table.rows.add(addArray).draw();
+    }
+}

@@ -38,15 +38,17 @@
                                     <div class="form-group flexStyle" style="justify-content: flex-end">
                                         <select class="ms2 form-control" id="groupSelect" style="width: 140px"></select>
                                         <select class="ms2 form-control" id="qgProcessor" style="width: 100px"></select>
-                                        <select class="ms2 form-control" id="cgProcessor" style="width: 100px"></select>
-                                        <select class="ms2 form-control" id="formState" style="width: 110px">
+                                        <select class="form-control" id="cgProcessor" style="width: 90px"></select>
+                                        <select class="form-control" id="formState" style="width: 120px">
                                             <option value="-1">全部状态</option>
                                             <option value="0">正常</option>
-                                            <option value="1">中止</option>
                                             <option value="2">审核完成</option>
                                             <option value="3">开始采购</option>
                                             <option value="4">仓库到货</option>
+                                            <option value="7">ERP已入库</option>
                                             <option value="5">订单完成</option>
+                                            <option value="1">中止</option>
+                                            <option value="6">撤销</option>
                                         </select>
                                         <input class="form-control" id="cgOrder" onfocusout="getPurchase()" maxlength="15" style="width: 110px">
                                     </div>

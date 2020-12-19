@@ -21,15 +21,19 @@ namespace BaiShengGuangDianWeb.Base.Chat
             }
 
             _isRun = true;
-            var keys = GetAllKeys().Where(x => x.Contains(_redisPre));
-            foreach (var key in keys)
+            var allKeys = GetAllKeys();
+            if (allKeys != null)
             {
-                var connectionInfos = ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key);
-                foreach (var connectionInfo in connectionInfos)
+                var keys = allKeys.Where(x => x.Contains(_redisPre));
+                foreach (var key in keys)
                 {
-                    if (connectionInfo.ExpireTime < DateTime.Now)
+                    var connectionInfos = ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key);
+                    foreach (var connectionInfo in connectionInfos)
                     {
-                        ServerConfig.RedisHelper.List_Remove(key, connectionInfo);
+                        if (connectionInfo.ExpireTime < DateTime.Now)
+                        {
+                            ServerConfig.RedisHelper.List_Remove(key, connectionInfo);
+                        }
                     }
                 }
             }

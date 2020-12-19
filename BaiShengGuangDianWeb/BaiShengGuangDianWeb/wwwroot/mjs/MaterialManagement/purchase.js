@@ -11,6 +11,7 @@ function pageReady() {
     new Promise(resolve => getValuer(resolve)).then(() => getGroup());
     $('#groupSelect').on('select2:select', () => getProcessor());
     $('#qgProcessor,#formState,#cgProcessor').on('select2:select', () => getPurchase());
+    $('#formState,#cgProcessor').on('change', () => getPurchase());
     $('#inWareList,#purchaseList').on('focus', '.zeroNum', function () {
         if ($(this).val() == 0) {
             $(this).val('');
@@ -377,7 +378,7 @@ function getPurchase() {
                                     Id: d.Id,
                                     ErpId: d.ErpId,
                                     State: d.State,
-                                    isShow: [3, 4].includes(d.State),
+                                    isShow: [3, 4, 7].includes(d.State),
                                     name: d.Name
                                 };
                                 $('#citePurchaseListBtn').prop('disabled', d.State != 5);
@@ -421,10 +422,10 @@ function updatePurchaseList() {
         return;
     }
     const purchasingCompany = $('#purchasingCompany').val().trim();
-    if (isStrEmptyOrUndefined(purchasingCompany)) {
-        layer.msg('采购公司不能为空');
-        return;
-    }
+    //if (isStrEmptyOrUndefined(purchasingCompany)) {
+    //    layer.msg('采购公司不能为空');
+    //    return;
+    //}
     let time = $('#cgTime').val();
     if (isStrEmptyOrUndefined(time)) {
         layer.msg('请选择入库日期');
@@ -443,59 +444,67 @@ function updatePurchaseList() {
         const tds = $(tr).find('td');
         const d = itemArr[i];
         const xh = i + 1;
-        const order = tds.eq(1).text().trim();
+        const t = 1;
+        const order = tds.eq(t + 1).text().trim();
         if (isStrEmptyOrUndefined(order)) {
             layer.msg(`序列${xh}：订单编号不能为空`);
             return;
         }
-        const code = tds.eq(2).text().trim();
+        const code = tds.eq(t + 2).text().trim();
         if (isStrEmptyOrUndefined(code)) {
             layer.msg(`序列${xh}：物料编码不能为空`);
             return;
         }
-        const name = tds.eq(3).text().trim();
+        const name = tds.eq(t + 3).text().trim();
         if (isStrEmptyOrUndefined(name)) {
             layer.msg(`序列${xh}：物料名称不能为空`);
             return;
         }
-        const specification = tds.eq(4).text().trim();
+        const specification = tds.eq(t + 4).text().trim();
         if (isStrEmptyOrUndefined(specification)) {
             layer.msg(`序列${xh}：规格不能为空`);
             return;
         }
-        const category = tds.eq(5).text().trim();
+        const category = tds.eq(t + 5).text().trim();
         if (isStrEmptyOrUndefined(category)) {
             layer.msg(`序列${xh}：类别不能为空`);
             return;
         }
-        const supplier = tds.eq(6).text().trim();
+        const supplier = tds.eq(t + 6).text().trim();
         if (isStrEmptyOrUndefined(supplier)) {
             layer.msg(`序列${xh}：供应商不能为空`);
             return;
         }
-        const unit = tds.eq(7).text().trim();
+        const unit = tds.eq(t + 7).text().trim();
         if (isStrEmptyOrUndefined(unit)) {
             layer.msg(`序列${xh}：单位不能为空`);
             return;
         }
-        const number = tds.eq(8).text().trim();
+        const number = tds.eq(t + 8).text().trim();
         if (number != parseFloat(number)) {
             layer.msg(`序列${xh}：数量不合法`);
             return;
         }
-        const price = tds.eq(9).text().trim();
+        const price = tds.eq(t + 9).text().trim();
         if (price != parseFloat(price)) {
             layer.msg(`序列${xh}：税前单价不合法`);
             return;
         }
-        const taxPrice = tds.eq(10).text().trim();
+        const taxPrice = tds.eq(t + 10).text().trim();
         if (taxPrice != parseFloat(taxPrice)) {
             layer.msg(`序列${xh}：税后单价不合法`);
             return;
         }
-        const taxAmount = tds.eq(11).text().trim();
+        const taxAmount = tds.eq(t + 11).text().trim();
         if (taxAmount != parseFloat(taxAmount)) {
             layer.msg(`序列${xh}：合计不合法`);
+            return;
+        }
+        let purchasingCompany1 = tds.eq(t + 13).text().trim();
+        if (purchasingCompany != '')
+            purchasingCompany1 = purchasingCompany;
+        if (isStrEmptyOrUndefined(purchasingCompany1)) {
+            layer.msg(`序列${xh}：采购公司不能为空`);
             return;
         }
         items[i] = {
@@ -516,7 +525,7 @@ function updatePurchaseList() {
             TaxPrice: taxPrice,
             TaxAmount: taxAmount,
             Tax: $(tr).find('.taxTate').val().trim(),
-            PurchasingCompany: purchasingCompany
+            PurchasingCompany: purchasingCompany1
         }
     }
     const list = {
@@ -588,7 +597,8 @@ function getPurchaseMaterial() {
                 { data: 'TaxTate', title: '税率（%)' },
                 { data: 'Price', title: '税前单价' },
                 { data: 'Stock', title: '已入库', sClass: 'text-red' },
-                { data: null, title: '本次入库', render: count, visible: _Purchase.isShow }
+                { data: null, title: '本次入库', render: count, visible: _Purchase.isShow },
+                { data: 'ThisCode', title: '入库编码' }
             ]
         });
     });
@@ -610,7 +620,7 @@ function inWareListSave() {
         return;
     }
     if (!_Purchase.isShow) {
-        layer.msg('开始采购和仓库到货才能入库');
+        layer.msg('开始采购,已入库,仓库到货才能入库');
         return;
     }
     const pId = _Purchase.Id;
@@ -648,7 +658,7 @@ function finishInWareList() {
         return;
     }
     if (!_Purchase.isShow) {
-        layer.msg('开始采购和仓库到货才能完成采购');
+        layer.msg('开始采购,已入库,仓库到货才能完成采购');
         return;
     }
     const doSth = function () {
@@ -724,7 +734,8 @@ function setPurchaseList(arr, isQuote) {
     isQuote ? $('#addPurchaseListBtn').removeClass('hidden') : $('#addPurchaseListBtn').addClass('hidden');
     const taxTate = d => `<input class="form-control text-center taxTate zeroNum" onblur="onInputEnd(this)" style="width:80px" value=${parseFloat(d) || 0}>`;
     const deBtn = () => `<button type="button" class="btn btn-danger btn-sm" onclick="delPurchaseTr.call(this)"><i class="fa fa-minus"></i></button>`;
-    $('#purchasingCompany').val(arr[0].PurchasingCompany || '');
+    $('#purchasingCompany').val('');
+    //$('#purchasingCompany').val(arr[0].PurchasingCompany || '');
     _purchaseDataTable = $('#purchaseList').DataTable({
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         destroy: true,
@@ -732,10 +743,11 @@ function setPurchaseList(arr, isQuote) {
         searching: true,
         language: oLanguage,
         data: arr,
-        aaSorting: [[0, 'asc']],
+        aaSorting: [[1, 'asc']],
         aLengthMenu: [20, 40, 60],
         iDisplayLength: 20,
         columns: [
+            { data: null, title: "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", render: d => `<input type="checkbox" class="icb_minimal isEnable">`, orderable: false },
             { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
             { data: 'Order', title: '订单编号' },
             { data: 'Code', title: '物料编码' },
@@ -749,6 +761,7 @@ function setPurchaseList(arr, isQuote) {
             { data: 'TaxPrice', title: '税后单价', sClass: 'tax-price' },
             { data: 'TaxAmount', title: '合计', sClass: 'tax-amount' },
             { data: isQuote ? 'Tax' : 'TaxTate', title: '税率（%)', render: taxTate },
+            { data: 'PurchasingCompany', title: '采购公司' },
             { data: null, title: '删除', render: deBtn, visible: !!isQuote }
         ],
         drawCallback: function () {
@@ -756,6 +769,25 @@ function setPurchaseList(arr, isQuote) {
                 $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(11),:nth-child(12),:nth-child(13),:nth-child(14))').prop('contenteditable', true);
             } else {
                 $('#purchaseList tbody tr td:nth-child(9)').prop('contenteditable', true);
+            }
+            $("#purchaseList td").css("padding", "3px");
+            $("#purchaseList .icb_minimal").iCheck({
+                checkboxClass: 'icheckbox_minimal-red',
+                radioClass: 'iradio_minimal',
+                increaseArea: '20%'
+            });
+
+            $("#checkAll").on("ifChanged", function (event) {
+                if ($(this).is(":checked")) {
+                    $("#purchaseList .icb_minimal").iCheck('check');
+                } else {
+                    $("#purchaseList .icb_minimal").iCheck('uncheck');
+                }
+            });
+            if ($("#checkAll").is(":checked")) {
+                $("#purchaseList .icb_minimal").iCheck('check');
+            } else {
+                $("#purchaseList .icb_minimal").iCheck('uncheck');
             }
         },
         initComplete: function () {
@@ -846,16 +878,22 @@ function printPurchaseList() {
         layer.msg('入库单为空');
         return;
     }
-    const purchasingCompany = $('#purchasingCompany').val().trim();
-    if (isStrEmptyOrUndefined(purchasingCompany)) {
-        layer.msg('采购公司不能为空');
-        return;
-    }
+    let purchasingCompany = $('#purchasingCompany').val().trim();
     let ops = '';
-    _purchaseDataTable.column(1).nodes().each(el => {
-        const purchaseCode = $(el).text().trim();
-        ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
-    });
+
+    const trs = _purchaseDataTable.rows().nodes();
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const tr = $(trs[i]);
+        const tds = tr.find('td');
+        if (tds.eq(0).find('.isEnable').is(":checked")) {
+            const purchaseCode = tds.eq(2).text().trim();
+            ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
+        }
+    }
+    //_purchaseDataTable.column(2).nodes().each(el => {
+    //    const purchaseCode = $(el).text().trim();
+    //    ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
+    //});
     const selectOp = `<label class="control-label text-nowrap">订单号选择：</label><select class="form-control" id="purchaseCode">${ops}</select>`;
     layer.confirm(selectOp, {
         btn: ['打印', '取消'],
@@ -883,33 +921,41 @@ function printPurchaseList() {
         layer.close(index);
         const thead = '<thead><tr><th>编号</th><th>物料编码</th><th>名称</th><th>类别</th><th>规格</th><th>单位</th><th>入库数量</th><th>单价</th><th>不含税金额</th><th>税额</th><th>合计金额</th><th>请购人</th></tr></thead>';
         let tbodyTrs = '';
-        const trs = _purchaseDataTable.rows().nodes();
-        const colIndex = [2, 3, 5, 4, 7, 8, 9];
+        const colIndex = [3, 4, 5, 6, 8, 9, 10];
         let num = 0, allPrice = 0;
+        //const supplier = $(_purchaseDataTable.column(6).nodes()[0]).text();
+        let supplier = '';
         for (let i = 0, len = trs.length; i < len; i++) {
             const tr = $(trs[i]);
             const tds = tr.find('td');
-            if (tds.eq(1).text().trim() == code) {
+            if (($("#checkAll").is(":checked") || tds.eq(0).find('.isEnable').is(":checked")) && tds.eq(2).text().trim() == code) {
+                if (purchasingCompany == '') {
+                    purchasingCompany = tds.eq(14).text().trim();
+                }
                 num++;
                 let td = `<td>${num}</td>`;
                 for (let j = 0, len1 = colIndex.length; j < len1; j++) {
                     td += tds.eq(colIndex[j]).prop('outerHTML');
                 }
-                const noTaxPrice = floatObj.multiply(parseFloat(tds.eq(8).text().trim()), parseFloat(tds.eq(9).text().trim())).toFixed(2);
+                const noTaxPrice = floatObj.multiply(parseFloat(tds.eq(9).text().trim()), parseFloat(tds.eq(10).text().trim())).toFixed(2);
                 td += `<td>${noTaxPrice}</td>`;
-                const taxAmount = parseFloat(tds.eq(11).text().trim());
+                const taxAmount = parseFloat(tds.eq(12).text().trim());
                 allPrice = floatObj.add(allPrice, taxAmount);
                 td += `<td>${floatObj.subtract(taxAmount, noTaxPrice).toFixed(2)}</td>`;
                 td += `<td>${taxAmount.toFixed(2)}</td>`;
                 td += `<td>${_Purchase.name}</td>`;
                 tbodyTrs += `<tr style="height:40px">${td}</tr>`;
+                supplier = tds.eq(7).text().trim();
             }
+        }
+        if (isStrEmptyOrUndefined(purchasingCompany)) {
+            layer.msg('采购公司不能为空');
+            return;
         }
         tbodyTrs += '<tr style="height:40px"><td>备注：</td><td colspan="11"></td></tr>';
         allPrice = allPrice.toFixed(2);
         tbodyTrs += `<tr style="height:40px"><td colspan="8">合计金额：${convertCurrency(allPrice)}</td><td colspan="4">￥${allPrice}</td></tr>`;
         const table = `<table border="1" style="width:100%;text-align:center;border-collapse:collapse">${thead}<tbody>${tbodyTrs}</tbody></table>`;
-        const supplier = $(_purchaseDataTable.column(6).nodes()[0]).text();
         let time = $('#cgTime').val().trim();
         const arr = ['年', '月', '日'];
         time && (time = time.split('-').map((item, i) => `${item}${arr[i]}`).join(''));

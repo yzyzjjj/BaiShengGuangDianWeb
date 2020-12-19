@@ -45,7 +45,7 @@
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Process', title: '流程' },
                 { data: 'Category', title: '设备类型' },
-                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` },
+                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}" p="${d.Process}">查看</button>` },
                 { data: null, title: '合格率', render: tableSet.addInput.bind(null, 'rate', 'auto', 0) },
                 { data: null, title: '工时', render: tableSet.hms }
             ]);
@@ -104,7 +104,7 @@
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程' },
             { data: null, title: '可否返工', render: tableSet.isRework },
-            { data: 'ProcessNumber', title: '单台加工数量', render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
+            { data: 'ProcessNumber', title: '单台加工数量', bVisible: false, render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
             { data: null, title: '工艺数据', render: tableSet.setBtn }
         ]);
         $(this).closest('.temp').find('.process-table').DataTable(tableConfig);
@@ -475,7 +475,7 @@
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Process', title: '流程' },
                 { data: 'Category', title: '设备类型' },
-                { data: 'ProcessId', title: '产能', render: d => `<button class="btn btn-primary btn-sm set-btn" value="${d}">设置</button>` },
+                { data: null, title: '产能', render: d => `<button class="btn btn-primary btn-sm set-btn" value="${d.ProcessId}" p="${d.Process}">设置</button>` },
                 { data: null, title: '是否设置', render: tableSet.isFinish }
             ]);
             const table = $(this).attr('table');
@@ -486,13 +486,33 @@
         showCapacitySetModal.call(this);
         $('#addCapacitySetBtn').removeClass('hidden');
     });
-    $('#devCapacitySetList,#personCapacitySetList').on('input', '.number', function () {
+    $('#devCapacitySetList,#personCapacitySetList').on('input', '.single', function () {
         onInput(this, 8, 0);
         const tr = $(this).closest('tr');
+        const single = $(this).val() >> 0;
+        const sCount = tr.find('.sCount').val() >> 0;
         const count = tr.find('.count').text() >> 0;
-        const number = $(this).val() >> 0;
+        const number = single * sCount;
+        tr.find('.number').text(number);
         tr.find('.total').text(count * number);
     });
+    $('#devCapacitySetList,#personCapacitySetList').on('input', '.sCount', function () {
+        onInput(this, 8, 0);
+        const tr = $(this).closest('tr');
+        const single = tr.find('.single').val() >> 0;
+        const sCount = $(this).val() >> 0;
+        const count = tr.find('.count').text() >> 0;
+        const number = single * sCount;
+        tr.find('.number').text(number);
+        tr.find('.total').text(count * number);
+    });
+    //$('#devCapacitySetList,#personCapacitySetList').on('input', '.number', function () {
+    //    onInput(this, 8, 0);
+    //    const tr = $(this).closest('tr');
+    //    const count = tr.find('.count').text() >> 0;
+    //    const number = $(this).val() >> 0;
+    //    tr.find('.total').text(count * number);
+    //});
     $('#capacityList').on('click', '.look-btn', function () {
         showCapacityDetailModal.call(this);
     });
@@ -502,7 +522,15 @@
             prop = 'processId';
             val = $(this).attr('process');
         }
-        myPromise(5564, { [prop]: val }, true).then(e => devicesOperatorsTable(e, true));
+
+        var process = $(this).attr("p");
+        const t = {};
+        t[prop] = val;
+        //myPromise(5564, { [prop]: val }, true).then(e => {
+        myPromise(5564, t, true).then(e => {
+            e.Process = process;
+            devicesOperatorsTable(e, true);
+        });
         $('#addCapacitySetBtn').addClass('hidden');
     });
     $('#addPlanCapacityList').on('click', '.capacity-btn', function () {
@@ -511,7 +539,15 @@
             prop = 'processId';
             val = $(this).attr('process');
         }
-        myPromise(5564, { [prop]: val }, true).then(e => devicesOperatorsTable(e, true));
+
+        var process = $(this).attr("p");
+        const t = {};
+        t[prop] = val;
+        //myPromise(5564, { [prop]: val }, true).then(e => {
+        myPromise(5564, t, true).then(e => {
+            e.Process = process;
+            devicesOperatorsTable(e, true);
+        });
         $('#addCapacitySetBtn').addClass('hidden');
     });
     $('#capacityList').on('click', '.update-btn', function () {
@@ -545,7 +581,7 @@
 }
 
 //异步获取数据
-function myPromise(opType, opData, isParGet = false, isLoad = 1) {
+function myPromise(opType, opData, isParGet = false, isLoad = 1, func = undefined) {
     const data = { opType };
     opData && (data.opData = JSON.stringify(opData));
     isParGet && (opData = !opData);
@@ -553,9 +589,22 @@ function myPromise(opType, opData, isParGet = false, isLoad = 1) {
         ajaxPost('/Relay/Post', data, ret => {
             if (opData) {
                 layer.msg(ret.errmsg);
-                if (ret.errno == 0) resolve(ret);
+                if (ret.errno == 0) {
+                    if (func != undefined)
+                        func();
+                    resolve(ret);
+                }
             } else {
-                if (ret.errno != 0) return layer.msg(ret.errmsg);
+                if (ret.errno != 0) {
+                    var t = "";
+                    if (ret.datas) {
+                        t = ret.datas.join();
+                        t += ",";
+                    }
+                    return layer.msg(t + ret.errmsg);
+                }
+                if (func != undefined)
+                    func();
                 resolve(ret);
             }
         }, isLoad);
@@ -578,7 +627,16 @@ function _tablesConfig(isList, data, order = 1) {
         language: oLanguage,
         columns: [
             { data: null, title: '序号', render: _tableSet().order, sWidth: '25px' }
-        ]
+        ],
+        //表头固定
+        //fixedHeader: true,
+        //scrollX: "500px",
+        //scrollY: "400px",
+        //scrollCollapse: true,
+        ////固定首列，需要引入相应 dataTables.fixedColumns.min.js
+        //fixedColumns: {
+        //    leftColumns: 2
+        //}
     };
     isList && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
     return obj;
@@ -1070,6 +1128,7 @@ function getDeviceList() {
             { data: 'Code', title: '机台号', render: tableSet.input.bind(null, 'code') },
             { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Category'), 'category') },
             { data: 'Model', title: '型号', render: tableSet.select.bind(null, '', 'model') },
+            { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
@@ -1078,6 +1137,7 @@ function getDeviceList() {
                 tr.find('.code').val(d.Code);
                 tr.find('.category').val(d.CategoryId);
                 myPromise(5024, { categoryId: d.CategoryId, menu: true }, true, 0).then(e => tr.find('.model').html(setOptions(e.datas, 'Model')).val(d.ModelId));
+                tr.find('.priority').val(d.Priority);
                 tr.find('.remark').val(d.Remark);
             });
         }
@@ -1097,6 +1157,7 @@ function getDeviceTrInfo(el, isAdd) {
         Code: code,
         CategoryId: category,
         ModelId: model,
+        Priority: el.find('.priority').val() >> 0,
         Remark: el.find('.remark').val(),
         State: isAdd ? 1 : el.find('.state').val()
     }
@@ -1120,6 +1181,7 @@ function showAddDeviceModel() {
             Code: '',
             Category: '',
             Model: '',
+            Priority: 0,
             Remark: ''
         };
         const tableConfig = _tablesConfig(false, [trData]);
@@ -1128,6 +1190,7 @@ function showAddDeviceModel() {
             { data: 'Code', title: '机台号', render: tableSet.addInput.bind(null, 'code', 'auto') },
             { data: 'Category', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(category, 'Category'), 'category') },
             { data: 'Model', title: '设备型号', render: tableSet.addSelect.bind(null, setOptions(e.datas, 'Model'), 'model') },
+            { data: 'Priority', title: '优先级', render: tableSet.addInput.bind(null, 'priority', 'auto') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
             { data: null, title: '删除', render: tableSet.delBtn }
         ]);
@@ -1392,10 +1455,15 @@ function addUpProcessCode(isAdd) {
 function addProcessOpTo(table, tbody) {
     const tr = $(this).parents('tr')[0];
     const d = $(table).DataTable().row(tr).data();
+    //const processCodeTr = `<tr list="${d.Id}">
+    //                         <td class="num"></td>
+    //                         <td>${d.Process}</td>
+    //                         <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
+    //                         <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
+    //                       </tr>`;
     const processCodeTr = `<tr list="${d.Id}">
                              <td class="num"></td>
                              <td>${d.Process}</td>
-                             <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
                              <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
                            </tr>`;
     $(tbody).append(processCodeTr);
@@ -1413,7 +1481,7 @@ function setAddProcessOpList(tbody) {
     for (let i = 0, len = trs.length; i < len; i++) {
         const tr = trs.eq(i);
         tr.find('.num').text(i + 1);
-        i ? tr.find('.upTr').removeClass('hidden') : tr.find('.upTr').addClass('hidden');
+        //i ? tr.find('.upTr').removeClass('hidden') : tr.find('.upTr').addClass('hidden');
     }
 }
 
@@ -1437,10 +1505,15 @@ function showUpdateProcessCodeModel() {
         $('#addProcessCodeRemark').val(d.Remark);
         const listId = d.List ? d.List.split(',') : [];
         const processes = d.Processes ? d.Processes.split(',') : [];
+        //const trs = listId.reduce((a, b, i) => `${a}<tr list="${b}">
+        //                     <td class="num"></td>
+        //                     <td>${processes[i]}</td>
+        //                     <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
+        //                     <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
+        //                   </tr>`, '');
         const trs = listId.reduce((a, b, i) => `${a}<tr list="${b}">
                              <td class="num"></td>
                              <td>${processes[i]}</td>
-                             <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
                              <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
                            </tr>`, '');
         $('#addProcessCodeBody').html(trs);
@@ -1552,10 +1625,15 @@ function showUpdateProcessCodeCategoryModel() {
             const d = $('#processCodeCategoryList').DataTable().row(tr).data();
             $('#addProcessCodeCategory').val(d.Category);
             $('#addProcessCodeCategoryRemark').val(d.Remark);
+            //const trs = data.datas.reduce((a, b) => `${a}<tr list="${b.ProcessId}" processid="${b.Id}">
+            //                 <td class="num"></td>
+            //                 <td>${b.Process}</td>
+            //                 <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
+            //                 <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
+            //               </tr>`, '');
             const trs = data.datas.reduce((a, b) => `${a}<tr list="${b.ProcessId}" processid="${b.Id}">
                              <td class="num"></td>
                              <td>${b.Process}</td>
-                             <td><span class="glyphicon glyphicon-arrow-up pointer text-green upTr" aria-hidden="true" title="上移"></span></td>
                              <td><button class="btn btn-danger btn-xs delBtn"><i class="fa fa-minus"></i></button></td>
                            </tr>`, '');
             $('#addProcessCodeCategoryBody').append(trs);
@@ -1586,6 +1664,7 @@ function getProcessOpList() {
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.input.bind(null, 'process') },
             { data: 'DeviceCategory', title: '设备类型', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Category'), 'category') },
+            { data: 'Order', title: '顺序', render: tableSet.input.bind(null, 'order') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
@@ -1608,6 +1687,7 @@ function getProcessOpTrInfo(el, isAdd) {
     const list = {
         DeviceCategoryId: category,
         Process: process,
+        Order: el.find('.order').val() >> 0,
         Remark: el.find('.remark').val()
     }
     isAdd || (list.Id = el.find('.isEnable').val() >> 0);
@@ -1625,14 +1705,20 @@ function addProcessOpModel() {
         const trData = {
             DeviceCategory: '',
             Process: '',
+            Order: '',
             Remark: ''
         }
+        e.datas.unshift({
+            Category: "无",
+            Id: 0
+        });
         const tableConfig = _tablesConfig(false, [trData]);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程', render: tableSet.addInput.bind(null, 'process', 'auto') },
             { data: 'DeviceCategory', title: '设备类型', render: tableSet.addSelect.bind(null, setOptions(e.datas, 'Category'), 'category') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+            { data: 'Order', title: '顺序', render: tableSet.addInput.bind(null, 'order', 'auto') },
             { data: null, title: '删除', render: tableSet.delBtn }
         ]);
         $('#addProcessOpList').DataTable(tableConfig);
@@ -1711,9 +1797,9 @@ function addEditPlanModel(callback, codeId) {
 
 //添加修改计划号
 function addUpPlan(isAdd) {
-    const categoryId = $('#addPlanProcess').val().trim();
-    if (isStrEmptyOrUndefined(categoryId)) return layer.msg('请选择流程编号');
-    const capacityId = $('#addPlanCapacity').val().trim();
+    const categoryId = $('#addPlanProcess').val() >> 0
+    if (isStrEmptyOrUndefined(categoryId)) return layer.msg('请选择流程编号类型');
+    const capacityId = $('#addPlanCapacity').val() >> 0;
     if (isStrEmptyOrUndefined(capacityId)) return layer.msg('请选择产能类型');
     const product = $('#addPlanName').val().trim();
     if (isStrEmptyOrUndefined(product)) return layer.msg('计划号不能为空');
@@ -1750,14 +1836,19 @@ function addUpPlan(isAdd) {
             Sec: second
         }
         const capacityBtn = tr.find('.capacity-btn');
-        const updateId = capacityBtn.attr('list');
-        !isAdd && updateId ? (o.Id = updateId) : (o.ProcessId = capacityBtn.attr('process'));
+        const updateId = capacityBtn.val();
+        const listId = capacityBtn.attr('list') >> 0;
+        if (isStrEmptyOrUndefined(listId)) return layer.msg('请先配置工序产能');
+        !isAdd && updateId != 0 ? (o.Id = updateId) : (o.ProcessId = capacityBtn.attr('process'));
         productCapacities[i] = o;
     }
     list.ProductCapacities = productCapacities;
     //流程编号清单
     trs = [];
-    $('#planProcessCodeList .process-table').each((i, item) => trs.push(...Array.from(getDataTableRow(item))));
+    $('#planProcessCodeList .process-table').each((i, item) => {
+        Array.from(getDataTableRow(item)).forEach(d => trs.push(d));
+        //trs.push(...Array.from(getDataTableRow(item))))
+    });
     list.ProductProcesses = trs.map(item => {
         const tr = $(item);
         const trInfo = tr.closest('table').DataTable().row(tr[0]).data();
@@ -1808,7 +1899,7 @@ function showUpdatePlanModel() {
             tableConfig.columns = tableConfig.columns.concat([
                 { data: 'Process', title: '流程' },
                 { data: 'Category', title: '设备类型' },
-                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" list="${d.ListId}" process="${d.ProcessId}">查看</button>` },
+                { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" list="${d.ListId}" process="${d.ProcessId}" pid="${d.PId}" p="${d.Process}">查看</button>` },
                 { data: 'Rate', title: '合格率', render: tableSet.addInput.bind(null, 'rate', 'auto') },
                 { data: null, title: '工时', render: tableSet.hms }
             ]);
@@ -1831,7 +1922,7 @@ function showUpdatePlanModel() {
                 tableConfig.columns = tableConfig.columns.concat([
                     { data: 'Process', title: '流程' },
                     { data: null, title: '可否返工', render: tableSet.isRework },
-                    { data: 'ProcessNumber', title: '单台加工数量', render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
+                    { data: 'ProcessNumber', title: '单台加工数量', bVisible: false, render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
                     { data: null, title: '工艺数据', render: tableSet.setBtn }
                 ]);
                 tableConfig.createdRow = (tr, d) => {
@@ -1870,7 +1961,7 @@ function getCapacityList() {
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Capacity', title: '类型', render: tableSet.input.bind(null, 'capacity') },
             { data: 'Category', title: '流程编号类型' },
-            { data: 'Number', title: '日产能' },
+            //{ data: 'Number', title: '日产能' },
             { data: null, title: '产能清单', render: d => `<button class="btn btn-info btn-sm look-btn look-update-btn" value="${d.Id}" categoryid="${d.CategoryId}" category="${d.Category}">查看</button>` },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
@@ -1912,6 +2003,9 @@ function showAddCapacityCategoryModel() {
 
 //设备&人员产能表格设置
 function devicesOperatorsTable(d, isLook = false) {
+    const process = d.Process;
+    var t = `产能${(isLook ? "查看" : "设置")}-${process}`;
+    $('#showCapacitySetModal').find('.modal-title').text(t);
     const devices = d.Devices;
     const tableSet = _tableSet();
     const devTableConfig = _tablesConfig(false, devices);
@@ -1920,7 +2014,9 @@ function devicesOperatorsTable(d, isLook = false) {
         { data: 'Model', title: '设备型号' },
         { data: 'Count', title: '设备数量', sClass: 'count' },
         { data: 'Single', title: '单次数量', render: isLook ? d => d : tableSet.addInput.bind(null, 'single', 'auto') },
-        { data: 'Number', title: '单台日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
+        { data: 'SingleCount', title: '日加工次数', render: isLook ? d => d : tableSet.addInput.bind(null, 'sCount', 'auto') },
+        { data: 'Number', title: '单台日产能', sClass: 'number' },
+        //{ data: 'Number', title: '单台日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
     $('#devCapacitySetList').DataTable(devTableConfig);
@@ -1931,7 +2027,9 @@ function devicesOperatorsTable(d, isLook = false) {
         { data: 'Level', title: '等级' },
         { data: 'Count', title: '员工数量', sClass: 'count' },
         { data: 'Single', title: '单次数量', render: isLook ? d => d : tableSet.addInput.bind(null, 'single', 'auto') },
-        { data: 'Number', title: '单人日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
+        { data: 'SingleCount', title: '日加工次数', render: isLook ? d => d : tableSet.addInput.bind(null, 'sCount', 'auto') },
+        { data: 'Number', title: '单台日产能', sClass: 'number' },
+        //{ data: 'Number', title: '单人日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
     $('#personCapacitySetList').DataTable(perTableConfig);
@@ -1948,7 +2046,16 @@ function showCapacitySetModal() {
             val = $(this).attr('process');
         }
     }
-    this.Devices ? devicesOperatorsTable(this) : myPromise(5564, { [prop]: val }, true).then(devicesOperatorsTable);
+    var process = $(this).attr("p");
+    const t = {};
+    t[prop] = val;
+    this.Devices
+        ? devicesOperatorsTable(this)
+        : myPromise(5564, t, true).then(e => {
+        //: myPromise(5564, { [prop]: val }, true).then(e => {
+            e.Process = process;
+            devicesOperatorsTable(e);
+        });
     //设备&人员产能设置确定
     $('#addCapacitySetBtn').off('click').on('click', () => {
         const fn = (table, prop) => {
@@ -1956,8 +2063,9 @@ function showCapacitySetModal() {
             const devTrs = Array.from(getDataTableRow(table));
             this[prop] = oldData.map((item, i) => {
                 const tr = $(devTrs[i]);
-                item.Number = tr.find('.number').val() >> 0;
                 item.Single = tr.find('.single').val() >> 0;
+                item.SingleCount = tr.find('.sCount').val() >> 0;
+                item.Number = tr.find('.number').text() >> 0;
                 item.Total = tr.find('.total').text() >> 0;
                 return item;
             });
@@ -1982,22 +2090,30 @@ function addCapacity() {
     for (let i = 0, len = btnAll.length; i < len; i++) {
         const item = btnAll[i];
         if (!item.Devices) return void layer.msg('请设置产能');
-        let deviceModel = [], deviceSingle = [], deviceNumber = [], operatorLevel = [], operatorSingle = [], operatorNumber = [];
+        let deviceModel = [], deviceSingle = [], deviceSingleCount = [], deviceNumber = [], operatorLevel = [], operatorSingle = [], operatorSingleCount = [], operatorNumber = [];
         item.Devices && item.Devices.forEach(item => {
             deviceModel.push(item.ModelId);
             deviceNumber.push(item.Number);
+            deviceSingle.push(item.Single);
+            deviceSingleCount.push(item.SingleCount);
         });
         item.Operators && item.Operators.forEach(item => {
             operatorLevel.push(item.LevelId);
             operatorNumber.push(item.Number);
-            operatorSingle.push(item.Count);
+            operatorSingle.push(item.Single);
+            operatorSingleCount.push(item.SingleCount);
         });
         list[i] = {
             ProcessId: $(item).val(),
             DeviceModel: deviceModel.join(),
             DeviceNumber: deviceNumber.join(),
+            DeviceSingle: deviceSingle.join(),
+            DeviceSingleCount: deviceSingleCount.join(),
+
             OperatorLevel: operatorLevel.join(),
-            OperatorNumber: operatorNumber.join()
+            OperatorNumber: operatorNumber.join(),
+            OperatorSingle: operatorSingle.join(),
+            OperatorSingleCount: operatorSingleCount.join()
         };
     }
     const opData = [{
@@ -2022,22 +2138,26 @@ function updateCapacityCategory() {
     for (let i = 0, len = btnAll.length; i < len; i++) {
         const item = btnAll[i];
         if (!item.Devices && !item.exist) return void layer.msg('请设置产能');
-        let deviceModel, deviceSingle, deviceNumber, operatorLevel, operatorSingle, operatorNumber;
+        let deviceModel, deviceSingle, deviceSingleCount, deviceNumber, operatorLevel, operatorSingle, operatorSingleCount, operatorNumber;
         if (item.Devices) {
-            const a = [], b = [], c = [], e = [], f = [], g = [];
+            const a = [], b = [], c = [], e = [], f = [], g = [], h = [], i = [];
             item.Devices.forEach(d => {
                 a.push(d.ModelId);
                 b.push(d.Number);
                 f.push(d.Single);
+                h.push(d.SingleCount);
             });
             item.Operators.forEach(d => {
                 c.push(d.LevelId);
                 e.push(d.Number);
                 g.push(d.Single);
+                i.push(d.SingleCount);
             });
-            deviceModel = a.join(), deviceNumber = b.join(), operatorLevel = c.join(), operatorNumber = e.join(), deviceSingle = f.join(), operatorSingle = g.join();
+            deviceModel = a.join(), deviceNumber = b.join(), operatorLevel = c.join(), operatorNumber = e.join(),
+                deviceSingle = f.join(), operatorSingle = g.join(), deviceSingleCount = h.join(), operatorSingleCount = i.join();
         } else {
-            deviceModel = item.DeviceModel, deviceNumber = item.DeviceNumber, operatorLevel = item.OperatorLevel, operatorNumber = item.OperatorNumber, deviceSingle = item.DeviceSingle, operatorSingle = item.OperatorSingle;
+            deviceModel = item.DeviceModel, deviceNumber = item.DeviceNumber, operatorLevel = item.OperatorLevel, operatorNumber = item.OperatorNumber,
+                deviceSingle = item.DeviceSingle, operatorSingle = item.OperatorSingle, deviceSingleCount = item.DeviceSingleCount, operatorSingleCount = item.OperatorSingleCount;
         }
         list[i] = {
             CapacityId: capacityId,
@@ -2045,9 +2165,11 @@ function updateCapacityCategory() {
             DeviceModel: deviceModel,
             DeviceNumber: deviceNumber,
             DeviceSingle: deviceSingle,
+            DeviceSingleCount: deviceSingleCount,
             OperatorLevel: operatorLevel,
             OperatorNumber: operatorNumber,
             OperatorSingle: operatorSingle,
+            OperatorSingleCount: operatorSingleCount,
             Id: item.exist ? $(item).val() : 0
         };
     }
@@ -2075,7 +2197,7 @@ function showCapacityDetailModal() {
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程' },
             { data: 'Category', title: '设备类型' },
-            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` }
+            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm capacity-btn" value="${d.Id}" process="${d.ProcessId}" p="${d.Process}">查看</button>` }
         ]);
         $('#capacityDetailList').DataTable(tableConfig);
         $('#showCapacityDetailModal').modal('show');
@@ -2096,17 +2218,20 @@ function showUpdateCapacityModal() {
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'Process', title: '流程' },
             { data: 'Category', title: '设备类型' },
-            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm set-btn" value="${d.Id}" process="${d.ProcessId}">查看</button>` },
+            { data: null, title: '产能', render: d => `<button class="btn btn-info btn-sm set-btn" value="${d.Id}" process="${d.ProcessId}" p="${d.Process}">查看</button>` },
             { data: null, title: '是否设置', render: tableSet.isFinish }
         ]);
         tableConfig.createdRow = (tr, d) => {
             const btn = $(tr).find('.set-btn')[0];
+            btn.Process = d.Process;
             btn.DeviceModel = d.DeviceModel;
             btn.DeviceNumber = d.DeviceNumber;
             btn.DeviceSingle = d.DeviceSingle;
+            btn.DeviceSingleCount = d.DeviceSingleCount;
             btn.OperatorLevel = d.OperatorLevel;
             btn.OperatorNumber = d.OperatorNumber;
             btn.OperatorSingle = d.OperatorSingle;
+            btn.OperatorSingleCount = d.OperatorSingleCount;
             btn.exist = true;
         };
         $('#updateCapacityList').DataTable(tableConfig);
@@ -2554,10 +2679,19 @@ function getNotArrangeTaskProcessList() {
         if (isStrEmptyOrUndefined(id)) return layer.msg('请选择任务单');
         const startTime = tr.find('.startTime').val().trim();
         const endTime = tr.find('.endTime').val().trim();
-        if (startTime && endTime) {
-            if (compareDate(startTime, endTime)) return layer.msg('截止时间不能小于开始时间');
+        if (startTime) {
             _pmcPreviewParams[id].StartTime = startTime;
+        } else {
+            delete _pmcPreviewParams[id].StartTime;
+        }
+        if (endTime) {
             _pmcPreviewParams[id].EndTime = endTime;
+        } else {
+            delete _pmcPreviewParams[id].EndTime;
+        }
+        if (startTime && endTime) {
+            if (compareDate(startTime, endTime))
+                return layer.msg('截止时间不能小于开始时间');
         }
     }
     const arr = Object.values(_pmcPreviewParams);
@@ -2574,7 +2708,7 @@ function getNotArrangeTaskProcessList() {
                                         <th rowspan="2">任务单</th>
                                         <th rowspan="2">计划号</th>${headTr}
                                     </tr>
-                                    <tr>${'<th class="bg-yellow">目标</th><th class="bg-green">已有</th><th>投料</th>'.repeat(n)}</tr>
+                                    <tr>${'<th class="bg-blue">总计</th><th class="bg-green">已有</th><th class="bg-yellow">剩余</th><th>投料</th>'.repeat(n)}</tr>
                                 </thead>
                                 <tbody>${tbody}</tbody>
                             </table>
@@ -2585,7 +2719,7 @@ function getNotArrangeTaskProcessList() {
                       </div>`;
         };
         const orders = ret.Orders.sort((a, b) => a.Order - b.Order);
-        const headTr = orders.reduce((a, b, i) => `${a}<th colspan="3" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
+        const headTr = orders.reduce((a, b, i) => `${a}<th colspan="4" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
         const data = ret.datas;
         _pmcPreviewParams = {};
         const tbody = data.reduce((a, b, i) => {
@@ -2609,12 +2743,14 @@ function getNotArrangeTaskProcessList() {
             const tds = orders.reduce((a, b) => {
                 const d = o[b.Order];
                 return d
-                    ? `${a}<td class="bg-yellow">${d.Target}</td>
-                          <td class="bg-green">
-                             <input type="text" class="form-control text-center stock" value="${d.Stock}" style="width:80px;margin:auto">
+                    ? `${a}
+                          <td style="padding:4px" class="bg-blue">${d.Target + d.Stock}</td>
+                          <td style="padding:4px" class="bg-green">
+                             <input type="text" class="form-control text-center stock" value="${d.Stock}" style="width:50px;margin:auto;padding:inherit">
                           </td>
-                          <td>${d.Put}</td>`
-                    : `${a}<td class="short-slab"><i></td><td class="short-slab"><i></td><td class="short-slab"><i></td>`;
+                          <td class="bg-yellow">${d.Target}</td>
+                          <td style="padding:4px"><strong class="text-red">${d.Put}</strong> (${d.Rate}%)</td>`
+                    : `${a}<td style="padding:4px" class="short-slab"><i></td><td style="padding:4px" class="short-slab"><i></td><td style="padding:4px" class="short-slab"><i></td><td style="padding:4px" class="short-slab"><i></td>`;
             }, '');
             return `${a}<tr>
                         <td>${i + 1}</td>
@@ -2627,6 +2763,19 @@ function getNotArrangeTaskProcessList() {
         $('#setNotArrangeTaskProcessBtn').off('click').on('click', () => {
             const stockEls = $('#notArrangeTaskProcessBox .stock');
             let i = 0;
+            //const opData = data.map(item => ({
+            //    Id: item.Id,
+            //    Needs: item.Needs.map(item => ({
+            //        Order: item.Order,
+            //        TaskOrderId: item.TaskOrderId,
+            //        ProcessId: item.ProcessId,
+            //        PId: item.PId,
+            //        ProductId: item.ProductId,
+            //        Target: item.Target,
+            //        Put: item.Put,
+            //        Stock: stockEls.eq(i++).val() >> 0
+            //    }))
+            //}));
             const opData = data.map(item => ({
                 Id: item.Id,
                 Needs: item.Needs.map(item => ({
@@ -2640,8 +2789,9 @@ function getNotArrangeTaskProcessList() {
                     Stock: stockEls.eq(i++).val() >> 0
                 }))
             }));
-            _taskOrders = [];
-            myPromise(5602, opData).then(ret => {
+            //_taskOrders = [];
+            //myPromise(5602, opData).then(ret => {
+            myPromise(5602, _taskOrders).then(ret => {
                 setTable(ret);
                 ret.datas.forEach(item => {
                     const o = {
@@ -2657,20 +2807,51 @@ function getNotArrangeTaskProcessList() {
                             Stock: item.Stock
                         }))
                     }
-                    _taskOrders.push(o);
+                    if (item.StartTime != "0001-01-01 00:00:00")
+                        o.StartTime = item.StartTime;
+                    if (item.EndTime != "0001-01-01 00:00:00")
+                        o.EndTime = item.EndTime;
+                    //_taskOrders.push(o);
                     _pmcPreviewParams[item.Id] = o;
                 });
+                _taskOrders = Object.values(_pmcPreviewParams);
             });
         });
+
+        _taskOrders = [];
+        data.forEach(item => {
+            const o = {
+                Id: item.Id,
+                Needs: item.Needs.map(item => ({
+                    Order: item.Order,
+                    TaskOrderId: item.TaskOrderId,
+                    ProcessId: item.ProcessId,
+                    PId: item.PId,
+                    ProductId: item.ProductId,
+                    Target: item.Target,
+                    Put: item.Put,
+                    Stock: item.Stock
+                }))
+            }
+            if (item.StartTime != "0001-01-01 00:00:00")
+                o.StartTime = item.StartTime;
+            if (item.EndTime != "0001-01-01 00:00:00")
+                o.EndTime = item.EndTime;
+            //_taskOrders.push(o);
+            _pmcPreviewParams[item.Id] = o;
+        });
+        _taskOrders = Object.values(_pmcPreviewParams);
     }
     myPromise(5602, arr, true).then(setTable);
 }
 
+let _arrangeTask = null;
 //获取已安排任务单
 function getArrangeTaskList() {
     const getLevelFn = myPromise(5590);
     const getArrangeTaskFn = myPromise(5600);
     Promise.all([getLevelFn, getArrangeTaskFn]).then(res => {
+        _arrangeTask = [];
         const tableConfig = _tablesConfig(false, res[1].datas);
         const tableSet = _tableSet();
         tableConfig.columns = tableConfig.columns.concat([
@@ -2681,12 +2862,28 @@ function getArrangeTaskList() {
             { data: 'Target', title: '数量' },
             { data: 'DoneTarget', title: '已完成' },
             { data: 'DeliveryTime', title: '交货时间', render: tableSet.showTime },
-            { data: 'StartTime', title: '开始时间', render: tableSet.showTime },
-            { data: 'EndTime', title: '截止时间', render: tableSet.showTime },
-            { data: 'CostDay', title: '工期', render: d => d || '' }
+            { data: 'StartTime', title: '开始时间', render: tableSet.addDay.bind(null, 'startTime') },
+            { data: 'EndTime', title: '截止时间', render: tableSet.addDay.bind(null, 'endTime') },
+            { data: 'CostDay', title: '工期', render: d => d || '', sClass: 'workDay' },
+
+            //{ data: 'StartTime', title: '开始时间', render: tableSet.showTime },
+            //{ data: 'EndTime', title: '截止时间', render: tableSet.showTime },
+            //{ data: 'CostDay', title: '工期', render: d => d || '' }
         ]);
-        tableConfig.createdRow = (tr, d) => $(tr).find('.level').val(d.LevelId);
+        tableConfig.createdRow = (tr, d) => {
+            $(tr).find('.level').val(d.LevelId);
+            initDayTime(tr);
+        }
+        //tableConfig.drawCallback = function () {
+        //    initCheckboxAddEvent.call(this, _arrangeTask, (tr, d) => {
+        //        tr.find('.startTime').val(d.StartTime && d.StartTime != '0001-01-01 00:00:00' ? d.StartTime.split(' ')[0] : '').datepicker('update');
+        //        tr.find('.endTime').val(d.EndTime && d.EndTime != '0001-01-01 00:00:00' ? d.EndTime.split(' ')[0] : '').datepicker('update');
+        //    });
+        //}
         $('#arrangeTaskList').DataTable(tableConfig);
+        $('#arrangeTaskList').off('changeDate').on('changeDate', '.form_date', function () {
+            setNotArrangeTaskWork($(this).closest('tr'));
+        });
     });
 }
 
@@ -2700,9 +2897,14 @@ function setArrangeTaskList() {
         const d = instance.row(tr).data();
         const levelId = $(tr).find('.level').val();
         if (isStrEmptyOrUndefined(levelId)) return void layer.msg('请选择等级');
+        const startTime = $(tr).find('.startTime').val();
+        if (isStrEmptyOrUndefined(startTime)) return layer.msg('请选择开始时间');
+        const endTime = $(tr).find('.endTime').val();
+        if (isStrEmptyOrUndefined(endTime)) return layer.msg('请选择结束时间');
+        //if (comTimeDay(endTime, startTime)) return;
         list[i] = {
-            StartTime: d.StartTime,
-            EndTime: d.EndTime,
+            StartTime: startTime,
+            EndTime: endTime,
             LevelId: levelId,
             Id: d.Id
         }
@@ -2723,13 +2925,14 @@ function getPmcPreviewList() {
                             <table class="table table-hover table-striped table-bordered">
                                 <thead class="flat-thead">
                                     <tr>
-                                        <th rowspan="2">序号</th>
-                                        <th rowspan="2">任务单</th>
-                                        <th rowspan="2">计划号</th>
-                                        <th rowspan="2">开始时间</th>
-                                        <th rowspan="2">结束时间</th>
-                                        <th rowspan="2">耗时</th>
-                                        <th rowspan="2">当前最优</th>${headTr}
+                                        <th rowspan="2" style="width: 40px">序号</th>
+                                        <th rowspan="2" style="width: 82px">任务单</th>
+                                        <th rowspan="2" style="width: 82px">计划号</th>
+                                        <th rowspan="2" style="width: 82px">开始时间</th>
+                                        <th rowspan="2" style="width: 82px">结束时间</th>
+                                        <th rowspan="2" style="width: 50px">耗时</th>
+                                        <th rowspan="2" style="width: 50px">逾期</th>
+                                        <th rowspan="2" style="width: 50px">当前最优</th>${headTr}
                                     </tr>
                                     <tr>${'<th class="bg-yellow">设备</th><th>人员</th>'.repeat(data.Orders.length)}</tr>
                                 </thead>
@@ -2738,9 +2941,21 @@ function getPmcPreviewList() {
                         </div>
                       </div>`;
         };
-        const headTr = data.Orders.sort((a, b) => a.Order - b.Order).reduce((a, b) => `${a}<th colspan="2">${b.Process}</th>`, '');
+        const orders = data.Orders.sort((a, b) => a.Order - b.Order);
+        const headTr = orders.reduce((a, b) => `${a}<th colspan="2">${b.Process}</th>`, '');
         const tbody = data.Cost.reduce((a, b, i) => {
-            const tds = b.CostDays.reduce((c, d) => `${c}<td class="bg-yellow">${d.DeviceDay}</td><td>${d.OperatorDay}</td>`, '');
+            const id = b.Id;
+            const costDays = b.CostDays.sort((a, b) => a.Order - b.Order);
+            const o = {};
+            costDays.forEach(item => {
+                o[item.Order] = item;
+            });
+            const tds = orders.reduce((c, d) => {
+                const e = o[d.Order];
+                return e
+                    ? `${c}<td class="bg-yellow">${e.DeviceDay}</td><td>${e.OperatorDay}</td>`
+                    : `${c}<td style="padding:4px" class="short-slab"><i></td><td style="padding:4px" class="short-slab"><i></td>`;
+            }, '');
             const estimatedStartTime = b.EstimatedStartTime.split(' ')[0];
             const estimatedCompleteTime = b.EstimatedCompleteTime.split(' ')[0];
             const trs = Array.from(getDataTableRow('#notArrangeTaskList'));
@@ -2752,8 +2967,14 @@ function getPmcPreviewList() {
                 const taskOrderId = el.find('.taskOrder').val();
                 select.prop('disabled', true);
                 if (taskOrderId == tId) {
-                    el.find('.startTime').val(estimatedStartTime).datepicker('update');
-                    el.find('.endTime').val(estimatedCompleteTime).datepicker('update');
+                    if (isStrEmptyOrUndefined(el.find('.startTime').val())) {
+                        el.find('.startTime').val(estimatedStartTime).datepicker('update');
+                        if (_pmcPreviewParams[id]) _pmcPreviewParams[tId].StartTime = estimatedStartTime;
+                    }
+                    if (isStrEmptyOrUndefined(el.find('.endTime').val())) {
+                        el.find('.endTime').val(estimatedCompleteTime).datepicker('update');
+                        if (_pmcPreviewParams[id]) _pmcPreviewParams[tId].EndTime = estimatedCompleteTime;
+                    }
                 }
             });
             return `${a}<tr>
@@ -2763,6 +2984,7 @@ function getPmcPreviewList() {
                         <td>${estimatedStartTime}</td>
                         <td>${estimatedCompleteTime}</td>
                         <td>${b.CostDay}</td>
+                        <td>${b.OverdueDay}</td>
                         <td>${b.Best ? '人员' : '设备'}</td>${tds}
                     </tr>`;
         }, '');
@@ -2782,9 +3004,9 @@ function getPresentSchedule(data) {
     $('#pmcPreviewProcessSelect').html(select);
     const o = {};
     data.Put.forEach(item => o[item.PId] = item);
-    $('#pmcScheduleBtn').off('click').on('click', function () {
+    var f = function () {
         const pid = $('#pmcScheduleSelect').val();
-        if (isStrEmptyOrUndefined(pid)) return layer.msg('请选择工序');
+        if (isStrEmptyOrUndefined(pid)) return;
         const opData = {
             startTime: data.StartTime,
             endTime: data.CompleteTime,
@@ -2813,6 +3035,7 @@ function getPresentSchedule(data) {
             time = time.split(' ')[0].split('-');
             return `${time[1]}月${time[2]}日`;
         }
+
         const createTable = (title, data) => {
             const headTr = data.Data[0].Data.reduce((a, b) => `${a}<th>${monthDay(b.ProcessTime)}</th>`, '');
             const putArr = [];
@@ -2820,13 +3043,17 @@ function getPresentSchedule(data) {
                 const params = b.Data.reduce((c, d, i) => {
                     const put = d.Put;
                     putArr[i] = (putArr[i] >> 0) + put;
-                    return `${c}<td><a href="javascript:showPmcProcessPlanModal('${d.ProcessTime}',${b.ProductId},${data.PId},'${b.Product}','${data.Process}')">${put}</a></td>`;
-                }, '');
+                    return `${c}<td><a href="javascript:showPmcProcessPlanModal('${d.ProcessTime}',${b.ProductId
+                        },${
+                        data.PId},'${b.Product}','${data.Process}')">${put}</a></td>`;
+                },
+                    '');
                 return `${a}<tr>
                             <td>${i + 1}</td>
                             <td>${b.Product}</td>${params}
                         </tr>`;
-            }, '');
+            },
+                '');
             const total = putArr.reduce((a, b) => `${a}<td>${b}</td>`, '');
             return fn(title, headTr, tbody, total);
         }
@@ -2846,49 +3073,56 @@ function getPresentSchedule(data) {
                 const put = d.Put;
                 putArr[i] = (putArr[i] >> 0) + put;
                 oldData.push(d.Data);
-                return `${c}<td><a href="javascript:;" class="old-data" index="${index++}" product="${b.Product}" process="${o[pid].Process}">${put}</a></td>`;
-            }, '');
+                return `${c}<td><a href="javascript:;" class="old-data" index="${index++}" product="${b.Product
+                    }" process="${o[pid].Process}">${put}</a></td>`;
+            },
+                '');
             return `${a}<tr>
                             <td>${i + 1}</td>
                             <td>${b.Product}</td>${params}
                         </tr>`;
         }, '');
         const total = putArr.reduce((a, b) => `${a}<td>${b}</td>`, '');
-        $('#pmcPreviewProcessLater').html(fn('安排后', headTr, tbody, total)).find('.old-data').on('click', function () {
-            const index = $(this).attr('index');
-            $('#pmcProcessPlanCode').text($(this).attr('product'));
-            $('#pmcProcessPlanProcess').text($(this).attr('process'));
-            const tableConfig = _tablesConfig(false, oldData[index]);
-            tableConfig.columns = tableConfig.columns.concat([
-                { data: 'TaskOrder', title: '任务单' },
-                { data: 'Put', title: '数量' }
-            ]);
-            tableConfig.initComplete = function () {
-                this.find('tfoot').remove();
-                if (!data.length) return;
-                const tFoot = `<tfoot>
+        $('#pmcPreviewProcessLater').html(fn('安排后', headTr, tbody, total)).find('.old-data').on('click',
+            function () {
+                const index = $(this).attr('index');
+                $('#pmcProcessPlanCode').text($(this).attr('product'));
+                $('#pmcProcessPlanProcess').text($(this).attr('process'));
+                const tableConfig = _tablesConfig(false, oldData[index]);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'TaskOrder', title: '任务单' },
+                    { data: 'Put', title: '数量' },
+                    { data: null, title: '安排', render: (d) => Object.values(d.Arranges).map((a) => ("{0}:{1}次".format(a.Item1, a.Item2))).join() }
+                ]);
+                tableConfig.initComplete = function () {
+                    this.find('tfoot').remove();
+                    if (!data.length) return;
+                    const tFoot = `<tfoot>
                               <tr>
                                 <th>总计</th>
                                 <th></th>
                                 <th>${data.reduce((a, b) => a + b.Put, 0)}</th>
                               </tr>
                            </tfoot>`;
-                this.append(tFoot).find('tfoot tr:last th').css('borderTop', 0);
-            }
-            $('#pmcProcessPlanList').DataTable(tableConfig);
-            $('#showPmcProcessPlanModal').modal('show');
-        });
+                    this.append(tFoot).find('tfoot tr:last th').css('borderTop', 0);
+                }
+                $('#pmcProcessPlanList').DataTable(tableConfig);
+                $('#showPmcProcessPlanModal').modal('show');
+            });
         //排产
-        $('#pmcPreviewProcessBtn').html('<button class="btn btn-primary btn-sm">排产</button>').find('button').on('click', () => {
-            if (!_taskOrders.length) return layer.msg('请先设置待排程任务单各工序数量');
-            const opData = {
-                TaskOrders: _taskOrders,
-                Schedule: data.Schedule
-            };
-            myPromise(5605, opData);
-        });
-    });
+        $('#pmcPreviewProcessBtn').html('<button class="btn btn-primary btn-sm">排产</button>').find('button').on('click',
+            () => {
+                if (!_taskOrders.length) return layer.msg('请先设置待排程任务单各工序数量');
+                const opData = {
+                    TaskOrders: _taskOrders,
+                    Schedule: data.Schedule
+                };
+                myPromise(5605, opData, false, 1, getArrangeTaskList);
+            });
+    };
+    $('#pmcScheduleBtn').off('click').on('click', f);
     $('#pmcScheduleBtn').click();
+    $('#pmcScheduleSelect').off('change').on('change', f);
 }
 
 //预览计划详情
@@ -2900,7 +3134,8 @@ function showPmcProcessPlanModal(time, productId, pId, product, process) {
         const tableConfig = _tablesConfig(false, data);
         tableConfig.columns = tableConfig.columns.concat([
             { data: 'TaskOrder', title: '任务单' },
-            { data: 'Put', title: '数量' }
+            { data: 'Put', title: '数量' },
+            { data: null, title: '安排', render: (d) => Object.values(d.Arranges).map((a) => ("{0}:{1}次".format(a.Item1, a.Item2))).join() }
         ]);
         tableConfig.initComplete = function () {
             this.find('tfoot').remove();
@@ -3028,6 +3263,7 @@ function getPmcPersonList() {
             { data: 'Name', title: '姓名' },
             { data: 'Level', title: '等级', render: tableSet.select.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
             { data: 'Process', title: '工序', render: tableSet.select.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
@@ -3035,6 +3271,7 @@ function getPmcPersonList() {
                 tr.find('.state').val(d.State);
                 tr.find('.level').val(d.LevelId);
                 tr.find('.process').val(d.ProcessId);
+                tr.find('.priority').val(d.Priority);
                 tr.find('.remark').val(d.Remark);
             });
         }
@@ -3070,6 +3307,7 @@ function getPmcPersonTrInfo(el, isAdd) {
     const process = el.find('.process').val();
     if (isStrEmptyOrUndefined(process)) return void layer.msg('请选择工序');
     list.ProcessId = process;
+    list.Priority = el.find('.priority').val() >> 0;
     list.Remark = el.find('.remark').val();
     return list;
 }
@@ -3089,6 +3327,7 @@ function showAddPmcPersonModel() {
             Name: '',
             Level: '',
             Process: '',
+            Priority: 0,
             Remark: ''
         }
         const tableConfig = _tablesConfig(false, [trData]);
@@ -3097,6 +3336,7 @@ function showAddPmcPersonModel() {
             { data: 'Name', title: '员工姓名', render: tableSet.addSelect.bind(null, setOptions(data[0].datas, 'Name'), 'name') },
             { data: 'Level', title: '等级', render: tableSet.addSelect.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
             { data: 'Process', title: '工序', render: tableSet.addSelect.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Priority', title: '优先级', render: tableSet.addInput.bind(null, 'priority', 'auto') },
             { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
             { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
         ]);
@@ -3398,7 +3638,7 @@ function addFlowCard() {
     const personArr = [];
     const getFlowCardTrInfo = el => {
         const processorId = el.find('.person').val();
-        if (isStrEmptyOrUndefined(processorId)) return layer.msg('请选择加个人');
+        if (isStrEmptyOrUndefined(processorId)) return layer.msg('请选择加工人');
         personArr.push(el.find('.person :selected').text());
         const number = el.find('.number').val().trim() >> 0;
         if (isStrEmptyOrUndefined(number)) return layer.msg('请输入加工数量');

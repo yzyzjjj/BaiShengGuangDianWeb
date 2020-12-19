@@ -1187,7 +1187,7 @@ function getScriptType(isShow) {
         if (isShow) {
             getScriptDecimals();
         }
-    },0);
+    }, 0);
 }
 
 //脚本小数位设置弹窗
@@ -1277,22 +1277,46 @@ function getScriptDecimals() {
         switch (scriptConfig) {
             case '0':
                 $('#scriptVarBox,#scriptInBox,#scriptOutBox').removeClass('hidden');
-                $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
-                $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
-                $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+                $('#scriptVarList').DataTable(Object.assign({ data: scriptData[1] }, tablesConfig));
+                $('#scriptInList').DataTable(Object.assign({ data: scriptData[2] }, tablesConfig));
+                $('#scriptOutList').DataTable(Object.assign({ data: scriptData[3] }, tablesConfig));
+                //$('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+                //$('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+                //$('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
                 break;
             case '1':
                 $('#scriptVarBox').removeClass('hidden');
-                $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+                $('#scriptVarList').DataTable(Object.assign({ data: scriptData[1] }, tablesConfig));
+                //$('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
                 break;
             case '2':
                 $('#scriptInBox').removeClass('hidden');
-                $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+                $('#scriptInList').DataTable(Object.assign({ data: scriptData[2] }, tablesConfig));
+                //$('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
                 break;
             case '3':
                 $('#scriptOutBox').removeClass('hidden');
-                $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+                $('#scriptOutList').DataTable(Object.assign({ data: scriptData[3] }, tablesConfig));
+                //$('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
                 break;
+            //case '0':
+            //    $('#scriptVarBox,#scriptInBox,#scriptOutBox').removeClass('hidden');
+            //    $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+            //    $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+            //    $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+            //    break;
+            //case '1':
+            //    $('#scriptVarBox').removeClass('hidden');
+            //    $('#scriptVarList').DataTable({ ...tablesConfig, data: scriptData[1] });
+            //    break;
+            //case '2':
+            //    $('#scriptInBox').removeClass('hidden');
+            //    $('#scriptInList').DataTable({ ...tablesConfig, data: scriptData[2] });
+            //    break;
+            //case '3':
+            //    $('#scriptOutBox').removeClass('hidden');
+            //    $('#scriptOutList').DataTable({ ...tablesConfig, data: scriptData[3] });
+            //    break;
         }
     });
 }

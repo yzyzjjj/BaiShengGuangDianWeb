@@ -208,7 +208,7 @@
                             <li><a href="#pmcChildNav" data-toggle="tab" aria-expanded="true">排程</a></li>
                             <li><a href="#pmcInStoreNav" data-toggle="tab" aria-expanded="false">入库</a></li>
                             <li class="active" id="pmcExpelProNavLi"><a href="#pmcExpelProNav" data-toggle="tab" aria-expanded="false">排产</a></li>
-                            <li><a href="#pmcPersonNav" data-toggle="tab" aria-expanded="false">人员</a></li>
+                            <li><a href="#pmcPersonNav" data-toggle="tab" aria-expanded="false">操作工</a></li>
                         </ul>
                         <div class="tab-content no-padding">
                             <div class="tab-pane fade in" id="pmcChildNav">
@@ -257,7 +257,7 @@
                                             <button class="btn btn-primary btn-sm" onclick="getNotArrangeTaskProcessList()">查询</button>
                                         </div>
                                         <div class="form-group" id="notArrangeTaskProcessBox"></div>
-                                        <hr/>
+                                        <hr />
                                         <div class="form-group">
                                             <div class="flexStyle" style="justify-content: space-between">
                                                 <label class="control-label no-margin">已安排任务单：</label>
@@ -273,14 +273,14 @@
                                                 <button class="btn btn-primary btn-sm" onclick="setArrangeTaskList()">设置</button>
                                             </div>
                                         </div>
-                                        <hr/>
+                                        <hr />
                                         <div class="form-group">
                                             <div class="text-center">
                                                 <button class="btn btn-primary btn-sm" onclick="getPmcPreviewList()">预览</button>
                                             </div>
                                             <div class="form-group" id="pmcPreviewBox"></div>
                                         </div>
-                                        <hr/>
+                                        <hr />
                                         <div class="form-group" id="pmcPreviewProcessSelect"></div>
                                         <div class="form-group" id="pmcPreviewProcessNew"></div>
                                         <div class="form-group" id="pmcPreviewProcessLater"></div>
@@ -291,7 +291,7 @@
                             <div class="tab-pane fade in" id="pmcPersonNav">
                                 <div class="box box-primary">
                                     <div class="box-header with-border">
-                                        <h3 class="box-title">人员管理</h3>
+                                        <h3 class="box-title">操作工管理</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-success btn-sm" onclick="updatePmcPerson()">修改</button>
                                             <button class="btn btn-primary btn-sm" onclick="showAddPmcPersonModel()">添加</button>
@@ -467,7 +467,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加设备</h4>
+                    <h4 class="modal-title">添加类型</h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
@@ -486,7 +486,7 @@
     </div>
     @*设备型号模态框*@
     <div class="modal fade" tabindex="-1" id="showDeviceModelModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -520,13 +520,13 @@
     </div>
     @*添加设备型号模态框*@
     <div class="modal fade" tabindex="-1" id="addDeviceModelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加设备</h4>
+                    <h4 class="modal-title">添加型号</h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
@@ -580,7 +580,7 @@
                                                 <tr>
                                                     <th>序号</th>
                                                     <th>流程</th>
-                                                    <th>上移</th>
+                                                    @*<th>上移</th>*@
                                                     <th>操作</th>
                                                 </tr>
                                             </thead>
@@ -677,7 +677,7 @@
                                                 <tr>
                                                     <th>序号</th>
                                                     <th>流程</th>
-                                                    <th>上移</th>
+                                                    @*<th>上移</th>*@
                                                     <th>操作</th>
                                                 </tr>
                                             </thead>
@@ -735,7 +735,7 @@
     </div>
     @*添加修改计划号模态框*@
     <div class="modal fade" tabindex="-1" id="addPlanModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -779,7 +779,7 @@
     </div>
     @*产能类型模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -813,7 +813,7 @@
     </div>
     @*添加产能类型模态框*@
     <div class="modal fade" tabindex="-1" id="showAddCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -848,7 +848,7 @@
     </div>
     @*修改产能类型模态框*@
     <div class="modal fade" tabindex="-1" id="showUpdateCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -875,7 +875,7 @@
     </div>
     @*产能类型详情模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -900,7 +900,7 @@
     </div>
     @*设备&人员产能设置模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacitySetModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1192,7 +1192,7 @@
     </div>
     @*报警信息模态框*@
     <div class="modal fade" tabindex="-1" id="showWarningDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1213,7 +1213,7 @@
     </div>
     @*任务单信息模态框*@
     <div class="modal fade" tabindex="-1" id="showTaskDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1234,7 +1234,7 @@
     </div>
     @*任务单信息模态框*@
     <div class="modal fade" tabindex="-1" id="showFlowDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1255,7 +1255,7 @@
     </div>
     @*排程信息模态框*@
     <div class="modal fade" tabindex="-1" id="showScheduleModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1276,7 +1276,7 @@
     </div>
     @*PMC等级模态框*@
     <div class="modal fade" tabindex="-1" id="showPmcGradeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1310,7 +1310,7 @@
     </div>
     @*PMC排程计划号模态框*@
     <div class="modal fade" tabindex="-1" id="showPmcChildPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1342,7 +1342,7 @@
     </div>
     @*PMC预览查看计划号模态框*@
     <div class="modal fade" tabindex="-1" id="showPmcProcessPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1373,7 +1373,7 @@
     </div>
     @*添加等级模态框*@
     <div class="modal fade" tabindex="-1" id="addPmcGradeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1398,7 +1398,7 @@
     </div>
     @*添加员工模态框*@
     <div class="modal fade" tabindex="-1" id="showAddPmcPersonModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1423,7 +1423,7 @@
     </div>
     @*PMC任务单等级模态框*@
     <div class="modal fade" tabindex="-1" id="showTaskLevelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
@@ -1457,7 +1457,7 @@
     </div>
     @*添加任务单等级模态框*@
     <div class="modal fade" tabindex="-1" id="showAddTaskLevelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="width: 50%;min-width: 380px">
+        <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
