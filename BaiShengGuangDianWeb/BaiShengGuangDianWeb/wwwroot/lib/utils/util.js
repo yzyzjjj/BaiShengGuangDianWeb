@@ -1958,10 +1958,12 @@ function deepCompare(x, y) {
 
     return true;
 }
+
 //判断数据类型
-function getClass(o) { 
+function getClass(o) {
     return Object.prototype.toString.call(o).slice(8, -1);
 }
+
 //深度拷贝
 function deepCopy(obj) {
     var result, oClass = getClass(obj);
@@ -1981,6 +1983,190 @@ function deepCopy(obj) {
     return result;
 }
 
+//dataTable基本参数
+function dataTableConfig(data = [], isCheck = false, order = 0) {
+    var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px' }];
+    const obj = {
+        dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
+        bAutoWidth: false,
+        data: data,
+        destroy: true,
+        paging: true,
+        searching: true,
+        //ordering: isList,
+        aaSorting: [[order, 'asc']],
+        aLengthMenu: [20, 40, 60],
+        iDisplayLength: 20,
+        language: oLanguage,
+        columns: defaultColumns,
+        //表头固定
+        //fixedHeader: true,
+        //scrollX: "500px",
+        //scrollY: "400px",
+        //scrollCollapse: true,
+        ////固定首列，需要引入相应 dataTables.fixedColumns.min.js
+        //fixedColumns: {
+        //    leftColumns: 2
+        //}
+    };
+    isCheck && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
+    obj.addColumns = function (columns) {
+        obj.columns = obj.columns.concat(columns);
+    }
+    return obj;
+}
+
+//dataTable渲染标签
+function _tableSet() {
+    return {
+        order: (a, b, c, d) => +d.row + 1,
+        isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value="${d.Id}">`,
+        input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
+        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:120px;width:${width}" value="${d}">`,
+        select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control hidden textIn ${className}" style="min-width:120px">${ops}</select>`,
+        addSelect: (ops, className) => `<select class="form-control ${className}" style="min-width:120px">${ops}</select>`,
+        updateBtn: (fn, d) => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)" value="${d}">修改</button>`,
+        delBtn: () => `<button class="btn btn-danger btn-xs" onclick="delDataTableTr.call(this)"><i class="fa fa-minus"></i></button>`,
+        addBtn: fn => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)"><i class="fa fa-plus"></i></button>`,
+        setBtn: () => '<button class="btn btn-primary btn-sm set-btn">设置</button>',
+        detailBtn: (fn, d) => `<button class="btn btn-info btn-sm" onclick="${fn}.call(this)" value="${d}">查看</button>`,
+        processDetail: d => d.replace(/,/g, ' > '),
+        isRework: () => '<select class="form-control isRework" style="width:100px"><option value="0">否</option><option value="1">是</option></select>',
+        isReworkText: d => d ? '是' : '否',
+        day: (className, d) => `<span class="textOn">${d.split(' ')[0]}</span><input type="text" class="pointer textIn hidden form_date form-control text-center ${className}" style="min-width: 100px">`,
+        addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d ? d.split(' ')[0] : ''}" style="min-width: 100px">`,
+        state: d => {
+            const colors = ['#CCCCCC', '#ff9933', '#ff33cc', 'black', 'black', '#FF0000'];
+            return `<span style="color:${colors[d.State]}">${d.StateStr}</span>`;
+        },
+        delivery: d => {
+            const threeDay = 259200000;
+            let color = 'black';
+            if (new Date(d) - new Date(getFullTime()) < threeDay) color = 'red';
+            return `<span style="color:${color}">${d.split(' ')[0]}</span>`;
+        },
+        progress: d => `${d}%`,
+        endFinishTime: d => d.State === 4 ? d.EndTime : _tableSet().state(d),
+        stateOps: '<option value="1">正常</option><option value="2">休息</option>',
+        DevStateOps: '<option value="1">正常</option><option value="2">故障</option><option value="3">报废</option>',
+        isFinish: d => {
+            let icon = 'remove', color = 'red';
+            if (d.Id) icon = 'ok', color = 'green';
+            return `<span class="glyphicon glyphicon-${icon} text-${color} middle" aria-hidden="true" style="font-size:25px"></span>`;
+        },
+        hms: d => {
+            return `<div class="flexStyle" style="justify-content:center">
+                        <input type="text" class="form-control text-center hour" style="width:50px" value="${d.Hour || 0}"><span style="margin:0 5px">时</span>
+                        <input type="text" class="form-control text-center minute" style="width:50px" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:50px" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
+                    </div>`;
+        },
+        showTime: d => d === '0001-01-01 00:00:00' ? '' : d.split(' ')[0]
+    }
+}
+
+//添加一行
+function addDataTableTr(id, obj) {
+    $(id).DataTable().row.add(obj).draw(false);
+}
+
+//删除一行
+function delDataTableTr() {
+    const tr = $(this).parents('tr')[0];
+    const xh = $(tr).find('td:first').text() >> 0;
+    const tableId = $(tr).parents('table').prop('id');
+    const dataTable = $(`#${tableId}`).DataTable();
+    dataTable.row(tr).remove().draw(false);
+    dataTable.column(0).nodes().each(item => {
+        const flag = $(item).text() >> 0;
+        if (flag > xh) {
+            $(item).text(flag - 1);
+        }
+    });
+}
+
+//获取dataTable所有row
+function getDataTableRow(table) {
+    return $(table).DataTable().rows().nodes();
+}
+
+//初始化iChick并添加事件
+function initCheckboxAddEvent(arr, callback, fn) {
+    const api = this.api();
+    $(this).find('.isEnable').iCheck({
+        handle: 'checkbox',
+        checkboxClass: 'icheckbox_minimal-blue',
+        increaseArea: '20%'
+    }).on('ifChanged', function () {
+        const tr = $(this).parents('tr');
+        const trDom = tr[0];
+        if ($(this).is(':checked')) {
+            arr.push(trDom);
+            if (callback) {
+                callback(tr, api.row(trDom).data());
+                tr.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+            }
+        } else {
+            arr.splice(arr.indexOf(trDom), 1);
+            callback && tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
+            fn && fn(tr);
+        }
+    });
+}
+
+//删除表格数据
+function delTableRow(trs, opType, callback) {
+    if (!trs || !trs.length) return layer.msg('请选择需要删除的数据');
+    const ids = [];
+    trs.forEach(item => {
+        const el = $(item);
+        ids.push(el.find('.isEnable').val() >> 0);
+    });
+    showConfirm('删除所选项', () => myPromise(opType, { ids }).then(callback));
+}
+
+//添加表格数据
+function addTableRow(tableId, getTrInfo, opType, callback) {
+    const arr = [];
+    const trs = getDataTableRow(tableId);
+    if (!trs || !trs.length) {
+        layer.msg('请先设置数据再添加');
+        return;
+    }
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const trInfo = getTrInfo($(trs[i]), true);
+        if (!trInfo) return;
+        arr.push(trInfo);
+    }
+    myPromise(opType, arr).then(callback);
+}
+
+//修改表格数据
+function updateTableRow(trs, getTrInfo, opType, callback) {
+    if (!trs || !trs.length) {
+        layer.msg('请选择需要修改的数据');
+        return;
+    }
+    const arr = [];
+    for (let i = 0, len = trs.length; i < len; i++) {
+        const trInfo = getTrInfo($(trs[i]), false);
+        if (!trInfo) return;
+        arr.push(trInfo);
+    }
+    myPromise(opType, arr).then(callback);
+}
+
+//初始化时间选择器
+function initDayTime(el) {
+    $(el).find('.form_date').attr('readonly', true).datepicker({
+        language: 'zh-CN',
+        format: 'yyyy-mm-dd',
+        maxViewMode: 2,
+        todayBtn: 'linked',
+        autoclose: true
+    });
+}
+
 //数据增加序号
 function addOrderData(data) {
     for (let i = 0; i < data.length; i++) {
@@ -1990,6 +2176,7 @@ function addOrderData(data) {
 
 //更新DataTable数据
 function updateTable(table, data) {
+    addOrderData(data);
     const newLength = data.length;
     if (newLength == 0) {
         table.clear().draw();

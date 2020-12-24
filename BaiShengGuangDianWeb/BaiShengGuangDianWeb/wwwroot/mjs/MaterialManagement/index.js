@@ -433,7 +433,6 @@ function planSend(resolve, planId) {
 
 let _materialCheckbox = null;
 let _materialTable = null;
-let _query = "";
 //获取物料信息
 function getMaterialList(el, resolve) {
     _materialCheckbox = [];
@@ -485,10 +484,6 @@ function getMaterialList(el, resolve) {
     var data = {}
     data.opType = 800;
     data.opData = JSON.stringify(list);
-    if (_query != data.opData) {
-        //_materialTable = null;
-        _query = data.opData;
-    }
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -500,105 +495,14 @@ function getMaterialList(el, resolve) {
         }
         _codeIdData = {};
         var rData = ret.datas;
-        addOrderData(rData);
         for (var i = 0, len = rData.length; i < len; i++) {
             var d = rData[i];
             _codeIdData[d.Id] = d;
         }
         $('#codeCount').text(ret.Count);
         $('#codeSum').text(ret.Sum);
-        if (_materialTable == null) {
-            var detail = function (data) {
-                return `<button type="button" class="btn btn-info btn-sm" onclick="showDetailModel(${data})">查看</button>`;
-            }
-            var number = function (data) {
-                return data.Number < data.Stock ? `<strong class="text-red">${data.Number}</strong>` : `<span>${data.Number}</span>`;
-            }
-            var inTime = function (data) {
-                var time = data.slice(0, data.indexOf(' '));
-                return time == "0001-01-01" ? "" : time;
-            }
-            var outTime = function (data) {
-                var time = data.slice(0, data.indexOf(' '));
-                return time == "0001-01-01" ? "" : time;
-            }
-            var remark = function (data) {
-                return data.length > tdShowLength ? `<span title="${data}" onclick="showAllContent('${escape(data)}')">${data.substring(0, tdShowLength)}...</span>`
-                    : `<span title="${data}">${data}</span>`;
-            }
-            var per538 = _permissionList[538].have;
-            var per539 = _permissionList[539].have;
-            var log = function (data) {
-                var op = `${per538 ? '<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(1, {0})">入库</button>' : ''}
-                    ${per539 ? '<button type="button" class="btn btn-success btn-sm" onclick="showLogModel(2, {0})">领用</button>' : ''}`;
-                return op.format(data.Id);
-            }
-
-            _materialTable = $('#materialList')
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    buttons: [
-                        {
-                            extend: 'excel',
-                            text: '导出Excel',
-                            className: 'btn-primary btn-sm',
-                            filename: `物料详情_${getDate()}`,
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-                            }
-                        }
-                    ],
-                    destroy: true,
-                    paging: true,
-                    searching: true,
-                    language: oLanguage,
-                    data: ret.datas,
-                    aaSorting: [[1, 'asc']],
-                    aLengthMenu: [50, 100, 150, 200], //更改显示记录数选项  
-                    iDisplayLength: 50, //默认显示的记录数
-                    columns: [
-                        {
-                            data: null,
-                            title: "选择",
-                            render: d => `<input type="checkbox" class="icb_minimal isEnable" value=${d.Id}>`,
-                            orderable: false
-                        },
-                        //{ data: null, title: "序号", render: (a, b, c, d) => ++d.row },
-                        { data: "XvHao", title: "序号" },
-                        { data: "Code", title: "货品编号" },
-                        { data: "Category", title: "类别" },
-                        { data: "Name", title: "名称" },
-                        { data: null, title: "库存数量", render: number },
-                        { data: "Supplier", title: "供应商" },
-                        { data: "Specification", title: "规格" },
-                        { data: "Site", title: "位置" },
-                        { data: "Unit", title: "单位" },
-                        { data: "Price", title: "价格" },
-                        { data: "Stock", title: "最低库存", sClass: "text-blue" },
-                        { data: "InTime", title: "上次入库", render: inTime },
-                        { data: "OutTime", title: "上次领用", render: outTime },
-                        { data: "Remark", title: "备注", render: remark },
-                        { data: "Id", title: "详情", render: detail, orderable: false },
-                        { data: null, title: "日志", render: log, orderable: false, visible: per538 || per539 }
-                    ],
-                    drawCallback: function () {
-                        $(this).find('.isEnable').iCheck({
-                            handle: 'checkbox',
-                            checkboxClass: 'icheckbox_minimal-blue',
-                            increaseArea: '20%'
-                        }).on('ifChanged',
-                            function () {
-                                const id = $(this).val();
-                                $(this).is(':checked')
-                                    ? _materialCheckbox.push(id)
-                                    : _materialCheckbox.splice(_materialCheckbox.indexOf(id), 1);
-                            });
-                    }
-                });
-        } else {
-            $('#materialList').removeClass('hidden');
-            updateTable(_materialTable, rData);
-        }
+        updateTable(_materialTable, rData);
+        $('#materialList').removeClass('hidden');
     });
 }
 

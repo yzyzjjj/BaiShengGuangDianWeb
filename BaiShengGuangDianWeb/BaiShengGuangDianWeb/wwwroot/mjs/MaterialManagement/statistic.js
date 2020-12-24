@@ -25,7 +25,39 @@
     });
     $('#materialSpecification,#materialSite').on('select2:select', () => getMaterialList());
     $('#materialMonth').on('changeDate', () => getMaterialList());
+
+    const tableConfig = dataTableConfig();
+    tableConfig.dom = '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>';
+    tableConfig.buttons = [{
+        extend: 'excel',
+        text: '导出Excel',
+        className: 'btn-primary btn-sm',
+        filename: `月度物料结存表_${getDate()}`
+    }];
+    tableConfig.addColumns([
+        { data: 'Code', title: '物料编码' },
+        { data: 'Category', title: '类别' },
+        { data: 'Name', title: '名称' },
+        { data: 'Supplier', title: '供应商' },
+        { data: 'Specification', title: '规格' },
+        { data: 'Site', title: '位置' },
+        { data: 'Unit', title: '单位' },
+        { data: 'TodayPrice', title: '价格' },
+        { data: 'Stock', title: '最低库存' },
+        { data: 'LastNumber', title: '月初数量' },
+        { data: 'LastAmount', title: '月初金额' },
+        { data: 'Increase', title: '本月入库数量' },
+        { data: 'IncreaseAmount', title: '本月入库金额' },
+        { data: 'Consume', title: '本月领用数量' },
+        { data: 'ConsumeAmount', title: '本月领用金额' },
+        { data: 'TodayNumber', title: '本月结存数量' },
+        { data: 'TodayAmount', title: '本月结存金额' }
+    ]);
+    _materialTable = $('#materialList').DataTable(tableConfig);
+    $('#materialList').addClass('hidden');
 }
+//报表table
+let _materialTable = null;
 
 //获取物料相关选项
 function getAllSelect(resolve, opData) {
@@ -119,42 +151,7 @@ function getMaterialList() {
         $('#consumeMoney').text(parseFloat(consumeMoney.toFixed(5)));
         $('#cashMoney').text(parseFloat(cashMoney.toFixed(5)));
         $('#materialInfo').removeClass('hidden');
-        $('#materialList').DataTable({
-            dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-            buttons: [{
-                extend: 'excel',
-                text: '导出Excel',
-                className: 'btn-primary btn-sm',
-                filename: `月度物料结存表_${getDate()}`
-            }],
-            destroy: true,
-            paging: true,
-            searching: true,
-            language: oLanguage,
-            data: rData,
-            aaSorting: [[0, 'asc']],
-            aLengthMenu: [20, 40, 60],
-            iDisplayLength: 20,
-            columns: [
-                { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
-                { data: 'Code', title: '物料编码' },
-                { data: 'Category', title: '类别' },
-                { data: 'Name', title: '名称' },
-                { data: 'Supplier', title: '供应商' },
-                { data: 'Specification', title: '规格' },
-                { data: 'Site', title: '位置' },
-                { data: 'Unit', title: '单位' },
-                { data: 'TodayPrice', title: '价格' },
-                { data: 'Stock', title: '最低库存' },
-                { data: 'LastNumber', title: '月初数量' },
-                { data: 'LastAmount', title: '月初金额' },
-                { data: 'Increase', title: '本月入库数量' },
-                { data: 'IncreaseAmount', title: '本月入库金额' },
-                { data: 'Consume', title: '本月领用数量' },
-                { data: 'ConsumeAmount', title: '本月领用金额' },
-                { data: 'TodayNumber', title: '本月结存数量' },
-                { data: 'TodayAmount', title: '本月结存金额' }
-            ]
-        });
+        $('#materialList').removeClass('hidden');
+        updateTable(_materialTable, rData);
     });
 }
