@@ -253,4 +253,5 @@ logs/*.log
 tmp/
 info.xml
 Logs/
+mjs/
 
