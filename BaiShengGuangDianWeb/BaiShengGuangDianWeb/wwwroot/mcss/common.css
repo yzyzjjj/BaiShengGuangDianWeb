@@ -5,6 +5,10 @@
     font-weight: 600;
 }
 
+.no-padding-left {
+    padding-left: 0;
+}
+
 .btn-group {
     white-space: nowrap
 }

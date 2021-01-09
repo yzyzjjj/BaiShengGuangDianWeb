@@ -189,6 +189,7 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">任务单管理</h3>
                             <div class="box-tools pull-right">
+                                <button class="btn btn-warning btn-sm" onclick="showCapacityNeedModel()">产能需求</button>
                                 <button class="btn btn-success btn-sm" onclick="updateTaskOrder()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="addTaskOrderModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delTaskOrder()">删除</button>
@@ -206,7 +207,6 @@
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs ui-sortable-handle">
                             <li><a href="#pmcChildNav" data-toggle="tab" aria-expanded="true">排程</a></li>
-                            <li><a href="#pmcInStoreNav" data-toggle="tab" aria-expanded="false">入库</a></li>
                             <li class="active" id="pmcExpelProNavLi"><a href="#pmcExpelProNav" data-toggle="tab" aria-expanded="false">排产</a></li>
                             <li><a href="#pmcPersonNav" data-toggle="tab" aria-expanded="false">操作工</a></li>
                         </ul>
@@ -215,76 +215,77 @@
                                 <div class="box box-primary">
                                     <div class="box-header with-border">
                                         <div class="flexStyle">
-                                            <label class="control-label no-margin">时间：</label>
+                                            <label class="control-label no-margin text-nowrap">交货时间：</label>
+                                            <input type="text" class="form_date form-control text-center pointer" id="pmcChildDTime" style="width: auto">
                                             <div class="flexStyle">
-                                                <input type="text" class="form_date form-control text-center pointer" id="pmcChildSTime" style="min-width: 100px">
-                                                <label class="control-label" style="margin: 5px">-</label>
-                                                <input type="text" class="form_date form-control text-center pointer" id="pmcChildETime" style="min-width: 100px">
+                                                <input type="checkbox" class="icb_minimal" id="pmcChildAll">
+                                                <label class="control-label no-margin text-nowrap text-red">含已完成</label>
                                             </div>
+                                            <label class="control-label no-margin text-nowrap">时间：</label>
+                                            <input type="text" class="form_date form-control text-center pointer" id="pmcChildSTime" style="width: auto">
+                                            <label class="control-label" style="margin: 5px">-</label>
+                                            <input type="text" class="form_date form-control text-center pointer" id="pmcChildETime" style="width: auto">
                                             <button class="btn btn-primary" onclick="getPmcChildList()" style="margin-left:3px">查看</button>
                                         </div>
                                     </div>
                                     <div class="box-body" id="pmcChildList"></div>
                                 </div>
                             </div>
-                            <div class="tab-pane fade in" id="pmcInStoreNav">
-                                <div class="box box-primary">
-                                    <div class="box-header with-border">
-                                        <div class="flexStyle">
-                                            <label class="control-label no-margin">时间：</label>
-                                            <div class="flexStyle">
-                                                <input type="text" class="form_date form-control text-center pointer" id="pmcInStoreSTime" style="min-width: 100px">
-                                                <label class="control-label" style="margin: 5px">-</label>
-                                                <input type="text" class="form_date form-control text-center pointer" id="pmcInStoreETime" style="min-width: 100px">
-                                            </div>
-                                            <button class="btn btn-primary" onclick="getPmcInStoreList()" style="margin-left:3px">查看</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="pmcInStoreList"></div>
-                                </div>
-                            </div>
                             <div class="tab-pane active in" id="pmcExpelProNav">
                                 <div class="box box-primary">
                                     <div class="box-body">
-                                        <div class="text-right">
-                                            <button class="btn btn-info btn-sm" onclick="getNotArrangeTaskListReset()">刷新</button>
-                                        </div>
-                                        <div class="table-responsive mailbox-messages">
-                                            <table class="table table-hover table-striped" id="notArrangeTaskList"></table>
-                                        </div>
-                                        <div class="text-center">
-                                            <button type="button" class="btn btn-success btn-sm" id="addNotArrangeTaskListBtn"><i class="fa fa-plus"></i></button>
-                                            <button class="btn btn-primary btn-sm" onclick="getNotArrangeTaskProcessList()">查询</button>
-                                        </div>
-                                        <div class="form-group" id="notArrangeTaskProcessBox"></div>
-                                        <hr />
                                         <div class="form-group">
                                             <div class="flexStyle" style="justify-content: space-between">
-                                                <label class="control-label no-margin">已安排任务单：</label>
+                                                <div class="flexStyle">
+                                                    <label class="control-label no-margin text-red">未安排任务单：</label>
+                                                    <input type="checkbox" class="icb_minimal" id="pmcChildAuto">
+                                                    <label class="control-label no-margin text-nowrap text-red">自动查询</label>
+                                                </div>
                                                 <div>
-                                                    <button class="btn btn-info btn-sm" onclick="getArrangeTaskList()">刷新</button>
-                                                    <button class="btn btn-primary btn-sm" onclick="showTaskLevelModel()">等级</button>
+                                                    <button class="btn btn-info btn-sm" onclick="notArrangeTaskListTimeReset()">重置时间</button>
+                                                    <button class="btn btn-info btn-sm" onclick="getNotArrangeTaskListReset()">刷新</button>
                                                 </div>
                                             </div>
                                             <div class="table-responsive mailbox-messages">
-                                                <table class="table table-hover table-striped" id="arrangeTaskList"></table>
+                                                <table class="table table-hover table-striped" id="notArrangeTaskList"></table>
                                             </div>
                                             <div class="text-center">
-                                                <button class="btn btn-primary btn-sm" onclick="setArrangeTaskList()">设置</button>
+                                                <button type="button" class="btn btn-success btn-sm" id="addNotArrangeTaskListBtn">新增</button>
                                             </div>
                                         </div>
-                                        <hr />
                                         <div class="form-group">
-                                            <div class="text-center">
-                                                <button class="btn btn-primary btn-sm" onclick="getPmcPreviewList()">预览</button>
+                                            <div class="box box-primary">
+                                                <div class="box-header no-padding-left">
+                                                    <label class="control-label no-margin text-red">已安排任务单：</label>
+                                                    <div class="box-tools pull-right">
+                                                        <button class="btn btn-warning btn-sm" onclick="setArrangeTaskList()">修改</button>
+                                                        <button class="btn btn-info btn-sm" onclick="getArrangeTaskList()">刷新</button>
+                                                        <button class="btn btn-primary btn-sm" onclick="showTaskLevelModel()">等级</button>
+                                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="box-body">
+                                                    <div class="form-group">
+                                                        <div class="table-responsive mailbox-messages">
+                                                            <table class="table table-hover table-striped" id="arrangeTaskList"></table>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="form-group" id="pmcPreviewBox"></div>
                                         </div>
+                                        <div class="form-group text-center">
+                                            <button class="btn btn-primary btn-sm" onclick="getTaskProcessList()">查询</button>
+                                        </div>
+                                        <div class="form-group" id="notArrangeTaskProcessBox"></div>
+                                        <div class="form-group" id="notArrangeTaskProcessBox"></div>
+                                        <div class="form-group text-center">
+                                            <button class="btn btn-success btn-sm" onclick="getPmcPreviewList()">预览</button>
+                                        </div>
+                                        <div class="form-group" id="pmcPreviewBox"></div>
                                         <hr />
-                                        <div class="form-group" id="pmcPreviewProcessSelect"></div>
-                                        <div class="form-group" id="pmcPreviewProcessNew"></div>
-                                        <div class="form-group" id="pmcPreviewProcessLater"></div>
+                                        @*<div class="form-group" id="pmcPreviewProcessSelect"></div>*@
                                         <div class="text-center" id="pmcPreviewProcessBtn"></div>
+                                        <div class="form-group" id="pmcPreviewProcess"></div>
                                     </div>
                                 </div>
                             </div>
@@ -708,6 +709,7 @@
             </div>
         </div>
     </div>
+
     @*添加流程编号类型模态框*@
     <div class="modal fade" tabindex="-1" id="addProcessOpModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -733,6 +735,7 @@
             </div>
         </div>
     </div>
+
     @*添加修改计划号模态框*@
     <div class="modal fade" tabindex="-1" id="addPlanModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
@@ -761,8 +764,43 @@
                         <select class="form-control" id="addPlanCapacity"></select>
                     </div>
                     <label class="control-label">产能清单：</label>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addPlanCapacityList"></table>
+                    @*<div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="addPlanCapacityList"></table>
+                        </div>*@
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <div class="mailbox-messages table-responsive">
+                                <table class="table table-hover table-striped table-condensed table-responsive" id="addPlanCapacityList"></table>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-8">
+                            <div class="form-group flexStyle add update calTimeBox">
+                                <label class="control-label">时间计算：</label>
+                                <input type="text" class="form-control text-center ch" style="width:60px" oninput="onInput(this, 5, 0)" value="0"><span style="margin:0 5px">时</span>
+                                <input type="text" class="form-control text-center cm" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">分</span>
+                                <input type="text" class="form-control text-center cs" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">秒</span>
+                                <label class="control-label"> = </label>
+                                <span class="rm" style="margin:5px 5px">0</span><span>分</span>
+                                <span class="rs" style="margin:0 5px">0</span><span>秒</span>
+                                <button type="button" style="margin:0 20px" class="btn btn-primary btn-sm set">重置</button>
+                            </div>
+                            <div class="form-group" id="planDevCapacitySetBox">
+                                <label class="control-label">设备产能设置：</label>
+                                <div class="mailbox-messages table-responsive">
+                                    <table class="table table-hover table-striped table-condensed table-responsive" id="planDevCapacitySetList"></table>
+                                </div>
+                                <hr>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">人员产能设置：</label>
+                                <div class="mailbox-messages table-responsive">
+                                    <table class="table table-hover table-striped table-condensed table-responsive" id="planPersonCapacitySetList"></table>
+                                </div>
+                            </div>
+                            <div class="form-group text-center">
+                                <button type="button" class="btn btn-primary  add update" id="addPlanCapacitySetBtn">确定</button>
+                            </div>
+                        </div>
                     </div>
                     <label class="control-label">流程编号清单：</label>
                     <div class="form-group" id="planProcessCodeList"></div>
@@ -777,6 +815,7 @@
             </div>
         </div>
     </div>
+
     @*产能类型模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -792,7 +831,7 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">产能类型管理</h3>
                             <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="updateCapacity()">修改</button>
+                                <button class="btn btn-success btn-sm" onclick="updateCapacityInfo()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddCapacityCategoryModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delCapacity()">删除</button>
                                 <button class="btn btn-info btn-sm" onclick="getCapacityList()">刷新</button>
@@ -811,69 +850,8 @@
             </div>
         </div>
     </div>
-    @*添加产能类型模态框*@
-    <div class="modal fade" tabindex="-1" id="showAddCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">添加产能类型管理</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">类型：</label>
-                        <input type="text" class="form-control" id="addCapacityCategory">
-                    </div>
-                    <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">备注：</label>
-                        <input type="text" class="form-control" id="addCapacityRemark">
-                    </div>
-                    <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">流程编号类型：</label>
-                        <select class="form-control" id="addCapacityProcess" table="#addCapacityList"></select>
-                    </div>
-                    <label class="control-label">产能清单：</label>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addCapacityList"></table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addCapacity()">添加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @*修改产能类型模态框*@
-    <div class="modal fade" tabindex="-1" id="showUpdateCapacityCategoryModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">修改产能清单</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">流程编号类型：</label>
-                        <select class="form-control" id="updateCapacityProcess" table="#updateCapacityList"></select>
-                    </div>
-                    <label class="control-label">产能清单：</label>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="updateCapacityList"></table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="updateCapacityCategoryBtn" onclick="updateCapacityCategory.call(this)">修改</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @*产能类型详情模态框*@
+
+    @*添加、查看和修改产能类型详情模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -884,52 +862,64 @@
                     <h4 class="modal-title">产能清单查看</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">流程编号类型：<span class="spanStyle" id="capacityDetailCode"></span></label>
-                    </div>
-                    <label class="control-label">产能清单：</label>
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="capacityDetailList"></table>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <div class="flexStyle form-group add">
+                                <label class="control-label text-nowrap no-margin">类型：</label>
+                                <input type="text" class="form-control" id="addCapacityCategory">
+                            </div>
+                            <div class="flexStyle form-group add">
+                                <label class="control-label text-nowrap no-margin">备注：</label>
+                                <input type="text" class="form-control" id="addCapacityRemark">
+                            </div>
+                            <div class="flexStyle form-group">
+                                <label class="control-label text-nowrap no-margin">流程编号类型：<span class="spanStyle look" id="capacityDetailCode"></span></label>
+                                <select class="form-control update add" id="capacityProcess" table="#capacityDetailList"></select>
+                            </div>
+                            <label class="control-label">产能清单：</label>
+                            <div class="mailbox-messages table-responsive">
+                                <table class="table table-hover table-striped table-condensed table-responsive" id="capacityDetailList"></table>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-8">
+                            <div class="form-group flexStyle add update" id="calTimeBox">
+                                <label class="control-label">时间计算：</label>
+                                <input type="text" class="form-control text-center ch" style="width:60px" oninput="onInput(this, 5, 0)" value="0"><span style="margin:0 5px">时</span>
+                                <input type="text" class="form-control text-center cm" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">分</span>
+                                <input type="text" class="form-control text-center cs" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">秒</span>
+                                <label class="control-label"> = </label>
+                                <span class="rm" style="margin:5px 5px">0</span><span>分</span>
+                                <span class="rs" style="margin:0 5px">0</span><span>秒</span>
+                                <button type="button" style="margin:0 20px" class="btn btn-primary btn-sm set">重置</button>
+                            </div>
+                            <div class="form-group" id="devCapacitySetBox">
+                                <label class="control-label">设备产能设置：</label>
+                                <div class="mailbox-messages table-responsive">
+                                    <table class="table table-hover table-striped table-condensed table-responsive" id="devCapacitySetList"></table>
+                                </div>
+                                <hr>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">人员产能设置：</label>
+                                <div class="mailbox-messages table-responsive">
+                                    <table class="table table-hover table-striped table-condensed table-responsive" id="personCapacitySetList"></table>
+                                </div>
+                            </div>
+                            <div class="form-group text-center">
+                                <button type="button" class="btn btn-primary  add update" id="addCapacitySetBtn">确定</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary add" onclick="addCapacity()">添加</button>
+                    <button type="button" class="btn btn-primary update" id="updateCapacityBtn" onclick="updateCapacity.call(this)">修改</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-    @*设备&人员产能设置模态框*@
-    <div class="modal fade" tabindex="-1" id="showCapacitySetModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">产能设置</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group" id="devCapacitySetBox">
-                        <label class="control-label">设备产能设置：</label>
-                        <div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped" id="devCapacitySetList"></table>
-                        </div>
-                        <hr>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">人员产能设置：</label>
-                        <div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped" id="personCapacitySetList"></table>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="addCapacitySetBtn">确定</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
     @*浏览流程编号模态框*@
     <div class="modal fade" tabindex="-1" id="browseProcessCodeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1048,6 +1038,71 @@
                         <label class="control-label text-nowrap">已发数量：<span class="spanStyle" id="taskOrderIssue"></span></label>
                         <label class="control-label text-nowrap">加工中数量：<span class="spanStyle" id="taskOrderDoingCount"></span></label>
                         <label class="control-label text-nowrap">已完成产量：<span class="spanStyle" id="taskOrderDoneCount"></span></label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*任务单产能需求模态框*@
+    <div class="modal fade" tabindex="-1" id="capacityNeedModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">产能需求</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-2">
+                            <label class="control-label no-margin text-red">任务单列表：</label>
+                            <div class="form-group" id="capacityTaskBox">
+                                @*<label class="flexStyle pointer">
+                                        <input type="checkbox" class="icb_minimal" id="processorAll" value="全选">
+                                        <span class="textOverTop" style="margin-left: 5px">全选</span>
+                                    </label>*@
+                                <div style="margin-left: 20px; padding-bottom: 10px; max-height: 400px; overflow-y: scroll;" id="capacityTaskCheck">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-10">
+                            <div class="row">
+                                <div class="form-group col-md-3 hidden" id="capacityTaskDetailListDiv">
+                                    <label class="control-label">流程列表：</label>
+                                    <div class="mailbox-messages table-responsive">
+                                        <table class="table table-hover table-striped table-condensed table-responsive" id="capacityTaskDetailList"></table>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-9 hidden" id="capacityTaskDevPerDiv">
+                                    <div class="form-group" id="devCapacityTaskSetBox">
+                                        <label class="control-label">设备选择：</label>
+                                        <div class="mailbox-messages table-responsive">
+                                            <table class="table table-hover table-striped table-condensed table-responsive" id="devCapacityTaskSetList"></table>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">人员选择：</label>
+                                        <div class="mailbox-messages table-responsive">
+                                            <table class="table table-hover table-striped table-condensed table-responsive" id="personCapacityTaskSetList"></table>
+                                        </div>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <button type="button" class="btn btn-primary btn-sm" id="capacityTaskSetBtn">确定</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group text-center">
+                            <button type="button" class="btn btn-success btn-sm" onclick="showCapacityTaskProcess()">预览</button>
+                        </div>
+                        <div class="table-responsive mailbox-messages" id="capacityTaskProcessListBox">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1316,20 +1371,46 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">计划号详情</h4>
+                    <h4 class="modal-title"></h4>
                 </div>
                 <div class="modal-body">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <label class="control-label">
-                                <span class="text-red" style="margin-right:20px">时间：<span class="text-black" id="pmcChildPlanTime"></span></span>
-                                <span class="text-red" style="margin-right:20px">计划号：<span class="text-black" id="pmcChildPlanCode"></span></span>
-                                <span class="text-red">工序：<span class="text-black" id="pmcChildPlanProcess"></span></span>
-                            </label>
                         </div>
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="pmcChildPlanList"></table>
+                                <table class="table table-hover table-striped" id="pmcChildPlanList0"></table>
+                                <table class="table table-hover table-striped" id="pmcChildPlanList1"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*PMC排程指数模态框*@
+    <div class="modal fade" tabindex="-1" id="showPmcChildIndexModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <label class="control-label">设备指数：</label>
+                                <table class="table table-hover table-striped" id="pmcChildIndexList0"></table>
+                                <label class="control-label">人员指数：</label>
+                                <table class="table table-hover table-striped" id="pmcChildIndexList1"></table>
                             </div>
                         </div>
                     </div>

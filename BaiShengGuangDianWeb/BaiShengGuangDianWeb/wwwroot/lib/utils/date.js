@@ -31,8 +31,8 @@ function getHourAgo(n = 1) {
 }
 
 //获得今日日期
-function getDate() {
-    return new Date().format("yyyy-MM-dd");
+function getDate(date = undefined) {
+    return (date ? new Date(date) : new Date()).format("yyyy-MM-dd");
     var nowTime = new Date();
     var year = nowTime.getFullYear();
     var month = padLeft0(nowTime.getMonth() + 1);
@@ -122,10 +122,34 @@ function getNowYear() {
     return year;
 }
 
+//计算两个日期天数差的函数，通用
+function dateDiff(date1, date2) {
+    var dt1 = new Date(Date.parse(date1));
+    var dt2 = new Date(Date.parse(date2));
+    //结果是天数
+    var diff = parseInt((dt1.getTime() - dt2.getTime()) / (1000 * 60 * 60 * 24));
+    //返回相差天数
+    return diff;
+}
+//时间比较
 function compareDate(date1, date2) {
     var oDate1 = new Date(date1);
     var oDate2 = new Date(date2);
     return oDate1.getTime() > oDate2.getTime();
+}
+
+//时间转化数组 0 年  1 月  2 日 3 周 4 小时
+function exchangeDateArray(date1, date2, type = 0) {
+    var dates = [];
+    if (compareDate(date1, date2))
+        return dates;
+    var days = dateDiff(date2, date1) + 1;
+    for (var i = 0; i < days; i++) {
+        var t = new Date(date1);
+        t.setDate(t.getDate() + i);
+        dates.push(t.format("yyyy-MM-dd hh:mm:ss"));
+    }
+    return dates;
 }
 //获得当前第几周
 function getWeek() {
@@ -159,6 +183,19 @@ function codeTime(second) {
     }
 }
 
+//秒换算成时间
+function convertTime(d, hIf = true, mIf = true, sIf = true) {
+    const h = hIf ? Math.floor(d / 3600) : 0;
+    const m = mIf ? Math.floor((d - (h * 3600)) / 60) : 0;
+    const s = sIf ? d - (h * 3600) - (m * 60) : 0;
+    return { h, m, s };
+}
+
+//时间换算成秒
+function convertSecond(h, m, s) {
+    return h * 3600 + m * 60 + s;
+}
+
 //选择时间是否超过当前时间
 function exceedTime(date) {
     if (date.indexOf(" ") > -1) {
@@ -184,4 +221,15 @@ function getMonthScope() {
 //时间不显示秒
 function noShowSecond(time) {
     return time == '0001-01-01 00:00:00' || time == '' ? '' : time.slice(0, time.lastIndexOf(':'));
+}
+
+//时间不显示秒
+function validTime(time) {
+    return time != '0001-01-01 00:00:00' && time != '0001-01-01' && time != '00:00:00';
+}
+
+//时间格式转换 mon月day日
+function monthDay(time) {
+    time = time.split(' ')[0].split('-');
+    return `${time[1]}月${time[2]}日`;
 }

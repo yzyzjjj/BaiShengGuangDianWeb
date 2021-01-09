@@ -1041,6 +1041,13 @@ function checkFileExt(file, fileExt) {
     return false;
 }
 
+//数值限制
+function onNumberLimitInput(obj, number = 59, zs = 5) {
+    obj.value = input(obj.value, zs, 0);
+    obj.value = obj.value < 0 ? 0 : obj.value;
+    obj.value = obj.value > number ? number : obj.value;
+}
+
 //整数5位  小数4位
 function onInput(obj, zs = 5, xs = 4) {
     obj.value = input(obj.value, zs, xs);
@@ -1552,10 +1559,10 @@ function printCode(contentId, hiddenId) {
 
 //所选时间比较
 function comTimeDay(startTime, endTime) {
-    if (exceedTime(startTime)) {
-        layer.msg("开始时间不能大于当前时间");
-        return true;
-    }
+    //if (exceedTime(startTime)) {
+    //    layer.msg("开始时间不能大于当前时间");
+    //    return true;
+    //}
     if (compareDate(startTime, endTime)) {
         layer.msg("开始时间不能大于结束时间");
         return true;
@@ -1984,35 +1991,58 @@ function deepCopy(obj) {
 }
 
 //dataTable基本参数
-function dataTableConfig(data = [], isCheck = false, order = 0) {
+function dataTableConfig(data = [], isCheck = false, order = 0, ordering = true) {
     var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px' }];
     const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-        bAutoWidth: false,
-        data: data,
+        bAutoWidth: true,
         destroy: true,
         paging: true,
         searching: true,
-        //ordering: isList,
+        ordering: ordering,
         aaSorting: [[order, 'asc']],
         aLengthMenu: [20, 40, 60],
         iDisplayLength: 20,
-        language: oLanguage,
-        columns: defaultColumns,
-        //表头固定
-        //fixedHeader: true,
-        //scrollX: "500px",
-        //scrollY: "400px",
-        //scrollCollapse: true,
-        ////固定首列，需要引入相应 dataTables.fixedColumns.min.js
-        //fixedColumns: {
-        //    leftColumns: 2
-        //}
+        language: oLanguage
     };
-    isCheck && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
-    obj.addColumns = function (columns) {
-        obj.columns = obj.columns.concat(columns);
+    if (data != 0) {
+        addOrderData(data);
+        obj.data = data;
     }
+    isCheck && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
+    obj.addColumns = function (columns, xvHao = true) {
+        if (!obj.columns) obj.columns = [];
+        obj.columns = obj.columns.length == 0 && xvHao ? defaultColumns.concat(columns) : obj.columns.concat(columns);
+    }
+    obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
+        //表头固定
+        obj.fixedHeader = fixedHeader;
+        //横向滚动
+        obj.scrollX = scrollX;
+        obj.scrollY = scrollY;
+        obj.scrollCollapse = true;
+        //固定首列，需要引入相应 dataTables.fixedColumns.min.js
+        obj.fixedColumns = {
+            leftColumns: leftColumn,
+            rightColumns: rightColumn
+        };
+    }
+    return obj;
+}
+
+function fixedHeaderColumn(fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
+    const obj = {};
+    //表头固定
+    obj.fixedHeader = fixedHeader;
+    //横向滚动
+    obj.scrollX = scrollX;
+    obj.scrollY = scrollY;
+    obj.scrollCollapse = true;
+    //固定首列，需要引入相应 dataTables.fixedColumns.min.js
+    obj.fixedColumns = {
+        leftColumns: leftColumn,
+        rightColumns: rightColumn
+    };
     return obj;
 }
 
@@ -2022,7 +2052,11 @@ function _tableSet() {
         order: (a, b, c, d) => +d.row + 1,
         isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value="${d.Id}">`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
-        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:120px;width:${width}" value="${d}">`,
+        addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:70px;width:${width}" value="${d}">`,
+        addNumberInput: (className, param, d) => {
+            var s = param.split(',');
+            return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`
+        },
         select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control hidden textIn ${className}" style="min-width:120px">${ops}</select>`,
         addSelect: (ops, className) => `<select class="form-control ${className}" style="min-width:120px">${ops}</select>`,
         updateBtn: (fn, d) => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)" value="${d}">修改</button>`,
@@ -2056,10 +2090,25 @@ function _tableSet() {
         },
         hms: d => {
             return `<div class="flexStyle" style="justify-content:center">
-                        <input type="text" class="form-control text-center hour" style="width:50px" value="${d.Hour || 0}"><span style="margin:0 5px">时</span>
-                        <input type="text" class="form-control text-center minute" style="width:50px" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
-                        <input type="text" class="form-control text-center second" style="width:50px" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
+                        <input type="text" class="form-control text-center hour" style="width:60px" oninput="onInput(this, 5, 0)" value="${d.Hour || 0}"><span style="margin:0 5px">时</span>
+                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onNumberLimitInput(this)" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onNumberLimitInput(this)" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
                     </div>`;
+        },
+        hmsCal: d => {
+            var t = convertTime(d);
+            return `<div class="flexStyle" style="justify-content:center">
+                        <input type="text" class="form-control text-center hour" style="width:60px" oninput="onInput(this, 5, 0)" value="${t.h}"><span style="margin:0 5px">时</span>
+                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onNumberLimitInput(this)" value="${t.m || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onNumberLimitInput(this)" value="${t.s || 0}"><span style="margin:0 5px">秒</span>
+                    </div>`;
+        },
+        msCal: (className, look, d) => {
+            var t = convertTime(d, false);
+            return !look ? `<div class="flexStyle" style="justify-content:center">
+                        <input type="text" class="form-control text-center minute ${className}" oninput="onInput(this, 5, 0)" style="width:60px" value="${t.m}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second ${className}" oninput="onNumberLimitInput(this)" style="width:40px" value="${t.s}"><span style="margin:0 5px">秒</span>
+                    </div>`: `${t.m}<span style="margin:0 5px">分</span>${t.s}<span style="margin:0 5px">秒</span>`;
         },
         showTime: d => d === '0001-01-01 00:00:00' ? '' : d.split(' ')[0]
     }
@@ -2157,13 +2206,18 @@ function updateTableRow(trs, getTrInfo, opType, callback) {
 }
 
 //初始化时间选择器
-function initDayTime(el) {
+function initDayTime(el, date = undefined, fnc = undefined) {
     $(el).find('.form_date').attr('readonly', true).datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm-dd',
         maxViewMode: 2,
         todayBtn: 'linked',
         autoclose: true
+    }).on('changeDate', function () {
+        if (isStrEmptyOrUndefined($(this).val()) && date) {
+            $(this).val(getDate(date)).datepicker('update');
+        }
+        if (fnc) fnc();
     });
 }
 
