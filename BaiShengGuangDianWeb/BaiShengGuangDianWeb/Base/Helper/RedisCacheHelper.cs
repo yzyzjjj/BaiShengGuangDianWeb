@@ -74,13 +74,13 @@ namespace BaiShengGuangDianWeb.Base.Helper
                                         case "reload_param":
                                             break;
                                         default:
-                                            Log.ErrorFormat("Uknown CMD {0}", data[1]);
+                                            Log.ErrorFormat("UnKnown CMD {0}", data[1]);
                                             break;
                                     }
                                 }
                                 else
                                 {
-                                    Log.ErrorFormat("Uknown data {0}", msg);
+                                    Log.ErrorFormat("UnKnown data {0}", msg);
                                 }
                             };
                             sub.SubscribeToChannels(_redisConfig.RedisKey);

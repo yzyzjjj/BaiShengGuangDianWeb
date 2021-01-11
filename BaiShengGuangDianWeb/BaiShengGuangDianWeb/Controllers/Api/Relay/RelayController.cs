@@ -51,7 +51,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
-            //url = "http://192.168.1.184:62101" + permission.Url;
+            url = "http://192.168.1.184:62101" + permission.Url;
             var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")
             {
