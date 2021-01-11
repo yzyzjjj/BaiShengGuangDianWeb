@@ -2795,12 +2795,12 @@ function showCapacityTaskProcess(cover = true) {
                     </div>`;
             //<tr>${'<th class="bg-blue">总计</th><th class="bg-green">库存</th><th class="bg-yellow">需生产</th><th>需投料</th><th class="bg-yellow">已完成</th><th>已投料</th>'.repeat(n)}</tr>
         };
-        const orders = ret.Orders.sort((a, b) => a.Order - b.Order);
+        const orders = ret.Orders.sort(sortOrder);
         const headTr = orders.reduce((a, b, i) => `${a}<th colspan="10" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
         //_pmcPreviewParams = {};
         const tbody = data.reduce((a, b, i) => {
             const id = b.Id;
-            const needs = b.Needs.sort((a, b) => a.Order - b.Order);
+            const needs = b.Needs.sort(sortOrder);
             const o = {};
             needs.forEach(item => { o[item.Order] = item; });
             const tds = orders.reduce((a, b) => {
@@ -3250,6 +3250,7 @@ function updatePmcPreviewParams(data) {
     data.forEach(item => {
         const o = {
             Id: item.Id,
+            Order: item.Order,
             Needs: item.Needs.map(item => ({
                 Order: item.Order,
                 TaskOrderId: item.TaskOrderId,
@@ -3281,7 +3282,7 @@ function getPmcPreviewParams(check = false, clear = true) {
             //$('#pmcPreviewBox,#pmcPreviewProcess').html('');
             $('#pmcPreviewProcessBtn').html('');
         }
-
+        let i = 0;
         _pmcPreviewParams = {};
         let trs = getDataTableRow('#arrangeTaskList');
         let instance = $('#arrangeTaskList').DataTable();
@@ -3294,6 +3295,7 @@ function getPmcPreviewParams(check = false, clear = true) {
             if (!_pmcPreviewParams[id]) {
                 _pmcPreviewParams[id] = { Id: id };
             }
+            _pmcPreviewParams[id].Order = i;
             if (startTime) {
                 _pmcPreviewParams[id].StartTime = startTime;
             } else {
@@ -3329,6 +3331,7 @@ function getPmcPreviewParams(check = false, clear = true) {
             if (!_pmcPreviewParams[id]) {
                 _pmcPreviewParams[id] = { Id: id };
             }
+            _pmcPreviewParams[id].Order = i;
             if (startTime) {
                 _pmcPreviewParams[id].StartTime = startTime;
             } else {
@@ -3492,12 +3495,12 @@ function getTaskProcessList(cover = true) {
                         </div>
                     </div>`;
         };
-        const orders = ret.Orders.sort((a, b) => a.Order - b.Order);
+        const orders = ret.Orders.sort(sortOrder);
         const headTr = orders.reduce((a, b, i) => `${a}<th colspan="6" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
         //_pmcPreviewParams = {};
-        const tbody = data.reduce((a, b, i) => {
+        const tbody = data.sort(sortOrder).reduce((a, b, i) => {
             const id = b.Id;
-            const needs = b.Needs.sort((a, b) => a.Order - b.Order);
+            const needs = b.Needs.sort(sortOrder);
             const o = {};
             needs.forEach(item => { o[item.Order] = item; });
             const tds = orders.reduce((a, b) => {
@@ -3580,11 +3583,11 @@ function getPmcPreviewList() {
                         </div>
                       </div>`;
         };
-        const orders = data.Orders.sort((a, b) => a.Order - b.Order);
+        const orders = data.Orders.sort(sortOrder);
         const headTr = orders.reduce((a, b, c) => c % 2 == 0 ? `${a}<th colspan="2" class="bg-gray">${b.Process}</th>` : `${a}<th colspan="2">${b.Process}</th>`, '');
         const tbody = data.Cost.reduce((a, b, i) => {
             const id = b.Id;
-            const costDays = b.CostDays.sort((a, b) => a.Order - b.Order);
+            const costDays = b.CostDays.sort(sortOrder);
             const o = {};
             costDays.forEach(item => {
                 o[item.Order] = item;

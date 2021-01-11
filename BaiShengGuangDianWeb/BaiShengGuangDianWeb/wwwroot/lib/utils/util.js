@@ -2274,3 +2274,8 @@ function updateTable(table, data) {
         table.rows.add(addArray).draw();
     }
 }
+
+//按顺序排序
+function sortOrder(a, b, t = 0) {
+    return t == 0 ? a.Order - b.Order : b.Order - a.Order;
+}
