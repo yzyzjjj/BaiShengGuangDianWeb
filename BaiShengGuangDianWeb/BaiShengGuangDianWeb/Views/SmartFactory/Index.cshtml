@@ -760,13 +760,10 @@
                         <select class="form-control" id="addPlanProcess"></select>
                     </div>
                     <div class="flexStyle form-group">
-                        <label class="control-label text-nowrap no-margin">产能类型：</label>
+                        <label class="control-label text-nowrap no-margin">产能配置：</label>
                         <select class="form-control" id="addPlanCapacity"></select>
                     </div>
                     <label class="control-label">产能清单：</label>
-                    @*<div class="table-responsive mailbox-messages">
-                            <table class="table table-hover table-striped" id="addPlanCapacityList"></table>
-                        </div>*@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <div class="mailbox-messages table-responsive">
@@ -776,14 +773,15 @@
                         <div class="form-group col-md-8">
                             <div class="form-group flexStyle add update calTimeBox">
                                 <label class="control-label">时间计算：</label>
-                                <input type="text" class="form-control text-center ch" style="width:60px" oninput="onInput(this, 5, 0)" value="0"><span style="margin:0 5px">时</span>
-                                <input type="text" class="form-control text-center cm" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">分</span>
-                                <input type="text" class="form-control text-center cs" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">秒</span>
+                                <input type="text" class="form-control text-center ch" style="width:60px" value="0"><span style="margin:0 5px">时</span>
+                                <input type="text" class="form-control text-center cm" style="width:40px" value="0"><span style="margin:0 5px">分</span>
+                                <input type="text" class="form-control text-center cs" style="width:40px" value="0"><span style="margin:0 5px">秒</span>
                                 <label class="control-label"> = </label>
                                 <span class="rm" style="margin:5px 5px">0</span><span>分</span>
                                 <span class="rs" style="margin:0 5px">0</span><span>秒</span>
                                 <button type="button" style="margin:0 20px" class="btn btn-primary btn-sm set">重置</button>
                             </div>
+                            <h4 class="control-label text-red capacityTitle"></h4>
                             <div class="form-group" id="planDevCapacitySetBox">
                                 <label class="control-label">设备产能设置：</label>
                                 <div class="mailbox-messages table-responsive">
@@ -816,7 +814,7 @@
         </div>
     </div>
 
-    @*产能类型模态框*@
+    @*产能配置模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -824,12 +822,12 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">产能类型管理</h4>
+                    <h4 class="modal-title">产能配置管理</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">产能类型管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateCapacityInfo()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddCapacityCategoryModel()">添加</button>
@@ -851,7 +849,7 @@
         </div>
     </div>
 
-    @*添加、查看和修改产能类型详情模态框*@
+    @*添加、查看和修改产能配置详情模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -865,8 +863,8 @@
                     <div class="row">
                         <div class="form-group col-md-4">
                             <div class="flexStyle form-group add">
-                                <label class="control-label text-nowrap no-margin">类型：</label>
-                                <input type="text" class="form-control" id="addCapacityCategory">
+                                <label class="control-label text-nowrap no-margin">名称：</label>
+                                <input type="text" class="form-control" disabled="disabled" id="addCapacityCategory">
                             </div>
                             <div class="flexStyle form-group add">
                                 <label class="control-label text-nowrap no-margin">备注：</label>
@@ -882,16 +880,17 @@
                             </div>
                         </div>
                         <div class="form-group col-md-8">
-                            <div class="form-group flexStyle add update" id="calTimeBox">
+                            <div class="form-group flexStyle calTimeBox add update">
                                 <label class="control-label">时间计算：</label>
-                                <input type="text" class="form-control text-center ch" style="width:60px" oninput="onInput(this, 5, 0)" value="0"><span style="margin:0 5px">时</span>
-                                <input type="text" class="form-control text-center cm" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">分</span>
-                                <input type="text" class="form-control text-center cs" style="width:40px" oninput="onNumberLimitInput(this)" value="0"><span style="margin:0 5px">秒</span>
+                                <input type="text" class="form-control text-center ch" style="width:60px" value="0"><span style="margin:0 5px">时</span>
+                                <input type="text" class="form-control text-center cm" style="width:40px" value="0"><span style="margin:0 5px">分</span>
+                                <input type="text" class="form-control text-center cs" style="width:40px" value="0"><span style="margin:0 5px">秒</span>
                                 <label class="control-label"> = </label>
                                 <span class="rm" style="margin:5px 5px">0</span><span>分</span>
                                 <span class="rs" style="margin:0 5px">0</span><span>秒</span>
                                 <button type="button" style="margin:0 20px" class="btn btn-primary btn-sm set">重置</button>
                             </div>
+                            <h4 class="control-label text-red capacityTitle"></h4>
                             <div class="form-group" id="devCapacitySetBox">
                                 <label class="control-label">设备产能设置：</label>
                                 <div class="mailbox-messages table-responsive">
@@ -1090,9 +1089,9 @@
                                             <table class="table table-hover table-striped table-condensed table-responsive" id="personCapacityTaskSetList"></table>
                                         </div>
                                     </div>
-                                    <div class="form-group text-center">
+                                    @*<div class="form-group text-center">
                                         <button type="button" class="btn btn-primary btn-sm" id="capacityTaskSetBtn">确定</button>
-                                    </div>
+                                    </div>*@
                                 </div>
                             </div>
                         </div>

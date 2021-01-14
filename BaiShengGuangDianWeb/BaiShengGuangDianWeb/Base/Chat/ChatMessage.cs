@@ -4,7 +4,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
 {
     public class ChatMessage
     {
-        public ChatEnum ChatEnum = ChatEnum.Default;
-        public object Message;
+        public ChatEnum ChatEnum { get; set; }
+        public object Message { get; set; }
     }
 }

@@ -37,15 +37,14 @@ namespace BaiShengGuangDianWeb
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(options =>
-                    {
-                        //忽略循环引用
-                        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                        ////不使用驼峰样式的key
-                        //options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                        //设置时间格式
-                        options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                    }
-                );
+                {
+                    //忽略循环引用
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    ////不使用驼峰样式的key
+                    //options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    //设置时间格式
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                });
 
 
             //注册过滤器
@@ -56,16 +55,8 @@ namespace BaiShengGuangDianWeb
             });
 
             //跨域
-            services.AddCors(options =>
-            {
-                options.AddPolicy("default", policy =>
-                {
-                    policy.AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowAnyOrigin()
-                        .AllowCredentials();
-                });
-            });
+            services.AddCors(options => options.AddPolicy("default",
+                policy => policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().AllowCredentials()));
             services.AddSignalR();
 
             //添加jwt验证：
@@ -104,10 +95,7 @@ namespace BaiShengGuangDianWeb
                 ContentTypeProvider = provider
             });
             //app.UseCookiePolicy();
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<ChatHub>("/chatHub");
-            });
+            app.UseSignalR(routes => routes.MapHub<ChatHub>("/chatHub"));
             app.UseMvcWithDefaultRoute();
 
             FilePath.RootPath = env.WebRootPath;

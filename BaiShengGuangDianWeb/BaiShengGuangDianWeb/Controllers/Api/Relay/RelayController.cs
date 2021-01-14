@@ -51,7 +51,9 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             }
 
             var url = managementServer.Host + permission.Url;
+#if  DEBUG
             url = "http://192.168.1.184:62101" + permission.Url;
+#endif
             var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")
             {

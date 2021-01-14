@@ -4,26 +4,42 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Base.Chat
 {
     public class ChatHub : Hub
     {
+        private static int t = 0;
         //SendMsg用于前端调用
         public Task SendMsg(ChatMessage info)
         {
             //在客户端实现此处的方法
             var cid = Context.ConnectionId;
             JObject msg;
+            int id;
             switch (info.ChatEnum)
             {
                 case ChatEnum.Connect:
-                    msg = JObject.Parse(info.Message.ToString());
-                    ChatHelper.AddConnectionId(msg["Id"].ToObject<int>(), cid);
+                    if (int.TryParse(info.Message.ToString(), out id))
+                        ChatHelper.AddConnectionId(id, cid);
+                    else
+                        info.ChatEnum = ChatEnum.Back;
+                    info.Message = info.ChatEnum + (info.ChatEnum == ChatEnum.Back ? $" Fail,{cid}" : $" Success,{cid}");
                     break;
                 case ChatEnum.Logout:
+                    if (int.TryParse(info.Message.ToString(), out id))
+                        ChatHelper.RemoveConnectionId(id, cid);
+                    else
+                        info.ChatEnum = ChatEnum.Back;
+                    info.Message = info.ChatEnum + (info.ChatEnum == ChatEnum.Back ? " Fail" : " Success");
+                    break;
+                case ChatEnum.Test:
+                    return Clients.All.SendAsync(info.ChatEnum.ToString(), info.Message.ToString());
+                case ChatEnum.RefreshId:
                     msg = JObject.Parse(info.Message.ToString());
-                    ChatHelper.RemoveConnectionId(msg["Id"].ToObject<int>(), cid);
+                    ChatHelper.RemoveConnectionId(msg["Id"].ToObject<int>(), msg["CId"].ToObject<string>());
+                    info.Message = $"{info.ChatEnum.ToString()} Success,{cid}";
                     break;
                 case ChatEnum.FaultDevice:
                     msg = JObject.Parse(info.Message.ToString());
@@ -45,11 +61,11 @@ namespace BaiShengGuangDianWeb.Base.Chat
 
                     EmailHelper.Send($"{msg["Code"].ToObject<string>()} 故障提醒!!!",
                         $"<span style=\"color: red\">{msg["Code"].ToObject<string>()}</span>出现故障, 上报时间:{DateTime.Now}", mailList, 1);
+                    info.ChatEnum = ChatEnum.Back;
+                    info.Message = info.ChatEnum + " Success";
                     break;
             }
-
-            info.Message = "success";
-            return Clients.Client(cid).SendAsync(ChatEnum.Default.ToString(), info.Message);
+            return Clients.Client(cid).SendAsync(info.ChatEnum.ToString(), info.Message);
         }
 
     }

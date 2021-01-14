@@ -961,7 +961,7 @@ function initFileInputMultiple(uiEle, type, func = null) {
         }
     }).on('fileclear', function (evt, file) {
         // 点击右上角叉叉执行
-        console.log('删除所有选择文件');
+        //console.log('删除所有选择文件');
         prepareUpload = [];
     }).on('fileremoved', function (evt, file) {
         // 该事件钩子针对只选择不上传的情况
@@ -1090,6 +1090,7 @@ function input(s, zs = 5, xs = 4) {
             s = s.join("");
         }
     }
+    isStrEmptyOrUndefined(s) && (s = '0');
     return s;
 }
 

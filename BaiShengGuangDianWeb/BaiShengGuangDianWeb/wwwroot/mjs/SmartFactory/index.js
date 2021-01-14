@@ -1,6 +1,6 @@
 ﻿const tableSet = _tableSet();
 function pageReady() {
-    $(".sidebar-mini").addClass("sidebar-collapse")
+    $(".sidebar-mini").addClass("sidebar-collapse");
     //$('#sendCardSTime,#sendCardETime,#pmcChildSTime,#pmcChildETime,#pmcInStoreSTime,#pmcInStoreETime').val(getDate())initDayTime
     $('#sendCardSTime,#sendCardETime,#pmcChildSTime,#pmcChildETime').val(getDate()).datepicker('update');
     $('#pmcChildDTime').val(getNowWeekRange(new Date().getDay() == 0 ? 7 : new Date().getDay()).end).datepicker('update');
@@ -30,18 +30,19 @@ function pageReady() {
         getNotArrangeTaskList();
         getArrangeTaskList();
     });
-    $('#addProcessCodeBody,#addProcessCodeCategoryBody').on('click', '.upTr', function () {
-        const tr = $(this).parents('tr');
-        const tbody = '#' + $(this).parents('tbody').attr('id');
-        const upTr = tr.prev();
-        upTr.before(tr);
-        setAddProcessOpList(tbody);
-    });
-    $('#addProcessCodeBody,#addProcessCodeCategoryBody').on('click', '.delBtn', function () {
-        const tbody = '#' + $(this).parents('tbody').attr('id');
-        $(this).parents('tr').remove();
-        setAddProcessOpList(tbody);
-    });
+    $('#addProcessCodeBody,#addProcessCodeCategoryBody')
+        .on('click', '.upTr', function () {
+            const tr = $(this).parents('tr');
+            const tbody = '#' + $(this).parents('tbody').attr('id');
+            const upTr = tr.prev();
+            upTr.before(tr);
+            setAddProcessOpList(tbody);
+        })
+        .on('click', '.delBtn', function () {
+            const tbody = '#' + $(this).parents('tbody').attr('id');
+            $(this).parents('tr').remove();
+            setAddProcessOpList(tbody);
+        });
     $('#addPlanCapacity').on('change', function () {
         const fn = data => {
             const tableConfig = _tablesConfig(false, data);
@@ -55,12 +56,30 @@ function pageReady() {
         const capacityId = $(this).val();
         capacityId ? myPromise(5560, { capacityId }, true).then(e => fn(e.datas)) : fn([]);
     });
-    $('#addPlanCapacityList').on('input', '.rate', function () {
-        if (($(this).val() >> 0) > 100) $(this).val(100);
-    });
-    $('#addPlanCapacityList').on('input', '.minute,.second', function () {
-        if (($(this).val() >> 0) > 59) $(this).val(59);
-    });
+    $('#addPlanCapacityList')
+        .on('input', '.rate', function () {
+            if (($(this).val() >> 0) > 100) $(this).val(100);
+        })
+        .on('input', '.minute,.second', function () {
+            if (($(this).val() >> 0) > 59) $(this).val(59);
+        })
+        .on('click', '.capacity-btn', function () {
+            let prop = 'qId', val = $(this).attr('list');
+            if (!val || val == 0) {
+                prop = 'processId';
+                val = $(this).attr('process');
+            }
+
+            var process = $(this).attr("p");
+            const t = {};
+            t[prop] = val;
+            //myPromise(5564, { [prop]: val }, true).then(e => {
+            myPromise(5564, t, true).then(e => {
+                e.Process = process;
+                devicesOperatorsTable(e, true, "planDevCapacitySetBox", "planDevCapacitySetList", "planPersonCapacitySetList");
+            });
+            $('#addCapacitySetBtn').addClass('hidden');
+        });
     $('#addPlanProcess').on('change', function (e, callback) {
         const categoryId = $(this).val();
         const getCapacityFn = myPromise(5530, { categoryId, menu: true }, true);
@@ -93,84 +112,85 @@ function pageReady() {
             $('#addPlanModel').modal('show');
         });
     });
-    $('#planProcessCodeList').on('change', '.process-code-select', function () {
-        const id = $(this).val();
-        const d = _planProcessCodeInfo[id];
-        $(this).siblings('.process-code-category').text(`类型：${d.Category}`);
-        const processId = d.List ? d.List.split(',') : [];
-        const processes = d.Processes ? d.Processes.split(',') : [];
-        const arr = processId.map((item, i) => ({ ProcessId: item, Process: processes[i], ProcessNumber: 0, ProcessCodeId: d.Id }));
-        const tableConfig = _tablesConfig(false, arr);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Process', title: '流程' },
-            { data: null, title: '可否返工', render: tableSet.isRework },
-            { data: 'ProcessNumber', title: '单台加工数量', bVisible: false, render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
-            { data: null, title: '工艺数据', render: tableSet.setBtn }
-        ]);
-        $(this).closest('.temp').find('.process-table').DataTable(tableConfig);
-        disabledProcessCode();
-    });
-    $('#planProcessCodeList').on('click', '.browse-btn', function () {
-        myPromise(5040).then(data => {
-            const tableConfig = _tablesConfig(false, data.datas, 0);
+    $('#planProcessCodeList')
+        .on('change', '.process-code-select', function () {
+            const id = $(this).val();
+            const d = _planProcessCodeInfo[id];
+            $(this).siblings('.process-code-category').text(`类型：${d.Category}`);
+            const processId = d.List ? d.List.split(',') : [];
+            const processes = d.Processes ? d.Processes.split(',') : [];
+            const arr = processId.map((item, i) => ({ ProcessId: item, Process: processes[i], ProcessNumber: 0, ProcessCodeId: d.Id }));
+            const tableConfig = _tablesConfig(false, arr);
             tableConfig.columns = tableConfig.columns.concat([
-                { data: 'Code', title: '编号' },
-                { data: 'Category', title: '类型' },
-                { data: 'Processes', title: '流程详情', render: tableSet.processDetail },
-                { data: 'Remark', title: '备注' }
+                { data: 'Process', title: '流程' },
+                { data: null, title: '可否返工', render: tableSet.isRework },
+                { data: 'ProcessNumber', title: '单台加工数量', bVisible: false, render: tableSet.addInput.bind(null, 'processNumber', 'auto') },
+                { data: null, title: '工艺数据', render: tableSet.setBtn }
             ]);
-            $('#browseProcessCodeList').DataTable(tableConfig);
-            $('#browseProcessCodeModel').modal('show');
-        });
-    });
-    $('#planProcessCodeList').on('click', '.del-btn', function () {
-        $(this).closest('.temp').remove();
-        disabledProcessCode();
-        $('#addPlanProcessList').prop('disabled', false);
-    });
-    $('#planProcessCodeList').on('click', '.set-btn', function () {
-        const data = this.ProcessData ? this.ProcessData.map(item => ({
-            addPressM: item[0],
-            addPressS: item[1],
-            workM: item[2],
-            workS: item[3],
-            setPress: item[4],
-            rotate: item[5]
-        })) : [];
-        const tableConfig = _tablesConfig(false, data);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'addPressM', title: '加压时间（M）', render: tableSet.addInput.bind(null, 'addPressM', 'auto') },
-            { data: 'addPressS', title: '加压时间（S）', render: tableSet.addInput.bind(null, 'addPressS', 'auto') },
-            { data: 'workM', title: '工序时间（M）', render: tableSet.addInput.bind(null, 'workM', 'auto') },
-            { data: 'workS', title: '工序时间（S）', render: tableSet.addInput.bind(null, 'workS', 'auto') },
-            { data: 'setPress', title: '设定压力（Kg）', render: tableSet.addInput.bind(null, 'setPress', 'auto') },
-            { data: 'rotate', title: '下盘速度（rpm）', render: tableSet.addInput.bind(null, 'rotate', 'auto') },
-            { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
-        ]);
-        $('#setCraftList').DataTable(tableConfig);
-        $('#addCraftTrBtn').prop('disabled', getDataTableRow('#setCraftList').length === 8);
-        $('#setCraftModel').modal('show');
-        $('#addCraftBtn').off('click').on('click', () => {
-            const trs = getDataTableRow('#setCraftList');
-            if (!trs.length) {
-                layer.msg('请先设置数据再添加');
-                return;
-            }
-            const info = Array.from(trs).map(tr => {
-                const el = $(tr);
-                const addPressM = el.find('.addPressM').val() >> 0 || 0;
-                const addPressS = el.find('.addPressS').val() >> 0 || 0;
-                const workM = el.find('.workM').val() >> 0 || 0;
-                const workS = el.find('.workS').val() >> 0 || 0;
-                const setPress = el.find('.setPress').val() >> 0 || 0;
-                const rotate = el.find('.rotate').val() >> 0 || 0;
-                return [addPressM, addPressS, workM, workS, setPress, rotate];
+            $(this).closest('.temp').find('.process-table').DataTable(tableConfig);
+            disabledProcessCode();
+        })
+        .on('click', '.browse-btn', function () {
+            myPromise(5040).then(data => {
+                const tableConfig = _tablesConfig(false, data.datas, 0);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'Code', title: '编号' },
+                    { data: 'Category', title: '类型' },
+                    { data: 'Processes', title: '流程详情', render: tableSet.processDetail },
+                    { data: 'Remark', title: '备注' }
+                ]);
+                $('#browseProcessCodeList').DataTable(tableConfig);
+                $('#browseProcessCodeModel').modal('show');
             });
-            this.ProcessData = info;
-            layer.msg('工艺设置成功');
-            $('#setCraftModel').modal('hide');
+        })
+        .on('click', '.del-btn', function () {
+            $(this).closest('.temp').remove();
+            disabledProcessCode();
+            $('#addPlanProcessList').prop('disabled', false);
+        })
+        .on('click', '.set-btn', function () {
+            const data = this.ProcessData ? this.ProcessData.map(item => ({
+                addPressM: item[0],
+                addPressS: item[1],
+                workM: item[2],
+                workS: item[3],
+                setPress: item[4],
+                rotate: item[5]
+            })) : [];
+            const tableConfig = _tablesConfig(false, data);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'addPressM', title: '加压时间（M）', render: tableSet.addInput.bind(null, 'addPressM', 'auto') },
+                { data: 'addPressS', title: '加压时间（S）', render: tableSet.addInput.bind(null, 'addPressS', 'auto') },
+                { data: 'workM', title: '工序时间（M）', render: tableSet.addInput.bind(null, 'workM', 'auto') },
+                { data: 'workS', title: '工序时间（S）', render: tableSet.addInput.bind(null, 'workS', 'auto') },
+                { data: 'setPress', title: '设定压力（Kg）', render: tableSet.addInput.bind(null, 'setPress', 'auto') },
+                { data: 'rotate', title: '下盘速度（rpm）', render: tableSet.addInput.bind(null, 'rotate', 'auto') },
+                { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
+            ]);
+            $('#setCraftList').DataTable(tableConfig);
+            $('#addCraftTrBtn').prop('disabled', getDataTableRow('#setCraftList').length === 8);
+            $('#setCraftModel').modal('show');
+            $('#addCraftBtn').off('click').on('click', () => {
+                const trs = getDataTableRow('#setCraftList');
+                if (!trs.length) {
+                    layer.msg('请先设置数据再添加');
+                    return;
+                }
+                const info = Array.from(trs).map(tr => {
+                    const el = $(tr);
+                    const addPressM = el.find('.addPressM').val() >> 0 || 0;
+                    const addPressS = el.find('.addPressS').val() >> 0 || 0;
+                    const workM = el.find('.workM').val() >> 0 || 0;
+                    const workS = el.find('.workS').val() >> 0 || 0;
+                    const setPress = el.find('.setPress').val() >> 0 || 0;
+                    const rotate = el.find('.rotate').val() >> 0 || 0;
+                    return [addPressM, addPressS, workM, workS, setPress, rotate];
+                });
+                this.ProcessData = info;
+                layer.msg('工艺设置成功');
+                $('#setCraftModel').modal('hide');
+            });
         });
-    });
     $('#setCraftList').on('click', '.del-btn', function () {
         $('#addCraftTrBtn').prop('disabled', false);
         delDataTableTr.call(this);
@@ -196,15 +216,16 @@ function pageReady() {
     $('#setCraftList,#planProcessCodeList,#addFlowCardProcessList,#devCapacitySetList,#personCapacitySetList,#addPlanCapacityList,#notArrangeTaskProcessBox').on('blur', 'input', function () {
         if (isStrEmptyOrUndefined($(this).val().trim())) $(this).val(0);
     });
-    $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('input', '.target', function () {
-        onInput(this, 8, 0);
-    });
-    $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('focus', '.target', function () {
-        if ($(this).val().trim() == 0) $(this).val('');
-    });
-    $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList').on('blur', '.target', function () {
-        if (isStrEmptyOrUndefined($(this).val().trim())) $(this).val(0);
-    });
+    $('#workOrderList,#addWorkOrderList,#taskOrderList,#addTaskOrderList')
+        .on('input', '.target', function () {
+            onInput(this, 8, 0);
+        })
+        .on('focus', '.target', function () {
+            if ($(this).val().trim() == 0) $(this).val('');
+        })
+        .on('blur', '.target', function () {
+            if (isStrEmptyOrUndefined($(this).val().trim())) $(this).val(0);
+        });
     $('#addTaskOrderList').on('change', '.workOrder', function () {
         const qId = $(this).val();
         myPromise(5070, { qId }, true).then(data => {
@@ -224,6 +245,7 @@ function pageReady() {
         });
     });
     $('#processDetailList').on('click', '.look-btn', function () {
+        $(`#devCapacitySetBox`).siblings('.capacityTitle').text("");
         const data = this.ProcessData.map(item => ({
             addPressM: item[0],
             addPressS: item[1],
@@ -262,154 +284,155 @@ function pageReady() {
         }
     });
     $('#showMode').on('change', getProductionLine);
-    $('#productionLineList').on('click', '.show-task-btn', function (e) {
-        const workOrderId = $(this).val();
-        myPromise(5250, { workOrderId }, true).then(data => {
-            const tableConfig = _tablesConfig(false, data.datas);
-            tableConfig.columns = tableConfig.columns.concat([
-                { data: 'TaskOrder', title: '任务单' },
-                { data: 'Product', title: '计划号' },
-                { data: null, title: '状态', render: tableSet.state },
-                { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
-                { data: 'Progress', title: '进度', render: tableSet.progress },
-                { data: 'Id', title: '流程卡', render: d => `<button class="btn btn-info btn-sm show-flow-btn" value="${d}">查看</button>` }
-            ]);
-            $('#taskDetailList').DataTable(tableConfig);
-            $('#showTaskDetailModal').modal('show');
+    $('#productionLineList')
+        .on('click', '.show-task-btn', function (e) {
+            const workOrderId = $(this).val();
+            myPromise(5250, { workOrderId }, true).then(data => {
+                const tableConfig = _tablesConfig(false, data.datas);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'TaskOrder', title: '任务单' },
+                    { data: 'Product', title: '计划号' },
+                    { data: null, title: '状态', render: tableSet.state },
+                    { data: 'DeliveryTime', title: '交货日期', render: tableSet.delivery },
+                    { data: 'Progress', title: '进度', render: tableSet.progress },
+                    { data: 'Id', title: '流程卡', render: d => `<button class="btn btn-info btn-sm show-flow-btn" value="${d}">查看</button>` }
+                ]);
+                $('#taskDetailList').DataTable(tableConfig);
+                $('#showTaskDetailModal').modal('show');
+            });
+            e.stopPropagation();
+        })
+        .on('click', '.work-order', function () {
+            getLineCommon.call(this, 5201, getWorkLine);
+            const tableFn = (data, timeTitle, infoTitle) => {
+                const tableConfig = _tablesConfig(false, data);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'FaultTime', title: timeTitle },
+                    { data: 'WorkOrder', title: '工单' },
+                    { data: 'FlowCard', title: '流程卡' },
+                    { data: 'Process', title: '工序' },
+                    { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+                ]);
+                return tableConfig;
+            }
+            const qId = $(this).attr('value');
+            const warningLineBox = () => {
+                myPromise(5204, { workOrderId: qId }, true).then(e => {
+                    processWarningDangerTemp('warning', `报警工单（${e.datas.length}）`);
+                    $('#warningLineBox .refresh').on('click', warningLineBox);
+                    $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+                });
+            }
+            const dangerLineBox = () => {
+                myPromise(5205, { workOrderId: qId }, true).then(e => {
+                    processWarningDangerTemp('danger', `中断工单（${e.datas.length}）`);
+                    $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                    $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+                });
+            }
+            warningLineBox();
+            dangerLineBox();
+        })
+        .on('click', '.task-order', function () {
+            getLineCommon.call(this, 5251, getTaskLine);
+            const tableFn = (data, timeTitle, infoTitle) => {
+                const tableConfig = _tablesConfig(false, data);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'FaultTime', title: timeTitle },
+                    { data: 'TaskOrder', title: '任务单' },
+                    { data: 'FlowCard', title: '流程卡' },
+                    { data: 'Process', title: '工序' },
+                    { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+                ]);
+                return tableConfig;
+            }
+            const qId = $(this).attr('value');
+            const workId = $(this).attr('work');
+            const successLineBox = () => {
+                myPromise(5251, { qId: workId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('success', `标准工序（${e.length ? e[0].Processes.length : 0}）`);
+                    $('#successLineBox .refresh').on('click', successLineBox);
+                    const tableConfig = _tablesConfig(false, e.length ? e[0].Processes : []);
+                    tableConfig.columns = tableConfig.columns.concat([
+                        { data: 'Process', title: '工序' },
+                        { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
+                        { data: 'Progress', title: '进度', render: tableSet.progress },
+                        { data: 'Qualified', title: '加工次数' },
+                        { data: 'Before', title: '产量' }
+                    ]);
+                    $('#successLineBox table').DataTable(tableConfig);
+                });
+            }
+            const warningLineBox = () => {
+                myPromise(5254, { taskOrderId: qId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                    $('#warningLineBox .refresh').on('click', warningLineBox);
+                    $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+                });
+            }
+            const dangerLineBox = () => {
+                myPromise(5255, { taskOrderId: qId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                    $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                    $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+                });
+            }
+            successLineBox();
+            warningLineBox();
+            dangerLineBox();
+        })
+        .on('click', '.flow-card', function () {
+            getLineCommon.call(this, 5301, getFlowCardLine);
+            const tableFn = (data, timeTitle, infoTitle) => {
+                const tableConfig = _tablesConfig(false, data);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: 'FaultTime', title: timeTitle },
+                    { data: 'FlowCard', title: '流程卡' },
+                    { data: 'Process', title: '工序' },
+                    { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
+                ]);
+                return tableConfig;
+            }
+            const qId = $(this).attr('value');
+            const successLineBox = () => {
+                myPromise(5150, { flowCardId: qId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('success', `流程卡工序（${e.length}）`);
+                    $('#successLineBox .refresh').on('click', successLineBox);
+                    const tableConfig = _tablesConfig(false, e);
+                    tableConfig.columns = tableConfig.columns.concat([
+                        { data: 'Process', title: '工序' },
+                        { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
+                        { data: 'Progress', title: '进度', render: tableSet.progress },
+                        { data: 'Count', title: '加工次数' },
+                        { data: 'Before', title: '产量' }
+                    ]);
+                    $('#successLineBox table').DataTable(tableConfig);
+                });
+            }
+            const warningLineBox = () => {
+                myPromise(5304, { flowCardId: qId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('warning', `报警工单（${e.length}）`);
+                    $('#warningLineBox .refresh').on('click', warningLineBox);
+                    $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
+                });
+            }
+            const dangerLineBox = () => {
+                myPromise(5305, { flowCardId: qId }, true).then(e => {
+                    e = e.datas;
+                    processWarningDangerTemp('danger', `中断工单（${e.length}）`);
+                    $('#dangerLineBox .refresh').on('click', dangerLineBox);
+                    $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
+                });
+            }
+            successLineBox();
+            warningLineBox();
+            dangerLineBox();
         });
-        e.stopPropagation();
-    });
-    $('#productionLineList').on('click', '.work-order', function () {
-        getLineCommon.call(this, 5201, getWorkLine);
-        const tableFn = (data, timeTitle, infoTitle) => {
-            const tableConfig = _tablesConfig(false, data);
-            tableConfig.columns = tableConfig.columns.concat([
-                { data: 'FaultTime', title: timeTitle },
-                { data: 'WorkOrder', title: '工单' },
-                { data: 'FlowCard', title: '流程卡' },
-                { data: 'Process', title: '工序' },
-                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
-            ]);
-            return tableConfig;
-        }
-        const qId = $(this).attr('value');
-        const warningLineBox = () => {
-            myPromise(5204, { workOrderId: qId }, true).then(e => {
-                processWarningDangerTemp('warning', `报警工单（${e.datas.length}）`);
-                $('#warningLineBox .refresh').on('click', warningLineBox);
-                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
-            });
-        }
-        const dangerLineBox = () => {
-            myPromise(5205, { workOrderId: qId }, true).then(e => {
-                processWarningDangerTemp('danger', `中断工单（${e.datas.length}）`);
-                $('#dangerLineBox .refresh').on('click', dangerLineBox);
-                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
-            });
-        }
-        warningLineBox();
-        dangerLineBox();
-    });
-    $('#productionLineList').on('click', '.task-order', function () {
-        getLineCommon.call(this, 5251, getTaskLine);
-        const tableFn = (data, timeTitle, infoTitle) => {
-            const tableConfig = _tablesConfig(false, data);
-            tableConfig.columns = tableConfig.columns.concat([
-                { data: 'FaultTime', title: timeTitle },
-                { data: 'TaskOrder', title: '任务单' },
-                { data: 'FlowCard', title: '流程卡' },
-                { data: 'Process', title: '工序' },
-                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
-            ]);
-            return tableConfig;
-        }
-        const qId = $(this).attr('value');
-        const workId = $(this).attr('work');
-        const successLineBox = () => {
-            myPromise(5251, { qId: workId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('success', `标准工序（${e.length ? e[0].Processes.length : 0}）`);
-                $('#successLineBox .refresh').on('click', successLineBox);
-                const tableConfig = _tablesConfig(false, e.length ? e[0].Processes : []);
-                tableConfig.columns = tableConfig.columns.concat([
-                    { data: 'Process', title: '工序' },
-                    { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
-                    { data: 'Progress', title: '进度', render: tableSet.progress },
-                    { data: 'Qualified', title: '加工次数' },
-                    { data: 'Before', title: '产量' }
-                ]);
-                $('#successLineBox table').DataTable(tableConfig);
-            });
-        }
-        const warningLineBox = () => {
-            myPromise(5254, { taskOrderId: qId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
-                $('#warningLineBox .refresh').on('click', warningLineBox);
-                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
-            });
-        }
-        const dangerLineBox = () => {
-            myPromise(5255, { taskOrderId: qId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
-                $('#dangerLineBox .refresh').on('click', dangerLineBox);
-                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
-            });
-        }
-        successLineBox();
-        warningLineBox();
-        dangerLineBox();
-    });
-    $('#productionLineList').on('click', '.flow-card', function () {
-        getLineCommon.call(this, 5301, getFlowCardLine);
-        const tableFn = (data, timeTitle, infoTitle) => {
-            const tableConfig = _tablesConfig(false, data);
-            tableConfig.columns = tableConfig.columns.concat([
-                { data: 'FaultTime', title: timeTitle },
-                { data: 'FlowCard', title: '流程卡' },
-                { data: 'Process', title: '工序' },
-                { data: null, title: infoTitle, render: d => d.Remark || d.Fault }
-            ]);
-            return tableConfig;
-        }
-        const qId = $(this).attr('value');
-        const successLineBox = () => {
-            myPromise(5150, { flowCardId: qId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('success', `流程卡工序（${e.length}）`);
-                $('#successLineBox .refresh').on('click', successLineBox);
-                const tableConfig = _tablesConfig(false, e);
-                tableConfig.columns = tableConfig.columns.concat([
-                    { data: 'Process', title: '工序' },
-                    { data: null, title: '最后完成时间', render: tableSet.endFinishTime },
-                    { data: 'Progress', title: '进度', render: tableSet.progress },
-                    { data: 'Count', title: '加工次数' },
-                    { data: 'Before', title: '产量' }
-                ]);
-                $('#successLineBox table').DataTable(tableConfig);
-            });
-        }
-        const warningLineBox = () => {
-            myPromise(5304, { flowCardId: qId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('warning', `报警工单（${e.length}）`);
-                $('#warningLineBox .refresh').on('click', warningLineBox);
-                $('#warningLineBox table').DataTable(tableFn(e, '报警时间', '报警信息'));
-            });
-        }
-        const dangerLineBox = () => {
-            myPromise(5305, { flowCardId: qId }, true).then(e => {
-                e = e.datas;
-                processWarningDangerTemp('danger', `中断工单（${e.length}）`);
-                $('#dangerLineBox .refresh').on('click', dangerLineBox);
-                $('#dangerLineBox table').DataTable(tableFn(e, '中断时间', '原因'));
-            });
-        }
-        successLineBox();
-        warningLineBox();
-        dangerLineBox();
-    });
     $('#taskDetailList,#productionLineList').on('click', '.show-flow-btn', function (e) {
         const taskOrderId = $(this).val();
         myPromise(5300, { taskOrderId }, true).then(data => {
@@ -450,12 +473,13 @@ function pageReady() {
     $('#pmcGradeList,#addPmcGradeList').on('input', '.order', function () {
         onInput(this, 8, 0);
     });
-    $('#addPmcPersonList').on('change', '.name', disabledPmcPerson);
-    $('#addPmcPersonList').on('click', '.del-btn', function () {
-        delDataTableTr.call(this);
-        disabledPmcPerson();
-        $('#addPmcPersonListBtn').prop('disabled', false);
-    });
+    $('#addPmcPersonList')
+        .on('change', '.name', disabledPmcPerson)
+        .on('click', '.del-btn', function () {
+            delDataTableTr.call(this);
+            disabledPmcPerson();
+            $('#addPmcPersonListBtn').prop('disabled', false);
+        });
     $('#addDeviceList,#deviceList').on('change', '.category', function () {
         const categoryId = $(this).val();
         const tr = $(this).closest('tr');
@@ -495,15 +519,21 @@ function pageReady() {
         });
     });
     $('#addCapacityList,#capacityDetailList').on('click', '.set-btn', function () {
+        $(`#devCapacitySetBox`).siblings('.capacityTitle').text("");
         showCapacitySetModal.call(this);
         $('#addCapacitySetBtn').removeClass('hidden');
     });
-    $('#capacityList').on('click', '.look-btn', function () {
-        showCapacityDetailModal.call(this, 0);
-    });
-    $('#capacityList').on('click', '.update-btn', function () {
-        showCapacityDetailModal.call(this, 1);
-    });
+    $('#capacityList')
+        .on('click', '.look-btn', function () {
+            $(`#devCapacitySetBox`).siblings('.capacityTitle').text("");
+            const title = $(this).closest('tr').find('.capacity').val();
+            showCapacityDetailModal.call(this, 0, title);
+        })
+        .on('click', '.update-btn', function () {
+            $(`#devCapacitySetBox`).siblings('.capacityTitle').text("");
+            const title = $(this).closest('tr').find('.capacity').val();
+            showCapacityDetailModal.call(this, 1, title);
+        });
     $('#capacityDetailList').on('click', '.capacity-btn', function () {
         let prop = 'qId', val = $(this).val();
         if (!val || val == 0) {
@@ -521,28 +551,18 @@ function pageReady() {
         });
         $('#addCapacitySetBtn').addClass('hidden');
     });
-    $('.calTimeBox').on('input', '.ch, .cm, .cs', function () {
-        exchangeTime(this);
-    });
-    $('.calTimeBox').on('click', '.set', function () {
-        exchangeTime(this, true);
-    });
-    $('#addPlanCapacityList').on('click', '.capacity-btn', function () {
-        let prop = 'qId', val = $(this).attr('list');
-        if (!val || val == 0) {
-            prop = 'processId';
-            val = $(this).attr('process');
+    $(".calTimeBox").on('input', '.ch, .cm, .cs', function () {
+        if ($(this).hasClass("ch")) {
+            onInput(this, 5, 0);
+        } else if ($(this).hasClass("cm")) {
+            onNumberLimitInput(this);
+        } else if ($(this).hasClass("cs")) {
+            onNumberLimitInput(this);
         }
 
-        var process = $(this).attr("p");
-        const t = {};
-        t[prop] = val;
-        //myPromise(5564, { [prop]: val }, true).then(e => {
-        myPromise(5564, t, true).then(e => {
-            e.Process = process;
-            devicesOperatorsTable(e, true);
-        });
-        $('#addCapacitySetBtn').addClass('hidden');
+        exchangeTime(this);
+    }).on('click', '.set', function () {
+        exchangeTime(this, true);
     });
     $('#addProcessCodeCategoryName').on('change', function () {
         const categoryId = $(this).val();
@@ -589,11 +609,9 @@ function exchangeTime(el, init = false) {
     const t = convertTime(second, false);
     div.find('.rm').text(t.m);
     div.find('.rs').text(t.s);
-    if (init) {
-        div.find('.ch').val(hour);
-        div.find('.cm').val(min);
-        div.find('.cs').val(sec);
-    }
+    div.find('.ch').val(hour);
+    div.find('.cm').val(min);
+    div.find('.cs').val(sec);
 }
 
 //异步获取数据
@@ -1594,7 +1612,7 @@ function getPlanList() {
             { data: 'Product', title: '计划号' },
             { data: 'Number', title: '日产能' },
             { data: 'Category', title: '流程编号类型' },
-            { data: 'Capacity', title: '产能类型' },
+            { data: 'Capacity', title: '产能配置' },
             { data: 'ProcessCodes', title: '流程编号清单' },
             { data: 'Remark', title: '备注' },
             { data: 'Id', title: '修改', render: tableSet.updateBtn.bind(null, 'showUpdatePlanModel'), sWidth: '80px' }
@@ -1640,7 +1658,7 @@ function addUpPlan(isAdd) {
     const categoryId = $('#addPlanProcess').val() >> 0;
     if (isStrEmptyOrUndefined(categoryId)) return layer.msg('请选择流程编号类型');
     const capacityId = $('#addPlanCapacity').val() >> 0;
-    if (isStrEmptyOrUndefined(capacityId)) return layer.msg('请选择产能类型');
+    if (isStrEmptyOrUndefined(capacityId)) return layer.msg('请选择产能配置');
     const product = $('#addPlanName').val().trim();
     if (isStrEmptyOrUndefined(product)) return layer.msg('计划号不能为空');
     const remark = $('#addPlanRemark').val().trim();
@@ -1782,22 +1800,22 @@ function delPlan() {
 //----------------------------------------产能管理----------------------------------------------------
 
 let _capacityTrs = null;
-//产能类型弹窗
+//产能配置弹窗
 function showCapacityModel() {
     getCapacityList();
     $('#showCapacityModel').modal('show');
 }
 
-//获取产能类型列表
+//获取产能配置列表
 function getCapacityList() {
     myPromise(5530).then(e => {
         _capacityTrs = [];
         const tableConfig = _tablesConfig(true, e.datas);
         tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Capacity', title: '类型', render: tableSet.input.bind(null, 'capacity') },
+            { data: 'Capacity', title: '配置名称', render: tableSet.input.bind(null, 'capacity') },
             { data: 'Category', title: '流程编号类型' },
             //{ data: 'Number', title: '日产能' },
-            { data: null, title: '产能清单', render: d => `<button class="btn btn-info btn-sm look-btn look-update-btn" value="${d.Id}" categoryId="${d.CategoryId}" category="${d.Category}">查看</button>` },
+            { data: null, title: '清单', render: d => `<button class="btn btn-info btn-sm look-btn look-update-btn" value="${d.Id}" categoryId="${d.CategoryId}" category="${d.Category}">查看</button>` },
             { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
         ]);
         tableConfig.drawCallback = function () {
@@ -1813,11 +1831,11 @@ function getCapacityList() {
     });
 }
 
-//修改产能类型
+//修改产能配置
 function updateCapacityInfo() {
     const fn = el => {
         const capacity = el.find('.capacity').val().trim();
-        if (isStrEmptyOrUndefined(capacity)) return void layer.msg('产能类型不能为空');
+        if (isStrEmptyOrUndefined(capacity)) return void layer.msg('名称不能为空');
         return {
             Capacity: capacity,
             Remark: el.find('.remark').val(),
@@ -1827,9 +1845,10 @@ function updateCapacityInfo() {
     updateTableRow(_capacityTrs, fn, 5531, getCapacityList);
 }
 
-//添加产能类型弹窗
+//添加产能配置弹窗
 function showAddCapacityCategoryModel() {
     $('#addCapacityCategory,#addCapacityRemark').val('');
+    $(`#devCapacitySetBox`).siblings('.capacityTitle').text("");
     showCapacityDetailModal(2);
 }
 
@@ -1838,7 +1857,9 @@ let _capacityDetailListType = -1;
 let capacityId = -1;
 let currentCategoryId = -1;
 //查看/修改产能清单 0 查看 1 修改 2 添加
-function showCapacityDetailModal(type) {
+function showCapacityDetailModal(type, title = "") {
+    $(`#addCapacityCategory`).removeAttr("disabled");
+    exchangeTime($(".calTimeBox"), true);
     let t = "";
     switch (type) {
         case 0:
@@ -1847,10 +1868,11 @@ function showCapacityDetailModal(type) {
             capacityId = $(this).val();
             t = `产能清单${(type == 0 ? "查看" : "修改")}`;
             $(`#showCapacityDetailModal .add`).addClass('hidden');
+            $(`#addCapacityCategory`).attr("disabled", "disabled").val(title).closest('div').removeClass('hidden');
             $(`#showCapacityDetailModal ${(type == 0 ? ".look" : ".update")}`).removeClass('hidden');
             $(`#showCapacityDetailModal ${(type != 0 ? ".look" : ".update")}`).addClass('hidden');
             break;
-        case 2: t = `添加产能类型`;
+        case 2: t = `添加产能配置`;
             currentCategoryId = 0;
             capacityId = 0;
             $(`#showCapacityDetailModal .look`).addClass('hidden');
@@ -1940,10 +1962,10 @@ function showCapacityDetailModal(type) {
 }
 
 //设备&人员产能表格查看/设置
-function devicesOperatorsTable(d, isLook = false) {
-    //const process = d.Process;
-    //var t = `产能${(isLook ? "查看" : "设置")}-${process}`;
-    //$('#showCapacitySetModal').find('.modal-title').text(t);
+function devicesOperatorsTable(d, isLook = false, box = "devCapacitySetBox", dev = "devCapacitySetList", per = "personCapacitySetList") {
+    const process = d.Process;
+    var t = `产能${(isLook ? "查看" : "设置")}-${process}`;
+    $(`#${box}`).siblings('.capacityTitle').text(t);
     const devices = d.Devices;
     const devTableConfig = _tablesConfig(false, devices);
     devTableConfig.columns = devTableConfig.columns.concat([
@@ -1954,14 +1976,12 @@ function devicesOperatorsTable(d, isLook = false) {
         { data: 'Rate', title: '合格率(%)', render: isLook ? d => d : tableSet.addNumberInput.bind(null, 'rate', '50px') },
         { data: 'WorkTime', title: '总工时', render: tableSet.msCal.bind(null, 'workTime', isLook) },
         { data: 'ProductTime', title: '单次工时', render: tableSet.msCal.bind(null, 'productTime', isLook) },
-        //{ data: 'SingleCount', title: '日加工次数', render: isLook ? d => d : tableSet.addNumberInput.bind(null, 'sCount', '72px') },
         { data: 'SingleCount', title: '日加工次数', sClass: 'sCount' },
         { data: 'Number', title: '单台日产能', sClass: 'number' },
-        //{ data: 'Number', title: '单台日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
-    $('#devCapacitySetList').DataTable(devTableConfig);
-    devices.length ? $('#devCapacitySetBox').removeClass('hidden') : $('#devCapacitySetBox').addClass('hidden');
+    $(`#${dev}`).DataTable(devTableConfig);
+    devices.length ? $(`#${box}`).removeClass('hidden') : $(`#${box}`).addClass('hidden');
 
     const operators = d.Operators;
     const perTableConfig = _tablesConfig(false, operators);
@@ -1972,13 +1992,11 @@ function devicesOperatorsTable(d, isLook = false) {
         { data: 'Rate', title: '合格率', render: isLook ? d => d : tableSet.addNumberInput.bind(null, 'rate', '50px') },
         { data: 'WorkTime', title: '总工时', render: tableSet.msCal.bind(null, 'workTime', isLook) },
         { data: 'ProductTime', title: '单次工时', render: tableSet.msCal.bind(null, 'productTime', isLook) },
-        //{ data: 'SingleCount', title: '日加工次数', render: isLook ? d => d : tableSet.addNumberInput.bind(null, 'sCount', '50px') },
         { data: 'SingleCount', title: '日加工次数', sClass: 'sCount' },
         { data: 'Number', title: '单台日产能', sClass: 'number' },
-        //{ data: 'Number', title: '单人日产能', render: isLook ? d => d : tableSet.addInput.bind(null, 'number', 'auto') },
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
-    $('#personCapacitySetList').DataTable(perTableConfig);
+    $(`#${per}`).DataTable(perTableConfig);
 }
 
 function devAndPersonInputInit() {
@@ -2055,6 +2073,7 @@ function showCapacitySetModal() {
     var process = $(this).attr("p");
     const t = {};
     t[prop] = val;
+
     this.Devices
         ? devicesOperatorsTable(this)
         : myPromise(5564, t, true).then(e => {
@@ -2077,7 +2096,7 @@ function showCapacitySetModal() {
                 let pTimeMin = tr.find('.minute.productTime').val() >> 0;
                 let pTimeSec = tr.find('.second.productTime').val() >> 0;
                 item.ProductTime = convertSecond(0, pTimeMin, pTimeSec);
-                item.SingleCount = tr.find('.sCount').val() >> 0;
+                item.SingleCount = tr.find('.sCount').text() >> 0;
                 item.Number = tr.find('.number').text() >> 0;
                 item.Total = tr.find('.total').text() >> 0;
                 return item;
@@ -2090,10 +2109,10 @@ function showCapacitySetModal() {
     });
 }
 
-//添加产能类型
+//添加产能配置
 function addCapacity() {
     const capacity = $('#addCapacityCategory').val().trim();
-    if (isStrEmptyOrUndefined(capacity)) return void layer.msg('产能类型不能为空');
+    if (isStrEmptyOrUndefined(capacity)) return void layer.msg('名称不能为空');
     const remark = $('#addCapacityRemark').val().trim();
     const categoryId = $('#capacityProcess').val();
     if (isStrEmptyOrUndefined(categoryId)) return void layer.msg('请选择流程编号');
@@ -2154,7 +2173,7 @@ function addCapacity() {
     });
 }
 
-//修改产能类型
+//修改产能配置
 function updateCapacity() {
     const capacityId = $(this).val();
     const categoryId = $('#capacityProcess').val();
@@ -2215,11 +2234,11 @@ function updateCapacity() {
     };
     myPromise(5561, opData).then(() => {
         $('#showUpdateCapacityCategoryModel').modal('hide');
-        getCapacityList();
+        //getCapacityList();
     });
 }
 
-//删除产能类型
+//删除产能配置
 function delCapacity() {
     delTableRow(_capacityTrs, 5533, getCapacityList);
 }
@@ -2510,8 +2529,8 @@ function showCapacityTaskChose(capacityId) {
                 data: null, title: '是否选择', render: d => {
                     const dl = _capacityNeed[_capacityNeedCurrentTaskId].Needs[d.Id]['DeviceList'];
                     const ol = _capacityNeed[_capacityNeedCurrentTaskId].Needs[d.Id]['OperatorList'];
-                    if ((dl && dl.length == 0) || (ol && ol.length == 0))
-                        d.Id = d.Id;
+                    if ((!dl || dl.length == 0) && (!ol || ol.length == 0))
+                        d.Id = 0;
                     return tableSet.isFinish(d);
                 }
             }
@@ -2534,56 +2553,104 @@ function showCapacityTaskChose(capacityId) {
                 devAndPersonInputCapacityTaskInit();
                 deviceOperatorCapacityTaskTable(e, true);
                 //设备&人员产能设置确定
-                $('#capacityTaskSetBtn').off('click').on('click', () => {
-                    const fn = (d, prop) => {
-                        if (!_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop]) {
-                            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
-                        }
-                        if (d.length == 0) {
-                            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
-                            return;
-                        }
-                        var ids = [];
-                        d.forEach(item => {
-                            const tr = $(item);
-                            var id = tr.find('.isEnable').val().trim() >> 0;
-                            var single = tr.find('.single').text().trim() >> 0;
-                            var sCount = tr.find('.sCount').text().trim() >> 0;
-                            if (id > 0) {
-                                if (single * sCount > 0) {
-                                    ids[id] = id;
-                                    _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id] = { id, single, sCount };
-                                } else {
-                                    delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id];
-                                }
-                            }
-                        });
-                        const cIds = [];
-                        _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop].forEach(cid => {
-                            cIds.push(cid.id);
-                        });
-                        cIds.forEach(c => {
-                            if (!ids[c]) {
-                                delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][c];
-                            }
-                        });
-                    }
-                    fn(_capacityTaskDeviceTrs, 'DeviceList');
-                    fn(_capacityTaskOperatorTrs, 'OperatorList');
-                    if (_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['DeviceList'].length > 0 || _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['OperatorList'].length > 0) {
-                        layer.msg('设置成功');
-                        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-ok text-green')
-                            .removeClass('glyphicon-remove text-red');
-                    } else {
-                        layer.msg('请选择');
-                        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-remove text-red')
-                            .removeClass('glyphicon-ok text-green');
-                    }
-                });
+                //$('#capacityTaskSetBtn').off('click').on('click', () => {
+                //    const fn = (d, prop) => {
+                //        if (!_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop]) {
+                //            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
+                //        }
+                //        if (d.length == 0) {
+                //            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
+                //            return;
+                //        }
+                //        var ids = [];
+                //        d.forEach(item => {
+                //            const tr = $(item);
+                //            var id = tr.find('.isEnable').val().trim() >> 0;
+                //            var single = tr.find('.single').text().trim() >> 0;
+                //            var sCount = tr.find('.sCount').text().trim() >> 0;
+                //            if (id > 0) {
+                //                if (single * sCount > 0) {
+                //                    ids[id] = id;
+                //                    _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id] = { id, single, sCount };
+                //                } else {
+                //                    delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id];
+                //                }
+                //            }
+                //        });
+                //        const cIds = [];
+                //        _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop].forEach(cid => {
+                //            cIds.push(cid.id);
+                //        });
+                //        cIds.forEach(c => {
+                //            if (!ids[c]) {
+                //                delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][c];
+                //            }
+                //        });
+                //    }
+                //    fn(_capacityTaskDeviceTrs, 'DeviceList');
+                //    fn(_capacityTaskOperatorTrs, 'OperatorList');
+                //    if (_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['DeviceList'].length > 0 || _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['OperatorList'].length > 0) {
+                //        layer.msg('设置成功');
+                //        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-ok text-green')
+                //            .removeClass('glyphicon-remove text-red');
+                //    } else {
+                //        layer.msg('请选择');
+                //        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-remove text-red')
+                //            .removeClass('glyphicon-ok text-green');
+                //    }
+                //});
             });
             $('#addCapacitySetBtn').addClass('hidden');
         });
     });
+}
+
+//设备&人员产能表格查看/设置勾选
+function capacityTaskSet(device = true) {
+    const fn = (d, prop) => {
+        if (!_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop]) {
+            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
+        }
+        if (d.length == 0) {
+            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
+            return;
+        }
+        var ids = [];
+        d.forEach(item => {
+            const tr = $(item);
+            var id = tr.find('.isEnable').val().trim() >> 0;
+            var single = tr.find('.single').text().trim() >> 0;
+            var sCount = tr.find('.sCount').text().trim() >> 0;
+            if (id > 0) {
+                if (single * sCount > 0) {
+                    ids[id] = id;
+                    _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id] = { id, single, sCount };
+                } else {
+                    delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id];
+                }
+            }
+        });
+        const cIds = [];
+        _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop].forEach(cid => {
+            cIds.push(cid.id);
+        });
+        cIds.forEach(c => {
+            if (!ids[c]) {
+                delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][c];
+            }
+        });
+    }
+    device ? fn(_capacityTaskDeviceTrs, 'DeviceList') : fn(_capacityTaskOperatorTrs, 'OperatorList');
+    let el = $(`#capacityTaskDetailList [value=${_capacityNeedCurrentPId}]`).closest('tr').find('.glyphicon');
+    if (_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['DeviceList'].length > 0 || _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['OperatorList'].length > 0) {
+        //layer.msg('设置成功');
+        $(el).closest('tr').find('.glyphicon').addClass('glyphicon-ok text-green')
+            .removeClass('glyphicon-remove text-red');
+    } else {
+        //layer.msg('请选择');
+        $(el).closest('tr').find('.glyphicon').addClass('glyphicon-remove text-red')
+            .removeClass('glyphicon-ok text-green');
+    }
 }
 
 //设备&人员产能表格查看/设置
@@ -2608,7 +2675,7 @@ function deviceOperatorCapacityTaskTable(d) {
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
     devTableConfig.drawCallback = function () {
-        initCheckboxAddEvent.call(this, _capacityTaskDeviceTrs);
+        initCheckboxAddEvent.call(this, _capacityTaskDeviceTrs, capacityTaskSet, capacityTaskSet);
     }
     devTableConfig.createdRow = function (tr, d) {
         var id = d.Id;
@@ -2636,9 +2703,12 @@ function deviceOperatorCapacityTaskTable(d) {
         { data: 'Total', title: '日总产能', sClass: 'total' }
     ]);
     perTableConfig.drawCallback = function () {
-        initCheckboxAddEvent.call(this, _capacityTaskOperatorTrs);
+        var callBack = () => {
+            capacityTaskSet(false);
+        }
+        initCheckboxAddEvent.call(this, _capacityTaskOperatorTrs, callBack, callBack);
     }
-    devTableConfig.createdRow = function (tr, d) {
+    perTableConfig.createdRow = function (tr, d) {
         var id = d.Id;
         const dl = _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId];
         $(tr).find('.isEnable').iCheck((dl && dl['OperatorList'] && dl['OperatorList'][id] ? 'check' : 'uncheck'));
@@ -2706,6 +2776,7 @@ function devAndPersonInputCapacityTaskInit() {
 }
 
 let _capacityTasks = null;
+//获取参数
 function getCapacityNeedParams() {
     _capacityTasks = [];
     if (_capacityTaskProcessListInit) {
@@ -2769,6 +2840,8 @@ function updateCapacityNeedParams(data) {
         }
     });
 }
+
+//显示产能需求表
 function showCapacityTaskProcess(cover = true) {
     getCapacityNeedParams();
     if (!_capacityTasks.length) return layer.msg('请选择任务单');
@@ -2837,7 +2910,7 @@ function showCapacityTaskProcess(cover = true) {
                         <td>${b.Product}</td>
                         <td>${b.Target}</td>${tds}
                     </tr>`;
-        }, '');
+        }, "");
         const temp = fn(headTr, orders.length, tbody);
         $("#capacityTaskProcessListBox").html(temp).find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid black').end().find('tbody .bg-green').css('padding', 0);
 
@@ -3274,8 +3347,10 @@ function updatePmcPreviewParams(data) {
     _taskOrders = Object.values(_pmcPreviewParams);
 }
 
+let _isGetPmcPreviewParams = true;
 //页面获取待排程任务单各工序数量
 function getPmcPreviewParams(check = false, clear = true) {
+    if (!_isGetPmcPreviewParams) return;
     if (!check) {
         if (clear) {
             //$('#pmcPreviewBox,#pmcPreviewProcess,#pmcPreviewProcessBtn').html('');
@@ -3307,8 +3382,10 @@ function getPmcPreviewParams(check = false, clear = true) {
                 delete _pmcPreviewParams[id].EndTime;
             }
             if (startTime && endTime) {
-                if (compareDate(startTime, endTime))
+                if (compareDate(startTime, endTime)) {
+                    _taskOrders = Object.values(_pmcPreviewParams);
                     return '截止时间不能小于开始时间';
+                }
             }
         }
 
@@ -3343,8 +3420,10 @@ function getPmcPreviewParams(check = false, clear = true) {
                 delete _pmcPreviewParams[id].EndTime;
             }
             if (startTime && endTime) {
-                if (compareDate(startTime, endTime))
+                if (compareDate(startTime, endTime)) {
+                    _taskOrders = Object.values(_pmcPreviewParams);
                     return '截止时间不能小于开始时间';
+                }
             }
         }
     }
@@ -3420,7 +3499,7 @@ function getArrangeTaskList() {
         tableConfig.drawCallback = (tr, d) => {
         }
         $('#arrangeTaskList').DataTable(tableConfig);
-        $('#arrangeTaskList').off('changeDate').on('changeDate', '.form_date', function () {
+        $('#arrangeTaskList').off('onSelectDate').on('onSelectDate', '.form_date', function () {
             //if (isStrEmptyOrUndefined($(this).val())) {
             //    $(this).val(getDate()).datepicker('update');
             //}
@@ -3459,24 +3538,26 @@ function setArrangeTaskList() {
 let _taskOrders = [];
 //接口获取任务单各工序数量
 function getTaskProcessList(cover = true) {
+    if (!_isGetPmcPreviewParams) return;
     const msg = getPmcPreviewParams();
     if (!isStrEmptyOrUndefined(msg)) {
         return layer.msg(msg);
     }
 
     if (!_taskOrders.length) return layer.msg('请选择任务单');
+    const plus = $("#notArrangeTaskProcessBox .fa-plus").length > 0;
     const setTable = ret => {
         const data = ret.datas;
         updatePmcPreviewParams(data);
         const fn = (headTr, n, tbody) => {
-            return `<div class="box box-primary">
+            return `<div class="box box-primary${(plus ? " collapsed-box" : "")}">
                         <div class="box-header no-padding-left">
                             <label class="control-label text-red">任务单各工序数量：</label>
                             <div class="box-tools pull-right">
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa ${(plus ? "fa-plus" : "fa-minus")}"></i></button>
                             </div>
                         </div>
-                        <div class="box-body">
+                        <div class="box-body" style="display:${(plus ? "none" : "block")}>
                             <div class="form-group">
                                 <div class="table-responsive mailbox-messages">
                                     <table class="table table-hover table-striped table-bordered" id="notArrangeTaskProcess">
@@ -3558,6 +3639,8 @@ function getPmcPreviewList() {
         return "";
     }
     myPromise(5604, !!$('#notArrangeTaskProcessBox').html() ? _taskOrders : [], true).then(data => {
+        if (data && data.Cost && data.Cost.length > 0)
+            _isGetPmcPreviewParams = false;
         const fn = (headTr, tbody) => {
             return `<div class="form-group">
                         <label class="control-label text-red">预计开始时间：${data.StartTime.split(' ')[0]}</label><br />
@@ -3611,11 +3694,11 @@ function getPmcPreviewList() {
                 if (taskOrderId == tId) {
                     if (isStrEmptyOrUndefined(el.find('.startTime').val())) {
                         el.find('.startTime').val(estimatedStartTime).datepicker('update');
-                        if (_pmcPreviewParams[id]) _pmcPreviewParams[tId].StartTime = estimatedStartTime;
+                        if (_pmcPreviewParams[tId]) _pmcPreviewParams[tId].StartTime = estimatedStartTime;
                     }
                     if (isStrEmptyOrUndefined(el.find('.endTime').val())) {
                         el.find('.endTime').val(estimatedEndTime).datepicker('update');
-                        if (_pmcPreviewParams[id]) _pmcPreviewParams[tId].EndTime = estimatedEndTime;
+                        if (_pmcPreviewParams[tId]) _pmcPreviewParams[tId].EndTime = estimatedEndTime;
                     }
                 }
             });
@@ -3635,10 +3718,13 @@ function getPmcPreviewList() {
         }, '');
         const temp = fn(headTr, tbody);
         $('#pmcPreviewBox').html(temp).find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid gray').end().find('th,td').css('width', 'auto');
+
+        getPresentSchedule(data);
+        _isGetPmcPreviewParams = true;
+        //getPmcPreviewParams();
         var t = dataTableConfig(0);
         t.fixedHeaderColumn(true, 9, 0);
         $("#pmcPreview").DataTable(t);
-        getPresentSchedule(data);
     });
 }
 

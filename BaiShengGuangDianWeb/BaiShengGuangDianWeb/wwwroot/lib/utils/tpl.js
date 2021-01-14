@@ -5,25 +5,22 @@ var commonfunc = function () {
         return;
     }
 
-    var tkinfo = getCookieTokenInfo();
-    $("#nuser_name").text(tkinfo.name);
-    $("#nuser_role").text(tkinfo.role.length > 10 ? tkinfo.role.substring(0, 10) + "..." : tkinfo.role);
-    $("#nuser_role").attr("title", tkinfo.role);
-    //$("#user_name").prepend(tkinfo.name);
-    $("#user_name").prepend(tkinfo.role.length > 10 ? tkinfo.role.substring(0, 10) + "..." : tkinfo.role);
-    $("#user_name").attr("title", tkinfo.role);
-    $("#user_email").prepend(tkinfo.email);
+    const tkInfo = getCookieTokenInfo();
+    $("#nuser_name").text(tkInfo.name);
+    $("#nuser_role").text(tkInfo.role.length > 10 ? tkInfo.role.substring(0, 10) + "..." : tkInfo.role);
+    $("#nuser_role").attr("title", tkInfo.role);
+    //$("#user_name").prepend(tkInfo.name);
+    $("#user_name").prepend(tkInfo.role.length > 10 ? tkInfo.role.substring(0, 10) + "..." : tkInfo.role);
+    $("#user_name").attr("title", tkInfo.role);
+    $("#user_email").prepend(tkInfo.email);
 
     $("#logoutBtn").click(function () {
-        var tkinfo = getCookieTokenInfo();
-        var info = {
+        const info = {
             ChatEnum: chatEnum.Logout,
-            Message: {
-                Id: tkinfo.id
-            }
+            Message: tkInfo.id
         }
         //调用服务器方法
-        hubConnection.invoke('SendMsg', info);
+        hubConnection.invoke("SendMsg", info);
 
         ajaxPost("/Account/Logout",
             null,
@@ -222,81 +219,120 @@ function getChild(list, parent) {
     return result.sort(sortRule);
 }
 var join = null;
+var check = null;
 var check1 = null;
 var check2 = null;
 function initHub() {
     if (hubConnection == null) {
         hubConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
-        initHubCallBack();
-    }
-    if (hubConnection.connection.connectionState != 1) {
-        //服务地址
-        hubConnection.start();
-
-        joinFunc();
-    }
-}
-
-function joinFunc() {
-    if (join == null) {
-        join = setInterval(function () {
-            if (hubConnection.connection.connectionState == 1) {
-                var tkinfo = getCookieTokenInfo();
-                var info = {
-                    ChatEnum: chatEnum.Connect,
-                    Message: {
-                        Id: tkinfo.id
+        hubConnection.SendMsg = (m, d, callBack) => {
+            var type = typeof m;
+            if (type != "string" && type != "number")
+                return;
+            if (type == "string" && !chatEnum[m])
+                return;
+            if (type == "number") {
+                for (var key in chatEnum) {
+                    if (chatEnum[key] == m) {
+                        m = key;
+                        break;
                     }
                 }
-                //调用服务器方法
-                hubConnection.invoke('SendMsg', info);
-                clearInterval(join);
-                join = null;
-                check1Func();
             }
-        }, 1000);
+
+            //删除已有回调方法
+            callBack && hubConnection.off(m);
+            //服务器回调方法
+            hubConnection.on(m, res => {
+                console.log(`${m} Back Success`);
+                callBack && callBack(res);
+            });
+
+            //调用服务器方法
+            hubConnection.invoke("SendMsg", {
+                ChatEnum: chatEnum[m],
+                Message: d
+            });
+        }
+        initHubCallBack();
+    }
+    if (hubConnection.connection.connectionState !== 1) {
+        check && clearInterval(check);
+        //服务地址
+        hubConnection.start()
+            .then(() => {
+                const tkInfo = getCookieTokenInfo();
+                //调用服务器方法
+                hubConnection.invoke('SendMsg', {
+                    ChatEnum: chatEnum.Connect,
+                    Message: tkInfo.id
+                });
+                checkFunc();
+            })
+            .catch(err => {
+                console.log(err.toString());
+                initHub();
+            });
     }
 }
 
-function check1Func() {
-    if (check1 == null) {
-        check1 = setInterval(function () {
-            if (hubConnection.connection.connectionState == 2) {
-                clearInterval(check1);
-                check1 = null;
-                check2Func();
-            }
-        }, 1000);
-    }
-}
-function check2Func() {
-    if (check2 == null) {
-        check2 = setInterval(function () {
-            if (hubConnection.connection.connectionState == 1) {
-                clearInterval(check2);
-                check2 = null;
-            }
+function checkFunc() {
+    check = setInterval(function () {
+        //console.log(`check, ${hubConnection.connection.connectionState}`);
+        if (hubConnection.connection.connectionState !== 1) {
+            //console.log("Reconnect");
             initHub();
-        }, 10000);
-    }
+        }
+    }, 10000);
 }
 
 function initHubCallBack() {
-
     //服务器回调方法
-    hubConnection.on('Default', () => {
-        console.log("connect success");
+    hubConnection.on("Back", res => {
+        console.log(res);
     });
 
-    hubConnection.on('FaultDevice', data => {
+    //服务器回调方法
+    hubConnection.on("Connect", res => {
+        console.log("Connect Success");
+        var oldCId = GetCookie("cid");
+        if (oldCId) {
+            const tkInfo = getCookieTokenInfo();
+            //调用服务器方法
+            hubConnection.invoke("SendMsg", {
+                ChatEnum: chatEnum.RefreshId,
+                Message: {
+                    Id: tkInfo.id,
+                    CId: oldCId
+                }
+            });
+        }
+        const r = res.split(",");
+        if (r.length > 1) {
+            if (r[0] === "Success") {
+                SetCookie("cid", r[1]);
+            }
+        }
+    });
+
+    //服务器回调方法
+    hubConnection.on("RefreshId", res => {
+        console.log("Refresh Success");
+    });
+
+    //服务器故障方法
+    hubConnection.on('FaultDevice', res => {
         var cnt = parseInt($(".rCnt").html());
         $(".rCnt").html(++cnt);
-        var faultDevice = '<li>' +
-            '<a href="/RepairManagement">' +
-            '<h3><strong class="text-red">{0}</strong>于<strong class="text-info">{1}</strong>发生故障</h3>' +
-            '</a>' +
-            '</li> ';
-        $("#errLi .menu").append(faultDevice.format(data.Code, getFullTime()));
+        var faultDevice =
+            `<li>
+                <a href="/RepairManagement">
+                <h3>
+                    <strong class="text-red">{0}</strong> 于<strong class="text-info">{1}</strong>发生故障
+                </h3>
+                </a>
+            </li>`;
+        $("#errLi .menu").append(faultDevice.format(res.Code, getFullTime()));
     });
 }
 

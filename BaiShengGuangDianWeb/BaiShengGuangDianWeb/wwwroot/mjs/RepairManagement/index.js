@@ -1,5 +1,6 @@
 ﻿var _permissionList = [];
 function pageReady() {
+    $(".sidebar-mini").addClass("sidebar-collapse");
     _permissionList[41] = { uIds: ['showFaultModelBtn'] };
     _permissionList[34] = { uIds: ['showMaintainerModel'] };
     _permissionList[45] = { uIds: ['showAddMaintainerModelBtn'] };
@@ -272,6 +273,10 @@ function setTable() {
             var data = d.FaultDescription;
             return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${d.FaultTypeId}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + '...' : data}</span>`;
         },
+        rSup: d => {
+            var data = d.Supplement;
+            return `<span title = "${data}" onclick = "showFaultTypeDetailModel(${d.FaultTypeId}, '${escape(data.trim())}')">${data.length > tdShowLength ? data.substring(0, tdShowLength) + '...' : data}</span>`;
+        },
         imgBtn: d => {
             var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
                       <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
@@ -283,7 +288,7 @@ function setTable() {
         },
         upServiceLog: (isLook, isStatistics, id) => `<button type="button" class="btn btn-primary btn-sm" onclick="showServiceLogModal(${id},${isLook},${isStatistics})">查看</button>`,
         serviceName: d => d == '' ? '未指派' : d,
-        detailBtn: d => `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${d.FaultDescription}\',${d.Priority},${d.Grade},\'${d.ImageList}\')">查看</button>`
+        detailBtn: d => `<button type="button" class="btn btn-info btn-sm" onclick="showLogDetailModel(${d.FaultTypeId},\'${d.DeviceCode}\',\'${d.Proposer}\',\'${d.FaultTime}\',\'${escape(d.Supplement)}\',${d.Priority},${d.Grade},\'${d.ImageList}\')">查看</button>`
     }
 }
 
@@ -414,7 +419,7 @@ function getFaultDeviceList() {
                     { "data": "Remark", "title": "维修备注", "render": setRow.remark },
                     { "data": "Proposer", "title": "报修人" },
                     { "data": "FaultTypeName", "title": "故障类型" },
-                    { "data": null, "title": "故障描述", "render": setRow.rDesc },
+                    { "data": null, "title": "故障补充", "render": setRow.rSup },
                     { "data": null, "title": "故障详情", "render": setRow.detailBtn }
                 ],
                 "drawCallback": function (settings, json) {
@@ -696,6 +701,7 @@ function showLogDetailModel(id, deviceCode, proposer, faultTime, faultDescriptio
         $('#logFaultTime').text(faultTime);
         $('#logFaultType').text(d.FaultTypeName);
         $('#logFaultTypeDesc').val(d.FaultDescription);
+        faultDescription = unescape(faultDescription);
         $('#logFaultSup').val(faultDescription);
         var str = '', color = '';
         switch (priority) {
@@ -820,24 +826,12 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
         var per79 = _permissionList[79].have;
         //修改
         var per78 = _permissionList[78].have;
-        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        var titleColumns = [12, 15];
+        var excelColumns = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+        var titleColumns = [11, 18];
+        var buttonColumns = [7];
+        var buttonColumnsDefault = [];
+        buttonColumnsDefault[7] = "评分";
         var el = name ? $('#statisticsDetailList') : $("#repairRecordList");
-        const scoreBtn = (d, a, b, index) => {
-            let scoreInfo;
-            if (per78 && !(d.FaultSolvers.length === d.Scores.length)) {
-                scoreInfo = `<button class="btn btn-primary btn-sm" onclick="showScoreModel(${index.row})">评分</button>`;
-            } else {
-                const solver = d.FaultSolver.split(',');
-                if (solver.length === 1) {
-                    scoreInfo = d.Score;
-                } else {
-                    const scores = d.Scores;
-                    scoreInfo = solver.reduce((a, b, i) => `${a},${b}-${scores[i] || 0}`, '').slice(1);
-                }
-            }
-            return scoreInfo;
-        }
         el.DataTable({
             dom: '<"pull-left"l><"pull-right"B><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
             buttons: [
@@ -848,7 +842,9 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
                     exportOptions: {
                         columns: excelColumns,
                         format: {
-                            body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ? $(node).find("span").attr("title") : node.textContent
+                            body: (data, row, column, node) => titleColumns.indexOf(column) > -1 ?
+                                $(node).find("span").attr("title") :
+                                ((buttonColumns.indexOf(column) > -1 && node.textContent == buttonColumnsDefault[column]) ? "" : node.textContent)
                         }
                     }
                 }
@@ -870,15 +866,36 @@ function getServiceLogList(isLoad, name, sTime, eTime, score) {
                 { "data": "CostTime", "title": "用时", "sClass": "text-primary" },
                 { "data": null, "title": "优先级", "render": setRow.priority },
                 { "data": "Grade", "title": "故障等级", "render": setRow.grade },
-                { "data": null, "title": "评分", "sClass": "text-primary", render: scoreBtn },
+                {
+                    "data": null, "title": "评分", "sClass": "text-primary", render: (d, a, b, index) => {
+                        let scoreInfo;
+                        if (per78 && !(d.FaultSolvers.length === d.Scores.length)) {
+                            scoreInfo = `<button class="btn btn-primary btn-sm" onclick="showScoreModel(${index.row})">评分</button>`;
+                        } else {
+                            const solver = d.FaultSolver.split(',');
+                            if (solver.length === 1) {
+                                scoreInfo = d.Score;
+                            } else {
+                                const scores = d.Scores;
+                                scoreInfo = solver.reduce((a, b, i) => `${a},${b}-${scores[i] || 0}`, '').slice(1);
+                            }
+                        }
+                        return scoreInfo;
+                    }
+                },
                 { "data": "Id", "title": "详情", "render": setRow.upServiceLog.bind(null, 0, !!name) },
                 { "data": "FaultSolver", "title": "解决人" },
                 { "data": "Name", "title": "指派给", "render": setRow.serviceName },
                 { "data": "EstimatedTime", "title": "预计解决时间", "render": setRow.setTime },
                 { "data": "Remark", "title": "维修备注", "render": setRow.remark },
                 { "data": "Proposer", "title": "报修人" },
-                { "data": "FaultTypeName", "title": "故障类型" },
-                { "data": null, "title": "故障描述", "render": setRow.rDesc },
+                { "data": "FaultTypeName1", "title": "故障类型" },
+                { "data": "FaultDescription1", "title": "故障类型描述", "visible": false },
+                { "data": "SolvePlan", "title": "解决方案", "visible": false },
+                { "data": "FaultTypeName", "title": "报修故障类型", "visible": false },
+                { "data": "FaultDescription", "title": "报修故障类型描述", "visible": false },
+                { "data": "Supplement", "title": "故障补充", "render": setRow.remark },
+                { "data": "Comment", "title": "评论", "visible": false },
                 { "data": null, "title": "故障图片", "render": setRow.imgBtn }
             ],
             "drawCallback": function (settings, json) {
@@ -1190,7 +1207,7 @@ function showServiceLogModal(id, isDel, isStatistics) {
             $('#serLogFaultTimeText').text(d.FaultTime);
             $('#serLogFaultTypeText').text(d.FaultTypeName);
             $('#serLogFaultDesc').val(_faultTypeData[d.FaultTypeId].FaultDescription);
-            $('#serLogFaultSup').val(d.FaultDescription);
+            $('#serLogFaultSup').val(d.Supplement);
             $('#serLogScore').text(d.Score);
             $('#serLogComment').val(d.Comment);
             var priority = d.Priority;
@@ -1368,8 +1385,8 @@ function reportFault() {
         FaultTime: time,
         //报修人
         Proposer: proposer,
-        //故障描述
-        FaultDescription: faultDesc,
+        //故障补充
+        Supplement: faultDesc,
         //故障类型
         FaultTypeId: faultType
     }
@@ -1500,7 +1517,7 @@ function addUpServiceLog(isAdd) {
             Proposer: serLogProposer,
             FaultTime: faultTime,
             FaultTypeId: serLogFaultType,
-            FaultDescription: serLogFaultSup,
+            Supplement: serLogFaultSup,
             Priority: serLogPriority,
             Grade: serLogGrade,
             Maintainer: serLogMaintainer.join()
