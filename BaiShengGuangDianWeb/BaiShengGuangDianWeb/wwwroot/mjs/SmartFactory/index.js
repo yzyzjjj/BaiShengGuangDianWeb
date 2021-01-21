@@ -1732,6 +1732,15 @@ function addUpPlan(isAdd) {
 
 //添加计划号弹窗
 function addPlanModel() {
+    $("#planDevCapacitySetBox").siblings(".capacityTitle").text("");
+    $("#planDevCapacitySetList").closest(".mailbox-messages").empty()
+        .append(
+            '<table class="table table-hover table-striped table-condensed table-responsive" id="planDevCapacitySetList"></table>');
+    $("#planPersonCapacitySetList").closest('.mailbox-messages').empty()
+        .append(
+            '<table class="table table-hover table-striped table-condensed table-responsive" id="planPersonCapacitySetList"></table>');
+    devAndPersonInputInit("#planDevCapacitySetList", "#planPersonCapacitySetList");
+
     addEditPlanModel(capacityData => {
         $('#addPlanCapacity').html(setOptions(capacityData, 'Capacity')).trigger('change');
         $('#addEditPlanTitle').text('添加计划号');
@@ -1742,6 +1751,15 @@ function addPlanModel() {
 
 //修改计划号弹窗
 function showUpdatePlanModel() {
+    $("#planDevCapacitySetBox").siblings(".capacityTitle").text("");
+    $("#planDevCapacitySetList").closest('.mailbox-messages').empty()
+        .append(
+            '<table class="table table-hover table-striped table-condensed table-responsive" id="planDevCapacitySetList"></table>');
+    $("#planPersonCapacitySetList").closest('.mailbox-messages').empty()
+        .append(
+            '<table class="table table-hover table-striped table-condensed table-responsive" id="planPersonCapacitySetList"></table>');
+    devAndPersonInputInit("#planDevCapacitySetList", "#planPersonCapacitySetList");
+
     const qId = $(this).val();
     myPromise(5060, { qId }, true).then(data => {
         const d = data.datas[0];
@@ -1999,7 +2017,7 @@ function devicesOperatorsTable(d, isLook = false, box = "devCapacitySetBox", dev
     $(`#${per}`).DataTable(perTableConfig);
 }
 
-function devAndPersonInputInit() {
+function devAndPersonInputInit(dev = "devCapacitySetList", per = "personCapacitySetList") {
     var countFn = (tr) => {
         const single = tr.find('.single').val() >> 0;
         const sCount = tr.find('.sCount').text() >> 0;
@@ -2008,7 +2026,7 @@ function devAndPersonInputInit() {
         tr.find('.number').text(number);
         tr.find('.total').text(count * number);
     }
-    $("#devCapacitySetList,#personCapacitySetList").on('input', '.single', function () {
+    $(`${dev},${per}`).on('input', '.single', function () {
         //onInput(this, 8, 0);
         const tr = $(this).closest('tr');
         countFn(tr);
@@ -2044,14 +2062,7 @@ function devAndPersonInputInit() {
         const sCount = productTime != 0 ? Math.floor(workTime / productTime) : 0;
         tr.find('.sCount').text(sCount);
     }
-    $("#devCapacitySetList,#personCapacitySetList").on('input', '.minute', function () {
-        //onInput(this, 8, 0);
-        const tr = $(this).closest('tr');
-        timeFn(tr);
-        countFn(tr);
-    });
-    $("#devCapacitySetList,#personCapacitySetList").on('input', '.second', function () {
-        //onInput(this, 8, 0);
+    $(`${dev},${per}`).on('input', '.minute,.second', function () {
         const tr = $(this).closest('tr');
         timeFn(tr);
         countFn(tr);
@@ -2464,13 +2475,14 @@ let _capacityNeedCurrentPId = 0;
 //产能需求
 function showCapacityNeedModel() {
     $(`#capacityTaskDetailListDiv`).addClass("hidden");
+    $(`#capacityTaskDetailListDiv strong`).text("");
     $(`#capacityTaskDevPerDiv`).addClass("hidden");
     myPromise(5090).then(data => {
         data = data.datas;
         var ops = data.reduce((a, b, i) => {
             return `${a}<div class="flexStyle pointer choseBox">
                             <label class="flexStyle pointer">
-                                <input type="checkbox" class="icb_minimal" value="${b.Id}" cid="${b.CapacityId}">
+                                <input type="checkbox" class="icb_minimal" value="${b.Id}" cid="${b.CapacityId}" task="${b.TaskOrder}">
                                 <span class="textOverTop" style="margin-left: 5px">${b.TaskOrder}-<span class="text-blue">${b.Product}</span>-<span class="text-red">${b.Target}</span></span>
                             </label>
                             <button type="button" class="btn btn-primary btn-xs hidden chose" style="margin-left: 5px">选择</button>
@@ -2500,10 +2512,11 @@ function showCapacityNeedModel() {
             const check = $(this).siblings('label').find('.icb_minimal');
             _capacityNeedCurrentTaskId = $(check).val().trim() >> 0;
             const choseId = $(check).attr('cid').trim() >> 0;
+            const choseTask = $(check).attr('task').trim();
             if (_capacityNeedCurrentTaskId == 0)
                 return;
             $(`#capacityTaskDevPerDiv`).addClass("hidden");
-            showCapacityTaskChose(choseId);
+            showCapacityTaskChose(choseId, choseTask);
         });
 
         $('#capacityNeedModel').modal('show');
@@ -2514,7 +2527,8 @@ let _capacityTaskProcessListInit = false;
 let _capacityTaskDetailList = null;
 let _capacityTaskDeviceTrs = null;
 let _capacityTaskOperatorTrs = null;
-function showCapacityTaskChose(capacityId) {
+function showCapacityTaskChose(capacityId, task) {
+    $(`#capacityTaskDetailListDiv strong`).text(`${task}`);
     $(`#capacityTaskDetailListDiv`).removeClass("hidden");
     myPromise(5560, { capacityId }, true, 0).then(e => {
         e.datas.forEach(d => {
@@ -2550,55 +2564,8 @@ function showCapacityTaskChose(capacityId) {
                 e.Process = process;
                 _capacityTaskDeviceTrs = [];
                 _capacityTaskOperatorTrs = [];
-                devAndPersonInputCapacityTaskInit();
+                devAndPersonInputInit("#devCapacityTaskSetList", "#personCapacityTaskSetList");
                 deviceOperatorCapacityTaskTable(e, true);
-                //设备&人员产能设置确定
-                //$('#capacityTaskSetBtn').off('click').on('click', () => {
-                //    const fn = (d, prop) => {
-                //        if (!_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop]) {
-                //            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
-                //        }
-                //        if (d.length == 0) {
-                //            _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop] = [];
-                //            return;
-                //        }
-                //        var ids = [];
-                //        d.forEach(item => {
-                //            const tr = $(item);
-                //            var id = tr.find('.isEnable').val().trim() >> 0;
-                //            var single = tr.find('.single').text().trim() >> 0;
-                //            var sCount = tr.find('.sCount').text().trim() >> 0;
-                //            if (id > 0) {
-                //                if (single * sCount > 0) {
-                //                    ids[id] = id;
-                //                    _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id] = { id, single, sCount };
-                //                } else {
-                //                    delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][id];
-                //                }
-                //            }
-                //        });
-                //        const cIds = [];
-                //        _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop].forEach(cid => {
-                //            cIds.push(cid.id);
-                //        });
-                //        cIds.forEach(c => {
-                //            if (!ids[c]) {
-                //                delete _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId][prop][c];
-                //            }
-                //        });
-                //    }
-                //    fn(_capacityTaskDeviceTrs, 'DeviceList');
-                //    fn(_capacityTaskOperatorTrs, 'OperatorList');
-                //    if (_capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['DeviceList'].length > 0 || _capacityNeed[_capacityNeedCurrentTaskId].Needs[_capacityNeedCurrentPId]['OperatorList'].length > 0) {
-                //        layer.msg('设置成功');
-                //        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-ok text-green')
-                //            .removeClass('glyphicon-remove text-red');
-                //    } else {
-                //        layer.msg('请选择');
-                //        $(this).closest('tr').find('.glyphicon').addClass('glyphicon-remove text-red')
-                //            .removeClass('glyphicon-ok text-green');
-                //    }
-                //});
             });
             $('#addCapacitySetBtn').addClass('hidden');
         });
@@ -2656,6 +2623,7 @@ function capacityTaskSet(device = true) {
 //设备&人员产能表格查看/设置
 function deviceOperatorCapacityTaskTable(d) {
     $(`#capacityTaskDevPerDiv`).removeClass("hidden");
+    $(`#capacityTaskDevPerDiv strong`).text(d.Process);
     d.Devices.forEach(de => {
         de.Id = de.ModelId;
         return de;
@@ -2716,65 +2684,6 @@ function deviceOperatorCapacityTaskTable(d) {
     $('#personCapacityTaskSetList').DataTable(perTableConfig);
 }
 
-function devAndPersonInputCapacityTaskInit() {
-    var countFn = (tr) => {
-        const single = tr.find('.single').val() >> 0;
-        const sCount = tr.find('.sCount').text() >> 0;
-        const count = tr.find('.count').text() >> 0;
-        const number = single * sCount;
-        tr.find('.number').text(number);
-        tr.find('.total').text(count * number);
-    }
-    $("#devCapacityTaskSetList,#personCapacityTaskSetList").on('input', '.single', function () {
-        //onInput(this, 8, 0);
-        const tr = $(this).closest('tr');
-        countFn(tr);
-    });
-    //$("#devCapacityTaskSetList,#personCapacityTaskSetList").on('input', '.sCount', function () {
-    //    //onInput(this, 8, 0);
-    //    const tr = $(this).closest('tr');
-    //    countFn(tr);
-    //});
-    var timeFn = (tr) => {
-        let wTimeMin = tr.find('.minute.workTime').val() >> 0;
-        let wTimeSec = tr.find('.second.workTime').val() >> 0;
-        let workTime = convertSecond(0, wTimeMin, wTimeSec);
-        var maxSecond = 24 * 3600;
-        if (workTime > maxSecond) {
-            workTime = maxSecond;
-            var t = convertTime(maxSecond, false);
-            wTimeMin = t.m;
-            wTimeSec = t.s;
-            tr.find('.minute.workTime').val(wTimeMin);
-            tr.find('.second.workTime').val(wTimeSec);
-        }
-        let pTimeMin = tr.find('.minute.productTime').val() >> 0;
-        let pTimeSec = tr.find('.second.productTime').val() >> 0;
-        let productTime = convertSecond(0, pTimeMin, pTimeSec);
-        if (productTime > workTime) {
-            productTime = workTime;
-            pTimeMin = wTimeMin;
-            pTimeSec = wTimeSec;
-            tr.find('.minute.productTime').val(pTimeMin);
-            tr.find('.second.productTime').val(pTimeSec);
-        }
-        const sCount = productTime != 0 ? Math.floor(workTime / productTime) : 0;
-        tr.find('.sCount').text(sCount);
-    }
-    $("#devCapacityTaskSetList,#personCapacityTaskSetList").on('input', '.minute', function () {
-        //onInput(this, 8, 0);
-        const tr = $(this).closest('tr');
-        timeFn(tr);
-        countFn(tr);
-    });
-    $("#devCapacityTaskSetList,#personCapacityTaskSetList").on('input', '.second', function () {
-        //onInput(this, 8, 0);
-        const tr = $(this).closest('tr');
-        timeFn(tr);
-        countFn(tr);
-    });
-}
-
 let _capacityTasks = null;
 //获取参数
 function getCapacityNeedParams() {
@@ -2792,7 +2701,7 @@ function getCapacityNeedParams() {
                 const stocks = tr.find('.stock');
                 stocks.each((index, item) => {
                     let el = $(item);
-                    const cid = el.attr('id').trim() >> 0;
+                    const cid = el.attr('cid').trim() >> 0;
                     _capacityNeed[id].Needs[cid].Stock = el.val().trim() >> 0;
                     //needs.push({
                     //    Order: el.attr('order').trim() >> 0,
@@ -2851,7 +2760,7 @@ function showCapacityTaskProcess(cover = true) {
             _capacityTaskProcessListInit = true;
         }
         updateCapacityNeedParams(data);
-        const fn = (headTr, n, tbody) => {
+        const fn = (headTr, n, tbody, tfoot) => {
             return `<div class="table-responsive mailbox-messages">
                         <table class="table table-hover table-striped table-bordered" id="capacityTaskProcessList">
                             <thead>
@@ -2863,27 +2772,35 @@ function showCapacityTaskProcess(cover = true) {
                                 </tr>
                                 <tr>${'<th class="bg-blue">总计</th><th class="bg-green">库存</th><th class="bg-yellow">需生产</th><th>需投料</th><th class="bg-yellow">设备</th><th>需要</th><th>已有</th><th class="bg-yellow">人员</th><th>需要</th><th>已有</th>'.repeat(n)}</tr>
                             </thead>
-                            <tbody>${tbody}</tbody>
+                            <tbody>
+                                ${tbody}
+                            </tbody>
+                            <tfoot>
+                                ${tfoot}
+                            </tfoot>
                         </table>
                     </div>`;
-            //<tr>${'<th class="bg-blue">总计</th><th class="bg-green">库存</th><th class="bg-yellow">需生产</th><th>需投料</th><th class="bg-yellow">已完成</th><th>已投料</th>'.repeat(n)}</tr>
         };
         const orders = ret.Orders.sort(sortOrder);
         const headTr = orders.reduce((a, b, i) => `${a}<th colspan="10" ${i % 2 ? '' : 'class="bg-gray"'}>${b.Process}</th>`, '');
-        //_pmcPreviewParams = {};
-        const tbody = data.reduce((a, b, i) => {
-            const id = b.Id;
+        let target = [], nTargetStock = [], nStock = [], nTarget = [], nPut = [];
+        const body = data.reduce((a, b, i) => {
+            target[0] = (target[0] >> 0) + b.Target;
             const needs = b.Needs.sort(sortOrder);
             const o = {};
             needs.forEach(item => { o[item.Order] = item; });
-            const tds = orders.reduce((a, b) => {
+            const tds = orders.reduce((a, b, j) => {
                 const d = o[b.Order];
+                nTargetStock[j] = (nTargetStock[j] >> 0) + d.Target + d.Stock;
+                nStock[j] = (nStock[j] >> 0) + d.Stock;
+                nTarget[j] = (nTarget[j] >> 0) + d.Target;
+                nPut[j] = (nPut[j] >> 0) + d.Put;
                 return d
                     ? `${a}
                           <td class="bg-blue">${d.Target + d.Stock}</td>
                           <td class="bg-green">
                              <input type="text" class="form-control text-center stock"
-                                value="${d.Stock}" id="${d.Id}" order="${b.Order}" pid="${d.PId}" processid="${d.ProcessId}" productid="${d.ProductId}" style="width:50px;margin:auto;padding:inherit" onchange="showCapacityTaskProcess.call(this)">
+                                value="${d.Stock}" cid="${d.Id}" order="${b.Order}" pid="${d.PId}" processid="${d.ProcessId}" productid="${d.ProductId}" style="width:50px;margin:auto;padding:inherit">
                           </td>
                           <td class="bg-yellow target">${d.Target}</td>
                           <td><strong class="text-green put">${d.Put}</strong> (${d.Rate}%)</td>
@@ -2911,7 +2828,39 @@ function showCapacityTaskProcess(cover = true) {
                         <td>${b.Target}</td>${tds}
                     </tr>`;
         }, "");
-        const temp = fn(headTr, orders.length, tbody);
+        //4+6 总计
+        const sumFoot = orders.reduce((a, b, i) =>
+            `${a}<td class="bg-blue">${nTargetStock[i]}</td>
+                 <td class="bg-green">${nStock[i]}</td>
+                 <td class="bg-yellow">${nTarget[i]}</td>
+                 <td><strong class="text-green">${nPut[i]}</strong></td>
+                 <td></td><td></td><td></td><td></td><td></td><td></td>`, `<td>总计</td><td></td><td></td><td>${target[0]}</td>`);
+
+        let max = 0;
+        orders.forEach(order => {
+            max = Math.max(order.Devices.length, max);
+            max = Math.max(order.Operators.length, max);
+        });
+        let foot = `<tr>
+                ${sumFoot}
+            </tr>` +
+            (max == 0 ?
+                `` :
+                `<tr>
+                    <th></th><th></th><th></th><th>${('<th class="bg-gray text-red">型号</th><th class="bg-gray">需求</th><th class="bg-gray">现有</th><th class="bg-gray">班次</th><th></th>' +
+                    '<th class="bg-gray text-red">等级</th><th class="bg-gray">需求</th><th class="bg-gray">现有</th><th class="bg-gray">班次</th><th></th>').repeat(orders.length)}
+                </tr>`);
+
+        const arrange = (d) => d ?
+            `<td>${d.Name}</td><td><strong class=${(d.NeedCapacity > d.HaveCapacity ? "text-red" : "text-green")}>${d.NeedCapacity}</strong</td><td>${d.HaveCapacity}</td><td>${d.Times}</td><td></td>`
+            : `<td></td><td></td><td></td><td></td><td></td>`;
+        for (let i = 0; i < max; i++) {
+            foot += `<tr>
+                        <td></td><td></td><td></td><td></td>
+                        ${orders.reduce((a, b, j) => a + arrange(b.Devices[i]) + arrange(b.Operators[i]), ``)}
+                    </tr>`;
+        }
+        const temp = fn(headTr, orders.length, body, foot);
         $("#capacityTaskProcessListBox").html(temp).find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid black').end().find('tbody .bg-green').css('padding', 0);
 
         var t = dataTableConfig(0);
@@ -3003,8 +2952,8 @@ function pmcChildCreate(ret) {
         const total = putArr.reduce((a, b, i) => `${a}<td class="bg-${(i !== 0 ? 'green' : 'yellow')}">${putArr[i]}</td><td ${havePutArr[i] == 0 ? 'class="text-black"' : havePutArr[i] < putArr[i] ? 'class="text-red"' : 'class="text-green"'}>${havePutArr[i]}</td>
                                                       <td class="bg-${(i !== 0 ? 'green' : 'yellow')}">${targetArr[i]}</td><td ${doneTargetArr[i] == 0 ? 'class="text-black"' : doneTargetArr[i] < targetArr[i] ? 'class="text-red"' : 'class="text-green"'}>${doneTargetArr[i]}</td>`, '');
         const indexClick = (d, color = "white") => d.Index > 0
-            ? `<a href="javascript: showPmcChildIndexModal('${d.ProcessTime}', ${d.PId}, '${b.Process}')" style="color:${color}">${d.Index}</a>`
-            : `${d.Index}`;
+            ? `<a href="javascript: showPmcChildIndexModal('${d.ProcessTime}', ${d.PId}, '${b.Process}')" style="color:${color}">${d.Index * 100}%</a>`
+            : `${d.Index * 100}%`;
         const index = indexData.reduce((a, b, i) => `${a}<td class="bg-green">${indexClick(b)}</td><td>0</td><td></td><td></td>`, '');
         return `${a}<div class="form-group">
                         <label class="control-label">${b.Process}：</label>
@@ -3029,7 +2978,7 @@ function pmcChildCreate(ret) {
                                         <th>总计</th><th></th><th></th><th></th>${total}
                                     </tr>
                                     <tr>
-                                        <th>产能</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>${index}
+                                        <th>利用率</th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>${index}
                                     </tr>
                                 </tfoot>
                             </table>
@@ -3559,7 +3508,7 @@ function getTaskProcessList(cover = true) {
                         </div>
                         <div class="box-body" style="display:${(plus ? "none" : "block")}>
                             <div class="form-group">
-                                <div class="table-responsive mailbox-messages">
+                                <div class="table-responsive1 mailbox-messages">
                                     <table class="table table-hover table-striped table-bordered" id="notArrangeTaskProcess">
                                         <thead>
                                             <tr>
@@ -3645,7 +3594,7 @@ function getPmcPreviewList() {
             return `<div class="form-group">
                         <label class="control-label text-red">预计开始时间：${data.StartTime.split(' ')[0]}</label><br />
                         <label class="control-label text-red">产能指数：</label>
-                        <div class="table-responsive">
+                        <div class="table-responsive1">
                             <table class="table table-hover table-striped table-bordered" id="pmcPreview">
                                 <thead>
                                     <tr>
@@ -3859,7 +3808,7 @@ function getPresentSchedule(data) {
                     (tag === 0
                         ? `<a href="javascript: showPmcChildPlanModal(undefined, 0, ${d.TaskOrderId}, ${d.PId}, '${d.Product}', '${b.Process}', 5608)" style="color:${color}";>${num}</a>`
                         : `<a href="javascript:;" class="allTarget" index="0" time="undefined" product="${d.Product}" process="${b.Process}" style="color:${color}">${num}</a>`)
-                    : `<${num}`;
+                    : `${num}`;
                 return `${c}<tr>
                             <td style="width: 40px">${i + 1}</td>
                             <td>${d.TaskOrder}</td>

@@ -1992,7 +1992,7 @@ function deepCopy(obj) {
 }
 
 //dataTable基本参数
-function dataTableConfig(data = [], isCheck = false, order = 0, ordering = true) {
+function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, ordering = true) {
     var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px' }];
     const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -2006,13 +2006,14 @@ function dataTableConfig(data = [], isCheck = false, order = 0, ordering = true)
         iDisplayLength: 20,
         language: oLanguage
     };
-    if (data != 0) {
-        addOrderData(data);
-        obj.data = data;
+    if (d != 0) {
+        addOrderData(d);
+        obj.data = d;
     }
-    isCheck && obj.columns.unshift({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px' });
+    isCheck && (!obj.columns && (obj.columns = []),
+        obj.columns.push({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px', visible: checkShow }));
     obj.addColumns = function (columns, xvHao = true) {
-        if (!obj.columns) obj.columns = [];
+        !obj.columns && (obj.columns = []);
         obj.columns = obj.columns.length == 0 && xvHao ? defaultColumns.concat(columns) : obj.columns.concat(columns);
     }
     obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
@@ -2143,25 +2144,27 @@ function getDataTableRow(table) {
 //初始化iChick并添加事件
 function initCheckboxAddEvent(arr, callback, fn) {
     const api = this.api();
-    $(this).find('.isEnable').iCheck({
-        handle: 'checkbox',
-        checkboxClass: 'icheckbox_minimal-blue',
-        increaseArea: '20%'
-    }).on('ifChanged', function () {
-        const tr = $(this).parents('tr');
-        const trDom = tr[0];
-        if ($(this).is(':checked')) {
-            arr.push(trDom);
-            if (callback) {
-                callback(tr, api.row(trDom).data());
-                tr.find('.textOn').addClass('hidden').siblings('.textIn').removeClass('hidden');
+    $(this).find(".isEnable").iCheck({
+        handle: "checkbox",
+        checkboxClass: "icheckbox_minimal-blue",
+        increaseArea: "20%"
+    }).iCheck("uncheck")
+        .off("ifChanged")
+        .on("ifChanged", function () {
+            const tr = $(this).parents("tr");
+            const trDom = tr[0];
+            if ($(this).is(":checked")) {
+                arr.push(trDom);
+                if (callback) {
+                    callback(tr, api.row(trDom).data());
+                    tr.find(".textOn").addClass("hidden").siblings(".textIn").removeClass("hidden");
+                }
+            } else {
+                arr.splice(arr.indexOf(trDom), 1);
+                callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
+                fn && fn(tr);
             }
-        } else {
-            arr.splice(arr.indexOf(trDom), 1);
-            callback && tr.find('.textIn').addClass('hidden').siblings('.textOn').removeClass('hidden');
-            fn && fn(tr);
-        }
-    });
+        });
 }
 
 //删除表格数据

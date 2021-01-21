@@ -1,10 +1,12 @@
 ﻿var _permissionList = [];
 function pageReady() {
+    $(".sidebar-mini").addClass("sidebar-collapse");
     _permissionList[589] = { uIds: ['updateDepartmentBtn'] };
     _permissionList[590] = { uIds: ['finishInWareListBtn'] };
     _permissionList[591] = { uIds: ['citePurchaseListBtn'] };
     _permissionList[592] = { uIds: ['printPurchaseListBtn'] };
     _permissionList[593] = { uIds: ['inWareListSaveBtn'] };
+    _permissionList[594] = { uIds: ['changePurchaseStateBtn', 'changePurchaseBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
@@ -66,7 +68,7 @@ function pageReady() {
         }
     });
 
-    const tableConfig = dataTableConfig();
+    const tableConfig = dataTableConfig(0, true, _changePurchase);
     tableConfig.dom = '<"pull-left"l><"pull-right"f>rt<"text-center"i><"table-flex"p>';
     const state = d => {
         let color = '';
@@ -90,7 +92,11 @@ function pageReady() {
         { data: 'Valuer', title: '核价人', sWidth: '20px' },
         { data: null, title: '状态', sWidth: '20px', render: state }
     ]);
+    tableConfig.createdRow = function (tr, d, i, tds) {
+        $(tr).attr("id", d.Id);
+    }
     tableConfig.drawCallback = function (settings) {
+        initCheckboxAddEvent.call(this, _purchaseTrs);
         if (settings.aoData.length) {
             const trs = $(settings.nTBody).find('tr');
             trs.addClass('pointer').off('click').on('click', function () {
@@ -334,8 +340,42 @@ function getValuer(resolve) {
     });
 }
 
-//获取请购单状态
+let _changePurchase = false;
+let _purchaseTrs = [];
+//选择要修改状态的请购单
+function changePurchase(e) {
+    _stateDataTable.columns(0).visible(!_changePurchase);
+    if (!_changePurchase) {
+        _stateDataTable.page(_stateDataTable.page()).draw(false);
+        $(e).removeClass("btn-warning").addClass("btn-danger").text("取消");
+        $(e).siblings(".update").removeClass("hidden");
+    } else {
+        _purchaseTrs = [];
+        $(e).addClass("btn-warning").removeClass("btn-danger").text("状态");
+        $(e).siblings(".update").addClass("hidden");
+    }
+    _changePurchase = !_changePurchase;
+}
+
+//修改请购单状态
+function changePurchaseState(e) {
+    if (_purchaseTrs.length == 0)
+        return;
+    const list = _purchaseTrs.map((a, b) => ({ Id: $(a).attr("id") }));
+    const data = {};
+    data.opType = 856;
+    data.opData = JSON.stringify(list);
+    ajaxPost('/Relay/Post', data, ret => {
+        layer.msg(ret.errmsg);
+        if (ret.errno == 0) {
+            getPurchase();
+        }
+    });
+}
+
+//获取请购单
 function getPurchase() {
+    _purchaseTrs = [];
     if (_inWareDataTable) {
         _inWareDataTable.destroy();
         _inWareDataTable.clear();

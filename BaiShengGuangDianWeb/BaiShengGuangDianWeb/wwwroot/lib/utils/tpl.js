@@ -218,6 +218,7 @@ function getChild(list, parent) {
 
     return result.sort(sortRule);
 }
+
 var join = null;
 var check = null;
 var check1 = null;
