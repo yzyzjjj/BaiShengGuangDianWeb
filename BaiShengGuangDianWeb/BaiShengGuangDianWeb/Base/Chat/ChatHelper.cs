@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BaiShengGuangDianWeb.Base.Helper;
 
 namespace BaiShengGuangDianWeb.Base.Chat
 {
@@ -27,12 +28,12 @@ namespace BaiShengGuangDianWeb.Base.Chat
                 var keys = allKeys.Where(x => x.Contains(_redisPre));
                 foreach (var key in keys)
                 {
-                    var connectionInfos = ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key);
+                    var connectionInfos = RedisHelper.List_GetList<ConnectionInfo>(key);
                     foreach (var connectionInfo in connectionInfos)
                     {
                         if (connectionInfo.ExpireTime < DateTime.Now)
                         {
-                            ServerConfig.RedisHelper.List_Remove(key, connectionInfo);
+                            RedisHelper.List_Remove(key, connectionInfo);
                         }
                     }
                 }
@@ -55,7 +56,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
                 ConnectionId = connectionId,
                 ExpireTime = DateTime.Now.AddHours(_hour)
             };
-            ServerConfig.RedisHelper.List_Add(key, connectionInfo, TimeSpan.FromHours(_hour));
+            RedisHelper.List_Add(key, connectionInfo, TimeSpan.FromHours(_hour));
         }
 
         public static void RemoveConnectionId(int accountId, string connectionId)
@@ -64,7 +65,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
             var connectionInfo = GetSingleConnectionId(accountId).FirstOrDefault(x => x.ConnectionId == connectionId);
             if (connectionInfo != null)
             {
-                ServerConfig.RedisHelper.List_Remove(key, connectionInfo);
+                RedisHelper.List_Remove(key, connectionInfo);
             }
         }
 
@@ -73,7 +74,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
             try
             {
                 var key = GetKey(accountId);
-                return ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key).Where(x => x.ExpireTime > DateTime.Now);
+                return RedisHelper.List_GetList<ConnectionInfo>(key).Where(x => x.ExpireTime > DateTime.Now);
             }
             catch (Exception)
             {
@@ -89,7 +90,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
                 var keys = GetAllKeys();
                 foreach (var key in keys)
                 {
-                    list.AddRange(ServerConfig.RedisHelper.List_GetList<ConnectionInfo>(key));
+                    list.AddRange(RedisHelper.List_GetList<ConnectionInfo>(key));
                 }
 
                 return list.Where(x => x.ExpireTime > DateTime.Now);
@@ -104,7 +105,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
         {
             try
             {
-                return ServerConfig.RedisHelper.GetAllKeys();
+                return RedisHelper.GetAllKeys();
             }
             catch (Exception)
             {

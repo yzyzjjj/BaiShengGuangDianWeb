@@ -18,7 +18,7 @@ namespace BaiShengGuangDianWeb.Base.Server
         public static string PasswordKey;
         public static string EmailAccount;
         public static string EmailPassword;
-        public static RedisCacheHelper RedisHelper;
+        public static RedisHelper RedisHelper;
         public static Dictionary<string, Action> Loads;
         public static void Init(IConfiguration configuration)
         {
@@ -26,7 +26,7 @@ namespace BaiShengGuangDianWeb.Base.Server
             PasswordKey = configuration.GetAppSettings<string>("PasswordKey");
             EmailAccount = configuration.GetAppSettings<string>("EmailAccount");
             EmailPassword = configuration.GetAppSettings<string>("EmailPassword");
-            RedisHelper = new RedisCacheHelper(configuration);
+            RedisHelper.Init(configuration);
             Loads = new Dictionary<string, Action>
             {
                 {PermissionHelper.TableName, PermissionHelper.LoadConfig},

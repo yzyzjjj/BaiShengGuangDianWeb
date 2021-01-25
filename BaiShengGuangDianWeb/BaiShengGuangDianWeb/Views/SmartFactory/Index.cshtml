@@ -16,8 +16,9 @@
         <div class="nav-tabs-custom">
             <ul class="nav nav-tabs ui-sortable-handle">
                 <li><a href="#productionLineNav" data-toggle="tab" aria-expanded="true">生产线</a></li>
-                <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
+                <li id="workshopNavLi"><a href="#workshopNav" data-toggle="tab" aria-expanded="false">车间管理</a></li>
                 <li id="deviceNavLi"><a href="#deviceNav" data-toggle="tab" aria-expanded="false">设备管理</a></li>
+                <li id="personNavLi"><a href="#personNav" data-toggle="tab" aria-expanded="false">人员管理</a></li>
                 <li id="flowNavLi"><a href="#flowNav" data-toggle="tab" aria-expanded="false">流程管理</a></li>
                 <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
                 <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
@@ -64,40 +65,88 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade in" id="personNav">
+                <div class="tab-pane fade in" id="workshopNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">人员管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="updatePerson()">修改</button>
-                                <button class="btn btn-primary btn-sm" onclick="addPersonModel()">添加</button>
-                                <button class="btn btn-danger btn-sm" onclick="delPerson()">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="getPersonList()">刷新</button>
+                                <button class="btn btn-success btn-sm" onclick="updateWorkshop()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="addWorkshopModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delWorkshop()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getWorkshopList()">刷新</button>
                             </div>
                         </div>
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="personList"></table>
+                                <table class="table table-hover table-striped" id="workshopList"></table>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane fade in" id="deviceNav">
                     <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">设备管理</h3>
+                        <div class="box-header with-border no-padding-bottom">
+                            <div class="flexStyle warp" style="padding-bottom: 10px">
+                                <label class="control-label text-nowrap">车间：</label>
+                                <div class="flexStyle">
+                                    <select class="form-control" id="deviceWsSelect"></select>
+                                </div>
+                            </div>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateDevice()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddDeviceModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delDevice()">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="getDeviceList()">刷新</button>
+                                <button class="btn btn-info btn-sm" onclick="getDeviceWorkshopList()">刷新</button>
                                 <button class="btn btn-primary btn-sm" onclick="showDeviceCategoryModal()">类型管理</button>
                                 <button class="btn btn-primary btn-sm" onclick="showDeviceModelModal()">型号管理</button>
                             </div>
                         </div>
+
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
                                 <table class="table table-hover table-striped" id="deviceList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="personNav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">人员管理</h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="updatePerson()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="showAddPersonModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delPerson()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getPersonList()">刷新</button>
+                                <button class="btn btn-primary btn-sm" onclick="showGradeModal()">等级</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle form-group" style="flex-wrap: wrap">
+                                <label class="control-label text-nowrap no-margin">查询方式：</label>
+                                <div class="flexStyle" style="margin-right:3px">
+                                    <select class="form-control" id="personQueryMode">
+                                        <option value="state">状态</option>
+                                        <option value="number">编号</option>
+                                        <option value="name">姓名</option>
+                                        <option value="roleId">角色</option>
+                                        <option value="levelId">等级</option>
+                                        <option value="processId">工序</option>
+                                    </select>
+                                    <select class="form-control" id="personQueryTF">
+                                        <option value="0">等于</option>
+                                        <option value="1">包含</option>
+                                    </select>
+                                    <select class="form-control" id="personQuerySelect">
+                                        <option value="1">正常</option>
+                                        <option value="2">休息</option>
+                                    </select>
+                                    <input type="text" class="form-control hidden" id="personQueryInput">
+                                </div>
+                                <button class="btn btn-primary" onclick="getPersonList()">查询</button>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="personList"></table>
                             </div>
                         </div>
                     </div>
@@ -208,7 +257,6 @@
                         <ul class="nav nav-tabs ui-sortable-handle">
                             <li><a href="#pmcChildNav" data-toggle="tab" aria-expanded="true">排程</a></li>
                             <li class="active" id="pmcExpelProNavLi"><a href="#pmcExpelProNav" data-toggle="tab" aria-expanded="false">排产</a></li>
-                            <li><a href="#pmcPersonNav" data-toggle="tab" aria-expanded="false">操作工</a></li>
                         </ul>
                         <div class="tab-content no-padding">
                             <div class="tab-pane fade in" id="pmcChildNav">
@@ -289,47 +337,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane fade in" id="pmcPersonNav">
-                                <div class="box box-primary">
-                                    <div class="box-header with-border">
-                                        <h3 class="box-title">操作工管理</h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-success btn-sm" onclick="updatePmcPerson()">修改</button>
-                                            <button class="btn btn-primary btn-sm" onclick="showAddPmcPersonModel()">添加</button>
-                                            <button class="btn btn-danger btn-sm" onclick="delPmcPerson()">删除</button>
-                                            <button class="btn btn-info btn-sm" onclick="getPmcPersonList()">刷新</button>
-                                            <button class="btn btn-primary btn-sm" onclick="showPmcGradeModal()">等级</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body">
-                                        <div class="flexStyle form-group" style="flex-wrap: wrap">
-                                            <label class="control-label text-nowrap no-margin">查询方式：</label>
-                                            <div class="flexStyle" style="margin-right:3px">
-                                                <select class="form-control" id="pmcPersonQueryMode">
-                                                    <option value="state">状态</option>
-                                                    <option value="number">编号</option>
-                                                    <option value="name">姓名</option>
-                                                    <option value="levelId">等级</option>
-                                                    <option value="processId">工序</option>
-                                                </select>
-                                                <select class="form-control" id="pmcPersonQueryTF">
-                                                    <option value="0">等于</option>
-                                                    <option value="1">包含</option>
-                                                </select>
-                                                <select class="form-control" id="pmcPersonQuerySelect">
-                                                    <option value="1">正常</option>
-                                                    <option value="2">休息</option>
-                                                </select>
-                                                <input type="text" class="form-control hidden" id="pmcPersonQueryInput">
-                                            </div>
-                                            <button class="btn btn-primary" onclick="getPmcPersonList()">查询</button>
-                                        </div>
-                                        <div class="table-responsive mailbox-messages">
-                                            <table class="table table-hover table-striped" id="pmcPersonList"></table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -372,6 +379,32 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*添加车间模态框*@
+    <div class="modal fade" tabindex="-1" id="addWorkshopModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加工单</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addWorkshopList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addWorkshopListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addWorkshop()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

@@ -7,8 +7,9 @@ function pageReady() {
     //getProductionLine();
     getNotArrangeTaskList();
     getArrangeTaskList();
-    $('#personNavLi').one('click', getPersonList);
-    $('#deviceNavLi').one('click', getDeviceList);
+    $('#workshopNavLi').one('click', getWorkshopList);
+    $('#deviceNavLi').one('click', getDeviceWorkshopList);
+    $('#pmcPersonNavLi').one('click', getPmcPersonList);
     $('#flowNavLi').one('click', getProcessCodeList);
     $('#processSetNavLi').one('click', getProcessOpList);
     $('#planNavLi').one('click', getPlanList);
@@ -898,120 +899,158 @@ function getFlowCardLine(qId) {
     });
 }
 
-//----------------------------------------人员管理----------------------------------------------------
-let _personTrs = null;
-
-//获取人员列表
-function getPersonList() {
-    myPromise(5000).then(data => {
-        _personTrs = [];
-        const tableConfig = _tablesConfig(true, data.datas);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Account', title: '用户名', render: tableSet.input.bind(null, 'account') },
-            { data: 'Number', title: '编号', render: tableSet.input.bind(null, 'number') },
-            { data: 'Name', title: '姓名', render: tableSet.input.bind(null, 'name') },
-            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
-        ]);
-        tableConfig.drawCallback = function () {
-            initCheckboxAddEvent.call(this, _personTrs, (tr, d) => {
-                tr.find('.account').val(d.Account);
-                tr.find('.number').val(d.Number);
-                tr.find('.name').val(d.Name);
-                tr.find('.remark').val(d.Remark);
-            });
+//----------------------------------------车间管理----------------------------------------------------
+let _workshopTrs = null;
+let _workshopListTable = null;
+//获取车间列表
+function getWorkshopList(t, menu = false, callBack = null) {
+    myPromise(5000, { menu }).then(data => {
+        _workshopTrs = [];
+        var rData = data.datas;
+        if (!menu) {
+            if (_workshopListTable == null) {
+                const tableConfig = dataTableConfig(rData, true);
+                tableConfig.columns = tableConfig.columns.concat([
+                    { data: "Workshop", title: "车间", render: tableSet.input.bind(null, "workshop") },
+                    { data: "Remark", title: "备注", render: tableSet.input.bind(null, "remark") }
+                ]);
+                tableConfig.createdRow = tr => initDayTime(tr);
+                tableConfig.drawCallback = function () {
+                    initCheckboxAddEvent.call(this,
+                        _workshopTrs,
+                        (tr, d) => {
+                            tr.find('.workshop').val(d.Workshop);
+                            tr.find('.remark').val(d.Remark);
+                        });
+                }
+                _workshopListTable = $('#workshopList').DataTable(tableConfig);
+            } else {
+                updateTable(_workshopListTable, rData);
+            }
         }
-        $('#personList').DataTable(tableConfig);
+        callBack && callBack(rData);
     });
 }
 
-//人员列表tr数据获取
-function getPersonTrInfo(el, isAdd) {
-    const account = el.find('.account').val().trim();
-    if (isStrEmptyOrUndefined(account)) return void layer.msg('用户名不能为空');
-    const number = el.find('.number').val().trim();
-    if (isStrEmptyOrUndefined(number)) return void layer.msg('编号不能为空');
-    const name = el.find('.name').val().trim();
-    if (isStrEmptyOrUndefined(name)) return void layer.msg('姓名不能为空');
+//车间列表tr数据获取
+function getWorkshopTrInfo(el, isAdd) {
+    const workshop = el.find('.workshop').val().trim();
+    if (isStrEmptyOrUndefined(workshop)) return void layer.msg("车间名不能为空");
     const list = {
-        Account: account,
-        Number: number,
-        Name: name,
+        Workshop: workshop,
         Remark: el.find('.remark').val()
     }
     isAdd || (list.Id = el.find('.isEnable').val() >> 0);
     return list;
 }
 
-//修改人员
-function updatePerson() {
-    updateTableRow(_personTrs, getPersonTrInfo, 5001, getPersonList);
+//修改车间
+function updateWorkshop() {
+    updateTableRow(_workshopTrs, getWorkshopTrInfo, 5001, getWorkshopList);
 }
 
-//添加人员模态框
-function addPersonModel() {
+//添加车间模态框
+function addWorkshopModel() {
     const trData = {
-        Account: '',
-        Number: '',
-        Name: '',
-        Remark: ''
+        Workshop: "",
+        Remark: ""
     }
-    const tableConfig = _tablesConfig(false, [trData]);
+    const tableConfig = dataTableConfig([trData]);
     tableConfig.columns = tableConfig.columns.concat([
-        { data: 'Account', title: '用户名', render: tableSet.addInput.bind(null, 'account', 'auto') },
-        { data: 'Number', title: '编号', render: tableSet.addInput.bind(null, 'number', 'auto') },
-        { data: 'Name', title: '姓名', render: tableSet.addInput.bind(null, 'name', 'auto') },
-        { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
-        { data: null, title: '删除', render: tableSet.delBtn }
+        { data: "Workshop", title: "车间", render: tableSet.addInput.bind(null, "workshop", "auto") },
+        { data: "Remark", title: "备注", render: tableSet.addInput.bind(null, "remark", "100%") },
+        { data: null, title: "删除", render: tableSet.delBtn }
     ]);
-    $('#addPersonList').DataTable(tableConfig);
-    $('#addPersonListBtn').off('click').on('click', () => addDataTableTr('#addPersonList', trData));
-    $('#addPersonModel').modal('show');
+    $('#addWorkshopList').DataTable(tableConfig);
+    $('#addWorkshopListBtn').off('click').on('click', () => addDataTableTr('#addWorkshopList', trData));
+    $('#addWorkshopModel').modal('show');
 }
 
-//添加人员
-function addPerson() {
-    addTableRow('#addPersonList', getPersonTrInfo, 5002, () => {
-        $('#addPersonModel').modal('hide');
-        getPersonList();
+//添加工单
+function addWorkshop() {
+    addTableRow('#addWorkshopList', getWorkshopTrInfo, 5002, () => {
+        $('#addWorkshopModel').modal('hide');
+        getWorkshopList();
     });
 }
 
-//删除人员
-function delPerson() {
-    delTableRow(_personTrs, 5003, getPersonList);
+//删除工单
+function delWorkshop() {
+    delTableRow(_workshopTrs, 5003, getWorkshopList);
 }
 
 //----------------------------------------设备管理----------------------------------------------------
 //----------------------------------------设备列表----------------------------------------------------
 let _deviceTrs = null;
+let _deviceListTable = null;
+//获取设备车间列表
+function getDeviceWorkshopList() {
+    getWorkshopList(null, true, (data) => {
+        var wId = $("#deviceWsSelect").val() >> 0;
+        var defaultId = wId == 0 && data.length > 0 ? data[0].Id : wId;
+        $("#deviceWsSelect").html(setOptions(data, "Workshop")).val(defaultId);
+        getDeviceList();
+    });
+}
 
 //获取设备列表
 function getDeviceList() {
-    const deviceTypeFn = myPromise(5020);
-    const deviceFn = myPromise(5010);
-    Promise.all([deviceTypeFn, deviceFn]).then(result => {
+    const wId = $("#deviceWsSelect").val() >> 0;
+    myPromise(5010, { wId }).then(data => {
         _deviceTrs = [];
-        const tableConfig = _tablesConfig(true, result[1].datas);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.DevStateOps, 'state') },
-            { data: 'Code', title: '机台号', render: tableSet.input.bind(null, 'code') },
-            { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(result[0].datas, 'Category'), 'category') },
-            { data: 'Model', title: '型号', render: tableSet.select.bind(null, '', 'model') },
-            { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
-            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
-        ]);
-        tableConfig.drawCallback = function () {
-            initCheckboxAddEvent.call(this, _deviceTrs, (tr, d) => {
-                tr.find('.state').val(d.State);
-                tr.find('.code').val(d.Code);
-                tr.find('.category').val(d.CategoryId);
-                myPromise(5024, { categoryId: d.CategoryId, menu: true }, true, 0).then(e => tr.find('.model').html(setOptions(e.datas, 'Model')).val(d.ModelId));
-                tr.find('.priority').val(d.Priority);
-                tr.find('.remark').val(d.Remark);
-            });
+        var rData = data.datas;
+        if (_deviceListTable == null) {
+            _deviceTrs = [];
+            const tableConfig = dataTableConfig(rData, true);
+            tableConfig.columns = tableConfig.columns.concat([
+                { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, '', 'state') },
+                { data: 'Category', title: '类型', render: tableSet.select.bind(null, '', 'category') },
+                { data: 'Model', title: '型号', render: tableSet.select.bind(null, '', 'model') },
+                { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
+                { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+            ]);
+            tableConfig.drawCallback = function () {
+                initCheckboxAddEvent.call(this,
+                    _deviceTrs,
+                    (tr, d) => {
+                        tr.find('.state').val(d.State);
+                        tr.find('.code').val(d.Code);
+                        tr.find('.category').val(d.CategoryId);
+                        myPromise(5024, { categoryId: d.CategoryId, menu: true }, true, 0)
+                            .then(e => tr.find('.model').html(setOptions(e.datas, 'Model')).val(d.ModelId));
+                        tr.find('.priority').val(d.Priority);
+                        tr.find('.remark').val(d.Remark);
+                    });
+            }
+            _deviceListTable = $('#deviceList').DataTable(tableConfig);
+        } else {
+            updateTable(_deviceListTable, rData);
         }
-        $('#deviceList').DataTable(tableConfig);
     });
+}
+
+//初始化设备列表
+function initDeviceList(data = [], categories = []) {
+    const tableConfig = _tablesConfig(true, data);
+    tableConfig.columns = tableConfig.columns.concat([
+        { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.DevStateOps, 'state') },
+        { data: 'Code', title: '机台号', render: tableSet.input.bind(null, 'code') },
+        { data: 'Category', title: '类型', render: tableSet.select.bind(null, setOptions(categories, 'Category'), 'category') },
+        { data: 'Model', title: '型号', render: tableSet.select.bind(null, '', 'model') },
+        { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
+        { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+    ]);
+    tableConfig.drawCallback = function () {
+        initCheckboxAddEvent.call(this, _deviceTrs, (tr, d) => {
+            tr.find('.state').val(d.State);
+            tr.find('.code').val(d.Code);
+            tr.find('.category').val(d.CategoryId);
+            myPromise(5024, { categoryId: d.CategoryId, menu: true }, true, 0).then(e => tr.find('.model').html(setOptions(e.datas, 'Model')).val(d.ModelId));
+            tr.find('.priority').val(d.Priority);
+            tr.find('.remark').val(d.Remark);
+        });
+    }
+    _deviceListTable = $('#deviceList').DataTable(tableConfig);
 }
 
 //设备列表tr数据获取
@@ -1255,6 +1294,138 @@ function delDeviceModel() {
         getDeviceList();
     });
 }
+
+//----------------------------------------操作工管理----------------------------------------------------
+let _pmcPersonTrs = null;
+
+//获取人员
+function getPmcPersonList() {
+    const opData = {
+        condition: $('#pmcPersonQueryTF').val()
+    }
+    const mode = $('#pmcPersonQueryMode').val();
+    opData[mode] = ['number', 'name'].includes(mode)
+        ? $('#pmcPersonQueryInput').val().trim()
+        : $('#pmcPersonQuerySelect').val();
+    const getPmcPersonFn = myPromise(5500, opData, true);
+    const getGradeFn = myPromise(5510, { menu: true }, true);
+    const getProcessFn = myPromise(5030, { menu: true }, true);
+    Promise.all([getPmcPersonFn, getGradeFn, getProcessFn]).then(data => {
+        _pmcPersonTrs = [];
+        const tableConfig = _tablesConfig(true, data[0].datas);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.stateOps, 'state') },
+            { data: 'Number', title: '编号' },
+            { data: 'Name', title: '姓名' },
+            { data: 'Level', title: '等级', render: tableSet.select.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
+            { data: 'Process', title: '工序', render: tableSet.select.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
+            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
+        ]);
+        tableConfig.drawCallback = function () {
+            initCheckboxAddEvent.call(this, _pmcPersonTrs, (tr, d) => {
+                tr.find('.state').val(d.State);
+                tr.find('.level').val(d.LevelId);
+                tr.find('.process').val(d.ProcessId);
+                tr.find('.priority').val(d.Priority);
+                tr.find('.remark').val(d.Remark);
+            });
+        }
+        $('#pmcPersonList').DataTable(tableConfig);
+    });
+}
+
+//人员列表tr数据获取
+function getPmcPersonTrInfo(el, isAdd) {
+    let list;
+    if (isAdd) {
+        const nameEl = el.find('.name');
+        const disabledName = nameEl.find('option[disabled]');
+        disabledName.prop('disabled', false);
+        const name = nameEl.val();
+        disabledName.prop('disabled', true);
+        if (isStrEmptyOrUndefined(name)) return void layer.msg('请选择员工');
+        list = {
+            UserId: name,
+            State: 1
+        }
+    } else {
+        const state = el.find('.state').val();
+        if (isStrEmptyOrUndefined(state)) return void layer.msg('请选择状态');
+        list = {
+            State: state,
+            Id: el.find('.isEnable').val() >> 0
+        }
+    }
+    const level = el.find('.level').val();
+    if (isStrEmptyOrUndefined(level)) return void layer.msg('请选择等级');
+    list.LevelId = level;
+    const process = el.find('.process').val();
+    if (isStrEmptyOrUndefined(process)) return void layer.msg('请选择工序');
+    list.ProcessId = process;
+    list.Priority = el.find('.priority').val() >> 0;
+    list.Remark = el.find('.remark').val();
+    return list;
+}
+
+//修改人员
+function updatePmcPerson() {
+    updateTableRow(_pmcPersonTrs, getPmcPersonTrInfo, 5501, getPmcPersonList);
+}
+
+//添加人员模态框
+function showAddPmcPersonModel() {
+    const getPmcPersonFn = myPromise(5500, { menu: true, add: true }, true);
+    const getLevelFn = myPromise(5510, { menu: true }, true);
+    const getProcessFn = myPromise(5030, { menu: true }, true);
+    Promise.all([getPmcPersonFn, getLevelFn, getProcessFn]).then(data => {
+        const trData = {
+            Name: '',
+            Level: '',
+            Process: '',
+            Priority: 0,
+            Remark: ''
+        }
+        const tableConfig = _tablesConfig(false, [trData]);
+        tableConfig.columns = tableConfig.columns.concat([
+            { data: 'Name', title: '员工姓名', render: tableSet.addSelect.bind(null, setOptions(data[0].datas, 'Name'), 'name') },
+            { data: 'Level', title: '等级', render: tableSet.addSelect.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
+            { data: 'Process', title: '工序', render: tableSet.addSelect.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
+            { data: 'Priority', title: '优先级', render: tableSet.addInput.bind(null, 'priority', 'auto') },
+            { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
+            { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
+        ]);
+        tableConfig.createdRow = tr => $(tr).find('.name').val(0);
+        $('#addPmcPersonList').DataTable(tableConfig);
+        $('#addPmcPersonListBtn').prop('disabled', data[0].datas.length <= $('#addPmcPersonList').DataTable().column(1).nodes().length);
+        $('#addPmcPersonListBtn').off('click').on('click', function () {
+            addDataTableTr('#addPmcPersonList', trData);
+            disabledPmcPerson();
+            if (data[0].datas.length === $('#addPmcPersonList').DataTable().column(1).nodes().length) $(this).prop('disabled', true);
+        });
+        $('#showAddPmcPersonModel').modal('show');
+    });
+}
+
+//PMC添加员工选择禁用
+function disabledPmcPerson() {
+    const selects = $($('#addPmcPersonList').DataTable().columns(1).nodes()[0]).find('.name');
+    disabledProcessCodeCommon(selects);
+}
+
+//添加人员
+function addPmcPerson() {
+    addTableRow('#addPmcPersonList', getPmcPersonTrInfo, 5502, () => {
+        $('#showAddPmcPersonModel').modal('hide');
+        getPmcPersonList();
+    });
+}
+
+//删除人员
+function delPmcPerson() {
+    delTableRow(_pmcPersonTrs, 5503, getPmcPersonList);
+}
+
 //----------------------------------------流程管理----------------------------------------------------
 //----------------------------------------流程编号----------------------------------------------------
 
@@ -1294,7 +1465,7 @@ function addEditProcessCodeModel(callback) {
 function addUpProcessCode(isAdd) {
     const code = $('#addProcessCodeName').val().trim();
     if (isStrEmptyOrUndefined(code)) return layer.msg('编号不能为空');
-    const categoryId = $('#addProcessCodeCategoryName').val();
+    const categoryId = $('#addProcessCodeCategoryName').val() >> 0;
     if (isStrEmptyOrUndefined(categoryId)) return layer.msg('请选择类型');
     const arr = [];
     $('#addProcessCodeBody tr').each((i, item) => arr.push($(item).attr('list')));
@@ -3560,11 +3731,13 @@ function getTaskProcessList(cover = true) {
                     </tr>`;
         }, '');
         const temp = fn(headTr, orders.length, tbody);
-        $("#notArrangeTaskProcessBox").html(temp).find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid black').end().find('tbody .bg-green').css('padding', 0);
+        $("#notArrangeTaskProcessBox").html(temp).find('table').css('width', '100%').find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid black').end().find('tbody .bg-green').css('padding', 0);
 
         var t = dataTableConfig(0);
         t.fixedHeaderColumn(true, 3, 0);
         $("#notArrangeTaskProcess").DataTable(t);
+        $("#notArrangeTaskProcessBox .DTFC_ScrollWrapper").css('height', 'auto');
+
         $('#setNotArrangeTaskProcessBtn').off('click').on('click', () => {
             getPmcPreviewParams();
             if (!_taskOrders.length) return layer.msg('请选择任务单');
@@ -3573,7 +3746,6 @@ function getTaskProcessList(cover = true) {
                 setTable(ret);
             });
         });
-
     }
     myPromise(5602, _taskOrders, true, cover).then(setTable);
 }
@@ -3666,7 +3838,7 @@ function getPmcPreviewList() {
                     </tr>`;
         }, '');
         const temp = fn(headTr, tbody);
-        $('#pmcPreviewBox').html(temp).find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid gray').end().find('th,td').css('width', 'auto');
+        $('#pmcPreviewBox').html(temp).find('table').css('width', '100%').find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid gray').end().find('th,td').css('width', 'auto');
 
         getPresentSchedule(data);
         _isGetPmcPreviewParams = true;
@@ -3674,6 +3846,7 @@ function getPmcPreviewList() {
         var t = dataTableConfig(0);
         t.fixedHeaderColumn(true, 9, 0);
         $("#pmcPreview").DataTable(t);
+        $("#pmcPreviewBox .DTFC_ScrollWrapper").css('height', 'auto');
     });
 }
 
@@ -3996,138 +4169,6 @@ function addTaskLevel() {
 function delTaskLevel() {
     delTableRow(_pmcTaskLevelTrs, 5593, getTaskLevelList);
 }
-
-//----------------------------------------PMC排程人员----------------------------------------------------
-let _pmcPersonTrs = null;
-
-//获取人员
-function getPmcPersonList() {
-    const opData = {
-        condition: $('#pmcPersonQueryTF').val()
-    }
-    const mode = $('#pmcPersonQueryMode').val();
-    opData[mode] = ['number', 'name'].includes(mode)
-        ? $('#pmcPersonQueryInput').val().trim()
-        : $('#pmcPersonQuerySelect').val();
-    const getPmcPersonFn = myPromise(5500, opData, true);
-    const getGradeFn = myPromise(5510, { menu: true }, true);
-    const getProcessFn = myPromise(5030, { menu: true }, true);
-    Promise.all([getPmcPersonFn, getGradeFn, getProcessFn]).then(data => {
-        _pmcPersonTrs = [];
-        const tableConfig = _tablesConfig(true, data[0].datas);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'StateStr', title: '状态', render: tableSet.select.bind(null, tableSet.stateOps, 'state') },
-            { data: 'Number', title: '编号' },
-            { data: 'Name', title: '姓名' },
-            { data: 'Level', title: '等级', render: tableSet.select.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
-            { data: 'Process', title: '工序', render: tableSet.select.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
-            { data: 'Priority', title: '优先级', render: tableSet.input.bind(null, 'priority') },
-            { data: 'Remark', title: '备注', render: tableSet.input.bind(null, 'remark') }
-        ]);
-        tableConfig.drawCallback = function () {
-            initCheckboxAddEvent.call(this, _pmcPersonTrs, (tr, d) => {
-                tr.find('.state').val(d.State);
-                tr.find('.level').val(d.LevelId);
-                tr.find('.process').val(d.ProcessId);
-                tr.find('.priority').val(d.Priority);
-                tr.find('.remark').val(d.Remark);
-            });
-        }
-        $('#pmcPersonList').DataTable(tableConfig);
-    });
-}
-
-//人员列表tr数据获取
-function getPmcPersonTrInfo(el, isAdd) {
-    let list;
-    if (isAdd) {
-        const nameEl = el.find('.name');
-        const disabledName = nameEl.find('option[disabled]');
-        disabledName.prop('disabled', false);
-        const name = nameEl.val();
-        disabledName.prop('disabled', true);
-        if (isStrEmptyOrUndefined(name)) return void layer.msg('请选择员工');
-        list = {
-            UserId: name,
-            State: 1
-        }
-    } else {
-        const state = el.find('.state').val();
-        if (isStrEmptyOrUndefined(state)) return void layer.msg('请选择状态');
-        list = {
-            State: state,
-            Id: el.find('.isEnable').val() >> 0
-        }
-    }
-    const level = el.find('.level').val();
-    if (isStrEmptyOrUndefined(level)) return void layer.msg('请选择等级');
-    list.LevelId = level;
-    const process = el.find('.process').val();
-    if (isStrEmptyOrUndefined(process)) return void layer.msg('请选择工序');
-    list.ProcessId = process;
-    list.Priority = el.find('.priority').val() >> 0;
-    list.Remark = el.find('.remark').val();
-    return list;
-}
-
-//修改人员
-function updatePmcPerson() {
-    updateTableRow(_pmcPersonTrs, getPmcPersonTrInfo, 5501, getPmcPersonList);
-}
-
-//添加人员模态框
-function showAddPmcPersonModel() {
-    const getPmcPersonFn = myPromise(5500, { menu: true, add: true }, true);
-    const getLevelFn = myPromise(5510, { menu: true }, true);
-    const getProcessFn = myPromise(5030, { menu: true }, true);
-    Promise.all([getPmcPersonFn, getLevelFn, getProcessFn]).then(data => {
-        const trData = {
-            Name: '',
-            Level: '',
-            Process: '',
-            Priority: 0,
-            Remark: ''
-        }
-        const tableConfig = _tablesConfig(false, [trData]);
-        tableConfig.columns = tableConfig.columns.concat([
-            { data: 'Name', title: '员工姓名', render: tableSet.addSelect.bind(null, setOptions(data[0].datas, 'Name'), 'name') },
-            { data: 'Level', title: '等级', render: tableSet.addSelect.bind(null, setOptions(data[1].datas, 'Level'), 'level') },
-            { data: 'Process', title: '工序', render: tableSet.addSelect.bind(null, setOptions(data[2].datas, 'Process'), 'process') },
-            { data: 'Priority', title: '优先级', render: tableSet.addInput.bind(null, 'priority', 'auto') },
-            { data: 'Remark', title: '备注', render: tableSet.addInput.bind(null, 'remark', '100%') },
-            { data: null, title: '删除', render: () => '<button class="btn btn-danger btn-xs del-btn"><i class="fa fa-minus"></i></button>' }
-        ]);
-        tableConfig.createdRow = tr => $(tr).find('.name').val(0);
-        $('#addPmcPersonList').DataTable(tableConfig);
-        $('#addPmcPersonListBtn').prop('disabled', data[0].datas.length <= $('#addPmcPersonList').DataTable().column(1).nodes().length);
-        $('#addPmcPersonListBtn').off('click').on('click', function () {
-            addDataTableTr('#addPmcPersonList', trData);
-            disabledPmcPerson();
-            if (data[0].datas.length === $('#addPmcPersonList').DataTable().column(1).nodes().length) $(this).prop('disabled', true);
-        });
-        $('#showAddPmcPersonModel').modal('show');
-    });
-}
-
-//PMC添加员工选择禁用
-function disabledPmcPerson() {
-    const selects = $($('#addPmcPersonList').DataTable().columns(1).nodes()[0]).find('.name');
-    disabledProcessCodeCommon(selects);
-}
-
-//添加人员
-function addPmcPerson() {
-    addTableRow('#addPmcPersonList', getPmcPersonTrInfo, 5502, () => {
-        $('#showAddPmcPersonModel').modal('hide');
-        getPmcPersonList();
-    });
-}
-
-//删除人员
-function delPmcPerson() {
-    delTableRow(_pmcPersonTrs, 5503, getPmcPersonList);
-}
-
 
 //----------------------------------------PMC排程等级----------------------------------------------------
 

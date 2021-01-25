@@ -2017,23 +2017,13 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
         obj.columns = obj.columns.length == 0 && xvHao ? defaultColumns.concat(columns) : obj.columns.concat(columns);
     }
     obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
-        //表头固定
-        obj.fixedHeader = fixedHeader;
-        //横向滚动
-        obj.scrollX = scrollX;
-        obj.scrollY = scrollY;
-        obj.scrollCollapse = true;
-        //固定首列，需要引入相应 dataTables.fixedColumns.min.js
-        obj.fixedColumns = {
-            leftColumns: leftColumn,
-            rightColumns: rightColumn
-        };
+        obj.ordering = false;
+        fixedHeaderColumn(obj, fixedHeader, leftColumn, rightColumn, scrollX, scrollY);
     }
     return obj;
 }
 
-function fixedHeaderColumn(fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
-    const obj = {};
+function fixedHeaderColumn(obj, fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
     //表头固定
     obj.fixedHeader = fixedHeader;
     //横向滚动
