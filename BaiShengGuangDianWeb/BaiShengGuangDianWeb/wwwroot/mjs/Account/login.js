@@ -29,7 +29,7 @@
         for (var i = 0; i < permissionPageTypes.length; i++) {
             if (find) break;
             for (var j = 0; j < rData.length; j++) {
-                if (find) break;
+                if (find && !isStrEmptyOrUndefined(first)) break;
                 var d = rData[j];
                 if (d.label == permissionPageTypes[i]) {
                     first = d.url;
