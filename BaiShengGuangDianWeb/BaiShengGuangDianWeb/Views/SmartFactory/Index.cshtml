@@ -9,7 +9,14 @@
     <script src="~/mminjs/SmartFactory/index.min.js"></script>
 </environment>
 <section class="content-header">
-    <h1>@ViewBag.Title</h1>
+    <h1>
+        @ViewBag.Title
+        <div class="flexStyle warp pull-right" style="padding-bottom: 10px">
+            <label class="control-label text-nowrap text-red">车间：</label>
+            <select class="form-control" id="wsSelect"></select>
+            <button class="btn btn-primary btn-sm" onclick="initWorkshopSelect()">刷新</button>
+        </div>
+    </h1>
 </section>
 <section class="content">
     <div class="row">
@@ -23,8 +30,9 @@
                 <li id="planNavLi"><a href="#planNav" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
                 <li id="workOrderNavLi"><a href="#workOrderNav" data-toggle="tab" aria-expanded="false">工单管理</a></li>
                 <li id="taskOrderNavLi"><a href="#taskOrderNav" data-toggle="tab" aria-expanded="false">任务单管理</a></li>
-                <li id="pmcScheduleNavLi" class="active"><a href="#pmcScheduleNav" data-toggle="tab" aria-expanded="false">PMC排程</a></li>
+                <li id="pmcScheduleNavLi"><a href="#pmcScheduleNav" data-toggle="tab" aria-expanded="false">PMC排程</a></li>
                 <li id="flowCardNavLi"><a href="#flowCardNav" data-toggle="tab" aria-expanded="false">流程卡管理</a></li>
+                <li id="taskKanBanNavLi" class="active"><a href="#taskKanBanNav" data-toggle="tab" aria-expanded="false">任务单看板</a></li>
             </ul>
             <div class="tab-content no-padding">
                 <div class="tab-pane fade in" id="productionLineNav">
@@ -85,20 +93,15 @@
                 </div>
                 <div class="tab-pane fade in" id="deviceNav">
                     <div class="box box-primary">
-                        <div class="box-header with-border no-padding-bottom">
-                            <div class="flexStyle warp" style="padding-bottom: 10px">
-                                <label class="control-label text-nowrap">车间：</label>
-                                <div class="flexStyle">
-                                    <select class="form-control" id="deviceWsSelect"></select>
-                                </div>
-                            </div>
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateDevice()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddDeviceModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delDevice()">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="getDeviceWorkshopList()">刷新</button>
-                                <button class="btn btn-primary btn-sm" onclick="showDeviceCategoryModal()">类型管理</button>
-                                <button class="btn btn-primary btn-sm" onclick="showDeviceModelModal()">型号管理</button>
+                                <button class="btn btn-info btn-sm" onclick="getDeviceList()">刷新</button>
+                                <button class="btn btn-warning btn-sm" onclick="showDeviceCategoryModal()">类型管理</button>
+                                <button class="btn btn-warning btn-sm" onclick="showDeviceModelModal()">型号管理</button>
                             </div>
                         </div>
 
@@ -112,13 +115,13 @@
                 <div class="tab-pane fade in" id="personNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">人员管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updatePerson()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="showAddPersonModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delPerson()">删除</button>
                                 <button class="btn btn-info btn-sm" onclick="getPersonList()">刷新</button>
-                                <button class="btn btn-primary btn-sm" onclick="showGradeModal()">等级</button>
+                                <button class="btn btn-primary btn-sm" onclick="showPersonGradeModal()">等级</button>
                             </div>
                         </div>
                         <div class="box-body">
@@ -129,13 +132,11 @@
                                         <option value="state">状态</option>
                                         <option value="number">编号</option>
                                         <option value="name">姓名</option>
-                                        <option value="roleId">角色</option>
+                                        @*<option value="roleId">角色</option>*@
                                         <option value="levelId">等级</option>
                                         <option value="processId">工序</option>
                                     </select>
                                     <select class="form-control" id="personQueryTF">
-                                        <option value="0">等于</option>
-                                        <option value="1">包含</option>
                                     </select>
                                     <select class="form-control" id="personQuerySelect">
                                         <option value="1">正常</option>
@@ -161,7 +162,7 @@
                             <div class="tab-pane active in" id="processCodeNav">
                                 <div class="box box-primary">
                                     <div class="box-header with-border">
-                                        <h3 class="box-title">流程编号</h3>
+                                        <h3 class="box-title"></h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-primary btn-sm" onclick="addProcessCodeModel()">添加</button>
                                             <button class="btn btn-danger btn-sm" onclick="delProcessCode()">删除</button>
@@ -179,17 +180,17 @@
                             <div class="tab-pane fade in" id="processSetNav">
                                 <div class="box box-primary">
                                     <div class="box-header with-border">
-                                        <h3 class="box-title">流程设置</h3>
+                                        <h3 class="box-title"></h3>
                                         <div class="box-tools pull-right">
-                                            <button class="btn btn-success btn-sm" onclick="updateProcessOp()">修改</button>
-                                            <button class="btn btn-primary btn-sm" onclick="addProcessOpModel()">添加</button>
-                                            <button class="btn btn-danger btn-sm" onclick="delProcessOp()">删除</button>
-                                            <button class="btn btn-info btn-sm" onclick="getProcessOpList()">刷新</button>
+                                            <button class="btn btn-success btn-sm" onclick="updateProcess()">修改</button>
+                                            <button class="btn btn-primary btn-sm" onclick="addProcessModel()">添加</button>
+                                            <button class="btn btn-danger btn-sm" onclick="delProcess()">删除</button>
+                                            <button class="btn btn-info btn-sm" onclick="getProcessList()">刷新</button>
                                         </div>
                                     </div>
                                     <div class="box-body">
                                         <div class="table-responsive mailbox-messages">
-                                            <table class="table table-hover table-striped" id="processOpList"></table>
+                                            <table class="table table-hover table-striped" id="processList"></table>
                                         </div>
                                     </div>
                                 </div>
@@ -200,7 +201,7 @@
                 <div class="tab-pane fade in" id="planNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">计划号管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="showCapacityModel()">产能</button>
                                 <button class="btn btn-primary btn-sm" onclick="addPlanModel()">添加</button>
@@ -218,7 +219,7 @@
                 <div class="tab-pane fade in" id="workOrderNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">工单管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateWorkOrder()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="addWorkOrderModel()">添加</button>
@@ -236,7 +237,7 @@
                 <div class="tab-pane fade in" id="taskOrderNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">任务单管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-warning btn-sm" onclick="showCapacityNeedModel()">产能需求</button>
                                 <button class="btn btn-success btn-sm" onclick="updateTaskOrder()">修改</button>
@@ -325,7 +326,6 @@
                                             <button class="btn btn-primary btn-sm" onclick="getTaskProcessList()">查询</button>
                                         </div>
                                         <div class="form-group" id="notArrangeTaskProcessBox"></div>
-                                        <div class="form-group" id="notArrangeTaskProcessBox"></div>
                                         <div class="form-group text-center">
                                             <button class="btn btn-success btn-sm" onclick="getPmcPreviewList()">预览</button>
                                         </div>
@@ -343,7 +343,7 @@
                 <div class="tab-pane fade in" id="flowCardNav">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">流程卡管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-primary btn-sm" onclick="addFlowCardModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delFlowCard()">删除</button>
@@ -380,6 +380,24 @@
                         </div>
                     </div>
                 </div>
+            <div class="tab-pane fade in" id="taskKanBanNav">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"></h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-success btn-sm" onclick="updateWorkOrder()">修改</button>
+                            <button class="btn btn-primary btn-sm" onclick="addWorkOrderModel()">添加</button>
+                            <button class="btn btn-danger btn-sm" onclick="delWorkOrder()">删除</button>
+                            <button class="btn btn-info btn-sm" onclick="getWorkOrderList()">刷新</button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="workOrderList"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -404,31 +422,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addWorkshop()">添加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @*添加人员模态框*@
-    <div class="modal fade" tabindex="-1" id="addPersonModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">添加人员</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addPersonList"></table>
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addPersonListBtn"><i class="fa fa-plus"></i> 添加新项</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addPerson()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -459,6 +452,76 @@
             </div>
         </div>
     </div>
+    @*设备型号模态框*@
+    <div class="modal fade" tabindex="-1" id="showDeviceModelModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">型号管理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-success btn-sm" onclick="updateDeviceModel()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="addDeviceModelModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delDeviceModel()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getDeviceModelList()">刷新</button>
+                                <button class="btn btn-warning btn-sm" onclick="showDeviceCategoryModal(true)">类型管理</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="deviceModelList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加设备型号模态框*@
+    <div class="modal fade" tabindex="-1" id="addDeviceModelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="min-width: 380px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加型号</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title"></h3>
+                            <div class="box-tools pull-right">
+                                <button class="btn btn-warning btn-sm" onclick="showDeviceCategoryModal(true)">类型管理</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="addDeviceModelList"></table>
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-default btn-sm" id="addDeviceModelListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addDeviceModel()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     @*设备类型模态框*@
     <div class="modal fade" tabindex="-1" id="deviceCategoryModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -467,12 +530,12 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">设备类型</h4>
+                    <h4 class="modal-title">类型管理</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">类型管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-success btn-sm" onclick="updateDeviceCategory()">修改</button>
                                 <button class="btn btn-primary btn-sm" onclick="addDeviceCategoryModel()">添加</button>
@@ -518,30 +581,30 @@
             </div>
         </div>
     </div>
-    @*设备型号模态框*@
-    <div class="modal fade" tabindex="-1" id="showDeviceModelModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @*显示人员等级模态框*@
+    <div class="modal fade" tabindex="-1" id="showPersonGradeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">设备型号</h4>
+                    <h4 class="modal-title">等级</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">型号管理</h3>
+                            <h3 class="box-title">等级管理</h3>
                             <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="updateDeviceModel()">修改</button>
-                                <button class="btn btn-primary btn-sm" onclick="addDeviceModelModel()">添加</button>
-                                <button class="btn btn-danger btn-sm" onclick="delDeviceModel()">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="getDeviceModelList()">刷新</button>
+                                <button class="btn btn-success btn-sm" onclick="updatePersonGrade()">修改</button>
+                                <button class="btn btn-primary btn-sm" onclick="addPersonGradeModel()">添加</button>
+                                <button class="btn btn-danger btn-sm" onclick="delPersonGrade()">删除</button>
+                                <button class="btn btn-info btn-sm" onclick="getPersonGradeList()">刷新</button>
                             </div>
                         </div>
                         <div class="box-body">
                             <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="deviceModelList"></table>
+                                <table class="table table-hover table-striped" id="personGradeList"></table>
                             </div>
                         </div>
                     </div>
@@ -552,26 +615,51 @@
             </div>
         </div>
     </div>
-    @*添加设备型号模态框*@
-    <div class="modal fade" tabindex="-1" id="addDeviceModelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @*添加人员等级模态框*@
+    <div class="modal fade" tabindex="-1" id="addPersonGradeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         &times;
                     </button>
-                    <h4 class="modal-title">添加型号</h4>
+                    <h4 class="modal-title">添加等级</h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addDeviceModelList"></table>
+                        <table class="table table-hover table-striped" id="addPersonGradeList"></table>
                     </div>
                     <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addDeviceModelListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                        <button type="button" class="btn btn-default btn-sm" id="addPersonGradeListBtn"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addDeviceModel()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addPersonGrade()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*添加人员模态框*@
+    <div class="modal fade" tabindex="-1" id="addPersonModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加人员</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="addPersonList"></table>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-default btn-sm" id="addPersonListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addPerson()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -593,6 +681,9 @@
                             <div class="box box-primary">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">新流程编号</h3>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
                                 </div>
                                 <div class="box-body">
                                     <div class="flexStyle form-group">
@@ -614,7 +705,7 @@
                                                 <tr>
                                                     <th>序号</th>
                                                     <th>流程</th>
-                                                    @*<th>上移</th>*@
+                                                    <th>移动</th>
                                                     <th>操作</th>
                                                 </tr>
                                             </thead>
@@ -628,6 +719,9 @@
                             <div class="box box-primary">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">流程选项</h3>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
                                 </div>
                                 <div class="box-body">
                                     <div class="table-responsive mailbox-messages">
@@ -658,7 +752,7 @@
                 <div class="modal-body">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">类型管理</h3>
+                            <h3 class="box-title"></h3>
                             <div class="box-tools pull-right">
                                 <button class="btn btn-primary btn-sm" onclick="addProcessCodeCategoryModel()">添加</button>
                                 <button class="btn btn-danger btn-sm" onclick="delProcessCodeCategory()">删除</button>
@@ -693,7 +787,10 @@
                         <div style="flex: 1">
                             <div class="box box-primary">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">新流程编号类型</h3>
+                                    <h3 class="box-title"></h3>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
                                 </div>
                                 <div class="box-body">
                                     <div class="flexStyle form-group">
@@ -711,7 +808,7 @@
                                                 <tr>
                                                     <th>序号</th>
                                                     <th>流程</th>
-                                                    @*<th>上移</th>*@
+                                                    <th>移动</th>
                                                     <th>操作</th>
                                                 </tr>
                                             </thead>
@@ -725,6 +822,9 @@
                             <div class="box box-primary">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">流程选项</h3>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
                                 </div>
                                 <div class="box-body">
                                     <div class="table-responsive mailbox-messages">
@@ -742,9 +842,8 @@
             </div>
         </div>
     </div>
-
-    @*添加流程编号类型模态框*@
-    <div class="modal fade" tabindex="-1" id="addProcessOpModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @*添加流程模态框*@
+    <div class="modal fade" tabindex="-1" id="addProcessModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -755,20 +854,19 @@
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addProcessOpList"></table>
+                        <table class="table table-hover table-striped" id="addProcessList"></table>
                     </div>
                     <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addProcessOpListBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                        <button type="button" class="btn btn-default btn-sm" id="addProcessListBtn"><i class="fa fa-plus"></i> 添加新项</button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addProcessOp()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addProcess()">添加</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-
     @*添加修改计划号模态框*@
     <div class="modal fade" tabindex="-1" id="addPlanModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
@@ -796,7 +894,9 @@
                         <label class="control-label text-nowrap no-margin">产能配置：</label>
                         <select class="form-control" id="addPlanCapacity"></select>
                     </div>
-                    <label class="control-label">产能清单：</label>
+                    <div class="form-group no-margin-bottom">
+                        <h4 class="control-label text-red"><strong>产能清单：</strong></h4>
+                    </div>
                     <div class="row">
                         <div class="form-group col-md-4">
                             <div class="mailbox-messages table-responsive">
@@ -833,7 +933,9 @@
                             </div>
                         </div>
                     </div>
-                    <label class="control-label">流程编号清单：</label>
+                    <div class="form-group no-margin-bottom">
+                        <h4 class="control-label text-red"><strong>流程编号清单：</strong></h4>
+                    </div>
                     <div class="form-group" id="planProcessCodeList"></div>
                     <div class="text-center">
                         <button type="button" class="btn btn-success btn-sm" id="addPlanProcessList"><i class="fa fa-plus"></i></button>
@@ -846,7 +948,6 @@
             </div>
         </div>
     </div>
-
     @*产能配置模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -881,7 +982,6 @@
             </div>
         </div>
     </div>
-
     @*添加、查看和修改产能配置详情模态框*@
     <div class="modal fade" tabindex="-1" id="showCapacityDetailModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -907,7 +1007,9 @@
                                 <label class="control-label text-nowrap no-margin">流程编号类型：<span class="spanStyle look" id="capacityDetailCode"></span></label>
                                 <select class="form-control update add" id="capacityProcess" table="#capacityDetailList"></select>
                             </div>
-                            <label class="control-label">产能清单：</label>
+                            <div class="form-group no-margin-bottom">
+                                <h4 class="control-label text-red"><strong>产能清单：</strong></h4>
+                            </div>
                             <div class="mailbox-messages table-responsive">
                                 <table class="table table-hover table-striped table-condensed table-responsive" id="capacityDetailList"></table>
                             </div>
@@ -938,20 +1040,21 @@
                                 </div>
                             </div>
                             <div class="form-group text-center">
-                                <button type="button" class="btn btn-primary  add update" id="addCapacitySetBtn">确定</button>
+                                <button type="button" class="btn btn-primary add update" id="capacitySetBtn">确定</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary add" onclick="addCapacity()">添加</button>
-                    <button type="button" class="btn btn-primary update" id="updateCapacityBtn" onclick="updateCapacity.call(this)">修改</button>
+                    <button type="button" class="btn btn-primary add" onclick="addCapacity(true)">添加并关闭</button>
+                    <button type="button" class="btn btn-primary update updateCapacityBtn" onclick="updateCapacity(this)">修改</button>
+                    <button type="button" class="btn btn-primary update updateCapacityBtn" onclick="updateCapacity(this, true)">修改并关闭</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-
     @*浏览流程编号模态框*@
     <div class="modal fade" tabindex="-1" id="browseProcessCodeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -1043,6 +1146,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addTaskOrder()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addTaskOrder(true)">添加并关闭</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -1359,40 +1463,6 @@
             </div>
         </div>
     </div>
-    @*PMC等级模态框*@
-    <div class="modal fade" tabindex="-1" id="showPmcGradeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="min-width: 380px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">等级</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">等级管理</h3>
-                            <div class="box-tools pull-right">
-                                <button class="btn btn-success btn-sm" onclick="updatePmcGrade()">修改</button>
-                                <button class="btn btn-primary btn-sm" onclick="addPmcGradeModel()">添加</button>
-                                <button class="btn btn-danger btn-sm" onclick="delPmcGrade()">删除</button>
-                                <button class="btn btn-info btn-sm" onclick="getPmcGradeList()">刷新</button>
-                            </div>
-                        </div>
-                        <div class="box-body">
-                            <div class="table-responsive mailbox-messages">
-                                <table class="table table-hover table-striped" id="pmcGradeList"></table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
     @*PMC排程计划号模态框*@
     <div class="modal fade" tabindex="-1" id="showPmcChildPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
@@ -1482,56 +1552,6 @@
             </div>
         </div>
     </div>
-    @*添加等级模态框*@
-    <div class="modal fade" tabindex="-1" id="addPmcGradeModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="min-width: 380px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">添加等级</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addPmcGradeList"></table>
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addPmcGradeListBtn"><i class="fa fa-plus"></i> 添加新项</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addPmcGrade()">添加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @*添加员工模态框*@
-    <div class="modal fade" tabindex="-1" id="showAddPmcPersonModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" style="min-width: 380px">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">添加员工</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive mailbox-messages">
-                        <table class="table table-hover table-striped" id="addPmcPersonList"></table>
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-default btn-sm" id="addPmcPersonListBtn"><i class="fa fa-plus"></i> 添加新项</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addPmcPerson()">添加</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
     @*PMC任务单等级模态框*@
     <div class="modal fade" tabindex="-1" id="showTaskLevelModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="min-width: 380px">
@@ -1586,6 +1606,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addTaskLevel()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addTaskLevel(true)">添加并关闭</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>

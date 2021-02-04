@@ -6,7 +6,7 @@ function pageReady() {
     _permissionList[591] = { uIds: ['citePurchaseListBtn'] };
     _permissionList[592] = { uIds: ['printPurchaseListBtn'] };
     _permissionList[593] = { uIds: ['inWareListSaveBtn'] };
-    _permissionList[594] = { uIds: ['changePurchaseStateBtn', 'changePurchaseBtn'] };
+    _permissionList[594] = { uIds: ['changePurchaseBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
@@ -361,7 +361,7 @@ function changePurchase(e) {
 function changePurchaseState(e) {
     if (_purchaseTrs.length == 0)
         return;
-    const list = _purchaseTrs.map((a, b) => ({ Id: $(a).attr("id") }));
+    const list = _purchaseTrs.map((a, b) => ({ Id: $(a).find("input").val() >> 0 }));
     const data = {};
     data.opType = 856;
     data.opData = JSON.stringify(list);

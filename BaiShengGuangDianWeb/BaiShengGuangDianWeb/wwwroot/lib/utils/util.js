@@ -1041,8 +1041,8 @@ function checkFileExt(file, fileExt) {
     return false;
 }
 
-//数值限制
-function onNumberLimitInput(obj, number = 59, zs = 5) {
+//时间数值限制
+function onTimeLimitInput(obj, number = 59, zs = 5) {
     obj.value = input(obj.value, zs, 0);
     obj.value = obj.value < 0 ? 0 : obj.value;
     obj.value = obj.value > number ? number : obj.value;
@@ -1991,30 +1991,57 @@ function deepCopy(obj) {
     return result;
 }
 
+//异步获取数据
+function myPromise(opType, opData = undefined, cover = 1, func = undefined, msg = undefined) {
+    const data = { opType };
+    opData && (data.opData = JSON.stringify(opData));
+    return new Promise(resolve => {
+        ajaxPost("/Relay/Post", data, ret => {
+            let errMsg = ret.errmsg;
+            if (ret.errno == 0) {
+                if (func != undefined)
+                    func();
+                resolve(ret);
+            } else {
+                if (ret.datas && ret.datas.length > 0) {
+                    let t = "";
+                    t = ret.datas.join();
+                    t += ",";
+                    errMsg = t + errMsg;
+                }
+            }
+            if ((ret.errno != 0 && errMsg) || cover !== 0) {
+                return layer.msg(errMsg);
+            }
+        }, cover);
+    });
+}
+
 //dataTable基本参数
 function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, ordering = true) {
-    var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px' }];
+    var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
     const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-        bAutoWidth: true,
+        bAutoWidth: !isCheck || !checkShow,
         destroy: true,
         paging: true,
         searching: true,
         ordering: ordering,
         aaSorting: [[order, 'asc']],
-        aLengthMenu: [20, 40, 60],
-        iDisplayLength: 20,
+        aLengthMenu: [25, 50, 75],
+        iDisplayLength: 25,
         language: oLanguage
     };
-    if (d != 0) {
+    if (d !== 0) {
         addOrderData(d);
         obj.data = d;
     }
     isCheck && (!obj.columns && (obj.columns = []),
-        obj.columns.push({ data: null, title: '', render: _tableSet().isEnable, orderable: false, sWidth: '80px', visible: checkShow }));
+        obj.columns.push({ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: '80px', visible: checkShow }));
     obj.addColumns = function (columns, xvHao = true) {
         !obj.columns && (obj.columns = []);
-        obj.columns = obj.columns.length == 0 && xvHao ? defaultColumns.concat(columns) : obj.columns.concat(columns);
+        xvHao && (obj.columns = obj.columns.concat(defaultColumns));
+        obj.columns = obj.columns.concat(columns);
     }
     obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
         obj.ordering = false;
@@ -2038,26 +2065,75 @@ function fixedHeaderColumn(obj, fixedHeader, leftColumn = -1, rightColumn = -1, 
     return obj;
 }
 
+//流程编号选择禁用
+function disabledOption(selects, v, tag = true) {
+    if (v) {
+        selects.find(`option[value='${v}']`).prop('disabled', tag);
+    } else {
+        const ids = [];
+        selects.find('option').prop('disabled', false);
+        selects.each((i, item) => {
+            const id = $(item).val();
+            if (id) ids[id] = 1;
+        });
+        if (!ids.length) return;
+        Object.keys(ids).forEach(item => {
+            selects.find(`option[value='${item}']`).prop('disabled', true);
+        });
+    }
+    selects.select2();
+}
+//更新选项
+function updateDataTableTrSelect(id, className, options) {
+    const selects = $(id).find(`.${className}`);
+    selects.find('option').prop('disabled', false);
+    const ids = [];
+    selects.each((i, item) => {
+        const id = $(item).val();
+        ids[i] = id ? id : 0;
+    });
+    $(selects).html(options);
+    if (ids.length) {
+        ids.forEach((v, i) => {
+            $(selects[i]).val(v).trigger('change');
+        });
+    };
+    Object.values(ids).forEach(item => {
+        selects.find(`option[value='${item}']`).prop('disabled', true);
+    });
+    //const disabled = $(el).find('option[disabled]').prop('disabled', false);
+    //const render = () => tableSet.addSelect.bind(null, options, 'taskOrder');
+    //getDataTableRow(id).each(item => {
+    //    const el = $(item).find(`.${className}`);
+    //    const v = $(el).val();
+    //    $(el).find('option[disabled]').prop('disabled', true);
+    //    $(el).html(options).val(v).trigger('change');
+    //});
+}
 //dataTable渲染标签
-function _tableSet() {
+function tableDefault() {
     return {
         order: (a, b, c, d) => +d.row + 1,
         isEnable: d => `<input type="checkbox" class="icb_minimal isEnable" value="${d.Id}">`,
+        span: (className, d) => `<span class="textOn ${className}">${d}</span>`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
         addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:70px;width:${width}" value="${d}">`,
         addNumberInput: (className, param, d) => {
             var s = param.split(',');
             return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`
         },
-        select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control hidden textIn ${className}" style="min-width:120px">${ops}</select>`,
-        addSelect: (ops, className) => `<select class="form-control ${className}" style="min-width:120px">${ops}</select>`,
+        select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control mSelect hidden textIn ${className}" style="min-width:120px;">${ops}</select>`,
+        addSelect: (ops, className) => `<select class="form-control mSelect ${className}" style="min-width:120px">${ops}</select>`,
         updateBtn: (fn, d) => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)" value="${d}">修改</button>`,
         delBtn: () => `<button class="btn btn-danger btn-xs" onclick="delDataTableTr.call(this)"><i class="fa fa-minus"></i></button>`,
         addBtn: fn => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)"><i class="fa fa-plus"></i></button>`,
         setBtn: () => '<button class="btn btn-primary btn-sm set-btn">设置</button>',
         detailBtn: (fn, d) => `<button class="btn btn-info btn-sm" onclick="${fn}.call(this)" value="${d}">查看</button>`,
         processDetail: d => d.replace(/,/g, ' > '),
-        isRework: () => '<select class="form-control isRework" style="width:100px"><option value="0">否</option><option value="1">是</option></select>',
+        text: (title, d, len = null) => d.length > (len ? len : tdShowLength)
+            ? `<span title="${d}" onclick = "showAllContent('${escape(d)}', '${title}')">${d.substring(0, (len ? len : tdShowLength))}...</span>`
+            : `<span title="${d}" class="chose1">${d}</span>`,
+        isRework: () => '<select class="form-control mSelect isRework" style="width:100px"><option value="0">否</option><option value="1">是</option></select>',
         isReworkText: d => d ? '是' : '否',
         day: (className, d) => `<span class="textOn">${d.split(' ')[0]}</span><input type="text" class="pointer textIn hidden form_date form-control text-center ${className}" style="min-width: 100px">`,
         addDay: (className, d) => `<input type="text" class="pointer form_date form-control text-center ${className}" value="${d ? d.split(' ')[0] : ''}" style="min-width: 100px">`,
@@ -2072,7 +2148,7 @@ function _tableSet() {
             return `<span style="color:${color}">${d.split(' ')[0]}</span>`;
         },
         progress: d => `${d}%`,
-        endFinishTime: d => d.State === 4 ? d.EndTime : _tableSet().state(d),
+        endFinishTime: d => d.State === 4 ? d.EndTime : tableDefault().state(d),
         stateOps: '<option value="1">正常</option><option value="2">休息</option>',
         DevStateOps: '<option value="1">正常</option><option value="2">故障</option><option value="3">报废</option>',
         isFinish: d => {
@@ -2080,26 +2156,31 @@ function _tableSet() {
             if (d.Id) icon = 'ok', color = 'green';
             return `<span class="glyphicon glyphicon-${icon} text-${color} middle" aria-hidden="true" style="font-size:25px"></span>`;
         },
+        isChose: (ok) => {
+            let icon = 'remove', color = 'red';
+            if (ok) icon = 'ok', color = 'green';
+            return `<span class="glyphicon glyphicon-${icon} text-${color} middle" aria-hidden="true" style="font-size:25px"></span>`;
+        },
         hms: d => {
             return `<div class="flexStyle" style="justify-content:center">
                         <input type="text" class="form-control text-center hour" style="width:60px" oninput="onInput(this, 5, 0)" value="${d.Hour || 0}"><span style="margin:0 5px">时</span>
-                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onNumberLimitInput(this)" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
-                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onNumberLimitInput(this)" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
+                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onTimeLimitInput(this)" value="${d.Min || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onTimeLimitInput(this)" value="${d.Sec || 0}"><span style="margin:0 5px">秒</span>
                     </div>`;
         },
         hmsCal: d => {
             var t = convertTime(d);
             return `<div class="flexStyle" style="justify-content:center">
                         <input type="text" class="form-control text-center hour" style="width:60px" oninput="onInput(this, 5, 0)" value="${t.h}"><span style="margin:0 5px">时</span>
-                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onNumberLimitInput(this)" value="${t.m || 0}"><span style="margin:0 5px">分</span>
-                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onNumberLimitInput(this)" value="${t.s || 0}"><span style="margin:0 5px">秒</span>
+                        <input type="text" class="form-control text-center minute" style="width:40px" oninput="onTimeLimitInput(this)" value="${t.m || 0}"><span style="margin:0 5px">分</span>
+                        <input type="text" class="form-control text-center second" style="width:40px" oninput="onTimeLimitInput(this)" value="${t.s || 0}"><span style="margin:0 5px">秒</span>
                     </div>`;
         },
         msCal: (className, look, d) => {
             var t = convertTime(d, false);
             return !look ? `<div class="flexStyle" style="justify-content:center">
                         <input type="text" class="form-control text-center minute ${className}" oninput="onInput(this, 5, 0)" style="width:60px" value="${t.m}"><span style="margin:0 5px">分</span>
-                        <input type="text" class="form-control text-center second ${className}" oninput="onNumberLimitInput(this)" style="width:40px" value="${t.s}"><span style="margin:0 5px">秒</span>
+                        <input type="text" class="form-control text-center second ${className}" oninput="onTimeLimitInput(this)" style="width:40px" value="${t.s}"><span style="margin:0 5px">秒</span>
                     </div>`: `${t.m}<span style="margin:0 5px">分</span>${t.s}<span style="margin:0 5px">秒</span>`;
         },
         showTime: d => d === '0001-01-01 00:00:00' ? '' : d.split(' ')[0]
@@ -2108,21 +2189,25 @@ function _tableSet() {
 
 //添加一行
 function addDataTableTr(id, obj) {
-    $(id).DataTable().row.add(obj).draw(false);
+    //obj.XvHao = $(id).DataTable().rows()[0].length + 1;
+    obj.XvHao = '';
+    const dataTable = $(id).DataTable();
+    dataTable.row.add(obj).draw(false);
+    dataTable.column(0).nodes().each((item, i) => {
+        //dataTable.data()[i].XvHao = i + 1;
+        $(item).text(i + 1);
+    });
 }
 
 //删除一行
 function delDataTableTr() {
     const tr = $(this).parents('tr')[0];
-    const xh = $(tr).find('td:first').text() >> 0;
     const tableId = $(tr).parents('table').prop('id');
     const dataTable = $(`#${tableId}`).DataTable();
-    dataTable.row(tr).remove().draw(false);
-    dataTable.column(0).nodes().each(item => {
-        const flag = $(item).text() >> 0;
-        if (flag > xh) {
-            $(item).text(flag - 1);
-        }
+    dataTable.rows(tr).remove().draw(false);
+    dataTable.column(0).nodes().each((item, i) => {
+        //dataTable.data()[i].XvHao = i + 1;
+        $(item).text(i + 1);
     });
 }
 
@@ -2132,14 +2217,13 @@ function getDataTableRow(table) {
 }
 
 //初始化iChick并添加事件
-function initCheckboxAddEvent(arr, callback, fn) {
+function initCheckboxAddEvent(arr, callback, fn, init = true) {
     const api = this.api();
     $(this).find(".isEnable").iCheck({
         handle: "checkbox",
         checkboxClass: "icheckbox_minimal-blue",
         increaseArea: "20%"
-    }).iCheck("uncheck")
-        .off("ifChanged")
+    }).off("ifChanged")
         .on("ifChanged", function () {
             const tr = $(this).parents("tr");
             const trDom = tr[0];
@@ -2155,6 +2239,7 @@ function initCheckboxAddEvent(arr, callback, fn) {
                 fn && fn(tr);
             }
         });
+    init && $(this).find(".isEnable").iCheck("uncheck");
 }
 
 //删除表格数据
@@ -2197,6 +2282,22 @@ function updateTableRow(trs, getTrInfo, opType, callback) {
         arr.push(trInfo);
     }
     myPromise(opType, arr).then(callback);
+}
+
+//初始化时间选择器
+function initDayTime(el, date = undefined, fnc = undefined) {
+    $(el).find('.form_date').attr('readonly', true).datepicker({
+        language: 'zh-CN',
+        format: 'yyyy-mm-dd',
+        maxViewMode: 2,
+        todayBtn: 'linked',
+        autoclose: true
+    }).on('changeDate', function () {
+        if (isStrEmptyOrUndefined($(this).val()) && date) {
+            $(this).val(getDate(date)).datepicker('update');
+        }
+        if (fnc) fnc();
+    });
 }
 
 //初始化时间选择器
