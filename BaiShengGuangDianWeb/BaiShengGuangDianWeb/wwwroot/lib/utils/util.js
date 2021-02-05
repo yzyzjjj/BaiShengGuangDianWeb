@@ -692,12 +692,12 @@ function ImgCreated(options) {
     this.id = options.id;
     this.url = options.url;
     this.dataType();
-    this.creat();
+    this.create();
 
 }
 //判断数据是否正常
 function dataType() {
-    var gettype = Object.prototype.toString
+    var gettype = Object.prototype.toString;
     var utility = {
         isStr: function (o) {
             return gettype.call(o) == "[object String]";
@@ -740,24 +740,23 @@ function imgShowBig(id) {
 }
 
 //创建img图片
-function creat() {
+function create() {
     var that = this;
     var type = [null, undefined, NaN]
-    this.url.forEach(function (value, index, array) {
+    this.url.forEach(function(value, index, array) {
         var html = document.getElementById(that.id[index]);
         html.innerHTML = '';
-        if (type.indexOf(value) >= 0) return false
-        value.split(',').forEach(function (val, ind, arr) {
+        if (type.indexOf(value) >= 0) return false;
+        value.split(',').forEach(function(val, ind, arr) {
             var img = document.createElement('img'); // 创建img标签
             img.className = 'idePhoto';
-            img.setAttribute('src', val)
-            html.appendChild(img)
-        })
-
-    })
+            img.setAttribute('src', val);
+            html.appendChild(img);
+        });
+    });
 }
 ImgCreated.prototype.dataType = dataType;
-ImgCreated.prototype.creat = creat;
+ImgCreated.prototype.create = create;
 
 //显示确认框
 function showConfirm(text, func) {
