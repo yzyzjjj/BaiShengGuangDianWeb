@@ -860,7 +860,6 @@ function getFlowCardLine(qId) {
 }
 
 //----------------------------------------车间管理----------------------------------------------------
-
 let _workshopTrs = null;
 let _workshopListTable = null;
 //获取车间列表
