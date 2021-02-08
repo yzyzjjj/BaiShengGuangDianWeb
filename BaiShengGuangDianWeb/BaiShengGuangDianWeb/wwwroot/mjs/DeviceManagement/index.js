@@ -192,9 +192,9 @@ function getDeviceList(resolve, isUpgrade) {
                     '</div>';
                 var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
                 var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
-                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15},{16})">修改</a></li>'
+                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15},{16}, \'{17}\')">修改</a></li>'
                     .format(data.Id, escape(data.DeviceName), escape(data.Code), escape(data.MacAddress), escape(data.Ip), escape(data.Port), escape(data.Identifier), escape(data.DeviceModelId), escape(data.ScriptId),
-                    escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId) ,escape(data.ClassId));
+                        escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId), escape(data.ClassId), escape(data.Icon));
                 var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
                 var deleteLi = '<li><a onclick="deleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.Code));
                 html = html.format(
@@ -253,7 +253,7 @@ function getDeviceList(resolve, isUpgrade) {
                     "columns": [
                         { "data": null, "title": "序号", "render": order },
                         { "data": "Code", "title": "机台号", "type": "html-percent" },
-                        { "data": "Class", "title": "设备分类"},
+                        { "data": "Class", "title": "设备分类" },
                         { "data": null, "title": "设备型号", "render": modelName },
                         { "data": null, "title": "摆放位置", "render": rModal },
                         { "data": null, "title": "IP地址", "render": ip },
@@ -313,7 +313,13 @@ function initAddSelect() {
     }
 }
 
+var _addUpload = null;
 function showAddModel() {
+    if (_addUpload == null) {
+        _addUpload = initFileInput("addImg", fileEnum.Device);
+    }
+    $("#addImg").fileinput('clear');
+    $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
     var data = {}
     data.opType = 107;
     ajaxPost("/Relay/Post", data,
@@ -443,49 +449,71 @@ function addDevice() {
     var remark = $("#addRemark").val();
     if (!add)
         return;
+
+    let device = {
+        //机台号
+        Code: code,
+        //设备名
+        DeviceName: deviceName,
+        //设备MAC地址
+        MacAddress: macAddress,
+        //IP
+        Ip: ip,
+        //端口
+        Port: port,
+        //识别码
+        Identifier: identifier,
+        //设备分类
+        ClassId: deviceClassId,
+        //设备型号编号
+        DeviceModelId: deviceModelId,
+        //设备流程脚本版本编号
+        ScriptId: scriptId,
+        //设备固件版本编号
+        FirmwareId: firmwareId,
+        //设备应用层版本编号
+        ApplicationId: applicationId,
+        //设备硬件版本编号
+        HardwareId: hardwareId,
+        //设备所在场地编号
+        SiteId: siteId,
+        //设备管理员
+        Administrator: administrator,
+        //备注
+        Remark: remark,
+        //图标
+        Icon: ""
+    };
     var doSth = function () {
-        var data = {}
-        data.opType = 103;
-        data.opData = JSON.stringify({
-            //机台号
-            Code: code,
-            //设备名
-            DeviceName: deviceName,
-            //设备MAC地址
-            MacAddress: macAddress,
-            //IP
-            Ip: ip,
-            //端口
-            Port: port,
-            //识别码
-            Identifier: identifier,
-            //设备分类
-            ClassId: deviceClassId,
-            //设备型号编号
-            DeviceModelId: deviceModelId,
-            //设备流程脚本版本编号
-            ScriptId: scriptId,
-            //设备固件版本编号
-            FirmwareId: firmwareId,
-            //设备应用层版本编号
-            ApplicationId: applicationId,
-            //设备硬件版本编号
-            HardwareId: hardwareId,
-            //设备所在场地编号
-            SiteId: siteId,
-            //设备管理员
-            Administrator: administrator,
-            //备注
-            Remark: remark
+        var imgJson = function (resolve) {
+            var imgData = $('#addImg').val();
+            if (!isStrEmptyOrUndefined(imgData)) {
+                $('#addImg').fileinput("upload");
+                fileCallBack[fileEnum.Device] = (fileRet) => {
+                    if (fileRet.errno == 0) {
+                        device.Icon = fileRet.data;
+                        resolve('success');
+                    }
+                };
+            } else {
+                resolve('success');
+            }
+        }
+        new Promise(function (resolve) {
+            imgJson(resolve);
+        }).then(function () {
+            const data = {};
+            data.opType = 103;
+            data.opData = JSON.stringify(device);
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        $("#addModel").modal("hide");
+                        getDeviceList();
+                    }
+                });
         });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    $("#addModel").modal("hide");
-                    getDeviceList();
-                }
-            });
     }
     showConfirm("添加机台号：" + code, doSth);
 }
@@ -508,7 +536,9 @@ function initUpdateSelect(categoryId, modelId, scriptId) {
     $("#updateScript").val(scriptId).trigger('change');
 }
 
-function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId, scriptId, firmwareId, applicationId, hardwareId, siteId, administrator, remark, categoryId,classId) {
+var _updateUpload = null;
+function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier, deviceModelId,
+    scriptId, firmwareId, applicationId, hardwareId, siteId, administrator, remark, categoryId, classId, icon) {
     deviceName = unescape(deviceName);
     code = unescape(code);
     macAddress = unescape(macAddress);
@@ -524,10 +554,50 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
     remark = unescape(remark);
     categoryId = unescape(categoryId);
     classId = unescape(classId);
-    var data = {}
-    data.opType = 107;
-    ajaxPost("/Relay/Post", data,
-        function (ret) {
+    icon = unescape(icon);
+    if (_updateUpload == null) {
+        _updateUpload = initFileInput("updateImg", fileEnum.Device);
+    }
+    $("#updateImg").fileinput('clear');
+    $('#updateImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
+    var iconFuc = new Promise(resolve => {
+        $("#oldUpdateImg").addClass("hidden");
+        if (!isStrEmptyOrUndefined(icon)) {
+            $(".file-caption-name").val(icon);
+            $(".file-caption-name").prop("disabled", true);
+            $("#oldUpdateFilePath").val(icon);
+            var data = {
+                type: fileEnum.Device,
+                files: JSON.stringify([icon])
+            };
+            data.dir = "";
+            for (var k in fileEnum) {
+                if (fileEnum[k] == data.type) {
+                    data.dir = k;
+                    break;
+                }
+            }
+            if (isStrEmptyOrUndefined(data.dir)) {
+                return void layer.msg("文件类型不存在！");
+            }
+            ajaxPost("/Upload/Path", data, function (ret) {
+                if (ret.errno != 0) {
+                    layer.msg(ret.errmsg);
+                    return;
+                }
+                $("#oldUpdateImg").removeClass("hidden").attr("src", ret.data[0].path)
+                    .off("click").on("click", function () {
+                        showBigImg(ret.data[0].path);
+                    });
+            });
+        }
+        resolve('success');
+    });
+
+    var deviceFuc = new Promise(resolve => {
+        var data = {}
+        data.opType = 107;
+        ajaxPost("/Relay/Post", data, function (ret) {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
                 return;
@@ -569,8 +639,13 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             $("#updateSite").val(siteId);
             $("#updateAdministrator").val(administrator);
             $("#updateRemark").val(remark);
-            $("#updateModel").modal("show");
         });
+        resolve('success');
+    });
+
+    Promise.all([iconFuc, deviceFuc]).then(e => {
+        $("#updateModel").modal("show");
+    });
 }
 
 function updateDevice() {
@@ -663,53 +738,79 @@ function updateDevice() {
     var administrator = $("#updateAdministrator").val();
     //备注
     var remark = $("#updateRemark").val();
+
+    var updateImg = $("#updateImg").val().trim();
+    var oldUpdateFilePath = $("#oldUpdateFilePath").val().trim();
+    var imgUpdate = false;
+    if (updateImg != oldUpdateFilePath) {
+        imgUpdate = true;
+    }
     if (!update)
         return;
+    var device = {
+        id: id,
+        //机台号
+        Code: code,
+        //设备名
+        DeviceName: deviceName,
+        //设备MAC地址
+        MacAddress: macAddress,
+        //IP
+        Ip: ip,
+        //端口
+        Port: port,
+        //识别码
+        Identifier: identifier,
+        //设备分类
+        ClassId: deviceClassId,
+        //设备型号编号
+        DeviceModelId: deviceModelId,
+        //设备流程脚本版本编号
+        ScriptId: scriptId,
+        //设备固件版本编号
+        FirmwareId: firmwareId,
+        //设备应用层版本编号
+        ApplicationId: applicationId,
+        //设备硬件版本编号
+        HardwareId: hardwareId,
+        //设备所在场地编号
+        SiteId: siteId,
+        //设备管理员
+        Administrator: administrator,
+        //备注
+        Remark: remark
+    }
     var doSth = function () {
-        $("#updateModel").modal("hide");
-
-        var data = {}
-        data.opType = 102;
-        data.opData = JSON.stringify({
-            id: id,
-            //机台号
-            Code: code,
-            //设备名
-            DeviceName: deviceName,
-            //设备MAC地址
-            MacAddress: macAddress,
-            //IP
-            Ip: ip,
-            //端口
-            Port: port,
-            //识别码
-            Identifier: identifier,
-            //设备分类
-            ClassId: deviceClassId,
-            //设备型号编号
-            DeviceModelId: deviceModelId,
-            //设备流程脚本版本编号
-            ScriptId: scriptId,
-            //设备固件版本编号
-            FirmwareId: firmwareId,
-            //设备应用层版本编号
-            ApplicationId: applicationId,
-            //设备硬件版本编号
-            HardwareId: hardwareId,
-            //设备所在场地编号
-            SiteId: siteId,
-            //设备管理员
-            Administrator: administrator,
-            //备注
-            Remark: remark
+        var imgJson = function (resolve) {
+            var imgData = $('#updateImg').val();
+            if (imgUpdate && !isStrEmptyOrUndefined(imgData)) {
+                $('#updateImg').fileinput("upload");
+                fileCallBack[fileEnum.Device] = (fileRet) => {
+                    if (fileRet.errno == 0) {
+                        device.Icon = fileRet.data;
+                        resolve('success');
+                    }
+                };
+            } else {
+                device.Icon = oldUpdateFilePath;
+                resolve('success');
+            }
+        }
+        new Promise(function (resolve) {
+            imgJson(resolve);
+        }).then(function () {
+            const data = {};
+            data.opType = 102;
+            data.opData = JSON.stringify(device);
+            ajaxPost("/Relay/Post", data,
+                function (ret) {
+                    layer.msg(ret.errmsg);
+                    if (ret.errno == 0) {
+                        $("#updateModel").modal("hide");
+                        getDeviceList();
+                    }
+                });
         });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getDeviceList();
-                }
-            });
     }
     showConfirm("修改", doSth);
 }
@@ -789,7 +890,7 @@ function deviceUpgrade(type = 0) {
         layer.msg('非待加工设备不能升级');
         return;
     }
-    var fileId = null, fileType = null, fileName = null, hintText = '';
+    var fileId = null, fileType = "", fileName = null, hintText = '';
     switch (type) {
         case 1:
             fileId = $('#upgradeScript').val();
@@ -822,9 +923,19 @@ function deviceUpgrade(type = 0) {
     }
     var doSth = () => {
         var data = {
-            type: fileType,
+            type: fileEnum[fileType],
             files: JSON.stringify([fileName])
         };
+        data.dir = "";
+        for (var k in fileEnum) {
+            if (fileEnum[k] == data.type) {
+                data.dir = k;
+                break;
+            }
+        }
+        if (isStrEmptyOrUndefined(data.dir)) {
+            return void layer.msg("文件类型不存在！");
+        }
         ajaxPost("/Upload/Path", data, ret => {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -1027,6 +1138,16 @@ function batchUpgrade(e, el) {
             type: fileType,
             files: JSON.stringify(info.filePath)
         };
+        data.dir = "";
+        for (var k in fileEnum) {
+            if (fileEnum[k] == data.type) {
+                data.dir = k;
+                break;
+            }
+        }
+        if (isStrEmptyOrUndefined(data.dir)) {
+            return void layer.msg("文件类型不存在！");
+        }
         ajaxPost("/Upload/Path", data, ret => {
             if (ret.errno != 0) {
                 layer.msg(ret.errmsg);
@@ -1062,7 +1183,7 @@ function batchUpgrade(e, el) {
                     var result = results[i];
                     var color = result.errno == 0 ? 'success' : 'red';
                     resultEl.eq(i).html(`<span class="text-${color}">升级${result.errmsg}</span>`);
-                }  
+                }
                 batchRefresh(e, el);
                 $(`#${el}List`)[0].time = setInterval(() => {
                     batchRefresh(e, el);

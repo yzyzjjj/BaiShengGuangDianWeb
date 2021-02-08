@@ -38,12 +38,12 @@ namespace BaiShengGuangDianWeb.Base.Server
                 action();
             }
 
-            const string baseDic = "File";
-            foreach (var entity in EnumHelper.EnumToList<FileEnum>())
-            {
-                var fileEnum = (FileEnum)entity.EnumValue;
-                FilePath.AddConfig(fileEnum, Path.Combine(baseDic, entity.EnumName));
-            }
+            //const string baseDic = "File";
+            //foreach (var entity in EnumHelper.EnumToList<FileEnum>())
+            //{
+            //    var fileEnum = (FileEnum)entity.EnumValue;
+            //    FilePath.AddConfig(fileEnum, Path.Combine(baseDic, entity.EnumName));
+            //}
 
             Log.InfoFormat("ServerConfig Done");
         }

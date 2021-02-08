@@ -343,6 +343,14 @@ $(function () {
             $(this).blur();
         };
     });
+
+    $(document).on("keydown", function (e) {
+        if (e.keyCode == 27) {
+            if ($('.fullScreenBtn').hasClass('show')) {
+                $(".fullScreenBtn").click();
+            }
+        };
+    });
     $('.form_date').datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm-dd',

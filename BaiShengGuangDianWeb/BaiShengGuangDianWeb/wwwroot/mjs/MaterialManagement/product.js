@@ -862,6 +862,16 @@ function showImgModel(id, code, category, name, supplier, specification, img, si
             type: fileEnum.Material,
             files: JSON.stringify(img)
         };
+        data.dir = "";
+        for (var k in fileEnum) {
+            if (fileEnum[k] == data.type) {
+                data.dir = k;
+                break;
+            }
+        }
+        if (isStrEmptyOrUndefined(data.dir)) {
+            return void layer.msg("文件类型不存在！");
+        }
         ajaxPost("/Upload/Path", data,
             function (ret) {
                 if (ret.errno != 0) {

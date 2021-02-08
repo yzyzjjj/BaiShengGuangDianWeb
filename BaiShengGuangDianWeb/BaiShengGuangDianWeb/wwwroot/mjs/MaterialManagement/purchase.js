@@ -615,15 +615,15 @@ function getPurchaseMaterial() {
                 { data: 'Specification', title: '规格' },
                 { data: 'Supplier', title: '供应商' },
                 { data: 'Unit', title: '单位' },
-                { data: 'Number', title: '数量', sClass: 'text-red' },
                 { data: 'Purchaser', title: '采购人' },
+                { data: 'Number', title: '数量', sClass: 'text-red' },
+                { data: 'Stock', title: '已入库', sClass: 'text-blue' },
+                { data: null, title: '本次入库', render: count, visible: _Purchase.isShow },
+                { data: null, title: '入库编码', sClass: 'text-green', render: d => `<span class="${((!isStrEmptyOrUndefined(d.ThisCode) && d.ThisCode != d.Code) ? "text-red text-bold" : "text-green")}">${d.ThisCode}</span>` },
                 { data: 'TaxPrice', title: '税后单价' },
                 { data: 'TaxAmount', title: '税后总价' },
                 { data: 'TaxTate', title: '税率（%)' },
-                { data: 'Price', title: '税前单价' },
-                { data: 'Stock', title: '已入库', sClass: 'text-red' },
-                { data: null, title: '本次入库', render: count, visible: _Purchase.isShow },
-                { data: 'ThisCode', title: '入库编码' }
+                { data: 'Price', title: '税前单价' }
             ]
         });
     });

@@ -87,7 +87,9 @@ var fileEnum = {
     // 故障上报
     FaultDevice: 7,
     // 脚本文件
-    Script:8
+    Script: 8,
+    // 脚本文件
+    Device: 9
 }
 
 //文件Accept
@@ -139,3 +141,8 @@ fileCallBack[fileEnum.FaultDevice] = function () { };
 fileAccept[fileEnum.Script] = ".npc";
 fileExt[fileEnum.Script] = ["npc"];
 fileCallBack[fileEnum.Script] = function () { };
+
+// 设备修改
+fileAccept[fileEnum.Device] = "image/*";
+fileExt[fileEnum.Device] = ["bmp", "jpg", "jpeg", "png", "gif"];
+fileCallBack[fileEnum.Device] = function () { };

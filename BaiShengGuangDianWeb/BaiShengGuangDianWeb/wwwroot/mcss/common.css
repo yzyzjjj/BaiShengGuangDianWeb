@@ -4,7 +4,10 @@
     color: red;
     font-weight: 600;
 }
-
+.mPadding {
+    padding-left: 5px;
+    padding-right: 5px;
+}
 .mSelect {
     text-align: center;
     -webkit-text-align-last: center;

@@ -35,5 +35,9 @@
         /// 流程脚本
         /// </summary>
         Script,
+        /// <summary>
+        /// 设备相关
+        /// </summary>
+        Device,
     }
 }

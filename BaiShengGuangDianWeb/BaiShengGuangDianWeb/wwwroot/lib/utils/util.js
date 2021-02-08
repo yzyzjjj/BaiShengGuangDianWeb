@@ -743,11 +743,11 @@ function imgShowBig(id) {
 function create() {
     var that = this;
     var type = [null, undefined, NaN]
-    this.url.forEach(function(value, index, array) {
+    this.url.forEach(function (value, index, array) {
         var html = document.getElementById(that.id[index]);
         html.innerHTML = '';
         if (type.indexOf(value) >= 0) return false;
-        value.split(',').forEach(function(val, ind, arr) {
+        value.split(',').forEach(function (val, ind, arr) {
             var img = document.createElement('img'); // 创建img标签
             img.className = 'idePhoto';
             img.setAttribute('src', val);
@@ -830,6 +830,22 @@ function getQueryString(name) {
     if (r != null) return unescape(r[2]); return null;
 }
 
+//异步获取数据
+function getFilePath(opData, func = undefined, cover = 1, msg = undefined) {
+    return new Promise(resolve => {
+        ajaxPost("/Upload/Path", opData, ret => {
+            let errMsg = ret.errmsg;
+            if (ret.errno == 0) {
+                if (func != undefined)
+                    func(ret.data);
+                resolve(ret);
+            } else {
+                return layer.msg(errMsg);
+            }
+        }, cover);
+    });
+}
+
 //单个文件
 function initFileInput(uiEle, type, func = null) {
     $("#" + uiEle).attr("accept", fileAccept[type]);
@@ -857,6 +873,14 @@ function initFileInput(uiEle, type, func = null) {
             //向后台传递type作为额外参数
             var obj = {};
             obj.type = type;
+            obj.dir = "";
+            for (var k in fileEnum) {
+                if (fileEnum[k] == type) {
+                    obj.dir = k;
+                    break;
+                }
+            }
+            obj.typeStr = type;
             return obj;
         }
     }).on("filebatchselected", function (event, files) {
@@ -934,6 +958,13 @@ function initFileInputMultiple(uiEle, type, func = null) {
             //向后台传递type作为额外参数
             var obj = {};
             obj.type = type;
+            obj.dir = "";
+            for (var k in fileEnum) {
+                if (fileEnum[k] == type) {
+                    obj.dir = k;
+                    break;
+                }
+            }
             return obj;
         }
     }).on("filebatchselected", function (event, files) {
@@ -1623,6 +1654,44 @@ function matcher(params, data) {
     return null;
 }
 
+//浏览器全屏放大
+function fullScreen(isShow) {
+    $('.fullScreenBtn').toggleClass('show');
+    if (isShow) {
+        var main = document.body;
+        if (main.requestFullscreen) {
+            main.requestFullscreen();
+        } else if (main.mozRequestFullScreen) {
+            main.mozRequestFullScreen();
+        } else if (main.webkitRequestFullScreen) {
+            main.webkitRequestFullScreen();
+        } else if (main.msRequestFullscreen) {
+            main.msRequestFullscreen();
+        }
+    } else {
+        if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+    //if (isShow) {
+    //    const main = document.body;
+    //    (main.requestFullscreen && main.requestFullscreen())
+    //        || (main.requestFullscreen && main.mozRequestFullScreen())
+    //        || (main.requestFullscreen && main.webkitRequestFullScreen())
+    //        || (main.requestFullscreen && main.webkitFullscreenElement());
+    //} else {
+    //    (document.mozCancelFullScreen && document.mozCancelFullScreen())
+    //        || (document.webkitCancelFullScreen && document.webkitCancelFullScreen())
+    //        || (document.msExitFullscreen && document.msExitFullscreen())
+    //        || (document.exitFullscreen && document.exitFullscreen());
+    //}
+}
 //假进度条
 function addFakeProgress() {
     var op = `<div class="alert alert-info alert-dismissible" style="width: 300px; position: fixed; top: 40%; left: 50%;transform: translateX(-50%);z-index:999999" id="progress_wrap">

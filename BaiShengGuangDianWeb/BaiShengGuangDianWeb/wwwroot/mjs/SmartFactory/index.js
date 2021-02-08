@@ -6,17 +6,40 @@ function pageReady() {
     $('#pmcChildDTime').val(getNowWeekRange(new Date().getDay() == 0 ? 7 : new Date().getDay()).end).datepicker('update');
     initWorkshopSelect(true);
     //getProductionLine();
-    $('#workshopNavLi').one('click', getWorkshopList);
-    $('#deviceNavLi').one('click', getDeviceList);
-    $('#personNavLi').one('click', () => {
+    $('#workshopNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getWorkshopList();
+    });
+    $('#deviceNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getDeviceList();
+    });
+    $('#personNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
         initPersonList();
     });
-    $('#flowNavLi').one('click', getProcessCodeList);
-    $('#processSetNavLi').one('click', getProcessList);
-    $('#planNavLi').one('click', getPlanList);
-    $('#workOrderNavLi').one('click', getWorkOrderList);
-    $('#taskOrderNavLi').one('click', getTaskOrderList);
-    $('#flowCardNavLi').one('click', () => {
+    $('#flowNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getProcessCodeList();
+    });
+    $('#processSetNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getProcessList();
+    });
+    $('#planNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getPlanList();
+    });
+    $('#workOrderNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getWorkOrderList();
+    });
+    $('#taskOrderNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
+        getTaskOrderList();
+    });
+    $('#flowCardNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
         const wId = $("#wsSelect").val() >> 0;
         const taskOrderFn = myPromise(5090, { wId }, 0);
         const processCodeFn = myPromise(5040, { wId }, 0);
@@ -29,9 +52,14 @@ function pageReady() {
             getFlowCardList();
         });
     });
-    $('#pmcExpelProNavLi').one('click', () => {
+    $('#pmcExpelProNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
         getNotArrangeTaskList();
         getArrangeTaskList();
+    });
+
+    $('#taskKanBanNavLi').on('click', function () {
+        _currentNav = $(this).attr("id");
     });
 
     $('#personQueryMode').on('change', function () {
@@ -583,9 +611,27 @@ function pageReady() {
         }
     });
     $("#pmcChildAuto").iCheck('check');
+    _currentNav = $(".navHeader").find(`li[class="active"]`).first().attr("id");
+    $('.fullScreenBtn').on('click', function () {
+        //$('#taskKanBansNav').toggleClass('panel-fullscreen');
+        //var isShow = $('#taskKanBansNav').hasClass('panel-fullscreen');
+        //$(this).toggleClass('glyphicon-fullscreen glyphicon-repeat').prop('title', isShow ? '还原' : '全屏放大');
+        //isShow ? $('.fullScreenBtn').addClass('show') : $('.fullScreenBtn').removeClass('show');
+        //fullScreen(isShow);
 
+        $('#taskKanBansNav').toggleClass('panel-fullscreen');
+        var isShow = $('#taskKanBansNav').hasClass('panel-fullscreen');
+        $(this).toggleClass('glyphicon-fullscreen glyphicon-repeat').prop('title', isShow ? '还原' : '全屏放大');
+        fullScreen(isShow);
+    });
+    _currentTime = setInterval(() => {
+        $('#currentTime').text(getFullTime());
+    }, 1000);
 }
 
+let _currentTime = null;
+let _tkbTime = null;
+let _currentNav = null;
 //时间转换
 function exchangeTime(el, init = false) {
     const div = $(el).closest('div');
@@ -615,15 +661,49 @@ function getMenuNoCover(func, callBack = null, qId = 0, table = false, cover = 0
 
 //初始化车间选项
 function initWorkshopSelect(init = false) {
-    getMenuNoCover(getWorkshopList, (data) => {
+    getListNoCover(getWorkshopList, (data) => {
         var wId = $("#wsSelect").val() >> 0;
         var defaultId = wId === 0 && data.length > 0 ? data[0].Id : wId;
         $("#wsSelect").html(setOptions(data, "Workshop")).val(defaultId);
-        //if (!init) {
-        getNotArrangeTaskList();
-        getArrangeTaskList();
-        //}
-    });
+        if (!init) {
+            getNotArrangeTaskList();
+            getArrangeTaskList();
+        }
+        data.length &&
+            data.every(item => {
+                if (item.Id == defaultId) {
+                    $("#tkbFrequency").val(item.Frequency);
+                    $("#tkbUnit").val(item.Unit);
+                    $("#tkbLength").val(item.Length);
+                    _tkbTime && clearInterval(_tkbTime);
+                    if (item.Frequency > 0) {
+                        let t = 0;
+                        switch (item.Unit) {
+                            case 0:
+                                t = item.Frequency;
+                                break;
+                            case 1:
+                                t = item.Frequency * 60;
+                                break;
+                            case 2:
+                                t = item.Frequency * 3600;
+                                break;
+                            default: ;
+                        }
+                        if (t > 0) {
+                            _tkbTime = setInterval(() => {
+                                if (_currentNav === "taskKanBanNavLi") {
+                                    console.log(getDate());
+                                    getListNoCover(getTaskKanBanList);
+                                }
+                            }, t * 1000);
+                        }
+                    }
+                    return false;
+                }
+                return true;
+            });
+    }, 0, false);
 }
 
 //----------------------------------------生产线----------------------------------------------------
@@ -865,7 +945,6 @@ let _workshopTrs = null;
 let _workshopListTable = null;
 //获取车间列表
 function getWorkshopList(_, menu = false, callBack = null, cover = 1, table = true, qId = 0) {
-
     myPromise(5000, { menu, qId }, cover).then(data => {
         _workshopTrs = [];
         var rData = data.datas;
@@ -889,7 +968,7 @@ function getWorkshopList(_, menu = false, callBack = null, cover = 1, table = tr
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //车间列表tr数据获取
@@ -947,7 +1026,6 @@ let _deviceListTable = null;
 function getDeviceList(_, menu = false, callBack = null, cover = 1, table = true, qId = 0) {
     const wId = $("#wsSelect").val() >> 0;
     if (wId === 0) return;
-
     myPromise(5010, { wId, menu, qId }, cover).then(data => {
         _deviceTrs = [];
         var rData = data.datas;
@@ -993,7 +1071,7 @@ function getDeviceList(_, menu = false, callBack = null, cover = 1, table = true
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //设备列表tr数据获取
@@ -1044,12 +1122,7 @@ function showAddDeviceModel() {
         ]);
         tableConfig.createdRow = tr => {
             const categoryChange = (cId) => {
-                const ms = [];
-                models.forEach(model => {
-                    if (model.CategoryId == cId) {
-                        ms.push(model);
-                    }
-                });
+                const ms = models.filter(x => x.CategoryId == cId);
                 $(tr).find('.model').html(setOptions(ms, 'Model'));
             }
             $(tr).find('.category').html(setOptions(categories, 'Category')).off('change').on('change', function () {
@@ -1127,7 +1200,7 @@ function getDeviceCategoryList(_, menu = false, callBack = null, cover = 1, tabl
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //设备类型列表tr数据获取
@@ -1232,7 +1305,7 @@ function getDeviceModelList(_, menu = false, callBack = null, cover = 1, table =
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //设备型号列表tr数据获取
@@ -1392,7 +1465,7 @@ function getPersonList(_, menu = false, callBack = null, cover = 1, table = true
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //人员列表tr数据获取
@@ -1570,7 +1643,7 @@ function getPersonGradeList(_, menu = false, callBack = null, cover = 1, table =
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //等级列表tr数据获取
@@ -1667,7 +1740,7 @@ function getProcessCodeList(_, menu = false, callBack = null, cover = 1, table =
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //添加修改流程编号模态框
@@ -1839,7 +1912,7 @@ function getProcessCodeCategoryList(_, menu = false, callBack = null, cover = 1,
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //获取流程编号类型的流程列表
@@ -1848,7 +1921,7 @@ function getProcessCodeCategoryProcessList(callBack = null, cover = 1, cId = 0, 
         _processCodeCategoryTrs = [];
         var rData = data.datas;
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //添加修改流程编号类型模态框
@@ -1991,7 +2064,7 @@ function getProcessList(_, menu = false, callBack = null, cover = 1, table = tru
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //流程设置列表tr数据获取
@@ -2095,7 +2168,7 @@ function getPlanList(_, menu = false, callBack = null, cover = 1, table = true, 
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //添加计划号流程编号选择禁用
@@ -2322,7 +2395,7 @@ function getCapacityList(_, menu = false, callBack = null, cover = 1, table = tr
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //修改产能配置
@@ -2801,7 +2874,7 @@ function getWorkOrderList(_, menu = false, callBack = null, cover = 1, table = t
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //工单列表tr数据获取
@@ -2918,7 +2991,7 @@ function getTaskOrderList(_, menu = false, callBack = null, cover = 1, table = t
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //详情弹窗
@@ -4603,11 +4676,12 @@ function addTaskLevel() {
 
 //删除任务单等级
 function delTaskLevel() {
-    delTableRow(_pmcTaskLevelTrs, 5593, getTaskLevelList);
+    delTableRow(_pmcTaskLevelTrs, 5593, () => {
+        getListNoCover(getTaskLevelList);
+    });
 }
 
 //----------------------------------------流程卡管理----------------------------------------------------
-
 let _flowCardTrs = null;
 let _flowCardListTable = null;
 //获取流程卡列表
@@ -4625,7 +4699,7 @@ function getFlowCardList(_, menu = false, callBack = null, cover = 1, table = tr
     if (isStrEmptyOrUndefined(taskOrderId)) return layer.msg('请选择任务单');
     const productId = $('#flowCardPlanSelect').val();
     if (isStrEmptyOrUndefined(productId)) return layer.msg('请选择计划号');
-    myPromise(5110, { wId, startTime, endTime, taskOrderId, productId, qId }, cover).then(data => {
+    myPromise(5110, { wId, menu, startTime, endTime, taskOrderId, productId, qId }, cover).then(data => {
         _flowCardTrs = [];
         var rData = data.datas;
         if (table) {
@@ -4650,7 +4724,7 @@ function getFlowCardList(_, menu = false, callBack = null, cover = 1, table = tr
             }
         }
         callBack && callBack(rData);
-    }, cover);
+    });
 }
 
 //流程详情弹窗
@@ -4840,5 +4914,98 @@ function flowCardPrint() {
 
 //删除流程卡
 function delFlowCard() {
-    delTableRow(_flowCardTrs, 5113, getFlowCardList);
+    delTableRow(_flowCardTrs, 5113, () => {
+        getListNoCover(getFlowCardList);
+    });
+}
+
+//----------------------------------------看板管理----------------------------------------------------
+let _tkbTable = null;
+//更新看板设置
+function tkbFrequencySave() {
+    const wId = $("#wsSelect").val() >> 0;
+    if (wId === 0) return;
+    const fre = $("#tkbFrequency").val() >> 0;
+    if (fre <= 0) return void layer.msg('频率必须大于零');
+    const unit = $("#tkbUnit").val() >> 0;
+    const len = $("#tkbLength").val() >> 0;
+    if (len <= 0) return void layer.msg('条数必须大于零');
+    myPromise(5004, [{ Id: wId, Frequency: fre, Unit: unit, Length: len }]).then(data => {
+        initWorkshopSelect();
+    });
+}
+
+let _tkbPage = 0;
+//获取任务单看板
+function getTaskKanBanList(_, menu = false, callBack = null, cover = 1, table = true, qId = 0) {
+    const wId = $("#wsSelect").val() >> 0;
+    if (wId === 0) return;
+    const len = $("#tkbLength").val() >> 0;
+    if (len === 0) return;
+    myPromise(5611, { wId, page: _tkbPage }, cover).then(data => {
+        const tasks = data.datas;
+        const fn = (headTr, tbody) => {
+            return `<div class="form-group">
+                        <label class="control-label text-red">上次刷新时间：${getFullTime()}</label><br/>
+                        <div class="table-responsive1">
+                            <table class="table table-hover table-striped table-bordered" id="taskKanBanList">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="width: 40px">序号</th>
+                                        <th rowspan="2" style="width: 82px">任务单</th>
+                                        <th rowspan="2" style="width: 82px">计划号</th>
+                                        <th rowspan="2" style="width: 82px">交货时间</th>
+                                        <th rowspan="2" style="width: 82px">状态</th>${headTr}
+                                    </tr>
+                                    <tr>${'<th class="bg-blue">已入库</th><th>入库率</th><th>理论率</th><th>状态</th>'.repeat(data.Orders.length)}</tr>
+                                </thead>
+                                <tbody>${tbody}</tbody>
+                            </table>
+                        </div>
+                      </div>`;
+        };
+        const orders = data.Orders.sort(sortOrder);
+        const colspan = 4;
+        const headTr = orders.reduce((a, b, c) => `${a}<th colspan="${colspan}"${(c % 2 == 0 ? "class=\"bg-gray\"" : "")}>${b.Process}</th>`, '');
+        const tbody = tasks.reduce((a, b, i) => {
+            const id = b.Id;
+            const o = {};
+            b.Needs.forEach(item => {
+                o[item.Order] = item;
+            });
+            const tds = orders.reduce((c, d) => {
+                const e = o[d.Order];
+                return c + (e
+                    ? `<td class="bg-blue">${e.DoneTarget}</td>
+                           <td>${e.ActualRate}%</td>
+                           <td>${e.TheoreticalRate}%</td>
+                           <td>${e.ErrorStr}</td>`
+                    : (colspan > 0 ? (`<td class="bg-blue short-slab"><i></td>` + (colspan > 1 ? `<td class="short-slab"><i></td>`.repeat(colspan - 1) : ``)) : ``));
+            }, '');
+            return `${a}<tr>
+                        <td>${i + 1}</td>
+                        <td>${b.TaskOrder}</td>
+                        <td>${b.Product}</td>
+                        <td>${b.DeliveryTime.split(' ')[0]}</td>
+                        <td>${b.ErrorStr}</td>${tds}
+                    </tr>`;
+        }, '');
+        const temp = fn(headTr, tbody);
+        $('#taskKanBanListBox').html(temp).find('table').css('width', '100%').find('th,td').css('padding', '4px').end().find('th,td').css('border', '1px solid gray').end().find('th,td').css('width', 'auto');
+
+        var t = dataTableConfig(0);
+        t.dom = '<"pull-left"l><"pull-right"f>rt';
+        t.bAutoWidth = false;
+        t.ordering = false;
+        t.paging = false;
+        t.searching = false;
+        t.aLengthMenu = [len];
+        t.iDisplayLength = len;
+        //t.fixedHeaderColumn(true, 4, 0);
+        $("#taskKanBanList").DataTable(t);
+        $("#taskKanBanListBox .DTFC_ScrollWrapper").css('height', 'auto');
+        _tkbPage++;
+        const maxPage = Math.floor(data.Count / len);
+        _tkbPage > maxPage && (_tkbPage = 0);
+    });
 }

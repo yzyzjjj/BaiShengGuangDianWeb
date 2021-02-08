@@ -1,4 +1,5 @@
 ﻿function pageReady() {
+    $(".sidebar-mini").addClass("sidebar-collapse");
     $('#kanBanList').select2();
     $('#deviceSelect').select2({
         allowClear: true,
@@ -13,17 +14,18 @@
             }
         });
         return new Promise(resolve => kanBanChange(resolve));
-    }).then(() => $('#navUl .kanBan:first').click());
+    }).then(() => "");
+    //}).then(() => $('#navUl .kanBan:first').click());
     var time = 0;
     $('#navUl').on('click', '.kanBan', function () {
-        $('#fullScreenBtn').removeClass('hidden');
+        $('.fullScreenBtn').removeClass('hidden');
         var flag = $(this).attr('href');
         var id = flag.replace('#kanBan', '');
         setChart(flag, id);
         clearInterval(time);
         time = setInterval(() => setChart(flag, id), 5000);
     });
-    $('#fullScreenBtn').on('click', function () {
+    $('.fullScreenBtn').on('click', function () {
         $('#tabBox').toggleClass('panel-fullscreen');
         var isShow = $('#tabBox').hasClass('panel-fullscreen');
         $(this).toggleClass('glyphicon-fullscreen glyphicon-repeat').prop('title', isShow ? '还原' : '全屏放大');
@@ -32,8 +34,9 @@
     });
     $('#firstNavLi').on('click', function () {
         clearInterval(time);
-        $('#fullScreenBtn').addClass('hidden');
+        $('.fullScreenBtn').addClass('hidden');
     });
+    getDeviceStateList();
 }
 
 //全屏轮播
@@ -463,32 +466,6 @@ function getKanBanList(resolve) {
     });
 }
 
-//浏览器全屏放大
-function fullScreen(isShow) {
-    if (isShow) {
-        var main = document.body;
-        if (main.requestFullscreen) {
-            main.requestFullscreen();
-        } else if (main.mozRequestFullScreen) {
-            main.mozRequestFullScreen();
-        } else if (main.webkitRequestFullScreen) {
-            main.webkitRequestFullScreen();
-        } else if (main.msRequestFullscreen) {
-            main.msRequestFullscreen();
-        }
-    } else {
-        if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitCancelFullScreen) {
-            document.webkitCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        } else if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-}
-
 //获取机台号
 function getDevice(resolve) {
     var data = {
@@ -572,5 +549,98 @@ function setAddKanBan(isAdd) {
         if (ret.errno == 0) {
             kanBanChange();
         }
+    });
+}
+
+//获取设备情况
+function getDeviceStateList() {
+    $('#deviceState').empty();
+    var data = {}
+    data.opType = 100;
+    data.opData = JSON.stringify({ hard: true });
+    ajaxPost("/Relay/Post", data, function (ret) {
+        if (ret.errno != 0) {
+            return void layer.msg(ret.errmsg);
+        }
+
+        const devices = ret.datas;
+        const len = devices.length;
+        if (!len) {
+            $('#deviceState').append('<div style="font:bold 25px/35px 微软雅黑;color:red">无数据</div>');
+            return;
+        }
+        const images = [];
+        for (var i = 0; i < len; i++) {
+            var d = devices[i];
+            !images[d.Icon] && (images.push(d.Icon));
+        }
+        data = {
+            type: fileEnum.Device,
+            files: JSON.stringify(images)
+        };
+        data.dir = "";
+        for (var k in fileEnum) {
+            if (fileEnum[k] == data.type) {
+                data.dir = k;
+                break;
+            }
+        }
+        if (isStrEmptyOrUndefined(data.dir)) {
+            return void layer.msg("文件类型不存在！");
+        }
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
+                return;
+            const images = [];
+            for (var i = 0; i < pLen; i++) {
+                var p = paths[i];
+                !existArray(images, p.Icon) && (images[p.name] = p.path);
+            }
+
+            var op =
+                `<div style="flex-basis: 190px; height: 190px; background:#dcdcdc; margin: 5px;text-align: center;cursor:pointer; box-shadow: 2px 2px 3px black;">
+                <div style="height: 33%;position: relative;display: flex;">
+                    <div style="width: 30%;position: relative;">
+                        <img style="width: 100%;height: 80%;" src="{0}">
+                    </div>
+                    <div style="width: 50%;position: relative;">
+                        <label class="" style="margin: 0;">{1}</label>
+                        <br>
+                        <label class="" style="margin: 0;">{2}</label>
+                        <br>
+                        <label class="" style="margin: 0;">{3}</label>
+                    </div>
+                    <div style="width: 30px;height: 30px;background: {4};position: absolute;top: 0;right: 0;/* float: right; */"></div>
+                </div>
+                <div style="height: 67%; position: relative;">
+                    {5}
+                </div>
+            </div>`;
+            var params =
+                `<div>
+                    <label class="control-label no-margin" style="float: left; width: 50%">{0}</label>
+                    <label class="control-label no-margin" style="float: right; width: 50%;">{1}</label>
+                </div>`;
+            var ops = '';
+            var zc = 0;
+            var gz = 0;
+            var yc = 0;
+            for (var i = 0; i < len; i++) {
+                var d = devices[i];
+                var color = "red";
+                if (d.StateStr == '连接正常' || d.StateStr == '加工中') {
+                    color = 'red';
+                    zc++;
+                } if (d.StateStr == '连接异常' || d.StateStr == '加工中') {
+                    yc++;
+                }
+                ops += op.format(images[d.Icon], d.Code, d.CategoryName, d.SiteName, color, '');
+            }
+            $('#zc').text(zc);
+            $('#gz').text(gz);
+            $('#yc').text(yc);
+            $('#deviceState').append(ops);
+        });
     });
 }

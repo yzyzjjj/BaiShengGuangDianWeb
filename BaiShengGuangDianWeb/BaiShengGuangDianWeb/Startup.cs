@@ -99,14 +99,14 @@ namespace BaiShengGuangDianWeb
             app.UseMvcWithDefaultRoute();
 
             FilePath.RootPath = env.WebRootPath;
-            foreach (var pair in FilePath.GetFileDictionary())
-            {
-                var filePath = Path.Combine(FilePath.RootPath, pair.Value);
-                if (!File.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
-            }
+            //foreach (var pair in FilePath.GetFileDictionary())
+            //{
+            //    var filePath = Path.Combine(FilePath.RootPath, pair.Value);
+            //    if (!File.Exists(filePath))
+            //    {
+            //        Directory.CreateDirectory(filePath);
+            //    }
+            //}
 
             Log.Info("Server Start");
         }
