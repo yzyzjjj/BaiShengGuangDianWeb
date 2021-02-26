@@ -1,5 +1,4 @@
-﻿using BaiShengGuangDianWeb.Base.FileConfig;
-using BaiShengGuangDianWeb.Base.Helper;
+﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.AspNetCore.Mvc;
 using ModelBase.Base.EnumConfig;
 using ModelBase.Base.HttpServer;

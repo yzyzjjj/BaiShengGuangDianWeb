@@ -101,9 +101,10 @@ function pageReady() {
         var tr = $(this).parents('tr');
         tr.find('.delTr').val(id);
         var d = _deviceData[id];
-        var state = d.DeviceStateStr;
-        var stateClass;
-        switch (state) {
+        if (d) {
+            var state = d.DeviceStateStr;
+            var stateClass;
+            switch (state) {
             case '待加工':
                 stateClass = 'success';
                 break;
@@ -118,9 +119,9 @@ function pageReady() {
                 break;
             default:
                 stateClass = 'red';
-        }
-        tr.find('.devState').html(`<span class="text-${stateClass}">${state}</span>`);
-        switch (e) {
+            }
+            tr.find('.devState').html(`<span class="text-${stateClass}">${state}</span>`);
+            switch (e) {
             case 0:
                 tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
                 new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
@@ -136,8 +137,9 @@ function pageReady() {
                 break;
             case 3:
                 break;
+            }
+            tr.find('.result').empty();
         }
-        tr.find('.result').empty();
     });
     $('#batchUpgradeModel').on('hidden.bs.modal', () => {
         clearInterval($('#scriptList')[0].time);
@@ -580,14 +582,13 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             if (isStrEmptyOrUndefined(data.dir)) {
                 return void layer.msg("文件类型不存在！");
             }
-            ajaxPost("/Upload/Path", data, function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
+            getFilePath(data, paths => {
+                const pLen = paths.length;
+                if (pLen <= 0)
                     return;
-                }
-                $("#oldUpdateImg").removeClass("hidden").attr("src", ret.data[0].path)
+                $("#oldUpdateImg").removeClass("hidden").attr("src", paths[0].path)
                     .off("click").on("click", function () {
-                        showBigImg(ret.data[0].path);
+                        showBigImg(paths[0].path);
                     });
             });
         }
@@ -936,11 +937,10 @@ function deviceUpgrade(type = 0) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost("/Upload/Path", data, ret => {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
                 return;
-            }
             data = {};
             data.opType = 108;
             data.opData = JSON.stringify({
@@ -948,7 +948,7 @@ function deviceUpgrade(type = 0) {
                 Infos: [{
                     Type: 1,
                     FileId: fileId,
-                    FileUrl: `${location.origin}${ret.data[0].path}`,
+                    FileUrl: `${location.origin}${paths[0].path}`,
                     DeviceId: codeId
                 }]
             });
@@ -1148,13 +1148,11 @@ function batchUpgrade(e, el) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost("/Upload/Path", data, ret => {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
+
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
                 return;
-            }
-            var paths = ret.data;
-            len = paths.length;
             var infos = [];
             var origin = location.origin;
             for (i = 0; i < len; i++) {

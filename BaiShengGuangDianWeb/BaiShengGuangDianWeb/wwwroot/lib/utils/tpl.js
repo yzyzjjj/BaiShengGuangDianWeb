@@ -346,9 +346,7 @@ $(function () {
 
     $(document).on("keydown", function (e) {
         if (e.keyCode == 27) {
-            if ($('.fullScreenBtn').hasClass('show')) {
-                $(".fullScreenBtn").click();
-            }
+            $('.content').find(".fullScreenBtn.fsb").click();
         };
     });
     $('.form_date').datepicker({

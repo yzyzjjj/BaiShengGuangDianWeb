@@ -250,12 +250,12 @@ function fileDownload(fileName) {
     if (isStrEmptyOrUndefined(data.dir)) {
         return void layer.msg("文件类型不存在！");
     }
-    ajaxPost("/Upload/Path", data, ret => {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
+
+    getFilePath(data, paths => {
+        const pLen = paths.length;
+        if (pLen <= 0)
             return;
-        }
-        downLoad(ret.data[0].path, fileName.slice(fileName.indexOf('_') + 1));
+        downLoad(paths[0].path, fileName.slice(fileName.indexOf('_') + 1));
     });
 }
 
@@ -486,7 +486,7 @@ function getScriptVersionDetailList() {
     var data = {}
     data.opType = 106;
     data.opData = JSON.stringify({
-        id: sScrId
+        sId: sScrId
     });
     $("#valList,#inList,#outList").empty();
     ajaxPost("/Relay/Post", data, function (ret) {
@@ -819,7 +819,7 @@ function showUsuallyDictionary() {
     var data = {}
     data.opType = 106;
     data.opData = JSON.stringify({
-        id: $("#udtScriptVersion").val()
+        sId: $("#udtScriptVersion").val()
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -1229,7 +1229,7 @@ function getScriptDecimals() {
     }
     const data = {};
     data.opType = 106;
-    data.opData = JSON.stringify({ id });
+    data.opData = JSON.stringify({ sId: id });
     ajaxPost('/Relay/Post', data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);

@@ -8,6 +8,9 @@
     padding-left: 5px;
     padding-right: 5px;
 }
+.no-box-shadow {
+    box-shadow: 0 0px 0px #000000;
+}
 .mSelect {
     text-align: center;
     -webkit-text-align-last: center;

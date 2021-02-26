@@ -832,12 +832,33 @@ function getQueryString(name) {
 
 //异步获取数据
 function getFilePath(opData, func = undefined, cover = 1, msg = undefined) {
+    ajaxPost(filePathUrl, opData, ret => {
+        const errMsg = ret.errmsg;
+        if (ret.errno == 0) {
+            if (func != undefined) {
+                ret.data.forEach(d => {
+                    d.path = fileUrl + d.path;
+                });
+                func(ret.data);
+            }
+        } else {
+            return layer.msg(errMsg);
+        }
+    }, cover);
+}
+
+//异步获取数据
+function getFilePathAsync(opData, func = undefined, cover = 1, msg = undefined) {
     return new Promise(resolve => {
-        ajaxPost("/Upload/Path", opData, ret => {
-            let errMsg = ret.errmsg;
+        ajaxPost(filePathUrl, opData, ret => {
+            const errMsg = ret.errmsg;
             if (ret.errno == 0) {
-                if (func != undefined)
+                if (func != undefined) {
+                    ret.data.forEach(d => {
+                        d.path = fileUrl + d.path;
+                    });
                     func(ret.data);
+                }
                 resolve(ret);
             } else {
                 return layer.msg(errMsg);
@@ -851,7 +872,7 @@ function initFileInput(uiEle, type, func = null) {
     $("#" + uiEle).attr("accept", fileAccept[type]);
     var obj = $("#" + uiEle).fileinput({
         language: 'zh', //设置语言 
-        uploadUrl: '/Upload/File',
+        uploadUrl: fileUploadUrl + "/File",
         //enctype: 'multipart/form-data',
         allowedFileExtensions: fileExt[type],//接收的文件后缀
         showUpload: false, //是否显示上传按钮
@@ -913,7 +934,7 @@ function initFileInput(uiEle, type, func = null) {
         console.log('文件上传失败！' + msg);
         $(this).fileinput('clear');
     }).on("fileuploaded", function (event, fileRet, previewId, index) {
-        console.log("文件上传成功！");
+        console.log(`文件上传${fileRet.response.errmsg}！`);
         $(this).fileinput('clear');
         fileCallBack[type](fileRet.response);
     });
@@ -930,7 +951,7 @@ function initFileInputMultiple(uiEle, type, func = null) {
 
     var obj = $("#" + uiEle).fileinput({
         language: 'zh', //设置语言 
-        uploadUrl: '/Upload/FileMultiple',
+        uploadUrl: fileUploadUrl + "/FileMultiple",
         //enctype: 'multipart/form-data',
         allowedFileExtensions: fileExt[type],//接收的文件后缀
         showUpload: false, //是否显示上传按钮
@@ -1219,6 +1240,13 @@ function autoCal(obj, ui) {
 //判断当前页面是pc端还是移动端
 function pcAndroid() {
     return /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent);
+}
+
+//数组对象实现字母、数字的混合排序：
+function SortNumberString(array, par) {
+    return array.sort(function (a, b) {
+        return a[par].localeCompare(b[par], 'zh-CN', { numeric: true });
+    });
 }
 
 //数组对象排序
@@ -1520,12 +1548,12 @@ function printImgUp(resolve, fileId) {
 }
 
 function showBigImg(url) {
-    var html =
-        `<div id="outerDiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:10000;width:100%;height:100%;">
-            <div id="innerDiv" style="position:absolute;">
-                <img id="bigImg" style="border:5px solid #fff;" src="" />
-            </div>
-        </div>`;
+    url = unescape(url);
+    const html = `<div id="outerDiv" class="hidden" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:10000;width:100%;height:100%;">
+                    <div id="innerDiv" style="position:absolute;">
+                        <img id="bigImg" style="border:5px solid #fff;" src="" />
+                    </div>
+                </div>`;
     var modal = $(html);
     $(".content").append(modal);
     var outerDiv = "#outerDiv";
@@ -1560,7 +1588,7 @@ function showBigImg(url) {
         var w = (windowW - imgWidth) / 2;//计算图片与窗口左边距
         var h = (windowH - imgHeight) / 2;//计算图片与窗口上边距
         $(innerDiv).css({ "top": h, "left": w });//设置#innerdiv的top和left属性
-        $(outerDiv).fadeIn("fast");//淡入显示#outerdiv及.pimg
+        $(outerDiv).removeClass("hidden").fadeIn("fast");//淡入显示#outerdiv及.pimg
     });
 
     $(outerDiv).click(function () {//再次点击淡出消失弹出层
@@ -2095,7 +2123,7 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
         paging: true,
         searching: true,
         ordering: ordering,
-        aaSorting: [[order, 'asc']],
+        aaSorting: [[(order === 0 && isCheck ? 1 : order), 'asc']],
         aLengthMenu: [25, 50, 75],
         iDisplayLength: 25,
         language: oLanguage
@@ -2105,7 +2133,7 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
         obj.data = d;
     }
     isCheck && (!obj.columns && (obj.columns = []),
-        obj.columns.push({ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: '80px', visible: checkShow }));
+        obj.columns.push({ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: 'auto', visible: checkShow }));
     obj.addColumns = function (columns, xvHao = true) {
         !obj.columns && (obj.columns = []);
         xvHao && (obj.columns = obj.columns.concat(defaultColumns));
@@ -2114,6 +2142,10 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
     obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
         obj.ordering = false;
         fixedHeaderColumn(obj, fixedHeader, leftColumn, rightColumn, scrollX, scrollY);
+    }
+    obj.updateData = function (data) {
+        addOrderData(data);
+        obj.data = data;
     }
     return obj;
 }
@@ -2186,9 +2218,16 @@ function tableDefault() {
         span: (className, d) => `<span class="textOn ${className}">${d}</span>`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
         addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:70px;width:${width}" value="${d}">`,
+        numberInput: (className, param, d) => {
+            var s = param.split(',');
+            return `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${
+                className} hidden" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0
+                })" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
+        },
         addNumberInput: (className, param, d) => {
             var s = param.split(',');
-            return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`
+            return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5
+                }, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
         },
         select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control mSelect hidden textIn ${className}" style="min-width:120px;">${ops}</select>`,
         addSelect: (ops, className) => `<select class="form-control mSelect ${className}" style="min-width:120px">${ops}</select>`,
@@ -2304,12 +2343,24 @@ function initCheckboxAddEvent(arr, callback, fn, init = true) {
             } else {
                 arr.splice(arr.indexOf(trDom), 1);
                 callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
-                fn && fn(tr);
+                fn && fn(tr, api.row(trDom).data());
             }
         });
     init && $(this).find(".isEnable").iCheck("uncheck");
 }
 
+//初始化Input change事件
+function initInputChangeEvent(callback) {
+    const api = this.api();
+    $(this).find(".textIn").off("change")
+        .on("change", function () {
+            const tr = $(this).parents("tr");
+            const trDom = tr[0];
+            if (callback) {
+                callback(tr, api.row(trDom).data());
+            }
+        });
+}
 //删除表格数据
 function delTableRow(trs, opType, callback) {
     if (!trs || !trs.length) return layer.msg('请选择需要删除的数据');
@@ -2389,6 +2440,7 @@ function addOrderData(data) {
     for (let i = 0; i < data.length; i++) {
         data[i].XvHao = i + 1;
     }
+    return data;
 }
 
 //更新DataTable数据

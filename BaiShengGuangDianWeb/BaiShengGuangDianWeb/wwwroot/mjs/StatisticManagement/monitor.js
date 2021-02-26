@@ -93,7 +93,7 @@ function getCodeDetail() {
     var data = {};
     data.opType = 106;
     data.opData = JSON.stringify({
-        id: id
+        sId: id
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -186,7 +186,7 @@ function getHistoryScript() {
     var data = {};
     data.opType = 106;
     data.opData = JSON.stringify({
-        id: id
+        sId: id
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

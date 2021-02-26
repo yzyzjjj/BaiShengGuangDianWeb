@@ -1,5 +1,4 @@
 ﻿using BaiShengGuangDianWeb.Base.Chat;
-using BaiShengGuangDianWeb.Base.FileConfig;
 using BaiShengGuangDianWeb.Base.Filter;
 using BaiShengGuangDianWeb.Base.Helper;
 using BaiShengGuangDianWeb.Base.Server;
@@ -97,17 +96,7 @@ namespace BaiShengGuangDianWeb
             //app.UseCookiePolicy();
             app.UseSignalR(routes => routes.MapHub<ChatHub>("/chatHub"));
             app.UseMvcWithDefaultRoute();
-
-            FilePath.RootPath = env.WebRootPath;
-            //foreach (var pair in FilePath.GetFileDictionary())
-            //{
-            //    var filePath = Path.Combine(FilePath.RootPath, pair.Value);
-            //    if (!File.Exists(filePath))
-            //    {
-            //        Directory.CreateDirectory(filePath);
-            //    }
-            //}
-
+            
             Log.Info("Server Start");
         }
     }

@@ -33,23 +33,21 @@ function addFile() {
             if (isStrEmptyOrUndefined(data.dir)) {
                 return void layer.msg("文件类型不存在！");
             }
-            ajaxPost("/Upload/Path", data,
-                function (ret) {
-                    if (ret.errno != 0) {
-                        layer.msg(ret.errmsg);
-                        return;
-                    }
+            getFilePath(data, paths => {
+                const pLen = paths.length;
+                if (pLen <= 0)
+                    return;
 
-                    console.log(ret);
+                console.log(paths);
 
-                    $("#showImg").empty();
-                    var img = '<img height="200px" src="{0}"/>';
-                    var html = "";
-                    for (var i = 0; i < ret.data.length; i++) {
-                        html += img.format(ret.data[i].path);
-                    }
-                    $("#showImg").append(html);
-                });
+                $("#showImg").empty();
+                var img = '<img height="200px" src="{0}"/>';
+                var html = "";
+                for (var i = 0; i < pLen; i++) {
+                    html += img.format(paths[i].path);
+                }
+                $("#showImg").append(html);
+            });
         }
     };
 
@@ -87,23 +85,21 @@ function addImage() {
             if (isStrEmptyOrUndefined(data.dir)) {
                 return void layer.msg("文件类型不存在！");
             }
-            ajaxPost("/Upload/Path", data,
-                function (ret) {
-                    if (ret.errno != 0) {
-                        layer.msg(ret.errmsg);
-                        return;
-                    }
+            getFilePath(data, paths => {
+                const pLen = paths.length;
+                if (pLen <= 0)
+                    return;
 
-                    console.log(ret);
+                console.log(paths);
 
-                    $("#showImg").empty();
-                    var img = '<img height="200px" src="{0}"/>';
-                    var html = "";
-                    for (var i = 0; i < ret.data.length; i++) {
-                        html += img.format(ret.data[i].path);
-                    }
-                    $("#showImg").append(html);
-                });
+                $("#showImg").empty();
+                var img = '<img height="200px" src="{0}"/>';
+                var html = "";
+                for (var i = 0; i < pLen; i++) {
+                    html += img.format(paths[i].path);
+                }
+                $("#showImg").append(html);
+            });
         }
     };
 

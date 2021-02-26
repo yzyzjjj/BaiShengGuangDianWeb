@@ -47,7 +47,7 @@ function pageReady() {
         }
         $('#taskDesc').prop('disabled', !_isClick);
     });
-    $('#taskGroupSelect').on('select2:select', function() {
+    $('#taskGroupSelect').on('select2:select', function () {
         setProcessorSelect($(this).val(), $('#taskProSelect'));
     });
     $('#updateCheck').on('click', function () {
@@ -682,22 +682,20 @@ function showImgModel(img) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost("/Upload/Path", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                var imgOps = "";
-                for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
+                return;
+            var imgOps = "";
+            for (var i = 0; i < pLen; i++) {
+                imgOps += `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
                     <div class="thumbnail">
-                    <img src=${ret.data[i].path} style="height:200px">
+                    <img src=${paths[i].path} style="height:200px">
                     </div>
                     </div>`;
-                }
-                $("#imgOldList").append(imgOps);
-            });
+            }
+            $("#imgOldList").append(imgOps);
+        });
     }
     $('#showImgModel').modal('show');
 }
@@ -737,7 +735,7 @@ function updateTaskDetail() {
         Desc: $('#taskDesc').val(),
         Person: perId,
         Processor: $('#taskProSelect :selected').text()
-}
+    }
     var state = $('#updateTask').val();
     if (state == 3) {
         var actualHour = $('#taskActualTime .hour').val();

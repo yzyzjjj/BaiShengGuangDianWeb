@@ -177,11 +177,11 @@ function deviceUpgrade(type = 0) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost('/Upload/Path', data, ret => {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
+
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
                 return;
-            }
             data = {};
             data.opType = 108;
             data.opData = JSON.stringify({
@@ -189,7 +189,7 @@ function deviceUpgrade(type = 0) {
                 Infos: [{
                     Type: 1,
                     FileId: fileId,
-                    FileUrl: `${location.origin}${ret.data[0].path}`,
+                    FileUrl: `${location.origin}${paths[0].path}`,
                     DeviceId: codeId
                 }]
             });

@@ -687,7 +687,7 @@ function setTable() {
         },
         imgBtn: d => {
             var op = `<span class="glyphicon glyphicon-{0}" aria-hidden="true" style="color:{1};font-size:25px;vertical-align:middle;margin-right:5px"></span>
-                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(\'${d.FaultTypeName}\',\'${d.ImageList}\')">查看</button>`;
+                      <button type="button" class="btn btn-info btn-sm" style="vertical-align:middle" onclick="showImgModel(\'${escape(d.FaultTypeName)}\',\'${escape(d.ImageList)}\')">查看</button>`;
             return d.ImageList.length ? op.format('ok', 'green') : op.format('remove', 'red');
         },
         serIsEnable: d => {
@@ -1288,18 +1288,18 @@ function getImg(el, img) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost('/Upload/Path', data, ret => {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
                 return;
-            }
             var imgOps = '';
-            for (var i = 0; i < ret.data.length; i++) {
-                imgOps += `<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
-                <div class="thumbnail">
-                <img src=${ret.data[i].path} style="height:200px">
-                </div>
-                </div>`;
+            for (var i = 0; i < pLen; i++) {
+                imgOps +=
+                    `<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+                        <div class="thumbnail">
+                        <img src=${paths[i].path} style="height:200px" onclick=showBigImg(\'${escape(paths[i].path)}\')>
+                        </div>
+                    </div>`;
             }
             $(el).append(imgOps);
         });
@@ -1308,6 +1308,8 @@ function getImg(el, img) {
 
 //故障图片查看
 function showImgModel(faultType, img) {
+    faultType = unescape(faultType);
+    img = unescape(img);
     $('#FaultImgName').text(faultType);
     getImg('#faultImgList', img);
     $("#showFaultImgModel").modal('show');

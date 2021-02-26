@@ -31,6 +31,10 @@ namespace BaiShengGuangDianWeb
                                 $"wwwroot/lib/utils/{name}.js",
                             }
                     });
+                    if (name == "const")
+                    {
+                        //File.WriteAllText(file, File.ReadAllText(file).Replace("development = false", "development = true"));
+                    }
                 }
             }
 
@@ -67,6 +71,23 @@ namespace BaiShengGuangDianWeb
             p = Path.Combine(path, @"bundleconfig.json");
             //File.WriteAllText(@"F:\NPC\私人\王辉\BaiShengGuangDianWeb\BaiShengGuangDianWeb\BaiShengGuangDianWeb\bundleconfig.json", s);
             File.WriteAllText(p, s);
+#else
+            //var p = @"F:\NPC\私人\王辉\BaiShengGuangDianWeb\BaiShengGuangDianWeb\BaiShengGuangDianWeb\wwwroot\mjs\";
+            var path = AppDomain.CurrentDomain.BaseDirectory.Split("bin")[0];
+            var p = Path.Combine(path, @"wwwroot\lib\utils\");
+            var files = Directory.GetFiles(p).Where(x => !x.Contains(".min.js"));
+            foreach (var file in files)
+            {
+                var names = file.Replace(p, "").Split(".");
+                if (names.Length == 2)
+                {
+                    var name = names[0];
+                    if (name == "const")
+                    {
+                        File.WriteAllText(file, File.ReadAllText(file).Replace("development = true", "development = false"));
+                    }
+                }
+            }
 #endif
             CreateWebHostBuilder(args).Build().Run();
         }

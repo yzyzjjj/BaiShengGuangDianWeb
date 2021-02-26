@@ -4,6 +4,7 @@
     ViewBag.Title = "看板数据";
     Layout = "_Layout";
 }
+<link href="~/mcss/css/kb.css" rel="stylesheet" />
 <environment include="Development">
     <script src="~/mjs/StatisticManagement/kanBan.js"></script>
     <script src="~/lib/echarts/echarts.min.js"></script>
@@ -23,102 +24,187 @@
     <div class="row">
         <div class="nav-tabs-custom" id="tabBox">
             <ul class="nav nav-tabs ui-sortable-handle" id="navUl">
-                <li class="active" id="stateNavLi"><a href="#stateNav" data-toggle="tab" aria-expanded="true">设备状态</a></li>
-                <li id="firstNavLi"><a href="#setKanBan" data-toggle="tab" aria-expanded="true">设置</a></li>
+                <li class="active" id="firstNavLi"><a class="text-red" href="#setKanBan" data-toggle="tab" aria-expanded="true">设置相关</a></li>
+                @*<li id="kanBan-1NavLi"><a href="#kanBan_5_5" class="kanBan" data-toggle="tab" aria-expanded="true">设备状态</a></li>*@
             </ul>
             <div class="tab-content no-padding" style="position: relative">
-                <span class="glyphicon glyphicon-fullscreen pointer hidden fullScreenBtn" style="position: absolute; right: 15px; top: 15px; font-size: 20px;z-index:1" title="全屏放大" aria-hidden="true"></span>
-                <div class="tab-pane active in" id="stateNav">
-                    <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <div class="form-group no-margin">
-                                <label class="control-label text-bold no-margin bg-green mPadding">正常：<label class="control-label" id="zc">0</label></label>
-                                <label class="control-label text-bold no-margin bg-red mPadding">故障：<label class="control-label" id="gz">0</label></label>
-                                <label class="control-label text-bold no-margin bg-gray mPadding">异常：<label class="control-label" id="yc">0</label></label>
-                                <span class="glyphicon glyphicon-fullscreen pointer fullScreenBtn" target="stateNav" style="position: absolute; right: 15px; top: 15px; font-size: 20px;z-index:1" title="全屏放大" aria-hidden="true"></span>
+                <div class="tab-pane active" id="setKanBan">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a href="#setTab" data-toggle="tab" aria-expanded="true">设置</a></li>
+                            <li><a href="#carouselTab" data-toggle="tab" aria-expanded="true">轮播</a></li>
+                        </ul>
+                        <div class="tab-content no-padding" style="position: relative">
+                            <div class="tab-pane active" id="setTab">
+                                <div class="box box-primary">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="control-label">看板列表：</label>
+                                            <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                <select class="form-control" id="kanBanList" style="width: 140px"></select>
+                                            </div>
+                                            <button class="btn btn-danger" onclick="delKanBanList()">删除</button>
+                                        </div>
+
+                                        <div style="display: flex; flex-wrap: wrap;">
+                                            <div class="form-group">
+                                                <label class="control-label">看板名称：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanName" maxlength="40" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">看板类型：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <select class="form-control" id="kanBanType" style="width: 140px"></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">刷新间隔（秒）：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanSecond" value="5" oninput="onInput(this, 4, 0);" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group stateEl hidden">
+                                                <label class="control-label">行数：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanRow" value="8" oninput="onInput(this, 4, 0);" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group stateEl hidden">
+                                                <label class="control-label">列数：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanCol" value="8" oninput="onInput(this, 4, 0);" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group stateEl hidden">
+                                                <label class="control-label">总数量：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanLength" readOnly="readOnly" value="30" oninput="onInput(this, 4, 0);" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">看板顺序：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanOrder" value="999" oninput="onInput(this, 4, 0);" style="width: 200px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label no-margin" style="vertical-align: middle">是否启用：</label>
+                                                <input type="checkbox" id="isShow" class="icb_minimal">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label">选择设备：</label>
+                                            <select class="form-control" id="deviceSelect" style="width: 100%"></select>
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <button class="btn btn-primary btn-flat" onclick="setAddKanBan(0)" style="width: 80px">修改</button>
+                                            <button class="btn btn-success btn-flat" onclick="setAddKanBan(1)" style="width: 80px">添加</button>
+                                        </div>
+                                        <div class="form-group stateEl hidden" id="kanBanScript">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="box-body">
-                            <div style="display: flex; flex-wrap: wrap" id="deviceState">
-                                @*<div style="flex-basis: 190px; height: 190px; background:#dcdcdc; margin: 5px;text-align: center;cursor:pointer; box-shadow: 2px 2px 3px black;">
-                                    <div style="height: 33%;position: relative;display: flex;">
-                                        <div style="width: 30%;position: relative;">
-                                            <img style="width: 100%;height: 80%;" src="/File/Device/210207200102_粗抛机.jpg">
+
+                            <div class="tab-pane fade in" id="carouselTab">
+                                <div class="box box-primary">
+                                    <div class="box-body">
+                                        <div style="display: flex; flex-wrap: wrap;" id="carouselDiv">
                                         </div>
-                                        <div style="width: 50%;position: relative;">
-                                            <label class="" style="margin: 0;">机台号</label>
-                                            <br>
-                                            <label class="" style="margin: 0;">粗抛机</label>
-                                            <br>
-                                            <label class="" style="margin: 0;">车间</label>
-                                        </div>
-                                        <div style="width: 30px;height: 30px;background: #FFCC33;position: absolute;top: 0;right: 0;/* float: right; */"></div>
-                                    </div>
-                                    <div style="height: 67%; position: relative;">
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">下盘速度</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
-                                        </div>
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
-                                        </div>
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
-                                        </div>
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
-                                        </div>
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
-                                        </div>
-                                        <div>
-                                            <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
-                                            <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                                        <div class="form-group text-center">
+                                            <button class="btn btn-primary btn-flat" onclick="fullScreenCarousel()" style="width: 80px">轮播</button>
                                         </div>
                                     </div>
-                                </div>*@
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane fade in" id="setKanBan">
-                    <div class="box box-primary">
-                        <div class="box-body">
-                            <button class="btn btn-primary pull-right" onclick="fullScreenCarousel()">轮播</button>
-                            <div class="form-group">
-                                <label class="control-label">看板列表：</label>
-                                <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                    <select class="form-control" id="kanBanList" style="width: 140px"></select>
-                                </div>
-                                <button class="btn btn-danger" onclick="delKanBanList()">删除</button>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">看板名称：</label>
-                                <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                    <input class="form-control" id="kanBanName" maxlength="40" style="width: 200px">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">选择设备：</label>
-                                <select class="form-control" id="deviceSelect" style="width: 100%"></select>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label no-margin" style="vertical-align: middle">是否启用：</label>
-                                <input type="checkbox" id="isShow" class="icb_minimal">
-                            </div>
-                            <div class="text-center">
-                                <button class="btn btn-primary btn-flat" onclick="setAddKanBan(0)" style="width: 80px">设置</button>
-                                <button class="btn btn-success btn-flat" onclick="setAddKanBan(1)" style="width: 80px">添加</button>
-                            </div>
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>
     </div>
 </section>
 <section class="panel-fullscreen" id="fullScreenCarousel" style="top:-100%; opacity: 0;background:white"></section>
+
+@*<div class="tab-pane fade in kb_body" id="kanBan_5_5">
+        <div class="form-group no-margin">
+            <label class="control-label textOverTop no-margin middle" style="position: absolute; top: 10px; left: 5px; z-index: 1">时间信息：<span id="{0}_time"></span></label>
+            <h3 class="text-center text-bold no-margin" style="color: cyan; padding: 10px;">监控平台</h3>
+            <span class="glyphicon glyphicon-fullscreen pointer fullScreenBtn" target="kanBan_5_5"
+                  style="position: absolute; top: 10px; right: 15px; font-size: 20px; z-index: 1; color: white;" title="全屏放大" aria-hidden="true"></span>
+        </div>
+        <div class="form-group no-margin">
+            <label class="control-label text-bold no-margin bg-blue mPadding text-center" style="width: 15%; font-size: 17px;">
+                正常：<label class="control-label no-margin" id="zc" style="font-size: 17px;">0</label>
+            </label>
+            <label class="control-label text-bold no-margin bg-green mPadding text-center" style="width: 15%; font-size: 17px;">
+                加工：<label class="control-label no-margin" id="jg" style="font-size: 17px;">0</label>
+            </label>
+            <label class="control-label text-bold no-margin bg-black mPadding text-center" style="width: 15%; font-size: 17px;">
+                闲置：<label class="control-label no-margin" id="xz" style="font-size: 17px;">0</label>
+            </label>
+            <label class="control-label text-bold no-margin bg-red mPadding text-center" style="width: 15%; font-size: 17px;">
+                故障：<label class="control-label no-margin" id="gz" style="font-size: 17px;">0</label>
+            </label>
+            <label class="control-label text-bold no-margin bg-gray mPadding text-center" style="width: 15%; font-size: 17px;">
+                未连接：<label class="control-label no-margin" id="wlj" style="font-size: 17px;">0</label>
+            </label>
+            <label class="control-label text-bold no-margin mPadding text-center" style="width: 15%; color: cyan; font-size: 17px;">
+                共：<label class="control-label no-margin" id="sum" style="font-size: 17px;">0</label>台
+            </label>
+        </div>
+        <div class="box box-primary kb_body" style="border-top-color:cyan">
+            <div class="box-header">
+            </div>
+            <div class="box-body">
+                <div style="display: flex; flex-wrap: wrap" id="deviceState">
+                    <div style="flex-basis: 190px; height: 190px; background: #dcdcdc; margin: 5px; text-align: center; cursor: pointer; box-shadow: 2px 2px 3px black;">
+                        <div style="height: 33%; position: relative; display: flex;">
+                            <div style="width: 35%; position: relative;">
+                                <img style="width: 100%; height: 100%;" src="/File/Device/210207200102_粗抛机.jpg">
+                            </div>
+                            <div style="width: 65%; position: relative;">
+                                <label class="text-blue" style="margin: 0; font-size: 17px;">机台号</label>
+                                <br>
+                                <label class="" style="margin: 0; white-space: nowrap;">粗抛机-13B</label>
+                                <br>
+                                <label class="" style="margin: 0;">蓝玻璃蓝玻璃车间</label>
+                            </div>
+                            <div style="width: 23px; height: 23px; background: #FFCC33; position: absolute; top: 0; right: 0; /* float: right; */"></div>
+                        </div>
+                        <div style="height: 67%; position: relative;">
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">下盘速度</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                            <div>
+                                <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
+                                <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>*@

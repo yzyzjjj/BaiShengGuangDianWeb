@@ -78,7 +78,7 @@ function getProcessor(isFirst) {
 
 //获取检验任务
 function getCheckTask() {
-    var account,gId;
+    var account, gId;
     if (_have404) {
         account = $('#processorSelect').val();
         if (isStrEmptyOrUndefined(account)) {
@@ -264,13 +264,12 @@ function showImgModel(img, id) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost("/Upload/Path", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                var imgOp = `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
+
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
+                return;
+            var imgOp = `<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">
                     <div class="thumbnail">
                     <img src={0} style="height:200px">
                     <div class="caption text-center ${id == null ? 'hidden' : ''}">
@@ -278,12 +277,12 @@ function showImgModel(img, id) {
                     </div>
                     </div>
                     </div>`;
-                var imgOps = "";
-                for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path, img[i]);
-                }
-                $("#imgOldList").append(imgOps);
-            });
+            var imgOps = "";
+            for (let i = 0; i < pLen; i++) {
+                imgOps += imgOp.format(paths[i].path, img[i]);
+            }
+            $("#imgOldList").append(imgOps);
+        });
     }
     $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择图片...');
     $('#showImgModel').modal('show');

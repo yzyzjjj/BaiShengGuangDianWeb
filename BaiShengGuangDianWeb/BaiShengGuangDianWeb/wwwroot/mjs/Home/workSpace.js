@@ -1551,19 +1551,19 @@ function showLogDetailModel(logId, isLook, isShow) {
             if (isStrEmptyOrUndefined(data.dir)) {
                 return void layer.msg("文件类型不存在！");
             }
-            ajaxPost("/Upload/Path", data, function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
+
+            getFilePath(data, paths => {
+                const pLen = paths.length;
+                if (pLen <= 0)
                     return;
-                }
                 var imgOp = '<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
                     '<div class="thumbnail">' +
                     '<img src={0}>' +
                     '</div>' +
                     '</div>';
                 var imgOps = "";
-                for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path);
+                for (var i = 0; i < pLen; i++) {
+                    imgOps += imgOp.format(paths[i].path);
                 }
                 $("#detailImgList").append(imgOps);
             });

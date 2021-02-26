@@ -325,7 +325,7 @@ function detailPage(deviceId, planId, isModal) {
             return `<input type="checkbox" class="icb_minimal isEnable" id=${data.Id} surveyorId=${data.SurveyorId}>`;
         }
         var number = 0;
-        var order = function() {
+        var order = function () {
             return ++number;
         }
         var plannedTime = function (data) {
@@ -529,26 +529,25 @@ function showImgModel(id, item, img) {
         if (isStrEmptyOrUndefined(data.dir)) {
             return void layer.msg("文件类型不存在！");
         }
-        ajaxPost("/Upload/Path", data,
-            function (ret) {
-                if (ret.errno != 0) {
-                    layer.msg(ret.errmsg);
-                    return;
-                }
-                var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
-                    '<div class="thumbnail">' +
-                    '<img src={0} style="height:200px">' +
-                    '<div class="caption text-center">' +
-                    '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
-                var imgOps = "";
-                for (var i = 0; i < ret.data.length; i++) {
-                    imgOps += imgOp.format(ret.data[i].path, img[i]);
-                }
-                $("#imgOldList").append(imgOps);
-            });
+
+        getFilePath(data, paths => {
+            const pLen = paths.length;
+            if (pLen <= 0)
+                return;
+            var imgOp = '<div class="imgOption col-lg-2 col-md-3 col-sm-4 col-xs-6">' +
+                '<div class="thumbnail">' +
+                '<img src={0} style="height:200px">' +
+                '<div class="caption text-center">' +
+                '<button type="button" class="btn btn-default glyphicon glyphicon-trash delImg" value="{1}"></button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            var imgOps = "";
+            for (var i = 0; i < pLen; i++) {
+                imgOps += imgOp.format(paths[i].path, img[i]);
+            }
+            $("#imgOldList").append(imgOps);
+        });
     }
     $('#addImgBox').find('.file-caption-name').attr('readonly', true).attr('placeholder', '请选择张图片...');
     $('#showImgModel').modal('show');
@@ -631,7 +630,7 @@ function getNextExamineList() {
             }
         }
         var number = 0;
-        var order = function() {
+        var order = function () {
             return ++number;
         }
         var plannedTime = function (data) {
@@ -639,12 +638,12 @@ function getNextExamineList() {
         }
         var planFlag = null, flag = 0;
         var colors = ['#cdcdcd', '#daf5fa'];
-        var rModal = function(data, type, full, meta) {
+        var rModal = function (data, type, full, meta) {
             full.Devices = full.Devices ? full.Devices : "";
             return full.Devices.length > tdShowContentLength
                 ? full.Devices.substr(0, tdShowContentLength) +
                 '<a href = \"javascript:showDeviceModel(\'{0}\')\">...</a> '
-                .format(escape(full.Devices.trim()))
+                    .format(escape(full.Devices.trim()))
                 : full.Devices;
         };
         $('#planCheckRecentList')
@@ -668,7 +667,7 @@ function getNextExamineList() {
                     { "data": "Unit", "title": "单位" },
                     { "data": "Reference", "title": "参考标准" },
                     { "data": "PlannedTime", "title": "计划时间", "render": plannedTime, "sClass": "text-primary" },
-                    { "data": "Devices", "title": "机台号", "render": rModal}
+                    { "data": "Devices", "title": "机台号", "render": rModal }
                 ],
                 "createdRow": function (row, data, index) {
                     var v = data.Plan;

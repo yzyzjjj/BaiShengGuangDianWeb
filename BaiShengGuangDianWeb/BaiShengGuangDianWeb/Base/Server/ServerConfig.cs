@@ -1,5 +1,4 @@
-﻿using BaiShengGuangDianWeb.Base.FileConfig;
-using BaiShengGuangDianWeb.Base.Helper;
+﻿using BaiShengGuangDianWeb.Base.Helper;
 using Microsoft.Extensions.Configuration;
 using ModelBase.Base.Dapper;
 using ModelBase.Base.Logger;

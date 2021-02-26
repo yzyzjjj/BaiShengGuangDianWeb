@@ -1,0 +1,63 @@
+﻿@charset "utf-8";
+/* CSS Document */
+.kb_body {
+    width: 100%;
+    height: 100%;
+    background-image: url('../../images/kb/statebg.jpg');
+    background-size: 100% 100%;
+}
+
+.kb_time1 {
+    position: absolute;
+    top: 30px;
+    left: 25px;
+    z-index: 1;
+    color: white;
+}
+
+.kb_fullscreen1 {
+    position: absolute;
+    top: 30px;
+    right: 25px;
+    font-size: 20px;
+    z-index: 1;
+    color: white;
+}
+
+.kb_title1 {
+    width: 20%;
+    height: 100%;
+    background-image: url('../../images/kb/statetiltle.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+    color: #ffffff;
+    text-align: center;
+    line-height: 26px
+}
+
+.kb_div1 {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.kb_border1 {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    border: 1px #0174f5 solid;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.kb_border2 {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 2px solid #016ae0;
+    border-radius: 10px;
+}
+
+
