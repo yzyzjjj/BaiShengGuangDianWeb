@@ -105,38 +105,38 @@ function pageReady() {
             var state = d.DeviceStateStr;
             var stateClass;
             switch (state) {
-            case '待加工':
-                stateClass = 'success';
-                break;
-            case '加工中':
-                stateClass = 'success';
-                break;
-            case '已确认':
-                stateClass = 'warning';
-                break;
-            case '维修中':
-                stateClass = 'info';
-                break;
-            default:
-                stateClass = 'red';
+                case '待机':
+                    stateClass = 'success';
+                    break;
+                case '加工中':
+                    stateClass = 'success';
+                    break;
+                case '已确认':
+                    stateClass = 'warning';
+                    break;
+                case '维修中':
+                    stateClass = 'info';
+                    break;
+                default:
+                    stateClass = 'red';
             }
             tr.find('.devState').html(`<span class="text-${stateClass}">${state}</span>`);
             switch (e) {
-            case 0:
-                tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
-                new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
-                    tr.find('.script').empty().append(e).val(d.ScriptId).trigger('change');
-                });
-                break;
-            case 1:
-                new Promise(resolve => getUpgrade(resolve, 130, 'FilePath', 'FirmwareName')).then(e => {
-                    tr.find('.firmware').empty().append(e).val(d.FirmwareId).trigger('change');
-                });
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
+                case 0:
+                    tr.find('.devModel').text(`${d.CategoryName}-${d.ModelName}`);
+                    new Promise(resolve => getUpgrade(resolve, 113, 'ScriptFile', 'ScriptName', d.DeviceModelId)).then(e => {
+                        tr.find('.script').empty().append(e).val(d.ScriptId).trigger('change');
+                    });
+                    break;
+                case 1:
+                    new Promise(resolve => getUpgrade(resolve, 130, 'FilePath', 'FirmwareName')).then(e => {
+                        tr.find('.firmware').empty().append(e).val(d.FirmwareId).trigger('change');
+                    });
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
             }
             tr.find('.result').empty();
         }
@@ -156,7 +156,9 @@ function getDeviceList(resolve, isUpgrade) {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
-        hard: true
+        detail: true,
+        other: true,
+        state: true,
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -169,7 +171,7 @@ function getDeviceList(resolve, isUpgrade) {
             for (var i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 _deviceData[d.Id] = d;
-                if (d.DeviceStateStr == '待加工') {
+                if (d.DeviceStateStr == '待机') {
                     _deviceData.state++;
                 }
             }
@@ -218,7 +220,7 @@ function getDeviceList(resolve, isUpgrade) {
             }
             var deviceState = function (data, type, row) {
                 var state = data.DeviceStateStr;
-                if (state == '待加工')
+                if (state == '待机')
                     return '<span class="text-success">' + state + '</span>';
                 if (state == '加工中')
                     return '<span class="text-success">' + state + '</span>';
@@ -749,7 +751,7 @@ function updateDevice() {
     if (!update)
         return;
     var device = {
-        id: id,
+        Id: id,
         //机台号
         Code: code,
         //设备名
@@ -802,7 +804,7 @@ function updateDevice() {
         }).then(function () {
             const data = {};
             data.opType = 102;
-            data.opData = JSON.stringify(device);
+            data.opData = JSON.stringify([device]);
             ajaxPost("/Relay/Post", data,
                 function (ret) {
                     layer.msg(ret.errmsg);
@@ -822,7 +824,7 @@ function showDetail(id) {
 
 function showControl(id, str) {
     str = unescape(str);
-    if (str == "待加工" || str == "加工中") {
+    if (str == "待机" || str == "加工中") {
         window.location = '/DeviceManagement/Control?id=' + id;
     } else {
         layer.msg("该设备" + str);
@@ -887,8 +889,8 @@ function showUpgrade(id) {
 //设备升级
 function deviceUpgrade(type = 0) {
     var codeId = $(this).val();
-    if (_deviceData[codeId].DeviceStateStr != '待加工') {
-        layer.msg('非待加工设备不能升级');
+    if (_deviceData[codeId].DeviceStateStr != '待机') {
+        layer.msg('非待机设备不能升级');
         return;
     }
     var fileId = null, fileType = "", fileName = null, hintText = '';
@@ -983,7 +985,7 @@ function addBatchUpgradeTr(e, el) {
     var ops = '';
     for (var key in _deviceData) {
         var d = _deviceData[key];
-        if (d.DeviceStateStr == '待加工') {
+        if (d.DeviceStateStr == '待机') {
             ops += op.format(key, d.Code, _batchCodeData[e].indexOf(key) == -1 ? '' : 'disabled');
         }
     }
@@ -1017,7 +1019,7 @@ function batchUpgradeSort(el) {
 function delBatchUpgradeTr(e, el) {
     var tr = $(this).parents('tr');
     var flag = true;
-    if (tr.find('.devState').text() != '待加工') {
+    if (tr.find('.devState').text() != '待机') {
         _deviceData.batchState--;
         flag = false;
     }
@@ -1037,7 +1039,9 @@ function batchRefresh(e, el) {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
-        hard: true,
+        detail: true,
+        other: true,
+        state: true,
         ids: _batchCodeData[e].join(',')
     });
     ajaxPost("/Relay/Post", data, ret => {
@@ -1049,7 +1053,7 @@ function batchRefresh(e, el) {
             data[d.Id] = d;
             var str = d.DeviceStateStr;
             if (str != _deviceData[d.Id].DeviceStateStr) {
-                str == '待加工' ? _deviceData.state++ : _deviceData.state--;
+                str == '待机' ? _deviceData.state++ : _deviceData.state--;
             }
             _deviceData[d.Id] = d;
         }
@@ -1061,7 +1065,7 @@ function batchRefresh(e, el) {
             var state = _deviceData[codeId].DeviceStateStr;
             var stateClass;
             switch (state) {
-                case '待加工':
+                case '待机':
                     stateClass = 'success';
                     break;
                 case '加工中':
@@ -1097,8 +1101,8 @@ function batchUpgrade(e, el) {
     for (; i < len; i++) {
         var tr = trs.eq(i);
         var codeId = tr.find('.delTr').val();
-        if (tr.find('.devState span').text() != '待加工') {
-            layer.msg(`序列${i + 1}：非待加工设备不能升级`);
+        if (tr.find('.devState span').text() != '待机') {
+            layer.msg(`序列${i + 1}：非待机设备不能升级`);
             return;
         }
         var scriptEl = tr.find(`.${el}`);

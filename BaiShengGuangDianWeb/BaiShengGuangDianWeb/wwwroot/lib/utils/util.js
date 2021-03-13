@@ -2183,6 +2183,7 @@ function disabledOption(selects, v, tag = true) {
     }
     selects.select2();
 }
+
 //更新选项
 function updateDataTableTrSelect(id, className, options) {
     const selects = $(id).find(`.${className}`);
@@ -2210,6 +2211,7 @@ function updateDataTableTrSelect(id, className, options) {
     //    $(el).html(options).val(v).trigger('change');
     //});
 }
+
 //dataTable渲染标签
 function tableDefault() {
     return {
@@ -2324,14 +2326,80 @@ function getDataTableRow(table) {
 }
 
 //初始化iChick并添加事件
-function initCheckboxAddEvent(arr, callback, fn, init = true) {
+function initCheckboxAddEvent(arr, callback, fn, init = true, event = "Changed") {
     const api = this.api();
     $(this).find(".isEnable").iCheck({
         handle: "checkbox",
         checkboxClass: "icheckbox_minimal-blue",
         increaseArea: "20%"
-    }).off("ifChanged")
-        .on("ifChanged", function () {
+    });
+    if (event == "Changed") {
+        $(this).find(".isEnable")
+            .off("ifChanged").on("ifChanged",
+                function () {
+                    const tr = $(this).parents("tr");
+                    const trDom = tr[0];
+                    if ($(this).is(":checked")) {
+                        arr.push(trDom);
+                        if (callback) {
+                            callback(tr, api.row(trDom).data());
+                            tr.find(".textOn").addClass("hidden").siblings(".textIn").removeClass("hidden");
+                        }
+                    } else {
+                        arr.splice(arr.indexOf(trDom), 1);
+                        callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
+                        fn && fn(tr, api.row(trDom).data());
+                    }
+                });
+    } else if (event == "Checked") {
+        $(this).find(".isEnable")
+            .off("ifChecked").on("ifChecked",
+                function () {
+                    const tr = $(this).parents("tr");
+                    const trDom = tr[0];
+                    if ($(this).is(":checked")) {
+                        arr.push(trDom);
+                        if (callback) {
+                            callback(tr, api.row(trDom).data());
+                            tr.find(".textOn").addClass("hidden").siblings(".textIn").removeClass("hidden");
+                        }
+                    } else {
+                        arr.splice(arr.indexOf(trDom), 1);
+                        callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
+                        fn && fn(tr, api.row(trDom).data());
+                    }
+            })
+            .off("ifUnchecked").on("ifUnchecked",
+                function () {
+                    const tr = $(this).parents("tr");
+                    const trDom = tr[0];
+                    if ($(this).is(":checked")) {
+                        arr.push(trDom);
+                        if (callback) {
+                            callback(tr, api.row(trDom).data());
+                            tr.find(".textOn").addClass("hidden").siblings(".textIn").removeClass("hidden");
+                        }
+                    } else {
+                        arr.splice(arr.indexOf(trDom), 1);
+                        callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
+                        fn && fn(tr, api.row(trDom).data());
+                    }
+                });
+    }
+
+
+    init && $(this).find(".isEnable").iCheck("uncheck");
+}
+
+//初始化iChick并添加事件
+function initCheckboxAddCheckedEvent(arr, callback, fn, init = true) {
+    const api = this.api();
+    $(this).find(".isEnable").iCheck({
+        handle: "checkbox",
+        checkboxClass: "icheckbox_minimal-blue",
+        increaseArea: "20%"
+    }).off("ifChecked")
+        .on("ifChecked", function () {
             const tr = $(this).parents("tr");
             const trDom = tr[0];
             if ($(this).is(":checked")) {
@@ -2349,6 +2417,26 @@ function initCheckboxAddEvent(arr, callback, fn, init = true) {
     init && $(this).find(".isEnable").iCheck("uncheck");
 }
 
+//选择禁用
+function disabledTableCheck(table, except = []) {
+    $(`#${table}`).find(".isEnable").iCheck("disable");
+    if (except.length > 0) {
+        except.forEach(t => {
+            $(`#${table}`).find(`.isEnable[value=${t}]`).iCheck('enable');
+        });
+    }
+}
+
+//选择启用
+function enableTableCheck(table, except = []) {
+    $(`#${table}`).find(".isEnable").iCheck("enable");
+    if (except.length > 0) {
+        except.forEach(t => {
+            $(`#${table}`).find(`.isEnable[value=${t}]`).iCheck('disable');
+        });
+    }
+}
+
 //初始化Input change事件
 function initInputChangeEvent(callback) {
     const api = this.api();
@@ -2361,6 +2449,7 @@ function initInputChangeEvent(callback) {
             }
         });
 }
+
 //删除表格数据
 function delTableRow(trs, opType, callback) {
     if (!trs || !trs.length) return layer.msg('请选择需要删除的数据');

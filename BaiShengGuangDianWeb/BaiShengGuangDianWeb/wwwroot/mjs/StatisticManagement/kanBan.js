@@ -1,13 +1,20 @@
-﻿var curId = -1;
+﻿var def = 180;
+var curId = -1;
 var t = 0;
-var time = 0;
-var page = 0;
+var uiTime = 0;
+var dataTime = 0;
+var run = false;
+var page = [];
 var maxSet = 6;
 var timeEl = "";
 let dsDivs = [];
 let dsPaths = [];
 let carouselTmp = [];
 let carouselChose = [];
+let carouselIndex = 0;
+let carouselId = 0;
+var carouselTime = 0;
+var carouselFlag = "";
 
 var scriptIndexTmp = [];
 var scriptTmp = [];
@@ -34,20 +41,33 @@ function pageReady() {
         if (kb) {
             type = kb.Type;
         }
-        dsDivs = [];
-        dsPaths = [];
-        timeEl = "";
+        //timeEl = "";
+        timeEl = flag;
         if (type == 2) {
-            timeEl = flag;
             $(`#${flag}_deviceState`).empty();
         }
         if (curId > -1) {
+            dsDivs[curId] = [];
+            dsPaths[curId] = [];
+            page[curId] = 0;
             setChart(flag, curId, type);
-            clearInterval(time);
+            clearInterval(uiTime);
+            clearInterval(dataTime);
+            t = (kb.UI < 1 ? 1 : kb.UI) * 1000;
+            uiTime = setInterval(() => {
+                if (run) return;
+                //console.log(getTime(), 1);
+                setChart(flag, curId, type, true);
+            }, t);
             t = (kb.Second < 1 ? 1 : kb.Second) * 1000;
-            time = setInterval(() => setChart(flag, curId, type), t);
+            dataTime = setInterval(() => {
+                if (run) return;
+                //console.log(getTime(), 2);
+                setChart(flag, curId, type);
+            }, t);
         } else {
-            clearInterval(time);
+            clearInterval(uiTime);
+            clearInterval(dataTime);
         }
     });
     $('.content').on('click', '.fullScreenBtn', function () {
@@ -64,7 +84,10 @@ function pageReady() {
     //    //$('.fullScreenBtn').addClass('hidden');
     //});
     //$('#kanBan-1NavLi a').click();
-    setInterval(() => $(`#${timeEl}_time`).length > 0 && $(`#${timeEl}_time`).text(getFullTime()), 1000);
+    setInterval(() => {
+        $(`#${timeEl}_time`).length > 0 && $(`#${timeEl}_time`).text(getFullTime());
+        $(`#${carouselFlag}_time`).length > 0 && $(`#${carouselFlag}_time`).text(getFullTime());
+    }, 1000);
 
     var func = function () {
         $('#kanBanLength').val(($('#kanBanRow').val() >> 0) * ($('#kanBanCol').val() >> 0));
@@ -95,17 +118,8 @@ function pageReady() {
             var d = kanBans[id];
             $('#kanBanName').val(d.Name);
             $('#kanBanOrder').val(d.Order);
-            $("#kanBanSecond").val(d.Second);
-            $('#deviceSelect').val(d.DeviceIdList).trigger('change');
             $('#isShow').iCheck(d.IsShow ? 'check' : 'uncheck');
             $("#setKanBan .stateEl").addClass("hidden");
-            if (d.Type == 2) {
-                $("#kanBanRow").val(d.Row);
-                $("#kanBanCol").val(d.Col);
-                $("#kanBanLength").val(d.Length);
-                $("#setKanBan .stateEl").removeClass("hidden");
-                getScriptList();
-            }
             $('#kanBanType').val(d.Type).off('change').on('change', function () {
                 var type = $(this).val();
                 $("#setKanBan .stateEl").addClass("hidden");
@@ -115,6 +129,19 @@ function pageReady() {
                     getScriptList();
                 }
             });
+            $("#kanBanUI").val(d.UI);
+            $("#kanBanSecond").val(d.Second);
+            if (d.Type == 2) {
+                $("#kanBanRow").val(d.Row);
+                $("#kanBanCol").val(d.Col);
+                $("#kanBanLength").val(d.Length);
+                $("#setKanBan .stateEl").removeClass("hidden");
+                //getScriptList();
+                scriptIndexTmp = [];
+                scriptTmp = [];
+                $('#kanBanScript').html("");
+            }
+            $('#deviceSelect').val(d.DeviceIdList).trigger('change');
         });
 
         $('#deviceSelect')
@@ -188,7 +215,7 @@ function getDevice(resolve) {
     var data = {
         opType: 100,
         opData: JSON.stringify({
-            hard: true,
+            detail : true,
             state: false
         })
     };
@@ -392,11 +419,11 @@ function getKanBanList(resolve) {
                         </label>
                     </div>
                 </div>
-                <div class="box box-primary no-box-shadow dsDiv" style="background-color: dodgerblue;border-top-color:cyan; background-color:transparent;">
+                <div class="box box-primary no-box-shadow no-margin kb_div2 dsDiv">
                     <div class="box-header no-padding">
                     </div>
                     <div class="box-body no-padding">
-                        <div style="display: flex; flex-wrap: wrap; padding: 10px; height: auto; width: 100%;" id="{0}_deviceState">
+                        <div class="kb_flex_div1" id="{0}_deviceState">
                         </div>
                     </div>
                 </div>
@@ -404,7 +431,7 @@ function getKanBanList(resolve) {
                 </div>
             </div>`;
         const stateTab = `<div class="tab-pane kb_body fade in" id="{0}">${state}</div>`;
-        const carouselOp = `<div class="item" id="{0}">{1}<div class="carousel-caption text-primary"><h3 class="text-primary isShow hidden">{2}</h3></div></div>`;
+        const carouselOp = `<div class="item kb_body" id="{0}">{1}<div class="carousel-caption text-primary"><h3 class="text-primary isShow hidden">{2}</h3></div></div>`;
 
         //rData.sort((a, b) => a.Order - b.Order);
         var ops = '', cops = '', lis = '', tabs = '', cOp = '';
@@ -485,6 +512,7 @@ function setAddKanBan(isAdd) {
     if (isStrEmptyOrUndefined(deviceId)) {
         return void layer.msg('请选择设备');
     }
+    const ui = $('#kanBanUI').val() >> 0;
     const sec = $('#kanBanSecond').val() >> 0;
     const row = $('#kanBanRow').val() >> 0;
     const col = $('#kanBanCol').val() >> 0;
@@ -504,6 +532,7 @@ function setAddKanBan(isAdd) {
         Name: name,
         DeviceIds: deviceId.join(","),
         Order: order,
+        UI: ui,
         Second: sec,
         Row: row,
         Col: col,
@@ -659,8 +688,7 @@ function getScriptList() {
                     sc[`${sc.divIn}Data`] = [];
                     sc[`${sc.divOut}Data`] = [];
                     codes = codes.repeat(5);
-                    $('#kanBanScript')
-                        .append(div.format(sc.div, scName, codes, sCodes, sc.divVal, sc.divIn, sc.divOut));
+                    $('#kanBanScript').append(div.format(sc.div, scName, codes, sCodes, sc.divVal, sc.divIn, sc.divOut));
 
                     let tableConfig = dataTableConfig(0, true);
                     tableConfig.bLengthChange = false;
@@ -694,18 +722,16 @@ function getScriptList() {
                         }
                     ]);
 
+                    const data1 = `${sc.divVal}Data`;
+                    const data2 = `${sc.divIn}Data`;
+                    const data3 = `${sc.divOut}Data`;
                     //变量
                     tableConfig.updateData(vals);
                     tableConfig.drawCallback = function () {
                         const trs = `${sc.divVal}Trs`;
-                        const data = `${sc.divVal}Data`;
-                        initCheckboxAddEvent.call(this,
-                            sc[trs],
+                        const data = data1;
+                        initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
-                                if (sc[trs].length > maxSet) {
-                                    $(tr).find(".isEnable").iCheck("uncheck");
-                                    return void layer.msg(`最多选择${maxSet}个`);
-                                }
                                 const v = $(tr).find(".name").val();
                                 const o = $(tr).find(".order").val() >> 0;
                                 sc[data].push({
@@ -716,11 +742,13 @@ function getScriptList() {
                                     VariableName: v ? v : "",
                                     Order: o ? o : 0
                                 });
+                                disabledChose(sc, data1, data2, data3);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id);
+                                enableChose(sc.divVal, sc.divIn, sc.divOut);
                             },
-                            false);
+                            false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
@@ -736,16 +764,19 @@ function getScriptList() {
                                         return true;
                                     });
                             });
+                        if (sc[data1].length + sc[data2].length + sc[data3].length >= maxSet)
+                            disabledChose(sc, data1, data2, data3);
+                        else
+                            enableChose(sc.divVal, sc.divIn, sc.divOut);
                     }
                     tableConfig.createdRow = function (tr, d) {
-                        const data = `${sc.divVal}Data`;
                         var t = false;
                         kanBan.VariableList.every(v => {
                             if (d.ScriptId == v.ScriptId &&
                                 d.VariableTypeId == v.VariableTypeId &&
                                 d.PointerAddress == v.PointerAddress) {
                                 t = true;
-                                sc[data].push({
+                                sc[data1].push({
                                     Id: d.Id,
                                     ScriptId: sid,
                                     VariableTypeId: 1,
@@ -758,22 +789,16 @@ function getScriptList() {
                             return true;
                         });
                         $(tr).find('.isEnable').iCheck((t ? 'check' : 'uncheck'));
-                        t &&
-                            $(tr).find(".textOn").text("").addClass("hidden").siblings(".textIn").removeClass("hidden");
+                        t && $(tr).find(".textOn").text("").addClass("hidden").siblings(".textIn").removeClass("hidden");
                     }
                     _dataTableData[sc.divVal] = $(`#${sc.divVal}`).DataTable(tableConfig);
                     //输入
                     tableConfig.updateData(ins);
                     tableConfig.drawCallback = function () {
                         const trs = `${sc.divIn}Trs`;
-                        const data = `${sc.divIn}Data`;
-                        initCheckboxAddEvent.call(this,
-                            sc[trs],
+                        const data = data2;
+                        initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
-                                if (sc[trs].length > maxSet) {
-                                    $(tr).find(".isEnable").iCheck("uncheck");
-                                    return void layer.msg(`最多选择${maxSet}个`);
-                                }
                                 const v = $(tr).find(".name").val();
                                 const o = $(tr).find(".order").val() >> 0;
                                 sc[data].push({
@@ -784,14 +809,16 @@ function getScriptList() {
                                     VariableName: v ? v : "",
                                     Order: o ? o : 0
                                 });
+                                disabledChose(sc, data1, data2, data3);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id);
+                                enableChose(sc.divVal, sc.divIn, sc.divOut);
                             },
-                            false);
+                            false, "Checked");
 
                         initInputChangeEvent.call(this,
-                            (tr, dd) => {
+                            (tr, d) => {
                                 const v = $(tr).find(".name").val();
                                 const o = $(tr).find(".order").val() >> 0;
                                 sc[data].length > 0 &&
@@ -804,16 +831,19 @@ function getScriptList() {
                                         return true;
                                     });
                             });
+                        if (sc[data1].length + sc[data2].length + sc[data3].length >= maxSet)
+                            disabledChose(sc, data1, data2, data3);
+                        else
+                            enableChose(sc.divVal, sc.divIn, sc.divOut);
                     }
                     tableConfig.createdRow = function (tr, d) {
-                        const data = `${sc.divIn}Data`;
                         var t = false;
                         kanBan.VariableList.every(v => {
                             if (d.ScriptId == v.ScriptId &&
                                 d.VariableTypeId == v.VariableTypeId &&
                                 d.PointerAddress == v.PointerAddress) {
                                 t = true;
-                                sc[data].push({
+                                sc[data2].push({
                                     Id: d.Id,
                                     ScriptId: sid,
                                     VariableTypeId: 2,
@@ -833,14 +863,9 @@ function getScriptList() {
                     tableConfig.updateData(outs);
                     tableConfig.drawCallback = function () {
                         const trs = `${sc.divOut}Trs`;
-                        const data = `${sc.divOut}Data`;
-                        initCheckboxAddEvent.call(this,
-                            sc[trs],
+                        const data = data3;
+                        initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
-                                if (sc[trs].length > maxSet) {
-                                    $(tr).find(".isEnable").iCheck("uncheck");
-                                    return void layer.msg(`最多选择${maxSet}个`);
-                                }
                                 const v = $(tr).find(".name").val();
                                 const o = $(tr).find(".order").val() >> 0;
                                 sc[data].push({
@@ -851,14 +876,16 @@ function getScriptList() {
                                     VariableName: v ? v : "",
                                     Order: o ? o : 0
                                 });
+                                disabledChose(sc, data1, data2, data3);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id);
+                                enableChose(sc.divVal, sc.divIn, sc.divOut);
                             },
-                            false);
+                            false, "Checked");
 
                         initInputChangeEvent.call(this,
-                            (tr, dd) => {
+                            (tr, d) => {
                                 const v = $(tr).find(".name").val();
                                 const o = $(tr).find(".order").val() >> 0;
                                 sc[data].length > 0 &&
@@ -871,16 +898,19 @@ function getScriptList() {
                                         return true;
                                     });
                             });
+                        if (sc[data1].length + sc[data2].length + sc[data3].length >= maxSet)
+                            disabledChose(sc, data1, data2, data3);
+                        else
+                            enableChose(sc.divVal, sc.divIn, sc.divOut);
                     }
                     tableConfig.createdRow = function (tr, d) {
-                        const data = `${sc.divOut}Data`;
                         var t = false;
                         kanBan.VariableList.every(v => {
                             if (d.ScriptId == v.ScriptId &&
                                 d.VariableTypeId == v.VariableTypeId &&
                                 d.PointerAddress == v.PointerAddress) {
                                 t = true;
-                                sc[data].push({
+                                sc[data3].push({
                                     Id: d.Id,
                                     ScriptId: sid,
                                     VariableTypeId: 3,
@@ -899,6 +929,7 @@ function getScriptList() {
                 } else {
                     $(`#${sc.div}>.box-header .name`).text(scName);
                     $(`#${sc.div}>.box-header .code`).text(codes);
+                    $(`#${sc.div} .val`).text("");
 
                     updateTable(_dataTableData[sc.divVal], vals);
                     updateTable(_dataTableData[sc.divIn], ins);
@@ -907,6 +938,20 @@ function getScriptList() {
             }
         });
     }, 0);
+}
+
+function disabledChose(sc, data1, data2, data3) {
+    if (sc[data1].length + sc[data2].length + sc[data3].length >= maxSet) {
+        disabledTableCheck(sc.divVal, sc[data1].map(x => x.Id));
+        disabledTableCheck(sc.divIn, sc[data2].map(x => x.Id));
+        disabledTableCheck(sc.divOut, sc[data3].map(x => x.Id));
+    }
+}
+
+function enableChose(table1, table2, table3) {
+    enableTableCheck(table1);
+    enableTableCheck(table2);
+    enableTableCheck(table3);
 }
 
 var _dataTableData = {};
@@ -933,7 +978,7 @@ function fullScreenCarousel() {
     var carousel =
         `<div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title" style="margin-top:8px">看板轮播</h3>
+                <h3 class="box-title" style="margin-top:8px">看板轮播<span class="ftitle"></span></h3>
                 <button class="btn btn-primary pull-right" onclick="cancelFullScreenCarousel()">取消轮播</button>
             </div>
             <div class="box-body">
@@ -955,7 +1000,13 @@ function fullScreenCarousel() {
     const carouselLis = carouselChose.reduce((a, b) => `${a}${carouselTmp[b.id].carouselLi}`, "");
     const carouselTabs = carouselChose.reduce((a, b) => `${a}${carouselTmp[b.id].carouselTab}`, "");
     _carouselBox = carousel.format(carouselLis, carouselTabs);
-
+    carouselChose.forEach(d => {
+        page[d.id] = 0;
+        dsDivs[d.id] = [];
+        dsPaths[d.id] = [];
+    });
+    carouselId = 0;
+    carouselIndex = 0;
     $('#fullScreenCarousel').empty().append(_carouselBox);
     $('#fullScreenCarousel').find("ol li:first").addClass("active");
     $('#fullScreenCarousel').find(".item:first").addClass("active");
@@ -963,27 +1014,58 @@ function fullScreenCarousel() {
         top: 0,
         opacity: 1
     }, 1000, 'linear', () => {
-        fullScreen(true);
+        //$(`#fullScreenBtn  .fullScreenBtn`).click();
+        //fullScreen(true);
     });
-
-    setFullScreenCarousel($('#fullScreenCarousel .item:first').attr('id'));
+    carouselFlag = $('#fullScreenCarousel .item:first').attr('id');
+    setFullScreenCarousel(carouselFlag);
     $('#carousel-example-generic').carousel({
-        interval: 8000
-    }).off('slide.bs.carousel').on('slide.bs.carousel', e => setFullScreenCarousel(e.relatedTarget.id))
+        interval: 10000
+    }).off('slide.bs.carousel').on('slide.bs.carousel', e => {
+        carouselFlag = e.relatedTarget.id;
+
+        //$(`#${carouselFlag}  .fullScreenBtn`).click();
+        carouselId = carouselFlag.replace('carousel_kanBan_', '');
+        if (kanBans[carouselId]) {
+            $(`#fullScreenCarousel .ftitle`).text(` - ${kanBans[carouselId].Name}`);
+            if (carouselFlag == "")
+                return;
+            setChart(carouselFlag, carouselId, kanBans[carouselId].Type, true);
+        }
+    })
         .on('mouseenter', () => $('#carousel-example-generic .isShow').removeClass('hidden'))
         .on('mouseleave', () => $('#carousel-example-generic .isShow').addClass('hidden'));
 }
 
 //轮播图设置
-function setFullScreenCarousel(elId) {
-    const id = elId.replace('carousel_kanBan_', '');
-    if (kanBans[id]) {
-        setChart(elId, id, kanBans[id].Type);
-    }
+function setFullScreenCarousel() {
+    clearInterval(carouselTime);
+    if (carouselFlag == "")
+        return;
+    carouselTime = setInterval(() => {
+        //$(`#${carouselFlag}  .fullScreenBtn`).click();
+        carouselId = carouselFlag.replace('carousel_kanBan_', '');
+        if (kanBans[carouselId]) {
+            $(`#fullScreenCarousel .ftitle`).text(` - ${kanBans[carouselId].Name}`);
+            if (carouselFlag == "")
+                return;
+            setChart(carouselFlag, carouselId, kanBans[carouselId].Type, true);
+        }
+        //console.log(getTime(), 1);
+        //setChart(flag, curId, type, true);
+    }, 5000);
+    //$(`#${elId}  .fullScreenBtn`).click();
+    //const id = elId.replace('carousel_kanBan_', '');
+    //if (kanBans[id]) {
+    //    $(`#fullScreenCarousel .ftitle`).text(`-${kanBans[id].Name}`);
+    //    setChart(elId, id, kanBans[id].Type, true);
+    //}
 }
 
 //取消轮播
 function cancelFullScreenCarousel() {
+    clearInterval(carouselTime);
+    carouselFlag = "";
     $('#carousel-example-generic').carousel('pause').off('slide.bs.carousel mouseenter mouseleave');
     $('#fullScreenCarousel').animate({
         top: '-100%',
@@ -995,24 +1077,44 @@ function cancelFullScreenCarousel() {
 }
 
 //图表设置
-function setChart(elId, kbId, type) {
+function setChart(elId, kbId, type, next = false) {
+    if (run) return;
+    run = true;
     var flag = `#${elId}`;
     //return;
+    const p = page[kbId] ? page[kbId] : 0;
     var data = {
         opType: 509,
-        opData: JSON.stringify({ qId: kbId, page })
+        opData: JSON.stringify({ qId: kbId, page: p })
     };
     ajaxPost('/Relay/Post', data, ret => {
-        if (ret.errno != 0) {
-            //layer.msg(ret.errmsg);
-            return;
-        }
-        var rData = ret.data;
+        run = false;
         var i;
         var ops;
-        if (type == 1) {
+        var rData;
+        const color1 = "text-red";
+        const color2 = "text-gray";
+        if (ret.errno == 0) {
+            var t1 = $(`${flag}_time`).text();
+            var t2 = ret.time;
             //时间信息
-            $(`${flag}_time`).text(ret.time);
+            if (Math.abs(dateDiffSec(t2, t1)) > 10) {
+                $(`${flag}_time`).toggleClass(color1);
+                $(`${flag}_time`).toggleClass(color2) && ($(`${flag}_time`).removeClass(color2));
+            } else {
+                $(`${flag}_time`).toggleClass(color2);
+                $(`${flag}_time`).hasClass(color1) && ($(`${flag}_time`).removeClass(color1));
+            }
+        } else {
+            !$(`${flag}_time`).hasClass(color1) && ($(`${flag}_time`).addClass(color1));
+            $(`${flag}_time`).hasClass(color2) && ($(`${flag}_time`).removeClass(color2));
+        }
+        rData = ret.data;
+        if (type == 1) {
+            if (ret.errno != 0) {
+                //layer.msg(ret.errmsg);
+                return;
+            }
             //设备详情
             var allRateScale = setPieChart(`${flag}_detail`, 'Rate', rData.AllProcessRate, '#0099ff');
             $(`${flag}_yxTime`).text(codeTime(rData.RunTime));
@@ -1152,14 +1254,21 @@ function setChart(elId, kbId, type) {
             $(`${flag}_liePianOps`).find('td:not(:first)').remove().end().append(liePianOps);
             $(`${flag}_rateOps`).find('td:not(:first)').remove().end().append(rateOps);
         } else if (type == 2) {
-            //时间信息
-            $(`${flag}_time`).toggleClass("text-gray");
+            var ds = `${flag}_deviceState`;
+            if (ret.errno != 0) {
+                dsDivs[kbId].forEach(dd => {
+                    $(`#${dd}`).addClass("hi");
+                });
+                $(`${ds} .hi`).css("display", "none").removeClass("hi");
+                //layer.msg(ret.errmsg);
+                return;
+            }
             //return;
             var op =
-                `<div id="{0}" class="ds" tw="190" style="flex-basis: 190px; height: 190px; background:#dcdcdc; margin: 5px;text-align: center;cursor:pointer; box-shadow: 2px 2px 3px black;">
+                `<div id="{0}" class="kb_device_div1 ds" style="display:none;">
                     <div style="height: 33%;position: relative;display: flex;">
                         <div style="width: 35%;position: relative;">
-                            <img id="{0}_img" style="width: 100%;height: 100%;" src="">
+                            <img id="{0}_img" class="kb_img1" src="">
                         </div>
                         <div style="width: 50%;position: relative;">
                             <label id="{0}_code" class="text-blue" style="margin: 0;font-size: 16px;"></label>
@@ -1170,46 +1279,67 @@ function setChart(elId, kbId, type) {
                         </div>
                         <div id="{0}_state" style="width: 23px;height: 23px;position: absolute;top: 0;right: 0;/* float: right; */"></div>
                     </div>
-                    <div style="height: 67%; position: relative; margin-top: 5px;" id="{0}_detail"></div>
+                    <div style="top: 2%; height: 65%; position: relative;" id="{0}_detail"></div>
                 </div>`;
             var params =
-                `<div>
-                    <label class="control-label no-margin text-blue" style="float: left; width: 50%; white-space: nowrap;">{0}</label>
-                    <label class="control-label no-margin text-blue" style="float: right; width: 50%; white-space: nowrap;">{1}</label>
+                `<div class="form-group no-margin" style="height:calc(100%/6);">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                        <label class=" control-label no-margin text-blue no-padding">{0}</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                        <label class="control-label no-margin text-blue no-padding">{1}</label>
+                    </div>
                 </div>`;
 
-            var ds = `${flag}_deviceState`;
+            //var params =
+            //    `<div class="form-group no-margin ">
+            //    <div class="form-group no-margin col-md-6">
+            //        <label class="col-md-6 col-sm-6control-label no-margin text-blue" style="white-space: nowrap;">{0}</label>
+            //    </div>
+            //    <div class="form-group no-margin col-md-6">
+            //        <label class="control-label no-margin text-blue" style="white-space: nowrap;">{1}</label>
+            //    </div>
+            //    </div>`;
             var left;
-            const dLen = dsDivs.length;
-            if (dLen < ret.len) {
+            const dLen = dsDivs[kbId].length;
+            if (dLen !== ret.len) {
                 ops = "";
-                left = ret.len - dLen;
+                left = Math.abs(ret.len - dLen);
                 for (let i = 0; i < left; i++) {
                     const divName = `${elId}_ds${(dLen + i)}`;
-                    dsDivs.push(divName);
-                    ops += op.format(divName);
+                    if (dLen < ret.len) {
+                        dsDivs[kbId].push(divName);
+                        ops += op.format(divName);
+                    } else if (dLen > ret.len) {
+                        removeArray(dsDivs[kbId], divName);
+                    }
                 }
-                $(`${ds}`).append(ops);
-            } else if (dLen > ret.len) {
-                left = dLen - ret.len;
-                for (let i = 0; i < left; i++) {
-                    const divName = `${elId}_ds${(dLen + i)}`;
-                    $(`#${divName}`).addClass("rm");
-                    removeArray(dsDivs, divName);
+                if (dLen < ret.len) {
+                    $(`${ds}`).append(ops);
+                } else if (dLen > ret.len) {
+                    $(`${ds} .rm`).remove();
                 }
-                $(`${ds} .rm`).remove();
             }
 
             const dsDiv = $(`${flag} .dsDiv`);
             if (dsDiv.length > 0) {
                 var windowH = $(window).height();//获取当前窗口高度
+                $(`${flag}`).css("height", `${windowH}px`);
+
+                //var windowH = $(`${flag} .kb_border2`).height() >> 0;
+                windowH = $(`${flag} .kb_border2`).height() >> 0;
+                //$(`${flag} .dsDiv`).css("height", `${windowH - th}px`);
                 var th = $(`${flag} .ttDiv`).height() >> 0;
-                $(`${flag} .dsDiv`).css("height", `${windowH - th - 20}px`);
+                $(`${flag} .dsDiv`).css("height", `${windowH - th}px`);
             }
             //return;
             const devices = SortNumberString(rData, "Code");
             let len = devices.length;
             if (!len) {
+                dsDivs[kbId].forEach(dd => {
+                    $(`#${dd}`).addClass("hi");
+                });
+                $(`${ds} .hi`).css("display", "none").removeClass("hi");
                 $(ds).append('<div class="no-data" style="font:bold 25px/35px 微软雅黑;color:red">无数据</div>');
                 return;
             }
@@ -1221,16 +1351,16 @@ function setChart(elId, kbId, type) {
                     len = paths.length;
                     for (i = 0; i < len; i++) {
                         var p = paths[i];
-                        !dsPaths[p.Icon] && (dsPaths[p.name] = p.path);
+                        !dsPaths[kbId][p.name] && (dsPaths[kbId][p.name] = p.path);
                     }
                 }
-                const pLen = Object.keys(dsPaths).length;
+                const pLen = Object.keys(dsPaths[kbId]).length;
                 if (pLen <= 0)
                     return;
 
                 var shows = [];
                 devices.forEach(d => shows[d.Id] = 1);
-                for (i = 0; i < ret.len; i++) {
+                for (i = 0; i < dLen; i++) {
                     const divName = `${flag}_ds${i}`;
                     var d = devices[i];
                     if (d) {
@@ -1239,7 +1369,7 @@ function setChart(elId, kbId, type) {
                             case '加工中':
                                 color = '#00A65C';
                                 break;
-                            case '待加工':
+                            case '待机':
                             case '流程升级中':
                             case '固件升级中':
                             case '设备重启中':
@@ -1257,8 +1387,8 @@ function setChart(elId, kbId, type) {
                                 color = 'gray';
                                 break;
                         }
-                        const ps = d.Data.reduce((a, b) => a + params.format(b.VName, b.V) + "<br>", '');
-                        $(`${divName}_img`).attr("src", dsPaths[d.Icon]);
+                        const ps = d.Data.reduce((a, b) => a + params.format(b.VName, b.V), '');
+                        $(`${divName}_img`).attr("src", dsPaths[kbId][d.Icon]);
                         $(`${divName}_code`).text(d.Code);
                         $(`${divName}_mc`).text(`${d.CategoryName}-${d.ModelName}`);
                         $(`${divName}_ws`).text(d.SiteName);
@@ -1272,32 +1402,36 @@ function setChart(elId, kbId, type) {
 
                 $(`${ds} .sh`).css("display", "block").removeClass("sh");
                 $(`${ds} .hi`).css("display", "none").removeClass("hi");
-                //$(`${ds} .sh`).css("opacity", 100).removeClass("sh");
-                //$(`${ds} .hi`).css("opacity", 0).removeClass("hi");
                 $(`${flag}_jg`).text(ret.jg);
                 $(`${flag}_xz`).text(ret.xz);
                 $(`${flag}_zc`).text(ret.zc);
                 $(`${flag}_gz`).text(ret.gz);
                 $(`${flag}_wlj`).text(ret.wlj);
                 $(`${flag}_sum`).text(ret.sum);
-                var def = 190;
                 var els = $(".ds");
-                //var fb = els.length > 0 ? $(els[0]).attr("tw").replace("px", "") >> 0 : 190;
                 var margin = els.length > 0 ? ($(els[0]).css("margin").replace("px", "") >> 0) * 2 : 5;
+                var padding = ($(ds).css("padding").replace("px", "") >> 0) * 2;
                 if (ret.row > 0) {
                     var tw = $(ds).width();
+                    var col = Math.floor(tw / def);
+                    var tCol = ret.col > col ? col : ret.col;
+                    var nWidth = Math.floor(tw / tCol) - margin;
+
+                    var windowH = $(window).height();//获取当前窗口高度
+                    $(`${flag}`).css("height", `${windowH}px`);
                     var th = $(ds).closest(".dsDiv").height();
-                    var nWidth = Math.floor(tw / ret.col) - margin;
-                    var nHeight = Math.floor(th / ret.row) - 20;
+                    var row = Math.floor(th / def);
+                    var tRow = ret.row > row ? row : ret.row;
+                    var nHeight = Math.floor(th / tRow) - padding;
                     $(".ds").css("flex-basis", `${(nWidth < def ? def : nWidth)}px`).css("height", `${(nHeight < def ? def : nHeight)}px`);
                 }
-                page = ++ret.cp;
+                next && (page[kbId] = ++ret.cp);
             }
 
             const images = [];
             for (i = 0; i < len; i++) {
                 var d = devices[i];
-                if (!dsPaths[d.Icon] && !~images.lastIndexOf(d.Icon))
+                if (!dsPaths[kbId][d.Icon] && !~images.lastIndexOf(d.Icon))
                     images.push(d.Icon);
             }
 

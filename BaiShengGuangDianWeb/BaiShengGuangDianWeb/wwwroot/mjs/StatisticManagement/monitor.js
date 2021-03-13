@@ -59,7 +59,7 @@ function getDevice() {
     var data = {};
     data.opType = 100;
     data.opData = JSON.stringify({
-        hard: true
+        detail : true
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {

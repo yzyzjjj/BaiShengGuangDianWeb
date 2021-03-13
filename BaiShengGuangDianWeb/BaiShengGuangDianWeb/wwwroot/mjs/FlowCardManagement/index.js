@@ -244,14 +244,12 @@ function selectPlan() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            $("#selectPlanList").empty();
-            $("#selectJhList").empty();
-            var option = "<option value='{0}'>{0}</option>";
-            for (var i = 0; i < ret.datas.length; i++) {
-                var d = ret.datas[i];
-                $("#selectPlanList").append(option.format(d.ProductionProcessName, d.ProductionProcessName));
-                $("#selectJhList").append(option.format(d.ProductionProcessName, d.ProductionProcessName));
-            }
+            var id = $("#selectPlanList").val();
+            $("#selectPlanList").empty().html(setOptions(ret.datas, "ProductionProcessName"));
+            id && $("#selectPlanList").val(id);
+            id = $("#selectJhList").val();
+            $("#selectJhList").empty().html(setOptions(ret.datas, "ProductionProcessName"));
+            id && $("#selectJhList").val(id);
         });
 }
 
@@ -267,15 +265,9 @@ function selectRaw() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            $("#selectYlList").empty();
-            var option = "<option value='{0}'>{0}</option>";
-            var arr = [];
-            for (var i = 0; i < ret.datas.length; i++) {
-                var d = ret.datas[i];
-                arr.push(option.format(d.RawMateriaName, d.RawMateriaName));
-            }
-            arr = arr.join("");
-            $("#selectYlList").append(arr);
+            var id = $("#selectYlList").val();
+            $("#selectYlList").empty().html(setOptions(ret.datas, "RawMateriaName"));
+            id && $("#selectYlList").val(id);
         }, 0);
 }
 
@@ -446,12 +438,13 @@ function showUpdateFlowCard(type) {
             return;
         if (type == -1)
             ufRecover = 1;
-        var id = type == -1 ? $("#updateFCId").html() : type;
-        var data = {}
-        data.opType = 201;
-        data.opData = JSON.stringify({
-            id: id
-        });
+        const id = type == -1 ? $("#updateFCId").html() : type;
+        const data = {
+            opType: 200,
+            opData: JSON.stringify({
+                qId: id
+            })
+        };
         ajaxPost("/Relay/Post", data,
             function (ret) {
                 if (ret.errno != 0) {
@@ -477,7 +470,7 @@ function showUpdateFlowCard(type) {
                         '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
                         '<td><input class="form-control" value="{3}" id="ufGGm{0}" maxlength="20"></td>' +
                         '<td><input class="form-control" value="{4}" id="ufGGz{0}" maxlength="20"></td>' +
-                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
                         '</tr>').format(ufGGmax, ufGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
                     $("#ufGGBody").append(tr);
                     ufGGmax++;
@@ -491,7 +484,7 @@ function showUpdateFlowCard(type) {
                         '<td><select class="ms2 yc form-control" id="ufGXm{0}"></td>' +
                         '<td><input class="form-control" value="{3}" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
                         '<td><input class="form-control text-center" value="{4}" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
                         '</tr>').format(ufGXmax, ufGXmaxV, processStep.Id, processStep.ProcessStepRequirements, processStep.ProcessStepRequirementMid);
                     $("#ufGXBody").append(tr);
                     ufGXmax++;
@@ -645,7 +638,7 @@ function ufResetGG() {
         '<td><label class="control-label" id="ufGGx{0}">{0}</label></td>' +
         '<td><input class="form-control" id="ufGGm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="ufGGz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(1);
     $("#ufGGBody").append(tr);
     ufGGmax = ufGGmaxV = 2;
@@ -657,7 +650,7 @@ function ufAddOtherGG() {
         '<td><label class="control-label" id="ufGGx{0}">{1}</label></td>' +
         '<td><input class="form-control" id="ufGGm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="ufGGz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(ufGGmax, ufGGmaxV);
     $("#ufGGBody").append(tr);
     ufGGmax++;
@@ -683,7 +676,7 @@ function ufResetGX() {
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
         '<td><input class="form-control" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
         '<td><input class="form-control text-center" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(ufGXmax);
     $("#ufGXBody").append(tr);
     if (DeviceProcessData != null) {
@@ -713,7 +706,7 @@ function ufAddOtherGX() {
         '<td><select class="ms2 form-control" id="ufGXm{0}"></select> ' +
         '<td><input class="form-control" id="ufGXz{0}" onblur="autoCal(this, \'ufGXh{0}\')" maxlength="100"></td>' +
         '<td><input class="form-control text-center" id="ufGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="ufGXDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(ufGXmax, ufGXmaxV);
     $("#ufGXBody").append(tr);
     if (DeviceProcessData != null) {
@@ -1215,13 +1208,13 @@ function getProductionProcessList() {
     var list = {}
     data.opType = 215;
     if ($(".jhHead .icb_minimal").is(":checked")) {
-        var productionName = $("#selectJhList").val();
+        var productionId = $("#selectJhList").val();
         if ($(".jhHead .icb_minimal").eq(0).is(":checked")) {
-            if (isStrEmptyOrUndefined(productionName)) {
+            if (isStrEmptyOrUndefined(productionId)) {
                 layer.msg("请选择计划号");
                 return;
             } else {
-                list["productionName"] = productionName;
+                list["qId"] = productionId;
             }
         }
         var startTime = $("#jhStartDate").val() + " 00:00:00";
@@ -1269,24 +1262,24 @@ function getProductionProcessList() {
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
                     { "data": "ProductionProcessName", "title": "计划号" },
-                    { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
-                    { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
-                    { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
-                    { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
-                    { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
-                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
+                    //{ "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
+                    //{ "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
+                    //{ "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
+                    //{ "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
+                    //{ "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
+                    //{ "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
                 ]
                 : [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },
                     { "data": "MarkedDateTime", "title": "修改时间" },
                     { "data": "ProductionProcessName", "title": "计划号" },
-                    { "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
-                    { "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
-                    { "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
-                    { "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
-                    { "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
-                    { "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
+                    //{ "data": "FlowCardCount", "title": "总流程卡数", "sClass": "text-info" },
+                    //{ "data": "AllRawMaterialQuantity", "title": "总原料数", "sClass": "text-info" },
+                    //{ "data": "Complete", "title": "已完成流程卡数", "sClass": "text-success" },
+                    //{ "data": "RawMaterialQuantity", "title": "已完成原料数", "sClass": "text-success" },
+                    //{ "data": "QualifiedNumber", "title": "总产量", "sClass": "text-warning" },
+                    //{ "data": "PassRate", "title": "总合格率", "sClass": "text-warning" }
                 ];
             $("#productionProcessList")
                 .DataTable({
@@ -1328,7 +1321,10 @@ function deleteProductionProcess(id, name) {
 function showProductionProcess(id) {
     hideClassTip("adt");
     var data = {}
-    data.opType = 216;
+    data.opType = 215;
+    data.opData = JSON.stringify({
+        qId: id
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -1368,10 +1364,10 @@ function showProductionProcessModel(type) {
             if (type == -1)
                 recover = 1;
             var data = {}
-            data.opType = 216;
+            data.opType = 215;
             var id = type == -1 ? $("#updateppId").html() : type;
             data.opData = JSON.stringify({
-                id: id
+                qId: id
             });
             ajaxPost("/Relay/Post", data,
                 function (ret) {
@@ -1388,7 +1384,7 @@ function showProductionProcessModel(type) {
                             '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
                             '<td><input class="form-control" value="{3}" id="apGGm{0}" maxlength="20"></td>' +
                             '<td><input class="form-control" value="{4}" id="apGGz{0}" maxlength="20"></td>' +
-                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
                             '</tr>').format(apGGmax, apGGmaxV, productionProcessSpecification.Id, productionProcessSpecification.SpecificationName, productionProcessSpecification.SpecificationValue);
                         $("#apGGBody").append(tr);
                         apGGmax++;
@@ -1402,7 +1398,7 @@ function showProductionProcessModel(type) {
                             '<td><select class="ms2 yc form-control" id="apGXm{0}"></td>' +
                             '<td><input class="form-control" value="{3}" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
                             '<td><input class="form-control text-center" value="{4}" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                            '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
                             '</tr>').format(apGXmax, apGXmaxV, processStep.Id, processStep.ProcessStepRequirements, processStep.ProcessStepRequirementMid);
                         $("#apGXBody").append(tr);
                         apGXmax++;
@@ -1477,7 +1473,7 @@ function addResetGG() {
         '<td><label class="control-label" id="apGGx{0}">{0}</label></td>' +
         '<td><input class="form-control" id="apGGm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="apGGz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(1);
     $("#apGGBody").append(tr);
     if (lastType == 0) {
@@ -1496,7 +1492,7 @@ function addOtherGG() {
         '<td><label class="control-label" id="apGGx{0}">{1}</label></td>' +
         '<td><input class="form-control" id="apGGm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="apGGz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGGDelSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(apGGmax, apGGmaxV);
     $("#apGGBody").append(tr);
     apGGmax++;
@@ -1522,7 +1518,7 @@ function addResetGX() {
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
         '<td><input class="form-control" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
         '<td><input class="form-control text-center" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> </button></td>' +
         '</tr>').format(apGXmax);
     $("#apGXBody").append(tr);
     if (DeviceProcessData != null) {
@@ -1554,7 +1550,7 @@ function addOtherGX() {
         '<td><select class="ms2 form-control" id="apGXm{0}"></select> ' +
         '<td><input class="form-control" id="apGXz{0}" onblur="autoCal(this, \'apGXh{0}\')" maxlength="100"></td>' +
         '<td><input class="form-control text-center" id="apGXh{0}" onkeyup="onInput(this)" onblur="onInputEnd(this)" maxlength="10"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="apGXDelSelf({0})"><i class="fa fa-minus"></i> </button></td>' +
         '</tr>').format(apGXmax, apGXmaxV);
     $("#apGXBody").append(tr);
     if (DeviceProcessData != null) {
@@ -1731,20 +1727,20 @@ function updateProductionProcess() {
             });
         }
     }
-    if (apGXdata.length <= 0) {
-        layer.msg("请填写工序");
-        return;
-    }
+    //if (apGXdata.length <= 0) {
+    //    layer.msg("请填写工序");
+    //    return;
+    //}
 
     var postData = {
-        id: parseInt($("#updateppId").html()),
+        Id: parseInt($("#updateppId").html()),
         ProductionProcessName: productionProcessName,
         Specifications: apGGdata,
         ProcessSteps: apGXdata
     };
 
     var doSth = function () {
-        $("#productionProcessModel").modal("hide");
+        //$("#productionProcessModel").modal("hide");
         var data = {}
         data.opType = 218;
         data.opData = JSON.stringify(postData);
@@ -1752,11 +1748,12 @@ function updateProductionProcess() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    selectPlan();
                     getProductionProcessList();
                 }
             });
     }
-    showConfirm("修改", doSth);
+    showConfirm(`修改${(apGXdata.length > 0 ? "" : ", 无工序")}`, doSth);
 }
 
 //原料
@@ -1765,13 +1762,13 @@ function getRawMateriaList() {
     var list = {}
     data.opType = 232;
     if ($(".ylHead .icb_minimal").is(":checked")) {
-        var rawMateriaName = $("#selectYlList").val();
+        var rawMateriaNameId = $("#selectYlList").val();
         if ($(".ylHead .icb_minimal").eq(0).is(":checked")) {
-            if (isStrEmptyOrUndefined(rawMateriaName)) {
+            if (isStrEmptyOrUndefined(rawMateriaNameId)) {
                 layer.msg("请选择原料批号");
                 return;
             } else {
-                list["rawMateriaName"] = rawMateriaName;
+                list["qId"] = rawMateriaNameId;
             }
         }
         var startTime = $("#ylStartDate").val() + " 00:00:00";
@@ -1871,11 +1868,12 @@ function showUpdateRawMateriaModel(id, type = 0) {
     $("#urRawMateriaName").val("");
     $("#urBody").empty();
     uMax = uMaxV = 1;
-    var data = {}
-    data.opType = 233;
-    data.opData = JSON.stringify({
-        id: id
-    });
+    const data = {
+        opType: 232,
+        opData: JSON.stringify({
+            qId: id
+        })
+    };
     if (type == 1 && rec == 1)
         return;
     if (type == 1)
@@ -1890,13 +1888,13 @@ function showUpdateRawMateriaModel(id, type = 0) {
             var r = ret.datas[0];
             $("#updateId").html(id);
             $("#urRawMateriaName").val(r.RawMateriaName);
-            for (var j = 0; j < r.RawMateriaSpecifications.length; j++) {
-                var rawMateriaSpecification = r.RawMateriaSpecifications[j];
+            for (var j = 0; j < r.Specifications.length; j++) {
+                var rawMateriaSpecification = r.Specifications[j];
                 var tr = ('<tr id="ur{0}" value="{2}">' +
                     '<td><label class="control-label" id="urx{0}">{1}</label></td>' +
                     '<td><input class="form-control" value="{3}" id="urm{0}" maxlength="20"></td>' +
                     '<td><input class="form-control" value="{4}" id="urz{0}" maxlength="20"></td>' +
-                    '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+                    '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i></button></td>' +
                     '</tr>').format(uMax, uMaxV, rawMateriaSpecification.Id, rawMateriaSpecification.SpecificationName, rawMateriaSpecification.SpecificationValue);
                 $("#urBody").append(tr);
                 uMax++;
@@ -1943,9 +1941,9 @@ function updateRawMateria() {
     //    return;
     //}
     var postData = {
-        id: parseInt($("#updateId").html()),
+        Id: parseInt($("#updateId").html()),
         RawMateriaName: urRawMateriaName,
-        RawMateriaSpecifications: inputData
+        Specifications: inputData
     };
     var doSth = function () {
         $("#updateRawMateriaModel").modal("hide");
@@ -1956,6 +1954,7 @@ function updateRawMateria() {
             function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
+                    selectRaw();
                     getRawMateriaList();
                 }
             });
@@ -1974,7 +1973,7 @@ function addOther1() {
         '<td><label class="control-label" id="urx{0}">{1}</label></td>' +
         '<td><input class="form-control" id="urm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="urz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf1({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(uMax, uMaxV);
     $("#urBody").append(tr);
     uMax++;
@@ -2010,7 +2009,7 @@ function reset() {
         '<td><label class="control-label" id="arx{0}">{0}</label></td>' +
         '<td><input class="form-control" id="arm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="arz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(1);
     $("#arBody").append(tr);
     max = maxV = 2;
@@ -2024,7 +2023,7 @@ function addOther() {
         '<td><label class="control-label" id="arx{0}">{1}</label></td>' +
         '<td><input class="form-control" id="arm{0}" maxlength="20"></td>' +
         '<td><input class="form-control" id="arz{0}" maxlength="20"></td>' +
-        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i> 删除</button></td>' +
+        '<td><button type="button" class="btn btn-default btn-sm" onclick="delSelf({0})"><i class="fa fa-minus"></i></button></td>' +
         '</tr>').format(max, maxV);
     $("#arBody").append(tr);
     max++;
@@ -2074,11 +2073,11 @@ function addRawMateria() {
     //}
     var postData = {
         RawMateriaName: arRawMateriaName,
-        RawMateriaSpecifications: inputData,
+        Specifications: inputData,
     };
 
     var doSth = function () {
-        $("#addRawMateriaModel").modal("hide");
+        //$("#addRawMateriaModel").modal("hide");
         var data = {}
         data.opType = 237;
         data.opData = JSON.stringify(postData);

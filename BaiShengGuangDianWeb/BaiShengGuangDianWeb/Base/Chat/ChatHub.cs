@@ -10,7 +10,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
 {
     public class ChatHub : Hub
     {
-        private static int t = 0;
+        //private static int _t = 0;
         //SendMsg用于前端调用
         public Task SendMsg(ChatMessage info)
         {
@@ -65,8 +65,10 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     info.Message = info.ChatEnum + " Success";
                     break;
             }
-            return Clients.Client(cid).SendAsync(info.ChatEnum.ToString(), info.Message);
+            return Clients.Caller.SendAsync(info.ChatEnum.ToString(), info.Message);
+            //return Clients.Client(cid).SendAsync(info.ChatEnum.ToString(), info.Message);
+            // 通知所有用户，有新用户连接
+            //return Clients.AllExcept(cid).SendAsync(info.ChatEnum.ToString(), info.Message);
         }
-
     }
 }

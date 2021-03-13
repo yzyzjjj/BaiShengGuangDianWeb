@@ -52,7 +52,7 @@ function getDevice(resolve) {
 //获取指定机台号
 function getAssignDevice(id) {
     $('#detailCode1,#detailCode2,#detailCode3').val(id).trigger('change');
-    ajaxPost('/Relay/Post', { opType: 100, opData: JSON.stringify({ ids: id, hard: true }) }, ret => {
+    ajaxPost('/Relay/Post', { opType: 100, opData: JSON.stringify({ ids: id, detail: true, other: true, state: true }) }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
@@ -127,8 +127,8 @@ function deviceUpgrade(type = 0) {
         layer.msg('请选择机台号');
         return;
     }
-    if ($('#name1').val().trim() != '待加工') {
-        layer.msg('非待加工设备不能升级');
+    if ($('#name1').val().trim() != '待机') {
+        layer.msg('非待机设备不能升级');
         return;
     }
     var fileId = null, fileType = null, fileName = null, hintText = '';

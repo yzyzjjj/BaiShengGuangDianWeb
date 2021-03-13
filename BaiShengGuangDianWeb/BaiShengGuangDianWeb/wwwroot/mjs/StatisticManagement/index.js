@@ -165,7 +165,7 @@ var _deviceType = null;
 function getDeviceList(resolve) {
     var data = {}
     data.opType = 100;
-    data.opData = JSON.stringify({ hard: true, work: true });
+    data.opData = JSON.stringify({ detail: true, work: true });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -637,8 +637,10 @@ function monthChart() {
 }
 
 function selectPlan() {
-    var data = {}
-    data.opType = 215;
+    const data = {
+        opType: 215,
+        opData: JSON.stringify({ menu: true })
+    };
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {
@@ -696,22 +698,23 @@ function getProcessDetail() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var panel = '<div class="panel panel-primary">' +
-                '<div class="panel-heading flexStyle" style="justify-content:space-between;flex-wrap:wrap">' +
-                '<div><h3 class="panel-title badge" id="code{0}" style="color:green">' +
-                '</h3>' +
-                '<h3 class="panel-title badge" id="meanTime{0}">' +
-                '</h3></div>' +
-                '<div><h3 class="panel-title badge" id="num{0}">' +
-                '</h3>' +
-                '<h3 class="panel-title badge pointer" onclick="rateList({0},{1},\'{2}\',\'{3}\', \'{4}\')">刷新' +
-                '</h3></div>' +
-                '</div>' +
-                '<div class="table-responsive mailbox-messages" style="padding:10px">' +
-                '<table class="table table-hover table-striped" id="processList{0}">' +
-                '</table>' +
-                '</div>' +
-                '</div>';
+            var panel =
+                `<div class="panel panel-primary">
+                    <div class="panel-heading flexStyle" style="justify-content:space-between;flex-wrap:wrap">
+                    <div>
+                        <h3 class="panel-title badge" id="code{0}" style="color:green"></h3>
+                        <h3 class="panel-title badge" id="time1_{0}"></h3>
+                        <h3 class="panel-title badge" id="time2_{0}"></h3>
+                    </div>
+                    <div>
+                        <h3 class="panel-title badge" id="num1_{0}"></h3>
+                        <h3 class="panel-title badge" id="num2_{0}"></h3>
+                        <h3 class="panel-title badge pointer" onclick="rateList({0},{1},\'{2}\',\'{3}\', \'{4}\')">刷新</h3>
+                    </div>
+                </div>
+                <div class="table-responsive mailbox-messages" style="padding:10px">
+                    <table class="table table-hover table-striped" id="processList{0}"></table>
+                </div>`;
             var i, len = ret.datas.length;
             $("#processDetailData").empty();
             var op = function (data, type, row) {
@@ -724,10 +727,10 @@ function getProcessDetail() {
                 return ++meta.row;
             }
             var opName = function (data, type, row, meta) {
-                return data == "闲置" ? `<span class="text-red">${data}</span>` : data;
+                return data.ProcessType == 0 ? `<span class="text-red">${data.OpName}</span>` : data.OpName;
             }
             var time = function (data, type, row) {
-                return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
+                return data.EndTime == "0001-01-01 00:00:00" ? `${data.OpName}中` : data.EndTime;
             }
             var totalTime = function (data, type, row) {
                 return codeTime(data.TotalTime);
@@ -741,13 +744,31 @@ function getProcessDetail() {
             var code = [];
             for (i = 0; i < len; i++) {
                 var processData = ret.datas[i];
-                if (processData.ProcessLog.length != 0) {
+                if (processData.Logs.length > 0) {
                     var option = $(panel.format(i, processData.DeviceId, escape(dayDate), escape(day2Date), escape(plan))).clone();
                     $("#processDetailData").append(option);
-                    var codeName = processData.ProcessLog[0].Code;
+                    var codeName = processData.Logs[0].Code;
                     code.push(codeName);
                     $("#code" + i).prepend(codeName);
-                    $("#num" + i).text("每日加工次数：" + processData.ProcessCount + "次");
+                    $(`#num1_${i}`).text(`总加工次数：${processData.Count}次`);
+                    $(`#num2_${i}`).text(`日均加工次数：${processData.CountAvg}次`);
+                    //var meanTime = 0;
+                    //var k, timeLen = processData.Logs.length;
+                    //var arr = [];
+                    //for (k = 0; k < timeLen; k++) {
+                    //    var d = processData.Logs[k];
+                    //    if (d.OpName == "加工") {
+                    //        var t = d.TotalTime;
+                    //        meanTime += t;
+                    //        arr.push(d.FlowCardName);
+                    //    }
+                    //}
+                    //timeLen = distinct(arr).length;
+                    //if (timeLen) {
+                    //    meanTime = Math.round(meanTime / timeLen);
+                    //}
+                    $(`#time1_${i}`).text("总加工时间：" + codeTime(processData.Time));
+                    $(`#time2_${i}`).text("单次加工时间：" + codeTime(processData.TimeAvg));
                     $("#processList" + i).DataTable({
                         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                         "destroy": true,
@@ -756,12 +777,12 @@ function getProcessDetail() {
                         "bLengthChange": false,
                         "searching": false,
                         "language": oLanguage,
-                        "data": processData.ProcessLog,
+                        "data": processData.Logs,
                         "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
                         "iDisplayLength": 5, //默认显示的记录数  
                         "columns": [
                             { "data": null, "title": "序号", "render": order },
-                            { "data": "OpName", "title": "操作", "render": opName },
+                            { "data": null, "title": "操作", "render": opName },
                             { "data": "StartTime", "title": "开始时间" },
                             { "data": null, "title": "结束时间", "render": time },
                             { "data": null, "title": "加工时间", "render": totalTime },
@@ -773,22 +794,6 @@ function getProcessDetail() {
                             { "data": "ProcessorName", "title": "加工人" }
                         ]
                     });
-                    var meanTime = 0;
-                    var k, timeLen = processData.ProcessLog.length;
-                    var arr = [];
-                    for (k = 0; k < timeLen; k++) {
-                        var d = processData.ProcessLog[k];
-                        if (d.OpName == "加工") {
-                            var t = d.TotalTime;
-                            meanTime += t;
-                            arr.push(d.FlowCardName);
-                        }
-                    }
-                    timeLen = distinct(arr).length;
-                    if (timeLen) {
-                        meanTime = Math.round(meanTime / timeLen);
-                    }
-                    $("#meanTime" + i).text("平均加工时间：" + codeTime(meanTime));
                 }
             }
             var noProcess = deviceName.filter(function (item) {
@@ -797,7 +802,7 @@ function getProcessDetail() {
             $("#noProcessDetailData").empty();
             if (noProcess.length > 0) {
                 $("#noProcessDetailData").removeClass("hidden");
-                $("#noProcessDetailData").append('<label class="control-label">无加工详情设备:</label>');
+                $("#noProcessDetailData").append('<label class="control-label">无加工记录设备:</label>');
                 $.each(noProcess, function (index, item) {
                     $("#noProcessDetailData").append('<span style="margin-left:5px;color:red;font-weight:bold">' + item + '</span>');
                 });
@@ -824,8 +829,8 @@ function rateList(i, deviceId, startTime, endTime, plan) {
             layer.msg(ret.errmsg);
             return;
         }
-        var processCount = ret.datas[0].ProcessCount + "次";
-        var rData = ret.datas[0].ProcessLog;
+        var processCount = ret.datas[0].Count + "次";
+        var rData = ret.datas[0].Logs;
         $("#num" + i).text("每日加工次数：" + processCount);
         var order = function (data, type, row, meta) {
             return ++meta.row;

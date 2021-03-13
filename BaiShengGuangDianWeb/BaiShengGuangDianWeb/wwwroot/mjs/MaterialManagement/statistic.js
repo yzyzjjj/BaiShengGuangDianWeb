@@ -1,6 +1,8 @@
 ﻿function pageReady() {
     $('.ms2').select2({ matcher });
     $('#materialMonth').val(getNowMonth()).datepicker('update');
+    $('#materialDate1').val(getDate()).datepicker('update');
+    $('#materialDate2').val(getDate()).datepicker('update');
     new Promise(resolve => getAllSelect(resolve)).then(e => allCodeSelect(e, 0));
     $('#materialCategory').on('select2:select', function () {
         new Promise(resolve => getAllSelect(resolve, {
@@ -54,10 +56,14 @@
         { data: 'TodayAmount', title: '本月结存金额' }
     ]);
     _materialTable = $('#materialList').DataTable(tableConfig);
-    $('#materialList').addClass('hidden');
+    _materialQueryTable = $('#materialQueryList').DataTable(tableConfig);
+    $('#materialList').closest('.dataTables_wrapper').addClass('hidden');
+    $('#materialQueryList').closest('.dataTables_wrapper').addClass('hidden');
 }
 //报表table
 let _materialTable = null;
+//报表table
+let _materialQueryTable = null;
 
 //获取物料相关选项
 function getAllSelect(resolve, opData) {
@@ -77,48 +83,48 @@ function getAllSelect(resolve, opData) {
 function allCodeSelect(ret, n) {
     switch (n) {
         case 0:
-            $('#materialCategory').empty().append(`<option value="0">所有类别</option>${setOptions(ret.Categories, 'Category')}`);
-            $('#materialSite').empty().append(`<option value="0">所有位置</option>${setOptions(ret.Sites, 'Site')}`);
+            $('.materialCategory').empty().append(`<option value="0">所有类别</option>${setOptions(ret.Categories, 'Category')}`);
+            $('.materialSite').empty().append(`<option value="0">所有位置</option>${setOptions(ret.Sites, 'Site')}`);
         case 1:
-            $('#materialName').empty().append(`<option value="0">所有名称</option>${setOptions(ret.Names, 'Name')}`);
+            $('.materialName').empty().append(`<option value="0">所有名称</option>${setOptions(ret.Names, 'Name')}`);
         case 2:
-            $('#materialSupplier').empty().append(`<option value="0">所有供应商</option>${setOptions(ret.Suppliers, 'Supplier')}`);
+            $('.materialSupplier').empty().append(`<option value="0">所有供应商</option>${setOptions(ret.Suppliers, 'Supplier')}`);
         case 3:
-            $('#materialSpecification').empty().append(`<option value="0">所有规格</option>${setOptions(ret.Specifications, 'Specification')}`);
+            $('.materialSpecification').empty().append(`<option value="0">所有规格</option>${setOptions(ret.Specifications, 'Specification')}`);
     }
-    getMaterialList();
+    //getMaterialList();
 }
 
 //获取物料结存表
 function getMaterialList() {
-    $('#materialInfo').addClass('hidden');
-    let time = $('#materialMonth').val();
-    if (isStrEmptyOrUndefined(time)) {
+    $('#materialBox').find('materialInfo').addClass('hidden');
+    let time1 = $('#materialMonth').val();
+    if (isStrEmptyOrUndefined(time1)) {
         layer.msg('请选择月份');
         return;
     }
-    time += '-01';
-    const categoryId = $('#materialCategory').val();
+    time1 += '-01';
+    const categoryId = $('#materialBox').find('.materialCategory').val();
     if (isStrEmptyOrUndefined(categoryId)) {
         layer.msg('请选择类别');
         return;
     }
-    const nameId = $('#materialName').val();
+    const nameId = $('#materialBox').find('.materialName').val();
     if (isStrEmptyOrUndefined(nameId)) {
         layer.msg('请选择名称');
         return;
     }
-    const supplierId = $('#materialSupplier').val();
+    const supplierId = $('#materialBox').find('.materialSupplier').val();
     if (isStrEmptyOrUndefined(supplierId)) {
         layer.msg('请选择供应商');
         return;
     }
-    const specificationId = $('#materialSpecification').val();
+    const specificationId = $('#materialBox').find('.materialSpecification').val();
     if (isStrEmptyOrUndefined(specificationId)) {
         layer.msg('请选择规格');
         return;
     }
-    const siteId = $('#materialSite').val();
+    const siteId = $('#materialBox').find('.materialSite').val();
     if (isStrEmptyOrUndefined(siteId)) {
         layer.msg('请选择位置');
         return;
@@ -126,7 +132,7 @@ function getMaterialList() {
     const data = {}
     data.opType = 891;
     data.opData = JSON.stringify({
-        day: time,
+        time1,
         interval: 3,
         categoryId,
         nameId,
@@ -147,11 +153,84 @@ function getMaterialList() {
             consumeMoney += d.ConsumeAmount;
             cashMoney += d.TodayAmount;
         }
-        $('#entryMoney').text(parseFloat(entryMoney.toFixed(5)));
-        $('#consumeMoney').text(parseFloat(consumeMoney.toFixed(5)));
-        $('#cashMoney').text(parseFloat(cashMoney.toFixed(5)));
-        $('#materialInfo').removeClass('hidden');
-        $('#materialList').removeClass('hidden');
+        $('#materialBox').find('.entryMoney').text(parseFloat(entryMoney.toFixed(6)));
+        $('#materialBox').find('.consumeMoney').text(parseFloat(consumeMoney.toFixed(6)));
+        $('#materialBox').find('.cashMoney').text(parseFloat(cashMoney.toFixed(6)));
+        $('#materialBox').find('.materialInfo').removeClass('hidden');
+        $('#materialList').closest('.dataTables_wrapper').removeClass('hidden');
         updateTable(_materialTable, rData);
+    });
+}
+
+
+//获取物料结存表
+function getMaterialQueryList() {
+    $('#materialBox').find('materialInfo').addClass('hidden');
+    let time1 = $('#materialDate1').val();
+    if (isStrEmptyOrUndefined(time1)) {
+        layer.msg('请选择日期');
+        return;
+    }
+    let time2 = $('#materialDate2').val();
+    if (isStrEmptyOrUndefined(time2)) {
+        layer.msg('请选择日期');
+        return;
+    }
+    const categoryId = $('#materialQueryBox').find('.materialCategory').val();
+    if (isStrEmptyOrUndefined(categoryId)) {
+        layer.msg('请选择类别');
+        return;
+    }
+    const nameId = $('#materialQueryBox').find('.materialName').val();
+    if (isStrEmptyOrUndefined(nameId)) {
+        layer.msg('请选择名称');
+        return;
+    }
+    const supplierId = $('#materialQueryBox').find('.materialSupplier').val();
+    if (isStrEmptyOrUndefined(supplierId)) {
+        layer.msg('请选择供应商');
+        return;
+    }
+    const specificationId = $('#materialQueryBox').find('.materialSpecification').val();
+    if (isStrEmptyOrUndefined(specificationId)) {
+        layer.msg('请选择规格');
+        return;
+    }
+    const siteId = $('#materialQueryBox').find('.materialSite').val();
+    if (isStrEmptyOrUndefined(siteId)) {
+        layer.msg('请选择位置');
+        return;
+    }
+    const data = {}
+    data.opType = 891;
+    data.opData = JSON.stringify({
+        time1,
+        time2,
+        interval: 1,
+        categoryId,
+        nameId,
+        supplierId,
+        specificationId,
+        siteId
+    });
+    ajaxPost('/Relay/Post', data, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const rData = ret.datas;
+        let entryMoney = 0, consumeMoney = 0, cashMoney = 0;
+        for (let i = 0, len = rData.length; i < len; i++) {
+            const d = rData[i];
+            entryMoney += d.IncreaseAmount;
+            consumeMoney += d.ConsumeAmount;
+            cashMoney += d.TodayAmount;
+        }
+        $('#materialQueryBox').find('.entryMoney').text(parseFloat(entryMoney.toFixed(6)));
+        $('#materialQueryBox').find('.consumeMoney').text(parseFloat(consumeMoney.toFixed(6)));
+        $('#materialQueryBox').find('.cashMoney').text(parseFloat(cashMoney.toFixed(6)));
+        $('#materialQueryBox').find('.materialInfo').removeClass('hidden');
+        $('#materialQueryList').closest('.dataTables_wrapper').removeClass('hidden');
+        updateTable(_materialQueryTable, rData);
     });
 }

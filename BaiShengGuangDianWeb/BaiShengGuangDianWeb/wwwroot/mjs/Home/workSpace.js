@@ -119,8 +119,9 @@ function getDeviceList() {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
-        hard: true,
-        work: true
+        detail: true,
+        work: true,
+        state: true
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -131,7 +132,7 @@ function getDeviceList() {
             var rData = ret.datas;
             var deviceState = function (data, type, row) {
                 var state = data.DeviceStateStr;
-                if (state == '待加工')
+                if (state == '待机')
                     return '<span class="text-success">' + state + '</span>';
                 if (state == '加工中')
                     return '<span class="text-success">' + state + '</span>';
@@ -177,7 +178,7 @@ function getDeviceList() {
             for (var i = 0, len = rData.length; i < len; i++) {
                 var d = rData[i];
                 var state = d.DeviceStateStr;
-                if (state == '待加工' || state == '加工中') {
+                if (state == '待机' || state == '加工中') {
                     $("#processCode,#addCraftCode").append(option.format(d.Id, d.Code, ''));
                 }
                 html += option.format(d.Code, d.Code, d.Administrator, d.Id);
@@ -215,12 +216,13 @@ function queryFlowCard() {
     if (!query)
         return;
 
-    var data = {}
-    data.opType = 260;
-    data.opData = JSON.stringify({
-        Id: deviceId,
-        FlowCardName: flowCard
-    });
+    const data = {
+        opType: 260,
+        opData: JSON.stringify({
+            deviceId: deviceId,
+            flowCard: flowCard
+        })
+    };
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {

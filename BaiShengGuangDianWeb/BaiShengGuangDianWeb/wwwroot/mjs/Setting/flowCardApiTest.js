@@ -14,10 +14,10 @@ function GetFlowCardLibrary() {
 }
 function GetFlowcardLibraryById() {
     var data = {}
-    data.opType = 201
+    data.opType = 200;
     data.opData = JSON.stringify({
-        id: 1
-    })
+        qId: 1
+    });
     ajaxPost("/Relay/Post", data,
         function (ret) {
             if (ret.errno != 0) {

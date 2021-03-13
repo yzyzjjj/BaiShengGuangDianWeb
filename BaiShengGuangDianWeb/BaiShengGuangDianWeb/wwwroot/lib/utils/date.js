@@ -122,7 +122,34 @@ function getNowYear() {
     return year;
 }
 
-//计算两个日期天数差的函数，通用
+//计算两个日期天数差的函数，返回相差秒
+function dateDiffSec(date1, date2) {
+    var dt1 = new Date(Date.parse(date1));
+    var dt2 = new Date(Date.parse(date2));
+    //结果是天数
+    var diff = parseInt((dt1.getTime() - dt2.getTime()) / (1000));
+    //返回相差天数
+    return diff;
+}
+//计算两个日期天数差的函数，返回相差分
+function dateDiffMin(date1, date2) {
+    var dt1 = new Date(Date.parse(date1));
+    var dt2 = new Date(Date.parse(date2));
+    //结果是天数
+    var diff = parseInt((dt1.getTime() - dt2.getTime()) / (1000 * 60));
+    //返回相差天数
+    return diff;
+}
+//计算两个日期天数差的函数，返回相差时
+function dateDiffHour(date1, date2) {
+    var dt1 = new Date(Date.parse(date1));
+    var dt2 = new Date(Date.parse(date2));
+    //结果是天数
+    var diff = parseInt((dt1.getTime() - dt2.getTime()) / (1000 * 60 * 60));
+    //返回相差天数
+    return diff;
+}
+//计算两个日期天数差的函数，返回相差天
 function dateDiff(date1, date2) {
     var dt1 = new Date(Date.parse(date1));
     var dt2 = new Date(Date.parse(date2));

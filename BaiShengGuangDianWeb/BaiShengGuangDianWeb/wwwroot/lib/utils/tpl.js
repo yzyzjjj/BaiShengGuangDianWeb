@@ -225,7 +225,9 @@ var check1 = null;
 var check2 = null;
 function initHub() {
     if (hubConnection == null) {
-        hubConnection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+        hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
         hubConnection.SendMsg = (m, d, callBack) => {
             var type = typeof m;
             if (type != "string" && type != "number")
@@ -271,14 +273,26 @@ function initHub() {
                 checkFunc();
             })
             .catch(err => {
-                console.log(err.toString());
+                console.log("hub err!");
+                err && console.log(JSON.stringify(err));
                 initHub();
             });
     }
 }
 
+function stopHub() {
+    hubStop = true;
+    hubConnection.stop();
+}
+
+function startHub() {
+    hubStop = false;
+}
+
 function checkFunc() {
     check = setInterval(function () {
+        if (hubStop)
+            return;
         //console.log(`check, ${hubConnection.connection.connectionState}`);
         if (hubConnection.connection.connectionState !== 1) {
             //console.log("Reconnect");

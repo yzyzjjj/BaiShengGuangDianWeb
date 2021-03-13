@@ -17,8 +17,8 @@ function getApplicationList() {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var per216 = _permissionList[223].have;
-            var per217 = _permissionList[224].have;
+            var per223 = _permissionList[223].have;
+            var per224 = _permissionList[224].have;
             var order = function (a, b, c,d) {
                 return ++d.row;
             }
@@ -42,9 +42,9 @@ function getApplicationList() {
                     '</div>';
                 var updateLi = '<li><a onclick="showUpdateApplication({0}, \'{1}\', \'{2}\', \'{3}\')">修改</a></li>'.format(data.Id, escape(data.ApplicationName), escape(data.FilePath), escape(data.Description));
                 var deleteLi = '<li><a onclick="deleteApplication({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.ApplicationName));
-                return html.format(per216 ? updateLi : '',per217 ? deleteLi : '');
+                return html.format(per223 ? updateLi : '',per224 ? deleteLi : '');
             }
-            var columns = per216 || per217
+            var columns = per223 || per224
                 ? [
                     { "data": null, "title": "序号", "render": order },
                     { "data": "Id", "title": "Id", "bVisible": false },

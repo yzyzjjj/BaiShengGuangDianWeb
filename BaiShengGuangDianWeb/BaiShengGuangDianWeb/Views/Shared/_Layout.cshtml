@@ -168,7 +168,6 @@
     <script src="~/lib/AdminLTE-2.3.11/plugins/flot/jquery.flot.pie.min.js"></script>
     <!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
     <script src="~/lib/AdminLTE-2.3.11/plugins/flot/jquery.flot.categories.min.js"></script>
-    <script src="~/lib/signalr/signalr.min.js"></script>
 
     <!-- fileinput -->
     <script src="~/lib/bootstrap-fileinput/js/plugins/piexif.min.js"></script>
@@ -184,6 +183,7 @@
     <script src="~/lib/utils/md5.min.js"></script>
     <script src="~/lib/utils/base64.min.js"></script>
     <environment include="Development">
+        <script src="~/lib/signalr/signalr.js"></script>
         <script src="~/lib/utils/const.js"></script>
         <script src="~/lib/utils/util.js"></script>
         <script src="~/lib/utils/date.js"></script>
@@ -191,6 +191,7 @@
         <script src="~/lib/utils/pinyin.js"></script>
     </environment>
     <environment include="Staging,Production">
+        <script src="~/lib/signalr/signalr.min.js"></script>
         <script src="~/lib/utils/const.min.js"></script>
         <script src="~/lib/utils/util.min.js"></script>
         <script src="~/lib/utils/date.min.js"></script>

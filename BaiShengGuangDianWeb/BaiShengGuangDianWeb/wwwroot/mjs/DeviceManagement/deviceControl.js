@@ -15,7 +15,8 @@ function getCodeList() {
     var data = {};
     data.opType = 100;
     data.opData = JSON.stringify({
-        hard: true
+        detail : true,
+        state: true
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -30,7 +31,8 @@ function getCodeList() {
         for (i = 0; i < len; i++) {
             var d = ret.datas[i];
             var state = d.DeviceStateStr;
-            if (state == '待加工' || state == '加工中') {
+            //if (state == '待机' || state == '加工中') {
+            if (state == '待机' || state == '加工中') {
                 options += option.format(d.Id, d.Code);
             }
         }
@@ -94,19 +96,19 @@ function setCodeVarPar() {
         UsuallyDictionaryId: codeVarId,
         Value: resetValue
     });
-    ajaxPost("/Relay/Post",data,
-        function(ret) {
+    ajaxPost("/Relay/Post", data,
+        function (ret) {
             layer.msg(ret.errmsg);
         });
 }
 
 //加工数据
-function getDataList() {}
+function getDataList() { }
 
-function openDevice() {}
+function openDevice() { }
 
-function closeDevice() {}
+function closeDevice() { }
 
-function lockDevice() {}
+function lockDevice() { }
 
-function unlockDevice() {}
+function unlockDevice() { }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using BaiShengGuangDianWeb.Base.Helper;
+using ModelBase.Base.Utils;
 
 namespace BaiShengGuangDianWeb.Base.Chat
 {
@@ -119,5 +120,6 @@ namespace BaiShengGuangDianWeb.Base.Chat
         public int AccountId { get; set; }
         public string ConnectionId { get; set; }
         public DateTime ExpireTime { get; set; }
+        public string Time => ExpireTime.ToStr();
     }
 }

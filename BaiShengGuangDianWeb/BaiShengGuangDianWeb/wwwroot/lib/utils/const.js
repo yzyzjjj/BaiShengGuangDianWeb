@@ -5,6 +5,7 @@ var filePathUrl = `${fileUrl}/Upload/Path`;
 var loginUrl = "/Account/Login";
 var indexUrl = "/Home";
 var hubConnection = null;
+var hubStop = false;
 
 var maxProcessData = 8;
 var lastLocation = "lastLocation";

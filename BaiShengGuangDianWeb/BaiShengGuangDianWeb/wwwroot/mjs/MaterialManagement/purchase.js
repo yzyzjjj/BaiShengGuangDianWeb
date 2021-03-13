@@ -34,7 +34,7 @@ function pageReady() {
             $(this).text(0);
         }
     });
-    $('#purchaseList').on('input', '.taxTate', function () {
+    $('#purchaseList').on('input', '.taxRate', function () {
         onInput(this, 2, 2);
         tFootTrCount.call(this);
     });
@@ -139,9 +139,13 @@ function tFootTrCount() {
     const tr = $(this).parents('tr');
     const number = parseFloat(tr.find('.number').text()) || 0;
     const price = parseFloat(tr.find('.price').text()) || 0;
-    const taxTate = parseFloat(tr.find('.taxTate').val()) || 0;
-    const taxPrice = parseFloat((price * (1 + taxTate / 100)).toFixed(5));
-    const taxAmount = parseFloat((number * taxPrice).toFixed(5));
+    const oldRate = tr.find('.taxRate').attr('old') >> 0;
+    const taxRate = parseFloat(tr.find('.taxRate').val()) || 0;
+    const taxPrice = parseFloat((price * (1 + taxRate / 100)).toFixed(6));
+    let taxAmount = parseFloat((number * taxPrice).toFixed(6));
+    if (oldRate == taxRate) {
+        taxAmount = tr.find('.taxRate').attr('taxAmount') >> 0;
+    }
     tr.find('.tax-price').text(taxPrice);
     tr.find('.tax-amount').text(taxAmount);
     tFootCount();
@@ -149,9 +153,13 @@ function tFootTrCount() {
 
 //入库单页脚计算
 function tFootCount() {
-    const numArr = _purchaseDataTable.columns(8).nodes()[0].map(item => $(item).text());
-    const priceArr = _purchaseDataTable.columns(9).nodes()[0].map(item => $(item).text());
-    const taxAmountArr = _purchaseDataTable.columns(11).nodes()[0].map(item => $(item).text());
+    //const numArr = _purchaseDataTable.columns(8).nodes()[0].map(item => $(item).text());
+    //const priceArr = _purchaseDataTable.columns(9).nodes()[0].map(item => $(item).text());
+    //const taxAmountArr = _purchaseDataTable.columns(11).nodes()[0].map(item => $(item).text());
+    const numArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.number').text() >> 0);
+    const priceArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.price').text());
+    const taxAmountArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.tax-amount').text());
+
     const arr = [];
     for (let i = 0, len = numArr.length; i < len; i++) {
         arr[i] = {
@@ -193,7 +201,7 @@ function pasteTable(e) {
                         Price: d[8] || '',
                         TaxPrice: d[9] || '',
                         TaxAmount: d[10] || '',
-                        TaxTate: d[11] || 0
+                        TaxRate: d[11] || 0
                     });
                 }
             }
@@ -219,7 +227,7 @@ function pasteTable(e) {
                     Price: d[8] || '',
                     TaxPrice: d[9] || '',
                     TaxAmount: d[10] || '',
-                    TaxTate: d[11] || 0
+                    TaxRate: d[11] || 0
                 });
             }
         }
@@ -526,13 +534,19 @@ function updatePurchaseList() {
             layer.msg(`序列${xh}：合计不合法`);
             return;
         }
-        let purchasingCompany1 = tds.eq(t + 13).text().trim();
+        const purchaser = tds.eq(t + 13).text().trim();
+        if (isStrEmptyOrUndefined(purchaser)) {
+            layer.msg(`序列${xh}：采购人不能为空`);
+            return;
+        }
+        let purchasingCompany1 = tds.eq(t + 14).text().trim();
         if (purchasingCompany != '')
             purchasingCompany1 = purchasingCompany;
         if (isStrEmptyOrUndefined(purchasingCompany1)) {
             layer.msg(`序列${xh}：采购公司不能为空`);
             return;
         }
+
         items[i] = {
             Purchase: _Purchase.ErpId,
             Order: order,
@@ -546,11 +560,12 @@ function updatePurchaseList() {
             Class: category,
             Supplier: supplier,
             Unit: unit,
+            Purchaser: purchaser,
             Number: number,
             Price: price,
             TaxPrice: taxPrice,
             TaxAmount: taxAmount,
-            Tax: $(tr).find('.taxTate').val().trim(),
+            TaxRate: $(tr).find('.taxRate').val().trim(),
             PurchasingCompany: purchasingCompany1
         }
     }
@@ -622,7 +637,7 @@ function getPurchaseMaterial() {
                 { data: null, title: '入库编码', sClass: 'text-green', render: d => `<span class="${((!isStrEmptyOrUndefined(d.ThisCode) && d.ThisCode != d.Code) ? "text-red text-bold" : "text-green")}">${d.ThisCode}</span>` },
                 { data: 'TaxPrice', title: '税后单价' },
                 { data: 'TaxAmount', title: '税后总价' },
-                { data: 'TaxTate', title: '税率（%)' },
+                { data: 'TaxRate', title: '税率（%)' },
                 { data: 'Price', title: '税前单价' }
             ]
         });
@@ -652,7 +667,7 @@ function inWareListSave() {
     const list = [];
     for (let i = 0, len = _trChangeData.length; i < len; i++) {
         const el = $(_trChangeData[i]).find('.count');
-        const v = el.val();
+        const v = el.val() >> 0;
         if (v) {
             list.push({
                 Id: el.attr('wid') >> 0,
@@ -745,8 +760,10 @@ function citePurchaseList() {
             const d = rData[i];
             d.ItemId = d.Id;
             d.Number = d.Stock;
-            d.TaxPrice = parseFloat(floatObj.multiply(d.Price, floatObj.add(1, floatObj.divide(d.TaxTate, 100))).toFixed(5));
-            d.TaxAmount = parseFloat(floatObj.multiply(d.Number, d.TaxPrice).toFixed(5));
+            d.TaxPrice = d.TaxPrice;
+            d.TaxAmount = (d.Number > 0 && d.Number == d.Stock) ? d.TaxAmount : parseFloat(floatObj.multiply(d.Stock, d.TaxPrice).toFixed(6));
+            //d.TaxPrice = parseFloat(floatObj.multiply(d.Price, floatObj.add(1, floatObj.divide(d.TaxRate, 100))).toFixed(6));
+            //d.TaxAmount = parseFloat(floatObj.multiply(d.Number, d.TaxPrice).toFixed(6));
             d.Id = 0;
         }
         _pasteData = null;
@@ -757,7 +774,8 @@ function citePurchaseList() {
 //入库单
 function setPurchaseList(arr, isQuote) {
     isQuote ? $('#addPurchaseListBtn').removeClass('hidden') : $('#addPurchaseListBtn').addClass('hidden');
-    const taxTate = d => `<input class="form-control text-center taxTate zeroNum" onblur="onInputEnd(this)" style="width:80px" value=${parseFloat(d) || 0}>`;
+    const taxRate = d => `<input class="form-control text-center taxRate zeroNum" onblur="onInputEnd(this)" 
+                            style="width:80px" value=${parseFloat(d.TaxRate) || 0} old=${parseFloat(d.TaxRate) || 0} taxAmount=${d.TaxAmount}>`;
     const deBtn = () => `<button type="button" class="btn btn-danger btn-sm" onclick="delPurchaseTr.call(this)"><i class="fa fa-minus"></i></button>`;
     $('#purchasingCompany').val('');
     //$('#purchasingCompany').val(arr[0].PurchasingCompany || '');
@@ -785,7 +803,8 @@ function setPurchaseList(arr, isQuote) {
             { data: 'Price', title: '税前单价', sClass: 'numZero price' },
             { data: 'TaxPrice', title: '税后单价', sClass: 'tax-price' },
             { data: 'TaxAmount', title: '合计', sClass: 'tax-amount' },
-            { data: isQuote ? 'Tax' : 'TaxTate', title: '税率（%)', render: taxTate },
+            { data: null, title: '税率（%)', render: taxRate },
+            { data: 'Purchaser', title: '采购人' },
             { data: 'PurchasingCompany', title: '采购公司' },
             { data: null, title: '删除', render: deBtn, visible: !!isQuote }
         ],
@@ -844,10 +863,12 @@ function computePrice(data) {
         const d = data[i];
         const all = parseFloat(d.TaxAmount);
         amount = floatObj.add(amount, all);
+        //tax = (d.Number > 0 && d.Number == d.Stock) ? floatObj.add(tax, floatObj.subtract(all, d.TaxAmount))
+        //    : floatObj.add(tax, floatObj.subtract(all, floatObj.multiply(parseFloat(d.Number), parseFloat(d.Price))));
         tax = floatObj.add(tax, floatObj.subtract(all, floatObj.multiply(parseFloat(d.Number), parseFloat(d.Price))));
     }
-    $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(5)) : 0);
-    $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(5)) : 0);
+    $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(6)) : 0);
+    $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(6)) : 0);
 }
 
 //添加入库单tr
@@ -866,7 +887,7 @@ function addPurchaseTr() {
         Price: 0,
         TaxPrice: 0,
         TaxAmount: 0,
-        TaxTate: 0
+        TaxRate: 0
     }).draw(false);
 }
 
