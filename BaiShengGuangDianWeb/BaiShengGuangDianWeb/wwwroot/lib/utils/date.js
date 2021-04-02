@@ -250,9 +250,24 @@ function noShowSecond(time) {
     return time == '0001-01-01 00:00:00' || time == '' ? '' : time.slice(0, time.lastIndexOf(':'));
 }
 
-//时间不显示秒
+//时间验证
 function validTime(time) {
     return time != '0001-01-01 00:00:00' && time != '0001-01-01' && time != '00:00:00';
+}
+
+//时间不显示秒
+function convertTime0(time) {
+    return time == '0001-01-01 00:00:00' ? "" : time;
+}
+
+//时间显示日期
+function convertTimeDay(time) {
+    return time == '0001-01-01 00:00:00' ? "" : time.split(' ')[0];
+}
+
+//时间显示时分秒
+function convertTimeHMS(time) {
+    return time == '0001-01-01 00:00:00' ? "" : time.split(' ')[1];
 }
 
 //时间格式转换 mon月day日

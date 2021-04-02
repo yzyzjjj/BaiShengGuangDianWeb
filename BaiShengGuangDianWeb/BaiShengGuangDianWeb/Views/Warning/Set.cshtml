@@ -41,21 +41,23 @@
                                         <select class="ms2 form-control" id="deviceWarn" style="width: 160px"></select>
                                     </div>
                                     <div class="box-body">
-                                        <div class="form-group">
-                                            <label class="control-label middle">预警名：</label>
-                                            <input class="form-control" id="warnName" maxlength="20" style="width: 160px; display: inline-block">
+                                        <div class="form-group no-margin" style="display:flex">
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label middle">预警名：</label>
+                                                <input class="form-control" id="warnName" maxlength="20" style="width: 160px; display: inline-block">
+                                            </div>
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label no-margin middle">设备分类：</label>
+                                                <select class="ms2 form-control" id="deviceType" style="width: 160px"></select>
+                                            </div>
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label no-margin middle">选择脚本：</label>
+                                                <select class="ms2 form-control" id="scriptSelect" style="width: 180px"></select>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin pointer middle" for="isStart">是否启用：</label>
+                                        <div class="form-group" style="white-space: nowrap;">
+                                            <label class="control-label no-margin pointer middle text-red" for="isStart">是否启用：</label>
                                             <input type="checkbox" class="icb_minimal" id="isStart">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">设备分类：</label>
-                                            <select class="ms2 form-control" id="deviceType" style="width: 160px"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">选择脚本：</label>
-                                            <select class="ms2 form-control" id="scriptSelect" style="width: 180px"></select>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label">选择设备：</label>
@@ -75,21 +77,21 @@
                                                     <div class="tab-pane active in" id="npcVar">
                                                         <div class="box-body">
                                                             <div class="table-responsive mailbox-messages">
-                                                                <table class="table table-hover table-striped" id="npcVarList"></table>
+                                                                <table class="table table-hover table-striped dTable" id="npcVarList"></table>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="tab-pane fade in" id="npcIns">
                                                         <div class="box-body">
                                                             <div class="table-responsive mailbox-messages">
-                                                                <table class="table table-hover table-striped" id="npcInsList"></table>
+                                                                <table class="table table-hover table-striped dTable" id="npcInsList"></table>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="tab-pane fade in" id="npcOut">
                                                         <div class="box-body">
                                                             <div class="table-responsive mailbox-messages">
-                                                                <table class="table table-hover table-striped" id="npcOutList"></table>
+                                                                <table class="table table-hover table-striped dTable" id="npcOutList"></table>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -99,6 +101,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="tab-pane fade in" id="productionData">
                                 <div class="box box-primary">
                                     <div class="box-header with-border">
@@ -107,21 +110,23 @@
                                         <select class="ms2 form-control" id="productionWarn" style="width: 160px"></select>
                                     </div>
                                     <div class="box-body">
-                                        <div class="form-group">
-                                            <label class="control-label middle">预警名：</label>
-                                            <input class="form-control" id="productionWarnName" maxlength="20" style="width: 160px; display: inline-block">
+                                        <div class="form-group no-margin" style="display:flex">
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label middle">预警名：</label>
+                                                <input class="form-control" id="productionWarnName" maxlength="20" style="width: 160px; display: inline-block">
+                                            </div>
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label no-margin middle">设备分类：</label>
+                                                <select class="ms2 form-control" id="productionDeviceClass" style="width: 160px"></select>
+                                            </div>
+                                            <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label no-margin middle">设备类型：</label>
+                                                <select class="ms2 form-control" id="productionDeviceType" style="width: 180px"></select>
+                                            </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label no-margin pointer middle" for="productionIsStart">是否启用：</label>
+                                            <label class="control-label no-margin pointer middle text-red" for="productionIsStart">是否启用：</label>
                                             <input type="checkbox" class="icb_minimal" id="productionIsStart">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">设备分类：</label>
-                                            <select class="ms2 form-control" id="productionDeviceClass" style="width: 160px"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">设备类型：</label>
-                                            <select class="ms2 form-control" id="productionDeviceType" style="width: 180px"></select>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label">选择设备：</label>
@@ -132,19 +137,7 @@
                                                 <button class="btn btn-warning btn-sm" onclick="productionRefreshTable()">重置</button>
                                             </div>
                                             <div class="table-responsive mailbox-messages">
-                                                <table class="table table-hover table-striped" id="productionList"></table>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin pointer middle" for="productionIsCollect">是否汇总：</label>
-                                            <input type="checkbox" class="icb_minimal" id="productionIsCollect">
-                                        </div>
-                                        <div class="form-group hidden" id="collectBox">
-                                            <div class="form-group text-right">
-                                                <button class="btn btn-warning btn-sm" onclick="productionSumRefreshTable()">重置</button>
-                                            </div>
-                                            <div class="table-responsive mailbox-messages">
-                                                <table class="table table-hover table-striped" id="productionCollectList"></table>
+                                                <table class="table table-hover table-striped dTable" id="productionList"></table>
                                             </div>
                                         </div>
                                     </div>
@@ -152,42 +145,42 @@
                             </div>
                             <div class="tab-pane fade in" id="faultData">
                                 @*<div class="box box-primary">
-                                    <div class="box-header with-border">
-                                        <button class="btn btn-primary btn-sm pull-right" onclick="">刷新</button>
-                                        <label class="control-label no-margin middle">预警名：</label>
-                                        <select class="ms2 form-control" id="faultWarn" style="width: 160px"></select>
-                                    </div>
-                                    <div class="box-body">
-                                        <div class="form-group">
-                                            <label class="control-label middle">预警名：</label>
-                                            <input class="form-control" id="faultWarnName" maxlength="20" style="width: 160px; display: inline-block">
+                                        <div class="box-header with-border">
+                                            <button class="btn btn-primary btn-sm pull-right" onclick="">刷新</button>
+                                            <label class="control-label no-margin middle">预警名：</label>
+                                            <select class="ms2 form-control" id="faultWarn" style="width: 160px"></select>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin pointer middle" for="productionIsStart">是否启用：</label>
-                                            <input type="checkbox" class="icb_minimal" id="faultIsStart">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">设备分类：</label>
-                                            <select class="ms2 form-control" id="faultDeviceClass" style="width: 160px"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label no-margin middle">设备类型：</label>
-                                            <select class="ms2 form-control" id="faultDeviceType" style="width: 180px"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label">选择设备：</label>
-                                            <select class="form-control" id="faultDeviceSelect"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="form-group text-right">
-                                                <button class="btn btn-warning btn-sm" onclick="">重置</button>
+                                        <div class="box-body">
+                                            <div class="form-group">
+                                                <label class="control-label middle">预警名：</label>
+                                                <input class="form-control" id="faultWarnName" maxlength="20" style="width: 160px; display: inline-block">
                                             </div>
-                                            <div class="table-responsive mailbox-messages">
-                                                <table class="table table-hover table-striped" id="faultList"></table>
+                                            <div class="form-group">
+                                                <label class="control-label no-margin pointer middle" for="productionIsStart">是否启用：</label>
+                                                <input type="checkbox" class="icb_minimal" id="faultIsStart">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label no-margin middle">设备分类：</label>
+                                                <select class="ms2 form-control" id="faultDeviceClass" style="width: 160px"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label no-margin middle">设备类型：</label>
+                                                <select class="ms2 form-control" id="faultDeviceType" style="width: 180px"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">选择设备：</label>
+                                                <select class="form-control" id="faultDeviceSelect"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-group text-right">
+                                                    <button class="btn btn-warning btn-sm" onclick="">重置</button>
+                                                </div>
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="faultList"></table>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>*@
+                                    </div>*@
                             </div>
                             <div class="tab-pane fade in" id="otherData"></div>
                         </div>

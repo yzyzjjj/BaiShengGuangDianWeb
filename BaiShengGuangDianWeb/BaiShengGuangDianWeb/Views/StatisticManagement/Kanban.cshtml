@@ -5,6 +5,7 @@
     Layout = "_Layout";
 }
 <link href="~/mcss/css/kb.css" rel="stylesheet" />
+<link href="~/mcss/css/scrollTable.css" rel="stylesheet" />
 <environment include="Development">
     <script src="~/mjs/StatisticManagement/kanBan.js"></script>
     <script src="~/lib/echarts/echarts.min.js"></script>
@@ -24,8 +25,8 @@
     <div class="row">
         <div class="nav-tabs-custom" id="tabBox">
             <ul class="nav nav-tabs ui-sortable-handle" id="navUl">
-                <li class="active" id="firstNavLi"><a class="text-red" href="#setKanBan" data-toggle="tab" aria-expanded="true">设置相关</a></li>
-                @*<li id="kanBan-1NavLi"><a href="#kanBan_5_5" class="kanBan" data-toggle="tab" aria-expanded="true">设备状态</a></li>*@
+                <li class="active" id="firstNavLi"><a class="text-red text-bold" href="#setKanBan" data-toggle="tab" aria-expanded="true">设置相关</a></li>
+                <li id="kanBan-1NavLi">@*<a href="#kanBan_6" class="kanBan" data-toggle="tab" aria-expanded="true">设备状态</a>*@</li>
             </ul>
             <div class="tab-content no-padding" style="position: relative">
                 <div class="tab-pane active" id="setKanBan">
@@ -38,12 +39,22 @@
                             <div class="tab-pane active" id="setTab">
                                 <div class="box box-primary">
                                     <div class="box-body">
-                                        <div class="form-group">
-                                            <label class="control-label">看板列表：</label>
-                                            <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                                <select class="form-control" id="kanBanList" style="width: 140px"></select>
+
+                                        <div style="display: flex; flex-wrap: wrap;">
+                                            <div class="form-group">
+                                                <label class="control-label">看板类型：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <select class="form-control" id="kanBanType" style="width: 140px"></select>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-danger" onclick="delKanBanList()">删除</button>
+                                            <div class="form-group">
+                                                <label class="control-label">看板列表：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <select class="form-control" id="kanBanList" style="width: 140px"></select>
+                                                </div>
+                                                <button class="btn btn-danger" onclick="delKanBanList()">删除</button>
+                                                <button class="btn btn-success" onclick="getKanBanList()">刷新</button>
+                                            </div>
                                         </div>
 
                                         <div style="display: flex; flex-wrap: wrap;">
@@ -51,12 +62,6 @@
                                                 <label class="control-label">看板名称：</label>
                                                 <div class="form-group no-margin" style="display: -webkit-inline-box">
                                                     <input class="form-control" id="kanBanName" maxlength="40" style="width: 200px">
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="control-label">看板类型：</label>
-                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                                    <select class="form-control" id="kanBanType" style="width: 140px"></select>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -77,12 +82,39 @@
                                                     <input class="form-control" id="kanBanRow" value="8" oninput="onInput(this, 4, 0);" style="width: 200px">
                                                 </div>
                                             </div>
-                                            <div class="form-group stateEl hidden">
+                                            <div class="form-group stateEl productEl hidden">
                                                 <label class="control-label">列数：</label>
                                                 <div class="form-group no-margin" style="display: -webkit-inline-box">
                                                     <input class="form-control" id="kanBanCol" value="8" oninput="onInput(this, 4, 0);" style="width: 200px">
                                                 </div>
                                             </div>
+                                            <div class="form-group stateEl hidden">
+                                                <label class="control-label">数据列数：</label>
+                                                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                    <input class="form-control" id="kanBanContentCol" value="8" oninput="onInput(this, 4, 0, 2, 5);" style="width: 200px">
+                                                </div>
+                                                <label class="control-label" id="kanBanContentColDesc"></label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group stateEl1 hidden" id="kanBanItemColNameDiv">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a href="#">列名：</a></li>
+                                            </ul>
+                                            <div class="tab-content no-padding">
+                                                <div class="tab-pane active in" id="kanBanItemColName" style="display: flex; flex-wrap: wrap;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group productEl hidden">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a href="#">列宽：</a></li>
+                                            </ul>
+                                            <div class="tab-content no-padding">
+                                                <div class="tab-pane active in" id="kanBanItemColSet" style="display: flex; flex-wrap: wrap;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; flex-wrap: wrap;">
                                             <div class="form-group stateEl hidden">
                                                 <label class="control-label">总数量：</label>
                                                 <div class="form-group no-margin" style="display: -webkit-inline-box">
@@ -96,8 +128,16 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label no-margin" style="vertical-align: middle">是否启用：</label>
-                                                <input type="checkbox" id="isShow" class="icb_minimal">
+                                                <label class="control-label no-margin text-red kb_param1">是否启用：</label>
+                                                <input type="checkbox" id="isShow" class="icb_minimal" style="vertical-align: middle; vertical-align: -webkit-baseline-middle;">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group productEl hidden">
+                                            <label class="control-label">选择数据：</label>
+                                            <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                <div class="flexStyle" id="kanBanItems">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -108,7 +148,56 @@
                                             <button class="btn btn-primary btn-flat" onclick="setAddKanBan(0)" style="width: 80px">修改</button>
                                             <button class="btn btn-success btn-flat" onclick="setAddKanBan(1)" style="width: 80px">添加</button>
                                         </div>
+
                                         <div class="form-group stateEl hidden" id="kanBanScript">
+                                        </div>
+                                        <div class="form-group productEl hidden">
+                                            <h3 class="control-label text-bold text-red">布局预览：</h3>
+                                            <div class="form-group kb_item_pre_div1 kb_body" id="kanBanProduct">
+                                                <h3 class="text-center" style="padding-top: 10px; color: cyan; padding: 10px;">标题</h3>
+                                                <div class="form-group kb_item_pre_div2" id="kanBanProductDetail">
+
+                                                    @*<div class="kb_item_pre_div3">
+                                                            <div class="kb_div1">
+                                                                <div class="kb_border1">
+                                                                    <div class="kb_border2">
+
+                                                                        <table class="table table-striped">
+                                                                            <thead>
+                                                                            <tr role="row">
+                                                                                <th colspan="2" class="bg-gray" rowspan="1" style="padding: 4px; border: 1px solid gray; width: auto;">切割</th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <tr role="row" class="odd">
+                                                                                <td style="padding: 4px; border: 1px solid gray; width: auto; display: table;">
+                                                                                    <label class="control-label text-bold" style="display: table-cell;">顺序</label>
+                                                                                    <input class="form-control text-center" style="display: table-cell;" placeholder="顺序" id="kanBanItemCol${i}" value=10 oninput="onInput(this, 3, 0);">
+                                                                                </td>
+                                                                                <td style="padding: 4px; border: 1px solid gray; width: auto; display: table;">
+                                                                                    <label class="control-label text-bold" style="display: table-cell;">高度</label>
+                                                                                    <input class="form-control text-center" style="display: table-cell;" placeholder="高度" id="kanBanItemCol${i}" value=10 oninput="onInput(this, 3, 0);">
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="kb_div1">
+                                                                <div class="kb_border1">
+                                                                    <div class="kb_border2">
+                                                                        <div class="form-group">
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>*@
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,9 +216,8 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
+
             </div>
         </div>
     </div>
@@ -206,6 +294,58 @@
                             <div>
                                 <label class="control-label no-margin" style="float: left; width: 50%">压力</label>
                                 <label class="control-label no-margin" style="float: right; width: 50%;">100</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>*@
+
+
+@*<div class="tab-pane fade in kb_body" id="kanBan_6">
+        <div class="form-group no-margin">
+            <label class="control-label textOverTop no-margin middle" style="position: absolute; top: 10px; left: 5px; z-index: 1">时间信息：<span id="{0}_time"></span></label>
+            <span class="glyphicon glyphicon-fullscreen pointer fullScreenBtn" target="kanBan_6"
+                  style="position: absolute; top: 10px; right: 15px; font-size: 20px; z-index: 1; color: white;" title="全屏放大" aria-hidden="true"></span>
+        </div>
+        <div class="box box-primary kb_body" style="border-top-color:cyan">
+            <div class="box-header">
+            </div>
+            <div class="box-body" id="productDiv_1">
+                <div class="kb_div1">
+                    <div class="kb_border1">
+                        <div class="kb_border2">
+                            <div class="form-group text-center">
+                                <h4 class="text-bold kb_title2">合格率异常报警</h4>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="rateList"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kb_div1">
+                    <div class="kb_border1">
+                        <div class="kb_border2">
+                            <div class="form-group text-center">
+                                <h4 class="text-bold kb_title3">合格率异常报警统计</h4>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="rateList"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kb_div1">
+                    <div class="kb_border1">
+                        <div class="kb_border2">
+                            <div class="form-group  text-center">
+                                <h4 class="text-bold kb_title2">设备状态反馈</h4>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="rateList1"></table>
+                                </div>
                             </div>
                         </div>
                     </div>

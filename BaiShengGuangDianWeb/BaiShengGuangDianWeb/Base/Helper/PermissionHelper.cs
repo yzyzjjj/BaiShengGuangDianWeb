@@ -42,6 +42,18 @@ namespace BaiShengGuangDianWeb.Base.Helper
             return false;
         }
 
+        public static bool CheckPermission(IEnumerable<int> list, int id)
+        {
+            if (PermissionsDetailList.Any() && list != null && list.Any())
+            {
+                var permission = PermissionsList.Where(x => list.Contains(x.Key)).SelectMany(x => x.Value.PList);
+                if (permission.Any() && permission.Contains(id))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static Permission Get(int id)
         {
             return PermissionsDetailList.ContainsKey(id) ? PermissionsDetailList[id] : null;

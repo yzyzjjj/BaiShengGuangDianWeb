@@ -28,7 +28,6 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             //{
             //    return Result.GenError<Result>(Error.NoAuth);
             //}
-
             var param = Request.GetRequestParams();
             var opTypeStr = param.GetValue("opType");
             var opData = param.GetValue("opData", "");
@@ -43,6 +42,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
                 return Result.GenError<Result>(Error.NoAuth);
             }
 
+            if (!PermissionHelper.CheckPermission(AccountHelper.CurrentUser.PermissionsList,opType))
+            {
+                return Result.GenError<Result>(Error.NoAuth);
+            }
             var managementServer = ManagementServerHelper.Get(permission.HostId);
             if (managementServer == null)
             {
@@ -52,6 +55,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             var url = managementServer.Host + permission.Url;
 #if  DEBUG
             url = "http://192.168.1.184:62101" + permission.Url;
+            //url = "http://192.168.1.142:61103" + permission.Url;
 #endif
             var result = HttpServer.Result(AccountHelper.CurrentUser.Account, url, permission.Verb, opData);
             if (result == "fail")

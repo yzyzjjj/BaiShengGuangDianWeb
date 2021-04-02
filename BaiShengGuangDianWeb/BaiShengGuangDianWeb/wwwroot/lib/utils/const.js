@@ -6,7 +6,9 @@ var loginUrl = "/Account/Login";
 var indexUrl = "/Home";
 var hubConnection = null;
 var hubStop = false;
-
+const optionColors = [
+    "red", "Blue", "Teal", "Indigo", "MediumVioletRed", "LightSkyBlue", "PowDerBlue", "SpringGreen", "ForestGreen"
+];
 var maxProcessData = 8;
 var lastLocation = "lastLocation";
 var tdShowLength = 15;

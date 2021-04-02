@@ -350,7 +350,6 @@ function initHubCallBack() {
         $("#errLi .menu").append(faultDevice.format(res.Code, getFullTime()));
     });
 }
-
 $(function () {
     $('.content').on("keydown", '.form_date', function (e) {
         if (e.keyCode == 13) {
@@ -361,6 +360,7 @@ $(function () {
     $(document).on("keydown", function (e) {
         if (e.keyCode == 27) {
             $('.content').find(".fullScreenBtn.fsb").click();
+            cancelFullScreenCarousel && cancelFullScreenCarousel();
         };
     });
     $('.form_date').datepicker({
@@ -452,6 +452,21 @@ $(function () {
     //        firstDay: 1
     //    }
     //});
+    $.fn.isOnVisibleScreen = function (father) {
+        var win = $("#" + father);
+        var viewport = {
+            top: win.scrollTop(),
+            left: win.scrollLeft()
+        };
+        viewport.right = viewport.left + document.body.clientWidth;
+        viewport.bottom = viewport.top + document.body.clientHeight;
+
+        var bounds = this.offset();
+        bounds.right = bounds.left + win.width();
+        bounds.bottom = bounds.top + win.height();
+
+        return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+    };
 });
 //datatables自定义排序
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {

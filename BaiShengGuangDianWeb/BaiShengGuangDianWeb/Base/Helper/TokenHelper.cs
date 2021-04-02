@@ -85,7 +85,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 try
                 {
                     AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
-                    if (left < 10 * 60)
+                    if (left < 30 * 60)
                     {
                         needUpdate += 1;
                     }

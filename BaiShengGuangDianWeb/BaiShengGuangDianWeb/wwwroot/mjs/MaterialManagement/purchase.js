@@ -39,7 +39,12 @@ function pageReady() {
         tFootTrCount.call(this);
     });
     $('#purchaseList').on('input', '.numZero', function () {
+        onInput(this, 6, 6);
         tFootTrCount.call(this);
+    });
+    $('#purchaseList').on('input', '.tax-amount', function () {
+        onInput(this, 6, 6);
+        tFootTrCount.call(this, true);
     });
     $('#departmentAll').on('ifChanged', function () {
         if ($(this).is(':checked')) {
@@ -135,19 +140,28 @@ function pageReady() {
 let _stateDataTable = null;
 
 //入库税后单价合计计算
-function tFootTrCount() {
+function tFootTrCount(t) {
     const tr = $(this).parents('tr');
-    const number = parseFloat(tr.find('.number').text()) || 0;
-    const price = parseFloat(tr.find('.price').text()) || 0;
-    const oldRate = tr.find('.taxRate').attr('old') >> 0;
-    const taxRate = parseFloat(tr.find('.taxRate').val()) || 0;
-    const taxPrice = parseFloat((price * (1 + taxRate / 100)).toFixed(6));
-    let taxAmount = parseFloat((number * taxPrice).toFixed(6));
-    if (oldRate == taxRate) {
-        taxAmount = tr.find('.taxRate').attr('taxAmount') >> 0;
+    const oldData = _purchaseDataTable.row(tr).data();
+    if (!t) {
+        const taxRate = parseFloat(tr.find('.taxRate').val()) || 0;
+        //let price = parseFloat(tr.find('.price').text()) || 0;
+        let price = oldData.Price;
+        let taxPrice = oldData.TaxPrice;
+        //let taxPrice = parseFloat(tr.find('.tax-price').text()) || 0;
+        if (oldData.TaxRate == taxRate) {
+            price = oldData.Price;
+        } else {
+            price = parseFloat((taxPrice * (1 - taxRate / 100)).toFixed(6));
+        }
+        tr.find('.price').text(price);
+        const number = parseFloat(tr.find('.number').text()) || 0;
+        let taxAmount = parseFloat((number * taxPrice).toFixed(6));
+        if (oldData.Number == number) {
+            taxAmount = parseFloat((number * taxPrice).toFixed(6));
+        }
+        tr.find('.tax-amount').text(taxAmount);
     }
-    tr.find('.tax-price').text(taxPrice);
-    tr.find('.tax-amount').text(taxAmount);
     tFootCount();
 }
 
@@ -723,7 +737,7 @@ function finishInWareList() {
                                 }
                             });
                         } else {
-                            $(tr).find('td:last').text('订单完成');
+                            $(tr).find('td:last').text('订单完成').css('color', '#008000');
                             data[i]._aData.State = 5;
                         }
                         _Purchase.State = 5;
@@ -810,9 +824,10 @@ function setPurchaseList(arr, isQuote) {
         ],
         drawCallback: function () {
             if (isQuote) {
-                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(11),:nth-child(12),:nth-child(13),:nth-child(14))').prop('contenteditable', true);
+                //$('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(11),:nth-child(12),:nth-child(13),:nth-child(14))').prop('contenteditable', true);
+                $('#purchaseList tbody tr td:not(:nth-child(1),:nth-child(11),:nth-child(12))').prop('contenteditable', true);
             } else {
-                $('#purchaseList tbody tr td:nth-child(9)').prop('contenteditable', true);
+                $('#purchaseList tbody tr td:nth-child(10)').prop('contenteditable', true);
             }
             $("#purchaseList td").css("padding", "3px");
             $("#purchaseList .icb_minimal").iCheck({

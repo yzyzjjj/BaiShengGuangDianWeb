@@ -1100,8 +1100,27 @@ function onTimeLimitInput(obj, number = 59, zs = 5) {
 }
 
 //整数5位  小数4位
-function onInput(obj, zs = 5, xs = 4) {
-    obj.value = input(obj.value, zs, xs);
+function onInput(obj, zs = 5, xs = 4, min = undefined, max = undefined) {
+    var v = "";
+    if (obj.value)
+        v = obj.value;
+    else if ($(obj).val())
+        v = $(obj).val();
+    else if ($(obj).text())
+        v = $(obj).text();
+
+    v = input(v, zs, xs);
+    if (min && parseFloat(v) < min)
+        v = min;
+    if (max && parseFloat(v) > max)
+        v = max;
+
+    if (obj.value)
+        obj.value = v;
+    else if ($(obj).val())
+        $(obj).val(v);
+    else if ($(obj).text())
+        $(obj).text(v);
 }
 
 function input(s, zs = 5, xs = 4) {
@@ -1314,6 +1333,16 @@ function removeArray(arr, key, value, all = false) {
     return arr;
 }
 
+function removeArray(arr, key1, value1, key2, value2, all = false) {
+    for (var i = arr.length - 1; i >= 0; i--) {
+        if (arr[i][key1] == value1 && arr[i][key2] == value2) {
+            arr.splice(arr.indexOf(arr[i]), all ? arr.length : 1);
+            break;
+        }
+    }
+    return arr;
+}
+
 // a["1"] = obj;
 function removeArrayObj(arr, key, all = false) {
     var res = [];
@@ -1345,6 +1374,12 @@ function existArrayObj(arr, key, value) {
         }
     }
     return false;
+}
+
+// [n1, n2, n3];
+function sliceArray(arr, len, start = 0) {
+    !arr && (arr = []);
+    return arr.slice(start, len);
 }
 
 function clone(obj) {
@@ -1758,8 +1793,8 @@ function toNonExponential(num) {
 }
 
 //options设置
-function setOptions(data, name) {
-    return data.reduce((a, b) => `${a}<option value="${b.Id}">${b[name]}</option>`, '');
+function setOptions(data, name, color = false) {
+    return data.reduce((a, b, i) => `${a}<option value="${b.Id}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${b[name]}</option>`, '');
 }
 
 //将数字金额转换为大写人民币汉字
@@ -2115,7 +2150,9 @@ function myPromise(opType, opData = undefined, cover = 1, func = undefined, msg 
 
 //dataTable基本参数
 function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, ordering = true) {
-    var defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
+    const checkColumns = [{ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: 'auto', visible: checkShow }];
+    const defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
+    const defaultChoseColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
     const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         bAutoWidth: !isCheck || !checkShow,
@@ -2133,11 +2170,21 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
         obj.data = d;
     }
     isCheck && (!obj.columns && (obj.columns = []),
-        obj.columns.push({ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: 'auto', visible: checkShow }));
+        obj.columns = obj.columns.concat(checkColumns));
     obj.addColumns = function (columns, xvHao = true) {
         !obj.columns && (obj.columns = []);
         xvHao && (obj.columns = obj.columns.concat(defaultColumns));
         obj.columns = obj.columns.concat(columns);
+    }
+    obj.modifyColumns = function (columns, xvHao = true, chose = false) {
+        obj.columns = [];
+        isCheck && (obj.columns = obj.columns.concat(checkColumns));
+        xvHao && (obj.columns = obj.columns.concat(defaultColumns));
+        obj.columns = obj.columns.concat(columns);
+    }
+    obj.clearColumns = function (xvHao = false, chose = false) {
+        obj.columns = [];
+        !xvHao && (obj.columns = obj.columns.concat(defaultColumns));
     }
     obj.fixedHeaderColumn = function (fixedHeader, leftColumn = -1, rightColumn = -1, scrollX = "100%", scrollY = "600px") {
         obj.ordering = false;
@@ -2222,14 +2269,13 @@ function tableDefault() {
         addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:70px;width:${width}" value="${d}">`,
         numberInput: (className, param, d) => {
             var s = param.split(',');
-            return `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${
-                className} hidden" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0
-                })" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
+            return `<span class="textOn">${(s[5] ? "" : d)}</span><input type="text" class="form-control text-center textIn ${className} hidden" 
+                        oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0}, ${s[3] || undefined}, ${s[4] || undefined})" 
+                            style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
         },
         addNumberInput: (className, param, d) => {
             var s = param.split(',');
-            return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5
-                }, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
+            return `<input type="text" class="form-control text-center ${className}" oninput="onInput(this, ${s[1] || 5}, ${s[2] || 0})" style="margin:auto;min-width:70px;width:${s[0]}" value="${d}">`;
         },
         select: (ops, className, d) => `<span class="textOn">${d}</span><select class="form-control mSelect hidden textIn ${className}" style="min-width:120px;">${ops}</select>`,
         addSelect: (ops, className) => `<select class="form-control mSelect ${className}" style="min-width:120px">${ops}</select>`,
@@ -2368,7 +2414,7 @@ function initCheckboxAddEvent(arr, callback, fn, init = true, event = "Changed")
                         callback && tr.find(".textIn").addClass('hidden').siblings(".textOn").removeClass("hidden");
                         fn && fn(tr, api.row(trDom).data());
                     }
-            })
+                })
             .off("ifUnchecked").on("ifUnchecked",
                 function () {
                     const tr = $(this).parents("tr");
@@ -2508,22 +2554,6 @@ function initDayTime(el, date = undefined, fnc = undefined) {
     });
 }
 
-//初始化时间选择器
-function initDayTime(el, date = undefined, fnc = undefined) {
-    $(el).find('.form_date').attr('readonly', true).datepicker({
-        language: 'zh-CN',
-        format: 'yyyy-mm-dd',
-        maxViewMode: 2,
-        todayBtn: 'linked',
-        autoclose: true
-    }).on('changeDate', function () {
-        if (isStrEmptyOrUndefined($(this).val()) && date) {
-            $(this).val(getDate(date)).datepicker('update');
-        }
-        if (fnc) fnc();
-    });
-}
-
 //数据增加序号
 function addOrderData(data) {
     for (let i = 0; i < data.length; i++) {
@@ -2581,5 +2611,89 @@ function updateTable(table, data) {
 
 //按顺序排序
 function sortOrder(a, b, t = 0) {
-    return t == 0 ? a.Order - b.Order : b.Order - a.Order;
+    if (a.hasOwnProperty("Order"))
+        return t == 0 ? a.Order - b.Order : b.Order - a.Order;
+    else
+        return t == 0 ? a.order - b.order : b.order - a.order;
+}
+
+//获取滚动table
+function getScrollTable(id, columns) {
+    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th>${b}</th>`, '') : "";
+    const table =
+        `<div class="tablebox">
+            <div class="tbl-header">
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            ${column}
+                        </tr>
+                    </thead>
+                    <tbody style="opacity:0;"></tbody>
+                </table>
+            </div>
+            
+            <div class="tbl-body">
+                <table border="0" cellspacing="0" cellpadding="0" id="${id}">
+                    <thead>
+                        <tr>
+                            ${column}
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>`;
+
+    return table;
+}
+
+//获取滚动table
+function getTable(id, columns, border = 0) {
+    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th>${b}</th>`, '') : "";
+    const table =
+        `<div class="kb_item_tablebox">
+        <table border="${border}" cellspacing="0" cellpadding="0" id="${id}">
+            <thead>
+                <tr>
+                    ${column}
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        </div>`;
+
+    return table;
+}
+
+function autoScroll(tableId) {
+    const tb = $(`#${tableId} tbody`);
+    const outerHeight = tb.find('tr:first').height();
+    // 改变table的margin-top，定时将第一行tr挪至（列表）最后
+    tb.animate({ 'marginTop': -outerHeight + 'px' }, 1000, () => {
+        tb.css({ margin: 0 }).find('tr:first').appendTo(tb);
+    });
+}
+
+//滚动table
+function scrollTable(obj, timer, tableId) {
+    clearInterval(obj[timer]);
+    const $this = $(`#${tableId}`); // table或者tablebox的id
+    $this.hover(() => {
+        clearInterval(obj[timer]);
+    }, () => {
+        obj[timer] = setInterval(() => {
+            //console.log(tableId);
+            autoScroll(tableId);
+        }, 2000);
+    }).trigger('mouseleave');
+}
+
+//停止滚动table
+function stopScrollTable(obj, timer, tableId) {
+    //$(`#${tableId}`).off("hover");
+    $(`#${tableId}`).unbind('mouseenter mouseleave');
+    clearInterval(obj[timer]);
+    //obj[timer] = "";
+    delete obj[timer];
 }

@@ -24,6 +24,15 @@
     color: white;
 }
 
+.kb_fullscreen2 {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 20px;
+    z-index: 1;
+    color: white;
+}
+
 .kb_title1 {
     width: 20%;
     height: 100%;
@@ -33,7 +42,34 @@
     margin: 0 auto;
     color: #ffffff;
     text-align: center;
-    line-height: 26px
+    line-height: 26px;
+    white-space: nowrap;
+}
+
+.kb_title2 {
+    width: 60%;
+    /*height: 100%;*/
+    background-image: url('../../images/kb/statetiltle.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+    color: #ffffff;
+    text-align: center;
+    line-height: 26px;
+    white-space: nowrap;
+}
+
+.kb_title3 {
+    width: 50%;
+    height: 100%;
+    background-image: url('../../images/kb/statetiltle.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+    color: #ffffff;
+    text-align: center;
+    line-height: 26px;
+    white-space: nowrap;
 }
 
 .kb_div1 {
@@ -93,10 +129,65 @@
     width: 90%;
     height: 90%;
 }
-
+/*垂直居中*/
 .kb_param1 {
     white-space: nowrap;
     position: relative;
     top: 50%;
     transform: translateY(-50%);
 }
+
+.kb_item_div1 {
+    width: 50px;
+    margin: 5px;
+}
+
+.kb_item_col1 {
+    color: red;
+}
+
+.kb_item_col2 {
+    width: 70px !important;
+}
+
+.kb_item_col3 {
+}
+
+.kb_item_pre_div1 {
+    background-color: #d3d7d4;
+}
+
+.kb_item_pre_div2 {
+    display: flex;
+    flex-wrap: wrap;
+    height: 700px;
+}
+
+.kb_item_pre_div3 {
+    /*background-color: #afdfe4;*/
+    width: 30%;
+    height: 100%;
+    border: 1px solid red; 
+}
+
+.kb_item_tablebox {
+    padding: 5px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    /*margin: 10px auto;*/
+    /*background-color: rgba(6,26,103,1);*/
+}
+
+    .kb_item_tablebox table {
+        width: 100%;
+    }
+
+        .kb_item_tablebox table th,
+        .kb_item_tablebox table td {
+            font-size: 2rem;
+            color: white;
+            /*line-height: 45px;*/
+            text-align: center;
+        }

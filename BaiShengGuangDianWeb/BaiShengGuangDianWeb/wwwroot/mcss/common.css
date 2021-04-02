@@ -11,6 +11,9 @@
 .no-box-shadow {
     box-shadow: 0 0px 0px #000000;
 }
+.no-border-top {
+    border-top: 0 solid #000000;
+}
 .mSelect {
     text-align: center;
     -webkit-text-align-last: center;

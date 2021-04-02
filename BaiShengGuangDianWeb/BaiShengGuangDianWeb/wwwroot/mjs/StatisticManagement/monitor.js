@@ -59,7 +59,7 @@ function getDevice() {
     var data = {};
     data.opType = 100;
     data.opData = JSON.stringify({
-        detail : true
+        detail: true
     });
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
@@ -167,6 +167,11 @@ function getScriptValue() {
         outConfig.data = _codeDetailObj[3];
         outConfig.columns[3].render = valueFn.bind(null, outData);
         _dataTableData.outList = $("#outList").DataTable(outConfig);
+
+        var vals = $("#realQuery .val");
+        vals.each((_, e) => {
+            !isStrEmptyOrUndefined(e.value) && e.oninput();
+        });
     });
 }
 

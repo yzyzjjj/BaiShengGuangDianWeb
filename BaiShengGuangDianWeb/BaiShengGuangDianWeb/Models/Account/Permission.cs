@@ -1,4 +1,9 @@
-﻿namespace BaiShengGuangDianWeb.Models.Account
+﻿using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
+using ServiceStack;
+
+namespace BaiShengGuangDianWeb.Models.Account
 {
     ///// <summary>
     /////1-99 页面相关  
@@ -45,6 +50,8 @@
         public int Level { get; set; }
         public int Self { get; set; }
         public string List { get; set; }
+        [JsonIgnore]
+        public IEnumerable<int> PList => List.IsNullOrEmpty() ? new List<int>() : List.Split(',').Select(int.Parse).Distinct();
         public string Name { get; set; }
         public string Url { get; set; }
         public bool IsPage { get; set; }
