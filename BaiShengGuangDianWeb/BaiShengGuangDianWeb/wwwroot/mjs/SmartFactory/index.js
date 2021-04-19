@@ -647,17 +647,17 @@ function exchangeTime(el, init = false) {
     div.find('.cs').val(sec);
 }
 
-//获取数据 无覆盖层
-function getListNoCover(func, callBack = null, qId = 0, table = true, cover = 0) {
-    if (func)
-        func(null, false, callBack, cover, table, qId);
-}
+////获取数据 无覆盖层
+//function getListNoCover(func, callBack = null, qId = 0, table = true, cover = 0) {
+//    if (func)
+//        func(null, false, callBack, cover, table, qId);
+//}
 
-//获取菜单数据 无覆盖层
-function getMenuNoCover(func, callBack = null, qId = 0, table = false, cover = 0) {
-    if (func)
-        func(null, true, callBack, cover, table, qId);
-}
+////获取菜单数据 无覆盖层
+//function getMenuNoCover(func, callBack = null, qId = 0, table = false, cover = 0) {
+//    if (func)
+//        func(null, true, callBack, cover, table, qId);
+//}
 
 //初始化车间选项
 function initWorkshopSelect(init = false) {

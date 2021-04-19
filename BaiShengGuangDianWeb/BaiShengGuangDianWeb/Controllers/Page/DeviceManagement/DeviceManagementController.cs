@@ -43,14 +43,14 @@ namespace BaiShengGuangDianWeb.Controllers.Page.DeviceManagement
             return View();
         }
 
-        /// <summary>
-        /// 场地库管理
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult Site()
-        {
-            return View();
-        }
+        ///// <summary>
+        ///// 场地库管理
+        ///// </summary>
+        ///// <returns></returns>
+        //public IActionResult Site()
+        //{
+        //    return View();
+        //}
 
         /// <summary>
         /// 固件库管理

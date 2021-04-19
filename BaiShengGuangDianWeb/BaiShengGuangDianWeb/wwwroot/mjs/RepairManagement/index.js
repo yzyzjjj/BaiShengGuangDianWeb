@@ -2587,19 +2587,19 @@ function showAddMaintainerModel(cover = 1) {
     initList();
     $("#addOneBtn").attr("disabled", "disabled");
     $("#addMaintainerBtn").attr("disabled", "disabled");
-    ajaxGet("/AccountManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
+    ajaxPost("/Relay/Post", {
+        opType: 75
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
 
-            $("#addOneBtn").removeAttr("disabled");
-            $("#addMaintainerBtn").removeAttr("disabled");
-            users = ret.datas;
-            $('#addMaintainerModel').modal('show');
-
-        }, cover);
+        $("#addOneBtn").removeAttr("disabled");
+        $("#addMaintainerBtn").removeAttr("disabled");
+        users = ret.datas;
+        $('#addMaintainerModel').modal('show');
+    }, cover);
 }
 
 //添加一行
@@ -2607,8 +2607,7 @@ function addOne() {
     //increaseList
     addMax++;
     addMaxV++;
-    var tr =
-        (`<tr id="add{0}" value="{0}" xh="{1}">
+    const tr = (`<tr id="add{0}" value="{0}" xh="{1}">
             <td style="vertical-align: addherit;" id="addXh{0}">{1}</td>
             <td><select class="ms2 form-control" id="addUser{0}"></select></td>
             <td><input class="form-control" type="tel" id="addPhone{0}" onkeyup="onInput(this, 11, 0)" onblur="onInputEnd(this)" maxlength="11"></td>
@@ -2616,25 +2615,19 @@ function addOne() {
             <td><button type="button" class="btn btn-danger btn-sm" onclick="delOne({0})"><i class="fa fa-minus"></i></button></td>
         </tr>`).format(addMax, addMaxV);
     $("#addList").append(tr);
-    var xh = addMax;
+    const xh = addMax;
     var selector = "#addUser" + xh;
-    $(selector).empty();
     if (users && users.length > 0) {
-        var html = "";
-        for (var i = 0; i < users.length; i++) {
-            var user = users[i];
-            html += `<option value="${user.account}" title="${user.account}">${user.name}</option>`;
-        }
-        $(selector).append(html);
-        $("#addPhone" + xh).val(users[0].phone);
-        $(selector).on('select2:select', function () {
+        $(selector).html(users.reduce((a, b, i) => `${a}<option value="${b.Account}" title="${b.Account}">${b.Name}</option>`, ''));
+        $("#addPhone" + xh).val(users[0].Phone);
+        $(selector).off('select2:select').on('select2:select', function () {
             var acc = $(this).val();
             var xh = $(this).parents('tr:first').attr("value");
             $("#addPhone" + xh).val('');
             for (var i = 0; i < users.length; i++) {
                 var user = users[i];
-                if (acc == user.account) {
-                    $("#addPhone" + xh).val(user.phone);
+                if (acc == user.Account) {
+                    $("#addPhone" + xh).val(user.Phone);
                     break;
                 }
             }
@@ -2644,8 +2637,10 @@ function addOne() {
     selector = "#add" + xh;
     $(selector).find(".ms2").css("width", "100%");
     $(selector).find(".ms2").select2({
-        width: "120px"
+        width: "120px",
+        matcher
     });
+
     $('#addTable').scrollTop($('#addTable')[0].scrollHeight);
 }
 
@@ -2697,28 +2692,26 @@ function addMaintainer() {
         return;
 
     var addMaintainerBtnTime = null;
-    var doSth = function () {
+    showConfirm("添加", () => {
         $("#addMaintainerBtn").attr("disabled", "disabled");
-        var data = {}
-        data.opType = opType;
-        data.opData = JSON.stringify(list);
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
-                if (addMaintainerBtnTime)
-                    clearTimeout(addMaintainerBtnTime);
-                $("#addMaintainerBtn").removeAttr("disabled");
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    showMaintainerModel(1, false);
-                    getWorkerSelect();
-                    $("#addMaintainerModel").modal("hide");
-                }
-            });
+        ajaxPost("/Relay/Post", {
+            opType: opType,
+            opData: JSON.stringify(list)
+        }, ret => {
+            if (addMaintainerBtnTime)
+                clearTimeout(addMaintainerBtnTime);
+            $("#addMaintainerBtn").removeAttr("disabled");
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0)
+                return;
+            showMaintainerModel(1, false);
+            //getWorkerSelect();
+            $("#addMaintainerModel").modal("hide");
+        });
         addMaintainerBtnTime = setTimeout(function () {
             $("#addMaintainerBtn").removeAttr("disabled");
         }, 5000);
-    }
-    showConfirm("添加", doSth);
+    });
 }
 
 //修改维修工信息

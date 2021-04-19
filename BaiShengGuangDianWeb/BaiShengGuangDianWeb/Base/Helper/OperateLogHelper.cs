@@ -30,11 +30,11 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 operateDesc = permission.Name;
             }
 
-            var accountInfo = AccountHelper.GetAccountInfo(accountId);
+            var accountInfo = AccountInfoHelper.GetAccountInfo(accountId);
             AccountInfo opAccountInfo = null;
             if (opAccountId != 0)
             {
-                opAccountInfo = AccountHelper.GetAccountInfo(accountId);
+                opAccountInfo = AccountInfoHelper.GetAccountInfo(accountId);
             }
             ServerConfig.WebDb.Execute(
                 "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `IP`, `Param`) " +
@@ -70,11 +70,11 @@ namespace BaiShengGuangDianWeb.Base.Helper
                 operateDesc = permission.Name;
             }
 
-            var accountInfo = AccountHelper.GetAccountInfo(accountId);
+            var accountInfo = AccountInfoHelper.GetAccountInfo(accountId);
             AccountInfo opAccountInfo = null;
             if (opAccountId != 0)
             {
-                opAccountInfo = AccountHelper.GetAccountInfo(accountId);
+                opAccountInfo = AccountInfoHelper.GetAccountInfo(accountId);
             }
             ServerConfig.WebDb.Execute(
                 "INSERT INTO operate_log (`AccountId`, `AccountName`, `OperateAccountId`, `OperateAccountName`, `OperateType`, `OperateDesc`, `OperateTime`, `IP`, `Param`) " +

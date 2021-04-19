@@ -39,128 +39,90 @@ var commonfunc = function () {
     });
     //控制左侧菜单栏的权限控制
     $(".sidebar-menu li.mli").remove();
-    ajaxGet("/Account/Pages",
-        null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.msg);
-                return;
+    //return;
+    ajaxPost("/Relay/Post", {
+        opType: 51
+    }, function (ret) {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var mMenu1 = '<li class="mli">' +
+            '   <a class="menuitem" id="{0}" href="{1}">' +
+            '       <i class="mi fa {2}"></i><span class="mt">{3}</span>' +
+            '   </a>' +
+            '</li>';
+
+        var mMenu2 = '<li class="mli treeview">' +
+            '    <a href="#">' +
+            '        <i class="mi fa {1}"></i><span class="mt">{2}</span>' +
+            '        <span class="pull-right-container">' +
+            '           <i class="fa fa-angle-left pull-right"></i>' +
+            '        </span>' +
+            '    </a>' +
+            '    <ul class="treeview-menu" id="{0}">{3}</ul>' +
+            '</li>';
+
+        var mMenu3 = '<li>' +
+            '   <a class="menuitem" href="{0}"><i class="fa fa-circle-o"></i><span>{1}</span></a>' +
+            '</li >';
+        var select = '<option value="{0}">{1}</option>';
+        var selectOps = '', liOps = '';
+        var childrenLi = { parent: [] };
+        var rData = ret.datas;
+        //rData.sort((a, b) => a.order - b.order);
+        //$.each(rData, (index, item) => {
+        rData.forEach(item => {
+            if (!isStrEmptyOrUndefined(item.Url)) {
+                selectOps += select.format(item.Url, item.Name.trim());
             }
-            var mMenu1 = '<li class="mli">' +
-                '   <a class="menuitem" id="{0}" href="{1}">' +
-                '       <i class="mi fa {2}"></i><span class="mt">{3}</span>' +
-                '   </a>' +
-                '</li>';
-
-            var mMenu2 = '<li class="mli treeview">' +
-                '    <a href="#">' +
-                '        <i class="mi fa {1}"></i><span class="mt">{2}</span>' +
-                '        <span class="pull-right-container">' +
-                '           <i class="fa fa-angle-left pull-right"></i>' +
-                '        </span>' +
-                '    </a>' +
-                '    <ul class="treeview-menu" id="{0}">{3}</ul>' +
-                '</li>';
-
-            var mMenu3 = '<li>' +
-                '   <a class="menuitem" href="{0}"><i class="fa fa-circle-o"></i><span>{1}</span></a>' +
-                '</li >';
-            var select = '<option value="{0}">{1}</option>';
-            var selectOps = '', liOps = '';
-            var childrenLi = { parent: [] };
-            var rData = ret.datas;
-            rData.sort((a, b) => a.order - b.order);
-            $.each(rData, (index, item) => {
-                if (!isStrEmptyOrUndefined(item.url)) {
-                    selectOps += select.format(item.url, item.name.trim());
-                }
-                var par = item.parent;
-                par == 0 ? childrenLi.parent.push(item) : childrenLi[par] ? childrenLi[par].push(item) : childrenLi[par] = [item];
-            });
-            $("#search-select").empty().append(`<option></option>${selectOps}`);
-            var local = window.location.pathname;
-            var canSee = false;
-            var first = null;
-            var i = 0, parLi = childrenLi.parent, len = parLi.length;
-            for (; i < len; i++) {
-                var d = parLi[i];
-                var childLi = childrenLi[d.id];
-                if (childLi) {
-                    var childLis = '';
-                    childLi.sort((a, b) => a.order - b.order);
-                    $.each(childLi, (index, item) => {
-                        childLis += mMenu3.format(item.url, item.name);
-                        if (item.url == local)
-                            canSee = true;
-                        if (!first)
-                            first = item.url;
-                    });
-                    liOps += mMenu2.format(`main${d.id}`, d.icon, d.name, childLis);
-                } else {
-                    liOps += mMenu1.format(`main${d.id}`, d.url, d.icon, d.name);
-                    if (d.url == local)
+            var par = item.Parent;
+            par == 0 ? childrenLi.parent.push(item) : childrenLi[par] ? childrenLi[par].push(item) : childrenLi[par] = [item];
+        });
+        $("#search-select").empty().append(`<option></option>${selectOps}`);
+        var local = window.location.pathname;
+        var canSee = false;
+        var first = null;
+        var i = 0, parLi = childrenLi.parent, len = parLi.length;
+        for (; i < len; i++) {
+            var d = parLi[i];
+            var childLi = childrenLi[d.Id];
+            if (childLi) {
+                var childLis = '';
+                childLi.sort((a, b) => a.order - b.order);
+                //$.each(childLi, (index, item) => {
+                childLi.forEach(item => {
+                    childLis += mMenu3.format(item.Url, item.Name);
+                    if (item.Url == local)
                         canSee = true;
                     if (!first)
-                        first = d.url;
-                }
+                        first = item.Url;
+                });
+                liOps += mMenu2.format(`main${d.Id}`, d.Icon, d.Name, childLis);
+            } else {
+                liOps += mMenu1.format(`main${d.Id}`, d.Url, d.Icon, d.Name);
+                if (d.Url == local)
+                    canSee = true;
+                if (!first)
+                    first = d.Url;
             }
-            $(".sidebar-menu").empty().append(liOps);
-            //var local = window.location.pathname;
-            //var canSee = false;
-            //var first = null;
-            //var parents = getParent(rData);
-            //for (i = 0; i < parents.length; i++) {
-            //    var parent = parents[i];
-            //    var childs = getChild(rData, parent);
-            //    var option = null;
-            //    var child = null;
-            //    if (parent.noChild) {
-            //        child = childs[0];
-            //        if (child.url == local)
-            //            canSee = true;
-            //        if (!first)
-            //            first = child.url;
-            //        option = $(mMenu1).clone();
-            //        option.find('.menuitem').attr('id', "main" + parent.id);
-            //        option.find('.menuitem').attr('href', child.url);
-            //        option.find('i.mi').addClass(parent.icon);
-            //        option.find('span.mt').text(parent.name);
-            //        $(".sidebar-menu").append(option);
-            //    } else {
-            //        option = $(mMenu2).clone();
-            //        option.find('.treeview-menu').attr('id', "main" + parent.id);
-            //        option.find('i.mi').addClass(parent.icon);
-            //        option.find('span.mt').text(parent.name);
-            //        $(".sidebar-menu").append(option);
-            //        for (var j = 0; j < childs.length; j++) {
-            //            child = childs[j];
-            //            if (child.url == local)
-            //                canSee = true;
-            //            if (!first)
-            //                first = child.url;
-            //            option = $(mMenu3).clone();
-            //            option.find('.treeview-menu').attr('id', "main" + child.id);
-            //            option.find('a').attr('href', child.url);
-            //            option.find('span').text(child.name.trim());
-            //            $(".sidebar-menu").find('[id=main' + child.parent + ']').append(option);
-            //        }
-            //    }
-            //}
-            if (!first)
-                first = "/";
-            if (!canSee) {
-                window.location = first;
-                return;
-            }
-            var url = window.location.pathname;
-            $("a.menuitem[href]").filter(function () {
-                return this.pathname === url;
-            }).parent().addClass("active").parent().parent().addClass("active");
+        }
+        $(".sidebar-menu").empty().append(liOps);
+        if (!first)
+            first = "/";
+        if (!canSee) {
+            window.location = first;
+            return;
+        }
+        var url = window.location.pathname;
+        $("a.menuitem[href]").filter(function () {
+            return this.pathname === url;
+        }).parent().addClass("active").parent().parent().addClass("active");
 
-            if (url != window.location.pathname) {
-                window.location = url;
-            }
-        });
+        if (url != window.location.pathname) {
+            window.location = url;
+        }
+    });
 
     //服务地址
     initHub();
@@ -177,7 +139,7 @@ function searchPage() {
 function sortRule(a, b) {
     if (typeof a == "object") {
         if (a.order == b.order) {
-            return a.id > b.id ? 1 : -1;
+            return a.Id > b.Id ? 1 : -1;
         } else {
             return a.order > b.order ? 1 : -1;
         }
@@ -193,9 +155,9 @@ function getParent(list) {
         var parent = PermissionPageTypes[i];
         for (var j = 0; j < list.length; j++) {
             var data = list[j];
-            if (data.label == parent.name) {
+            if (data.label == parent.Name) {
                 var d = clone(parent);
-                d.id = id--;
+                d.Id = id--;
                 result.push(d);
                 break;
             }
@@ -209,9 +171,9 @@ function getChild(list, parent) {
     var result = new Array();
     for (var j = 0; j < list.length; j++) {
         var data = list[j];
-        if (data.label == parent.name) {
+        if (data.label == parent.Name) {
             var d = clone(data);
-            d.parent = parent.id;
+            d.parent = parent.Id;
             result.push(d);
         }
     }
@@ -357,12 +319,6 @@ $(function () {
         };
     });
 
-    $(document).on("keydown", function (e) {
-        if (e.keyCode == 27) {
-            $('.content').find(".fullScreenBtn.fsb").click();
-            cancelFullScreenCarousel && cancelFullScreenCarousel();
-        };
-    });
     $('.form_date').datepicker({
         language: 'zh-CN',
         format: 'yyyy-mm-dd',

@@ -17,14 +17,14 @@ function pageReady() {
         increaseArea: '20%'
     });
     $("#selectDevice").on("select2:select", function () {
-        var v = $(this).val();
+        const v = $(this).val();
         if (v.indexOf("0,所有设备") > -1) {
             $(this).val("0,所有设备").trigger("change");
         }
     });
     getWorkShopList();
     getDeviceList();
-    $('.form_date').val(getDate()).datepicker('update');
+    $(".form_date").val(getDate()).datepicker('update');
     $("#selectWorkShop").on("select2:select", function () {
         $("#recordChart").empty();
         var v = $(this).val();
@@ -154,7 +154,7 @@ function getWorkShopList() {
         var ops = '<option value = "所有车间">所有车间</option>';
         for (var i = 0, len = list.length; i < len; i++) {
             var d = list[i];
-            ops += op.format(d.SiteName);
+            ops += op.format(d.Name);
         }
         $("#selectWorkShop,#selectWorkShop1,#productionWorkShop").empty().append(ops);
     });

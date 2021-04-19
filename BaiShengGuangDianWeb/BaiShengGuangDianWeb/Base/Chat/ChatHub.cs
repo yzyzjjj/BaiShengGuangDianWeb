@@ -45,7 +45,7 @@ namespace BaiShengGuangDianWeb.Base.Chat
                     msg = JObject.Parse(info.Message.ToString());
                     var mailList = new List<string>();
                     var admin = msg["Admin"].ToObject<string>();
-                    var acc = AccountHelper.GetAccountInfo(admin);
+                    var acc = AccountInfoHelper.GetAccountInfo(admin);
                     if (acc != null)
                     {
                         mailList.Add(acc.EmailAddress);

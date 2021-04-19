@@ -16,5 +16,9 @@ namespace BaiShengGuangDianWeb.Controllers.Page.AccountManagement
         {
             return View();
         }
+        public IActionResult Workshop()
+        {
+            return View();
+        }
     }
 }

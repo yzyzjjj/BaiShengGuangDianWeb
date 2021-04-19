@@ -41,12 +41,12 @@ namespace BaiShengGuangDianWeb.Base.Filter
                 switch (needUpdate)
                 {
                     case 1:
-                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountHelper.CurrentUser), context.HttpContext.Response); break;
+                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountInfoHelper.CurrentUser), context.HttpContext.Response); break;
                     case 2:
-                        CookieHelper.SetCookie("per", AccountHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
+                        CookieHelper.SetCookie("per", AccountInfoHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
                     case 3:
-                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountHelper.CurrentUser), context.HttpContext.Response);
-                        CookieHelper.SetCookie("per", AccountHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
+                        CookieHelper.SetCookie("token", TokenHelper.CreateJwtToken(AccountInfoHelper.CurrentUser), context.HttpContext.Response);
+                        CookieHelper.SetCookie("per", AccountInfoHelper.CurrentUser.PermissionsList.Join(), context.HttpContext.Response); break;
                 }
             }
             base.OnActionExecuting(context);

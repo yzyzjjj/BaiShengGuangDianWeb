@@ -84,27 +84,27 @@ namespace BaiShengGuangDianWeb.Base.Helper
             {
                 try
                 {
-                    AccountHelper.CurrentUser = AccountHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
+                    AccountInfoHelper.CurrentUser = AccountInfoHelper.GetAccountInfo(int.Parse(payLoad["id"].ToString()));
                     if (left < 30 * 60)
                     {
                         needUpdate += 1;
                     }
                     else
                     {
-                        if (AccountHelper.CurrentUser.Name != payLoad["name"].ToString() ||
-                            AccountHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
-                            AccountHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
-                            AccountHelper.CurrentUser.Permissions != per ||
-                            AccountHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
+                        if (AccountInfoHelper.CurrentUser.Name != payLoad["name"].ToString() ||
+                            AccountInfoHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
+                            AccountInfoHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
+                            AccountInfoHelper.CurrentUser.Permissions != per ||
+                            AccountInfoHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
                         {
                             needUpdate += 1;
                         }
                     }
-                    if (AccountHelper.CurrentUser.Name != payLoad["name"].ToString() ||
-                        AccountHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
-                        AccountHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
-                        AccountHelper.CurrentUser.Permissions != per ||
-                        AccountHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
+                    if (AccountInfoHelper.CurrentUser.Name != payLoad["name"].ToString() ||
+                        AccountInfoHelper.CurrentUser.RoleName != payLoad["role"].ToString() ||
+                        AccountInfoHelper.CurrentUser.EmailAddress != payLoad["email"].ToString() ||
+                        AccountInfoHelper.CurrentUser.Permissions != per ||
+                        AccountInfoHelper.CurrentUser.ProductionRole != payLoad["prole"].ToString())
                     {
                         needUpdate += 2;
                     }

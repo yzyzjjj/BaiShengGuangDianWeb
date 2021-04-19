@@ -116,19 +116,24 @@
                                                 <input class="form-control" id="productionWarnName" maxlength="20" style="width: 160px; display: inline-block">
                                             </div>
                                             <div class="form-group no-padding" style="white-space: nowrap;">
+                                                <label class="control-label no-margin middle">工序：</label>
+                                                <select class="ms2 form-control" id="productionDeviceStep" style="width: 160px"></select>
+                                            </div>
+                                            @*<div class="form-group no-padding" style="white-space: nowrap;">
                                                 <label class="control-label no-margin middle">设备分类：</label>
                                                 <select class="ms2 form-control" id="productionDeviceClass" style="width: 160px"></select>
-                                            </div>
+                                            </div>*@
                                             <div class="form-group no-padding" style="white-space: nowrap;">
                                                 <label class="control-label no-margin middle">设备类型：</label>
-                                                <select class="ms2 form-control" id="productionDeviceType" style="width: 180px"></select>
+                                                @*<label class="control-label no-margin middle" id="productionDeviceType"></label>*@
+                                                <input class="form-control" id="productionDeviceType" readonly="readonly" style="width: 160px; display: inline-block">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label no-margin pointer middle text-red" for="productionIsStart">是否启用：</label>
                                             <input type="checkbox" class="icb_minimal" id="productionIsStart">
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" id="productionDeviceSelectDiv">
                                             <label class="control-label">选择设备：</label>
                                             <select class="form-control" id="productionDeviceSelect"></select>
                                         </div>

@@ -1,38 +1,38 @@
-﻿using BaiShengGuangDianWeb.Base.Server;
-using BaiShengGuangDianWeb.Models.Account;
-using ServiceStack;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using BaiShengGuangDianWeb.Base.Helper;
+using BaiShengGuangDianWeb.Base.Server;
+using BaiShengGuangDianWeb.Models.BaseModel;
+using ServiceStack;
 
-namespace BaiShengGuangDianWeb.Base.Helper
+namespace BaiShengGuangDianWeb.Models.Account
 {
-    public class PermissionHelper
+    public class PermissionHelper : DataHelper
     {
+        private PermissionHelper()
+        {
+            TableName = Table = "permissions";
+        }
+        public static string TableName;
+        public static readonly PermissionHelper Instance = new PermissionHelper();
         public static Dictionary<int, Permission> PermissionsList;
-        public static Dictionary<int, Permission> PermissionsDetailList;
-
-        public static string TableName = "permissions_group";
-
         public static void LoadConfig()
         {
-            PermissionsList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions_group` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
-            PermissionsDetailList = ServerConfig.WebDb.Query<Permission>("SELECT * FROM `permissions` WHERE IsDelete = 0;").ToDictionary(x => x.Id);
-            //UpdateOrder();
+            PermissionsList = Instance.GetAll<Permission>().ToDictionary(x => x.Id);
         }
 
         public static bool CheckPermission(string url)
         {
-            if (PermissionsDetailList.Any())
+            if (PermissionsList.Any())
             {
-                var permission = PermissionsDetailList.Values.FirstOrDefault(x => x.Url == url);
+                var permission = PermissionsList.Values.FirstOrDefault(x => x.Url == url);
                 if (permission != null)
                 {
-                    var permissionsDetailList = PermissionsList
-                        .Where(x => AccountHelper.CurrentUser.PermissionsList.Contains(x.Key))
+                    var permissionsList = PermissionGroupHelper.PermissionGroupsList
+                        .Where(x => AccountInfoHelper.CurrentUser.PermissionsList.Contains(x.Key))
                         .SelectMany(y => y.Value.List.IsNullOrEmpty() ? new int[0] : y.Value.List.Split(",").Select(int.Parse))
                         .Distinct();
-                    if (permissionsDetailList.Contains(permission.Id))
+                    if (permissionsList.Contains(permission.Id))
                     {
                         //Console.WriteLine(AccountHelper.CurrentUser.Id);
                         return true;
@@ -44,9 +44,9 @@ namespace BaiShengGuangDianWeb.Base.Helper
 
         public static bool CheckPermission(IEnumerable<int> list, int id)
         {
-            if (PermissionsDetailList.Any() && list != null && list.Any())
+            if (PermissionsList.Any() && list != null && list.Any())
             {
-                var permission = PermissionsList.Where(x => list.Contains(x.Key)).SelectMany(x => x.Value.PList);
+                var permission = PermissionGroupHelper.PermissionGroupsList.Where(x => list.Contains(x.Key)).SelectMany(x => x.Value.PList);
                 if (permission.Any() && permission.Contains(id))
                 {
                     return true;
@@ -56,12 +56,12 @@ namespace BaiShengGuangDianWeb.Base.Helper
         }
         public static Permission Get(int id)
         {
-            return PermissionsDetailList.ContainsKey(id) ? PermissionsDetailList[id] : null;
+            return PermissionsList.ContainsKey(id) ? PermissionsList[id] : null;
         }
 
         public static Permission Get(string url)
         {
-            return PermissionsDetailList.Values.FirstOrDefault(x => x.Url == url);
+            return PermissionsList.Values.FirstOrDefault(x => x.Url == url);
         }
 
         public static IEnumerable<int> GetDefault()
@@ -69,14 +69,9 @@ namespace BaiShengGuangDianWeb.Base.Helper
             return PermissionsList.Values.Where(x => x.Type == 0).Select(x => x.Id);
         }
 
-        public static void Delete(IEnumerable<int> list)
-        {
-            ServerConfig.WebDb.Execute("UPDATE permissions_group SET  `IsDelete` = 1 WHERE `Id` IN @Id AND Type != 0;", new { Id = list });
-        }
-
         public static void UpdateOrder()
         {
-            var permissionsList = PermissionsList.Values.OrderBy(x => x.Id);
+            var permissionsList = PermissionGroupHelper.PermissionGroupsList.Values.OrderBy(x => x.Id);
             foreach (var parent in permissionsList.GroupBy(x => x.Parent).Select(z => z.Key))
             {
                 var levels = permissionsList.Where(x => x.Parent == parent).GroupBy(y => y.Level).Select(z => z.Key);

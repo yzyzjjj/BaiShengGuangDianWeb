@@ -24,7 +24,7 @@
                 <div class="box-header">
                     <h3 class="box-title"></h3>
                     <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-primary btn-sm" id="showAddOrganizationUnitModal" onclick="showAddOrganizationUnitModal()">添加部门</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="addOrganizationUnitBtn" onclick="showAddOrganizationUnitModal()">添加部门</button>
                         <button type="button" class="btn btn-primary btn-sm" onclick="getOrganizationUnits()">刷新</button>
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
@@ -38,7 +38,7 @@
                 <div class="box-header">
                     <h5 class="box-title" id="unName" style="font-size: 16px">成员列表</h5>
                     <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddMemberModal()" id="showAddMemberModal">添加成员</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="showAddMemberModal()" id="addMemberBtn">添加成员</button>
                         <button type="button" class="btn btn-box-tool hidden" data-widget="collapse" id="showBolModal"><i class="fa fa-minus"></i></button>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">添加组织结构</h4>
+                    <h4 class="modal-title">添加部门</h4>
                 </div>
                 <div class="modal-body">
                     <div class="box box-primary">
@@ -81,6 +81,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="addOrganizationUnit()">添加</button>
+                    <button type="button" class="btn btn-primary" onclick="addOrganizationUnit(true)">添加并关闭</button>
                 </div>
             </div>
         </div>
@@ -95,7 +96,7 @@
                         &times;
                     </button>
                     <h4 class="modal-title" id="myModalLabel">
-                        修改组织结构
+                        修改部门
                     </h4>
                     <label class="hidden" id="updateId"></label>
                 </div>
@@ -112,6 +113,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                     <button type="button" class="btn btn-primary" onclick="updateOrganizationUnit()">修改</button>
+                    <button type="button" class="btn btn-primary" onclick="updateOrganizationUnit(true)">修改并关闭</button>
                 </div>
             </div>
         </div>

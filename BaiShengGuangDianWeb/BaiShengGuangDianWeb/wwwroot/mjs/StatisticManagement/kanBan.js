@@ -22,6 +22,12 @@ var kanBans = [];
 var kanBanItems = [];
 var kanBanItemsTmp = [];
 
+$(document).on("keydown", function (e) {
+    if (e.keyCode == 27) {
+        $('.content').find(".fullScreenBtn.fsb").click();
+        cancelFullScreenCarousel && cancelFullScreenCarousel();
+    };
+});
 
 //合格率异常报警 = 1,
 //合格率异常统计 = 2,
@@ -172,7 +178,7 @@ function pageReady() {
             if (d.ContentCol > 2) {
                 $("#kanBanItemColNameDiv").removeClass("hidden");
                 var fOs = getFirstOrders(d.ContentCol);
-                var desc = `（首列顺序：${fOs.join()}）`;
+                var desc = `（首列：${fOs.join()},不为空的列名）`;
                 $("#kanBanContentColDesc").text(desc);
                 initColName(true);
             }
@@ -192,59 +198,65 @@ function pageReady() {
         .on("select2:select", function () {
             var v = $(this).val();
             if (~v.indexOf('0')) {
-                $(this).val(deviceIds).trigger('change');
+                $(this).val(0).trigger('change');
             }
         })
         .on("change", function () {
-            const deviceId = $(this).val();
+            let deviceId = $(this).val();
             if (isStrEmptyOrUndefined(deviceId)) {
                 scriptIndexTmp = [];
                 scriptTmp = [];
                 $('#kanBanScript').html("");
                 return;
             }
+            
             var tmp = [];
-            deviceId.forEach(d => {
-                if (d != 0) {
-                    var sId = deviceTmp[d].ScriptId;
-                    if (!~tmp.indexOf(sId)) {
-                        tmp.push(sId);
-                    }
-                    if (!~scriptIndexTmp.indexOf(sId)) {
-                        scriptIndexTmp.push(sId);
-                        scriptTmp[sId] = {
-                            sId,
-                            sName: deviceTmp[d].ScriptName,
-                            ds: [{ id: d, code: deviceTmp[d].Code }]
-                        };
-                    } else {
-                        if (!existArrayObj(scriptTmp[sId].ds, "id", d))
-                            scriptTmp[sId].ds.push({ id: d, code: deviceTmp[d].Code });
-                    }
-                }
-            });
-            scriptIndexTmp = tmp;
-            scriptTmp.forEach(s => {
-                const t = s.sId;
-                if (!~scriptIndexTmp.indexOf(t)) {
-                    if (scriptTmp[t].div) {
-                        $(`#${scriptTmp[t].div}`).remove();
-                    }
-                    delete scriptTmp[t];
-                } else {
-                    const old = scriptTmp[t].ds.map(d => d.id);
-                    old.forEach(d => {
-                        if (!~deviceId.indexOf(d)) {
-                            removeArray(scriptTmp[t].ds, "id", d);
-                        }
-                    });
-                    if (scriptTmp[t].ds.length == 0)
-                        delete scriptTmp[t];
-                }
-            });
+            if (deviceId.length == 1 && ~deviceId.indexOf('0'))
+                deviceId = deviceTmp.map(x => x.Id).filter(x => x);
 
-            const type = $('#kanBanType').val();
-            type == 2 && getScriptList();
+            const type = $('#kanBanType').val() >> 0;
+            if (type == 2) {
+                deviceId.forEach(d => {
+                    if (d != 0) {
+                        var sId = deviceTmp[d].ScriptId;
+                        if (!~tmp.indexOf(sId)) {
+                            tmp.push(sId);
+                        }
+                        if (!~scriptIndexTmp.indexOf(sId)) {
+                            scriptIndexTmp.push(sId);
+                            scriptTmp[sId] = {
+                                sId,
+                                sName: deviceTmp[d].ScriptName,
+                                ds: [{ id: d, code: deviceTmp[d].Code }]
+                            };
+                        } else {
+                            if (!existArrayObj(scriptTmp[sId].ds, "id", d))
+                                scriptTmp[sId].ds.push({ id: d, code: deviceTmp[d].Code });
+                        }
+                    }
+                });
+                scriptIndexTmp = tmp;
+                scriptTmp.forEach(s => {
+                    const t = s.sId;
+                    if (!~scriptIndexTmp.indexOf(t)) {
+                        if (scriptTmp[t].div) {
+                            $(`#${scriptTmp[t].div}`).remove();
+                        }
+                        delete scriptTmp[t];
+                    } else {
+                        const old = scriptTmp[t].ds.map(d => d.id);
+                        old.forEach(d => {
+                            if (!~deviceId.indexOf(d)) {
+                                removeArray(scriptTmp[t].ds, "id", d);
+                            }
+                        });
+                        if (scriptTmp[t].ds.length == 0)
+                            delete scriptTmp[t];
+                    }
+                });
+
+                getScriptList();
+            }
         });
 
     var getDeviceFunc = new Promise(resolve => getDevice(resolve));
@@ -338,6 +350,24 @@ function pageReady() {
             }
         });
     });
+
+    $('#kanBanScript')
+        .on('input', '.order', function () {
+            const tr = $(this).closest('tr');
+            const cCol = $("#kanBanContentCol").val() >> 0;
+            const maxSet = getMaxSet(cCol);
+            onInput(this, 5, 2, 1, maxSet);
+        });
+
+    $('#kanBanScript')
+        .on('input', '.subOrder', function () {
+            const tr = $(this).closest('tr');
+            //const o = $(tr).find('.order').val >> 0;
+
+            //const cCol = $("#kanBanContentCol").val() >> 0;
+            //const maxSet = getMaxSet(cCol);
+            onInput(this, 5, 2, 1, 5);
+        });
 
     $('#kanBanItems')
         .on('ifChanged', '.icb_minimal', function () {
@@ -680,17 +710,18 @@ var _carouselBox;
 function getKanBanList(resolve) {
     const id = $('#kanBanList').val();
     //return;
-    var data = {
+    ajaxPost('/Relay/Post', {
         opType: 509,
-        opData: JSON.stringify({ init: true })
-    };
-    ajaxPost('/Relay/Post', data, ret => {
+        opData: JSON.stringify({
+            init: true
+        })
+    }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
         var type = $('#kanBanType').val();
-        $('#kanBanType').html(`${setOptions(ret.menu, "Type", true)}`);
+        $('#kanBanType').html(setOptions(ret.menu, "Type", true));
         type ? $('#kanBanType').val(type) : $('#kanBanType').trigger("change");
         type = $('#kanBanType').val();
         kanBanItems = ret.item;
@@ -905,20 +936,26 @@ function getKanBanList(resolve) {
             name: "合格率异常报警",
             isTable: true,
             dataSource: "WarningLogs",
-            trFlag: "Id",
+            trFlag: "XvHao",
+            //trFlag: "Id",
             order: "desc",
             cols: [
-                { data: 'XvHao', title: '序号' },
-                { data: null, title: '时间', render: d => convertTimeHMS(d.WarningTime) },
-                { data: 'Code', title: '机台号' },
-                { data: 'Value', title: '合格率', suffix: "%" },
+                { data: 'XvHao', title: '序号', width:"80" },
+                { data: null, title: '时间', render: d => convertTimeHMS(d.WarningTime), width: "80" },
+                { data: 'Code', title: '机台号', width: "80" },
+                { data: 'Value', title: '合格率', suffix: "%", width: "80" },
                 {
                     data: null, title: '信息', render: d => {
+                        let t = "";
                         if (d.WarningData && d.WarningData.length > 0) {
-                            return JSON.parse(d.WarningData[0].Param).join();
+                            const wd = d.WarningData[0];
+                            t += JSON.parse(wd.Param).join();
+                            const otherParam = JSON.parse(wd.OtherParam);
+                            if (otherParam.length)
+                                t += (isStrEmptyOrUndefined(t) ? "" : ",") + otherParam.filter(x => x.count > 0).map(x=>`${x.comment}:${x.count}`).join();
                         }
-                        return "";
-                    }
+                        return t;
+                    }, width: "auto"
                 }
             ],
             div: "itemRateWarningDiv",
@@ -929,8 +966,9 @@ function getKanBanList(resolve) {
             name: "合格率异常统计",
             isTable: true,
             dataSource: "WarningStatistics",
-            order: "asc",
             trFlag: "XvHao",
+            order: "asc",
+            //trFlag: "XvHao",
             cols: [
                 { data: 'XvHao', title: '序号' },
                 {
@@ -949,7 +987,8 @@ function getKanBanList(resolve) {
             name: "设备状态反馈",
             isTable: true,
             dataSource: "DeviceStateInfos",
-            trFlag: "DeviceId",
+            trFlag: "XvHao",
+            //trFlag: "DeviceId",
             order: "asc",
             cols: [
                 { data: 'XvHao', title: '序号' },
@@ -968,7 +1007,8 @@ function getKanBanList(resolve) {
             name: "设备预警状态",
             isTable: true,
             dataSource: "WarningDeviceInfos",
-            trFlag: "DeviceId",
+            //trFlag: "DeviceId",
+            trFlag: "XvHao",
             order: "desc",
             cols: [
                 { data: 'XvHao', title: '序号' },
@@ -987,7 +1027,8 @@ function getKanBanList(resolve) {
             name: "计划号日进度表",
             isTable: true,
             dataSource: "ProductionSchedules",
-            trFlag: "ProductionId",
+            //trFlag: "ProductionId",
+            trFlag: "XvHao",
             order: "asc",
             cols: [
                 { data: 'XvHao', title: '序号' },
@@ -1003,7 +1044,8 @@ function getKanBanList(resolve) {
             name: "设备日进度表",
             isTable: true,
             dataSource: "DeviceSchedules",
-            trFlag: "DeviceId",
+            trFlag: "XvHao",
+            //trFlag: "DeviceId",
             order: "asc",
             cols: [
                 { data: 'XvHao', title: '序号' },
@@ -1019,7 +1061,8 @@ function getKanBanList(resolve) {
             name: "操作工日进度表",
             isTable: true,
             dataSource: "ProcessorSchedules",
-            trFlag: "ProcessorId",
+            trFlag: "XvHao",
+            //trFlag: "ProcessorId",
             order: "asc",
             cols: [
                 { data: 'XvHao', title: '序号' },
@@ -1085,7 +1128,8 @@ function getKanBanList(resolve) {
                                     if (kanBanProductItemsEl[b.val] && kanBanProductItemsEl[b.val].isTable) {
                                         const el = kanBanProductItemsEl[b.val];
                                         pItem = el.op.format(
-                                            getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
+                                            getTableW(`${ff}_${el.div}`, el.cols, 3),
+                                            //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
                                             el.name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
                                     }
                                     return a + pItem;
@@ -1126,7 +1170,8 @@ function getKanBanList(resolve) {
         $('#firstNavLi').nextAll().remove().end().after(lis).end();
         firstNav && $('#tabBox a:not(:first)').first().click();
         $('#setKanBan').nextAll().remove().end().after(tabs);
-
+        //todo
+        //$('#kanBanType').val(2).trigger("change");
         rData = rData.filter(d => d.Id !== 0);
         //$('[href="#kanBan_6"]').click();
         resolve && resolve(rData);
@@ -1278,6 +1323,7 @@ function getScriptList() {
                         <ul class="nav nav-tabs ui-sortable-handle">
                             <li class="active"><a href="#{0}_kanBanDeviceDataDiv" data-toggle="tab" aria-expanded="true">设备数据</a></li>
                             <li><a href="#{0}_kanBanProductDataDiv" data-toggle="tab" aria-expanded="true">生产数据</a></li>
+                            <li><a href="#{0}_kanBanPreDiv" data-toggle="tab" aria-expanded="true">内容预览</a></li>
                         </ul>
                         <div class="tab-content no-padding" style="position: relative">
                             <div class="tab-pane active" id="{0}_kanBanDeviceDataDiv">
@@ -1286,14 +1332,14 @@ function getScriptList() {
                                         <label class="control-label">变量：</label>
                                         <div class="flexStyle" style="justify-content: flex-end">
                                             <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, '{4}')">
-                                                <option value="0">序号</option>
                                                 <option value="1">名称</option>
                                                 <option value="2">地址</option>
+                                                <option value="0">序号</option>
                                             </select>
                                             <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, '{4}')">
+                                                <option value="2">包含</option>
                                                 <option value="0">等于</option>
                                                 <option value="1">不等于</option>
-                                                <option value="2">包含</option>
                                             </select>
                                             <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this, '{4}')">
                                         </div>
@@ -1305,14 +1351,14 @@ function getScriptList() {
                                         <label class="control-label">输入：</label>
                                         <div class="flexStyle" style="justify-content: flex-end">
                                             <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, '{5})'">
-                                                <option value="0">序号</option>
                                                 <option value="1">名称</option>
                                                 <option value="2">地址</option>
+                                                <option value="0">序号</option>
                                             </select>
                                             <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, '{5}')">
+                                                <option value="2">包含</option>
                                                 <option value="0">等于</option>
                                                 <option value="1">不等于</option>
-                                                <option value="2">包含</option>
                                             </select>
                                             <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this, '{5}')">
                                         </div>
@@ -1324,14 +1370,14 @@ function getScriptList() {
                                         <label class="control-label">输出：</label>
                                         <div class="flexStyle" style="justify-content: flex-end">
                                             <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, '{6}')">
-                                                <option value="0">序号</option>
                                                 <option value="1">名称</option>
                                                 <option value="2">地址</option>
+                                                <option value="0">序号</option>
                                             </select>
                                             <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, '{6}')">
+                                                <option value="2">包含</option>
                                                 <option value="0">等于</option>
                                                 <option value="1">不等于</option>
-                                                <option value="2">包含</option>
                                             </select>
                                             <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this, '{6}')">
                                         </div>
@@ -1344,6 +1390,10 @@ function getScriptList() {
                             <div class="tab-pane fade in" id="{0}_kanBanProductDataDiv">
                                 <div class="table-responsive mailbox-messages">
                                     <table class="table table-hover table-striped table-condensed" id="{7}"></table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="{0}_kanBanPreDiv">
+                                <div class="kb_device_div1" id="{0}_kanBanContentPre">
                                 </div>
                             </div>
                         </div>
@@ -1408,7 +1458,7 @@ function getScriptList() {
                                     v.VariableTypeId == d.VariableTypeId &&
                                     v.PointerAddress == d.PointerAddress);
                                 var v = t.length > 0 ? t[0].VariableName : "";
-                                return tableSet.input("name", v);
+                                return tableSet.emptyInput("name no-padding", v);
                             }
 
                         },
@@ -1423,6 +1473,30 @@ function getScriptList() {
                                 var v = t.length > 0 && t[0].Order > 0 ? t[0].Order : "1";
                                 return tableSet.numberInput("order", `50px,5,2,1,99999,0`, v);
                             }
+                        },
+                        {
+                            data: null,
+                            title: '子顺序',
+                            render: d => {
+                                const type = 0;
+                                var t = kanBan.VariableList.filter(v => v.Type == type && v.ScriptId == d.ScriptId &&
+                                    v.VariableTypeId == d.VariableTypeId &&
+                                    v.PointerAddress == d.PointerAddress);
+                                var v = t.length > 0 && t[0].SubOrder > 0 ? t[0].SubOrder : "1";
+                                return tableSet.numberInput("subOrder", `50px,5,2,1,99999,0`, v);
+                            }
+                        },
+                        {
+                            data: null,
+                            title: '分隔符',
+                            render: d => {
+                                const type = 0;
+                                var t = kanBan.VariableList.filter(v => v.Type == type && v.ScriptId == d.ScriptId &&
+                                    v.VariableTypeId == d.VariableTypeId &&
+                                    v.PointerAddress == d.PointerAddress);
+                                var v = t.length > 0 && !isStrEmptyOrUndefined(t[0].Delimiter) ? t[0].Delimiter : "";
+                                return tableSet.emptyInput("delimiter no-padding", `30,30`, v);
+                            }
                         }
                     ]);
 
@@ -1435,10 +1509,12 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].push({
                                     Type: type,
                                     Id: d.Id,
@@ -1447,7 +1523,9 @@ function getScriptList() {
                                     PointerAddress: d.PointerAddress,
                                     VariableName: v ? v : "",
                                     VName: d.VariableName,
-                                    Order: o ? o : 1
+                                    Order: o ? o : 1,
+                                    SubOrder: so ? so : 1,
+                                    Delimiter: de ? de : ""
                                 });
                                 disabledChose(sc, dataArray, divArray);
                             },
@@ -1460,15 +1538,19 @@ function getScriptList() {
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].length > 0 &&
                                     sc[data].every(vv => {
                                         if (vv.Id == d.Id && vv.Type == type) {
                                             vv.VariableName = v;
                                             vv.Order = o;
+                                            vv.SubOrder = so;
+                                            vv.Delimiter = de;
                                             return false;
                                         }
                                         return true;
@@ -1495,7 +1577,9 @@ function getScriptList() {
                                     VariableName: v.VariableName,
                                     VName: d.VariableName,
                                     PointerAddress: d.PointerAddress,
-                                    Order: v.Order
+                                    Order: v.Order,
+                                    SubOrder: v.SubOrder,
+                                    Delimiter: v.Delimiter
                                 });
                                 return false;
                             }
@@ -1514,10 +1598,12 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].push({
                                     Type: type,
                                     Id: d.Id,
@@ -1526,7 +1612,9 @@ function getScriptList() {
                                     PointerAddress: d.PointerAddress,
                                     VariableName: v ? v : "",
                                     VName: d.VariableName,
-                                    Order: o ? o : 1
+                                    Order: o ? o : 1,
+                                    SubOrder: so ? so : 1,
+                                    Delimiter: de ? de : ""
                                 });
                                 disabledChose(sc, dataArray, divArray);
                             },
@@ -1539,15 +1627,19 @@ function getScriptList() {
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].length > 0 &&
                                     sc[data].every(vv => {
                                         if (vv.Id == d.Id && vv.Type == type) {
                                             vv.VariableName = v;
                                             vv.Order = o;
+                                            vv.SubOrder = so;
+                                            vv.Delimiter = de;
                                             return false;
                                         }
                                         return true;
@@ -1561,7 +1653,7 @@ function getScriptList() {
                         var t = false;
                         const type = 0;
                         kanBan.VariableList.every(v => {
-                            if (v.Type == 0 &&
+                            if (v.Type == type &&
                                 d.ScriptId == v.ScriptId &&
                                 d.VariableTypeId == v.VariableTypeId &&
                                 d.PointerAddress == v.PointerAddress) {
@@ -1573,7 +1665,9 @@ function getScriptList() {
                                     VariableName: v.VariableName,
                                     VName: d.VariableName,
                                     PointerAddress: v.PointerAddress,
-                                    Order: v.Order
+                                    Order: v.Order,
+                                    SubOrder: v.SubOrder,
+                                    Delimiter: v.Delimiter
                                 });
                                 return false;
                             }
@@ -1592,10 +1686,12 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].push({
                                     Type: type,
                                     Id: d.Id,
@@ -1604,28 +1700,34 @@ function getScriptList() {
                                     PointerAddress: d.PointerAddress,
                                     VariableName: v ? v : "",
                                     VName: d.VariableName,
-                                    Order: o ? o : 1
+                                    Order: o ? o : 1,
+                                    SubOrder: so ? so : 1,
+                                    Delimiter: de ? de : ""
                                 });
                                 disabledChose(sc, dataArray, divArray);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id, "Type", type);
-                                enableChose(divArray);
+                                enableChose(sc, dataArray, divArray);
                             },
                             false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].length > 0 &&
                                     sc[data].every(vv => {
                                         if (vv.Id == d.Id && vv.Type == type) {
                                             vv.VariableName = v;
                                             vv.Order = o;
+                                            vv.SubOrder = so;
+                                            vv.Delimiter = de;
                                             return false;
                                         }
                                         return true;
@@ -1639,7 +1741,7 @@ function getScriptList() {
                         var t = false;
                         const type = 0;
                         kanBan.VariableList.every(v => {
-                            if (v.Type == 0 &&
+                            if (v.Type == type &&
                                 d.ScriptId == v.ScriptId &&
                                 d.VariableTypeId == v.VariableTypeId &&
                                 d.PointerAddress == v.PointerAddress) {
@@ -1651,7 +1753,9 @@ function getScriptList() {
                                     VariableName: v.VariableName,
                                     VName: d.VariableName,
                                     PointerAddress: v.PointerAddress,
-                                    Order: v.Order
+                                    Order: v.Order,
+                                    SubOrder: v.SubOrder,
+                                    Delimiter: v.Delimiter
                                 });
                                 return false;
                             }
@@ -1694,10 +1798,12 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].push({
                                     Type: type,
                                     Id: d.Id,
@@ -1705,7 +1811,9 @@ function getScriptList() {
                                     ItemType: d.Id,
                                     VariableName: v ? v : "",
                                     VName: d.Type,
-                                    Order: o ? o : 1
+                                    Order: o ? o : 1,
+                                    SubOrder: so ? so : 1,
+                                    Delimiter: de ? de : ""
                                 });
                                 disabledChose(sc, dataArray, divArray);
                             },
@@ -1718,15 +1826,19 @@ function getScriptList() {
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                const cCol = $("#kanBanContentCol").val() >> 0;
-                                const maxSet = getMaxSet(cCol);
-                                onInput($(tr).find(".order"), 5, 2, 1, maxSet);
+                                //const cCol = $("#kanBanContentCol").val() >> 0;
+                                //const maxSet = getMaxSet(cCol);
+                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
+                                const so = $(tr).find(".subOrder").val() >> 0;
+                                const de = $(tr).find(".delimiter").val();
                                 sc[data].length > 0 &&
                                     sc[data].every(vv => {
                                         if (vv.Id == d.Id && vv.Type == type) {
                                             vv.VariableName = v;
                                             vv.Order = o;
+                                            vv.SubOrder = so;
+                                            vv.Delimiter = de;
                                             return false;
                                         }
                                         return true;
@@ -1751,7 +1863,9 @@ function getScriptList() {
                                     ItemType: d.Id,
                                     VariableName: v.VariableName,
                                     VName: d.Type,
-                                    Order: v.Order
+                                    Order: v.Order,
+                                    SubOrder: v.SubOrder,
+                                    Delimiter: v.Delimiter
                                 });
                                 return false;
                             }
@@ -1776,13 +1890,74 @@ function getScriptList() {
     }, 0);
 }
 
+function changeContentColPre(data, cCol, cName) {
+    let ps = "";
+    if (cCol == 2) {
+        ps = data.reduce((a, b) =>
+            `${a}<div class="form-group no-margin" style="height:calc(100%/6);">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                                        <label class=" control-label no-margin text-blue no-padding">${b.VName}</label>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                                        <label class="control-label no-margin text-blue no-padding">${b.V}</label>
+                                    </div>
+                                </div>`, '');
+    } else if (cCol > 2) {
+        const tCol = cCol - 1;
+        let content = "";
+        if (data.length > 0) {
+            const maxSet = Math.max.apply(null, data.map(x => x.Order)) + 1;
+            const cRow = Math.floor(maxSet / tCol);
+            for (var i = 0; i < cRow; i++) {
+                let tds = "";
+                var cNameI = tCol * i + 1;
+                let n = "";
+                var j;
+                for (j = 0; j < tCol; j++) {
+                    const d = data.filter(x => x.Order == cNameI + j);
+                    if (d.length > 0 && !isStrEmptyOrUndefined(d[0].VName)) {
+                        n = d[0].VName;
+                        tds += `<td><label class="control-label no-margin text-blue no-padding">${n}</label></td>`;
+                        break;
+                    }
+                }
+                if (n === "") {
+                    tds += `<td><label class="control-label no-margin text-blue no-padding">${n}</label></td>`;
+                }
+                for (j = 0; j < tCol; j++) {
+                    const d = data.filter(x => x.Order == cNameI + j);
+                    let v = "";
+                    if (d.length > 0) {
+                        v = d[0].V;
+                    }
+                    tds += `<td><label class="control-label no-margin text-blue no-padding">${v}</label></td>`;
+                }
+                content += `<tr>${tds}</tr>`;
+            }
+        }
+        //${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})">${b}</th>`, '')}
+        ps =
+            `<table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+                <thead>
+                    <tr>
+                        ${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})"><label class="control-label no-margin no-padding">${b}</label></th>`, '')}
+                    </tr>
+                </thead>
+                    ${content}
+                <tbody>
+                </tbody>
+            </table>`;
+    }
+    return ps;
+}
+
 function getChoseLength(sc, dataArray) {
     return dataArray.reduce((a, b) => a + sc[b].length, 0);
 }
 
 function updateChoseTitle(sc, dataArray) {
-    const t = dataArray.reduce((a, b, i) => a.concat(sc[b]), []).sort(sortOrder).map(d => `[${d.Order},${d.VName}]`);
-    $(`#${sc.div} .chosed`).text(t.join());
+    const t = dataArray.reduce((a, b, i) => a.concat(sc[b]), []).sort(sortOrder).map(d => `[${d.VName} (<span class="text-orange">${d.Order},${d.SubOrder},${d.Delimiter}</span>)]`);
+    $(`#${sc.div} .chosed`).html(t.join());
 }
 
 function disabledChose(sc, dataArray, divArray) {
@@ -2240,57 +2415,87 @@ function setChart(elId, kbId, type, next = false) {
 
                 function getContentCol(data, cCol, cName) {
                     let ps = "";
-                    if (cCol == 2) {
-                        ps = data.reduce((a, b) =>
-                            `${a}<div class="form-group no-margin" style="height:calc(100%/6);">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
-                                    <label class=" control-label no-margin text-blue no-padding">${b.VName}</label>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
-                                    <label class="control-label no-margin text-blue no-padding">${b.V}</label>
-                                </div>
-                            </div>`, '');
-                    } else if (cCol > 2) {
-                        const tCol = cCol - 1;
-                        let content = "";
-                        if (data.length > 0) {
-                            const maxSet = Math.max.apply(null, data.map(x => x.Order)) + 1;
-                            const cRow = Math.floor(maxSet / tCol);
-                            for (var i = 0; i < cRow; i++) {
-                                var tds = "";
-                                var cNameI = tCol * i;
-                                var d = data.filter(x => x.Order == cNameI);
-                                var n = "";
-                                if (d.length > 0) {
-                                    n = d[0].VName;
-                                }
-                                tds += `<td>${n}</td>`;
-                                for (var j = 1; j <= tCol; j++) {
-                                    d = data.filter(x => x.Order == cNameI + j);
-                                    var v = "";
-                                    if (d.length > 0) {
-                                        v = d[0].V;
+                    var i;
+                    const tCol = cCol - 1;
+                    if (data.length > 0) {
+                        const maxSet = Math.max.apply(null, data.map(x => x.Order)) + 1;
+                        const cRow = Math.floor(maxSet / tCol);
+                        if (cCol == 2) {
+                            for (i = 0; i < cRow; i++) {
+                                let n = "";
+                                const d = data.filter(x => x.Order == i + 1);
+                                if (d.length) {
+                                    for (var j = 0; j < tCol; j++) {
+                                        if (!isStrEmptyOrUndefined(d[j].VName)) {
+                                            n = d[j].VName;
+                                            break;
+                                        }
                                     }
-                                    tds += `<td>${v}</td>`;
+                                    //v = d[0].V;
+                                    let bV = false;
+                                    const v = d.reduce((a, b, i) => {
+                                        !isStrEmptyOrUndefined(b.V) && (bV = true);
+                                        return i == 0 ? `${a}${b.V}` : `${a}${(bV ? b.Delimiter : "")}${b.V}`;
+                                    }, '');
+                                    ps +=
+                                        `<div class="form-group no-margin" style="height:calc(100%/6);">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                                                <label class=" control-label no-margin text-blue no-padding">${n}</label>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                                                <label class="control-label no-margin text-blue no-padding">${v}</label>
+                                            </div>
+                                        </div>`;
+                                }
+                            }
+                        } else if (cCol > 2) {
+                            let content = "";
+                            for (i = 0; i < cRow; i++) {
+                                let tds = "";
+                                var cNameI = tCol * i + 1;
+                                let n = "";
+                                for (var j = 0; j < tCol; j++) {
+                                    const d = data.filter(x => x.Order == cNameI + j);
+                                    if (d.length > 0 && !isStrEmptyOrUndefined(d[0].VName)) {
+                                        n = d[0].VName;
+                                        tds += `<td><label class="control-label no-margin text-blue no-padding">${n}</label></td>`;
+                                        break;
+                                    }
+                                }
+                                if (n === "") {
+                                    tds += `<td><label class="control-label no-margin text-blue no-padding">${n}</label></td>`;
+                                }
+                                for (j = 0; j < tCol; j++) {
+                                    const d = data.filter(x => x.Order == cNameI + j);
+                                    let v = "";
+                                    if (d.length > 0) {
+                                        //v = d[0].V;
+                                        let bV = false;
+                                        v = d.reduce((a, b, i) => {
+                                            !isStrEmptyOrUndefined(b.V) && (bV = true);
+                                            return i == 0 ? `${a}${b.V}` : `${a}${(bV ? b.Delimiter : "")}${b.V}`;
+                                        }, '');
+                                    }
+                                    tds += `<td><label class="control-label no-margin text-blue no-padding">${v}</label></td>`;
                                 }
                                 content +=
                                     `<tr>
                                     ${tds}
                                 </tr>`;
                             }
-                        }
-                        //${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})">${b}</th>`, '')}
-                        ps =
-                            `<table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+                            //${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})">${b}</th>`, '')}
+                            ps =
+                                `<table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
                                 <thead>
                                     <tr>
-                                        ${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})">${b}</th>`, '')}
+                                        ${cName.reduce((a, b) => `${a}<th style="width:calc(100%/${cCol})"><label class="control-label no-margin no-padding">${b}</label></th>`, '')}
                                     </tr>
                                 </thead>
                                     ${content}
                                 <tbody>
                                 </tbody>
                             </table>`;
+                        }
                     }
                     return ps;
                 }
@@ -2414,89 +2619,108 @@ function setChart(elId, kbId, type, next = false) {
                     addOrderData(dataSource);
                     let trs = $(`${tabN} tbody tr`);
                     //if (dataSource.length == 0) continue;
-
+                    if (el.name == "操作工日进度表") {
+                        var a = 1;
+                    }
                     if (el.isTable) {
                         const cols = el.cols;
                         if (trs.length == 0) {
-                            const trs = dataSource.reduce((r, ds, i) => {
-                                const tds = cols.reduce((a, col, i) => {
-                                    var d = col.data ? ds[col.data] : col.render(ds);
-                                    var suffix = col.suffix ? col.suffix : "";
-                                    return a + `<td>${d}${suffix}</td>`;
-                                }, '');
-                                var maxClass = "";
-                                if ((el.order == "asc" && dataSource.length == i + 1) ||
-                                    (el.order == "desc" && i == 0)) {
-                                    maxClass = ` class="max"`;
-                                }
-                                return r + `<tr${maxClass} order=${ds.XvHao} ${el.trFlag}=${ds[el.trFlag]}>${tds}</tr>`;
-                            }, '');
+                            const trs = getItemTrs(dataSource, el);
                             $(`${tabN} tbody`).html(trs);
                         } else {
                             const maxTr = $(`${tabN} tr[class='max']`);
                             const maxOrder = $(maxTr).attr("order") >> 0;
-                            const tLen = dataSource.length - trs.length;
-                            let oldData = [];
-                            if (el.order == "asc") {
-                                oldData = dataSource.filter(x => x.XvHao <= maxOrder);
-                            } else {
-                                oldData = sliceArray(dataSource, dataSource.length, tLen - 1);
-                            }
-                            oldData.forEach(od => {
-                                const mTr = $(`${tabN} tr[${el.trFlag}=${od[el.trFlag]}]`);
-                                for (var i = 0, len = cols.length; i < len; i++) {
-                                    const col = cols[i];
-                                    //if (el.name == "操作工日进度表" && col.data == "Actual" && od.XvHao == 1) {
-                                    //    od[col.data] = od[col.data] + Math.ceil(Math.random() * 100);
-                                    //}
-                                    //if (el.name == "合格率异常报警") {
-                                    //    var a = 1;
-                                    //}
-                                    const d = col.data ? od[col.data] : col.render(od);
-                                    const suffix = col.suffix ? col.suffix : "";
-                                    const tV = `${d}${suffix}`;
-                                    const tO = od.XvHao;
-                                    const nV = $(mTr.find('td')[i]).text();
-                                    const nO = $(mTr).attr("order") >> 0;
-                                    if (nV != tV) {
-                                        $(mTr.find('td')[i]).text(tV);
-                                    }
-                                    if (nO != tO) {
-                                        $(mTr).attr("order", tO);
-                                    }
+                            let remove = false;
+
+                            trs.each((_, tr) => {
+                                const trFlag = $(tr).attr(el.trFlag);
+                                const removeData = dataSource.filter(x => x[el.trFlag] == trFlag);
+                                if (removeData.length == 0) {
+                                    $(tr).remove();
+                                    remove = true;
                                 }
                             });
-
-                            if (dataSource.length > trs.length) {
-                                maxTr.removeClass("max");
-                                let addData = [];
+                            if (maxOrder == 0)
+                                remove = true;
+                            if (remove && trs.length > 0) {
+                                $(`${tabN} tbody`).html(getItemTrs(dataSource, el));
+                                trs = $(`${tabN} tbody tr`);
+                            }
+                            if (!remove) {
+                                const tLen = dataSource.length - trs.length;
+                                let oldData = [];
                                 if (el.order == "asc") {
-                                    addData = dataSource.filter(x => x.Order > maxOrder);
+                                    oldData = dataSource.filter(x => x.XvHao <= maxOrder);
                                 } else {
-                                    addData = sliceArray(dataSource, tLen);
+                                    oldData = sliceArray(dataSource, dataSource.length, tLen - 1);
                                 }
-
-                                const addTrs = addData.reduce((r, ds, i) => {
-                                    const tds = cols.reduce((a, col, i) => {
-                                        var d = col.data ? ds[col.data] : col.render(ds);
-                                        var suffix = col.suffix ? col.suffix : "";
-                                        return a + `<td>${d}${suffix}</td>`;
-                                    }, '');
-                                    var maxClass = "";
-                                    if ((el.order == "asc" && i + 1 == addData.length) ||
-                                        (el.order == "desc" && i == 0)) {
-                                        maxClass = ` class="max"`;
+                                if (el.name == "操作工日进度表") {
+                                    var a = 1;
+                                }
+                                oldData.forEach(od => {
+                                    const mTr = $(`${tabN} tr[${el.trFlag}=${od[el.trFlag]}]`);
+                                    for (var i = 0, len = cols.length; i < len; i++) {
+                                        const col = cols[i];
+                                        //if (el.name == "操作工日进度表" && col.data == "Actual" && od.XvHao == 1) {
+                                        //    od[col.data] = od[col.data] + Math.ceil(Math.random() * 100);
+                                        //}
+                                        //if (el.name == "合格率异常报警") {
+                                        //    var a = 1;
+                                        //}
+                                        const d = col.data ? od[col.data] : col.render(od);
+                                        const suffix = col.suffix ? col.suffix : "";
+                                        const tV = `${d}${suffix}`;
+                                        const tO = od.XvHao;
+                                        const nV = $(mTr.find('td')[i]).text();
+                                        const nO = $(mTr).attr("order") >> 0;
+                                        if (nV != tV) {
+                                            $(mTr.find('td')[i]).text(tV);
+                                        }
+                                        if (nO != tO) {
+                                            $(mTr).attr("order", tO);
+                                        }
                                     }
-                                    return r + `<tr${maxClass} order=${ds.XvHao} ${el.trFlag}=${ds[el.trFlag]}>${tds}</tr>`;
-                                }, '');
+                                });
 
-                                if (el.order == "asc") {
-                                    maxTr.after(addTrs);
-                                } else {
-                                    maxTr.before(addTrs);
+                                if (dataSource.length > trs.length) {
+                                    maxTr.removeClass("max");
+                                    let addData = [];
+                                    if (el.order == "asc") {
+                                        addData = dataSource.filter(x => x.XvHao > maxOrder);
+                                    } else {
+                                        addData = sliceArray(dataSource, tLen);
+                                    }
+
+                                    if (el.name == "操作工日进度表") {
+                                        var a = 1;
+                                    }
+                                    const addTrs = addData.reduce((r, ds, i) => {
+                                        const thisTr = $(`${tabN} tr[${el.trFlag}=${ds[el.trFlag]}]`);
+                                        if (thisTr.length == 0) {
+                                            const tds = cols.reduce((a, col, i) => {
+                                                var d = col.data ? ds[col.data] : col.render(ds);
+                                                var suffix = col.suffix ? col.suffix : "";
+                                                return a + `<td>${d}${suffix}</td>`;
+                                            }, '');
+                                            let maxClass = "";
+                                            if ((el.order == "asc" && i + 1 == addData.length) ||
+                                                (el.order == "desc" && i == 0)) {
+                                                maxClass = ` class="max"`;
+                                            }
+                                            return r + `<tr${maxClass} order=${ds.XvHao} ${el.trFlag}=${ds[el.trFlag]}>${tds}</tr>`;
+                                        }
+                                        return r;
+                                    }, '');
+
+                                    if (el.order == "asc") {
+                                        maxTr.after(addTrs);
+                                    } else {
+                                        maxTr.before(addTrs);
+                                    }
+                                } else if (dataSource.length < trs.length) {
+                                    const trs = getItemTrs(dataSource, el);
+                                    $(`${tabN} tbody`).html(trs);
                                 }
-                            } else if (dataSource.length < trs.length) {
-                                $(`${tabN} tbody`).html("");
                             }
                         }
 
@@ -2511,15 +2735,39 @@ function setChart(elId, kbId, type, next = false) {
                         trs = $(`${tabN} tbody tr`);
                         var showTr = Math.floor(tBodyHeight / trHeight);
                         const timer = `${elId}_${el.div}_timer`;
+
+                        if (el.name == "设备状态反馈") {
+                            var a = 1;
+                        }
                         if (trs.length > showTr && !el[timer]) {
                             scrollTable(el, timer, `${elId}_${el.div}`);
+                        } else if (trs.length <= showTr && el[timer]) {
+                            const trs = getItemTrs(dataSource, el);
+                            $(`${tabN} tbody`).html(trs);
+                            stopScrollTable(el, timer, `${elId}_${el.div}`);
                         }
                     }
-
                 }
             }
         }
     }, 0);
+}
+
+function getItemTrs(dataSource, el) {
+    const cols = el.cols;
+    return dataSource.reduce((r, ds, i) => {
+        const tds = cols.reduce((a, col, i) => {
+            var d = col.data ? ds[col.data] : col.render(ds);
+            var suffix = col.suffix ? col.suffix : "";
+            return a + `<td style='width:${col.width && col.width !== "auto" ? `${col.width}px` : "auto"}'>${d}${suffix}</td>`;
+        }, '');
+        var maxClass = "";
+        if ((el.order == "asc" && dataSource.length == i + 1) ||
+            (el.order == "desc" && i == 0)) {
+            maxClass = ` class="max"`;
+        }
+        return r + `<tr${maxClass} order=${ds.XvHao} ${el.trFlag}=${ds[el.trFlag]}>${tds}</tr>`;
+    }, '');
 }
 
 //环形图设置

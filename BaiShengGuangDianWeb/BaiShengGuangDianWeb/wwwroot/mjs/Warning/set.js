@@ -1,6 +1,9 @@
-﻿function pageReady() {
+﻿//let steps = [];
+//let classes = [];
+let dws = [];
+function pageReady() {
     $(".sidebar-mini").addClass("sidebar-collapse");
-    $('.ms2').select2();
+    $('.ms2').select2({ matcher });
     $('#deviceSelect,#productionDeviceSelect').select2({
         allowClear: true,
         placeholder: '请选择',
@@ -39,12 +42,59 @@
     //生产数据
     $('#productionLi').one('click', function () {
         const p1 = new Promise(resolve => getWarnSet(resolve, '#productionWarn', 2));
-        const p2 = new Promise(resolve => getDeviceType(resolve));
+        const p2 = new Promise(resolve => getStep(resolve));
         Promise.all([p1, p2]).then(result => {
+            const ws = result[0];
+            const steps = result[1];
+
+            $('#productionDeviceStep').html(setOptions(steps, 'StepName'))
+                .on("change", function () {
+                    const i = $(this).val() >> 0;
+                    const ds = steps.filter(x => x.Id == i);
+                    if (ds.length) {
+                        const d = ds[0];
+                        $('#productionDeviceType').attr("categoryId", d.DeviceCategoryId);
+                        $('#productionDeviceType').val(d.CategoryName);
+                        if (d.DeviceCategoryId) {
+                            $('#productionDeviceSelectDiv').removeClass("hidden");
+                            new Promise(resolve => getDevice(resolve, { categoryId: d.DeviceCategoryId }, '#productionDeviceSelect'))
+                                .then(() => {
+                                    const wi = $("#productionWarn").val() >> 0;
+                                    const wds = ws.filter(x => x.Id == wi);
+                                    if (wds.length) {
+                                        const wd = wds[0];
+                                        $('#productionDeviceSelect').val(wd.DeviceList).trigger('change')
+                                    }
+                                });
+                        } else {
+                            $('#productionDeviceSelect').empty();
+                            $('#productionDeviceSelectDiv').addClass("hidden");
+                        }
+                    }
+                });
+            //$('#productionDeviceStep').val(id ? id : (rData.length ? rData[0].Id : 0)).trigger('change');
+
             if (result[0].length) {
                 showProductionWarnSet(result[0][0]);
             } else {
-                getDevice(null, { categoryId: result[1] }, '#productionDeviceSelect');
+                $('#productionDeviceSelect').addClass("hidden");
+                if (result[1].length && result[1][0].DeviceCategoryId) {
+                    $('#productionDeviceSelect').removeClass("hidden");
+                    getDevice(null, { categoryId: result[1].DeviceCategoryId }, '#productionDeviceSelect');
+                }
+                const ds = result[1];
+                if (ds.length) {
+                    const d = ds[0];
+                    $('#productionDeviceType').text(d.CategoryName);
+                    if (d.DeviceCategoryId) {
+                        $('#productionDeviceSelectDiv').removeClass("hidden");
+                        new Promise(resolve => getDevice(resolve, { categoryId: rData.CategoryId }, '#productionDeviceSelect')).then(() => $('#productionDeviceSelect'));
+                    } else {
+                        $('#productionDeviceSelect').empty();
+                        $('#productionDeviceSelectDiv').addClass("hidden");
+                    }
+                }
+
                 getProductionItem();
             }
         });
@@ -59,6 +109,8 @@
         $(this).siblings().removeClass("hidden");
         if (interval == 1) {
             $(this).siblings().addClass("hidden");
+        } else if (interval == 2) {
+            $(this).siblings('.frequency').addClass("hidden");
         }
     });
 }
@@ -131,9 +183,17 @@ function showProductionWarnSet(rData) {
     setProduction(rData.Items, false);
     $('#productionWarnName').val(rData.Name);
     $('#productionIsStart').iCheck(rData.Enable ? 'check' : 'uncheck');
-    $('#productionDeviceClass').val(rData.ClassId).trigger('change');
-    $('#productionDeviceType').val(rData.CategoryId).trigger('change');
-    new Promise(resolve => getDevice(resolve, { categoryId: rData.CategoryId }, '#productionDeviceSelect')).then(() => $('#productionDeviceSelect').val(rData.DeviceList).trigger('change'));
+    $('#productionDeviceStep').val(rData.StepId).trigger('change');
+    $('#productionDeviceType').attr("categoryId", rData.CategoryId);
+    $('#productionDeviceType').val(rData.CategoryName);
+    if (rData.CategoryId) {
+        $('#productionDeviceSelectDiv').removeClass("hidden");
+        new Promise(resolve => getDevice(resolve, { categoryId: rData.CategoryId }, '#productionDeviceSelect')).then(() => $('#productionDeviceSelect').val(rData.DeviceList).trigger('change'));
+    }
+    else {
+        $('#productionDeviceSelect').empty();
+        $('#productionDeviceSelectDiv').addClass("hidden");
+    }
 }
 
 //设备数据刷新
@@ -151,18 +211,34 @@ function productionSumRefreshTable() {
     $('#productionIsCollect').trigger('ifChanged');
 }
 
+//获取工序
+function getStep(resolve) {
+    ajaxPost('/Relay/Post', {
+        opType: 150,
+        //opData: JSON.stringify({ menu: true })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const rData = ret.datas;
+        resolve(rData);
+    }, 0);
+}
+
 //获取分类
 function getClass(resolve) {
     ajaxPost('/Relay/Post', {
         opType: 168,
         opData: JSON.stringify({ menu: true })
     }, ret => {
+        const rData = ret.datas;
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $('#deviceType,#productionDeviceClass').empty().append(setOptions(ret.datas, 'Class'));
-        resolve();
+        $('#deviceType').empty().append(setOptions(ret.datas, 'Class'));
+        resolve(rData);
     }, 0);
 }
 
@@ -181,20 +257,20 @@ function getScript(resolve) {
     }, 0);
 }
 
-//获取设备类型
-function getDeviceType(resolve) {
-    ajaxPost('/Relay/Post', {
-        opType: 140,
-        opData: JSON.stringify({ menu: true })
-    }, ret => {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
-        }
-        $('#productionDeviceType').empty().append(setOptions(ret.datas, 'CategoryName'));
-        resolve(ret.datas[0].Id);
-    }, 0);
-}
+////获取设备类型
+//function getDeviceType(resolve) {
+//    ajaxPost('/Relay/Post', {
+//        opType: 140,
+//        opData: JSON.stringify({ menu: true })
+//    }, ret => {
+//        if (ret.errno != 0) {
+//            layer.msg(ret.errmsg);
+//            return;
+//        }
+//        $('#productionDeviceType').empty().append(setOptions(ret.datas, 'CategoryName'));
+//        resolve(ret.datas[0].Id);
+//    }, 0);
+//}
 
 //获取设备
 function getDevice(resolve, opData, el) {
@@ -289,7 +365,7 @@ function setDataTable(type, el, data, arr) {
         updateTable(_dataTable[type][table], data);
     } else {
         const frequencyFn = d => {
-            const arr = ['不设置', '每次', '秒', '分', '小时', '天', '周', '月', '年'];
+            const arr = ['不设置', '每次', '连续', '秒', '分', '小时', '天', '周', '月', '年'];
             const frequency = d.Frequency;
             const count = d.Count;
             return `<span class="textOn"></span>
@@ -347,6 +423,8 @@ function setDataTable(type, el, data, arr) {
                     tr.find('.value2').val(d.Value2);
                     if (interval == 1) {
                         tr.find('.interval').siblings().addClass("hidden");
+                    } else if (interval == 2) {
+                        tr.find('.interval').siblings('.frequency').addClass("hidden");
                     } else {
                         tr.siblings().removeClass("hidden");
                     }
@@ -400,6 +478,8 @@ function setDataTable(type, el, data, arr) {
             $(this).siblings().removeClass("hidden");
             if (d.Interval == 1) {
                 $(tr).find('.interval').siblings().addClass("hidden");
+            } else if (d.Interval == 2) {
+                $(tr).find('.frequency').addClass("hidden");
             }
         }
         _dataTable[type][table] = $(el).DataTable(tableConfig);
@@ -421,7 +501,7 @@ function getItemFn(from, target, n) {
         const frequency = d.Frequency;
         const interval = d.Interval;
         const count = d.Count;
-        if (interval != 1 && (frequency == 0 || count == 0)) {
+        if (interval != 1 && interval != 2 && (frequency == 0 || count == 0)) {
             layer.msg(`序号${xh}：出现频率次数都必须大于0`);
             return false;
         }
@@ -545,32 +625,30 @@ function addUpProductionWarning(isUp, dataType) {
         layer.msg('请输入预警名');
         return;
     }
-    const classId = $('#productionDeviceClass').val();
+    const stepId = $('#productionDeviceStep').val();
     const isEnable = $('#productionIsStart').is(':checked');
-    if (isStrEmptyOrUndefined(classId)) {
-        layer.msg('请选择设备分类');
+    if (isStrEmptyOrUndefined(stepId)) {
+        layer.msg('请选择工序');
         return;
     }
-    const deviceTypeId = $('#productionDeviceType').val();
-    if (isStrEmptyOrUndefined(deviceTypeId)) {
-        layer.msg('请选择设备类型');
-        return;
-    }
-    let deviceIds = $('#productionDeviceSelect').val();
-    if (isStrEmptyOrUndefined(deviceIds)) {
-        layer.msg('请选择设备');
-        return;
-    }
-    deviceIds = deviceIds.join();
+    const deviceTypeId = $('#productionDeviceType').attr("categoryId") >> 0;
     const type = $('#typeBox li.active').val();
     const list = {
         WarningType: type,
         DataType: dataType,
         Name: name,
         Enable: isEnable,
-        ClassId: classId,
+        StepId: stepId,
         CategoryId: deviceTypeId,
-        DeviceIds: deviceIds
+        DeviceIds: ""
+    }
+    if (deviceTypeId) {
+        let deviceIds = $('#productionDeviceSelect').val();
+        if (isStrEmptyOrUndefined(deviceIds)) {
+            layer.msg('请选择设备');
+            return;
+        }
+        list.DeviceIds = deviceIds.join();
     }
     let opType, message;
     if (isUp) {

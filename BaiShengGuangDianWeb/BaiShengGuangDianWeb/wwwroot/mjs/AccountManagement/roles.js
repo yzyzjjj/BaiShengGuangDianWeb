@@ -1,4 +1,5 @@
 ﻿var _permissionList = [];
+var tableTmp = [];
 function pageReady() {
     _permissionList[123] = { uIds: ['showAddRoles'] };
     _permissionList[124] = { uIds: [] };
@@ -25,79 +26,73 @@ function pageReady() {
 }
 
 function getRoleList() {
-    ajaxGet("/RoleManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
+    ajaxPost("/Relay/Post", {
+        opType: 81
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+
+        const rData = ret.datas;
+        const tableId = "rolesList";
+        const tableEl = `#${tableId}`;
+        const tableArr = `${tableId}Arr`;
+        const tableData = `${tableId}Data`;
+        tableTmp[tableArr] = [];
+        tableTmp[tableData] = [];
+
+        if (!tableTmp[tableId]) {
+            const tableConfig = dataTableConfig(rData);
+            tableConfig.addColumns([
+                { data: "Name", title: "角色名称" },
+            ]);
             var per124 = _permissionList[124].have;
             var per125 = _permissionList[125].have;
-            var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '        <span class="caret"></span>' +
-                    '        <span class="sr-only">Toggle Dropdown</span>' +
-                    '    </button>' +
-                    '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                    '    </ul>' +
-                    '</div>';
-                var upRole = '<li><a onclick="showUpdateRole({0}, \'{1}\', \'{2}\')">修改</a></li>'.format(data.id, escape(data.name), escape(data.permissions));
-                var delRole = '<li><a onclick="deleteRole({0}, \'{1}\')">删除</a></li>'.format(data.id, escape(data.name));
-                html = html.format(per124 ? upRole : "", per125 ? delRole : "");
-                return html;
+            const op = function (data, type, row) {
+                const upRole = `<li><a onclick="showUpdateRole(${data.Id}, \'${escape(data.Name)}\', \'${escape(data.Permissions)}\')">修改</a></li>`;
+                const delRole = `<li><a onclick="deleteRole(${data.Id}, \'${escape(data.Name)}\')">删除</a></li>`;
+                return `<div class="btn-group">
+                            <button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" style="cursor:pointer">${(per124 ? upRole : "")}${(per125 ? delRole : "")}
+                            </ul>
+                        </div>`;
             }
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
+            if (per124 || per125) {
+                tableConfig.addColumns([
+                    { data: null, title: "操作", render: op, orderable: false }
+                ]);
             }
-            var columns = per124 || per125
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "id", "title": "Id", "bVisible": false },
-                    { "data": "name", "title": "角色名称" },
-                    { "data": null, "title": "操作", "render": op, "orderable": false }
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "id", "title": "Id", "bVisible": false },
-                    { "data": "name", "title": "角色名称" }
-                ];
-            $("#rolesList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aLengthMenu": [10, 20, 30], //更改显示记录数选项  
-                    "iDisplayLength": 10, //默认显示的记录数  
-                    "columns": columns
-                });
-        });
+            tableTmp[tableId] = $(tableEl).DataTable(tableConfig);
+        } else {
+            updateTable(tableTmp[tableId], rData);
+        }
+    });
 }
 
 function showAddRoles() {
     $("#addRoleName").val("");
     $("#add_per_body").empty();
-    ajaxGet("/Account/Permissions", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            if (ret.datas.length > 0) {
-                showPermissions("add_per_body", ret.datas);
-            }
-            $("#addRoleModel").modal("show");
-        });
+    ajaxPost("/Relay/Post", {
+        opType: 55
+    }, ret => {
+        if (ret.errno != 0) {
+            return;
+        };
+        if (ret.datas.length > 0) {
+            showPermissions("add_per_body", ret.datas);
+        }
+        $("#addRoleModel").modal("show");
+    });
 }
 
-function addRole() {
-    var roleNames = $("#addRoleName").val().trim();
-    if (isStrEmptyOrUndefined(roleNames)) {
+function addRole(close) {
+    var roleName = $("#addRoleName").val().trim();
+    if (isStrEmptyOrUndefined(roleName)) {
         layer.msg("角色名不能为空");
         return;
     }
@@ -114,39 +109,39 @@ function addRole() {
         layer.msg("请选择权限");
         return;
     }
-    var doSth = function () {
-        $("#addRoleModel").modal("hide");
-        var data = {
-            //角色名称
-            name: roleNames,
-            permissions: roleId
-        }
-        ajaxPost("/RoleManagement/Add", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getRoleList();
-                }
-            });
-    }
-    showConfirm("添加", doSth);
+    showConfirm("添加", () => {
+        ajaxPost("/Relay/Post", {
+            opType: 83,
+            opData: JSON.stringify([{
+                //角色名称
+                Name: roleName,
+                Permissions: roleId
+            }])
+        }, ret => {
+            close && $("#addRoleModel").modal("hide");
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0)
+                return;
+            getRoleList();
+        });
+    });
 }
 
 function deleteRole(id, name) {
     name = unescape(name);
-    var doSth = function () {
-        var data = {
-            id: id
-        }
-        ajaxPost("/RoleManagement/Delete", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getRoleList();
-                }
-            });
-    }
-    showConfirm("删除角色：" + name, doSth);
+    showConfirm(`删除角色：${name}`, () => {
+        ajaxPost("/Relay/Post", {
+            opType: 84,
+            opData: JSON.stringify({
+                ids: [id]
+            })
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getRoleList();
+            }
+        });
+    });
 }
 
 function showUpdateRole(id, name, permissions) {
@@ -157,25 +152,26 @@ function showUpdateRole(id, name, permissions) {
     $("#updateRoleName").val(name);
     $("#update_per_body").empty();
     $("#updateId").html(id);
-    ajaxGet("/Account/Permissions", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            if (ret.datas.length > 0) {
-                showPermissions("update_per_body", ret.datas);
-                var el = $("#update_per_body .on_cb");
-                el.filter('[value=0]').iCheck("check");
-                for (var i = 0, len = dataPermissions.length; i < len; i++) {
-                    el.filter(`[value=${dataPermissions[i]}]`).iCheck("check");
-                }
+    ajaxPost("/Relay/Post", {
+        opType: 55
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        };
+        if (ret.datas.length > 0) {
+            showPermissions("update_per_body", ret.datas);
+            var el = $("#update_per_body .on_cb");
+            el.filter('[value=0]').iCheck("check");
+            for (var i = 0, len = dataPermissions.length; i < len; i++) {
+                el.filter(`[value=${dataPermissions[i]}]`).iCheck("check");
             }
-            $("#updateRoleModal").modal("show");
-        });
+        }
+        $("#updateRoleModal").modal("show");
+    });
 }
 
-function updateRole() {
+function updateRole(close) {
     var roleName = $("#updateRoleName").val();
     if (isStrEmptyOrUndefined(roleName)) {
         layer.msg("角色名不能为空");
@@ -195,78 +191,22 @@ function updateRole() {
         return;
     }
     var id = parseInt($("#updateId").html());
-    var doSth = function () {
-        $("#updateRoleModal").modal("hide");
-        var data = {
-            id: id,
-            //角色名称
-            name: roleName,
-            permissions: roleId
-        }
-        ajaxPost("/RoleManagement/Update", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getRoleList();
-                }
-            });
-    }
-    showConfirm("修改", doSth);
-}
-
-function showPermissions(uiName, list) {
-    var permissionTypes = `<div class="box box-solid noShadow" style="margin-bottom: 0;">
-                            <div class="box-header no-padding">
-                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
-                                <label class="pointer" style="margin:0;font-weight:inherit">
-                                    <input type="checkbox" class="on_cb" style="width: 15px" value="0">
-                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">权限管理</span>
-                                </label>
-                            </div>
-                            <div class="box-body no-padding">
-                                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{0}</ul>
-                            </div>
-                        </div>`;
-    var mOptionStr = `<li><div class="box box-solid noShadow collapsed-box" style="margin-bottom: 0;">
-                        <div class="box-header no-padding">
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-plus"></i></button>
-                            <label class="pointer" style="margin:0;font-weight:inherit">
-                                <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
-                                <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
-                            </label>
-                        </div>
-                        <div class="box-body no-padding">
-                            <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{2}</ul>
-                        </div>
-                    </div></li>`;
-    var mNameStr = `<li><div class="box box-solid noShadow" style="margin-bottom: 0;">
-                            <div class="box-header no-padding">
-                                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
-                                <label class="pointer" style="margin:0;font-weight:inherit">
-                                    <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
-                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
-                                </label>
-                            </div>
-                        </div></li>`;
-    list.sort((a, b) => a.order - b.order);
-    var opObj = { parent: [] };
-    for (var i = 0, len = list.length; i < len; i++) {
-        var d = list[i];
-        var par = d.parent;
-        par == 0 ? opObj.parent.push(d) : opObj[par] ? opObj[par].push(d) : opObj[par] = [d];
-    }
-    var childTree = arr => {
-        return arr.map(item => {
-            var obj = '';
-            obj += opObj[item.id]
-                ? mOptionStr.format(item.id, item.name, childTree(opObj[item.id]))
-                : mNameStr.format(item.id, item.name);
-            return obj;
-        }).join('');
-    }
-    $(`#${uiName}`).empty().append(opObj.parent.length ? permissionTypes.format(childTree(opObj.parent)) : '');
-    $(".on_cb").iCheck({
-        checkboxClass: 'icheckbox_minimal',
-        increaseArea: '20%'
+    showConfirm("修改", () => {
+        ajaxPost("/Relay/Post", {
+            opType: 82,
+            opData: JSON.stringify([{
+                Id: id,
+                //角色名称
+                Name: roleName,
+                Permissions: roleId
+            }])
+        }, ret => {
+            close && $("#updateRoleModal").modal("hide");
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0)
+                return;
+            getRoleList();
+        });
     });
 }
+

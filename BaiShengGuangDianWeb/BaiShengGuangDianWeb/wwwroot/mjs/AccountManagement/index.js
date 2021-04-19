@@ -1,9 +1,10 @@
 ﻿var _permissionList = [];
+var tableTmp = [];
 function pageReady() {
-    _permissionList[107] = { uIds: ['showAddOrganizationUnitModal'] };
+    _permissionList[107] = { uIds: ['addOrganizationUnitBtn'] };
     _permissionList[108] = { uIds: [] };
     _permissionList[109] = { uIds: [] };
-    _permissionList[110] = { uIds: ['showAddMemberModal'] };
+    _permissionList[110] = { uIds: ['addMemberBtn'] };
     _permissionList[111] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
     $(".ms2").select2();
@@ -19,115 +20,118 @@ function pageReady() {
 
 function getOrganizationUnits() {
     $("#organizationUnits").empty();
-    ajaxGet("/OrganizationUnitManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            var doAction = '<div class="btn-group pull-right">' +
-                '<button type = "button" class="btn btn-default btn-sm" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                '        <span class="caret"></span>' +
-                '        <span class="sr-only">Toggle Dropdown</span>' +
-                '    </button>' +
-                '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
-                '    </ul>' +
-                '</div>';
+    ajaxPost("/Relay/Post", {
+        opType: 65
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        var doAction = '<div class="btn-group pull-right">' +
+            '<button type = "button" class="btn btn-default btn-sm" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
+            '    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
+            '        <span class="caret"></span>' +
+            '        <span class="sr-only">Toggle Dropdown</span>' +
+            '    </button>' +
+            '    <ul class="dropdown-menu" role="menu" style="cursor:pointer">{0}{1}' +
+            '    </ul>' +
+            '</div>';
 
-            var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
-                '    <div class="box-header" style="padding: 2px;">' +
-                '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
-                '        <h3 class="box-title pointer" style="vertical-align: middle;font-size: 16px;" onclick="onClick(\'{0}\',\'{1}\')"></h3>' +
-                '    </div>' +
-                '    <div class="box-body no-padding">' +
-                '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
-                '    </div>' +
-                '</div>';
+        var mMenuStr = '<div class="box box-solid noShadow"  style="margin-bottom: 0;">' +
+            '    <div class="box-header" style="padding: 2px;">' +
+            '        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>' +
+            '        <h3 class="box-title pointer" style="vertical-align: middle;font-size: 16px;" onclick="onClick(\'{0}\',\'{1}\')"></h3>' +
+            '    </div>' +
+            '    <div class="box-body no-padding">' +
+            '        <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px"></ul>' +
+            '    </div>' +
+            '</div>';
 
-            var datas = ret.datas;
-            var parents = getOrganizationUnitsParent(datas);
-            for (var i = 0; i < parents.length; i++) {
-                var children = getOrganizationUnitsChild(datas, parents[i]);
-                for (var j = 0; j < children.length; j++) {
-                    var child = children[j];
-                    var mMenu;
-                    var option;
+        var datas = ret.datas;
+        var parents = getOrganizationUnitsParent(datas);
+        for (var i = 0; i < parents.length; i++) {
+            var children = getOrganizationUnitsChild(datas, parents[i]);
+            for (var j = 0; j < children.length; j++) {
+                var child = children[j];
+                var mMenu;
+                var option;
 
-                    var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>'.format(child.id, escape(child.name));
-                    var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>'.format(child.id, escape(child.name));
-                    var da = "";
-                    if (_permissionList[108].have || _permissionList[109].have) {
-                        da = doAction.format(
-                            _permissionList[108].have ? upUnit : "",
-                            _permissionList[109].have ? delUnit : "");
-                    }
-                    if (child.parentId == 0) {
-                        mMenu = mMenuStr.format(child.id, escape(child.name));
-                        option = $(mMenu).clone();
-                        option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(da);
-                        option.find('.on_ul').attr('id', "on" + child.id);
-                        $("#organizationUnits").append(option);
-                    } else {
-                        mMenu = "<li>" + mMenuStr.format(child.id, escape(child.name)) + "</li>";
-                        option = $(mMenu).clone();
-                        option.find('h3').text(child.name).append("(<span>" + child.memberCount + "</span>)");
-                        option.find('h3').after(da);
-                        option.find('.on_ul').attr('id', "on" + child.id);
-                        $("#organizationUnits").find('[id=' + "on" + child.parentId + ']').append(option);
-                    }
+                var upUnit = '<li><a onclick="showUpdateOrganizationUnit({0}, \'{1}\')">修改</a></li>'.format(child.Id, escape(child.Name));
+                var delUnit = '<li><a onclick="deleteOrganizationUnit({0}, \'{1}\')">删除</a></li>'.format(child.Id, escape(child.Name));
+                var da = "";
+                if (_permissionList[108].have || _permissionList[109].have) {
+                    da = doAction.format(
+                        _permissionList[108].have ? upUnit : "",
+                        _permissionList[109].have ? delUnit : "");
+                }
+                if (child.ParentId == 0) {
+                    mMenu = mMenuStr.format(child.Id, escape(child.Name));
+                    option = $(mMenu).clone();
+                    option.find('h3').text(child.Name).append("(<span>" + child.MemberCount + "</span>)");
+                    option.find('h3').after(da);
+                    option.find('.on_ul').attr('id', "on" + child.Id);
+                    $("#organizationUnits").append(option);
+                } else {
+                    mMenu = "<li>" + mMenuStr.format(child.Id, escape(child.Name)) + "</li>";
+                    option = $(mMenu).clone();
+                    option.find('h3').text(child.Name).append("(<span>" + child.MemberCount + "</span>)");
+                    option.find('h3').after(da);
+                    option.find('.on_ul').attr('id', "on" + child.Id);
+                    $("#organizationUnits").find('[id=' + "on" + child.ParentId + ']').append(option);
                 }
             }
-        });
+        }
+    });
 }
 
 function rule(a, b) {
-    return a.id > b.id;
+    return a.Id > b.Id;
 }
 
 function getOrganizationUnitsParent(list) {
-    var parents = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (parents.indexOf(data.parentId) < 0) {
-            parents.push(data.parentId);
-        }
-    }
-    return parents.sort(function (a, b) { return a > b ? 1 : -1 });
+    //var parents = new Array();
+    //for (var i = 0; i < list.length; i++) {
+    //    var data = list[i];
+    //    if (parents.indexOf(data.ParentId) < 0) {
+    //        parents.push(data.ParentId);
+    //    }
+    //}
+    //return parents.sort(function (a, b) { return a > b ? 1 : -1 });
+    return distinct(list.map(x => x.ParentId)).sort(function (a, b) { return a > b ? 1 : -1 });
 }
 
 function getOrganizationUnitsChild(list, parentId) {
-    var result = new Array();
-    for (var i = 0; i < list.length; i++) {
-        var data = list[i];
-        if (data.parentId == parentId) {
-            result.push(data);
-        }
-    }
+    //var result = new Array();
+    //for (var i = 0; i < list.length; i++) {
+    //    var data = list[i];
+    //    if (data.ParentId == parentId) {
+    //        result.push(data);
+    //    }
+    //}
 
-    return result.sort(rule);
+    //return result.sort(rule);
+    return list.filter(x => x.ParentId == parentId).sort(rule);
 }
 
-function showAddOrganizationUnitModal() {
-    $("#rdo2").iCheck("check");
-    $("#cbDiv").removeClass("hidden");
-    $("#addOrganizationUnit").empty();
-    $("#addName").val("");
-    ajaxGet("/OrganizationUnitManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            };
-            var option = '<option value="{0}">{1}</option>';
-            var dataS = OrganizationUnitSort(ret.datas);
-            for (var i = 0; i < dataS.length; i++) {
-                var data = dataS[i];
-                $("#addOrganizationUnit").append(option.format(data.id, data.name));
-            }
-            $("#addOrganizationUnitModal").modal("show");
-        });
+function showAddOrganizationUnitModal(show = true) {
+    if (show) {
+        $("#rdo2").iCheck("check");
+        $("#cbDiv").removeClass("hidden");
+        $("#addName").val("");
+    }
+    ajaxPost("/Relay/Post", {
+        opType: 65
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        };
+        const pid = $("#addOrganizationUnit").val() >> 0;
+        const dataS = OrganizationUnitSort(ret.datas);
+        $('#addOrganizationUnit').html(setOptions(dataS, "Name"));
+        pid && $('#addOrganizationUnit').val(pid);
+        show && $("#addOrganizationUnitModal").modal("show");
+    });
 }
 
 function OrganizationUnitSort(dataS) {
@@ -138,26 +142,25 @@ function OrganizationUnitSort(dataS) {
         var children = getOrganizationUnitsChild(dataS, parents[i]);
         for (var j = 0; j < children.length; j++) {
             var child = children[j];
-            var parent = child.parentId;
+            var parent = child.ParentId;
             if (parent == 0) {
                 data.push({
-                    id: child.id,
-                    name: child.name
+                    Id: child.Id,
+                    Name: child.Name
                 });
             } else {
-                depName = child.name;
+                depName = child.Name;
                 while (parent != 0) {
-                    $.each(dataS, function (index, item) {
-                        if (item.id == parent) {
-                            depName = depName.replace("", item.name + " - ");
-                            parent = item.parentId;
-                            return false;
-                        }
-                    });
+                    const p = dataS.filter(x => x.Id == parent);
+                    if (p.length <= 0)
+                        break;
+                    const item = p[0];
+                    depName = depName.replace("", item.Name + " - ");
+                    parent = item.ParentId;
                 }
                 data.push({
-                    id: child.id,
-                    name: depName
+                    Id: child.Id,
+                    Name: depName
                 });
             }
         }
@@ -165,33 +168,34 @@ function OrganizationUnitSort(dataS) {
     return data;
 }
 
-function addOrganizationUnit() {
-    var data = {}
-    var addName = $("#addName").val().trim();
+function addOrganizationUnit(close) {
+    const addName = $("#addName").val().trim();
     if (isStrEmptyOrUndefined(addName)) {
         layer.msg("部门名称不能为空");
         return;
     }
-    if ($("#rdo1").is(":checked")) {
-        //一级部门
-        data.parentId = 0;
-        data.name = addName;
-    } else {
-        var pid = $("#addOrganizationUnit").val();
-        data.parentId = pid;
-        data.name = addName;
-    }
-    var doSth = function () {
-        $("#addOrganizationUnitModal").modal("hide");
-        ajaxPost("/OrganizationUnitManagement/Add", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getOrganizationUnits();
-                }
-            });
-    }
-    showConfirm("添加", doSth);
+    showConfirm("添加", () => {
+        const pid = $("#addOrganizationUnit").val() >> 0;
+        const data = {
+            Name: addName,
+            ParentId: $("#rdo1").is(":checked") ? 0 : pid
+        }
+
+        ajaxPost('/Relay/Post', {
+            opType: 67,
+            opData: JSON.stringify([
+                data
+            ])
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0) {
+                return;
+            }
+            getOrganizationUnits();
+            showAddOrganizationUnitModal(false);
+            close && $("#addOrganizationUnitModal").modal("hide");
+        });
+    });
 }
 
 function showUpdateOrganizationUnit(id, name) {
@@ -201,8 +205,7 @@ function showUpdateOrganizationUnit(id, name) {
     $("#updateOrganizationUnitModal").modal("show");
 }
 
-function updateOrganizationUnit() {
-
+function updateOrganizationUnit(close) {
     var id = parseInt($("#updateId").html());
     var organizationName = $("#organizationName").val().trim();
     if (isStrEmptyOrUndefined(organizationName)) {
@@ -210,51 +213,53 @@ function updateOrganizationUnit() {
         return;
     }
 
-    var doSth = function () {
-        $("#updateOrganizationUnitModal").modal("hide");
+    showConfirm("修改", () => {
         var data = {
-            id: id,
-            name: organizationName
+            Id: id,
+            Name: organizationName
         }
-        ajaxPost("/OrganizationUnitManagement/Update", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getOrganizationUnits();
-                    if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
-                        $("#unName").text(organizationName);
-                    }
-                }
-            });
-    }
-    showConfirm("修改", doSth);
+        ajaxPost('/Relay/Post', {
+            opType: 66,
+            opData: JSON.stringify([
+                data
+            ])
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0) {
+                return;
+            }
+            getOrganizationUnits();
+            if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
+                $("#unName").text(organizationName);
+            }
+            close && $("#updateOrganizationUnitModal").modal("hide");
+        });
+    });
 }
 
 function deleteOrganizationUnit(id, organizationUnitName) {
     organizationUnitName = unescape(organizationUnitName);
-
-    var doSth = function () {
-        var data = {
-            id: id
-        }
-
-        ajaxPost("/OrganizationUnitManagement/Delete", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    //getOrganizationUnits();
-                    $("#on" + id).parents(".box-solid:first").remove();
-                    if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
-                        $("#memberDataTable").empty();
-                        $("#memberDataTable").append('<table class="table table-hover table-striped" id="memberListTable"></table>');
-                        $("#showAddMemberModal,#showBolModal").addClass("hidden");
-                        $("#unName").text("成员列表");
-                        $("#unName").removeAttr("value");
-                    }
+    showConfirm(`删除部门：${organizationUnitName}`, () => {
+        ajaxPost('/Relay/Post', {
+            opType: 69,
+            opData: JSON.stringify({
+                ids: [id]
+            })
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                //getOrganizationUnits();
+                $("#on" + id).parents(".box-solid:first").remove();
+                if (!$("#showAddMemberModal").is(":hidden") && $("#unName").attr("value") == id) {
+                    const tableId = "memberListTable";
+                    updateTable(tableTmp[tableId], []);
+                    $("#showAddMemberModal,#showBolModal").addClass("hidden");
+                    $("#unName").text("成员列表");
+                    $("#unName").removeAttr("value");
                 }
-            });
-    }
-    showConfirm("删除部门：" + organizationUnitName, doSth);
+            }
+        });
+    });
 }
 
 function moveOrganizationUnits() {
@@ -263,169 +268,145 @@ function moveOrganizationUnits() {
 
 function onClick(id, name) {
     name = unescape(name);
-    $("#memberListTable").empty();
+    $("#addMemberBtn").attr("uid", id);
     getMemberList(id, name);
 }
 
 var memberList = null;
 function getMemberList(id, name) {
-    memberList = new Array();
+    const tableId = "memberListTable";
+    const tableEl = `#${tableId}`;
+    const tableArr = `${tableId}Arr`;
+    const tableData = `${tableId}Data`;
+    tableTmp[tableArr] = [];
+    tableTmp[tableData] = [];
+
     $("#unName").text(name);
     $("#unName").attr("value", id);
     $("#showBolModal").removeClass("hidden");
-    ajaxGet("/OrganizationUnitManagement/MemberList",
-        {
-            organizationUnitId: id
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
+    ajaxPost("/Relay/Post", {
+        opType: 70,
+        opData: JSON.stringify({
+            unitId: id
+        })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        const rData = ret.datas;
+        memberList = rData.map(x => x.AccountId);
+        if (!tableTmp[tableId]) {
+            const tableConfig = dataTableConfig(rData);
+            tableConfig.addColumns([
+                { data: "Name", title: "姓名" },
+                { data: "RoleName", title: "角色" },
+            ]);
+            if (_permissionList[111].have) {
+                const op = function (data, type, row) {
+                    return `<button type="button" class="btn btn-primary btn-sm btn-danger" data-toggle="modal" onclick="deleteMember(${data.Id}, \'${escape(data.Name)}\')">删除</button>`;
+                };
+                tableConfig.addColumns([
+                    { data: null, title: "操作", render: op, orderable: false }
+                ]);
             }
-            for (var i = 0; i < ret.datas.length; i++) {
-                memberList.push(ret.datas[i].Id);
+            tableConfig.drawCallback = function () {
+                $(tableEl).css("padding", "3px");
+                initCheckboxAddEvent.call(this, tableTmp[tableArr],
+                    (tr, d) => {
+                        tableTmp[tableData].push(d);
+                    },
+                    (tr, d) => {
+                        removeArray(tableTmp[tableData], "id", d.id);
+                    });
             }
-            var op = function (data, type, row) {
-                var html = '<button type="button" class="btn btn-primary btn-sm btn-danger" data-toggle="modal" onclick="deleteMember({0},\'{1}\')">删除</button>'.format(data.Id, escape(data.Name));
-                return html;
-            }
-
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-            var columns = _permissionList[111].have
-                ? [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "Name", "title": "姓名" },
-                    { "data": "RoleName", "title": "角色" },
-                    { "data": null, "title": "操作", "render": op, "orderable": false}
-                ]
-                : [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "Name", "title": "姓名" },
-                    { "data": "RoleName", "title": "角色" }
-                ];
-            $("#memberListTable")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": ret.datas,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "columns": columns,
-                    "drawCallback": function (settings, json) {
-                        $("#memberListTable td").css("padding", "3px");
-                    }
-                });
-        });
+            tableTmp[tableId] = $(tableEl).DataTable(tableConfig);
+        } else {
+            updateTable(tableTmp[tableId], rData);
+        }
+    });
 }
 
-var addList = null;
 function showAddMemberModal() {
-    $("#memberList").empty();
-    addList = new Array();
-    ajaxGet("/AccountManagement/List", null,
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
+    if (!$("#addMemberBtn").attr("uid"))
+        return;
 
-            var data = new Array();
-            for (var i = 0; i < ret.datas.length; i++) {
-                if (memberList.indexOf(ret.datas[i].id) == -1 && !ret.datas[i].isDeleted)
-                    data.push(ret.datas[i]);
-            }
-            var op = function (data, type, row) {
-                return '<input type="checkbox" value="{0}" class="icb_minimal" onclick="">'.format(data.id);
-            }
+    const tableId = "memberList";
+    const tableEl = `#${tableId}`;
+    const tableArr = `${tableId}Arr`;
+    const tableData = `${tableId}Data`;
+    tableTmp[tableArr] = [];
+    tableTmp[tableData] = [];
+    ajaxPost("/Relay/Post", {
+        opType: 75,
+        opData: JSON.stringify({
+            all: false,
+            eIds: memberList.join()
+        })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
 
-            var o = 0;
-            var order = function (data, type, row) {
-                return ++o;
-            }
-            $("#memberList")
-                .DataTable({
-                    dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                    "destroy": true,
-                    "paging": true,
-                    "searching": true,
-                    "language": oLanguage,
-                    "data": data,
-                    "aLengthMenu": [20, 40, 60], //更改显示记录数选项  
-                    "iDisplayLength": 20, //默认显示的记录数  
-                    "aaSorting": [[0, "asc"]],
-                    "columns": [
-                        { "data": null, "title": "序号", "render": order },
-                        { "data": "id", "title": "id", "bVisible": false },
-                        { "data": "name", "title": "姓名" },
-                        { "data": "account", "title": "账号" },
-                        { "data": "roleName", "title": "角色" },
-                        { "data": null, "title": "选择", "sClass": "text-red", "render": op, "orderable": false }
-                    ],
-                    "drawCallback": function (settings, json) {
-                        $("#memberList td").css("padding", "3px");
-                        $("#memberList .icb_minimal").iCheck({
-                            checkboxClass: 'icheckbox_minimal',
-                            radioClass: 'iradio_minimal',
-                            increaseArea: '20%' // optional
-                        });
-                        $("#memberList .icb_minimal").on('ifChanged', function (event) {
-                            var ui = $(this);
-                            var v = ui.attr("value");
-                            if (ui.is(":checked")) {
-                                ui.parents("tr:first").css("background-color", "gray");
-                                addList.push(v);
-                            } else {
-                                if (ui.parents("tr:first").hasClass("odd"))
-                                    ui.parents("tr:first").css("background-color", "#f9f9f9");
-                                else
-                                    ui.parents("tr:first").css("background-color", "");
+        const rData = ret.datas;
+        if (!tableTmp[tableId]) {
+            const tableConfig = dataTableConfig(rData, true);
+            tableConfig.addColumns([
+                { data: "Name", title: "姓名" },
+                { data: "Account", title: "账号" },
+                { data: "RoleName", title: "角色" },
+            ]);
 
-                                addList.splice(addList.indexOf(v), 1);
-                            }
-                        });
-                    }
-                });
-            $("#addMemberModal").modal("show");
-        });
+            tableConfig.drawCallback = function () {
+                initCheckboxAddEvent.call(this, tableTmp[tableArr],
+                    (tr, d) => {
+                        $(tr).css("background-color", "gray");
+                        tableTmp[tableData].push(d);
+                    },
+                    (tr, d) => {
+                        if ($(tr).hasClass("odd"))
+                            $(tr).css("background-color", "#f9f9f9");
+                        else
+                            $(tr).css("background-color", "");
+                        removeArray(tableTmp[tableData], "Id", d.Id);
+                    });
+            }
+            tableTmp[tableId] = $(tableEl).DataTable(tableConfig);
+        } else {
+            updateTable(tableTmp[tableId], rData);
+        }
+        $("#addMemberModal").modal("show");
+    });
 }
 
 function addMember() {
-    var unId = $("#unName").attr("value");
+    var unId = $("#unName").attr("value") >> 0;
     var unName = $("#unName").text();
-    if (addList == null || addList.length == 0) {
+    const tableId = "memberList";
+    const tableData = `${tableId}Data`;
+    if (tableTmp[tableData] == null || tableTmp[tableData].length == 0) {
         layer.msg("请选择成员");
         return;
     }
-    var codeId = addList.join(",");
-    var cnt = addList.length;
-    addList = new Array();
-    var doSth = function () {
+    var cnt = tableTmp[tableData].length;
+    var data = tableTmp[tableData].map(x => ({ OrganizationUnitId: unId, AccountId: x.Id }));
+    showConfirm("添加", () => {
         $("#addMemberModal").modal("hide");
-        var data = {
-            organizationUnitId: unId,
-            memberId: codeId
-        }
-        ajaxPost("/OrganizationUnitManagement/AddMember", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getMemberList(unId, unName);
+        ajaxPost("/Relay/Post", {
+            opType: 71,
+            opData: JSON.stringify(data)
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno != 0) {
+                return;
+            }
+            getMemberList(unId, unName);
 
-                    var ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
-                    ui.html(parseInt(ui.text()) + cnt);
-                }
-            });
-    }
-
-    showConfirm("添加", doSth);
+            var ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
+            ui.html(parseInt(ui.text()) + cnt);
+        });
+    });
 
 }
 
@@ -433,22 +414,20 @@ function deleteMember(id, name) {
     name = unescape(name);
     var unId = $("#unName").attr("value");
     var unName = $("#unName").text();
-    var doSth = function () {
-        var data = {
-            organizationUnitId: unId,
-            memberId: id
-        }
-
-        ajaxPost("/OrganizationUnitManagement/DeleteMember", data,
-            function (ret) {
-                layer.msg(ret.errmsg);
-                if (ret.errno == 0) {
-                    getMemberList(unId, unName);
-                    var ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
-                    ui.html(parseInt(ui.text() - 1));
-                }
-            });
-    }
-    showConfirm("删除成员：" + name, doSth);
-
+    showConfirm(`删除成员：${name}`, () => {
+        $("#addMemberModal").modal("hide");
+        ajaxPost("/Relay/Post", {
+            opType: 72,
+            opData: JSON.stringify({
+                ids: [id]
+            })
+        }, ret => {
+            layer.msg(ret.errmsg);
+            if (ret.errno == 0) {
+                getMemberList(unId, unName);
+                const ui = $("#on" + unId).parents(".box-solid:first").find("span:first");
+                ui.html(parseInt(ui.text() - 1));
+            }
+        });
+    });
 }

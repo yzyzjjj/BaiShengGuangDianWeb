@@ -1,7 +1,6 @@
 ﻿using BaiShengGuangDianWeb.Base.Server;
 using ModelBase.Base.Logger;
 using ModelBase.Base.Utils;
-using ModelBase.Models.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using BaiShengGuangDianWeb.Models.Account;
 
 namespace BaiShengGuangDianWeb.Base.Helper
 {
@@ -43,7 +43,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
             }
             emailAddress.ForEach(e => mailMessage.To.Add(e));
 
-            mailMessage.From = new MailAddress(ServerConfig.EmailAccount);
+            mailMessage.From = new MailAddress(AccountInfoHelper.EmailAccount);
             mailMessage.Subject = subject;
             mailMessage.SubjectEncoding = Encoding.UTF8;
 
@@ -59,7 +59,7 @@ namespace BaiShengGuangDianWeb.Base.Helper
                     //smtpClient.Port = 25;
                     smtpClient.EnableSsl = true;
                     smtpClient.UseDefaultCredentials = false;
-                    smtpClient.Credentials = new NetworkCredential(ServerConfig.EmailAccount, ServerConfig.EmailPassword);
+                    smtpClient.Credentials = new NetworkCredential(AccountInfoHelper.EmailAccount, AccountInfoHelper.EmailPassword);
                     try
                     {
                         smtpClient.Send(mailMessage);

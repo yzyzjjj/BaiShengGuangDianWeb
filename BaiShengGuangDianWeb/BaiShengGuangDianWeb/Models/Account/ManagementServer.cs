@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BaiShengGuangDianWeb.Models.Account
+﻿namespace BaiShengGuangDianWeb.Models.Account
 {
     public class ManagementServer
     {

@@ -80,6 +80,7 @@
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <label class="control-label no-margin middle text-nowrap">预警名：</label>
                                             <select class="ms2 form-control device-warn" id="deviceWarnCurrent" style="width: 160px"></select>
+                                            <button class="btn btn-primary btn-sm pull-right" onclick="getDeviceData(true)">刷新</button>
                                         </div>
                                     </div>
                                     <div class="box-body">
@@ -161,6 +162,9 @@
                                                     <input type="text" id="productionETime" class="form_date form-control text-center pointer" style="min-width: 80px">
                                                 </div>
                                             </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px; margin-left: 5px">
+                                                <button class="btn btn-primary btn-sm pull-right" onclick="getProductionData(false)">刷新</button>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="box-body">
@@ -181,6 +185,7 @@
                                         <div class="flexStyle" style="flex-wrap: wrap">
                                             <label class="control-label no-margin middle text-nowrap">预警名：</label>
                                             <select class="ms2 form-control production-warn" id="productionWarnCurrent" style="width: 160px"></select>
+                                            <button class="btn btn-primary btn-sm pull-right" onclick="getProductionData(true)">刷新</button>
                                         </div>
                                     </div>
                                     <div class="box-body">

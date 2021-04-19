@@ -45,6 +45,11 @@
 "wwwroot/mjs/AccountManagement/users.js"]
 },
 {
+"outputFileName":"wwwroot/mminjs/AccountManagement/workshop.min.js",
+"inputFiles":[
+"wwwroot/mjs/AccountManagement/workshop.js"]
+},
+{
 "outputFileName":"wwwroot/mminjs/DeviceManagement/applicationLibrary.min.js",
 "inputFiles":[
 "wwwroot/mjs/DeviceManagement/applicationLibrary.js"]

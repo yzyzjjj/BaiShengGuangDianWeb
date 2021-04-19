@@ -34,7 +34,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 Password = param.GetValue("password"),
                 RememberMe = param.GetValue("rememberMe")
             };
-            var accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
+            var accountInfo = AccountInfoHelper.GetAccountInfo(loginBody.Account);
             if (!special)
             {
                 if (accountInfo == null)
@@ -42,7 +42,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                     return Result.GenError<Result>(Error.AccountNotExist);
                 }
 
-                var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
+                var pwd = AccountInfoHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
                 if (accountInfo.Password != pwd)
                 {
                     return Result.GenError<Result>(Error.PasswordError);
@@ -61,11 +61,13 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                     });
                     if (res.Contains("0"))
                     {
+                        var oldAccountInfo = AccountInfoHelper.GetAccountInfo(loginBody.Account, true);
+
                         var role = ServerConfig.WebDb.Query<int>("SELECT Id FROM `roles` WHERE New = 1;");
                         var info = new AccountInfo
                         {
                             Account = loginBody.Account,
-                            Password = AccountHelper.GenAccountPwdByOne(loginBody.Account, loginBody.Password),
+                            Password = AccountInfoHelper.GenAccountPwdByOne(loginBody.Account, loginBody.Password),
                             Name = loginBody.Account,
                             Role = role?.Join(",") ?? "",
                             EmailType = "",
@@ -75,7 +77,15 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                             ProductionRole = "",
                             MaxProductionRole = ""
                         };
-                        AccountHelper.AddAccountInfo(info);
+                        if (oldAccountInfo == null)
+                        {
+                            AccountInfoHelper.Instance.Add(info);
+                        }
+                        else
+                        {
+                            //AccountInfoHelper.Instance.Update(info);
+                        }
+
                         accountInfo = info;
                     }
                     else if (res.Contains("1"))
@@ -89,7 +99,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 }
                 else
                 {
-                    var pwd = AccountHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
+                    var pwd = AccountInfoHelper.GenAccountPwdByOne(accountInfo.Account, loginBody.Password);
                     if (accountInfo.Password != pwd)
                     {
                         var res = HttpServer.Post(url, new Dictionary<string, string>
@@ -100,8 +110,8 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                         if (res.Contains("0"))
                         {
                             accountInfo.Password = pwd;
-                            AccountHelper.UpdateAccountInfo(accountInfo);
-                            accountInfo = AccountHelper.GetAccountInfo(loginBody.Account);
+                            AccountInfoHelper.Instance.Update(accountInfo);
+                            accountInfo = AccountInfoHelper.GetAccountInfo(loginBody.Account);
                         }
                         else
                         {
@@ -125,10 +135,10 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
                 CookieHelper.DelCookie("n", Response);
                 CookieHelper.DelCookie("p", Response);
             }
+            AccountInfoHelper.Login(accountInfo);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
-            var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
-            var result = new LoginResult();
-            result.token = token;
+            var pages = PermissionGroupHelper.PermissionGroupsList.Values.Where(x => !x.MarkedDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
+            var result = new LoginResult { token = token };
             result.datas.AddRange(pages);
             return result;
         }
@@ -142,7 +152,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             {
                 Number = param.GetValue("number"),
             };
-            var accountInfo = AccountHelper.GetAccountInfoByNumber(loginBody.Number);
+            var accountInfo = AccountInfoHelper.GetAccountInfoByNumber(loginBody.Number);
             if (accountInfo == null)
             {
                 return Result.GenError<Result>(Error.NumberNotExist);
@@ -162,8 +172,9 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             CookieHelper.DelCookie("n", Response);
             CookieHelper.DelCookie("p", Response);
             //}
+            AccountInfoHelper.Login(accountInfo);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登录系统");
-            var pages = PermissionHelper.PermissionsList.Values.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
+            var pages = PermissionGroupHelper.PermissionGroupsList.Values.Where(x => !x.MarkedDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id));
             var result = new DataResult();
             result.datas.AddRange(pages);
             return result;
@@ -173,131 +184,132 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
         //[AllowAnonymous]
         public Result Logout()
         {
-            var accountInfo = AccountHelper.CurrentUser;
+            var accountInfo = AccountInfoHelper.CurrentUser;
             if (accountInfo == null)
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
             CookieHelper.DelCookie("token", Response);
             CookieHelper.DelCookie("per", Response);
+            AccountInfoHelper.Logout(accountInfo);
             OperateLogHelper.Log(Request, accountInfo.Id, Request.Path.Value, $"账号{accountInfo.Account}登出系统");
             return Result.GenError<Result>(Error.Success);
         }
 
-        [HttpGet("Permission")]
-        public CommonResult Permission()
-        {
-            var accountInfo = AccountHelper.CurrentUser;
-            if (accountInfo == null)
-            {
-                return Result.GenError<CommonResult>(Error.AccountNotExist);
-            }
+        //[HttpGet("Permission")]
+        //public CommonResult Permission()
+        //{
+        //    var accountInfo = AccountHelper.CurrentUser;
+        //    if (accountInfo == null)
+        //    {
+        //        return Result.GenError<CommonResult>(Error.AccountNotExist);
+        //    }
 
-            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            //{
-            //    return Result.GenError<CommonResult>(Error.NoAuth);
-            //}
-            var result = new CommonResult { data = accountInfo.Permissions };
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
-            return result;
-        }
+        //    //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+        //    //{
+        //    //    return Result.GenError<CommonResult>(Error.NoAuth);
+        //    //}
+        //    var result = new CommonResult { data = accountInfo.Permissions };
+        //    OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+        //    return result;
+        //}
 
-        [HttpGet("Permissions")]
-        public DataResult Permissions()
-        {
-            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            //{
-            //    return Result.GenError<DataResult>(Error.NoAuth);
-            //}
-            var result = new DataResult();
-            //result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0));
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
-            return result;
-        }
+        //[HttpGet("Permissions")]
+        //public DataResult Permissions()
+        //{
+        //    //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+        //    //{
+        //    //    return Result.GenError<DataResult>(Error.NoAuth);
+        //    //}
+        //    var result = new DataResult();
+        //    //result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0).Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+        //    result.datas.AddRange(PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0));
+        //    OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+        //    return result;
+        //}
 
-        [HttpGet("OtherPermissions")]
-        public DataResult OtherPermissions()
-        {
-            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            //{
-            //    return Result.GenError<DataResult>(Error.NoAuth);
-            //}
-            var param = Request.GetRequestParams();
-            var roleStr = param.GetValue("role");
+        //[HttpGet("OtherPermissions")]
+        //public DataResult OtherPermissions()
+        //{
+        //    //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+        //    //{
+        //    //    return Result.GenError<DataResult>(Error.NoAuth);
+        //    //}
+        //    var param = Request.GetRequestParams();
+        //    var roleStr = param.GetValue("role");
 
-            var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
-            if (!roleList.Any())
-            {
-                return Result.GenError<DataResult>(Error.RoleNotSelect);
-            }
-            var roleInfos = RoleHelper.GetRoleInfos(roleList);
-            IEnumerable<int> rolePermissionsList;
-            if (roleInfos == null || !roleInfos.Any())
-            {
-                rolePermissionsList = new List<int>();
-            }
-            else
-            {
-                rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
-            }
+        //    var roleList = roleStr.Split(",").GroupBy(x => x).Where(x => int.TryParse(x.Key, out var _)).Select(y => int.Parse(y.Key)).OrderBy(x => x);
+        //    if (!roleList.Any())
+        //    {
+        //        return Result.GenError<DataResult>(Error.RoleNotSelect);
+        //    }
+        //    var roleInfos = RoleHelper.GetRoleInfos(roleList);
+        //    IEnumerable<int> rolePermissionsList;
+        //    if (roleInfos == null || !roleInfos.Any())
+        //    {
+        //        rolePermissionsList = new List<int>();
+        //    }
+        //    else
+        //    {
+        //        rolePermissionsList = roleInfos.SelectMany(x => x.PermissionsList).Distinct();
+        //    }
 
-            var result = new DataResult();
-            var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !rolePermissionsList.Contains(x.Id)).ToList();
-            //result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
-            result.datas.AddRange(otherPermissions);
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
-            return result;
-        }
+        //    var result = new DataResult();
+        //    var otherPermissions = PermissionHelper.PermissionsList.Values.Where(x => x.Type != 0 && !rolePermissionsList.Contains(x.Id)).ToList();
+        //    //result.datas.AddRange(otherPermissions.Select(x => new { x.Id, x.Name, x.IsPage, x.Type, x.Label, x.Order }));
+        //    result.datas.AddRange(otherPermissions);
+        //    OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+        //    return result;
+        //}
 
-        [HttpGet("Pages")]
-        public DataResult Pages()
-        {
-            var accountInfo = AccountHelper.CurrentUser;
-            if (accountInfo == null)
-            {
-                return Result.GenError<DataResult>(Error.AccountNotExist);
-            }
+        //[HttpGet("Pages")]
+        //public DataResult Pages()
+        //{
+        //    var accountInfo = AccountHelper.CurrentUser;
+        //    if (accountInfo == null)
+        //    {
+        //        return Result.GenError<DataResult>(Error.AccountNotExist);
+        //    }
 
-            //if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            //{
-            //    return Result.GenError<DataResult>(Error.NoAuth);
-            //}
+        //    //if (!PermissionHelper.CheckPermission(Request.Path.Value))
+        //    //{
+        //    //    return Result.GenError<DataResult>(Error.NoAuth);
+        //    //}
 
-            var result = new DataResult();
-            result.datas.AddRange(PermissionHelper.PermissionsList.Values
-                //.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Order, x.Label }));
-                .Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)));
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
-            return result;
-        }
+        //    var result = new DataResult();
+        //    result.datas.AddRange(PermissionHelper.PermissionsList.Values
+        //        //.Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)).Select(x => new { x.Id, x.Name, x.Url, x.Order, x.Label }));
+        //        .Where(x => !x.IsDelete && x.IsPage && accountInfo.PermissionsList.Any(y => y == x.Id)));
+        //    OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+        //    return result;
+        //}
 
-        [HttpPost("DeletePermission")]
-        public Result DeletePermission()
-        {
-            var accountInfo = AccountHelper.CurrentUser;
-            if (accountInfo == null)
-            {
-                return Result.GenError<CommonResult>(Error.AccountNotExist);
-            }
-            var param = Request.GetRequestParams();
-            var permission = param.GetValue("permission");
+        //[HttpPost("DeletePermission")]
+        //public Result DeletePermission()
+        //{
+        //    var accountInfo = AccountHelper.CurrentUser;
+        //    if (accountInfo == null)
+        //    {
+        //        return Result.GenError<CommonResult>(Error.AccountNotExist);
+        //    }
+        //    var param = Request.GetRequestParams();
+        //    var permission = param.GetValue("permission");
 
-            if (!PermissionHelper.CheckPermission(Request.Path.Value))
-            {
-                return Result.GenError<CommonResult>(Error.NoAuth);
-            }
+        //    if (!PermissionHelper.CheckPermission(Request.Path.Value))
+        //    {
+        //        return Result.GenError<CommonResult>(Error.NoAuth);
+        //    }
 
-            if (!permission.IsNullOrEmpty())
-            {
-                var permissionList = permission.Split(",").Select(int.Parse).Distinct();
-                PermissionHelper.Delete(permissionList);
-                PermissionHelper.LoadConfig();
-            }
+        //    if (!permission.IsNullOrEmpty())
+        //    {
+        //        var permissionList = permission.Split(",").Select(int.Parse).Distinct();
+        //        PermissionHelper.Delete(permissionList);
+        //        PermissionHelper.LoadConfig();
+        //    }
 
-            OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
-            return Result.GenError<Result>(Error.Success);
-        }
+        //    OperateLogHelper.Log(Request, AccountHelper.CurrentUser.Id, Request.Path.Value);
+        //    return Result.GenError<Result>(Error.Success);
+        //}
 
     }
 }

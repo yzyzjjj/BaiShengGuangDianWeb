@@ -1,4 +1,4 @@
-﻿namespace ModelBase.Models.Mail
+﻿namespace BaiShengGuangDianWeb.Models.Account
 {
     public class MailType
     {

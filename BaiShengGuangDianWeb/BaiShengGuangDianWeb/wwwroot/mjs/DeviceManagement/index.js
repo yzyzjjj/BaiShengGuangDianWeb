@@ -8,7 +8,7 @@ function pageReady() {
     _permissionList[147] = { uIds: [] };
     _permissionList = checkPermissionUi(_permissionList);
     getDeviceList();
-    $(".ads").css("width", "100%").select2();;
+    $(".ads").css("width", "100%").select2({ matcher });;
     $(".col-sm-2").addClass("mcolsm2");
     $("#addIp").inputmask("ip");
     $("#updateIp").inputmask("ip");
@@ -184,30 +184,26 @@ function getDeviceList(resolve, isUpgrade) {
             var per162 = _permissionList[162].have;
             var per164 = _permissionList[164].have;
             var per163 = _permissionList[163].have;
-            var op = function (data, type, row) {
-                var html = '<div class="btn-group">' +
-                    '<button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >' +
-                    '<button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' +
-                    '   <span class="caret"></span>' +
-                    '   <span class="sr-only">Toggle Dropdown</span>' +
-                    '</button>' +
-                    '<ul class="dropdown-menu pointer" role="menu">{0}{1}{2}{3}{4}' +
-                    '</ul>' +
-                    '</div>';
-                var controlLi = '<li><a onclick="showControl({0},\'{1}\')">控制</a></li>'.format(data.Id, escape(data.DeviceStateStr));
-                var detailLi = '<li><a onclick="showDetail({0})">详情</a></li>'.format(data.Id);
-                var updateLi = '<li><a onclick="showUpdateModel({0}, \'{1}\', \'{2}\', \'{3}\', \'{4}\', \'{5}\', \'{6}\', {7}, {8}, {9}, {10}, {11}, {12}, \'{13}\', \'{14}\', {15},{16}, \'{17}\')">修改</a></li>'
-                    .format(data.Id, escape(data.DeviceName), escape(data.Code), escape(data.MacAddress), escape(data.Ip), escape(data.Port), escape(data.Identifier), escape(data.DeviceModelId), escape(data.ScriptId),
-                        escape(data.FirmwareId), escape(data.ApplicationId), escape(data.HardwareId), escape(data.SiteId), escape(data.Administrator), escape(data.Remark), escape(data.DeviceCategoryId), escape(data.ClassId), escape(data.Icon));
-                var upgradeLi = '<li><a onclick="showUpgrade({0})">升级</a></li>'.format(data.Id);
-                var deleteLi = '<li><a onclick="deleteDevice({0}, \'{1}\')">删除</a></li>'.format(data.Id, escape(data.Code));
-                html = html.format(
-                    per148 ? controlLi : '',
-                    per147 ? detailLi : '',
-                    per162 ? updateLi : '',
-                    per164 ? upgradeLi : '',
-                    per163 ? deleteLi : '');
-                return html;
+            const op = function (data, type, row) {
+                const controlLi = `<li><a onclick="showControl(${data.Id},\'${data.DeviceStateStr}\')">控制</a></li>`;
+                const detailLi = `<li> <a onclick="showDetail(${data.Id})">详情</a></li>`;
+                const updateLi = `<li><a onclick="showUpdateModel(${data.Id}, \'${escape(data.DeviceName)}\', \'${escape(data.Code)}\', \'${escape(data.MacAddress)}\', \'${escape(data.Ip)}\', \'${escape(data.Port)}\', \'${escape(data.Identifier)}\', ${escape(data.DeviceModelId)}, ${escape(data.ScriptId)}, ${escape(data.FirmwareId)}, ${escape(data.ApplicationId)}, ${escape(data.HardwareId)}, \'${escape(`${data.WorkshopId}-${data.SiteId}`)}\', \'${escape(data.Administrator)}\', \'${escape(data.Remark)}\', ${escape(data.DeviceCategoryId)},${escape(data.ClassId)}, \'${escape(data.Icon)}\')">修改</a></li>`;
+                const upgradeLi = `<li><a onclick="showUpgrade(${data.Id})">升级</a></li>`;
+                const deleteLi = `<li><a onclick="deleteDevice(${data.Id}, \'${escape(data.Code)}\')">删除</a></li>`;
+                return `<div class="btn-group">
+                            <button type = "button" class="btn btn-default" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-asterisk"></i>操作</button >
+                            <button type = "button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                               <span class="caret"></span>
+                               <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu pointer" role="menu">
+                                ${(per147 ? detailLi : '')}
+                                ${(per162 ? updateLi : '')}
+                                ${(per148 ? controlLi : '')}
+                                ${(per164 ? upgradeLi : '')}
+                                ${(per163 ? deleteLi : '')}
+                            </ul>
+                        </div>`;
             }
             var ip = function (data, type, row) {
                 return `${data.Ip}:${data.Port}`;
@@ -237,11 +233,10 @@ function getDeviceList(resolve, isUpgrade) {
                 return ++meta.row;
             }
             var rModal = function (data, type, meta) {
-                var placeName = data.SiteName + data.RegionDescription;
+                var placeName = data.WorkshopName + data.Region;
                 return ("" + placeName).length > tdShowContentLength
                     ? placeName.substr(0, tdShowContentLength) +
-                    ' <a href = \"javascript:showPlaceNameModel({0})\">...</a> '
-                        .format(data.Id)
+                    `<a href = \"javascript:showPlaceNameModel(${data.Id})\">...</a>`
                     : placeName;
             };
             $("#deviceList")
@@ -259,7 +254,7 @@ function getDeviceList(resolve, isUpgrade) {
                         { "data": "Code", "title": "机台号", "type": "html-percent" },
                         { "data": "Class", "title": "设备分类" },
                         { "data": null, "title": "设备型号", "render": modelName },
-                        { "data": null, "title": "摆放位置", "render": rModal },
+                        { "data": null, "title": "位置", "render": rModal },
                         { "data": null, "title": "IP地址", "render": ip },
                         { "data": "AdministratorName", "title": "管理员" },
                         { "data": null, "title": "运行状态", "render": state },
@@ -274,7 +269,8 @@ function showPlaceNameModel(id) {
     var data = {}
     data.opType = 100;
     data.opData = JSON.stringify({
-        id: id
+        id: id,
+        menu: false
     });
     ajaxPost("/Relay/Post", data,
         function (ret) {
@@ -283,8 +279,8 @@ function showPlaceNameModel(id) {
                 return;
             }
             if (ret.datas.length > 0) {
-                $("#siteName").html(ret.datas[0].SiteName);
-                $("#regionDescription").html(ret.datas[0].RegionDescription);
+                $("#siteName").html(ret.datas[0].WorkshopName);
+                $("#regionDescription").html(ret.datas[0].Region);
             }
             $("#placeNameModel").modal("show");
         });
@@ -342,9 +338,14 @@ function showAddModel() {
             var i;
             var data;
             var html = '';
-            for (i = 0; i < ret.sites.length; i++) {
-                data = ret.sites[i];
-                html += option.format(data.Id, data.SiteName + data.RegionDescription);
+
+            for (i = 0; i < ret.workshops.length; i++) {
+                const workshop = ret.workshops[i];
+                var sites = ret.sites.filter(x => x.WorkshopId == workshop.Id);
+                for (var j = 0; j < sites.length; j++) {
+                    data = sites[j];
+                    html += option.format(`${workshop.Id}-${data.Id}`, workshop.Name + data.Region);
+                }
             }
             $('#addSite').append(html);
             html = "";
@@ -441,12 +442,16 @@ function addDevice() {
         showTip("addHardwareTip", "硬件版本错误");
         add = false;
     }
-    //设备所在场地编号
-    var siteId = $("#addSite").val();
-    if (isStrEmptyOrUndefined(siteId)) {
+    //设备位置编号
+    var wsId = $("#addSite").val();
+    if (isStrEmptyOrUndefined(wsId)) {
         showTip("addSiteTip", "场地错误");
         add = false;
     }
+    var ws = wsId.split("-");
+    var wId = ws[0];
+    var siteId = ws[1];
+
     //设备管理员
     var administrator = $("#addAdministrator").val();
     //备注
@@ -455,6 +460,8 @@ function addDevice() {
         return;
 
     let device = {
+        //车间
+        WorkshopId: wId,
         //机台号
         Code: code,
         //设备名
@@ -479,7 +486,7 @@ function addDevice() {
         ApplicationId: applicationId,
         //设备硬件版本编号
         HardwareId: hardwareId,
-        //设备所在场地编号
+        //设备位置编号
         SiteId: siteId,
         //设备管理员
         Administrator: administrator,
@@ -613,9 +620,13 @@ function showUpdateModel(id, deviceName, code, macAddress, ip, port, identifier,
             var i;
             var data;
             var html = '';
-            for (i = 0; i < ret.sites.length; i++) {
-                data = ret.sites[i];
-                html += option.format(data.Id, data.SiteName + data.RegionDescription);
+            for (i = 0; i < ret.workshops.length; i++) {
+                const workshop = ret.workshops[i];
+                var sites = ret.sites.filter(x => x.WorkshopId == workshop.Id);
+                for (var j = 0; j < sites.length; j++) {
+                    data = sites[j];
+                    html += option.format(`${workshop.Id}-${data.Id}`, workshop.Name + data.Region);
+                }
             }
             $('#updateSite').append(html);
             html = '';
@@ -731,12 +742,16 @@ function updateDevice() {
         showTip("updateHardwareTip", "硬件版本错误");
         update = false;
     }
-    //设备所在场地编号
-    var siteId = $("#updateSite").val();
-    if (isStrEmptyOrUndefined(siteId)) {
+    //设备位置编号
+    var wsId = $("#updateSite").val();
+    if (isStrEmptyOrUndefined(wsId)) {
         showTip("updateSiteTip", "场地错误");
         update = false;
     }
+
+    var ws = wsId.split("-");
+    var wId = ws[0];
+    var siteId = ws[1];
     //设备管理员
     var administrator = $("#updateAdministrator").val();
     //备注
@@ -752,6 +767,8 @@ function updateDevice() {
         return;
     var device = {
         Id: id,
+        //车间
+        WorkshopId: wId,
         //机台号
         Code: code,
         //设备名
@@ -776,7 +793,7 @@ function updateDevice() {
         ApplicationId: applicationId,
         //设备硬件版本编号
         HardwareId: hardwareId,
-        //设备所在场地编号
+        //设备位置编号
         SiteId: siteId,
         //设备管理员
         Administrator: administrator,
@@ -880,7 +897,7 @@ function showUpgrade(id) {
         $('#upgradeHardware').append(e[2]).val(d.HardwareId).trigger('change');
         $('#upgradeApplication').append(e[3]).val(d.ApplicationId).trigger('change');
     });
-    $('#upgradeSite').val(d.SiteName);
+    $('#upgradeSite').val(d.WorkshopName);
     $('#upgradeAdministrator').val(d.AdministratorName);
     $('#upgradeRemark').val(d.Remark);
     $('#upgradeModel').modal('show');

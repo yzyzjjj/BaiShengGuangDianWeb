@@ -152,7 +152,7 @@ function tFootTrCount(t) {
         if (oldData.TaxRate == taxRate) {
             price = oldData.Price;
         } else {
-            price = parseFloat((taxPrice * (1 - taxRate / 100)).toFixed(6));
+            price = parseFloat((taxPrice * 100 / (100 + taxRate)).toFixed(6));
         }
         tr.find('.price').text(price);
         const number = parseFloat(tr.find('.number').text()) || 0;
@@ -173,13 +173,15 @@ function tFootCount() {
     const numArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.number').text() >> 0);
     const priceArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.price').text());
     const taxAmountArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.tax-amount').text());
+    const taxArr = _purchaseDataTable.rows().nodes().map(tr => $(tr).find('.taxRate').val());
 
     const arr = [];
     for (let i = 0, len = numArr.length; i < len; i++) {
         arr[i] = {
             Number: numArr[i],
             Price: priceArr[i],
-            TaxAmount: taxAmountArr[i]
+            TaxAmount: taxAmountArr[i],
+            TaxRate: taxArr[i]
         }
     }
     computePrice(arr);
@@ -792,6 +794,7 @@ function setPurchaseList(arr, isQuote) {
                             style="width:80px" value=${parseFloat(d.TaxRate) || 0} old=${parseFloat(d.TaxRate) || 0} taxAmount=${d.TaxAmount}>`;
     const deBtn = () => `<button type="button" class="btn btn-danger btn-sm" onclick="delPurchaseTr.call(this)"><i class="fa fa-minus"></i></button>`;
     $('#purchasingCompany').val('');
+    var arrColor = distinct(arr.map(x => x.Order));
     //$('#purchasingCompany').val(arr[0].PurchasingCompany || '');
     _purchaseDataTable = $('#purchaseList').DataTable({
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
@@ -806,7 +809,7 @@ function setPurchaseList(arr, isQuote) {
         columns: [
             { data: null, title: "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", render: d => `<input type="checkbox" class="icb_minimal isEnable">`, orderable: false },
             { data: null, title: '序号', render: (a, b, c, d) => ++d.row },
-            { data: 'Order', title: '订单编号' },
+            { data: 'Order', title: '订单编号', sClass: 'order text-bold' },
             { data: 'Code', title: '物料编码' },
             { data: 'Name', title: '物料名称' },
             { data: 'Specification', title: '规格' },
@@ -867,6 +870,10 @@ function setPurchaseList(arr, isQuote) {
             this.append(tFoot);
             computePrice(arr);
             this.find('tfoot tr:last th').css('borderTop', 0);
+        },
+        createdRow: function (tr, d) {
+            const i = arrColor.indexOf(d.Order);
+            $(tr).find(`.order`).css('color', optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]);
         }
     });
 }
@@ -876,11 +883,11 @@ function computePrice(data) {
     let amount = 0, tax = 0;
     for (let i = 0, len = data.length; i < len; i++) {
         const d = data[i];
-        const all = parseFloat(d.TaxAmount);
-        amount = floatObj.add(amount, all);
+        isStrEmptyOrUndefined(d.TaxRate) && (d.TaxRate = 0);
+        amount = decimalObj.add(amount, d.TaxAmount);
         //tax = (d.Number > 0 && d.Number == d.Stock) ? floatObj.add(tax, floatObj.subtract(all, d.TaxAmount))
         //    : floatObj.add(tax, floatObj.subtract(all, floatObj.multiply(parseFloat(d.Number), parseFloat(d.Price))));
-        tax = floatObj.add(tax, floatObj.subtract(all, floatObj.multiply(parseFloat(d.Number), parseFloat(d.Price))));
+        tax = decimalObj.add(tax, decimalObj.divide(decimalObj.multiply(d.TaxAmount, d.TaxRate), decimalObj.add(100, d.TaxRate)));
     }
     $('#purchaseAmount').text(amount ? parseFloat(amount.toFixed(6)) : 0);
     $('#purchaseTax').text(tax ? parseFloat(tax.toFixed(6)) : 0);

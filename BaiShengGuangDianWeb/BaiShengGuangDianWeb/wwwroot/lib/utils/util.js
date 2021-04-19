@@ -1183,6 +1183,50 @@ function inputEnd(s) {
     }
 }
 
+
+//整数,逗号隔开
+function onInputDouHao(obj) {
+    var v = "";
+    if (obj.value)
+        v = obj.value;
+    else if ($(obj).val())
+        v = $(obj).val();
+    else if ($(obj).text())
+        v = $(obj).text();
+
+    v = inputDouHao(v);
+    if (obj.value)
+        obj.value = v;
+    else if ($(obj).val())
+        $(obj).val(v);
+    else if ($(obj).text())
+        $(obj).text(v);
+}
+
+function inputDouHao(s, zs = 5, xs = 4) {
+
+    //修复第一个字符是逗号 的情况.
+    if (s != '' && s.substr(0, 1) == ',') {
+        s = "";
+    }
+    //修复最后一个字符是逗号 的情况.
+    while (s != '' && s[s.length - 1] == ',') {
+        s = s.substr(0, s.length - 1);
+    }
+    s = s.replace(/^0*(0\.|[1-9])/, '$1');//解决 粘贴不生效
+    s = s.replace(/[^\d,]/g, "");  //清除“数字”和“,”以外的字符
+    //s = s.replace(/\.{2,}/g, "."); //只保留第一个. 清除多余的     
+    s = s.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+
+    //修复最后一个字符是逗号 的情况.
+    while (s != '' && s[s.length - 1] == ',') {
+        s = s.substr(0, s.length - 1);
+    }
+    isStrEmptyOrUndefined(s) && (s = '');
+    return s;
+}
+
+
 function autoCal(obj, ui) {
     if (obj.value == '')
         return;
@@ -1797,6 +1841,11 @@ function setOptions(data, name, color = false) {
     return data.reduce((a, b, i) => `${a}<option value="${b.Id}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${b[name]}</option>`, '');
 }
 
+//options设置
+function setOptionsWithKey(data, id, name, color = false) {
+    return data.reduce((a, b, i) => `${a}<option value="${b[id]}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${b[name]}</option>`, '');
+}
+
 //将数字金额转换为大写人民币汉字
 function convertCurrency(money) {
     //汉字的数字
@@ -1957,6 +2006,52 @@ var floatObj = function () {
             case 'divide':
                 result = (n1 / n2) * (t2 / t1);
                 return result;
+        }
+    }
+
+    // 加减乘除的四个接口
+    function add(a, b) {
+        return operation(a, b, 'add');
+    }
+
+    function subtract(a, b) {
+        return operation(a, b, 'subtract');
+    }
+
+    function multiply(a, b) {
+        return operation(a, b, 'multiply');
+    }
+
+    function divide(a, b) {
+        return operation(a, b, 'divide');
+    }
+
+    // exports
+    return {
+        add: add,
+        subtract: subtract,
+        multiply: multiply,
+        divide: divide
+    }
+}();
+
+
+//js计算精度丢失解决方案
+var decimalObj = function () {
+
+    /*
+     * 核心方法，decimal
+     */
+    function operation(a, b, op) {
+        switch (op) {
+            case 'add':
+                return new Decimal(a).add(new Decimal(b)).toNumber();
+            case 'subtract':
+                return new Decimal(a).sub(new Decimal(b)).toNumber();
+            case 'multiply':
+                return new Decimal(a).mul(new Decimal(b)).toNumber();
+            case 'divide':
+                return new Decimal(a).div(new Decimal(b)).toNumber();
         }
     }
 
@@ -2152,7 +2247,9 @@ function myPromise(opType, opData = undefined, cover = 1, func = undefined, msg 
 function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, ordering = true) {
     const checkColumns = [{ data: null, title: '', render: tableDefault().isEnable, orderable: false, sWidth: 'auto', visible: checkShow }];
     const defaultColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
-    const defaultChoseColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
+    const chosenColumns = [{ data: "XvHao", title: "序号", sWidth: '25px', sClass: 'xvhao' }];
+    const choseAllColumns = [{ data: null, title: "全选<input type='checkbox' class='icb_minimal' id='checkAll'>", render: d => `<input type="checkbox" class="icb_minimal isEnable">`, orderable: false }];
+
     const obj = {
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         bAutoWidth: !isCheck || !checkShow,
@@ -2173,7 +2270,7 @@ function dataTableConfig(d = 0, isCheck = false, checkShow = true, order = 0, or
         obj.columns = obj.columns.concat(checkColumns));
     obj.addColumns = function (columns, xvHao = true) {
         !obj.columns && (obj.columns = []);
-        xvHao && (obj.columns = obj.columns.concat(defaultColumns));
+        if (xvHao && !~obj.columns.indexOf(defaultColumns)) obj.columns = obj.columns.concat(defaultColumns);
         obj.columns = obj.columns.concat(columns);
     }
     obj.modifyColumns = function (columns, xvHao = true, chose = false) {
@@ -2267,6 +2364,16 @@ function tableDefault() {
         span: (className, d) => `<span class="textOn ${className}">${d}</span>`,
         input: (className, d) => `<span class="textOn">${d}</span><input type="text" class="form-control text-center textIn ${className} hidden" maxlength="20" style="min-width:120px;width:${className === 'remark' ? '100%' : 'auto'}" value=${d}>`,
         addInput: (className, width, d) => `<input type="text" class="form-control text-center ${className}" style="margin:auto;min-width:70px;width:${width}" value="${d}">`,
+        emptyInput: (className, param, d) => {
+            if (d == undefined && param != undefined)
+                d = param;
+            if (param == undefined)
+                param = "";
+            var s = param.split(',');
+            return `<span class="textOn"></span>
+                        <input type="text" class="form-control text-center textIn ${className} hidden" 
+                            maxlength="20" style="min-width:${s[0] || 80}px;width:${s[1] || 80}px;" value=${d}>`;
+        },
         numberInput: (className, param, d) => {
             var s = param.split(',');
             return `<span class="textOn">${(s[5] ? "" : d)}</span><input type="text" class="form-control text-center textIn ${className} hidden" 
@@ -2283,7 +2390,7 @@ function tableDefault() {
         delBtn: () => `<button class="btn btn-danger btn-xs" onclick="delDataTableTr.call(this)"><i class="fa fa-minus"></i></button>`,
         addBtn: fn => `<button class="btn btn-success btn-xs" onclick="${fn}.call(this)"><i class="fa fa-plus"></i></button>`,
         setBtn: () => '<button class="btn btn-primary btn-sm set-btn">设置</button>',
-        detailBtn: (fn, d) => `<button class="btn btn-info btn-sm" onclick="${fn}.call(this)" value="${d}">查看</button>`,
+        detailBtn: (fn, d) => `<button class="btn btn-info btn-sm" onclick="${fn}.call(this, ${d})" value="${d}">查看</button>`,
         processDetail: d => d.replace(/,/g, ' > '),
         text: (title, d, len = null) => d.length > (len ? len : tdShowLength)
             ? `<span title="${d}" onclick = "showAllContent('${escape(d)}', '${title}')">${d.substring(0, (len ? len : tdShowLength))}...</span>`
@@ -2344,8 +2451,8 @@ function tableDefault() {
 
 //添加一行
 function addDataTableTr(id, obj) {
-    //obj.XvHao = $(id).DataTable().rows()[0].length + 1;
-    obj.XvHao = '';
+    obj.XvHao = $(id).DataTable().rows()[0].length + 1;
+    //obj.XvHao = '';
     const dataTable = $(id).DataTable();
     dataTable.row.add(obj).draw(false);
     dataTable.column(0).nodes().each((item, i) => {
@@ -2650,7 +2757,7 @@ function getScrollTable(id, columns) {
 
 //获取滚动table
 function getTable(id, columns, border = 0) {
-    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th>${b}</th>`, '') : "";
+    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th style='width:${b.width ? `${b.width}px` : "auto"}'>${b}</th>`, '') : "";
     const table =
         `<div class="kb_item_tablebox">
         <table border="${border}" cellspacing="0" cellpadding="0" id="${id}">
@@ -2666,6 +2773,23 @@ function getTable(id, columns, border = 0) {
     return table;
 }
 
+//获取滚动table
+function getTableW(id, columns, border = 0) {
+    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th style='width:${b.width && b.width !== "auto" ? `${b.width}px` : "auto"}'>${b.title}</th>`, '') : "";
+    const table =
+        `<div class="kb_item_tablebox">
+            <table border="${border}" cellspacing="0" cellpadding="0" id="${id}" style="table-layout:fixed;">
+                <thead>
+                    <tr>
+                        ${column}
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
+
+    return table;
+}
 function autoScroll(tableId) {
     const tb = $(`#${tableId} tbody`);
     const outerHeight = tb.find('tr:first').height();
@@ -2696,4 +2820,73 @@ function stopScrollTable(obj, timer, tableId) {
     clearInterval(obj[timer]);
     //obj[timer] = "";
     delete obj[timer];
+}
+
+function showPermissions(uiName, list) {
+    var permissionTypes = `<div class="box box-solid noShadow" style="margin-bottom: 0;">
+                            <div class="box-header no-padding">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-minus"></i></button>
+                                <label class="pointer" style="margin:0;font-weight:inherit">
+                                    <input type="checkbox" class="on_cb" style="width: 15px" value="0">
+                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">权限管理</span>
+                                </label>
+                            </div>
+                            <div class="box-body no-padding">
+                                <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{0}</ul>
+                            </div>
+                        </div>`;
+    var mOptionStr = `<li><div class="box box-solid noShadow collapsed-box" style="margin-bottom: 0;">
+                        <div class="box-header no-padding">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="on_i fa fa-plus"></i></button>
+                            <label class="pointer" style="margin:0;font-weight:inherit">
+                                <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                                <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
+                            </label>
+                        </div>
+                        <div class="box-body no-padding">
+                            <ul class="on_ul nav nav-pills nav-stacked mli" style="margin-left: 20px">{2}</ul>
+                        </div>
+                    </div></li>`;
+    var mNameStr = `<li><div class="box box-solid noShadow" style="margin-bottom: 0;">
+                            <div class="box-header no-padding">
+                                <a type="button" class="btn btn-box-tool disabled" data-widget="collapse"><i class="fa fa-chevron-right"></i></a>
+                                <label class="pointer" style="margin:0;font-weight:inherit">
+                                    <input type="checkbox" class="on_cb" style="width: 15px" value="{0}">
+                                    <span class="textOverTop" style="vertical-align: middle;font-size: 16px">{1}</span>
+                                </label>
+                            </div>
+                        </div></li>`;
+    list.sort((a, b) => a.order - b.order);
+    var opObj = { parent: [] };
+    for (var i = 0, len = list.length; i < len; i++) {
+        var d = list[i];
+        var par = d.Parent;
+        par == 0 ? opObj.parent.push(d) : opObj[par] ? opObj[par].push(d) : opObj[par] = [d];
+    }
+    var childTree = arr => {
+        return arr.map(item => {
+            var obj = '';
+            obj += opObj[item.Id]
+                ? mOptionStr.format(item.Id, item.Name, childTree(opObj[item.Id]))
+                : mNameStr.format(item.Id, item.Name);
+            return obj;
+        }).join('');
+    }
+    $(`#${uiName}`).empty().append(opObj.parent.length ? permissionTypes.format(childTree(opObj.parent)) : '');
+    $(".on_cb").iCheck({
+        checkboxClass: 'icheckbox_minimal',
+        increaseArea: '20%'
+    });
+}
+
+//获取数据 无覆盖层
+function getListNoCover(func, callBack = null, qId = 0, table = true, cover = 0) {
+    if (func)
+        func(null, false, callBack, cover, table, qId);
+}
+
+//获取菜单数据 无覆盖层
+function getMenuNoCover(func, callBack = null, qId = 0, table = false, cover = 0) {
+    if (func)
+        func(null, true, callBack, cover, table, qId);
 }

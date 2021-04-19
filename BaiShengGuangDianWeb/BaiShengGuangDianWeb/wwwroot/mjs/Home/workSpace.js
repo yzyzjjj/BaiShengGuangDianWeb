@@ -697,8 +697,8 @@ function reportFault() {
         FaultTime: time,
         //报修人
         Proposer: proposer,
-        //故障描述
-        FaultDescription: faultDesc,
+        //故障补充
+        Supplement: faultDesc,
         //故障类型
         FaultTypeId: faultType
     }
@@ -1509,7 +1509,7 @@ function showLogDetailModel(logId, isLook, isShow) {
         $('#faultTypeText').text(d.FaultTypeName);
         $('#faultTimeText').text(d.FaultTime.slice(0, d.FaultTime.lastIndexOf(':')));
         $('#faultTypeDesc').text(d.FaultDescription);
-        $('#faultSup').text(d.Fault1);
+        $('#faultSup').text(d.Supplement);
         var priority = d.Priority;
         var str = '', color = '';
         switch (priority) {

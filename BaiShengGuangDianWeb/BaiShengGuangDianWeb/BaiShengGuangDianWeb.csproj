@@ -7,14 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\Api\AccountManagement\**" />
     <Compile Remove="Views\Home\css\**" />
     <Compile Remove="wwwroot\mimages\**" />
+    <Content Remove="Controllers\Api\AccountManagement\**" />
     <Content Remove="Views\Home\css\**" />
     <Content Remove="wwwroot\mimages\**" />
+    <EmbeddedResource Remove="Controllers\Api\AccountManagement\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
     <EmbeddedResource Remove="wwwroot\mimages\**" />
+    <None Remove="Controllers\Api\AccountManagement\**" />
     <None Remove="Views\Home\css\**" />
     <None Remove="wwwroot\mimages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Base\Helper\HtmlHelper.cs" />
+    <Compile Remove="Base\Helper\OrganizationUnitHelper.cs" />
+    <Compile Remove="Base\Helper\RoleHelper.cs" />
+    <Compile Remove="Models\Account\OrganizationUnit.cs" />
+    <Compile Remove="Models\Account\RoleInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +47,9 @@
   <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Views\AccountManagement\Workshop.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\ManufactureManagement\CheckWorkSpace.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>

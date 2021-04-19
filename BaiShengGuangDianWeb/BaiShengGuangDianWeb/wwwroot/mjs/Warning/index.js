@@ -20,17 +20,22 @@ function pageReady() {
     $('.form_date').val(getDate()).datepicker('update');
     //设备数据
     //new Promise(resolve => getWarnSet(resolve, 1, '.device-warn')).then(() => getDeviceData(false));
-    new Promise(resolve => getWarnSet(resolve, 1, '.device-warn')).then(() => { });
+    //new Promise(resolve => getWarnSet(resolve, 1, '.device-warn')).then(() => { });
+
+    const getDeviceWarnSetFunc = new Promise(resolve => getWarnSet(resolve, 1, '.device-warn'));
+    const getProductionWarnSetFunc = new Promise(resolve => getWarnSet(resolve, 2, '.production-warn'));
+    Promise.all([getDeviceWarnSetFunc, getProductionWarnSetFunc]).then(ret => {
+    });
     $('#deviceSTime,#deviceETime').on('changeDate', () => getDeviceData(false));
     $('#deviceWarn').on('select2:select', () => getDeviceData(false));
-    $('#devCurrentLi').one('click', () => getDeviceData(true));
+    //$('#devCurrentLi').one('click', () => getDeviceData(true));
     $('#deviceWarnCurrent').on('select2:select', () => getDeviceData(true));
-    $('#devDealLogLi').one('click', () => getDealLog('device'));
+    //$('#devDealLogLi').one('click', () => getDealLog('device'));
     //生产数据
-    $('#productionBox').one('click', () => new Promise(resolve => getWarnSet(resolve, 2, '.production-warn')).then(() => getProductionData(false)));
+    //$('#productionBox').one('click', () => new Promise(resolve => getWarnSet(resolve, 2, '.production-warn')).then(() => getProductionData(false)));
     $('#productionSTime,#productionETime').on('changeDate', () => getProductionData(false));
     $('#productionWarn').on('select2:select', () => getProductionData(false));
-    $('#productionCurrentLi').one('click', () => getProductionData(true));
+    //$('#productionCurrentLi').one('click', () => getProductionData(true));
     $('#productionWarnCurrent').on('select2:select', () => getProductionData(true));
 }
 
@@ -220,8 +225,8 @@ function setWarnLogList(el, data, isCurrent) {
         const isDeal = d => d == 1 ? '<span class="text-black">是</span>' : '否';
         const time = d => (convertTime0(d.StartTime) == "" && convertTime0(d.EndTime) == "" ? "" : `${d.StartTime}至${d.EndTime}`);
         const frequency = d => {
-            const arr = ['', '每次', '秒', '分', '小时', '天', '周', '月', '年'];
-            return d.Interval == 1 ? `<span>${arr[d.Interval]}</span>` : `<span>${d.Frequency}${arr[d.Interval]}${d.Count}次</span>`;
+            const arr = ['', '每次', '连续', '秒', '分', '小时', '天', '周', '月', '年', '连续'];
+            return d.Interval == 1 ? `<span>${arr[d.Interval]}</span>` : d.Interval == 2 ? `<span>${arr[d.Interval]}${d.Count}次</span>` : `<span>${d.Frequency}${arr[d.Interval]}${d.Count}次</span>`;
         };
         const condition = d => {
             const arr = ['', '大于', '大于等于', '小于', '小于等于'];

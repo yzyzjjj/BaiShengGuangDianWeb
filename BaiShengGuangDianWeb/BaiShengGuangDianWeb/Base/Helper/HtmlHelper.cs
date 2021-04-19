@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace BaiShengGuangDianWeb.Base.Helpers
+namespace BaiShengGuangDianWeb.Base.Helper
 {
     public static class HtmlHelper
     {

@@ -8,28 +8,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BaiShengGuangDianWeb.Models.Account;
 
 namespace BaiShengGuangDianWeb.Base.Server
 {
     public class ServerConfig
     {
         public static DataBase WebDb;
-        public static string PasswordKey;
-        public static string EmailAccount;
-        public static string EmailPassword;
         public static RedisHelper RedisHelper;
         public static Dictionary<string, Action> Loads;
         public static void Init(IConfiguration configuration)
         {
             WebDb = new DataBase(configuration.GetConnectionString("WebDb"));
-            PasswordKey = configuration.GetAppSettings<string>("PasswordKey");
-            EmailAccount = configuration.GetAppSettings<string>("EmailAccount");
-            EmailPassword = configuration.GetAppSettings<string>("EmailPassword");
             RedisHelper.Init(configuration);
+            AccountInfoHelper.Init(configuration);
             Loads = new Dictionary<string, Action>
             {
-                {PermissionHelper.TableName, PermissionHelper.LoadConfig},
                 {ManagementServerHelper.TableName, ManagementServerHelper.LoadConfig},
+                {PermissionHelper.TableName, PermissionHelper.LoadConfig},
+                {PermissionGroupHelper.TableName, PermissionGroupHelper.LoadConfig},
             };
 
             foreach (var action in Loads.Values)
