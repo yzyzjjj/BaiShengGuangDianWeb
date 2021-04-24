@@ -19,7 +19,6 @@
         var rData = ret.datas;
         var lastUrl = GetCookie(lastLocation);
         if (!isStrEmptyOrUndefined(lastUrl)) {
-            DelCookie(lastLocation);
             window.location.href = lastUrl;
             return;
         }

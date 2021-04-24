@@ -189,6 +189,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Account
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
+            CookieHelper.DelCookie("lastLocation", Response);
             CookieHelper.DelCookie("token", Response);
             CookieHelper.DelCookie("per", Response);
             AccountInfoHelper.Logout(accountInfo);

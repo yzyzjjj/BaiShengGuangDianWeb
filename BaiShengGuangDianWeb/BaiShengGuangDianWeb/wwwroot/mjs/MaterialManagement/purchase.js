@@ -796,6 +796,8 @@ function setPurchaseList(arr, isQuote) {
     $('#purchasingCompany').val('');
     var arrColor = distinct(arr.map(x => x.Order));
     //$('#purchasingCompany').val(arr[0].PurchasingCompany || '');
+    var count = arr.length;
+    var t = 0;
     _purchaseDataTable = $('#purchaseList').DataTable({
         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
         destroy: true,
@@ -837,19 +839,27 @@ function setPurchaseList(arr, isQuote) {
                 checkboxClass: 'icheckbox_minimal-red',
                 radioClass: 'iradio_minimal',
                 increaseArea: '20%'
+            }).on("ifChanged", function (event) {
+                if ($(this).is(":checked")) {
+                    t++;
+                    //if (count == t)
+                    //    $("#checkAll").iCheck('check');
+                } else {
+                    t--;
+                    $("#checkAll").iCheck('uncheck');
+                }
             });
 
             $("#checkAll").on("ifChanged", function (event) {
                 if ($(this).is(":checked")) {
                     $("#purchaseList .icb_minimal").iCheck('check');
                 } else {
-                    $("#purchaseList .icb_minimal").iCheck('uncheck');
+                    if (count == t)
+                        $("#purchaseList .icb_minimal").iCheck('uncheck');
                 }
             });
             if ($("#checkAll").is(":checked")) {
                 $("#purchaseList .icb_minimal").iCheck('check');
-            } else {
-                $("#purchaseList .icb_minimal").iCheck('uncheck');
             }
         },
         initComplete: function () {
@@ -948,7 +958,7 @@ function printPurchaseList() {
     }
     let purchasingCompany = $('#purchasingCompany').val().trim();
     let ops = '';
-
+    const codes = [];
     const trs = _purchaseDataTable.rows().nodes();
     for (let i = 0, len = trs.length; i < len; i++) {
         const tr = $(trs[i]);
@@ -956,37 +966,23 @@ function printPurchaseList() {
         if (tds.eq(0).find('.isEnable').is(":checked")) {
             const purchaseCode = tds.eq(2).text().trim();
             ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
+            !codes.includes(purchaseCode) && codes.push(purchaseCode);
         }
     }
     //_purchaseDataTable.column(2).nodes().each(el => {
     //    const purchaseCode = $(el).text().trim();
     //    ops.includes(purchaseCode) || (ops += `<option value=${purchaseCode}>${purchaseCode}</option>`);
     //});
-    const selectOp = `<label class="control-label text-nowrap">订单号选择：</label><select class="form-control" id="purchaseCode">${ops}</select>`;
-    layer.confirm(selectOp, {
-        btn: ['打印', '取消'],
-        success: function () {
-            this.enterEsc = function (event) {
-                if (event.keyCode === 13) {
-                    $(".layui-layer-btn0").click();
-                    return false; //阻止系统默认回车事件
-                } else if (event.keyCode == 27) {
-                    $(".layui-layer-btn1").click();
-                    return false;
-                }
-            };
-            $(document).on('keydown', this.enterEsc); //监听键盘事件，关闭层
-        },
-        end: function () {
-            $(document).off('keydown', this.enterEsc); //解除键盘关闭事件
-        }
-    }, function (index) {
-        const code = $('#purchaseCode').val();
-        if (isStrEmptyOrUndefined(code)) {
-            layer.msg('订单号不能为空');
-            return;
-        }
-        layer.close(index);
+
+    const length = codes.length;
+    if (length <= 0) {
+        layer.msg('请选择订单号');
+        return;
+    }
+    const all = $("#checkAll").is(":checked");
+    let printContent = "";
+    for (var c = 0; c < length; c++) {
+        const code = codes[c];
         const thead = '<thead><tr><th>编号</th><th>物料编码</th><th>名称</th><th>类别</th><th>规格</th><th>单位</th><th>入库数量</th><th>单价</th><th>不含税金额</th><th>税额</th><th>合计金额</th><th>请购人</th></tr></thead>';
         let tbodyTrs = '';
         const colIndex = [3, 4, 5, 6, 8, 9, 10];
@@ -996,9 +992,9 @@ function printPurchaseList() {
         for (let i = 0, len = trs.length; i < len; i++) {
             const tr = $(trs[i]);
             const tds = tr.find('td');
-            if (($("#checkAll").is(":checked") || tds.eq(0).find('.isEnable').is(":checked")) && tds.eq(2).text().trim() == code) {
+            if ((all || tds.eq(0).find('.isEnable').is(":checked")) && tds.eq(2).text().trim() == code) {
                 if (purchasingCompany == '') {
-                    purchasingCompany = tds.eq(14).text().trim();
+                    purchasingCompany = tds.eq(15).text().trim();
                 }
                 num++;
                 let td = `<td>${num}</td>`;
@@ -1031,9 +1027,82 @@ function printPurchaseList() {
         const tableTop1 = `<div style="text-align:right">订单号：${code}</div>`;
         const tableTop2 = `<div style="position:absolute;right:0">供应商：${supplier}</div><div style="text-align:center;width:100%">日期：${time}</div>`;
         const footer = `<div style="display:flex;margin:8px 0"><label style="flex:1">主管：</label><label style="flex:1">仓库：<span style="margin-left:20px">${getCookieTokenInfo().name}</span></label><label style="flex:1">记账：</label><label style="flex:1">采购人：<span style="margin-left:20px">${_purchaseDataTable.data()[0].Purchaser || ''}</span></label></div>`;
-        const printContent = `<div style="position:relative">${title}${tableTop1}${tableTop2}${table}${footer}</div>`;
-        printCode(printContent);
-    }, function (index) {
-        layer.close(index);
-    });
+        printContent += `<div style="position:relative">${title}${tableTop1}${tableTop2}${table}${footer}</div>`;
+    }
+    printCode(printContent);
+
+    //const selectOp = `<label class="control-label text-nowrap">订单号选择：</label><select class="form-control" id="purchaseCode">${ops}</select>`;
+    //layer.confirm(selectOp, {
+    //    btn: ['打印', '取消'],
+    //    success: function () {
+    //        this.enterEsc = function (event) {
+    //            if (event.keyCode === 13) {
+    //                $(".layui-layer-btn0").click();
+    //                return false; //阻止系统默认回车事件
+    //            } else if (event.keyCode == 27) {
+    //                $(".layui-layer-btn1").click();
+    //                return false;
+    //            }
+    //        };
+    //        $(document).on('keydown', this.enterEsc); //监听键盘事件，关闭层
+    //    },
+    //    end: function () {
+    //        $(document).off('keydown', this.enterEsc); //解除键盘关闭事件
+    //    }
+    //}, function (index) {
+    //    const code = $('#purchaseCode').val();
+    //    if (isStrEmptyOrUndefined(code)) {
+    //        layer.msg('订单号不能为空');
+    //        return;
+    //    }
+    //    layer.close(index);
+    //    const thead = '<thead><tr><th>编号</th><th>物料编码</th><th>名称</th><th>类别</th><th>规格</th><th>单位</th><th>入库数量</th><th>单价</th><th>不含税金额</th><th>税额</th><th>合计金额</th><th>请购人</th></tr></thead>';
+    //    let tbodyTrs = '';
+    //    const colIndex = [3, 4, 5, 6, 8, 9, 10];
+    //    let num = 0, allPrice = 0;
+    //    //const supplier = $(_purchaseDataTable.column(6).nodes()[0]).text();
+    //    let supplier = '';
+    //    for (let i = 0, len = trs.length; i < len; i++) {
+    //        const tr = $(trs[i]);
+    //        const tds = tr.find('td');
+    //        if (($("#checkAll").is(":checked") || tds.eq(0).find('.isEnable').is(":checked")) && tds.eq(2).text().trim() == code) {
+    //            if (purchasingCompany == '') {
+    //                purchasingCompany = tds.eq(15).text().trim();
+    //            }
+    //            num++;
+    //            let td = `<td>${num}</td>`;
+    //            for (let j = 0, len1 = colIndex.length; j < len1; j++) {
+    //                td += tds.eq(colIndex[j]).prop('outerHTML');
+    //            }
+    //            const noTaxPrice = floatObj.multiply(parseFloat(tds.eq(9).text().trim()), parseFloat(tds.eq(10).text().trim())).toFixed(2);
+    //            td += `<td>${noTaxPrice}</td>`;
+    //            const taxAmount = parseFloat(tds.eq(12).text().trim());
+    //            allPrice = floatObj.add(allPrice, taxAmount);
+    //            td += `<td>${floatObj.subtract(taxAmount, noTaxPrice).toFixed(2)}</td>`;
+    //            td += `<td>${taxAmount.toFixed(2)}</td>`;
+    //            td += `<td>${_Purchase.name}</td>`;
+    //            tbodyTrs += `<tr style="height:40px">${td}</tr>`;
+    //            supplier = tds.eq(7).text().trim();
+    //        }
+    //    }
+    //    if (isStrEmptyOrUndefined(purchasingCompany)) {
+    //        layer.msg('采购公司不能为空');
+    //        return;
+    //    }
+    //    tbodyTrs += '<tr style="height:40px"><td>备注：</td><td colspan="11"></td></tr>';
+    //    allPrice = allPrice.toFixed(2);
+    //    tbodyTrs += `<tr style="height:40px"><td colspan="8">合计金额：${convertCurrency(allPrice)}</td><td colspan="4">￥${allPrice}</td></tr>`;
+    //    const table = `<table border="1" style="width:100%;text-align:center;border-collapse:collapse">${thead}<tbody>${tbodyTrs}</tbody></table>`;
+    //    let time = $('#cgTime').val().trim();
+    //    const arr = ['年', '月', '日'];
+    //    time && (time = time.split('-').map((item, i) => `${item}${arr[i]}`).join(''));
+    //    const title = `<div style="text-align:center">${purchasingCompany}</div><h3 style="text-align:center;margin:5px;letter-spacing:8px">采购入库单</h3>`;
+    //    const tableTop1 = `<div style="text-align:right">订单号：${code}</div>`;
+    //    const tableTop2 = `<div style="position:absolute;right:0">供应商：${supplier}</div><div style="text-align:center;width:100%">日期：${time}</div>`;
+    //    const footer = `<div style="display:flex;margin:8px 0"><label style="flex:1">主管：</label><label style="flex:1">仓库：<span style="margin-left:20px">${getCookieTokenInfo().name}</span></label><label style="flex:1">记账：</label><label style="flex:1">采购人：<span style="margin-left:20px">${_purchaseDataTable.data()[0].Purchaser || ''}</span></label></div>`;
+    //    const printContent = `<div style="position:relative">${title}${tableTop1}${tableTop2}${table}${footer}</div>`;
+    //    printCode(printContent);
+    //}, function (index) {
+    //    layer.close(index);
+    //});
 }

@@ -20,6 +20,7 @@ var scriptIndexTmp = [];
 var scriptTmp = [];
 var kanBans = [];
 var kanBanItems = [];
+var shift = [];
 var kanBanItemsTmp = [];
 
 $(document).on("keydown", function (e) {
@@ -209,7 +210,7 @@ function pageReady() {
                 $('#kanBanScript').html("");
                 return;
             }
-            
+
             var tmp = [];
             if (deviceId.length == 1 && ~deviceId.indexOf('0'))
                 deviceId = deviceTmp.map(x => x.Id).filter(x => x);
@@ -282,24 +283,6 @@ function pageReady() {
         if (opData.length > 0) {
             const d = opData[0];
             $('#kanBanList').val(d.Id).trigger("select2:select");
-            //if (type == 2) {
-            //    $("#setKanBan .stateEl").removeClass("hidden");
-            //    $("#kanBanLength").val(d.Length);
-            //    const cCol = $("#kanBanContentCol").val();
-            //    if (cCol > 2) {
-            //        $("#kanBanItemColNameDiv").removeClass("hidden");
-            //        var fOs = getFirstOrders(cCol);
-            //        var desc = `（首列顺序：${fOs.join()}）`;
-            //        $("#kanBanContentColDesc").text(desc);
-            //        initColName(true);
-            //    }
-            //    getScriptList();
-            //} else if (type == 3) {
-            //    $("#setKanBan .productEl").removeClass("hidden");
-            //    initColSet(true);
-            //    initProduct(type);
-            //    showPreProduct();
-            //}
         }
     });
 
@@ -330,25 +313,6 @@ function pageReady() {
             $("#kanBanItemColNameDiv").addClass("hidden");
         }
         $("#kanBanContentColDesc").text(desc);
-
-        //1 变量
-        //2 输入
-        //3 输出
-        scriptIndexTmp.forEach(sid => {
-            if (scriptTmp[sid]) {
-                const sc = scriptTmp[sid];
-
-                const data1 = `${sc.divVal}Data`;
-                const data2 = `${sc.divIn}Data`;
-                const data3 = `${sc.divOut}Data`;
-                const data4 = `${sc.divProduct}Data`;
-                const divArray = [sc.divVal, sc.divIn, sc.divOut, sc.divProduct];
-                const dataArray = [data1, data2, data3, data4];
-
-                disabledChose(sc, dataArray, divArray);
-                enableChose(sc, dataArray, divArray);
-            }
-        });
     });
 
     $('#kanBanScript')
@@ -370,68 +334,77 @@ function pageReady() {
         });
 
     $('#kanBanItems')
-        .on('ifChanged', '.icb_minimal', function () {
+        .on('click', '.itemAddBtn', function () {
             const el = $(this);
-            const id = el.val().trim() >> 0;
+            const id = $(el).attr("value").trim() >> 0;
             const name = el.attr("name");
-            if (el.is(':checked') && !existArray(kanBanItemsTmp, id)) {
-                kanBanItemsTmp.push(id);
-                const order = colSet[0].chose.length;
-                colSet[0].chose.push({
-                    name,
-                    val: id,
-                    col: 0,
-                    order: order,
-                    height: -1
-                });
-            } else if (!el.is(':checked') && existArray(kanBanItemsTmp, id)) {
-                kanBanItemsTmp = kanBanItemsTmp.filter(x => x != id);
-                colSet.forEach(d => {
-                    var t = [], i = 0;
-                    d.chose.forEach(c => {
-                        if (c.val !== id) {
-                            c.order = i++;
-                            t.push(c);
-                        }
-                    });
-                    d.chose = t;
-                });
-            }
+            const order = colSet[0].chose.length;
+            kanBanItemsTmp.push({
+                Item: id,
+                Col: 0,
+                Order: order,
+                Shits: 0,
+                Hour: 0,
+                Min: 0
+            });
+            colSet[0].chose.push({
+                name,
+                val: id,
+                col: 0,
+                order: order,
+                height: -1
+            });
+
+            //if (el.is(':checked') && !existArray(kanBanItemsTmp, id)) {
+            //    kanBanItemsTmp.push(id);
+            //    const order = colSet[0].chose.length;
+            //    colSet[0].chose.push({
+            //        name,
+            //        val: id,
+            //        col: 0,
+            //        order: order,
+            //        height: -1
+            //    });
+            //} else if (!el.is(':checked') && existArray(kanBanItemsTmp, id)) {
+            //    kanBanItemsTmp = kanBanItemsTmp.filter(x => x != id);
+            //    colSet.forEach(d => {
+            //        var t = [], i = 0;
+            //        d.chose.forEach(c => {
+            //            if (c.val !== id) {
+            //                c.order = i++;
+            //                t.push(c);
+            //            }
+            //        });
+            //        d.chose = t;
+            //    });
+            //}
             showPreProduct();
         });
 
     $('#kanBanProductDetail')
-        .on('change', '.colSet', function () {
-            var tmp = colSet.map(d => ({ width: d.width, chose: [] }));
-            const els = $('#kanBanProductDetail .kb_div1');
-            els.each((_, el) => {
-                var id = $(el).attr("val") >> 0;
-                var name = $(el).find(`.N_${id}`).text();
-                var col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
-                var order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
-                var height = $(el).find(`.H_${id}`).val();
-                tmp[col] && tmp[col].chose.push({
-                    name,
-                    val: id,
-                    col: col,
-                    order: order,
-                    height: isStrEmptyOrUndefined(height) ? -1 : (height >> 0)
-                });
-            });
-            tmp.forEach(d => {
-                d.chose = d.chose.sort(sortOrder);
-                for (let i = 0, len = d.chose.length; i < len; i++) {
-                    d.chose[i].order = i;
+        .on('click', '.itemDelBtn', function () {
+            const el = $(this).closest('.kb_div1');
+            const id = $(el).attr("value") >> 0;
+            var col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+            var order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+            removeArray(kanBanItemsTmp, "Col", col, "Order", order);
+            kanBanItemsTmp.forEach(d => {
+                if (d.Col == col && d.Order >= order) {
+                    d.Order--;
                 }
-            });
-            colSet = tmp;
+            })
+            removeArray(colSet[col].chose, "col", col, "order", order);
+            colSet[col].chose = colSet[col].chose.sort(sortOrder);
+            for (let i = 0, len = colSet[col].chose.length; i < len; i++) {
+                colSet[col].chose[i].order = i;
+            }
             showPreProduct();
         });
 
     $('#kanBanProductDetail')
         .on('click', '.upTr', function () {
             const el = $(this).closest(".kb_div1");
-            const id = $(el).attr("val") >> 0;
+            const id = $(el).attr("value") >> 0;
             const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
             const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
             if (colSet[col] && colSet[col].chose) {
@@ -439,13 +412,26 @@ function pageReady() {
                 colSet[col].chose[order - 1].order = order;
                 colSet[col].chose = colSet[col].chose.sort(sortOrder);
             }
+            var d1 = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+            var d2 = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order - 1);
+
+            kanBanItemsTmp.forEach(d => {
+                if (d == d1[0]) {
+                    d.Order = order - 1;
+                }
+                if (d == d2[0]) {
+                    d.Order = order;
+                }
+            })
+
+            kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
             showPreProduct();
         });
 
     $('#kanBanProductDetail')
         .on('click', '.downTr', function () {
             const el = $(this).closest(".kb_div1");
-            const id = $(el).attr("val") >> 0;
+            const id = $(el).attr("value") >> 0;
             const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
             const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
             if (colSet[col] && colSet[col].chose) {
@@ -453,6 +439,52 @@ function pageReady() {
                 colSet[col].chose[order + 1].order = order;
                 colSet[col].chose = colSet[col].chose.sort(sortOrder);
             }
+            var d1 = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+            var d2 = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order + 1);
+            kanBanItemsTmp.forEach(d => {
+                if (d == d1[0]) {
+                    d.Order = order + 1;
+                }
+                if (d == d2[0]) {
+                    d.Order = order;
+                }
+            })
+
+            kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
+            showPreProduct();
+        });
+
+    $('#kanBanProductDetail')
+        .on('change', '.colSet', function () {
+            const el = $(this).closest(".kb_div1");
+            const id = $(el).attr("value") >> 0;
+            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+            const name = $(el).find(`.N_${id}`).val().trim();
+            const height = $(el).find(`.H_${id}`).val();
+
+            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
+            const hour = $(el).find(`.Hour_${id}`).val() >> 0;
+            const min = $(el).find(`.Min_${id}`).val() >> 0;
+
+            colSet[col].chose.forEach(d => {
+                if (d.order == order) {
+                    d.name = name;
+                    d.height = isStrEmptyOrUndefined(height) ? -1 : (height >> 0);
+                }
+            })
+
+            var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+            kanBanItemsTmp.forEach(d => {
+                if (d == n[0]) {
+                    d.Shits = shift;
+                    d.Hour = hour;
+                    d.Min = min;
+                }
+            })
+
+            kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
+
             showPreProduct();
         });
 }
@@ -527,9 +559,24 @@ function initColSet(init = true) {
 
     const id = $('#kanBanList').val();
     const kanBan = kanBans[id];
-    if (kanBan) {
-        init && (col = kanBan.Col);
-        init && (colSet = kanBan.ColSet ? JSON.parse(kanBan.ColSet) : []);
+    if (kanBan && init) {
+        col = kanBan.Col;
+        colSet = kanBan.ColSet ? JSON.parse(kanBan.ColSet) : [];
+        kanBanItemsTmp = kanBan.ItemList ? kanBan.ItemList : [];
+        var col0 = kanBanItemsTmp.filter(x => x.Col == 0);
+        if (col0.length) {
+            var cols = colSet.selectMany(x => x.chose);
+            kanBanItemsTmp.forEach(d => {
+                if (d.Col == 0) {
+                    var t = cols.filter(x => x.val == d.Item);
+                    if (t.length) {
+                        d.Col = t[0].col;
+                        d.Order = t[0].order;
+                    }
+                }
+            })
+            kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
+        }
     }
 
     let len = colSet.length;
@@ -609,39 +656,57 @@ function initProduct(type) {
 
     const items = kanBanItems[type] ? kanBanItems[type] : [];
     const ops = items.reduce((a, b, i) => {
-        return `${a}<div class="flexStyle pointer choseBox">
-                        <label class="flexStyle pointer">
-                            <input type="checkbox" class="icb_minimal" ${(~kanBanItemsTmp.indexOf(b.Id) ? 'checked="checked"' : '')} value="${b.Id}" type="${type}" name="${b.Type}">
-                            <span class="textOverTop mPadding">${b.Type}</span>
-                        </label>
+        return `${a}<div class="flexStyle mPadding">
+                        <button type="button" class="btn btn-success btn-xs itemAddBtn" value="${b.Item}" type="${type}" name="${b.Name}"><i class="fa fa-plus"></i></button>
+                        <span class="textOverTop mPadding">${b.Name}</span>
                     </div>`;
     }, "");
-    $('#kanBanItems').empty().append(ops);
-    $(`#kanBanItems .icb_minimal`).iCheck({
-        handle: 'checkbox',
-        checkboxClass: 'icheckbox_minimal-green',
-        increaseArea: '20%'
-    });
+    $('#kanBanItems').html(ops);
+
+    //const items = kanBanItems[type] ? kanBanItems[type] : [];
+    //const ops = items.reduce((a, b, i) => {
+    //    return `${a}<div class="flexStyle pointer choseBox">
+    //                    <label class="flexStyle pointer">
+    //                        <input type="checkbox" class="icb_minimal" ${(~kanBanItemsTmp.indexOf(b.Id) ? 'checked="checked"' : '')} value="${b.Id}" type="${type}" name="${b.Type}">
+    //                        <span class="textOverTop mPadding">${b.Type}</span>
+    //                    </label>
+    //                </div>`;
+    //}, "");
+    //$('#kanBanItems').empty().append(ops);
+    //$(`#kanBanItems .icb_minimal`).iCheck({
+    //    handle: 'checkbox',
+    //    checkboxClass: 'icheckbox_minimal-green',
+    //    increaseArea: '20%'
+    //});
 }
 
 //生产相关配置预览
 function showPreProduct() {
     //return;
     $("#kanBanProduct h3").text($("#kanBanName").val());
+    const type = $('#kanBanType').val();
+    const items = kanBanItems[type] ? kanBanItems[type] : [];
     const col = colSet.length;
     const ops = colSet.reduce((a, d, i) => {
         d.chose = d.chose.sort(sortOrder);
         const oMax = d.chose.length;
         const colspan = oMax > 1 ? 4 : 3;
         const tdShow = oMax > 1 ? "" : " hidden";
-        const chose = d.chose.reduce((a, b, i) =>
-            `${a}<div class="kb_div1" style="height: ${(b.height == -1 ? "auto" : `${b.height}%`)}" val="${b.val}">
+        const chose = d.chose.reduce((a, b, i) => {
+            var item = items.filter(x => x.Item == b.val);
+            var itemSet = kanBanItemsTmp.filter(x => x.Col == b.col && x.Order == b.order);
+            const ops = setOptions(shift, "Type");
+            return !item.length ? a :
+                `${a}<div class="kb_div1" style="height: ${(b.height == -1 ? "auto" : `${b.height}%`)}" value="${b.val}">
                     <div class="kb_border1">
                         <div class="kb_border2" style="padding: 5px;">
                             <table class="table table-striped no-margin">
                                 <thead>
                                     <tr role="row">
-                                        <th colspan="${colspan}" class="bg-gray N_${b.val}" style="padding: 4px; border: 1px solid gray; width: auto;">${b.name}</th>
+                                        <th colspan="${colspan}" class="bg-gray" style="padding: 4px; border: 1px solid gray; width: auto;">
+                                            <input class="form-control text-center colSet N_${b.val}" style="width: 50%;display: inline;" value=${b.name} length="30">
+                                            <button type="button" class="btn btn-danger btn-xs itemDelBtn" value=${b.val} style="float: right;"><i class="fa fa-minus"></i></button>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -660,18 +725,38 @@ function showPreProduct() {
                                             <span class="glyphicon glyphicon-arrow-down pointer text-red${((i + 1) == oMax ? " hidden" : "")} downTr" aria-hidden="true" title="下移"></span>
                                         </td>
                                     </tr>
+                                        ${(!item[0].HaveShits && !item[0].HaveDuration ? "" :
+                    `<tr role="row" style="background-color: #f9f9f9;">
+                                            <td style="padding: 4px; border: 1px solid gray;" class="form-inline" colspan="${colspan}" >
+                                                <div class="form-group form-inline">
+                                                ${(!item[0].HaveShits ? "" :
+                        `<label class="control-label">班制</label>
+                                                    <select class="form-control colSet Shift_${b.val}" value=${(itemSet.length ? itemSet[0].Shits : 0)}>${ops}</select>`)}
+                                                ${(!item[0].HaveDuration ? "" :
+                        `<label class="control-label">显示最近</label>
+                                                    <input class="form-control text-center colSet Hour_${b.val}" style="width: 70px;" value=${(itemSet.length ? itemSet[0].Hour : 24)} oninput="onInput(this, 3, 0, 0, 24);">
+                                                    <label class="control-label">小时</label>
+                                                    <input class="form-control text-center colSet Min_${b.val}" style="width: 70px;" value=${(itemSet.length ? itemSet[0].Min : 0)} oninput="onTimeLimitInput(this);">
+                                                    <label class="control-label">分</label>`)}
+                                                </div>
+                                            </td>
+                                        </tr>`)}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>`, '');
+                </div>`;
+        }, '');
 
         return `${a}<div class="kb_item_pre_div3" style="width: ${d.width}%; overflow-y: auto;">
                     ${chose}
                  </div>`;
     }, '');
 
-    $("#kanBanProductDetail").html(ops);
+    $("#kanBanProductDetail").html(ops).find("select").each((_, el) => {
+        var id = $(el).attr("value");
+        $(el).val(id);
+    });
 }
 var deviceTmp = [];
 //获取机台号
@@ -708,12 +793,13 @@ function getDevice(resolve) {
 var _carouselBox;
 //获取看板列表
 function getKanBanList(resolve) {
-    const id = $('#kanBanList').val();
+    const id = $('#kanBanList').val() >> 0;
     //return;
     ajaxPost('/Relay/Post', {
         opType: 509,
         opData: JSON.stringify({
-            init: true
+            init: id == 0,
+            qId: id
         })
     }, ret => {
         if (ret.errno != 0) {
@@ -725,6 +811,7 @@ function getKanBanList(resolve) {
         type ? $('#kanBanType').val(type) : $('#kanBanType').trigger("change");
         type = $('#kanBanType').val();
         kanBanItems = ret.item;
+        shift = ret.shift;
         var rData = ret.data;
         const len = rData.length;
         if (len <= 0)
@@ -922,7 +1009,7 @@ function getKanBanList(resolve) {
                 <div class="kb_border1">
                     <div class="kb_border2">
                         <div class="form-group text-center no-margin" style="">
-                            <h4 class="text-bold kb_title2">{1}</h4>
+                            <h4 class="text-bold kb_title2"><span class="tt1">{1}</span>(<span class="tt2"></span>)</h4>
                         </div>
                         <div class="table-responsive mailbox-messages no-margin" style="width:100%">
                             {0}
@@ -935,12 +1022,11 @@ function getKanBanList(resolve) {
         kanBanProductItemsEl[1] = {
             name: "合格率异常报警",
             isTable: true,
-            dataSource: "WarningLogs",
             trFlag: "XvHao",
             //trFlag: "Id",
             order: "desc",
             cols: [
-                { data: 'XvHao', title: '序号', width:"80" },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: null, title: '时间', render: d => convertTimeHMS(d.WarningTime), width: "80" },
                 { data: 'Code', title: '机台号', width: "80" },
                 { data: 'Value', title: '合格率', suffix: "%", width: "80" },
@@ -952,46 +1038,42 @@ function getKanBanList(resolve) {
                             t += JSON.parse(wd.Param).join();
                             const otherParam = JSON.parse(wd.OtherParam);
                             if (otherParam.length)
-                                t += (isStrEmptyOrUndefined(t) ? "" : ",") + otherParam.filter(x => x.count > 0).map(x=>`${x.comment}:${x.count}`).join();
+                                t += (isStrEmptyOrUndefined(t) ? "" : ",") + otherParam.filter(x => x.count > 0).map(x => `${x.comment}:${x.count}`).join();
                         }
                         return t;
                     }, width: "auto"
                 }
             ],
-            div: "itemRateWarningDiv",
             op: defaultItem
         }
         //合格率异常统计 = 2,
         kanBanProductItemsEl[2] = {
             name: "合格率异常统计",
             isTable: true,
-            dataSource: "WarningStatistics",
             trFlag: "XvHao",
             order: "asc",
             //trFlag: "XvHao",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 {
-                    data: null, title: '时间', render: d => getDate(d.Time)
+                    data: null, title: '时间', render: d => getDate(d.Time), width: "110"
                 },
                 { data: 'SetName', title: '预警设置' },
                 { data: 'Item', title: '名称' },
-                { data: 'Range', title: '条件' },
-                { data: 'Count', title: '预警次数', suffix: "次" },
+                { data: 'Range', title: '条件', width: "120" },
+                { data: 'Count', title: '预警次数', suffix: "次", width: "120" },
             ],
-            div: "itemRateWarningSumDiv",
             op: defaultItem
         }
         //设备状态反馈 = 3,
         kanBanProductItemsEl[3] = {
             name: "设备状态反馈",
             isTable: true,
-            dataSource: "DeviceStateInfos",
             trFlag: "XvHao",
             //trFlag: "DeviceId",
             order: "asc",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: 'Code', title: '机台号' },
                 {
                     data: null, title: '待机时间', render: d => {
@@ -999,19 +1081,17 @@ function getKanBanList(resolve) {
                     }
                 }
             ],
-            div: "itemDeviceSateDiv",
             op: defaultItem
         }
         //设备预警状态 = 4,
         kanBanProductItemsEl[4] = {
             name: "设备预警状态",
             isTable: true,
-            dataSource: "WarningDeviceInfos",
             //trFlag: "DeviceId",
             trFlag: "XvHao",
             order: "desc",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: 'Code', title: '机台号' },
                 { data: 'Time', title: '时间' },
                 //{ data: 'SetName', title: '预警设置' },
@@ -1019,58 +1099,51 @@ function getKanBanList(resolve) {
                 { data: 'Range', title: '条件' },
                 { data: 'Value', title: '预警值' },
             ],
-            div: "itemDeviceWarningSateDiv",
             op: defaultItem
         }
         //计划号日进度表 = 5,
         kanBanProductItemsEl[5] = {
             name: "计划号日进度表",
             isTable: true,
-            dataSource: "ProductionSchedules",
             //trFlag: "ProductionId",
             trFlag: "XvHao",
             order: "asc",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: 'Production', title: '计划号' },
                 { data: 'Plan', title: '计划' },
                 { data: 'Actual', title: '实际' },
             ],
-            div: "itemProductionDayScheduleDiv",
             op: defaultItem
         }
         //设备日进度表 = 6,
         kanBanProductItemsEl[6] = {
             name: "设备日进度表",
             isTable: true,
-            dataSource: "DeviceSchedules",
             trFlag: "XvHao",
             //trFlag: "DeviceId",
             order: "asc",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: 'Code', title: '机台号' },
                 { data: 'Plan', title: '计划' },
                 { data: 'Actual', title: '实际' },
             ],
-            div: "itemDeviceDayScheduleDiv",
             op: defaultItem
         }
         //操作工日进度表 = 7
         kanBanProductItemsEl[7] = {
             name: "操作工日进度表",
             isTable: true,
-            dataSource: "ProcessorSchedules",
             trFlag: "XvHao",
             //trFlag: "ProcessorId",
             order: "asc",
             cols: [
-                { data: 'XvHao', title: '序号' },
+                { data: 'XvHao', title: '序号', width: "60" },
                 { data: 'Processor', title: '操作工' },
                 { data: 'Plan', title: '计划' },
                 { data: 'Actual', title: '实际' },
             ],
-            div: "itemProcessorDayScheduleDiv",
             op: defaultItem
         }
 
@@ -1128,9 +1201,9 @@ function getKanBanList(resolve) {
                                     if (kanBanProductItemsEl[b.val] && kanBanProductItemsEl[b.val].isTable) {
                                         const el = kanBanProductItemsEl[b.val];
                                         pItem = el.op.format(
-                                            getTableW(`${ff}_${el.div}`, el.cols, 3),
+                                            getTableW(`${ff}_${b.col}_${b.order}`, el.cols, 3),
                                             //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
-                                            el.name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                            b.name ? b.name : el.name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
                                     }
                                     return a + pItem;
                                 }, '');
@@ -1171,7 +1244,8 @@ function getKanBanList(resolve) {
         firstNav && $('#tabBox a:not(:first)').first().click();
         $('#setKanBan').nextAll().remove().end().after(tabs);
         //todo
-        //$('#kanBanType').val(2).trigger("change");
+        //$('#kanBanType').val(3).trigger("change");
+        //$('#kanBanList').val(13).trigger("change");
         rData = rData.filter(d => d.Id !== 0);
         //$('[href="#kanBan_6"]').click();
         resolve && resolve(rData);
@@ -1509,9 +1583,6 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1527,20 +1598,15 @@ function getScriptList() {
                                     SubOrder: so ? so : 1,
                                     Delimiter: de ? de : ""
                                 });
-                                disabledChose(sc, dataArray, divArray);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id, "Type", type);
-                                enableChose(sc, dataArray, divArray);
                             },
                             false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1557,8 +1623,6 @@ function getScriptList() {
                                     });
                                 updateChoseTitle(sc, dataArray);
                             });
-                        disabledChose(sc, dataArray, divArray);
-                        enableChose(sc, dataArray, divArray);
                     }
                     tableConfig.createdRow = function (tr, d) {
                         var t = false;
@@ -1598,9 +1662,6 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1616,20 +1677,15 @@ function getScriptList() {
                                     SubOrder: so ? so : 1,
                                     Delimiter: de ? de : ""
                                 });
-                                disabledChose(sc, dataArray, divArray);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id, "Type", type);
-                                enableChose(sc, dataArray, divArray);
                             },
                             false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1646,8 +1702,6 @@ function getScriptList() {
                                     });
                                 updateChoseTitle(sc, dataArray);
                             });
-                        disabledChose(sc, dataArray, divArray);
-                        enableChose(sc, dataArray, divArray);
                     }
                     tableConfig.createdRow = function (tr, d) {
                         var t = false;
@@ -1686,9 +1740,6 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1704,20 +1755,15 @@ function getScriptList() {
                                     SubOrder: so ? so : 1,
                                     Delimiter: de ? de : ""
                                 });
-                                disabledChose(sc, dataArray, divArray);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id, "Type", type);
-                                enableChose(sc, dataArray, divArray);
                             },
                             false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1734,8 +1780,6 @@ function getScriptList() {
                                     });
                                 updateChoseTitle(sc, dataArray);
                             });
-                        disabledChose(sc, dataArray, divArray);
-                        enableChose(sc, dataArray, divArray);
                     }
                     tableConfig.createdRow = function (tr, d) {
                         var t = false;
@@ -1798,9 +1842,6 @@ function getScriptList() {
                         initCheckboxAddEvent.call(this, sc[trs],
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1815,20 +1856,15 @@ function getScriptList() {
                                     SubOrder: so ? so : 1,
                                     Delimiter: de ? de : ""
                                 });
-                                disabledChose(sc, dataArray, divArray);
                             },
                             (tr, d) => {
                                 removeArray(sc[data], "Id", d.Id, "Type", type);
-                                enableChose(sc, dataArray, divArray);
                             },
                             false, "Checked");
 
                         initInputChangeEvent.call(this,
                             (tr, d) => {
                                 const v = $(tr).find(".name").val();
-                                //const cCol = $("#kanBanContentCol").val() >> 0;
-                                //const maxSet = getMaxSet(cCol);
-                                //onInput($(tr).find(".order"), 5, 2, 1, maxSet);
                                 const o = $(tr).find(".order").val() >> 0;
                                 const so = $(tr).find(".subOrder").val() >> 0;
                                 const de = $(tr).find(".delimiter").val();
@@ -1845,8 +1881,6 @@ function getScriptList() {
                                     });
                                 updateChoseTitle(sc, dataArray);
                             });
-                        disabledChose(sc, dataArray, divArray);
-                        enableChose(sc, dataArray, divArray);
                     }
                     tableConfig.createdRow = function (tr, d) {
                         var t = false;
@@ -1895,13 +1929,13 @@ function changeContentColPre(data, cCol, cName) {
     if (cCol == 2) {
         ps = data.reduce((a, b) =>
             `${a}<div class="form-group no-margin" style="height:calc(100%/6);">
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
-                                        <label class=" control-label no-margin text-blue no-padding">${b.VName}</label>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
-                                        <label class="control-label no-margin text-blue no-padding">${b.V}</label>
-                                    </div>
-                                </div>`, '');
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                        <label class=" control-label no-margin text-blue no-padding">${b.VName}</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 no-margin text-blue no-padding kb_param1">
+                        <label class="control-label no-margin text-blue no-padding">${b.V}</label>
+                    </div>
+                </div>`, '');
     } else if (cCol > 2) {
         const tCol = cCol - 1;
         let content = "";
@@ -1958,30 +1992,6 @@ function getChoseLength(sc, dataArray) {
 function updateChoseTitle(sc, dataArray) {
     const t = dataArray.reduce((a, b, i) => a.concat(sc[b]), []).sort(sortOrder).map(d => `[${d.VName} (<span class="text-orange">${d.Order},${d.SubOrder},${d.Delimiter}</span>)]`);
     $(`#${sc.div} .chosed`).html(t.join());
-}
-
-function disabledChose(sc, dataArray, divArray) {
-    const cCol = $("#kanBanContentCol").val() >> 0;
-    const maxSet = getMaxSet(cCol);
-    const l = getChoseLength(sc, dataArray);
-    if (l >= maxSet) {
-        divArray.forEach((d, i) => {
-            disabledTableCheck(d, sc[dataArray[i]].map(x => x.Id));
-        });
-    }
-    updateChoseTitle(sc, dataArray);
-}
-
-function enableChose(sc, dataArray, divArray) {
-    const cCol = $("#kanBanContentCol").val() >> 0;
-    const maxSet = getMaxSet(cCol);
-    const l = getChoseLength(sc, dataArray);
-    if (l < maxSet) {
-        divArray.forEach(table => {
-            enableTableCheck(table);
-        });
-    }
-    updateChoseTitle(sc, dataArray);
 }
 
 var _dataTableData = {};
@@ -2602,20 +2612,32 @@ function setChart(elId, kbId, type, next = false) {
             if (ret.errno != 0) {
                 return;
             }
-
-            var rData = ret.data.WarningLogs;
+            //加工相关
+            if (!ret.data) {
+                return;
+            }
+            //加工相关
+            if (!ret.data.ItemData) {
+                return;
+            }
+            var rData = ret.data.ItemData;
+            var rColSet = ret.colSet ? JSON.parse(ret.colSet) : [];
             var ps = `${flag}_productDiv`;
             var windowH = $(window).height();//获取当前窗口高度
             var tittleHeight = $(`${flag} .kb_title1`).closest('div').height() >> 0;
             $(`${ps}`).css("height", `${windowH - tittleHeight}px`);
             for (var ii = 0, iLen = ret.items.length; ii < iLen; ii++) {
-                const item = ret.items[ii];
+                const itemSet = ret.items[ii];
+                const item = itemSet.Item;
                 if (kanBanProductItemsEl[item]) {
                     const el = kanBanProductItemsEl[item];
-                    const tabN = `${flag}_${el.div}`;
+                    const dataKey = `${itemSet.Item}_${itemSet.Col}_${itemSet.Order}`;
+                    const tabN = `${flag}_${itemSet.Col}_${itemSet.Order}`;
 
-                    const dataSource = ret.data[el.dataSource];
-                    $(`${tabN}`).closest('.kb_border2').find('.kb_title2').text(`${el.name}（${dataSource.length}）`);
+                    const dataSource = rData[dataKey];
+
+                    $(`${tabN}`).closest('.kb_border2').find('.tt1').text(rColSet[itemSet.Col].chose[itemSet.Order].name);
+                    $(`${tabN}`).closest('.kb_border2').find('.tt2').text(dataSource.length);
                     addOrderData(dataSource);
                     let trs = $(`${tabN} tbody tr`);
                     //if (dataSource.length == 0) continue;
@@ -2734,17 +2756,17 @@ function setChart(elId, kbId, type, next = false) {
                             - $(`${tabN} tbody`).closest('.kb_item_tablebox').css("padding").replace("px", '') * 2;
                         trs = $(`${tabN} tbody tr`);
                         var showTr = Math.floor(tBodyHeight / trHeight);
-                        const timer = `${elId}_${el.div}_timer`;
+                        const timer = `${elId}_${itemSet.Col}_${itemSet.Order}_timer`;
 
                         if (el.name == "设备状态反馈") {
                             var a = 1;
                         }
                         if (trs.length > showTr && !el[timer]) {
-                            scrollTable(el, timer, `${elId}_${el.div}`);
+                            scrollTable(el, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         } else if (trs.length <= showTr && el[timer]) {
                             const trs = getItemTrs(dataSource, el);
                             $(`${tabN} tbody`).html(trs);
-                            stopScrollTable(el, timer, `${elId}_${el.div}`);
+                            stopScrollTable(el, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         }
                     }
                 }

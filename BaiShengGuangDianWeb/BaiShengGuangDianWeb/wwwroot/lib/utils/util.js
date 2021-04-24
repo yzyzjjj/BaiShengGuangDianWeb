@@ -137,7 +137,6 @@ function checkPermission(opType) {
     var info = getCookieTokenInfo();
 
     if (info == null || !isTokenValid()) {
-        SetCookie(lastLocation, window.location.pathname);
         window.location.href = loginUrl;
         return -1;
     } else {
@@ -183,8 +182,8 @@ function removeCover() {
 }
 
 function reLogin() {
-    //window.location.href = loginUrl
     console.log("err");
+    window.location.href = loginUrl
 }
 
 //ajax 包装 data 必须是张表，或者null,带token
@@ -201,6 +200,10 @@ function ajaxPost(url, data, func, tf) {
     //    data.token = token
     //}
     var funcC = function (e) {
+        if (e == loginUrl) {
+            reLogin();
+            return;
+        }
         if (tf != 0) {
             removeCover();
         }
@@ -235,6 +238,10 @@ function ajaxGet(url, data, func) {
     }
 
     var funcC = function (e) {
+        if (e == loginUrl) {
+            reLogin();
+            return;
+        }
         removeCover();
         func(e);
     }
@@ -267,7 +274,6 @@ function errorHandle(ret) {
     if (ret.errno == undefined || ret.errno == null) {
         return false;
     }
-
     if (ret.errno == 0) {
         return false;
     }
@@ -276,7 +282,6 @@ function errorHandle(ret) {
 
     ////token 有问题，重新登录
     //if (ret.errno == ErrorEnum.MissToken || ret.errno == ErrorEnum.TokenError || ret.errno == ErrorEnum.TokenInvalid) {
-    //    SetCookie(lastLocation, window.location.href);
     //    window.location.href = loginUrl;
     //}
     return true;
@@ -1305,6 +1310,12 @@ function pcAndroid() {
     return /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent);
 }
 
+Array.prototype.selectMany = function (selector) {
+    return this.map(selector).reduce(function (a, b) {
+        return a.concat(b);
+    });
+};
+
 //数组对象实现字母、数字的混合排序：
 function SortNumberString(array, par) {
     return array.sort(function (a, b) {
@@ -1695,6 +1706,19 @@ function printCode(contentId, hiddenId) {
     }
 }
 
+//打印
+function printCode(content) {
+    var userAgent = navigator.userAgent.toLowerCase(); //取得浏览器的userAgent字符串
+    if (~userAgent.indexOf('trident') || ~userAgent.indexOf('msie')) {
+        alert('请使用google或者360浏览器打印');
+    } else {//其它浏览器使用lodop
+        $('body').append('<iframe id="iframe" class="hidden" name="iframe"></iframe>');
+        var iframeDom = $('#iframe')[0].contentDocument;
+        iframeDom.body.innerHTML = content;
+        window.frames['iframe'].print();
+        $('#iframe').remove();
+    }
+}
 //所选时间比较
 function comTimeDay(startTime, endTime) {
     //if (exceedTime(startTime)) {
@@ -2790,6 +2814,7 @@ function getTableW(id, columns, border = 0) {
 
     return table;
 }
+
 function autoScroll(tableId) {
     const tb = $(`#${tableId} tbody`);
     const outerHeight = tb.find('tr:first').height();
