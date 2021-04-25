@@ -1919,6 +1919,7 @@ function getScriptList() {
                     updateTable(_dataTableData[sc.divOut], outs);
                     updateTable(_dataTableData[sc.divProduct], products);
                 }
+                updateChoseTitle(sc, dataArray);
             }
         });
     }, 0);
