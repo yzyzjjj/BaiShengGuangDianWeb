@@ -174,10 +174,10 @@ function pageReady() {
     $('#batchAssignList').on('select2:unselect', '.serviceName', function () {
         $(this).parents('td').next().text(Array.from($(this).find('option:selected')).map(item => $(item).attr('phone')).join());
     });
-    $("#serLogDevSite,#devSite").select2({
-        allowClear: true,
-        placeholder: "请选择(可不选)"
-    });
+    //$("#serLogDevSite,#devSite").select2({
+    //    allowClear: true,
+    //    placeholder: "请选择(可不选)"
+    //});
     $('#faultCode').select2({
         allowClear: true,
         placeholder: "请选择"
@@ -186,12 +186,6 @@ function pageReady() {
         allowClear: true,
         placeholder: "请选择",
         matcher
-    });
-    $("#serLogWorkshop").on("change", function (e) {
-        setWorkSiteSelect('#serLogWorkshop', '#serLogDevSite');
-    });
-    $("#workshop").on("change", function (e) {
-        setWorkSiteSelect('#workshop', '#devSite');
     });
     $('#maintainerModel').on('show.bs.modal', function () {
         const fn = () => $('#currentTime').text(getFullTime());
@@ -1339,7 +1333,7 @@ function delServiceLog() {
 }
 
 //获取机台号
-function getDeviceCode(resolve) {
+function getDeviceCode(el) {
     var data = {}
     data.opType = 100;
     ajaxPost("/Relay/Post", data, function (ret) {
@@ -1349,77 +1343,65 @@ function getDeviceCode(resolve) {
         }
         var list = ret.datas;
         list.sort((a, b) => a.Code - b.Code);
-        var op = '<option value="{0}" admin="{2}">{1}</option>';
-        var ops = '';
-        for (var i = 0; i < list.length; i++) {
-            var d = list[i];
-            ops += op.format(d.Id, d.Code, d.Administrator);
-        }
-        if (resolve != null) {
-            resolve(ops);
-        }
+        var ops = list.reduce((a, d, c) => `${a}<option value=${d.Id} admin="${d.Administrator}">${d.Code}</option>`, '');
+        $(el).html(ops);
     }, 0);
 }
 
 //获取车间
-function getWorkShop(resolve) {
-    var data = {}
-    data.opType = 162;
-    ajaxPost("/Relay/Post", data, function (ret) {
+function getWorkShopSite(workEl, siteEl) {
+    var wsF = new Promise(r => getWorkShop(r));
+    var siteF = new Promise(r => getSite(r));
+
+    Promise.all([wsF, siteF]).then(ret => {
+        var ws = ret[0];
+        var ss = ret[1];
+        $(workEl).html(setOptions(ret[0], "Name"))
+            .off("change").on("change", function () {
+                var wsId = $(this).val();
+                var sites = ss.filter(x => x.WorkshopId == wsId);
+                $(siteEl).html(setOptions(sites, "Region"));
+            });
+
+        if (ws.length) {
+            var wsId = ws[0].Id;
+            var sites = ss.filter(x => x.WorkshopId == wsId);
+            $(siteEl).html(setOptions(sites, "Region"));
+        }
+    });
+}
+
+//获取车间
+function getWorkShop(r) {
+    ajaxPost('/Relay/Post', {
+        opType: 162,
+        opData: JSON.stringify({
+            menu: true
+        })
+    }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        var list = ret.datas;
-        var op = '<option value = "{0}">{0}</option>';
-        var ops = '';
-        for (var i = 0; i < list.length; i++) {
-            var d = list[i];
-            ops += op.format(d.SiteName);
-        }
-        if (resolve != null) {
-            resolve(ops);
-        }
+        r && (r(ret.datas));
     }, 0);
 }
 
-var _siteData = null;
 //获取场地
-function getSite(workEl, siteEl) {
-    var data = {}
-    data.opType = 125;
-    ajaxPost("/Relay/Post", data, function (ret) {
+function getSite(r) {
+    ajaxPost('/Relay/Post', {
+        opType: 125,
+        opData: JSON.stringify({
+            menu: true
+        })
+    }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        _siteData = {};
-        var rData = ret.datas;
-        for (var i = 0, len = rData.length; i < len; i++) {
-            var d = rData[i];
-            _siteData[d.SiteName]
-                ? _siteData[d.SiteName].push(d.RegionDescription)
-                : _siteData[d.SiteName] = [d.RegionDescription];
-        }
-        setWorkSiteSelect(workEl, siteEl);
-    }, 0);
-}
 
-//车间对应场地
-function setWorkSiteSelect(workEl, siteEl) {
-    $(siteEl).empty();
-    var workshop = $(workEl).val();
-    if (isStrEmptyOrUndefined(workshop)) {
-        return;
-    }
-    var sData = _siteData[workshop];
-    var ops = '';
-    for (var i = 0, len = sData.length; i < len; i++) {
-        var d = sData[i];
-        ops += `<option value=${d}>${d}</option>`;
-    }
-    $(siteEl).append(ops);
-    $(siteEl).val('').trigger('change');
+        r && (r(ret.datas));
+    }, 0);
 }
 
 //添加修改维修记录弹窗
@@ -1527,18 +1509,15 @@ function showServiceLogModal(id, isDel, isStatistics) {
         $("#serLogMaintainer,#serLogFaultSolver").append(_worker);
         var v = $('#serLogFaultType').val();
         $("#serLogFaultDesc").val(_faultTypeData[v].FaultDescription);
-        var deviceCode = new Promise(resolve => getDeviceCode(resolve));
-        var workShop = new Promise(resolve => getWorkShop(resolve));
+        var deviceCode = new Promise(() => getDeviceCode("#serLogCode"));
+        var workShop = new Promise(() => getWorkShopSite('#serLogWorkshop', '#serLogDevSite'));
         Promise.all([deviceCode, workShop]).then(e => {
-            $("#serLogCode,#serLogWorkshop").empty();
-            $("#serLogCode").append(e[0]);
-            $("#serLogCode").val(0).trigger('change');
-            $("#serLogCode").select2({
-                allowClear: true,
-                placeholder: "请选择"
-            });
-            $("#serLogWorkshop").append(e[1]);
-            getSite('#serLogWorkshop', '#serLogDevSite');
+            //$("#serLogCode").append(e[0]);
+            //$("#serLogCode").val(0).trigger('change');
+            //$("#serLogCode").select2({
+            //    allowClear: true,
+            //    placeholder: "请选择"
+            //});
         });
     }
     $('#showServiceLogModal').modal('show');
@@ -1547,14 +1526,12 @@ function showServiceLogModal(id, isDel, isStatistics) {
 //故障报修弹窗
 var _updateFirmwareUpload = null;
 function showFaultModel() {
-    var deviceCode = new Promise(resolve => getDeviceCode(resolve));
-    var workShop = new Promise(resolve => getWorkShop(resolve));
+    var deviceCode = new Promise(() => getDeviceCode("#faultCode"));
+    var workShop = new Promise(() => getWorkShopSite('#workshop', '#devSite'));
     Promise.all([deviceCode, workShop]).then(e => {
-        $("#faultCode,#workshop").empty();
-        $("#faultCode").append(e[0]);
-        $("#faultCode").val("").trigger("change");
-        $("#workshop").append(e[1]);
-        getSite('#workshop', '#devSite');
+        //$("#faultCode,#workshop").empty();
+        //$("#faultCode").append(e[0]);
+        //$("#faultCode").val("").trigger("change");
     });
     $('#faultType').empty().append(_faultType).trigger('change');
     $("#faultOther").val("");
@@ -1588,13 +1565,16 @@ function reportFault() {
             }
         }
     }
+    var workshopId = 1;
     if (!isStrEmptyOrUndefined(faultOther)) {
-        var workshop = $('#workshop').val();
+        workshopId = $('#workshop').val();
+        var workshop = $(`#workshop [value=${workshopId}]`).text();
         if (isStrEmptyOrUndefined(workshop)) {
             layer.msg('请选择车间');
             return;
         } else {
-            var site = $('#devSite').val();
+            var siteId = $('#devSite').val();
+            var site = $(`#devSite [value=${siteId}]`).text();
             faultOther = `${workshop}-${site ? site + '-' : ''}${faultOther}`;
         }
     }
@@ -1622,6 +1602,8 @@ function reportFault() {
     var faults = [];
     var admins = [];
     var list = {
+        //创建
+        WorkshopId: workshopId,
         //故障时间
         FaultTime: time,
         //报修人

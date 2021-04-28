@@ -86,10 +86,10 @@ function pageReady() {
     $("#workshop").on("change", function (e) {
         setWorkSiteSelect();
     });
-    $("#devSite").select2({
-        allowClear: true,
-        placeholder: "请选择(可不选)"
-    });
+    //$("#devSite").select2({
+    //    allowClear: true,
+    //    placeholder: "请选择(可不选)"
+    //});
     if (!pcAndroid()) {
         $(".scanning").addClass("hidden");
     }
@@ -563,70 +563,65 @@ function getFaultType() {
 }
 
 //获取车间
-function getWorkShop() {
-    var data = {}
-    data.opType = 162;
-    ajaxPost("/Relay/Post", data, function (ret) {
+function getWorkShopSite() {
+    var wsF = new Promise(r => getWorkShop(r));
+    var siteF = new Promise(r => getSite(r));
+
+    Promise.all([wsF, siteF]).then(ret => {
+        var ws = ret[0];
+        var ss = ret[1];
+        $("#workshop").html(setOptions(ret[0], "Name"))
+            .off("change").on("change", function () {
+                var wsId = $(this).val();
+                var sites = ss.filter(x => x.WorkshopId == wsId);
+                $("#devSite").html(setOptions(sites, "Region"));
+            });
+
+        if (ws.length) {
+            var wsId = ws[0].Id;
+            var sites = ss.filter(x => x.WorkshopId == wsId);
+            $("#devSite").html(setOptions(sites, "Region"));
+        }
+    });
+}
+
+//获取车间
+function getWorkShop(r) {
+    ajaxPost('/Relay/Post', {
+        opType: 162,
+        opData: JSON.stringify({
+            menu: true
+        })
+    }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#workshop").empty();
-        var list = ret.datas;
-        var op = '<option value = "{0}">{0}</option>';
-        var ops = '';
-        for (var i = 0; i < list.length; i++) {
-            var d = list[i];
-            ops += op.format(d.SiteName);
-        }
-        $("#workshop").append(ops);
-        getSite();
-    });
+        r && (r(ret.datas));
+    }, 0);
 }
 
-var _siteData = null;
 //获取场地
-function getSite() {
-    var data = {}
-    data.opType = 125;
-    ajaxPost("/Relay/Post", data, function (ret) {
+function getSite(r) {
+    ajaxPost('/Relay/Post', {
+        opType: 125,
+        opData: JSON.stringify({
+            menu: true
+        })
+    }, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        _siteData = {};
-        var rData = ret.datas;
-        for (var i = 0, len = rData.length; i < len; i++) {
-            var d = rData[i];
-            _siteData[d.SiteName]
-                ? _siteData[d.SiteName].push(d.RegionDescription)
-                : _siteData[d.SiteName] = [d.RegionDescription];
-        }
-        setWorkSiteSelect();
-    });
-}
 
-//车间对应场地
-function setWorkSiteSelect() {
-    $('#devSite').empty();
-    var workshop = $("#workshop").val();
-    if (isStrEmptyOrUndefined(workshop)) {
-        return;
-    }
-    var sData = _siteData[workshop];
-    var ops = '';
-    for (var i = 0, len = sData.length; i < len; i++) {
-        var d = sData[i];
-        ops += `<option value=${d}>${d}</option>`;
-    }
-    $('#devSite').append(ops);
-    $("#devSite").val(0).trigger('change');
+        r && (r(ret.datas));
+    }, 0);
 }
 
 var _updateFirmwareUpload = null;
 function showFaultModel() {
     getFaultType();
-    getWorkShop();
+    getWorkShopSite();
     if (_updateFirmwareUpload == null) {
         _updateFirmwareUpload = initFileInputMultiple("addImg", fileEnum.FaultDevice);
     }
@@ -659,13 +654,16 @@ function reportFault() {
             }
         }
     }
+    var workshopId = 1;
     if (!isStrEmptyOrUndefined(faultOther)) {
-        var workshop = $('#workshop').val();
+        workshopId = $('#workshop').val();
+        var workshop = $(`#workshop [value=${workshopId}]`).text();
         if (isStrEmptyOrUndefined(workshop)) {
             layer.msg('请选择车间');
             return;
         } else {
-            var site = $('#devSite').val();
+            var siteId = $('#devSite').val();
+            var site = $(`#devSite [value=${siteId}]`).text();
             faultOther = `${workshop}-${site ? site + '-' : ''}${faultOther}`;
         }
     }
@@ -693,6 +691,8 @@ function reportFault() {
     var faults = [];
     var admins = [];
     var list = {
+        //创建
+        WorkshopId: workshopId,
         //故障时间
         FaultTime: time,
         //报修人

@@ -458,6 +458,8 @@ function pageReady() {
         .on('change', '.colSet', function () {
             const el = $(this).closest(".kb_div1");
             const id = $(el).attr("value") >> 0;
+            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
+            const oldOrder = ($(el).find(`.O_${id}`).attr("old") >> 0) - 1;
             const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
             const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
             const name = $(el).find(`.N_${id}`).val().trim();
@@ -466,22 +468,40 @@ function pageReady() {
             const shift = $(el).find(`.Shift_${id}`).val() >> 0;
             const hour = $(el).find(`.Hour_${id}`).val() >> 0;
             const min = $(el).find(`.Min_${id}`).val() >> 0;
+            if (oldCol == col) {
+                colSet[col].chose.forEach(d => {
+                    if (d.order == order) {
+                        d.name = name;
+                        d.height = isStrEmptyOrUndefined(height) ? -1 : (height >> 0);
+                    }
+                })
 
-            colSet[col].chose.forEach(d => {
-                if (d.order == order) {
-                    d.name = name;
-                    d.height = isStrEmptyOrUndefined(height) ? -1 : (height >> 0);
+                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(d => {
+                    if (d == n[0]) {
+                        d.Shits = shift;
+                        d.Hour = hour;
+                        d.Min = min;
+                    }
+                })
+            } else {
+                var n = colSet[oldCol].chose.filter(x => x.order == order);
+                var kn = kanBanItemsTmp.filter(x => x.Col == oldCol && x.Order == order);
+                var newOrder = order;
+                if (n.length) {
+                    removeArray(colSet[oldCol].chose, "order", order);
+                    n[0].col = col;
+                    n[0].order = colSet[col].chose.length;
+                    colSet[col].chose.push(n[0]);
+                    newOrder = n[0].order;
                 }
-            })
-
-            var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
-            kanBanItemsTmp.forEach(d => {
-                if (d == n[0]) {
-                    d.Shits = shift;
-                    d.Hour = hour;
-                    d.Min = min;
+                if (kn.length) {
+                    removeArray(kanBanItemsTmp, "Col", oldCol, "Order", order);
+                    kn[0].Col = oldCol;
+                    kn[0].Order = newOrder;
+                    kanBanItemsTmp.push(kn[0]);
                 }
-            })
+            }
 
             kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
 
@@ -588,16 +608,27 @@ function initColSet(init = true) {
         }
     } else {
         for (let i = len - 1; i >= col; i--) {
-            let l = colSet[i].chose.length;
+            let l = colSet[0].chose.length;
             if (l) {
                 for (var j = 0, jLen = colSet[i].chose.length; j < jLen; j++) {
                     const d = colSet[i].chose[j];
+                    var c = d.col;
+                    var o = d.order;
+                    d.col = 0;
                     d.order = l++;
                     colSet[0].chose.push(d);
+                    var n = kanBanItemsTmp.filter(x => x.Col == c && x.Order == o);
+                    kanBanItemsTmp.forEach(kd => {
+                        if (kd == n[0]) {
+                            kd.Col = d.col;
+                            kd.Order = d.order;
+                        }
+                    })
                 }
             }
         }
         colSet = sliceArray(colSet, col);
+            kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
     }
     if (!init) {
         var colWidth = Array.from($('#kanBanItemColSet .kb_item_col2').map((_, a) => ({ width: a.value >> 0 })));
@@ -712,10 +743,10 @@ function showPreProduct() {
                                 <tbody>
                                     <tr role="row" class="odd">
                                         <td style="padding: 4px; border: 1px solid gray;" class="form-inline">
-                                            列<input class="form-control text-center colSet C_${b.val}" style="width: 50%;" value=${b.col + 1} oninput="onInput(this, 3, 0, 1, ${col});">
+                                            列<input class="form-control text-center colSet C_${b.val}" style="width: 50%;" old=${b.col + 1} value=${b.col + 1} oninput="onInput(this, 3, 0, 1, ${col});">
                                         </td>
                                         <td style="padding: 4px; border: 1px solid gray;" class="form-inline">
-                                            顺序<input class="form-control text-center colSet O_${b.val}" readonly="readonly" style="width: 50%;" value=${b.order + 1} oninput="onInput(this, 3, 0, 1);">
+                                            顺序<input class="form-control text-center colSet O_${b.val}" readonly="readonly" style="width: 50%;" old=${b.order + 1} value=${b.order + 1} oninput="onInput(this, 3, 0, 1);">
                                         </td>
                                         <td style="padding: 4px; border: 1px solid gray;" class="form-inline">
                                             高度<input class="form-control text-center colSet H_${b.val}" style="width: 50%;" value="${(b.height == -1 ? "" : b.height)}" oninput="onInput(this, 3, 0, 0, 100);">%
@@ -1077,7 +1108,16 @@ function getKanBanList(resolve) {
                 { data: 'Code', title: '机台号' },
                 {
                     data: null, title: '待机时间', render: d => {
-                        return codeTime(d.IdleSecond);
+                        var color = "";
+                        var t = d.IdleSecond;
+                        if (t > 30 * 60) {
+                            color = "red";
+                        } else if (t > 20 * 60) {
+                            color = "orange";
+                        } else if (t > 10 * 60) {
+                            color = "yellow";
+                        }
+                        return `<span class="text-bold" style="color:${color}">${codeTime(d.IdleSecond)}</span>`;
                     }
                 }
             ],
@@ -1143,6 +1183,40 @@ function getKanBanList(resolve) {
                 { data: 'Processor', title: '操作工' },
                 { data: 'Plan', title: '计划' },
                 { data: 'Actual', title: '实际' },
+            ],
+            op: defaultItem
+        }
+        //故障状态反馈 = 8
+        kanBanProductItemsEl[8] = {
+            name: "故障状态反馈",
+            isTable: true,
+            trFlag: "XvHao",
+            //trFlag: "ProcessorId",
+            order: "asc",
+            cols: [
+                { data: 'XvHao', title: '序号', width: "60" },
+                { data: 'DeviceCode', title: '机台号' },
+                { data: 'FaultTime', title: '故障时间' },
+                {
+                    data: null, title: '状态', render: d =>
+                        `<span class="text-bold ${(d.State == 0 ? "text-danger" : (d.State == 0 ? "text-warning" : (d.State == 1 ? "text-warning" : "text-success")))}">${d.StateDesc}</span>`
+                },
+                { data: 'Proposer', title: '报修人' },
+                { data: 'Name', title: '维修工' },
+                {
+                    data: null, title: '耗时', render: d => {
+                        var color = "";
+                        var t = d.TotalCostTime;
+                        if (t > 60 * 60) {
+                            color = "red";
+                        } else if (t > 30 * 60) {
+                            color = "orange";
+                        } else if (t > 10 * 60) {
+                            color = "yellow";
+                        }
+                        return `<span style="color:${color}">${codeTime(d.TotalCostTime)}</span>`;
+                    }
+                },
             ],
             op: defaultItem
         }
@@ -2149,7 +2223,7 @@ function cancelFullScreenCarousel() {
         fullScreen(false);
     });
 }
-
+var tt, tn;
 var pTable = [];
 //图表设置
 function setChart(elId, kbId, type, next = false) {
@@ -2169,6 +2243,16 @@ function setChart(elId, kbId, type, next = false) {
         var rData;
         const color1 = "text-red";
         const color2 = "text-gray";
+        var n = new Date();
+        if (!tt) {
+            tt = ret.time;
+            tn = n;
+        }
+        if (tt != ret.time) {
+            //console.log(dateDiffSec(n, tn), dateDiffSec(ret.time, tt))
+            tt = ret.time;
+            tn = n;
+        }
         if (ret.errno == 0) {
             var t1 = $(`${flag}_time`).text();
             var t2 = ret.time;
@@ -2617,11 +2701,7 @@ function setChart(elId, kbId, type, next = false) {
             if (!ret.data) {
                 return;
             }
-            //加工相关
-            if (!ret.data.ItemData) {
-                return;
-            }
-            var rData = ret.data.ItemData;
+            var rData = ret.data;
             var rColSet = ret.colSet ? JSON.parse(ret.colSet) : [];
             var ps = `${flag}_productDiv`;
             var windowH = $(window).height();//获取当前窗口高度
@@ -2697,7 +2777,7 @@ function setChart(elId, kbId, type, next = false) {
                                         const nV = $(mTr.find('td')[i]).text();
                                         const nO = $(mTr).attr("order") >> 0;
                                         if (nV != tV) {
-                                            $(mTr.find('td')[i]).text(tV);
+                                            $(mTr.find('td')[i]).html(tV);
                                         }
                                         if (nO != tO) {
                                             $(mTr).attr("order", tO);
