@@ -482,3 +482,12 @@ select, .pointer {
             margin: 0 0 0 5px;
             color: red
         }
+
+
+
+.mColorpicker {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    background: url('../../images/colorpicker.png');
+}

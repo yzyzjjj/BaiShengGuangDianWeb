@@ -40,6 +40,14 @@ function getDate(date = undefined) {
     return year + "-" + month + "-" + day;
 }
 
+//获得今日日期
+function getDay(date = undefined) {
+    return (date ? new Date(date) : new Date()).format("yyyy-MM-dd");
+    var nowTime = new Date();
+    var day = padLeft0(nowTime.getDate());
+    return day;
+}
+
 function getTime() {
     return new Date().format("hh:mm:ss");
     var nowTime = new Date();
@@ -211,6 +219,22 @@ function codeTime(second) {
 }
 
 //秒换算成时间
+function codeTime0(second) {
+    var t = "";
+    const d = Math.floor(second / 86400);
+    d && (t += `${d}天`);
+    second -= d * 86400;
+    const h = Math.floor(second / 3600);
+    h && (t += `${h}小时`);
+    second -= h * 3600;
+    const m = Math.floor(second / 60);
+    m && (t += `${m}分`);
+    second -= m * 60;
+    second && (t += `${second}秒`);
+    return t;
+}
+
+//秒换算成时间
 function convertTime(d, hIf = true, mIf = true, sIf = true) {
     const h = hIf ? Math.floor(d / 3600) : 0;
     const m = mIf ? Math.floor((d - (h * 3600)) / 60) : 0;
@@ -271,7 +295,12 @@ function convertTimeHMS(time) {
 }
 
 //时间格式转换 mon月day日
-function monthDay(time) {
+function monthDay(time, type = 0) {
     time = time.split(' ')[0].split('-');
-    return `${time[1]}月${time[2]}日`;
+    switch (type) {
+        case 0: return `${time[1]}-${time[2]}`;
+        case 1: return `${time[1]}/${time[2]}`;
+        case 2: return `${time[1]}月${time[2]}日`;
+    }
+    return ``;
 }

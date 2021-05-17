@@ -221,6 +221,72 @@
             </div>
         </div>
     </div>
+
+    <!-- 处理逻辑模态框 -->
+    <div class="modal fade" tabindex="-1" id="showFuncModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">逻辑处理</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group flexStyle" style="justify-content: center">
+                        <label class="control-label text-nowrap">显示处理：</label>
+                        <div style="flex-basis: 150px">
+                            <select class="form-control" id="showFunc" style="width:100%"></select>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="justify-content: center">
+                        <label class="control-label text-nowrap">是否加粗：</label>
+                        <div style="flex-basis: 150px">
+                            <select class="form-control" id="boldFunc" style="width:100%">
+                                <option value="0">否</option>
+                                <option value="1">是</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle" style="justify-content: center">
+                        <label class="control-label text-nowrap">颜色处理：</label>
+                        <div style="flex-basis: 150px">
+                            <select class="form-control" id="colorFunc" style="width:100%">
+                                <option value="0">无</option>
+                                <option value="1">与列同色</option>
+                                <option value="2">条件变色</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group flexStyle conDiv hidden" style="justify-content: center">
+                        <label class="control-label text-nowrap">条件：</label>
+                        <div style="flex-basis: 150px">
+                            <table class="table table-striped no-margin">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>条件(从上往下判断)</th>
+                                        <th>颜色</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="conFunc"></tbody>
+                            </table>
+                            <br>
+                            <div style="width: 100%;text-align: center;">
+                                <button type="button" class="btn btn-success btn-sm" onclick="addConTr()"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveCons()">确定</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCons(true)">确定并关闭</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 <section class="panel-fullscreen" id="fullScreenCarousel" style="top:-100%; opacity: 0;background:white"></section>
 

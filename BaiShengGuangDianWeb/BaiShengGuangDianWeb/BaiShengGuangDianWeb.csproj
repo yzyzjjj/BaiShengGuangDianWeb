@@ -9,15 +9,19 @@
   <ItemGroup>
     <Compile Remove="Controllers\Api\AccountManagement\**" />
     <Compile Remove="Views\Home\css\**" />
+    <Compile Remove="wwwroot\lib\AdminLTE-2.3.11\plugins\colorpicker\img\**" />
     <Compile Remove="wwwroot\mimages\**" />
     <Content Remove="Controllers\Api\AccountManagement\**" />
     <Content Remove="Views\Home\css\**" />
+    <Content Remove="wwwroot\lib\AdminLTE-2.3.11\plugins\colorpicker\img\**" />
     <Content Remove="wwwroot\mimages\**" />
     <EmbeddedResource Remove="Controllers\Api\AccountManagement\**" />
     <EmbeddedResource Remove="Views\Home\css\**" />
+    <EmbeddedResource Remove="wwwroot\lib\AdminLTE-2.3.11\plugins\colorpicker\img\**" />
     <EmbeddedResource Remove="wwwroot\mimages\**" />
     <None Remove="Controllers\Api\AccountManagement\**" />
     <None Remove="Views\Home\css\**" />
+    <None Remove="wwwroot\lib\AdminLTE-2.3.11\plugins\colorpicker\img\**" />
     <None Remove="wwwroot\mimages\**" />
   </ItemGroup>
 

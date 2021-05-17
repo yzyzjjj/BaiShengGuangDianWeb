@@ -1310,11 +1310,14 @@ function pcAndroid() {
     return /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent);
 }
 
-Array.prototype.selectMany = function (selector) {
-    return this.map(selector).reduce(function (a, b) {
-        return a.concat(b);
-    });
-};
+//Array.prototype.selectMany = function (selector) {
+//    return this.map(selector).reduce(function (a, b) {
+//        return a.concat(b);
+//    });
+//};
+function selectMany(t, key) {
+    return t.map(x => x[key]).reduce((a, b, i) => a.concat(b));
+}
 
 //数组对象实现字母、数字的混合排序：
 function SortNumberString(array, par) {
@@ -2799,7 +2802,19 @@ function getTable(id, columns, border = 0) {
 
 //获取滚动table
 function getTableW(id, columns, border = 0) {
-    const column = columns && columns.length > 0 ? columns.reduce((a, b, i) => `${a}<th style='width:${b.width && b.width !== "auto" ? `${b.width}px` : "auto"}'>${b.title}</th>`, '') : "";
+    const xvHao = columns.filter(x => x.Field == "XvHao");
+    if (!xvHao.length)
+        columns.unshift({
+            Order: 0,
+            Column: "序号",
+            Field: "XvHao",
+            Width: "60"
+        })
+    const column = columns && columns.length > 0 ? columns.reduce((a, col, i) => {
+        var width = col.Width && col.Width !== "auto" ? `width: ${col.Width}px;` : `width: auto;`;
+        var color = col.Color ? `color: ${col.Color};` : ``;
+        return `${a}<th style='${width}${color}'>${col.Column}</th>`
+    }, '') : "";
     const table =
         `<div class="kb_item_tablebox">
             <table border="${border}" cellspacing="0" cellpadding="0" id="${id}" style="table-layout:fixed;">
@@ -2819,7 +2834,7 @@ function autoScroll(tableId) {
     const tb = $(`#${tableId} tbody`);
     const outerHeight = tb.find('tr:first').height();
     // 改变table的margin-top，定时将第一行tr挪至（列表）最后
-    tb.animate({ 'marginTop': -outerHeight + 'px' }, 1000, () => {
+    tb.animate({ 'marginTop': -outerHeight + 'px' }, 2000, () => {
         tb.css({ margin: 0 }).find('tr:first').appendTo(tb);
     });
 }
@@ -2914,4 +2929,27 @@ function getListNoCover(func, callBack = null, qId = 0, table = true, cover = 0)
 function getMenuNoCover(func, callBack = null, qId = 0, table = false, cover = 0) {
     if (func)
         func(null, true, callBack, cover, table, qId);
+}
+
+function setFieldOptions(func) {
+    const fields = FieldFunc[func] ? FieldFunc[func] : [];
+    let ops = `<option value="">无</option>`;
+    Object.keys(fields).forEach(key => {
+        var c = fields[key];
+        ops += `<option value="${key}">${c.desc}</option>`;
+    })
+    return ops;
+}
+
+function meetCondition(d, con, conv) {
+    //定义于const.js ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"]
+    switch (con) {
+        case 0: return d > conv;
+        case 1: return d >= conv;
+        case 2: return d == conv;
+        case 3: return d < conv;
+        case 4: return d <= conv;
+        case 5: return d != conv;
+    }
+    return false;
 }

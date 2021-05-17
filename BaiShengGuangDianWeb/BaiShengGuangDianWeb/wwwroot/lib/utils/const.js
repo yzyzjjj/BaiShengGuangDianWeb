@@ -15,6 +15,7 @@ var tdShowLength = 15;
 var tdShowLengthLong = 150;
 var tdShowContentLength = 10;
 var _handleIcon = 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z';
+const defColor = "#333333";
 
 var oLanguage = {
     "sProcessing": "处理中...",
@@ -154,3 +155,78 @@ fileCallBack[fileEnum.Script] = function () { };
 fileAccept[fileEnum.Device] = "image/*";
 fileExt[fileEnum.Device] = ["bmp", "jpg", "jpeg", "png", "gif"];
 fileCallBack[fileEnum.Device] = function () { };
+
+const FieldFunc = [];
+//数据类型为整形
+FieldFunc["int"] = {
+    //1 -> 1秒
+    time: {
+        desc: "秒转时间",
+        func: codeTime0
+    },
+};
+
+//数据类型为年月日 时分秒
+FieldFunc["datetime"] = {
+    //2021-5-12 14:44:10 -> 2021-5-12
+    date: {
+        desc: "时间转年月日",
+        func: convertTimeDay
+    },
+    //2021-5-12 14:44:10 -> 5-12
+    mDate: {
+        desc: "时间转月日",
+        func: monthDay
+    },
+    //2021-5-12 14:44:10 -> 12
+    day: {
+        desc: "时间转日",
+        func: getDay
+    },
+    //2021-5-12 14:44:10 -> 14:44:10
+    time: {
+        desc: "时间转时分秒",
+        func: convertTimeHMS
+    },
+};
+
+//数据类型为年月日
+FieldFunc["date"] = {
+    //2021-5-12 -> 5-12
+    date: {
+        desc: "时间转月日",
+        func: monthDay
+    },
+    //2021-5-12 -> 12
+    date: {
+        desc: "时间转日",
+        func: getDay
+    },
+};
+
+//数据类型为数组
+FieldFunc["array"] = {
+    //[1,2,3,4]
+    date: {
+        desc: "时间转月日",
+        func: monthDay
+    },
+    //2021-5-12 -> 12
+    date: {
+        desc: "时间转日",
+        func: getDay
+    },
+};
+
+//数据类型为数组
+FieldFunc["list"] = {
+    //[{ a: 1}, {}]
+    array: {
+        desc: "",
+        func: (d) => {
+            return JSON.parse(d);
+        }
+    },
+};
+
+const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
