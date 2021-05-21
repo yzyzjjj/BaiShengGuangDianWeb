@@ -230,3 +230,4 @@ FieldFunc["list"] = {
 };
 
 const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const itemShowOptions = ["表格", "折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');

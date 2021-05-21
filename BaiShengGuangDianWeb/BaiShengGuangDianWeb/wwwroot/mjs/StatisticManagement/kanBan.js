@@ -356,7 +356,7 @@ function pageReady() {
                 });
                 colSet[0].chose.push({
                     name,
-                    isTable: true,
+                    isTable: it.Display,
                     val: id,
                     col: 0,
                     order: order,
@@ -1594,13 +1594,20 @@ function getKanBanList(resolve) {
                                 var chose = cs.chose.reduce((a, b, i) => {
                                     var pItem = "";
                                     const el = sItemList[b.val];
-                                    const isTable = b.isTable ? b.isTable : true;
-                                    const fieldList = el.FieldList ? el.FieldList.filter(x => x.Order) : [];
-                                    if (el && isTable) {
-                                        pItem = defaultItem.format(
-                                            getTableW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
-                                            //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
-                                            b.name ? b.name : el.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                    if (el) {
+                                        const fieldList = el.FieldList ? el.FieldList.filter(x => x.Order) : [];
+                                        b.isTable = b.isTable ? b.isTable : 0;
+                                        if (b.isTable == 0) {
+                                            pItem = defaultItem.format(
+                                                getTableW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
+                                                //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
+                                                b.name ? b.name : el.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                        } else if (b.isTable == 1) {
+                                            pItem = defaultItem.format(
+                                                getTableW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
+                                                //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
+                                                b.name ? b.name : el.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                        }
                                     }
                                     return a + pItem;
                                 }, '');
@@ -3065,8 +3072,8 @@ function setChart(elId, kbId, type, next = false) {
                     if (itemConfig.Name == "操作工日进度表") {
                         var a = 1;
                     }
-                    const isTable = colSet.isTable ? colSet.isTable : true;
-                    if (isTable) {
+                    colSet.isTable = colSet.isTable ? colSet.isTable : 0;
+                    if (colSet.isTable == 0) {
                         if (trs.length == 0) {
                             const trs = getItemTrs(dataSource, itemConfig, itemSet, sWay);
                             $(`${tabN} tbody`).html(trs);
@@ -3168,7 +3175,7 @@ function setChart(elId, kbId, type, next = false) {
                                         var hBold = $(mTr.find('td')[i]).hasClass(bold);
                                         if (bold && !hBold) {
                                             $(mTr.find('td')[i]).addClass(bold)
-                                        } else if(!bold && hBold) {
+                                        } else if (!bold && hBold) {
                                             $(mTr.find('td')[i]).removeClass(bold)
                                         }
                                         $(mTr.find('td')[i]).attr("style", width);
@@ -3240,6 +3247,11 @@ function setChart(elId, kbId, type, next = false) {
                             $(`${tabN} tbody`).html(trs);
                             stopScrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         }
+                    }
+                    else if (colSet.isTable == 1) {
+
+
+
                     }
                 }
             }

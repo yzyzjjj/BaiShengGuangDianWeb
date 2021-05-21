@@ -9,8 +9,43 @@ function pageReady() {
     _permissionList[234] = { uIds: ['delSiteBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
     getListNoCover(getWorkshopList);
+
+    $("#workshopList").on("input", ".shifts", function () {
+        const tr = $(this).closest('tr');
+        const shifts = tr.find('.shifts').val() >> 0;
+        $(tr).find('.shiftNames').attr("placeholder", getTip(0, shifts));
+        $(tr).find('.shiftTimes').attr("placeholder", getTip(1, shifts));
+    })
+
+    $("#addWorkshopList").on("input", ".shifts", function () {
+        const tr = $(this).closest('tr');
+        const shifts = tr.find('.shifts').val() >> 0;
+        $(tr).find('.shiftNames').attr("placeholder", getTip(0, shifts));
+        $(tr).find('.shiftTimes').attr("placeholder", getTip(1, shifts));
+    })
 }
 
+function getCount(type, shifts) {
+    var st = 0;
+    if (shifts == 1)
+        st = type == 0 ? 1 : 2;
+    else if (shifts >= 2)
+        st = shifts;
+    return st;
+}
+
+function getTip(type, shifts) {
+    var st = getCount(type, shifts);
+    var sd = "";
+    if (st > 0) {
+        sd = `${st}个${(type == 0 ? "名称" : "时间")}`;
+        if (st > 1) {
+            sd += `,${(type == 0 ? "以英文逗号隔开" : "格式:00:00:00,以英文逗号隔开")}`;
+        }
+    } else
+        sd= "班次应大于0";
+    return sd;
+}
 
 //----------------------------------------车间管理----------------------------------------------------
 let _workshopId = 0;
@@ -27,7 +62,8 @@ function getWorkshopList(_, menu = false, callBack = null, cover = 1, table = tr
                 tableConfig.addColumns([
                     { data: "Name", title: "车间", render: tableSet.input.bind(null, "name") },
                     { data: "Abbrev", title: "缩写", render: tableSet.input.bind(null, "abbrev") },
-                    { data: "Shifts", title: "班次", render: tableSet.input.bind(null, "shifts") },
+                    { data: "Shifts", title: "班次", render: tableSet.numberInput.bind(null, "shifts", "") },
+                    { data: "ShiftNames", title: "班次名称", render: tableSet.input.bind(null, "shiftNames") },
                     { data: "ShiftTimes", title: "班次时间", render: tableSet.input.bind(null, "shiftTimes") },
                     { data: "Remark", title: "备注", render: tableSet.input.bind(null, "remark") },
                     { data: "Id", title: "位置", render: tableSet.detailBtn.bind(null, "clickWorkshopTr") }
@@ -38,12 +74,15 @@ function getWorkshopList(_, menu = false, callBack = null, cover = 1, table = tr
                             tr.find('.name').val(d.Name);
                             tr.find('.abbrev').val(d.Abbrev);
                             tr.find('.shifts').val(d.Shifts);
+                            tr.find('.shiftNames').val(d.ShiftNames);
                             tr.find('.shiftTimes').val(d.ShiftTimes);
                             tr.find('.remark').val(d.Remark);
                         });
                 }
                 tableConfig.createdRow = function (tr, d) {
-                    $(tr).find('.shiftTimes').attr("placeholder", "00:00:00,多个以英文逗号隔开");
+                    const shifts = d.Shifts;
+                    $(tr).find('.shiftNames').attr("placeholder", getTip(0, shifts));
+                    $(tr).find('.shiftTimes').attr("placeholder", getTip(1, shifts));
                 }
                 _workshopListTable = $("#workshopList").DataTable(tableConfig);
             } else {
@@ -67,15 +106,19 @@ function getWorkshopTrInfo(el, isAdd) {
     const abbrev = el.find('.abbrev').val().trim();
     const shifts = el.find('.shifts').val() >> 0;
     const shiftTimes = el.find('.shiftTimes').val().trim();
+    const shiftNames = el.find('.shiftNames').val().trim();
     if (shifts <= 0)
         return void layer.msg("班次设置错误");
-    else if (isStrEmptyOrUndefined(shiftTimes) || shifts != shiftTimes.split(",").length)
-        return void layer.msg("班次与班次时间设置不符");
+    else if (isStrEmptyOrUndefined(shiftNames) || getCount(0, shifts) != shiftNames.split(",").length)
+        return void layer.msg("班次与班次名称数量不符");
+    else if (isStrEmptyOrUndefined(shiftTimes) || getCount(1, shifts) != shiftTimes.split(",").length)
+        return void layer.msg("班次与班次时间数量不符");
     const remark = el.find('.remark').val().trim();
     const list = {
         Name: name,
         Abbrev: abbrev,
         Shifts: shifts,
+        ShiftNames: shiftNames,
         ShiftTimes: shiftTimes,
         Remark: remark
     }
@@ -88,21 +131,25 @@ function addWorkshopModel() {
     const trData = {
         Name: "",
         Abbrev: "",
-        Shifts: 1,
+        Shifts: 0,
+        ShiftNames: "",
         ShiftTimes: "",
         Remark: ""
     }
     const tableConfig = dataTableConfig([trData]);
     tableConfig.addColumns([
-        { data: "Name", title: "车间", render: tableSet.addInput.bind(null, "name", "auto") },
-        { data: "Abbrev", title: "缩写", render: tableSet.addInput.bind(null, "abbrev", "auto") },
-        { data: "Shifts", title: "班次", render: tableSet.addNumberInput.bind(null, "shifts", "auto") },
-        { data: "ShiftTimes", title: "班次时间", render: tableSet.addInput.bind(null, "shiftTimes", "auto") },
-        { data: "Remark", title: "备注", render: tableSet.addInput.bind(null, "remark", "100") },
+        { data: "Name", title: "车间", render: tableSet.addInput.bind(null, "name", "100%") },
+        { data: "Abbrev", title: "缩写", render: tableSet.addInput.bind(null, "abbrev", "100%") },
+        { data: "Shifts", title: "班次", render: tableSet.addNumberInput.bind(null, "shifts", "60px") },
+        { data: "ShiftNames", title: "班次名称", render: tableSet.addInput.bind(null, "shiftNames", "100%") },
+        { data: "ShiftTimes", title: "班次时间", render: tableSet.addInput.bind(null, "shiftTimes", "100%") },
+        { data: "Remark", title: "备注", render: tableSet.addInput.bind(null, "remark", "100%") },
         { data: null, title: "删除", render: tableSet.delBtn }
     ]);
     tableConfig.createdRow = function (tr, d) {
-        $(tr).find('.shiftTimes').attr("placeholder", "00:00:00,多个以英文逗号隔开");
+        const tip = `班次应大于0`;
+        $(tr).find('.shiftNames').attr("placeholder", tip);
+        $(tr).find('.shiftTimes').attr("placeholder", tip);
     }
     $('#addWorkshopList').DataTable(tableConfig);
     $('#addWorkshopListBtn').off('click').on('click', () => addDataTableTr('#addWorkshopList', trData));
