@@ -15,8 +15,13 @@ function pageReady() {
     _permissionList = checkPermissionUi(_permissionList);
     $(".ads").css('width', '100%').select2();
     $('.ms2').select2();
-    getDataTypeList();
-    getDeviceModelList();
+    var getFunc1 = new Promise(resolve => getDataTypeList(resolve, 0));
+    var getFunc2 = new Promise(resolve => getDeviceModelList(resolve, 0));
+    var getFunc3 = new Promise(resolve => getScriptVersionList(resolve, 0));
+    Promise.all([getFunc1, getFunc2, getFunc3]).then(ret => {
+        const sData = scriptData.filter(x => ~(x.DeviceModelId.split(",").map(x => parseInt(x)).indexOf(deModel)));
+        $("#sScriptVersion").html(setOptions(sData, "ScriptName")).val(0);
+    });
     $("#fScriptVersion").change(function () {
         $(".sd ").addClass("hidden");
         var v = $("#fScriptVersion").val();
@@ -32,7 +37,17 @@ function pageReady() {
 
     $("#sDeviceModel").on("select2:select", function (e) {
         deModel = parseInt($("#sDeviceModel").val());
-        getScriptVersionList();
+        const sData = scriptData.filter(x => ~(x.DeviceModelId.split(",").map(x => parseInt(x)).indexOf(deModel)));
+        $("#sScriptVersion").html(setOptions(sData, "ScriptName")).val(0);
+        //$("#valList,#inList,#outList").empty();
+
+        $("#valList_wrapper").parent().empty()
+            .append('<table class="table table-hover table-striped" id="valList"></table>');
+        $("#inList_wrapper").parent().empty()
+            .append('<table class="table table-hover table-striped" id="inList"></table>');
+        $("#outList_wrapper").parent().empty()
+            .append('<table class="table table-hover table-striped" id="outList"></table>');
+        //getScriptVersionList();
     });
     $("#aDeviceModel").on("select2:select", function (e) {
         adeModel = parseInt($("#aDeviceModel").val());
@@ -140,26 +155,26 @@ function pageReady() {
         allowClear: true,
         placeholder: "请选择"
     });
-    var data = {}
-    data.opType = 113;
-    ajaxPost("/Relay/Post", data, function (ret) {
-        if (ret.errno != 0) {
-            layer.msg(ret.errmsg);
-            return;
-        }
-        scriptData = ret.datas;
-    });
-    ajaxPost("/Relay/Post",
-        {
-            opType: 112
-        },
-        function (ret) {
-            if (ret.errno != 0) {
-                layer.msg(ret.errmsg);
-                return;
-            }
-            valueType = ret.datas;
-        });
+    //var data = {}
+    //data.opType = 113;
+    //ajaxPost("/Relay/Post", data, function (ret) {
+    //    if (ret.errno != 0) {
+    //        layer.msg(ret.errmsg);
+    //        return;
+    //    }
+    //    scriptData = ret.datas;
+    //});
+    //ajaxPost("/Relay/Post",
+    //    {
+    //        opType: 112
+    //    },
+    //    function (ret) {
+    //        if (ret.errno != 0) {
+    //            layer.msg(ret.errmsg);
+    //            return;
+    //        }
+    //        valueType = ret.datas;
+    //    }, 0);
     $("#udtScriptVersion").on("select2:select", function (e) {
         showUsuallyDictionaryTypeModel(true);
     });
@@ -402,7 +417,7 @@ function updateScriptVersion() {
 var valueType = null;
 var deModel = 0;
 var sScrId = 0;
-function getDataTypeList() {
+function getDataTypeList(resolve, tf = 1) {
     ajaxPost("/Relay/Post", { opType: 112 }, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -421,62 +436,49 @@ function getDataTypeList() {
             var data1 = ret.datas[i];
             $("#addDataType").append(option1.format(data1.Id, data1.TypeName));
         }
-    });
+        resolve && resolve(ret.datas);
+    }, tf);
 }
 
-function getDeviceModelList() {
-    $("#valList_wrapper").parent().empty()
-        .append('<table class="table table-hover table-striped" id="valList"></table>');
-    $("#inList_wrapper").parent().empty()
-        .append('<table class="table table-hover table-striped" id="inList"></table>');
-    $("#outList_wrapper").parent().empty()
-        .append('<table class="table table-hover table-striped" id="outList"></table>');
-    deModel = 0;
+function getDeviceModelList(resolve, tf = 1) {
+    //$("#valList_wrapper").parent().empty()
+    //    .append('<table class="table table-hover table-striped" id="valList"></table>');
+    //$("#inList_wrapper").parent().empty()
+    //    .append('<table class="table table-hover table-striped" id="inList"></table>');
+    //$("#outList_wrapper").parent().empty()
+    //    .append('<table class="table table-hover table-striped" id="outList"></table>');
     ajaxPost("/Relay/Post", { opType: 120 }, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#sDeviceModel").empty();
-        $("#addScriptVersionDeviceModel").empty();
-        $("#updateScriptVersionDeviceModel").empty();
-        var option = '<option value="{0}">{1}</option>';
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            if (deModel == 0)
-                deModel = data.Id;
-            $("#sDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-            $("#addScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-            $("#updateScriptVersionDeviceModel").append(option.format(data.Id, data.CategoryName + "-" + data.ModelName));
-        }
-        getScriptVersionList();
-    });
+        deModel = (deModel == 0 && ret.datas.length) ? (ret.datas[0].Id) : (ret.datas.length == 0 ? 0 : deModel);
+        var options = setOptionsWithNames(ret.datas, ["CategoryName", "ModelName"], "-");
+
+        $("#sDeviceModel").html(options);
+        deModel & $("#sDeviceModel").val(deModel);
+        $("#addScriptVersionDeviceModel").html(options);
+        $("#updateScriptVersionDeviceModel").html(options);
+        resolve && resolve(ret.datas);
+    }, tf);
 }
 
-function getScriptVersionList() {
+function getScriptVersionList(resolve, tf = 1) {
     sScrId = 0;
     var data = {}
     data.opType = 113;
-    data.opData = JSON.stringify({
-        //设备类型
-        deviceModelId: deModel
-    });
+    //data.opData = JSON.stringify({
+    //    //设备类型
+    //    deviceModelId: deModel
+    //});
     ajaxPost("/Relay/Post", data, function (ret) {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#sScriptVersion").empty();
-        var option = '<option value="{0}">{1}</option>';
-        for (var i = 0; i < ret.datas.length; i++) {
-            var data = ret.datas[i];
-            //if (sScrId == 0)
-            //    sScrId = data.Id;
-            $("#sScriptVersion").append(option.format(data.Id, data.ScriptName));
-        }
-        $("#sScriptVersion").val(0).trigger("update");
-        //getScriptVersionDetailList();
-    });
+        scriptData = ret.datas;
+        resolve && resolve(ret.datas);
+    }, tf);
 }
 
 function getScriptVersionDetailList() {
@@ -789,7 +791,7 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
         var data = {}
         data.opType = 118;
         data.opData = JSON.stringify({
-            id: $("#udtScriptVersion").val()
+            sId: $("#udtScriptVersion").val()
         });
         ajaxPost("/Relay/Post",
             data,
@@ -815,6 +817,7 @@ function showUsuallyDictionaryTypeModel(refresh = false) {
     }
 }
 var usData = null;
+let _udtListTable = null;
 function showUsuallyDictionary() {
     var data = {}
     data.opType = 106;
@@ -841,87 +844,45 @@ function showUsuallyDictionary() {
         vData["1"] = getData(ret.datas, 1);
         vData["2"] = getData(ret.datas, 2);
         vData["3"] = getData(ret.datas, 3);
-        var o = 0;
-        var order = function (data, type, row) {
-            return ++o;
-        }
-        var op = function (data, type, row) {
-            var html = '<div class="form-group">{0}{1}</div>';
-            var sel1 = '<select class="mSel mSel1 form-control" v="{0}" id="val{0}" ov="{1}" did="{2}" vid="vid1_{3}"></select>'.format(o, data.VariableTypeId, data.Id, data.VariableNameId);
-            var sel2 = '<select class="mSel mSel2 form-control" v="{0}" id="dic{0}" ov="{1}" vid="vid2_{2}"></select>'.format(o, data.DictionaryId, data.VariableNameId);
-
-            html = html.format(sel1, sel2);
-            return html;
-        };
-        $("#udtList")
-            .DataTable({
-                dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-                "destroy": true,
-                "paging": true,
-                "searching": true,
-                "language": oLanguage,
-                "data": usData,
-                "aLengthMenu": [35, 70, 105], //更改显示记录数选项  
-                "iDisplayLength": 35, //默认显示的记录数
-                "columns": [
-                    { "data": null, "title": "序号", "render": order },
-                    { "data": "Id", "title": "Id", "bVisible": false },
-                    { "data": "VariableName", "title": "变量用途" },
-                    { "data": null, "title": "变量地址", "render": op, "sClass": "text-left" }
-                ],
-                "drawCallback": function (settings, json) {
-                    var msl = $(".mSel");
-                    var init = true;
-                    for (var i = 0; i < msl.length; i++) {
-                        if (!$(msl[i]).hasClass("done")) {
-                            init = false;
-                            break;
-                        }
-                    }
-                    if (init)
-                        return;
-                    $(".mSel2").select2();
-                    $(".mSel1").empty();
-                    var option = '<option value="{0}">{1}</option>';
-                    var list = $(".mSel1");
-                    if (list.length > 0) {
-                        for (var i = 0; i < valueType.length; i++) {
-                            var d = valueType[i];
-                            $(".mSel1").append(option.format(d.Id, d.TypeName));
-                        }
-                        var sel1s = [];
-                        for (var j = 0; j < list.length; j++) {
-                            var mSel1 = $(list[j]);
-                            var v = mSel1.attr("v");
-                            var ov = mSel1.attr("ov");
-                            mSel1.val(ov).trigger("change");
-                            $("#dic" + v).addClass("vt" + ov);
-                            if (sel1s.indexOf(ov) == -1)
-                                sel1s.push(ov);
-                        }
-                        for (var va in sel1s) {
-                            var val = sel1s[va];
-                            $(".vt" + val).empty();
-                            //$(".vt" + val).append(option.format(0, "未设置"));
-                            for (var i = 0; i < vData[val].length; i++) {
-                                var d = vData[val][i];
-                                $(".vt" + val).append(option.format(d.PointerAddress, d.PointerAddress + "-" + d.VariableName));
-                            }
-                        }
-                        for (var j = 0; j < list.length; j++) {
-                            var mSel1 = $(list[j]);
-                            var v = mSel1.attr("v");
-                            var ov = $("#dic" + v).attr("ov");
-                            $("#dic" + v).val(ov).trigger("update");
-                        }
-                        $(".mSel1").addClass("done");
-                        $(".mSel2").addClass("done");
-                        $(".mSel1").removeClass("mSel1");
-                        $(".mSel2").removeClass("mSel2");
-
-                    }
+        const tableConfig = dataTableConfig(usData);
+        tableConfig.iDisplayLength = 35;
+        tableConfig.aLengthMenu = [35, 70, 105];
+        tableConfig.addColumns([
+            { data: "VariableName", title: "变量用途" },
+            {
+                data: null, title: "变量地址", sClass: "text-left", render: d => {
+                    return `<div class="form-group">
+                                    <select class="mSel vt form-control" v="${d.XvHao}" id="val${d.XvHao}" ov="${d.VariableTypeId}" did="${d.Id}" vid="vid1_${d.VariableNameId}"></select>
+                                    <select class="mSel vv form-control" v="${d.XvHao}" id="dic${d.XvHao}" ov="${d.DictionaryId}" vid="vid2_${d.VariableNameId}"></select>
+                                </div>`;
+                }
+            }
+        ]);
+        tableConfig.createdRow = (tr, d) => {
+            tr = $(tr);
+            var vId = d.VariableTypeId;
+            var options = setOptions(valueType, "TypeName");
+            tr.find('.vt').html(options).val(d.VariableTypeId).on("change", function () {
+                var cvId = $(this).val();
+                options = setOptionsWithKeyNames(vData[cvId], "PointerAddress", ["PointerAddress", "VariableName"], "-");
+                tr.find('.vv').html(options);
+                if (cvId == vId) {
+                    tr.find('.vv').val(d.DictionaryId);
                 }
             });
+
+            options = setOptionsWithKeyNames(vData[vId], "PointerAddress", ["PointerAddress", "VariableName"], "-");
+            tr.find('.vv').html(options).val(d.DictionaryId);
+            tr.find('.vv').select2({ matcher });
+        };
+        //tableConfig.drawCallback = function () {
+        //    initCheckboxAddEvent.call(this, _workshopTrs, (tr, d) => {
+        //        tr.find('.workshop').val(d.Workshop);
+        //        tr.find('.remark').val(d.Remark);
+        //    });
+        //}
+        _udtListTable = $('#udtList').DataTable(tableConfig);
+
         $("#usuallyDictionaryTypeModel").modal("show");
     });
 }
@@ -966,18 +927,19 @@ function updateUdt() {
 
         if (!change)
             return;
-
-        var doSth = function () {
+        showConfirm("修改", () => {
             var data = {}
             data.opType = 119;
             data.opData = JSON.stringify(postData);
-            ajaxPost("/Relay/Post", data, function (ret) {
+            ajaxPost("/Relay/Post", {
+                opType: 119,
+                opData: JSON.stringify(postData)
+            }, function (ret) {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0)
                     showUsuallyDictionaryTypeModel(true);
             });
-        }
-        showConfirm("修改", doSth);
+        });
     }
 }
 
