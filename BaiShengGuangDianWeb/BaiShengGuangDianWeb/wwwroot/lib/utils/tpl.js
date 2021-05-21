@@ -122,7 +122,7 @@ var commonfunc = function () {
         if (url != window.location.pathname) {
             window.location = url;
         }
-    });
+    }, 0);
 
     //服务地址
     initHub();

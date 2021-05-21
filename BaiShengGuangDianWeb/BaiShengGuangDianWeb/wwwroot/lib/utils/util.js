@@ -1869,10 +1869,19 @@ function setOptions(data, name, color = false) {
 }
 
 //options设置
+function setOptionsWithNames(data, names, separator, color = false) {
+    return data.reduce((a, b, i) => `${a}<option value="${b.Id}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${(names.map(x => b[x]).join(separator))}</option >`, '');
+}
+
+//options设置
 function setOptionsWithKey(data, id, name, color = false) {
     return data.reduce((a, b, i) => `${a}<option value="${b[id]}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${b[name]}</option>`, '');
 }
 
+//options设置
+function setOptionsWithKeyNames(data, id, names, separator, color = false) {
+    return data.reduce((a, b, i) => `${a}<option value="${b[id]}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${(names.map(x => b[x]).join(separator))}</option>`, '');
+}
 //将数字金额转换为大写人民币汉字
 function convertCurrency(money) {
     //汉字的数字
