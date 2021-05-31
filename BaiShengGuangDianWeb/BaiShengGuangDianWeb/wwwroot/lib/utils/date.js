@@ -42,10 +42,19 @@ function getDate(date = undefined) {
 
 //获得今日日期
 function getDay(date = undefined) {
-    return (date ? new Date(date) : new Date()).format("yyyy-MM-dd");
+    return (date ? new Date(date) : new Date()).getDate();
     var nowTime = new Date();
     var day = padLeft0(nowTime.getDate());
     return day;
+}
+
+function getHour(time, type = 0) {
+    var t = (time ? new Date(time) : new Date()).getHours();
+    switch (type) {
+        case 0: break;
+        case 1: t += "点"; break;
+    }
+    return t;
 }
 
 function getTime() {
@@ -116,18 +125,37 @@ function getNowMonthRange(day = 0) {
 }
 
 //获得当前月份
-function getNowMonth() {
-    var nowTime = new Date();
-    var year = nowTime.getFullYear();
-    var month = padLeft0(nowTime.getMonth() + 1);
-
-    return year + "-" + month;
+function getNowMonth(time, type = 0) {
+    var t = (time ? new Date(time) : new Date());
+    var year = t.getFullYear();
+    var month = t.getMonth() + 1;
+    switch (type) {
+        case 0: t = `${year}年${month}月`; break;
+        case 1: t = `${month}月`; break;
+        case 2: ; break;
+    }
+    return t;
 }
 //获得当前年份
-function getNowYear() {
-    var nowTime = new Date();
-    var year = nowTime.getFullYear();
-    return year;
+function getNowYear(time, type = 0) {
+    var t = (time ? new Date(time) : new Date()).getFullYear();
+    switch (type) {
+        case 0: break;
+        case 1: t += "年"; break;
+    }
+    return t;
+}
+
+//获得当前第几周
+function getWeek(time, type = 0) {
+    var t = (time ? new Date(time) : new Date()).getFullYear();
+    switch (type) {
+        case 0: t = !time ? `${getNowYear()}第${$.datepicker.iso8601Week(new Date())}周`
+            : `${getNowYear(time)}第${$.datepicker.iso8601Week(new Date(time))}周`; break;
+        case 1: t = !time ? `第${$.datepicker.iso8601Week(new Date())}周`
+            : `第${$.datepicker.iso8601Week(new Date(time))}周`; break;
+    }
+    return t;
 }
 
 //计算两个日期天数差的函数，返回相差秒
@@ -185,10 +213,6 @@ function exchangeDateArray(date1, date2, type = 0) {
         dates.push(t.format("yyyy-MM-dd hh:mm:ss"));
     }
     return dates;
-}
-//获得当前第几周
-function getWeek() {
-    return getNowYear() + "第" + $.datepicker.iso8601Week(new Date()) + "周";
 }
 
 //秒换算成时间

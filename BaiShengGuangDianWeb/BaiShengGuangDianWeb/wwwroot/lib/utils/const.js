@@ -178,8 +178,18 @@ FieldFunc["datetime"] = {
         desc: "时间转月日",
         func: monthDay
     },
+    //2021-5-12 14:44:10 -> 2021
+    year: {
+        desc: "时间转年",
+        func: getNowYear
+    },
+    //2021-5-12 14:44:10 -> 2021
+    month: {
+        desc: "时间转月",
+        func: getNowMonth
+    },
     //2021-5-12 14:44:10 -> 12
-    day: {
+    sDay: {
         desc: "时间转日",
         func: getDay
     },
@@ -187,6 +197,16 @@ FieldFunc["datetime"] = {
     time: {
         desc: "时间转时分秒",
         func: convertTimeHMS
+    },
+
+    week: {
+        desc: "时间转周",
+        func: getWeek
+    },
+    //2021-5-12 14:44:10 -> 12
+    hour: {
+        desc: "时间转小时",
+        func: getHour
     },
 };
 
@@ -206,16 +226,16 @@ FieldFunc["date"] = {
 
 //数据类型为数组
 FieldFunc["array"] = {
-    //[1,2,3,4]
-    date: {
-        desc: "时间转月日",
-        func: monthDay
-    },
-    //2021-5-12 -> 12
-    date: {
-        desc: "时间转日",
-        func: getDay
-    },
+    ////[1,2,3,4]
+    //date: {
+    //    desc: "时间转月日",
+    //    func: monthDay
+    //},
+    ////2021-5-12 -> 12
+    //date: {
+    //    desc: "时间转日",
+    //    func: getDay
+    //},
 };
 
 //数据类型为数组
@@ -229,5 +249,11 @@ FieldFunc["list"] = {
     },
 };
 
+
 const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const itemShowOptions = ["表格", "折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+//const itemShowOptions = ["表格", "折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const itemShowOptions = ["折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const dataGroups = ["设备", "计划号", "操作工"];
+const dataGroupOptions = dataGroups.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const timeTypes = ["小时", "日", "周", "月", "年"];
+const timeOptions = timeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');

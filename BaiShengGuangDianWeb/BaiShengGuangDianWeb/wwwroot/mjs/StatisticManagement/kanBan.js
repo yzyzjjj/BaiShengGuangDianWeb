@@ -20,7 +20,7 @@ var scriptIndexTmp = [];
 var scriptTmp = [];
 var kanBans = [];
 var kanBanItems = [];
-var shift = [];
+var shifts = [];
 var kanBanItemsTmp = [];
 var trFlag = "XvHao";
 $(document).on("keydown", function (e) {
@@ -46,7 +46,11 @@ function pageReady() {
     $(".sidebar-mini").addClass("sidebar-collapse");
     _permissionList[675] = { uIds: [] };
     _permissionList[676] = { uIds: ["firstNavLi", "setKanBan"] };
+    _permissionList[722] = { uIds: ["setTab", "setTabLi"] };
+    _permissionList[723] = { uIds: ["carouselTab", "carouselTabLi"] };
     _permissionList = checkPermissionUi(_permissionList);
+    if (!_permissionList[722].have && _permissionList[723].have)
+        $('#carouselTabLi a').click();
     $('#kanBanList').select2();
     $('#deviceSelect').select2({
         allowClear: true,
@@ -260,16 +264,6 @@ function pageReady() {
             }
         });
 
-    var getDeviceFunc = new Promise(resolve => getDevice(resolve));
-    var getKanBanListFunc = new Promise(resolve => getKanBanList(resolve));
-    Promise.all([getDeviceFunc, getKanBanListFunc]).then(ret => {
-        const deviceIds = ret[0];
-        const kbs = ret[1];
-        if (kbs.length > 0) {
-            $('#kanBanList').trigger('select2:select');
-        }
-    });
-
     $('#kanBanType').on('change', function () {
         const type = $(this).val();
         const color = $(this).find(`[value=${type}]`).css("color");
@@ -345,6 +339,7 @@ function pageReady() {
             const its = items.filter(x => x.Item == id);
             if (its.length > 0) {
                 const it = its[0];
+                addOrderData(it.FieldList);
                 kanBanItemsTmp.push({
                     Item: id,
                     Col: 0,
@@ -354,13 +349,14 @@ function pageReady() {
                     Min: 0,
                     FieldList: it.FieldList
                 });
+
                 colSet[0].chose.push({
                     name,
-                    isTable: it.Display,
+                    //isTable: it.Display,
                     val: id,
                     col: 0,
                     order: order,
-                    height: -1,
+                    height: 100,
                     dOrder: 0,
                     dField: it.FieldList.length ? it.FieldList[0].Field : "",
                 });
@@ -473,10 +469,18 @@ function pageReady() {
             const oldOrder = ($(el).find(`.O_${id}`).attr("old") >> 0) - 1;
             const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
             const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
-            const dOrder = $(el).find(`.DO_${id}`).val();
-            const dField = $(el).find(`.DF_${id}`).val();
             const name = $(el).find(`.N_${id}`).val().trim();
             const height = $(el).find(`.H_${id}`).val();
+
+            const dField = $(el).find(`.DF_${id}`).val();
+            const dOrder = $(el).find(`.DO_${id}`).val();
+
+            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
+            const range = $(el).find(`.Range_${id}`).val() >> 0;
+            const step = $(el).find(`.Step_${id}`).val() >> 0;
+            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            var gItems = $(el).find(`.GroupItems_${id}`).val();
+            isStrEmptyOrUndefined(gItems) && (gItems = []);
 
             const shift = $(el).find(`.Shift_${id}`).val() >> 0;
             const hour = $(el).find(`.Hour_${id}`).val() >> 0;
@@ -494,33 +498,231 @@ function pageReady() {
                 var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
                 kanBanItemsTmp.forEach(d => {
                     if (d == n[0]) {
-                        d.Shifts = shift;
-                        d.Hour = hour;
-                        d.Min = min;
+                        if (~its.indexOf(d.Item)) {
+                            !d.ConfigList && (d.ConfigList = []);
+                            /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
+                            var index = 0;
+                            !d.ConfigList[index] && (d.ConfigList[index] = []);
+                            d.ConfigList[index][0] = shift;
+                            d.ConfigList[index][1] = timeType;
+                            d.ConfigList[index][2] = range;
+                            d.ConfigList[index][3] = isSum ? 1 : 0;
+                            //[1][...]工序;
+                            index = 1;
+                            !d.ConfigList[index] && (d.ConfigList[index] = []);
+                            d.ConfigList[index][0] = step;
+                            //[2][...] 计划号
+                            index = 2;
+                            !d.ConfigList[index] && (d.ConfigList[index] = []);
+                            if (d.Item == 9)
+                                d.ConfigList[index] = gItems;
+                            //[3][...] 操作工
+                            index = 3;
+                            !d.ConfigList[index] && (d.ConfigList[index] = []);
+                            if (d.Item == 11)
+                                d.ConfigList[index] = gItems;
+
+                            var special = "";
+                            if (timeType == 0)
+                                special = "hour";
+                            else if (timeType == 1)
+                                special = "mDate";
+                            else if (timeType == 2)
+                                special = "week";
+                            else if (timeType == 3)
+                                special = "month";
+                            else if (timeType == 4)
+                                special = "year";
+                            d.FieldList.forEach((f, i) => {
+                                if (f.XvHao == 0) {
+                                    f.Func = JSON.stringify({
+                                        special,
+                                    });
+                                }
+                            })
+                        } else {
+                            d.Shifts = shift;
+                            d.Hour = hour;
+                            d.Min = min;
+                        }
                     }
                 })
             } else {
                 var n = colSet[oldCol].chose.filter(x => x.order == order);
                 var kn = kanBanItemsTmp.filter(x => x.Col == oldCol && x.Order == order);
+                var newCol = col;
                 var newOrder = order;
-                if (n.length) {
+                if (n.length && kn.length) {
                     removeArray(colSet[oldCol].chose, "order", order);
+                    removeArray(kanBanItemsTmp, "Col", oldCol, "Order", order);
                     n[0].col = col;
                     n[0].order = colSet[col].chose.length;
                     colSet[col].chose.push(n[0]);
+                    newCol = n[0].col;
                     newOrder = n[0].order;
-                }
-                if (kn.length) {
-                    removeArray(kanBanItemsTmp, "Col", oldCol, "Order", order);
-                    kn[0].Col = oldCol;
+
+                    kn[0].Col = newCol;
                     kn[0].Order = newOrder;
                     kanBanItemsTmp.push(kn[0]);
+
+                    colSet[oldCol].chose.forEach((d, i) => {
+                        if (d.order != i) {
+                            var n = kanBanItemsTmp.filter(x => x.Col == oldCol && x.Order == d.order);
+                            kanBanItemsTmp.forEach(d => {
+                                if (d == n[0]) {
+                                    d.Order = i;
+                                }
+                            })
+                            d.order = i;
+                        }
+                    })
                 }
             }
 
             kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
 
             showPreProduct();
+        });
+
+    $('#kanBanProductDetail')
+        .on('change', '.ms2', function () {
+            const el = $(this).closest(".kb_div1");
+            const id = $(el).attr("value") >> 0;
+            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
+            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+
+            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
+            const range = $(el).find(`.Range_${id}`).val() >> 0;
+            const step = $(el).find(`.Step_${id}`).val() >> 0;
+            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            var gItems = $(el).find(`.GroupItems_${id}`).val();
+            isStrEmptyOrUndefined(gItems) && (gItems = []);
+
+            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
+            if (oldCol == col) {
+                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(d => {
+                    if (d == n[0]) {
+                        !d.ConfigList && (d.ConfigList = []);
+                        /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
+                        var index = 0;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = shift;
+                        d.ConfigList[index][1] = timeType;
+                        d.ConfigList[index][2] = range;
+                        d.ConfigList[index][3] = isSum ? 1 : 0;
+                        //[1][...]工序;
+                        index = 1;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = step;
+                        //[2][...] 计划号
+                        index = 2;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 9)
+                            d.ConfigList[index] = gItems;
+                        //[3][...] 操作工
+                        index = 3;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 11)
+                            d.ConfigList[index] = gItems;
+                    }
+                })
+            }
+        });
+
+    $('#kanBanProductDetail')
+        .on('change', '.ms2m', function () {
+            const el = $(this).closest(".kb_div1");
+            const id = $(el).attr("value") >> 0;
+            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
+            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+
+            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
+            const range = $(el).find(`.Range_${id}`).val() >> 0;
+            const step = $(el).find(`.Step_${id}`).val() >> 0;
+            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            var gItems = $(el).find(`.GroupItems_${id}`).val();
+            isStrEmptyOrUndefined(gItems) && (gItems = []);
+
+            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
+            if (oldCol == col) {
+                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(d => {
+                    if (d == n[0]) {
+                        !d.ConfigList && (d.ConfigList = []);
+                        /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
+                        var index = 0;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = shift;
+                        d.ConfigList[index][1] = timeType;
+                        d.ConfigList[index][2] = range;
+                        d.ConfigList[index][3] = isSum ? 1 : 0;
+                        //[1][...]工序;
+                        index = 1;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = step;
+                        //[2][...] 计划号
+                        index = 2;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 9)
+                            d.ConfigList[index] = gItems;
+                        //[3][...] 操作工
+                        index = 3;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 11)
+                            d.ConfigList[index] = gItems;
+                    }
+                })
+            }
+        });
+
+    $('#kanBanProductDetail')
+        .on('ifChanged', '.cbs', function () {
+            const el = $(this).closest(".kb_div1");
+            const id = $(el).attr("value") >> 0;
+            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
+            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+
+            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
+            const range = $(el).find(`.Range_${id}`).val() >> 0;
+            const step = $(el).find(`.Step_${id}`).val() >> 0;
+            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            var gItems = $(el).find(`.GroupItems_${id}`).val();
+            isStrEmptyOrUndefined(gItems) && (gItems = []);
+
+            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
+            if (oldCol == col) {
+                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(d => {
+                    if (d == n[0]) {
+                        !d.ConfigList && (d.ConfigList = []);
+                        /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
+                        var index = 0;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = shift;
+                        d.ConfigList[index][1] = timeType;
+                        d.ConfigList[index][2] = range;
+                        d.ConfigList[index][3] = isSum ? 1 : 0;
+                        //[1][...]工序;
+                        index = 1;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        d.ConfigList[index][0] = step;
+                        //[2][...] 计划号
+                        index = 2;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 9)
+                            d.ConfigList[index] = gItems;
+                        //[3][...] 操作工
+                        index = 3;
+                        !d.ConfigList[index] && (d.ConfigList[index] = []);
+                        if (d.Item == 11)
+                            d.ConfigList[index] = gItems;
+                    }
+                })
+            }
         });
 
     $('#kanBanProductDetail')
@@ -591,38 +793,61 @@ function pageReady() {
 
     $('#kanBanProductDetail')
         .on('change', '.cb', function () {
-            var check = $(this).prop("checked");
             const el = $(this).closest(".kb_div1");
-            const id = $(el).attr("value") >> 0;
-            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
-            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+            const display = $(el).attr("display") >> 0;
+            if (display == 0) {
+                var check = $(this).prop("checked");
+                const el = $(this).closest(".kb_div1");
+                const id = $(el).attr("value") >> 0;
+                const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+                const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
 
-            const tr = $(this).closest("tr");
-            const trXvHao = $(tr).attr("value") >> 0;
+                const tr = $(this).closest("tr");
+                const trXvHao = $(tr).attr("value") >> 0;
 
-            var d = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
-            kanBanItemsTmp.forEach(dt => {
-                if (dt == d[0]) {
-                    var length = dt.FieldList.length;
-                    dt.FieldList.forEach((f, i) => {
-                        if (f.XvHao == trXvHao) {
-                            if (!check)
-                                f.Order = 0;
-                            else
-                                f.Order = length + 1;
-                        }
-                    })
-                    var tfl = dt.FieldList.filter(t => t.Order).sort(firstBy("Order"));
-                    tfl.forEach((f, i) => {
-                        f.Order = i + 1;
-                    })
-                    var nfl = dt.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
-                    dt.FieldList = tfl.concat(nfl);
-                    dt.FieldList.forEach((f, i) => {
-                        f.XvHao = i;
-                    })
-                }
-            })
+                var d = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(dt => {
+                    if (dt == d[0]) {
+                        var length = dt.FieldList.length;
+                        dt.FieldList.forEach((f, i) => {
+                            if (f.XvHao == trXvHao) {
+                                if (!check)
+                                    f.Order = 0;
+                                else
+                                    f.Order = length + 1;
+                            }
+                        })
+                        var tfl = dt.FieldList.filter(t => t.Order).sort(firstBy("Order"));
+                        tfl.forEach((f, i) => {
+                            f.Order = i + 1;
+                        })
+                        var nfl = dt.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
+                        dt.FieldList = tfl.concat(nfl);
+                        dt.FieldList.forEach((f, i) => {
+                            f.XvHao = i;
+                        })
+                    }
+                })
+            } else if (display == 1) {
+                const el = $(this).closest(".kb_div1");
+                const id = $(el).attr("value") >> 0;
+                const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
+                const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+
+                const tr = $(this).closest("tr");
+                const trXvHao = $(tr).attr("value") >> 0;
+
+                var d = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
+                kanBanItemsTmp.forEach(dt => {
+                    if (dt == d[0]) {
+                        dt.FieldList.forEach((f, i) => {
+                            f.Order = f.XvHao == trXvHao ? 1 : 0;
+                            //const color = f.XvHao == trXvHao ? "#d2d6de" : "#f9f9f9"
+                            //$(el).find(`tr[value=${f.XvHao}]`).css("background-color", color);
+                        })
+                    }
+                })
+            }
             showPreProduct();
         });
 
@@ -657,6 +882,24 @@ function pageReady() {
             })
             //showPreProduct();
         });
+
+    var getWorkshopFunc = new Promise(resolve => getWorkshop(resolve));
+    var getStepFunc = new Promise(resolve => getStep(resolve));
+    var getProductionFunc = new Promise(resolve => getProduction(resolve));
+    var getDeviceFunc = new Promise(resolve => getDevice(resolve));
+    var getProcessorFunc = new Promise(resolve => getProcessor(resolve));
+    //var getKanBanListFunc = new Promise(resolve => getKanBanList(resolve));
+    getWorkshopFunc.then(ret => {
+        Promise.all([getStepFunc, getProductionFunc, getDeviceFunc, getProcessorFunc]).then(ret => {
+            new Promise(resolve => getKanBanList(resolve)).then(ret => {
+                const deviceIds = ret[0];
+                const kbs = ret[1];
+                if (kbs.length > 0) {
+                    $('#kanBanList').trigger('select2:select');
+                }
+            });
+        });
+    })
 }
 
 let colName = [];
@@ -735,21 +978,23 @@ function initColSet(init = true) {
         kanBanItemsTmp = kanBan.ItemList ? kanBan.ItemList : [];
         var col0 = kanBanItemsTmp.filter(x => x.Col == 0);
         if (col0.length) {
-            var cols = selectMany(colSet, "chose");
+            //var cols = selectMany(colSet, "chose");
             kanBanItemsTmp.forEach(d => {
-                if (d.Col == 0) {
-                    var t = cols.filter(x => x.val == d.Item);
-                    if (t.length) {
-                        d.Col = t[0].col;
-                        d.Order = t[0].order;
-                    }
-                }
+                //if (d.Col == 0) {
+                //    var t = cols.filter(x => x.val == d.Item);
+                //    if (t.length) {
+                //        d.Col = t[0].col;
+                //        d.Order = t[0].order;
+                //    }
+                //}
                 d.FieldList.forEach((f, i) => {
                     f.XvHao = i;
                 })
-                var tfl = d.FieldList.filter(t => t.Order).sort(firstBy("Order"));
-                var nfl = d.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
-                d.FieldList = tfl.concat(nfl);
+                if (!~its.indexOf(d.Item)) {
+                    var tfl = d.FieldList.filter(t => t.Order).sort(firstBy("Order"));
+                    var nfl = d.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
+                    d.FieldList = tfl.concat(nfl);
+                }
             })
             kanBanItemsTmp = kanBanItemsTmp.sort(firstBy("Col").thenBy("Order"));
         }
@@ -866,7 +1111,7 @@ function initProduct(type) {
     //    increaseArea: '20%'
     //});
 }
-
+var its = [9, 10, 11];
 //生产相关配置预览
 function showPreProduct() {
     //return;
@@ -885,13 +1130,84 @@ function showPreProduct() {
             if (!item.length || !itemSet.length)
                 return a;
             const cItem = item[0];
+            const sItem = itemSet[0];
+            //const isTable = b.isTable ? b.isTable : 0;
             const cFieldList = cItem.FieldList;
-            const sFieldList = itemSet[0].FieldList;
+            const sFieldList = sItem.FieldList;
             const sMax = sFieldList.filter(x => x.Order).length;
             const sTdShow = sMax > 1
+
+
+            var shift = 0;
+            var timeType = 0;
+            var range = 10;
+            var isSum = false;
+            var step = 0;
+            var productionIds = [];
+            var processorIds = [];
+            let stepOptions = "";
+            let groupItems = "";
+            if (~its.indexOf(cItem.Item)) {
+                if (sItem.ConfigList) {
+                    //item.ConfigList 工序推移图[0][0] 班制[0][1]数据类型[0][2]时间范围[0][3]合计;[1][...]工序
+                    var index = 0;
+                    if (sItem.ConfigList.length > index) {
+                        //班制
+                        shift = sItem.ConfigList[index].length > 0 ? sItem.ConfigList[index][0] : shift;
+                        //时间类型
+                        timeType = sItem.ConfigList[index].length > 1 ? sItem.ConfigList[index][1] : timeType;
+                        //时间范围
+                        range = sItem.ConfigList[index].length > 2 ? sItem.ConfigList[index][2] : range;
+                        //是否是合计
+                        isSum = sItem.ConfigList[index].length > 3 ? sItem.ConfigList[index][3] : isSum;
+                    }
+                    //工序
+                    index = 1;
+                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
+                        step = sItem.ConfigList[index][0];
+                    }
+                    //计划号
+                    index = 2;
+                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
+                        productionIds = sItem.ConfigList[index] ? sItem.ConfigList[index] : [];
+                    }
+                    //操作工
+                    index = 3;
+                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
+                        processorIds = sItem.ConfigList[index] ? sItem.ConfigList[index] : [];
+                    }
+                }
+
+                stepOptions = setOptions(stepTmp, "StepName");
+                groupItems +=
+                    `</br>
+                    <label class="control-label">工序</label>
+                    <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>`;
+                if (cItem.Item != 10) {
+                    let gItems = "";
+                    if (cItem.Item == 9) {
+                        gItems = setOptions(productionTmp, "ProductionProcessName");
+                        groupItems +=
+                            `计划号<select class="form-control ms2 GroupItems_${b.val}" value="${(productionIds.join())}">${gItems}</select>`;
+                    } else if (cItem.Item == 11) {
+                        gItems = setOptions(processorTmp, "Name");
+                        groupItems +=
+                            `操作工<select class="form-control ms2m GroupItems_${b.val}" value="${(processorIds.join())}">${gItems}</select>`;
+                    }
+                }
+                groupItems +=
+                    `<label class="control-label text-red">合计
+                        <input type="checkbox" class="icb_minimal cbs IsSum_${b.val}" value="${isSum}">
+                    </label>`;
+            }
+            else {
+                shift = itemSet.length ? sItem.Shifts : 0;
+            }
+
             const fields = sFieldList.reduce((fs, fl, fi) => {
                 const bConfig = cFieldList.filter(x => x.Field == fl.Field);
                 const bColumn = bConfig.length ? bConfig[0].Column : "";
+                const bAxis = bConfig.length ? bConfig[0].Axis : 0;
                 const bDeal = bConfig.length ? bConfig[0].DataType : "";
                 const bDeal1 = !!FieldFunc[bDeal];
                 const bSpecial = bConfig.length ? bConfig[0].Special : "";
@@ -903,14 +1219,20 @@ function showPreProduct() {
                 const sPre = fl.Pre ? fl.Pre : "";
                 const sSuffix = fl.Suffix ? fl.Suffix : "";
                 const sFunc = fl.Func ? fl.Func : "";
+
                 return fs +=
                     `<tr role="row" style="background-color: #f9f9f9;" value=${fl.XvHao}>
-                        <td style="padding: 4px; border: 1px solid gray;"><input type="checkbox" class="cb Cho_${fi}" ${(fl.Order ? "checked" : "")} value="0"></td>
+                        <td style="padding: 4px; border: 1px solid gray;">
+                            ${(cItem.Display == 1 && bAxis == 0 ? `` : (cItem.Display == 1 && bAxis == 1 ?
+                        `<input type="radio" name="Radio_${b.col}_${b.order}" class="cb Cho_${fi}" ${(fl.Order ? "checked" : "")} value="0">` :
+                        `<input type="checkbox" class="cb Cho_${fi}" ${(fl.Order ? "checked" : "")} value="0">`))}
+                        </td>
                         <td style="padding: 4px; border: 1px solid gray;">${fi + 1}</td>
                         <td style="padding: 4px; border: 1px solid gray;">
                             ${bColumn}
                         </td>
-                        <td style="padding: 4px; border: 1px solid gray;" class="form-inline">
+                        ${(cItem.Display == 1 ? `` :
+                        `<td style="padding: 4px; border: 1px solid gray;" class="form-inline">
                             <input style="width: auto;${(sColor ? `color:${sColor};` : "")}" class="form-control text-center no-padding fieldSet Com_${fi}" old=${sColumn} value=${(sColumn ? sColumn : "")}>
                             <img class="mColorpicker Color_${fi}"><i style="cursor: pointer;" class="CClear_${fi}">清除</i>
                         </td>
@@ -929,12 +1251,17 @@ function showPreProduct() {
                         <td style="padding: 4px; border: 1px solid gray;" class="form-inline Or_${fi}" value=${fl.Order}>
                             <span class="glyphicon glyphicon-arrow-up pointer text-green${(fi == 0 ? " hidden" : "")} ${((sTdShow && fl.Order) ? "" : " hidden")} sUpTr" aria-hidden="true" title="上移"></span>
                             <span class="glyphicon glyphicon-arrow-down pointer text-red${((fi + 1) == sMax ? " hidden" : "")} ${((sTdShow && fl.Order) ? "" : " hidden")}   sDownTr" aria-hidden="true" title="下移"></span>
-                        </td>
+                        </td>`)}
                     </tr>`;
             }, '');
 
-            const ops = setOptions(shift, "Type");
-            return `${a}<div class="kb_div1" style="height: ${(b.height == -1 ? "auto" : `${b.height}%`)}" col="${b.col}" order="${b.order}" value="${b.val}">
+            let ops = "";
+
+            if (~its.indexOf(cItem.Item))
+                ops = workshopTmp[workshopId].ShiftNameList.reduce((a, b, i) => `${a}<option value="${i + 1}">${b}</option>`, '<option value="0">全天</option>');
+            else
+                ops = setOptions(shifts, "Type");
+            return `${a}<div class="kb_div1" style="height: ${(b.height == -1 ? "auto" : `${b.height}%`)}" col="${b.col}" order="${b.order}" value="${b.val}" display="${cItem.Display}" >
                     <div class="kb_border1">
                         <div class="kb_border3" style="padding: 5px;">
                             <table class="table table-striped no-margin">
@@ -959,10 +1286,10 @@ function showPreProduct() {
                                         </td>
                                         <td style="padding: 4px; border: 1px solid gray;" class="form-inline">
                                             排序
-                                            <select class="form-control colSet DF_${b.val}" style="width: auto;">
+                                            <select class="form-control colSet DF_${b.val}" value=${(b.dField ? b.dField : "")} style="width: auto;">
                                                 ${setOptionsWithKey(sFieldList, "Field", "Column")}
                                             </select>
-                                            <select class="form-control colSet DO_${b.val}" style="width: auto;">
+                                            <select class="form-control colSet DO_${b.val}" value=${(b.dOrder ? b.dOrder : 0)} style="width: auto;">
                                                 <option value="0">正序</option>
                                                 <option value="1">倒序</option>
                                             </select>
@@ -982,13 +1309,22 @@ function showPreProduct() {
                                             <div class="form-group form-inline">
                                             ${(!item[0].BShifts ? "" :
                         `<label class="control-label">班制</label>
-                                                <select class="form-control colSet Shift_${b.val}" value=${(itemSet.length ? itemSet[0].Shifts : 0)}>${ops}</select>`)}
+                                                <select class="form-control colSet Shift_${b.val}" value=${shift}>${ops}</select>`)}
                                             ${(!item[0].BDuration ? "" :
-                        `<label class="control-label">显示最近</label>
-                                                <input class="form-control text-center colSet Hour_${b.val}" style="width: 70px;" value=${(itemSet.length ? itemSet[0].Hour : 24)} oninput="onInput(this, 3, 0, 0, 24);">
+                        (~its.indexOf(cItem.Item) ?
+                            `<label class="control-label">时间类型</label>
+                                                <select class="form-control colSet Time_${b.val}" value=${timeType}>${timeOptions}</select>
+                                                <label class="control-label">时间范围</label>
+                                                <div class="input-group">
+                                                    <input class="form-control text-center colSet Range_${b.val}" style="width: 70px;" value=${range} oninput="onInput(this, 3, 0, 0, 24);">
+                                                    <div class="input-group-addon">${timeTypes[timeType]}</div>
+                                                </div>
+                                                ${groupItems}` :
+                            `<label class="control-label">显示最近</label>
+                                                <input class="form-control text-center colSet Hour_${b.val}" style="width: 70px;" value=${(itemSet.length ? sItem.Hour : 24)} oninput="onInput(this, 3, 0, 0, 24);">
                                                 <label class="control-label">小时</label>
-                                                <input class="form-control text-center colSet Min_${b.val}" style="width: 70px;" value=${(itemSet.length ? itemSet[0].Min : 0)} oninput="onTimeLimitInput(this);">
-                                                <label class="control-label">分</label>`)}
+                                                <input class="form-control text-center colSet Min_${b.val}" style="width: 70px;" value=${(itemSet.length ? sItem.Min : 0)} oninput="onTimeLimitInput(this);">
+                                                <label class="control-label">分</label>`))}
                                             </div>
                                         </td>
                                     </tr>`)}
@@ -1004,16 +1340,17 @@ function showPreProduct() {
                                         </th>
                                     </tr>
                                     <tr role="row" style="background-color: #f9f9f9;">
-                                        <th style="padding: 4px; border: 1px solid gray; width: auto;">
+                                        <th style="padding: 4px; border: 1px solid gray; width: 80px;">
                                             选择
                                         </th>
-                                        <th style="padding: 4px; border: 1px solid gray; width: auto;">
+                                        <th style="padding: 4px; border: 1px solid gray; width: 80px;">
                                             序号
                                         </th>
                                         <th style="padding: 4px; border: 1px solid gray; width: auto;">
                                             列名
                                         </th>
-                                        <th style="padding: 4px; border: 1px solid gray; width: auto;">
+                                        ${(cItem.Display == 1 ? `` :
+                        `<th style="padding: 4px; border: 1px solid gray; width: auto;">
                                             自定义及颜色
                                         </th>
                                         <th style="padding: 4px; border: 1px solid gray; width: auto;">
@@ -1030,7 +1367,7 @@ function showPreProduct() {
                                         </th>
                                         <th style="padding: 4px; border: 1px solid gray; width: auto;">
                                             顺序
-                                        </th>
+                                        </th>`)}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1049,7 +1386,44 @@ function showPreProduct() {
 
     $("#kanBanProductDetail").html(ops).find("select").each((_, el) => {
         var id = $(el).attr("value");
-        $(el).val(id);
+        if ($(el).hasClass("ms2m")) {
+            if (~id.indexOf(",")) {
+                $(el).select2({
+                    allowClear: true,
+                    placeholder: '请选择',
+                    multiple: true,
+                    width: '55%',
+                    matcher,
+                });
+                id = id.split(",");
+            } else {
+                $(el).select2({
+                    matcher,
+                    width: '120px',
+                });
+            }
+            $(el).val(id).trigger("change");
+        } else if ($(el).hasClass("ms2")) {
+            $(el).select2({
+                allowClear: true,
+                placeholder: '请选择',
+                multiple: true,
+                width: '55%',
+            });
+            var vs = "";
+            if (!isStrEmptyOrUndefined(id))
+                vs = id.split(",");
+
+            $(el).val(vs).trigger("change");
+        } else
+            $(el).val(id);
+    }).end().find(".icb_minimal").each((_, el) => {
+        var st = $(el).attr("value");
+        $(el).iCheck({
+            handle: 'checkbox',
+            checkboxClass: 'icheckbox_minimal-red',
+            increaseArea: '20%'
+        }).iCheck(st == 1 ? "check" : "unckeck");
     }).end().find(".kb_border3").each((_, el) => {
         const ekb = $(el).closest(".kb_div1");
         const id = $(ekb).attr("value") >> 0;
@@ -1271,6 +1645,61 @@ function saveCons(close = false) {
     close && $('#showFuncModal').modal('hide');
 }
 
+var workshopId = 0;
+var workshopTmp = [];
+//获取车间
+function getWorkshop(resolve) {
+    ajaxPost('/Relay/Post', {
+        opType: 162
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        workshopTmp = ret.datas.sort(firstBy("Id"));
+        workshopId = ret.datas.length ? workshopTmp[0].Id : 0;
+        resolve && resolve(workshopTmp);
+    }, 0);
+}
+
+var stepTmp = [];
+//获取工序
+function getStep(resolve) {
+    ajaxPost('/Relay/Post', {
+        opType: 150,
+        opData: JSON.stringify({
+            wId: workshopId,
+            menu: true
+        })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        stepTmp = ret.datas;
+        resolve && resolve(stepTmp);
+    }, 0);
+}
+
+var processorTmp = [];
+//获取计划号
+function getProduction(resolve) {
+    ajaxPost('/Relay/Post', {
+        opType: 215,
+        opData: JSON.stringify({
+            wId: workshopId,
+            menu: true
+        })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        productionTmp = ret.datas;
+        resolve && resolve(productionTmp);
+    }, 0);
+}
+
 var deviceTmp = [];
 //获取机台号
 function getDevice(resolve) {
@@ -1279,6 +1708,7 @@ function getDevice(resolve) {
     var data = {
         opType: 100,
         opData: JSON.stringify({
+            wId: workshopId,
             script: true,
             detail: false,
             //other: true,
@@ -1304,6 +1734,24 @@ function getDevice(resolve) {
     }, 0);
 }
 
+var processorTmp = [];
+//获取操作工
+function getProcessor(resolve) {
+    ajaxPost('/Relay/Post', {
+        opType: 248,
+        opData: JSON.stringify({
+            wId: workshopId,
+            menu: true
+        })
+    }, ret => {
+        if (ret.errno != 0) {
+            layer.msg(ret.errmsg);
+            return;
+        }
+        processorTmp = ret.datas;
+        resolve && resolve(processorTmp);
+    }, 0);
+}
 var _carouselBox;
 //获取看板列表
 function getKanBanList(resolve) {
@@ -1311,6 +1759,7 @@ function getKanBanList(resolve) {
     ajaxPost('/Relay/Post', {
         opType: 509,
         opData: JSON.stringify({
+            wId: workshopId,
             init: true
         })
     }, ret => {
@@ -1515,7 +1964,7 @@ function getKanBanList(resolve) {
                 <div class="kb_border1">
                     <div class="kb_border2">
                         <div class="form-group text-center no-margin" style="">
-                            <h4 class="text-bold kb_title2"><span class="tt1">{1}</span>(<span class="tt2"></span>)</h4>
+                            <h4 class="text-bold kb_title2"><span class="tt1">{1}</span><span class="tt2"></span></h4>
                         </div>
                         <div class="table-responsive mailbox-messages no-margin" style="width:100%">
                             {0}
@@ -1551,7 +2000,7 @@ function getKanBanList(resolve) {
                 kanBanItems[itemG][k.Item] = k;
             })
         }
-        shift = ret.shift;
+        shifts = ret.shift;
 
         var cops = '', lis = '', tabs = '', cOp = '';
         carouselTmp = [];
@@ -1596,17 +2045,17 @@ function getKanBanList(resolve) {
                                     const el = sItemList[b.val];
                                     if (el) {
                                         const fieldList = el.FieldList ? el.FieldList.filter(x => x.Order) : [];
-                                        b.isTable = b.isTable ? b.isTable : 0;
-                                        if (b.isTable == 0) {
+                                        const itemConfig = kanBanItems[d.Type][b.val];
+                                        if (itemConfig.Display == 0) {
                                             pItem = defaultItem.format(
                                                 getTableW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
                                                 //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
-                                                b.name ? b.name : el.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
-                                        } else if (b.isTable == 1) {
+                                                b.name ? b.name : itemConfig.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                        } else if (itemConfig.Display == 1) {
                                             pItem = defaultItem.format(
-                                                getTableW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
+                                                getChartW(`${ff}_${b.col}_${b.order}`, fieldList, 3),
                                                 //getTable(`${ff}_${el.div}`, el.cols.map(d => d.title), 3),
-                                                b.name ? b.name : el.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
+                                                b.name ? b.name : itemConfig.Name, b.height == -1 ? "auto" : `${b.height}%`, b.val);
                                         }
                                     }
                                     return a + pItem;
@@ -1649,7 +2098,7 @@ function getKanBanList(resolve) {
         $('#setKanBan').nextAll().remove().end().after(tabs);
         //todo
         //$('#kanBanType').val(3).trigger("change");
-        //$('#kanBanList').val(13).trigger("change");
+        //$('#kanBanList').val(16).trigger("select2:select");
         rData = rData.filter(d => d.Id !== 0);
         //$('[href="#kanBan_6"]').click();
         resolve && resolve(rData);
@@ -1710,7 +2159,16 @@ function setAddKanBan(isAdd) {
         list.Variables = JSON.stringify(vs.filter(x => x.Order <= maxSet));
     }
     else if (type == 3) {
-        kanBanItemsTmp.forEach(d => d = getFieldList(d));
+        //kanBanItemsTmp.forEach(d => {
+        //    d = getFieldList(d);
+        //    d.
+        //});
+        for (var k in kanBanItemsTmp) {
+            const t = kanBanItemsTmp[k];
+            if (!t.FieldList || !t.FieldList.length || !t.FieldList.filter(x => x.Order).length) {
+                return void layer.msg('请选择列');
+            }
+        }
         list.Items = JSON.stringify(kanBanItemsTmp);
         list.ColSet = JSON.stringify(colSet);
     }
@@ -1729,6 +2187,7 @@ function setAddKanBan(isAdd) {
     ajaxPost('/Relay/Post', data, ret => {
         layer.msg(ret.errmsg);
         if (ret.errno == 0) {
+            pTableOrChart = [];
             getKanBanList();
         }
     });
@@ -2564,7 +3023,7 @@ function cancelFullScreenCarousel() {
     });
 }
 var tt, tn;
-var pTable = [];
+var pTableOrChart = [];
 //图表设置
 function setChart(elId, kbId, type, next = false) {
     if (run) return;
@@ -3041,6 +3500,7 @@ function setChart(elId, kbId, type, next = false) {
             if (!ret.data) {
                 return;
             }
+
             var rData = ret.data;
             var rColSet = ret.colSet ? JSON.parse(ret.colSet) : [];
             var ps = `${flag}_productDiv`;
@@ -3054,29 +3514,41 @@ function setChart(elId, kbId, type, next = false) {
                 const colSet = rColSet[itemSet.Col].chose[itemSet.Order];
                 if (!itemSet || !itemConfig || !colSet)
                     continue;
-                const fieldList = itemSet.FieldList = itemSet.FieldList ? itemSet.FieldList.filter(x => x.Order).sort(firstBy("Order")) : [];
-                if (fieldList && fieldList.length) {
+
+                //配置
+                const cFieldList = itemConfig.FieldList ? itemConfig.FieldList : [];
+                //配置
+                const ccFieldList = [];
+                cFieldList.forEach(d => {
+                    ccFieldList[d.Field] = d;
+                })
+                const sFieldList = itemSet.FieldList ? itemSet.FieldList : [];
+                const vFieldList = sFieldList.filter(x => x.Order).sort(firstBy("Order"));
+                if (vFieldList && vFieldList.length) {
                     const dataKey = `${itemSet.Item}_${itemSet.Col}_${itemSet.Order}`;
                     const tabN = `${flag}_${itemSet.Col}_${itemSet.Order}`;
 
-                    const sWay = colSet.dOrder == "0" ? "asc" : "desc";
+                    const divHeight = $(`${tabN}`).closest('.kb_border2').height();
+                    const titleHeight = $(`${tabN}`).closest('.kb_border2').find('h4').height();
+                    const leftHeight = divHeight - titleHeight;
+                    //$(`${tabN}`).closest('.kb_border2').find('h4').css("height", `${titleHeight / divHeight}%`);
+                    $(`${tabN}`).closest('.table-responsive').css("height", `${Math.floor(leftHeight * 100 / divHeight)}%`);
+                    $(`${tabN}`).closest('.kb_border2').find('.tt1').text(colSet.name);
+
                     if (!rData.hasOwnProperty(dataKey))
                         continue;
-                    const dataSource = rData[dataKey].sort(firstBy(colSet.dField, sWay));
-
-                    $(`${tabN}`).closest('.kb_border2').find('.tt1').text(colSet.name);
-                    $(`${tabN}`).closest('.kb_border2').find('.tt2').text(dataSource.length);
-                    addOrderData(dataSource);
-                    let trs = $(`${tabN} tbody tr`);
-                    //if (dataSource.length == 0) continue;
-                    if (itemConfig.Name == "操作工日进度表") {
-                        var a = 1;
-                    }
-                    colSet.isTable = colSet.isTable ? colSet.isTable : 0;
-                    if (colSet.isTable == 0) {
-                        if (trs.length == 0) {
-                            const trs = getItemTrs(dataSource, itemConfig, itemSet, sWay);
-                            $(`${tabN} tbody`).html(trs);
+                    var dataSource = rData[dataKey];
+                    if (itemConfig.Display == 0) {
+                        const sWay = colSet.dOrder == "0" ? "asc" : "desc";
+                        dataSource = dataSource.sort(firstBy(colSet.dField, sWay));
+                        $(`${tabN}`).closest('.kb_border2').find('.tt2').text(`(${dataSource.length})`);
+                        addOrderData(dataSource);
+                        let trs = $(`${tabN} tbody tr`);
+                        //if (dataSource.length == 0) continue;
+                        if (!trs.length) {
+                            if (dataSource.length) {
+                                $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
+                            }
                         } else {
                             const maxTr = $(`${tabN} tr[class='max']`);
                             const maxOrder = $(maxTr).attr("order") >> 0;
@@ -3085,59 +3557,63 @@ function setChart(elId, kbId, type, next = false) {
                             trs.each((_, tr) => {
                                 const tF = $(tr).attr(trFlag);
                                 const removeData = dataSource.filter(x => x[trFlag] == tF);
-                                if (removeData.length == 0) {
+                                if (!removeData.length) {
                                     $(tr).remove();
                                     remove = true;
                                 }
                             });
-                            if (maxOrder == 0)
-                                remove = true;
                             if (remove && trs.length > 0) {
-                                $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
                                 trs = $(`${tabN} tbody tr`);
+                                var tTtrs = [];
+                                trs.each((i, tr) => {
+                                    var xvhao = $(tr).attr(trFlag) >> 0;
+                                    tTtrs[xvhao] = tr;
+                                });
+                                var tt = Object.values(tTtrs);
+                                tt.forEach((tr, i) => {
+                                    $(tr).attr("order", i + 1);
+                                    $(tr).attr(trFlag, i + 1);
+                                    var maxClass = "";
+                                    if ((sWay == "asc" && dataSource.length == i + 1) ||
+                                        (sWay == "desc" && i == 0)) {
+                                        maxClass = `max`;
+                                        $(tr).addClass(maxClass);
+                                    }
+                                });
                             }
+                            //if (maxOrder == 0)
+                            //    remove = true;
+                            //if (remove && trs.length > 0) {
+                            //    $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
+                            //    trs = $(`${tabN} tbody tr`);
+                            //}
                             if (!remove) {
-                                const tLen = dataSource.length - trs.length;
                                 let oldData = [];
                                 if (sWay == "asc") {
                                     oldData = dataSource.filter(x => x.XvHao <= maxOrder);
                                 } else {
-                                    oldData = sliceArray(dataSource, dataSource.length, tLen - 1);
+                                    oldData = sliceArray(dataSource, trs.length, 0);
                                 }
-                                if (itemConfig.Name == "操作工日进度表") {
-                                    var a = 1;
-                                }
-                                oldData.forEach(od => {
+                                oldData.length && oldData.forEach(od => {
                                     const mTr = $(`${tabN} tr[${trFlag}=${od[trFlag]}]`);
-                                    //配置
-                                    const cFieldList = [];
-                                    itemConfig.FieldList && itemConfig.FieldList.forEach(d => {
-                                        cFieldList[d.Field] = d;
-                                    })
                                     //设置
-                                    const xvHao = fieldList.filter(x => x.Field == "XvHao");
+                                    const xvHao = vFieldList.filter(x => x.Field == "XvHao");
                                     if (!xvHao.length)
-                                        fieldList.unshift({
+                                        vFieldList.unshift({
                                             Order: 0,
                                             Column: "序号",
                                             Field: "XvHao",
                                             Width: "60"
                                         })
-                                    for (var i = 0, len = fieldList.length; i < len; i++) {
-                                        const col = fieldList[i];
-                                        //if (itemConfig.Name == "操作工日进度表" && col.data == "Actual" && od.XvHao == 1) {
-                                        //    od[col.data] = od[col.data] + Math.ceil(Math.random() * 100);
-                                        //}
-                                        //if (itemConfig.Name == "异常报警") {
-                                        //    var a = 1;
-                                        //}
+                                    for (var i = 0, len = vFieldList.length; i < len; i++) {
+                                        const col = vFieldList[i];
                                         var d = od[col.Field];
                                         var pre = col.Pre ? col.Pre : "";
                                         var suffix = col.Suffix ? col.Suffix : "";
                                         var width = col.Width && col.Width !== "auto" ? `width: ${col.Width}px;` : `width: auto;`;
                                         var bold = "";
                                         var color = "";
-                                        if (cFieldList[col.Field] && col.Func) {
+                                        if (ccFieldList[col.Field] && col.Func) {
                                             const func = JSON.parse(col.Func);
                                             if (func.color == 1)
                                                 color = col.Color;
@@ -3151,7 +3627,7 @@ function setChart(elId, kbId, type, next = false) {
                                                 })
                                             }
                                             if (func.special) {
-                                                const dType = cFieldList[col.Field].DataType;
+                                                const dType = ccFieldList[col.Field].DataType;
                                                 d = FieldFunc[dType][func.special].func(d);
                                             }
                                             if (func.bold) {
@@ -3172,7 +3648,7 @@ function setChart(elId, kbId, type, next = false) {
                                         if (nO != tO) {
                                             $(mTr).attr("order", tO);
                                         }
-                                        var hBold = $(mTr.find('td')[i]).hasClass(bold);
+                                        var hBold = $(mTr.find('td')[i]).hasClass("text-bold");
                                         if (bold && !hBold) {
                                             $(mTr.find('td')[i]).addClass(bold)
                                         } else if (!bold && hBold) {
@@ -3189,47 +3665,39 @@ function setChart(elId, kbId, type, next = false) {
                                     if (sWay == "asc") {
                                         addData = dataSource.filter(x => x.XvHao > maxOrder);
                                     } else {
+                                        const tLen = dataSource.length - trs.length;
                                         addData = sliceArray(dataSource, tLen);
                                     }
 
-                                    if (itemConfig.Name == "操作工日进度表") {
-                                        var a = 1;
-                                    }
-                                    const addTrs = addData.reduce((r, ds, i) => {
-                                        const thisTr = $(`${tabN} tr[${trFlag}=${ds[trFlag]}]`);
-                                        if (thisTr.length == 0) {
-                                            const tds = cols.reduce((a, col, i) => {
-                                                var d = col.data ? ds[col.data] : col.render(ds);
-                                                var suffix = col.suffix ? col.suffix : "";
-                                                return a + `<td>${d}${suffix}</td>`;
-                                            }, '');
-                                            let maxClass = "";
-                                            if ((sWay == "asc" && i + 1 == addData.length) ||
-                                                (sWay == "desc" && i == 0)) {
-                                                maxClass = ` class="max"`;
-                                            }
-                                            return r + `<tr${maxClass} order=${ds.XvHao} ${trFlag}=${ds[trFlag]}>${tds}</tr>`;
-                                        }
-                                        return r;
-                                    }, '');
-
+                                    //const addTrs = addData.reduce((r, ds, i) => {
+                                    //    const thisTr = $(`${tabN} tr[${trFlag}=${ds[trFlag]}]`);
+                                    //    if (thisTr.length == 0) {
+                                    //        const tds = cols.reduce((a, col, i) => {
+                                    //            var d = col.data ? ds[col.data] : col.render(ds);
+                                    //            var suffix = col.suffix ? col.suffix : "";
+                                    //            return a + `<td>${d}${suffix}</td>`;
+                                    //        }, '');
+                                    //        let maxClass = "";
+                                    //        if ((sWay == "asc" && i + 1 == addData.length) ||
+                                    //            (sWay == "desc" && i == 0)) {
+                                    //            maxClass = ` class="max"`;
+                                    //        }
+                                    //        return r + `<tr${maxClass} order=${ds.XvHao} ${trFlag}=${ds[trFlag]}>${tds}</tr>`;
+                                    //    }
+                                    //    return r;
+                                    //}, '');
+                                    const addTrs = getItemTrs(addData, itemConfig, itemSet, sWay);;
                                     if (sWay == "asc") {
                                         maxTr.after(addTrs);
                                     } else {
                                         maxTr.before(addTrs);
                                     }
                                 } else if (dataSource.length < trs.length) {
-                                    const trs = getItemTrs(dataSource, itemConfig, itemSet, sWay);
-                                    $(`${tabN} tbody`).html(trs);
+                                    $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
                                 }
                             }
                         }
 
-                        const divHeight = $(`${tabN}`).closest('.kb_border2').height();
-                        const titleHeight = $(`${tabN}`).closest('.kb_border2').find('h4').height();
-                        const leftHeight = divHeight - titleHeight;
-                        //$(`${tabN}`).closest('.kb_border2').find('h4').css("height", `${titleHeight / divHeight}%`);
-                        $(`${tabN}`).closest('.table-responsive').css("height", `${Math.floor(leftHeight * 100 / divHeight)}%`);
                         var trHeight = $(`${tabN} tr`).height();
                         var tBodyHeight = leftHeight
                             - $(`${tabN} tbody`).closest('.kb_item_tablebox').css("padding").replace("px", '') * 2;
@@ -3237,21 +3705,203 @@ function setChart(elId, kbId, type, next = false) {
                         var showTr = Math.floor(tBodyHeight / trHeight);
                         const timer = `${elId}_${itemSet.Col}_${itemSet.Order}_timer`;
 
-                        if (itemConfig.Name == "设备状态反馈") {
-                            var a = 1;
-                        }
                         if (trs.length > showTr && !kanBanProductItemsEl[timer]) {
                             scrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         } else if (trs.length <= showTr && kanBanProductItemsEl[timer]) {
-                            const trs = getItemTrs(dataSource, itemConfig, itemSet, sWay);
-                            $(`${tabN} tbody`).html(trs);
+                            $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
                             stopScrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         }
                     }
-                    else if (colSet.isTable == 1) {
+                    else if (itemConfig.Display == 1) {
+                        if (!dataSource.length)
+                            continue;
+                        if (!vFieldList.length)
+                            continue;
+                        var vField = vFieldList[0];
+                        var sType = "";
+                        switch (itemConfig.DisplayType) {
+                            case 0: sType = "line"; break;
+                            case 1: sType = "bar"; break;
+                            case 2: sType = "pie"; break;
+                        }
+                        if (isStrEmptyOrUndefined(sType))
+                            continue;
+                        var cFields = cFieldList.filter(x => x.Axis == 0);
+                        if (!cFields.length)
+                            continue;
+                        var cField = cFields[0];
+                        var field = cField.Field;
+                        const sWay = colSet.dOrder == "0" ? "asc" : "desc";
+                        dataSource = dataSource.sort(firstBy(colSet.dField, sWay));
 
+                        var sFields = sFieldList.filter(x => x.Field == field);
+                        if (!sFields.length)
+                            continue;
+                        var sField = sFields[0];
+                        var func = null;
+                        var param = null;
+                        var xName = null;
+                        if (~its.indexOf(item)) {
+                            if (sField.Func) {
+                                const fc = JSON.parse(sField.Func);
+                                if (fc.special) {
+                                    func = FieldFunc[cField.DataType][fc.special].func;
+                                    //if (fc.special == "hour")
+                                    param = 1;
+                                    if (itemSet.ConfigList) {
+                                        //item.ConfigList 工序推移图[0][0] 班制[0][1]数据类型[0][2]时间范围[0][3]合计;[1][...]工序
+                                        var index = 0;
+                                        if (itemSet.ConfigList.length > index) {
+                                            //时间类型
+                                            timeType = itemSet.ConfigList[index].length > 1 ? itemSet.ConfigList[index][1] : timeType;
+                                            xName = timeTypes[timeType];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        var xData = distinct(dataSource.map(x => func ? func(x[field], param) : x[field]));
 
+                        var series = [];
+                        var key = "";
+                        switch (itemConfig.Item) {
+                            case 9: key = "Production"; break;
+                            case 10: key = "Code"; break;
+                            case 11: key = "Processor"; break;
+                        }
 
+                        if (isStrEmptyOrUndefined(key))
+                            continue;
+                        var lData = distinct(dataSource.map(x => x[key]).filter(x => x));
+                        if (!lData.length) {
+                            var ldd = dataSource.map(x => x[vField.Field]);
+                            series.push({
+                                type: sType,
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                },
+                                //symbol: 'none',
+                                lineStyle: {
+                                    width: 3
+                                },
+                                data: ldd
+                            })
+                        } else {
+                            lData.forEach(ld => {
+                                var ldd = dataSource.filter(x => x[key] == ld).map(x => x[vField.Field]);
+                                series.push({
+                                    name: ld,
+                                    type: sType,
+                                    label: {
+                                        show: true,
+                                        position: 'top',
+                                        fontWeight: "bold",
+                                        fontSize: 14,
+                                    },
+                                    //symbol: 'none',
+                                    lineStyle: {
+                                        width: 3
+                                    },
+                                    data: ldd
+                                })
+                            })
+                        }
+
+                        if (!pTableOrChart[tabN]) {
+                            pTableOrChart[tabN] = {
+                                lData: lData,
+                                xData: xData,
+                                series: series,
+                                chart: echarts.init($(tabN)[0]),
+                            };
+                            pTableOrChart[tabN].chart.setOption({
+                                tooltip: {
+                                    trigger: 'axis'
+                                },
+                                grid: {
+                                    left: '3%',
+                                    right: '6%',
+                                    bottom: '3%',
+                                    containLabel: true
+                                },
+                                color: ["#00a65a", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+                                xAxis: {
+                                    name: xName ? xName : cField.Field,
+                                    nameTextStyle: {
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 14,
+                                    },
+                                    type: 'category',
+                                    boundaryGap: false,
+                                    data: xData,
+                                    axisLine: {
+                                        lineStyle: {
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            fontSize: 19,
+                                        }
+                                    },
+                                },
+                                yAxis: {
+                                    name: vField ? vField.Column : "",
+                                    nameTextStyle: {
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 14,
+                                    },
+                                    //boundaryGap: [0, '20%'],
+                                    type: 'value',
+                                    axisLine: {
+                                        lineStyle: {
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            fontSize: 16,
+                                        }
+                                    },
+                                },
+                                legend: {
+                                    data: lData,
+                                    textStyle: {
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 16,
+                                    }
+                                },
+                                series: series
+                            }, true);
+
+                            $(tabN).resize(function () {
+                                for (var k in pTableOrChart) {
+                                    const p = pTableOrChart[k];
+                                    p.chart && p.chart.resize();
+                                }
+                            });
+                        } else {
+                            var option = {};
+                            var update = false;
+                            if (!isEqual(pTableOrChart[tabN].lData, lData)) {
+                                update = true;
+                                option.legend = lData;
+                            }
+                            if (!isEqual(pTableOrChart[tabN].xData, xData)) {
+                                update = true;
+                                option.xAxis = { data: xData };
+                            }
+                            if (!isEqual(pTableOrChart[tabN].series, series)) {
+                                update = true;
+                                option.series = series;
+                            }
+                            if (update) {
+                                pTableOrChart[tabN].chart.setOption(option);
+                                pTableOrChart[tabN].lData = lData;
+                                pTableOrChart[tabN].xData = xData;
+                                pTableOrChart[tabN].series = series;
+                            }
+                        }
                     }
                 }
             }
