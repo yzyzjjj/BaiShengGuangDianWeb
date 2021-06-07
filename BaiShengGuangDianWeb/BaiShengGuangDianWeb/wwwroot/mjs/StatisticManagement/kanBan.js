@@ -3668,24 +3668,7 @@ function setChart(elId, kbId, type, next = false) {
                                         const tLen = dataSource.length - trs.length;
                                         addData = sliceArray(dataSource, tLen);
                                     }
-
-                                    //const addTrs = addData.reduce((r, ds, i) => {
-                                    //    const thisTr = $(`${tabN} tr[${trFlag}=${ds[trFlag]}]`);
-                                    //    if (thisTr.length == 0) {
-                                    //        const tds = cols.reduce((a, col, i) => {
-                                    //            var d = col.data ? ds[col.data] : col.render(ds);
-                                    //            var suffix = col.suffix ? col.suffix : "";
-                                    //            return a + `<td>${d}${suffix}</td>`;
-                                    //        }, '');
-                                    //        let maxClass = "";
-                                    //        if ((sWay == "asc" && i + 1 == addData.length) ||
-                                    //            (sWay == "desc" && i == 0)) {
-                                    //            maxClass = ` class="max"`;
-                                    //        }
-                                    //        return r + `<tr${maxClass} order=${ds.XvHao} ${trFlag}=${ds[trFlag]}>${tds}</tr>`;
-                                    //    }
-                                    //    return r;
-                                    //}, '');
+                                    
                                     const addTrs = getItemTrs(addData, itemConfig, itemSet, sWay);;
                                     if (sWay == "asc") {
                                         maxTr.after(addTrs);
