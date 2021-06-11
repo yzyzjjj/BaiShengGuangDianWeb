@@ -10,7 +10,16 @@ function pageReady() {
     _permissionList = checkPermissionUi(_permissionList);
     $('.ms2').select2();
     $('#cgTime').val(getDate()).datepicker('update');
-    new Promise(resolve => getValuer(resolve)).then(() => getGroup());
+    var fc1 = new Promise(resolve => getValuer(resolve));
+    var fc2 = new Promise(resolve => getGroup(resolve)).then(res => {
+        getProcessor(res);
+    })
+    Promise.all([fc1, fc2]).then(res => {
+        getPurchase();
+    }).then(res => {
+        getPurchase();
+    });
+
     $('#groupSelect').on('select2:select', () => getProcessor());
     $('#qgProcessor,#formState,#cgProcessor').on('select2:select', () => getPurchase());
     $('#formState,#cgProcessor').on('change', () => getPurchase());
@@ -262,7 +271,7 @@ function pasteTable(e) {
 var _pasteData = null;
 let _departmentItem = null;
 //获取请购部门
-function getGroup(group) {
+function getGroup(resolve, group) {
     _departmentItem = [];
     const data = {};
     data.opType = 871;
@@ -299,8 +308,9 @@ function getGroup(group) {
         });
         $('#departmentItem .isget').iCheck('check');
         $('#groupSelect').empty().append(selectOps);
-        group ? $('#groupSelect').val(group).trigger('change') : getProcessor();
-    });
+        group && $('#groupSelect').val(group).trigger('change');
+        resolve('success');
+    }, 0);
 }
 
 //部门修改
@@ -329,7 +339,7 @@ function updateDepartment() {
     ajaxPost('/Relay/Post', data, ret => {
         layer.msg(ret.errmsg);
         if (ret.errno == 0) {
-            getGroup(flag ? group : null);
+            getGroup(null, flag ? group : null);
         }
     });
 }
@@ -346,8 +356,7 @@ function getProcessor() {
             return;
         }
         $('#qgProcessor').empty().append(`<option value="-1">全部</option>${setOptions(ret.datas, 'Member')}`);
-        getPurchase();
-    });
+    }, 0);
 }
 
 //获取核价人
@@ -361,7 +370,7 @@ function getValuer(resolve) {
         }
         $('#cgProcessor').empty().append(`<option value="-1">全部</option>${setOptions(ret.datas, 'Valuer')}`);
         resolve('success');
-    });
+    }, 0);
 }
 
 let _changePurchase = false;
@@ -414,10 +423,9 @@ function getPurchase() {
         return;
     }
     const list = { dId };
-    const name = $('#qgProcessor').val();
+    var name = $('#qgProcessor').val();
     if (isStrEmptyOrUndefined(name)) {
-        layer.msg('请选择请购人');
-        return;
+        name = "-1";
     }
     if (~name) {
         list.name = $('#qgProcessor :selected').text();
@@ -462,7 +470,7 @@ function getQuoteList(isQuote) {
         const rData = ret.datas;
         $('#cgTime').val(rData.length ? rData[0].Time.split(' ')[0] : getDate()).datepicker('update');
         setPurchaseList(rData, isQuote);
-    });
+    }, 0);
 }
 
 //保存入库单
@@ -657,7 +665,7 @@ function getPurchaseMaterial() {
                 { data: 'Price', title: '税前单价' }
             ]
         });
-    });
+    }, 0);
 }
 
 let _trChangeData = null;
