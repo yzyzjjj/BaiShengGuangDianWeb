@@ -25,6 +25,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
             {
                 return Result.GenError<Result>(Error.AccountNotExist);
             }
+            Console.WriteLine(AccountInfoHelper.CurrentUser.Name);
             //if (!PermissionHelper.CheckPermission(Request.Path.Value))
             //{
             //    return Result.GenError<Result>(Error.NoAuth);
@@ -55,7 +56,7 @@ namespace BaiShengGuangDianWeb.Controllers.Api.Relay
 
             var url = managementServer.Host + permission.Url;
 #if  DEBUG
-            url = "http://192.168.1.184:62101" + permission.Url;
+            //url = "http://192.168.1.184:62101" + permission.Url;
             //url = "http://192.168.1.142:61103" + permission.Url;
 #endif
             var result = HttpServer.Result(AccountInfoHelper.CurrentUser.Account, url, permission.Verb, opData);

@@ -360,30 +360,6 @@ function pageReady() {
                     dOrder: 0,
                     dField: it.FieldList.length ? it.FieldList[0].Field : "",
                 });
-
-                //if (el.is(':checked') && !existArray(kanBanItemsTmp, id)) {
-                //    kanBanItemsTmp.push(id);
-                //    const order = colSet[0].chose.length;
-                //    colSet[0].chose.push({
-                //        name,
-                //        val: id,
-                //        col: 0,
-                //        order: order,
-                //        height: -1
-                //    });
-                //} else if (!el.is(':checked') && existArray(kanBanItemsTmp, id)) {
-                //    kanBanItemsTmp = kanBanItemsTmp.filter(x => x != id);
-                //    colSet.forEach(d => {
-                //        var t = [], i = 0;
-                //        d.chose.forEach(c => {
-                //            if (c.val !== id) {
-                //                c.order = i++;
-                //                t.push(c);
-                //            }
-                //        });
-                //        d.chose = t;
-                //    });
-                //}
                 showPreProduct();
             }
         });
@@ -533,13 +509,10 @@ function pageReady() {
                                 special = "month";
                             else if (timeType == 4)
                                 special = "year";
-                            d.FieldList.forEach((f, i) => {
-                                if (f.XvHao == 0) {
-                                    f.Func = JSON.stringify({
-                                        special,
-                                    });
-                                }
-                            })
+                            d.FieldList && d.FieldList.length
+                                && (d.FieldList[0].Func = JSON.stringify({
+                                    special,
+                                }));
                         } else {
                             d.Shifts = shift;
                             d.Hour = hour;
@@ -585,7 +558,7 @@ function pageReady() {
         });
 
     $('#kanBanProductDetail')
-        .on('change', '.ms2', function () {
+        .on('change', '.dOther', function () {
             const el = $(this).closest(".kb_div1");
             const id = $(el).attr("value") >> 0;
             const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
@@ -596,6 +569,7 @@ function pageReady() {
             const range = $(el).find(`.Range_${id}`).val() >> 0;
             const step = $(el).find(`.Step_${id}`).val() >> 0;
             const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            const isCompare = $(el).find(`.IsCompare_${id}`).is(':checked');
             var gItems = $(el).find(`.GroupItems_${id}`).val();
             isStrEmptyOrUndefined(gItems) && (gItems = []);
 
@@ -612,100 +586,21 @@ function pageReady() {
                         d.ConfigList[index][1] = timeType;
                         d.ConfigList[index][2] = range;
                         d.ConfigList[index][3] = isSum ? 1 : 0;
-                        //[1][...]工序;
-                        index = 1;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        d.ConfigList[index][0] = step;
-                        //[2][...] 计划号
-                        index = 2;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        if (d.Item == 9)
-                            d.ConfigList[index] = gItems;
-                        //[3][...] 操作工
-                        index = 3;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        if (d.Item == 11)
-                            d.ConfigList[index] = gItems;
-                    }
-                })
-            }
-        });
+                        d.ConfigList[index][4] = isCompare ? 1 : 0;
+                        if (isCompare) {
+                            const cTimeType = $(el).find(`.cTimeType_${id}`).val() >> 0;
+                            d.ConfigList[index][5] = cTimeType;
+                            const cTimeRangeType = $(el).find(`.cTimeRange_${id}`).val() >> 0;
+                            d.ConfigList[index][6] = cTimeRangeType;
+                            //const.js timeRangeTypes
+                            if (cTimeRangeType == 0) {
 
-    $('#kanBanProductDetail')
-        .on('change', '.ms2m', function () {
-            const el = $(this).closest(".kb_div1");
-            const id = $(el).attr("value") >> 0;
-            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
-            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
-            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
+                            } else if (cTimeRangeType == 1) {
 
-            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
-            const range = $(el).find(`.Range_${id}`).val() >> 0;
-            const step = $(el).find(`.Step_${id}`).val() >> 0;
-            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
-            var gItems = $(el).find(`.GroupItems_${id}`).val();
-            isStrEmptyOrUndefined(gItems) && (gItems = []);
+                            } else if (cTimeRangeType == 2) {
 
-            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
-            if (oldCol == col) {
-                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
-                kanBanItemsTmp.forEach(d => {
-                    if (d == n[0]) {
-                        !d.ConfigList && (d.ConfigList = []);
-                        /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
-                        var index = 0;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        d.ConfigList[index][0] = shift;
-                        d.ConfigList[index][1] = timeType;
-                        d.ConfigList[index][2] = range;
-                        d.ConfigList[index][3] = isSum ? 1 : 0;
-                        //[1][...]工序;
-                        index = 1;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        d.ConfigList[index][0] = step;
-                        //[2][...] 计划号
-                        index = 2;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        if (d.Item == 9)
-                            d.ConfigList[index] = gItems;
-                        //[3][...] 操作工
-                        index = 3;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        if (d.Item == 11)
-                            d.ConfigList[index] = gItems;
-                    }
-                })
-            }
-        });
-
-    $('#kanBanProductDetail')
-        .on('ifChanged', '.cbs', function () {
-            const el = $(this).closest(".kb_div1");
-            const id = $(el).attr("value") >> 0;
-            const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
-            const col = ($(el).find(`.C_${id}`).val() >> 0) - 1;
-            const order = ($(el).find(`.O_${id}`).val() >> 0) - 1;
-
-            const timeType = $(el).find(`.Time_${id}`).val() >> 0;
-            const range = $(el).find(`.Range_${id}`).val() >> 0;
-            const step = $(el).find(`.Step_${id}`).val() >> 0;
-            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
-            var gItems = $(el).find(`.GroupItems_${id}`).val();
-            isStrEmptyOrUndefined(gItems) && (gItems = []);
-
-            const shift = $(el).find(`.Shift_${id}`).val() >> 0;
-            if (oldCol == col) {
-                var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
-                kanBanItemsTmp.forEach(d => {
-                    if (d == n[0]) {
-                        !d.ConfigList && (d.ConfigList = []);
-                        /// 工序推移图  [0][0] 班制 [0][1]数据类型 [0][2]时间范围 [0][3]合计
-                        var index = 0;
-                        !d.ConfigList[index] && (d.ConfigList[index] = []);
-                        d.ConfigList[index][0] = shift;
-                        d.ConfigList[index][1] = timeType;
-                        d.ConfigList[index][2] = range;
-                        d.ConfigList[index][3] = isSum ? 1 : 0;
+                            }
+                        }
                         //[1][...]工序;
                         index = 1;
                         !d.ConfigList[index] && (d.ConfigList[index] = []);
@@ -784,7 +679,7 @@ function pageReady() {
                     var nfl = dt.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
                     dt.FieldList = tfl.concat(nfl);
                     dt.FieldList.forEach((f, i) => {
-                        f.XvHao = i;
+                        f.XvHao = i + 1;
                     })
                 }
             })
@@ -824,7 +719,7 @@ function pageReady() {
                         var nfl = dt.FieldList.filter(t => !t.Order).sort(firstBy("XvHao"));
                         dt.FieldList = tfl.concat(nfl);
                         dt.FieldList.forEach((f, i) => {
-                            f.XvHao = i;
+                            f.XvHao = i + 1;
                         })
                     }
                 })
@@ -1135,70 +1030,168 @@ function showPreProduct() {
             const cFieldList = cItem.FieldList;
             const sFieldList = sItem.FieldList;
             const sMax = sFieldList.filter(x => x.Order).length;
-            const sTdShow = sMax > 1
-
+            const sTdShow = sMax > 1;
 
             var shift = 0;
             var timeType = 0;
             var range = 10;
-            var isSum = false;
+            var isSum = 0;
+            var isCompare = 0;
+            var cTimeType = 0;
+            var cTimeRangeType = 0;
+            var cTimeRange = [];
             var step = 0;
             var productionIds = [];
             var processorIds = [];
             let stepOptions = "";
             let groupItems = "";
             if (~its.indexOf(cItem.Item)) {
-                if (sItem.ConfigList) {
-                    //item.ConfigList 工序推移图[0][0] 班制[0][1]数据类型[0][2]时间范围[0][3]合计;[1][...]工序
-                    var index = 0;
-                    if (sItem.ConfigList.length > index) {
-                        //班制
-                        shift = sItem.ConfigList[index].length > 0 ? sItem.ConfigList[index][0] : shift;
-                        //时间类型
-                        timeType = sItem.ConfigList[index].length > 1 ? sItem.ConfigList[index][1] : timeType;
-                        //时间范围
-                        range = sItem.ConfigList[index].length > 2 ? sItem.ConfigList[index][2] : range;
-                        //是否是合计
-                        isSum = sItem.ConfigList[index].length > 3 ? sItem.ConfigList[index][3] : isSum;
-                    }
-                    //工序
-                    index = 1;
-                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
-                        step = sItem.ConfigList[index][0];
-                    }
-                    //计划号
-                    index = 2;
-                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
-                        productionIds = sItem.ConfigList[index] ? sItem.ConfigList[index] : [];
-                    }
-                    //操作工
-                    index = 3;
-                    if (sItem.ConfigList.length > index && sItem.ConfigList[index].length > 0) {
-                        processorIds = sItem.ConfigList[index] ? sItem.ConfigList[index] : [];
-                    }
+                if (!sItem.ConfigList) {
+                    sItem.ConfigList = [];
                 }
+                //item.ConfigList 工序推移图[0][0] 班制[0][1]数据类型[0][2]时间范围[0][3]合计;[1][...]工序
+                var index = 0;
+                var cIndex = 0;
+                if (sItem.ConfigList.length <= index) {
+                    sItem.ConfigList = [];
+                }
+                if (!sItem.ConfigList[index]) {
+                    sItem.ConfigList[index] = [];
+                }
+                //班制
+                cIndex = 0;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = shift;
+                }
+                shift = sItem.ConfigList[index][cIndex];
+                //时间类型
+                cIndex = 1;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = timeType;
+                }
+                timeType = sItem.ConfigList[index][cIndex];
+                //时间范围
+                cIndex = 2;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = range;
+                }
+                range = sItem.ConfigList[index][cIndex];
+                //是否是合计
+                cIndex = 3;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = isSum;
+                }
+                isSum = sItem.ConfigList[index][cIndex];
+                //是否是比较
+                cIndex = 4;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = isCompare;
+                }
+                isCompare = sItem.ConfigList[index][cIndex];
+                //比较的时间类型
+                cIndex = 5;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = cTimeType;
+                }
+                cTimeType = sItem.ConfigList[index][cIndex];
+                //比较的时间范围类型
+                cIndex = 6;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = cTimeRangeType;
+                }
+                cTimeRangeType = sItem.ConfigList[index][cIndex];
+
+                index = 1;
+                if (!sItem.ConfigList[index]) {
+                    sItem.ConfigList[index] = [];
+                }
+                //工序
+                cIndex = 0;
+                if (sItem.ConfigList[index].length <= cIndex) {
+                    sItem.ConfigList[index][cIndex] = step;
+                }
+                step = sItem.ConfigList[index][cIndex];
+
+                //计划号
+                index = 2;
+                if (!sItem.ConfigList[index]) {
+                    sItem.ConfigList[index] = productionIds;
+                }
+                productionIds = sItem.ConfigList[index];
+
+                //操作工
+                index = 3;
+                if (!sItem.ConfigList[index]) {
+                    sItem.ConfigList[index] = processorIds;
+                }
+                processorIds = sItem.ConfigList[index];
+
+                //对比时间范围
+                index = 4;
+                if (!sItem.ConfigList[index]) {
+                    sItem.ConfigList[index] = cTimeRange;
+                }
+                cTimeRange = sItem.ConfigList[index];
+                var cTimeRangeType0 = 0;
+                var cTimeRangeType1 = [];
+                var cTimeRangeType2 = [];
+                if (cTimeRangeType == 0)
+
+
+
+
+                var special = "";
+                if (timeType == 0)
+                    special = "hour";
+                else if (timeType == 1)
+                    special = "mDate";
+                else if (timeType == 2)
+                    special = "week";
+                else if (timeType == 3)
+                    special = "month";
+                else if (timeType == 4)
+                    special = "year";
+                sFieldList && sFieldList.length && !sFieldList[0].Func
+                    && (sFieldList[0].Func = JSON.stringify({
+                        special,
+                    }));
 
                 stepOptions = setOptions(stepTmp, "StepName");
                 groupItems +=
                     `</br>
                     <label class="control-label">工序</label>
-                    <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>`;
+                    <select class="form-control dOther ms2m Step_${b.val}" value="${step}">${stepOptions}</select>`;
                 if (cItem.Item != 10) {
                     let gItems = "";
                     if (cItem.Item == 9) {
                         gItems = setOptions(productionTmp, "ProductionProcessName");
                         groupItems +=
-                            `计划号<select class="form-control ms2 GroupItems_${b.val}" value="${(productionIds.join())}">${gItems}</select>`;
+                            `计划号<select class="form-control dOther ms2 GroupItems_${b.val}" value="${(productionIds.join())}">${gItems}</select>`;
                     } else if (cItem.Item == 11) {
                         gItems = setOptions(processorTmp, "Name");
                         groupItems +=
-                            `操作工<select class="form-control ms2m GroupItems_${b.val}" value="${(processorIds.join())}">${gItems}</select>`;
+                            `操作工<select class="form-control dOther ms2m GroupItems_${b.val}" value="${(processorIds.join())}">${gItems}</select>`;
                     }
                 }
                 groupItems +=
                     `<label class="control-label text-red">合计
-                        <input type="checkbox" class="icb_minimal cbs IsSum_${b.val}" value="${isSum}">
-                    </label>`;
+                        <input type="checkbox" class="icb_minimal dOther cbs IsSum_${b.val}" value="${isSum}">
+                    </label>
+                        <label class="control-label text-blue ${(timeType != 0 ? "" : "hidden")}">比较
+                            <input type="checkbox" class="icb_minimal dOther cbc IsCompare_${b.val}" value="${isCompare}">
+                        </label>
+                        <div class=${(isCompare == 1 ? "" : " hidden")}${(timeType != 0 ? "" : " hidden")}>
+                            </br>
+                            <label class="control-label">类型</label>
+                            <select class="form-control dOther cTimeRangeType_${b.val}" value=${cTimeRangeType}>${timeUnderOptions(timeType)}</select>
+                            <div class="input-group${(cTimeRangeType == 0 ? "" : " hidden")}">
+                                <input class="form-control text-center colSet cTimeRangeType_0_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
+                                <div class="input-group-addon">${timeTypes[timeType]}</div>
+                            </div>
+                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
+                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
+                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
+                    </div >`;
             }
             else {
                 shift = itemSet.length ? sItem.Shifts : 0;
@@ -1218,8 +1211,8 @@ function showPreProduct() {
                 const sWidth = fl.Width ? fl.Width : "";
                 const sPre = fl.Pre ? fl.Pre : "";
                 const sSuffix = fl.Suffix ? fl.Suffix : "";
-                const sFunc = fl.Func ? fl.Func : "";
 
+                const sFunc = fl.Func ? fl.Func : "";
                 return fs +=
                     `<tr role="row" style="background-color: #f9f9f9;" value=${fl.XvHao}>
                         <td style="padding: 4px; border: 1px solid gray;">
@@ -2097,8 +2090,8 @@ function getKanBanList(resolve) {
         firstNav && $('#tabBox a:not(:first)').first().click();
         $('#setKanBan').nextAll().remove().end().after(tabs);
         //todo
-        //$('#kanBanType').val(3).trigger("change");
-        //$('#kanBanList').val(16).trigger("select2:select");
+        $('#kanBanType').val(3).trigger("change");
+        $('#kanBanList').val(16).trigger("select2:select");
         rData = rData.filter(d => d.Id !== 0);
         //$('[href="#kanBan_6"]').click();
         resolve && resolve(rData);
@@ -3580,6 +3573,7 @@ function setChart(elId, kbId, type, next = false) {
                                         $(tr).addClass(maxClass);
                                     }
                                 });
+                                trs = $(`${tabN} tbody tr`);
                             }
                             //if (maxOrder == 0)
                             //    remove = true;
@@ -3588,14 +3582,42 @@ function setChart(elId, kbId, type, next = false) {
                             //    trs = $(`${tabN} tbody tr`);
                             //}
                             if (!remove) {
+                                const tLen = dataSource.length - trs.length;
+                                if (dataSource.length > trs.length) {
+                                    maxTr.removeClass("max");
+                                    let addData = [];
+                                    if (sWay == "asc") {
+                                        addData = sliceArray(dataSource, tLen, trs.length);
+                                    } else {
+                                        addData = sliceArray(dataSource, tLen, 0);
+                                    }
+
+                                    const addTrs = getItemTrs(addData, itemConfig, itemSet, sWay);;
+                                    if (sWay == "asc") {
+                                        maxTr.after(addTrs);
+                                    } else {
+                                        maxTr.before(addTrs);
+                                    }
+                                }
+                                //else if (dataSource.length < trs.length) {
+                                //    $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
+                                //}
+
                                 let oldData = [];
                                 if (sWay == "asc") {
-                                    oldData = dataSource.filter(x => x.XvHao <= maxOrder);
-                                } else {
                                     oldData = sliceArray(dataSource, trs.length, 0);
+                                } else {
+                                    oldData = sliceArray(dataSource, dataSource.length, tLen);
                                 }
-                                oldData.length && oldData.forEach(od => {
-                                    const mTr = $(`${tabN} tr[${trFlag}=${od[trFlag]}]`);
+                                var tTtrs = [];
+                                trs.each((i, tr) => {
+                                    var xvhao = $(tr).attr(trFlag) >> 0;
+                                    tTtrs[xvhao] = tr;
+                                });
+                                var tt = Object.values(tTtrs);
+                                tt.length && tt.forEach((tr, tri) => {
+                                    const od = oldData[tri];
+                                    const mTr = $(tr);
                                     //设置
                                     const xvHao = vFieldList.filter(x => x.Field == "XvHao");
                                     if (!xvHao.length)
@@ -3635,7 +3657,6 @@ function setChart(elId, kbId, type, next = false) {
                                             }
                                         }
                                         color = color ? `color: ${color};` : `color: "";`;
-
                                         //新值
                                         const tV = `${pre}${d}${suffix}`;
                                         const tO = od.XvHao;
@@ -3646,6 +3667,7 @@ function setChart(elId, kbId, type, next = false) {
                                             $(mTr.find('td')[i]).html(tV);
                                         }
                                         if (nO != tO) {
+                                            $(mTr).attr("XvHao", tO);
                                             $(mTr).attr("order", tO);
                                         }
                                         var hBold = $(mTr.find('td')[i]).hasClass("text-bold");
@@ -3658,26 +3680,6 @@ function setChart(elId, kbId, type, next = false) {
                                         $(mTr.find('td')[i]).attr("style", color);
                                     }
                                 });
-
-                                if (dataSource.length > trs.length) {
-                                    maxTr.removeClass("max");
-                                    let addData = [];
-                                    if (sWay == "asc") {
-                                        addData = dataSource.filter(x => x.XvHao > maxOrder);
-                                    } else {
-                                        const tLen = dataSource.length - trs.length;
-                                        addData = sliceArray(dataSource, tLen);
-                                    }
-                                    
-                                    const addTrs = getItemTrs(addData, itemConfig, itemSet, sWay);;
-                                    if (sWay == "asc") {
-                                        maxTr.after(addTrs);
-                                    } else {
-                                        maxTr.before(addTrs);
-                                    }
-                                } else if (dataSource.length < trs.length) {
-                                    $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
-                                }
                             }
                         }
 
@@ -3685,14 +3687,17 @@ function setChart(elId, kbId, type, next = false) {
                         var tBodyHeight = leftHeight
                             - $(`${tabN} tbody`).closest('.kb_item_tablebox').css("padding").replace("px", '') * 2;
                         trs = $(`${tabN} tbody tr`);
-                        var showTr = Math.floor(tBodyHeight / trHeight);
+                        var showTr = Math.floor(tBodyHeight / trHeight) - 1;
                         const timer = `${elId}_${itemSet.Col}_${itemSet.Order}_timer`;
 
                         if (trs.length > showTr && !kanBanProductItemsEl[timer]) {
                             scrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
-                        } else if (trs.length <= showTr && kanBanProductItemsEl[timer]) {
-                            $(`${tabN} tbody`).html(getItemTrs(dataSource, itemConfig, itemSet, sWay));
-                            stopScrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
+                            //} else if (trs.length <= showTr && kanBanProductItemsEl[timer]) {
+                        } else if (trs.length <= showTr) {
+                            var html = getItemTrs(dataSource, itemConfig, itemSet, sWay);
+                            $(`${tabN} tbody`).html(html);
+                            if (kanBanProductItemsEl[timer])
+                                stopScrollTable(kanBanProductItemsEl, timer, `${elId}_${itemSet.Col}_${itemSet.Order}`);
                         }
                     }
                     else if (itemConfig.Display == 1) {

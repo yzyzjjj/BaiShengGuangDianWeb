@@ -255,5 +255,11 @@ const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于"
 const itemShowOptions = ["折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
 const dataGroups = ["设备", "计划号", "操作工"];
 const dataGroupOptions = dataGroups.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const timeTypes = ["小时", "日", "周", "月", "年"];
+//const timeRangeTypes = ["前多少时间", "指定时间", "时间范围"];
+const timeRangeTypes = ["前", "指定时间", "时间范围"];
+const timeRangeOptions = timeRangeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const timeTypes = ["小时", "天", "周", "月", "年"];
 const timeOptions = timeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const timeUnderOptions = function (timeType) {
+    timeTypes.filter((x, i) => i < timeType).reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+}
