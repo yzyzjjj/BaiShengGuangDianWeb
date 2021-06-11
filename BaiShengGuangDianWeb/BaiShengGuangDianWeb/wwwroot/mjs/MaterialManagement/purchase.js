@@ -125,7 +125,7 @@ function pageReady() {
                             Id: d.Id,
                             ErpId: d.ErpId,
                             State: d.State,
-                            isShow: [3, 4, 7].includes(d.State),
+                            isShow: [2, 3, 4, 7].includes(d.State),
                             name: d.Name
                         };
                         $('#citePurchaseListBtn').prop('disabled', d.State != 5);
@@ -684,7 +684,7 @@ function inWareListSave() {
         return;
     }
     if (!_Purchase.isShow) {
-        layer.msg('开始采购,已入库,仓库到货才能入库');
+        layer.msg('审核完成,开始采购,已入库,仓库到货才能入库');
         return;
     }
     const pId = _Purchase.Id;
@@ -722,7 +722,7 @@ function finishInWareList() {
         return;
     }
     if (!_Purchase.isShow) {
-        layer.msg('开始采购,已入库,仓库到货才能完成采购');
+        layer.msg('审核完成,开始采购,已入库,仓库到货才能完成采购');
         return;
     }
     const doSth = function () {
