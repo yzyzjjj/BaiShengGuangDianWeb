@@ -1907,6 +1907,9 @@ function getKanBanList(resolve) {
                         <label class="control-label text-bold no-margin bg-green mPadding text-center" style="width: 15%; font-size: 17px;">
                             加工：<label class="control-label no-margin" id="{0}_jg" style="font-size: 17px;">0</label>
                         </label>
+                        <label class="control-label text-bold no-margin mPadding text-center" style="width: 15%; font-size: 17px; background: #ffd400; color:white;">
+                            准备：<label class="control-label no-margin" id="{0}_zb" style="font-size: 17px;">0</label>
+                        </label>
                         <label class="control-label text-bold no-margin mPadding text-center" style="width: 15%; font-size: 17px; background: #f47920; color:white;">
                             闲置：<label class="control-label no-margin" id="{0}_xz" style="font-size: 17px;">0</label>
                         </label>
@@ -3398,6 +3401,9 @@ function setChart(elId, kbId, type, next = false) {
                             case '加工中':
                                 color = '#00A65C';
                                 break;
+                            case '准备中':
+                                color = '#ffd400';
+                                break;
                             case '待机':
                             case '流程升级中':
                             case '固件升级中':
@@ -3432,6 +3438,7 @@ function setChart(elId, kbId, type, next = false) {
                 $(`${ds} .sh`).css("display", "block").removeClass("sh");
                 $(`${ds} .hi`).css("display", "none").removeClass("hi");
                 $(`${flag}_jg`).text(ret.jg);
+                $(`${flag}_zb`).text(ret.zb);
                 $(`${flag}_xz`).text(ret.xz);
                 $(`${flag}_zc`).text(ret.zc);
                 $(`${flag}_gz`).text(ret.gz);
