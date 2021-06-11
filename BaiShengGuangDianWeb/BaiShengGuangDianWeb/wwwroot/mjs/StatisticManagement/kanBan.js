@@ -1135,7 +1135,13 @@ function showPreProduct() {
                 var cTimeRangeType0 = 0;
                 var cTimeRangeType1 = [];
                 var cTimeRangeType2 = [];
-                if (cTimeRangeType == 0)
+                if (cTimeRangeType == 0) {
+
+                } else if (cTimeRangeType == 1) {
+
+                } else if (cTimeRangeType == 2) {
+
+                }
 
 
 
@@ -1177,20 +1183,25 @@ function showPreProduct() {
                     `<label class="control-label text-red">合计
                         <input type="checkbox" class="icb_minimal dOther cbs IsSum_${b.val}" value="${isSum}">
                     </label>
-                        <label class="control-label text-blue ${(timeType != 0 ? "" : "hidden")}">比较
-                            <input type="checkbox" class="icb_minimal dOther cbc IsCompare_${b.val}" value="${isCompare}">
-                        </label>
-                        <div class=${(isCompare == 1 ? "" : " hidden")}${(timeType != 0 ? "" : " hidden")}>
-                            </br>
-                            <label class="control-label">类型</label>
-                            <select class="form-control dOther cTimeRangeType_${b.val}" value=${cTimeRangeType}>${timeUnderOptions(timeType)}</select>
-                            <div class="input-group${(cTimeRangeType == 0 ? "" : " hidden")}">
-                                <input class="form-control text-center colSet cTimeRangeType_0_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
-                                <div class="input-group-addon">${timeTypes[timeType]}</div>
-                            </div>
-                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
-                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
-                            <select class="form-control ms2m Step_${b.val}" value="${step}">${stepOptions}</select>
+                    <label class="control-label text-blue ${(timeType != 0 ? "" : "hidden")}">比较
+                        <input type="checkbox" class="icb_minimal dOther cbc IsCompare_${b.val}" value="${isCompare}">
+                    </label>
+                    <div class=${(timeType != 0 ? "" : "hidden")}${(isCompare == 1 ? "" : " hidden")}>
+                        </br>
+                        <label class="control-label">类型</label>
+                        <select class="form-control dOther cTimeRangeType_${b.val}" value=${cTimeRangeType}>${timeUnderOptions(timeType)}</select>
+                        <div class="input-group${(cTimeRangeType == 0 ? "" : " hidden")}">
+                            <input class="form-control text-center dOther cTimeRangeType_0_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
+                            <div class="input-group-addon">${timeTypes[timeType]}</div>
+                        </div>
+                        <div class="input-group${(cTimeRangeType == 1 ? "" : " hidden")}">
+                            <select class="form-control ms2m dOther cTimeRangeType_1_${b.val}" value="${step}">${stepOptions}</select>
+                        </div>
+                        <div class="input-group${(cTimeRangeType == 2 ? "" : " hidden")}">
+                            <input class="form-control text-center dOther cTimeRangeType_2_1_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
+                            <label class="control-label">-</label>
+                            <input class="form-control text-center dOther cTimeRangeType_2_2_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
+                        </div>
                     </div >`;
             }
             else {
