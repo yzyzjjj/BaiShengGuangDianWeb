@@ -1,4 +1,152 @@
-﻿function padLeft0(obj) {
+﻿
+const weekNames = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+//const itemShowOptions = ["表格", "折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const itemShowOptions = ["折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const dataGroups = ["设备", "计划号", "操作工"];
+const dataGroupOptions = dataGroups.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+//const timeRangeTypes = ["前多少时间", "指定时间", "时间范围"];
+//const timeRangeTypes = ["前", "指定时间", "时间范围"];
+const timeRangeTypes = ["前", "指定"];
+const timeRangeOptions = timeRangeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+const timeTypes = ["小时", "天", "周", "月", "年"];
+const timeOptions = timeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
+function timeUnderTypes(timeType) {
+    return timeTypes.filter((_, i) => i < timeType);
+}
+function timeUnderOptions(timeType) {
+    return timeUnderTypes(timeType).reduce((a, b, i) => i == 2 ? a : `${a}<option value="${i}">${b}</option>`, '');
+}
+
+function timeRanges(timeType, cTimeType, t1 = 0, t2 = 0) {
+    var res = [];
+    switch (cTimeType) {
+        //小时
+        case 0:
+            for (var i = 0; i < 24; i++) {
+                if (t1 && t2 && i < t1 && i > t2)
+                    continue;
+                res.push(`${i}点`);
+            }
+            break;
+        //天
+        case 1:
+            switch (timeType) {
+                //周
+                case 2:
+                    for (var i = 0; i < 7; i++) {
+                        if (t1 && t2 && i < t1 && i > t2)
+                            continue;
+                        res.push(weekNames[i]);
+                    }
+                    break;
+                //月
+                case 3:
+                    for (var i = 1; i < 32; i++) {
+                        if (t1 && t2 && i < t1 && i > t2)
+                            continue;
+                        res.push(`${i}日`);
+                    }
+                    break;
+                //年
+                case 4:
+                    var first = new Date(2020, 0, 1);
+                    var end = new Date(2021, 0, 1);
+                    while (first < end) {
+                        if (t1 && t2 && first < t1 && first > t2)
+                            continue;
+                        res.push(monthDay(first, 1));
+                        addDays(first, 1);
+                    }
+                    break;
+            }
+            break;
+        //周
+        case 2:
+            switch (timeType) {
+                //月
+                case 3:
+                    for (var i = 1; i < 5; i++) {
+                        if (t1 && t2 && i < t1 && i > t2)
+                            continue;
+                        res.push(`第${i}周`);
+                    }
+                    break;
+                //年
+                case 4:
+                    for (var i = 1; i < 54; i++) {
+                        if (t1 && t2 && i < t1 && i > t2)
+                            continue;
+                        res.push(`第${i}周`);
+                    }
+                    break;
+            }
+            break;
+        //月
+        case 3:
+            switch (timeType) {
+                //年
+                case 4:
+                    for (var i = 1; i < 13; i++) {
+                        if (t1 && t2 && i < t1 && i > t2)
+                            continue;
+                        res.push(`${i}月`);
+                    }
+                    break;
+            }
+            break;
+    }
+    return res;
+}
+
+//function timeRanges(timeType, t1 = 0, t2 = 0) {
+//    var res = [];
+//    switch (timeType) {
+//        //小时返回分
+//        case 0:
+//            for (var i = 0; i < 60; i++) {
+//                if (t1 && t2 && i < t1 && i > t2)
+//                    continue;
+//                res.push(`${i}分`);
+//            }
+//            break;
+//        //天返回小时
+//        case 1:
+//            for (var i = 0; i < 24; i++) {
+//                if (t1 && t2 && i < t1 && i > t2)
+//                    continue;
+//                res.push(`${i}点`);
+//            }
+//            break;
+//        //周返回周几
+//        case 2:
+//            for (var i = 0; i < 7; i++) {
+//                if (t1 && t2 && i < t1 && i > t2)
+//                    continue;
+//                res.push(weekNames[i]);
+//            }
+//            break;
+//        //月返回天
+//        case 3:
+//            for (var i = 1; i < 32; i++) {
+//                if (t1 && t2 && i < t1 && i > t2)
+//                    continue;
+//                res.push(`${i}日`);
+//            }
+//            break;
+//        //年返回月
+//        case 4:
+//            for (var i = 1; i < 24; i++) {
+//                if (t1 && t2 && i < t1 && i > t2)
+//                    continue;
+//                res.push(`${i}月`);
+//            }
+//            break;
+//    }
+//    return res;
+//}
+
+function padLeft0(obj) {
     return obj.toString().replace(/^[0-9]{1}$/, "0" + obj);
 }
 
@@ -35,17 +183,22 @@ function getDate(date = undefined) {
     return (date ? new Date(date) : new Date()).format("yyyy-MM-dd");
     var nowTime = new Date();
     var year = nowTime.getFullYear();
-    var month = padLeft0(nowTime.getMonth() + 1);
-    var day = padLeft0(nowTime.getDate());
+    //var month = padLeft0(nowTime.getMonth() + 1);
+    //var day = padLeft0(nowTime.getDate());
+    var month = nowTime.getMonth() + 1;
+    var day = nowTime.getDate();
     return year + "-" + month + "-" + day;
 }
 
 //获得今日日期
-function getDay(date = undefined) {
-    return (date ? new Date(date) : new Date()).getDate();
-    var nowTime = new Date();
-    var day = padLeft0(nowTime.getDate());
-    return day;
+function getDay(date = undefined, type = 0) {
+    var t = (date ? new Date(date) : new Date());
+    switch (type) {
+        case 0: t = t.getDate(); break;
+        case 1: t = `${t.getDate()}日`; break;
+        case 2: t = padLeft0(t.getDate()); break;
+    }
+    return t;
 }
 
 function getHour(time, type = 0) {
@@ -99,7 +252,7 @@ function getDayAgo(daysAgo) {
 }
 
 //获得当前星期 范围  1 <= weekDay <= 7
-function getNowWeekRange(weekDay = 0) {
+function getNowWeekRange(weekDay = 1) {
     return {
         start: new Date(new Date().setDate(new Date().getDate() - (weekDay - 1))).format("yyyy-MM-dd"),
         end: new Date(new Date().setDate(new Date().getDate() + (7 - weekDay))).format("yyyy-MM-dd")
@@ -136,6 +289,7 @@ function getNowMonth(time, type = 0) {
     }
     return t;
 }
+
 //获得当前年份
 function getNowYear(time, type = 0) {
     var t = (time ? new Date(time) : new Date()).getFullYear();
@@ -146,7 +300,39 @@ function getNowYear(time, type = 0) {
     return t;
 }
 
-//获得当前第几周
+////获得当前年第几周
+//function getWeek(time, type = 0) {
+//    var t = (time ? new Date(time) : new Date()).getFullYear();
+//    switch (type) {
+//        case 0: t = !time ? `${getNowYear()}第${$.datepicker.iso8601Week(new Date())}周`
+//            : `${getNowYear(time)}第${$.datepicker.iso8601Week(new Date(time))}周`; break;
+//        case 1: t = !time ? `第${$.datepicker.iso8601Week(new Date())}周`
+//            : `第${$.datepicker.iso8601Week(new Date(time))}周`; break;
+//    }
+//    return t;
+//}
+function getWeekInMonth(time, type = 0) {
+    var t = (time ? new Date(time) : new Date());
+    var date = t,
+        w = date.getDay(),
+        d = date.getDate(),
+        week = Math.ceil((d + 6 - w) / 7);
+    if (w == 0) {
+        w = 7;
+    }
+    switch (type) {
+        case 0: t = {
+            getMonth: t.getMonth() + 1,
+            getYear: t.getFullYear(),
+            getWeek: week,
+        }; break;
+        case 1: t = `第${week}周`; break;
+        case 2: t = week; break;
+    }
+    return t;
+}
+
+//获得当前年第几周
 function getWeek(time, type = 0) {
     var t = (time ? new Date(time) : new Date()).getFullYear();
     switch (type) {
@@ -156,6 +342,11 @@ function getWeek(time, type = 0) {
             : `第${$.datepicker.iso8601Week(new Date(time))}周`; break;
     }
     return t;
+}
+
+//获得周几
+function getWeekNames(time, type = 0) {
+    return weekNames[(time ? new Date(time) : new Date()).getDay() - 1];
 }
 
 //计算两个日期天数差的函数，返回相差秒
@@ -320,11 +511,103 @@ function convertTimeHMS(time) {
 
 //时间格式转换 mon月day日
 function monthDay(time, type = 0) {
-    time = time.split(' ')[0].split('-');
+    time = new Date(time);
+    var year = time.getFullYear();
+    var month = time.getMonth() + 1;
+    var day = time.getDate();
     switch (type) {
-        case 0: return `${time[1]}-${time[2]}`;
-        case 1: return `${time[1]}/${time[2]}`;
-        case 2: return `${time[1]}月${time[2]}日`;
+        case 0: return `${month}-${day}`;
+        case 1: return `${month}月${day}日`;
+        case 2: return `${month}/${day}`;
     }
     return ``;
+}
+
+/*
+ *   参数:number,数值表达式，表示要添加的时间间隔的个数.
+ *   参数:date,时间对象.
+ *   参数:interval,字符串表达式，表示要添加的时间间隔.
+ *   返回:新的时间对象.
+ *   var now = new Date();
+ *   var newDate = DateAdd(now, 5, "d");
+ *---------------   DateAdd(date, number, interval)   -----------------
+ */
+function dateAdd(date, number, interval = "") {
+    switch (interval) {
+        //年
+        case "y":
+        case "year": {
+            date.setFullYear(date.getFullYear() + number);
+            return date;
+            break;
+        }
+        //季度
+        case "q":
+        case "quarter": {
+            date.setMonth(date.getMonth() + number * 3);
+            return date;
+            break;
+        }
+        //月
+        case "mon":
+        case "month": {
+            date.setMonth(date.getMonth() + number);
+            return date;
+            break;
+        }
+        //周
+        case "week": {
+            date.setDate(date.getDate() + number * 7);
+            return date;
+            break;
+        }
+        //天
+        case "d":
+        case "day": {
+            date.setDate(date.getDate() + number);
+            return date;
+            break;
+        }
+        //小时
+        case "hour": {
+            date.setHours(date.getHours() + number);
+            return date;
+            break;
+        }
+        //分
+        case "minute":
+        case "min": {
+            date.setMinutes(date.getMinutes() + number);
+            return date;
+            break;
+        }
+        //秒
+        case "second":
+        case "sec": {
+            date.setSeconds(date.getSeconds() + number);
+            return date;
+            break;
+        }
+        default: {
+            date.setDate(date.getDate() + number);
+            return date;
+            break;
+        }
+    }
+}
+
+function addDays(date, n) {
+    return dateAdd(date, n, "day");
+}
+
+function addWeeks(date, n) {
+    return dateAdd(date, n, "week");
+}
+
+function addMonths(date, n) {
+    return dateAdd(date, n, "month");
+}
+
+function addYears(date, n) {
+    return dateAdd(date, n, "year");
 }

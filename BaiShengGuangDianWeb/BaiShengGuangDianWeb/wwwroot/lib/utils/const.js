@@ -249,65 +249,67 @@ FieldFunc["list"] = {
     },
 };
 
-const weekNames = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
-const conOptions = ["大于", "大于等于", "等于", "小于", "小于等于", "不等于"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-//const itemShowOptions = ["表格", "折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const itemShowOptions = ["折线图", "柱状图", "饼图"].reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const dataGroups = ["设备", "计划号", "操作工"];
-const dataGroupOptions = dataGroups.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-//const timeRangeTypes = ["前多少时间", "指定时间", "时间范围"];
-//const timeRangeTypes = ["前", "指定时间", "时间范围"];
-const timeRangeTypes = ["前", "指定时间"];
-const timeRangeOptions = timeRangeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const timeTypes = ["小时", "天", "周", "月", "年"];
-const timeOptions = timeTypes.reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-const timeUnderOptions = function (timeType) {
-    timeTypes.filter((x, i) => i < timeType).reduce((a, b, i) => `${a}<option value="${i}">${b}</option>`, '');
-}
-const timeRanges = function (timeType, t1 = 0, t2 = 0) {
-    var res = [];
-    switch (timeType) {
-        //小时返回分
-        case 0:
-            for (var i = 0; i < 60; i++) {
-                if (!(t1 && t2 && i >= t1 && i <= t2))
-                    continue;
-                res.push(`${i}分`);
-            }
-            break;
-        //天返回小时
-        case 1:
-            for (var i = 0; i < 24; i++) {
-                if (!(t1 && t2 && i >= t1 && i <= t2))
-                    continue;
-                res.push(`${i}点`);
-            }
-            break;
-        //周返回周几
-        case 2:
-            for (var i = 1; i < 8; i++) {
-                if (!(t1 && t2 && i >= t1 && i <= t2))
-                    continue;
-                res.push(weekNames[i]);
-            }
-            break;
-        //月返回天
-        case 3:
-            for (var i = 1; i < 32; i++) {
-                if (!(t1 && t2 && i >= t1 && i <= t2))
-                    continue;
-                res.push(`${i}日`);
-            }
-            break;
-        //年返回月
-        case 4:
-            for (var i = 0; i < 24; i++) {
-                if (!(t1 && t2 && i >= t1 && i <= t2))
-                    continue;
-                res.push(i);
-            }
-            break;
 
-    }
-    return res;
-}
+//const timeTypes = ["小时", "天", "周", "月", "年"];
+const CompareTimeFunc = [];
+CompareTimeFunc["天"] = {
+    //2021-5-12 14:44:10 -> 12
+    "小时": {
+        desc: "比较小时",
+        func: getHour
+    },
+};
+
+CompareTimeFunc["周"] = {
+    //2021-5-12 14:44:10 -> 12
+    "小时": {
+        desc: "比较小时",
+        func: getHour
+    },
+    //2021-5-12 14:44:10 -> 2021-5-12
+    "天": {
+        desc: "比较天",
+        func: getWeekNames
+    },
+};
+
+CompareTimeFunc["月"] = {
+    //2021-5-12 14:44:10 -> 12
+    "小时": {
+        desc: "比较小时",
+        func: getHour
+    },
+    //2021-5-12 14:44:10 -> 2021-5-12
+    "天": {
+        desc: "比较天",
+        func: getDay
+    },
+    //2021-5-12 14:44:10 -> 第几周
+    "周": {
+        desc: "比较周",
+        func: getWeekInMonth
+    },
+};
+
+CompareTimeFunc["年"] = {
+    //2021-5-12 14:44:10 -> 12
+    "小时": {
+        desc: "比较小时",
+        func: getHour
+    },
+    //2021-5-12 14:44:10 -> 2021-5-12
+    "天": {
+        desc: "比较天",
+        func: monthDay
+    },
+    //2021-5-12 14:44:10 -> 第几周
+    "周": {
+        desc: "比较周",
+        func: getWeek
+    },
+    //2021-5-12 14:44:10 -> 5月
+    "月": {
+        desc: "比较月",
+        func: getNowMonth
+    },
+};

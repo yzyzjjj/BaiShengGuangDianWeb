@@ -457,6 +457,7 @@ function pageReady() {
             const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
             var gItems = $(el).find(`.GroupItems_${id}`).val();
             isStrEmptyOrUndefined(gItems) && (gItems = []);
+            gItems = [].concat(gItems);
 
             const shift = $(el).find(`.Shift_${id}`).val() >> 0;
             const hour = $(el).find(`.Hour_${id}`).val() >> 0;
@@ -556,9 +557,11 @@ function pageReady() {
 
             showPreProduct();
         });
-
+    var ii = 0;
     $('#kanBanProductDetail')
-        .on('change', '.dOther', function () {
+        .on('change ifChanged', '.dOther', function () {
+            console.log(ii++)
+
             const el = $(this).closest(".kb_div1");
             const id = $(el).attr("value") >> 0;
             const oldCol = ($(el).find(`.C_${id}`).attr("old") >> 0) - 1;
@@ -568,11 +571,11 @@ function pageReady() {
             const timeType = $(el).find(`.Time_${id}`).val() >> 0;
             const range = $(el).find(`.Range_${id}`).val() >> 0;
             const step = $(el).find(`.Step_${id}`).val() >> 0;
-            const isSum = $(el).find(`.IsSum_${id}`).is(':checked');
-            const isCompare = $(el).find(`.IsCompare_${id}`).is(':checked');
+            var isSum = $(el).find(`.IsSum_${id}`).is(':checked');
+            var isCompare = $(el).find(`.IsCompare_${id}`).is(':checked');
             var gItems = $(el).find(`.GroupItems_${id}`).val();
             isStrEmptyOrUndefined(gItems) && (gItems = []);
-
+            gItems = [].concat(gItems);
             const shift = $(el).find(`.Shift_${id}`).val() >> 0;
             if (oldCol == col) {
                 var n = kanBanItemsTmp.filter(x => x.Col == col && x.Order == order);
@@ -584,22 +587,45 @@ function pageReady() {
                         !d.ConfigList[index] && (d.ConfigList[index] = []);
                         d.ConfigList[index][0] = shift;
                         d.ConfigList[index][1] = timeType;
+                        if (timeType == 0)
+                            isCompare = false;
                         d.ConfigList[index][2] = range;
-                        d.ConfigList[index][3] = isSum ? 1 : 0;
                         d.ConfigList[index][4] = isCompare ? 1 : 0;
+                        //if (isCompare) {
+                        //    isSum = true;
+                        //    $(el).find(`.IsSum_${id}`).iCheck('check')
+                        //}
+                        d.ConfigList[index][3] = isSum ? 1 : 0;
                         if (isCompare) {
+                            $(el).find(`.compareDiv_${id}`).removeClass("hidden");
                             const cTimeType = $(el).find(`.cTimeType_${id}`).val() >> 0;
+                            var change = d.ConfigList[index][5] != cTimeType;
                             d.ConfigList[index][5] = cTimeType;
-                            const cTimeRangeType = $(el).find(`.cTimeRange_${id}`).val() >> 0;
+                            const cTimeRangeType = $(el).find(`.cTimeRangeType_${id}`).val() >> 0;
                             d.ConfigList[index][6] = cTimeRangeType;
+                            //[4][...]对比时间范围;
+                            index = 4;
+                            !d.ConfigList[index] && (d.ConfigList[index] = []);
                             //const.js timeRangeTypes
+                            $(el).find(`.cTimeRangeType`).addClass("hidden");
                             if (cTimeRangeType == 0) {
-
+                                $(el).find(`.cTimeRangeType_0_${id}`).removeClass("hidden");
+                                $(el).find(`.cTimeRangeType_02_${id}`).text(timeTypes[cTimeType]);
+                                const cTimeRange = $(el).find(`.cTimeRangeType_01_${id}`).val() >> 0;
+                                d.ConfigList[index][0] = cTimeRange;
                             } else if (cTimeRangeType == 1) {
+                                $(el).find(`.cTimeRangeType_1_${id}`).removeClass("hidden");
+                                let cTimeRange = $(el).find(`.cTimeRangeType_11_${timeType}_${cTimeType}_${id}`).val();
+                                cTimeRange = cTimeRange ? cTimeRange : [];
+                                d.ConfigList[index] = cTimeRange;
 
+                                $(el).find(`.cTimeRangeType_div`).addClass("hidden");
+                                $(el).find(`.cTimeRangeType_div_${timeType}_${cTimeType}_${id}`).removeClass("hidden");
                             } else if (cTimeRangeType == 2) {
 
                             }
+                        } else {
+                            $(el).find(`.compareDiv_${id}`).addClass("hidden");
                         }
                         //[1][...]工序;
                         index = 1;
@@ -618,6 +644,7 @@ function pageReady() {
                     }
                 })
             }
+
         });
 
     $('#kanBanProductDetail')
@@ -1049,7 +1076,7 @@ function showPreProduct() {
                 if (!sItem.ConfigList) {
                     sItem.ConfigList = [];
                 }
-                //item.ConfigList 工序推移图[0][0] 班制[0][1]数据类型[0][2]时间范围[0][3]合计;[1][...]工序
+                //item.ConfigList 工序推移图 [0][0] 班制; [0][1]数据类型; [0][2]时间范围; [0][3]合计; [1][...]工序
                 var index = 0;
                 var cIndex = 0;
                 if (sItem.ConfigList.length <= index) {
@@ -1133,18 +1160,17 @@ function showPreProduct() {
                 }
                 cTimeRange = sItem.ConfigList[index];
                 var cTimeRangeType0 = 0;
-                var cTimeRangeType1 = [];
+                var cTimeRangeType1 = [0, 0];
                 var cTimeRangeType2 = [];
                 if (cTimeRangeType == 0) {
-
+                    if (cTimeRange.length)
+                        cTimeRangeType0 = cTimeRange[0];
                 } else if (cTimeRangeType == 1) {
-
+                    if (cTimeRange.length > 2)
+                        cTimeRangeType1 = cTimeRange;
                 } else if (cTimeRangeType == 2) {
 
                 }
-
-
-
 
                 var special = "";
                 if (timeType == 0)
@@ -1179,6 +1205,15 @@ function showPreProduct() {
                             `操作工<select class="form-control dOther ms2m GroupItems_${b.val}" value="${(processorIds.join())}">${gItems}</select>`;
                     }
                 }
+                const timeRangeSelect = timeTypes.reduce((a1, _, i1) =>
+                    i1 == 0 ? a1 : a1 + timeUnderTypes(i1).reduce((a2, _, i2) =>
+                        `${a2}<div class="cTimeRangeType_div cTimeRangeType_div_${i1}_${i2}_${b.val} ${(timeType == i1 && cTimeType == i2 ? "" : "hidden")}">
+                            <select class="form-control ms2 dOther cTimeRangeType_11_${i1}_${i2}_${b.val}" value="${(cTimeRange.join())}">
+                                ${setOptionsArray(timeRanges(i1, i2))}
+                            </select>
+                        </div>`, '')
+                    , '');
+
                 groupItems +=
                     `<label class="control-label text-red">合计
                         <input type="checkbox" class="icb_minimal dOther cbs IsSum_${b.val}" value="${isSum}">
@@ -1186,23 +1221,19 @@ function showPreProduct() {
                     <label class="control-label text-blue ${(timeType != 0 ? "" : "hidden")}">比较
                         <input type="checkbox" class="icb_minimal dOther cbc IsCompare_${b.val}" value="${isCompare}">
                     </label>
-                    <div class=${(timeType != 0 ? "" : "hidden")}${(isCompare == 1 ? "" : " hidden")}>
-                        </br>
-                        <label class="control-label">类型</label>
-                        <select class="form-control dOther cTimeRangeType_${b.val}" value=${cTimeRangeType}>${timeUnderOptions(timeType)}</select>
-                        <div class="input-group${(cTimeRangeType == 0 ? "" : " hidden")}">
-                            <input class="form-control text-center dOther cTimeRangeType_0_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
-                            <div class="input-group-addon">${timeTypes[timeType]}</div>
+                    </br>
+                    <div class="compareDiv_${b.val} ${(timeType == 0 ? "hidden" : "")}${(isCompare == 0 ? " hidden" : "")}">
+                        <label class="control-label">比较时间</label>
+                        <select class="form-control dOther cTimeType_${b.val}" value=${cTimeType}>${timeUnderOptions(timeType)}</select>
+                        <select class="form-control dOther cTimeRangeType_${b.val}" value=${cTimeRangeType}>${timeRangeOptions}</select>
+                        <div class="input-group${(cTimeRangeType == 0 ? "" : " hidden")} cTimeRangeType cTimeRangeType_0_${b.val}">
+                            <input class="form-control text-center dOther cTimeRangeType_01_${b.val}" style="width: 70px;" value=${cTimeRangeType0} oninput="onInput(this, 3, 0, 0, 24);">
+                            <div class="input-group-addon cTimeRangeType_02_${b.val}"">${timeTypes[cTimeType]}</div>
                         </div>
-                        <div class="input-group${(cTimeRangeType == 1 ? "" : " hidden")}">
-                            <select class="form-control ms2m dOther cTimeRangeType_1_${b.val}" value="${step}">${stepOptions}</select>
+                        <div class="${(cTimeRangeType == 1 ? '' : ' hidden')} cTimeRangeType cTimeRangeType_1_${b.val}">
+                            ${timeRangeSelect}
                         </div>
-                        <div class="input-group${(cTimeRangeType == 2 ? "" : " hidden")}">
-                            <input class="form-control text-center dOther cTimeRangeType_2_1_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
-                            <label class="control-label">-</label>
-                            <input class="form-control text-center dOther cTimeRangeType_2_2_${b.val}" style="width: 70px;" value=${(cTimeRangeType == 0 ? "" : " hidden")} oninput="onInput(this, 3, 0, 0, 24);">
-                        </div>
-                    </div >`;
+                    </div>`;
             }
             else {
                 shift = itemSet.length ? sItem.Shifts : 0;
@@ -1320,7 +1351,7 @@ function showPreProduct() {
                                                 <select class="form-control colSet Time_${b.val}" value=${timeType}>${timeOptions}</select>
                                                 <label class="control-label">时间范围</label>
                                                 <div class="input-group">
-                                                    <input class="form-control text-center colSet Range_${b.val}" style="width: 70px;" value=${range} oninput="onInput(this, 3, 0, 0, 24);">
+                                                    <input class="form-control text-center colSet Range_${b.val}" style="width: 70px;" value=${range} oninput="onInput(this, 3, 0, 1, 24);">
                                                     <div class="input-group-addon">${timeTypes[timeType]}</div>
                                                 </div>
                                                 ${groupItems}` :
@@ -1393,11 +1424,11 @@ function showPreProduct() {
         if ($(el).hasClass("ms2m")) {
             if (~id.indexOf(",")) {
                 $(el).select2({
+                    matcher,
                     allowClear: true,
                     placeholder: '请选择',
                     multiple: true,
                     width: '55%',
-                    matcher,
                 });
                 id = id.split(",");
             } else {
@@ -1409,10 +1440,11 @@ function showPreProduct() {
             $(el).val(id).trigger("change");
         } else if ($(el).hasClass("ms2")) {
             $(el).select2({
+                matcher,
                 allowClear: true,
                 placeholder: '请选择',
                 multiple: true,
-                width: '55%',
+                width: '70%',
             });
             var vs = "";
             if (!isStrEmptyOrUndefined(id))
@@ -3747,6 +3779,9 @@ function setChart(elId, kbId, type, next = false) {
                         var func = null;
                         var param = null;
                         var xName = null;
+                        var timeType = 0;
+                        var isCompare = 0;
+                        var cTimeType = 0;
                         if (~its.indexOf(item)) {
                             if (sField.Func) {
                                 const fc = JSON.parse(sField.Func);
@@ -3759,8 +3794,18 @@ function setChart(elId, kbId, type, next = false) {
                                         var index = 0;
                                         if (itemSet.ConfigList.length > index) {
                                             //时间类型
-                                            timeType = itemSet.ConfigList[index].length > 1 ? itemSet.ConfigList[index][1] : timeType;
+                                            var cIndex = 1;
+                                            if (itemSet.ConfigList[index].length > cIndex)
+                                                timeType = itemSet.ConfigList[index][cIndex];
                                             xName = timeTypes[timeType];
+                                            //是否是比较
+                                            cIndex = 4;
+                                            if (itemSet.ConfigList[index].length > cIndex)
+                                                isCompare = itemSet.ConfigList[index][cIndex];
+                                            //比较的时间类型
+                                            cIndex = 5;
+                                            if (itemSet.ConfigList[index].length > cIndex)
+                                                cTimeType = itemSet.ConfigList[index][cIndex];
                                         }
                                     }
                                 }
@@ -3769,37 +3814,11 @@ function setChart(elId, kbId, type, next = false) {
                         var xData = distinct(dataSource.map(x => func ? func(x[field], param) : x[field]));
 
                         var series = [];
-                        var key = "";
-                        switch (itemConfig.Item) {
-                            case 9: key = "Production"; break;
-                            case 10: key = "Code"; break;
-                            case 11: key = "Processor"; break;
-                        }
-
-                        if (isStrEmptyOrUndefined(key))
-                            continue;
-                        var lData = distinct(dataSource.map(x => x[key]).filter(x => x));
-                        if (!lData.length) {
-                            var ldd = dataSource.map(x => x[vField.Field]);
-                            series.push({
-                                type: sType,
-                                label: {
-                                    show: true,
-                                    position: 'top',
-                                    fontWeight: "bold",
-                                    fontSize: 14,
-                                },
-                                //symbol: 'none',
-                                lineStyle: {
-                                    width: 3
-                                },
-                                data: ldd
-                            })
-                        } else {
-                            lData.forEach(ld => {
-                                var ldd = dataSource.filter(x => x[key] == ld).map(x => x[vField.Field]);
+                        var lData = distinct(dataSource.map(x => x.Data).filter(x => x));
+                        if (!isCompare) {
+                            if (!lData.length) {
+                                var ldd = dataSource.map(x => x[vField.Field]);
                                 series.push({
-                                    name: ld,
                                     type: sType,
                                     label: {
                                         show: true,
@@ -3813,9 +3832,147 @@ function setChart(elId, kbId, type, next = false) {
                                     },
                                     data: ldd
                                 })
-                            })
+                            } else {
+                                lData.forEach(ld => {
+                                    var ldd = dataSource.filter(x => x.Data == ld).map(x => x[vField.Field]);
+                                    series.push({
+                                        name: ld,
+                                        type: sType,
+                                        label: {
+                                            show: true,
+                                            position: 'top',
+                                            fontWeight: "bold",
+                                            fontSize: 14,
+                                        },
+                                        //symbol: 'none',
+                                        lineStyle: {
+                                            width: 3
+                                        },
+                                        data: ldd
+                                    })
+                                })
+                            }
+                        } else {
+                            var ctfunc = CompareTimeFunc[timeTypes[timeType]][timeTypes[cTimeType]].func;
+                            var llData = distinct(dataSource.map(x => ctfunc(x[sField.Field], 1)).filter(x => x));
+
+                            if (!lData.length) {
+                                //var ldd = dataSource.map(x => x[vField.Field]);
+                                llData.forEach(ld => {
+                                    var ldd = dataSource.filter(x => ctfunc(x[sField.Field], 1) == ld).map(x => x[vField.Field]);
+                                    series.push({
+                                        name: ld,
+                                        type: sType,
+                                        label: {
+                                            show: true,
+                                            position: 'top',
+                                            fontWeight: "bold",
+                                            fontSize: 14,
+                                        },
+                                        //symbol: 'none',
+                                        lineStyle: {
+                                            width: 3
+                                        },
+                                        data: ldd
+                                    })
+                                })
+                            } else {
+                                //lData.forEach(ld => {
+                                //    var ldd = dataSource.filter(x => x.Data == ld).map(x => x[vField.Field]);
+                                //    series.push({
+                                //        name: ld,
+                                //        type: sType,
+                                //        label: {
+                                //            show: true,
+                                //            position: 'top',
+                                //            fontWeight: "bold",
+                                //            fontSize: 14,
+                                //        },
+                                //        //symbol: 'none',
+                                //        lineStyle: {
+                                //            width: 3
+                                //        },
+                                //        data: ldd
+                                //    })
+                                //})
+                                llData.forEach(ld => {
+                                    var ldd = dataSource.filter(x => CompareTimeFunc[timeTypes[timeType]][special].func(x[sField.Field]) == ld).map(x => x[vField.Field]);
+                                    series.push({
+                                        name: ld,
+                                        type: sType,
+                                        label: {
+                                            show: true,
+                                            position: 'top',
+                                            fontWeight: "bold",
+                                            fontSize: 14,
+                                        },
+                                        //symbol: 'none',
+                                        lineStyle: {
+                                            width: 3
+                                        },
+                                        data: ldd
+                                    })
+                                })
+                            }
+                            lData = llData;
                         }
 
+                        var option = {
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '6%',
+                                bottom: '3%',
+                                containLabel: true
+                            },
+                            color: ["#00a65a", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
+                            xAxis: {
+                                name: xName ? xName : cField.Field,
+                                nameTextStyle: {
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                },
+                                type: 'category',
+                                boundaryGap: false,
+                                data: xData,
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 19,
+                                    }
+                                },
+                            },
+                            yAxis: {
+                                name: vField ? vField.Column : "",
+                                nameTextStyle: {
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                },
+                                //boundaryGap: [0, '20%'],
+                                type: 'value',
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 16,
+                                    }
+                                },
+                            },
+                            legend: {
+                                data: lData,
+                                textStyle: {
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    fontSize: 16,
+                                }
+                            },
+                            series: series
+                        }
                         if (!pTableOrChart[tabN]) {
                             pTableOrChart[tabN] = {
                                 lData: lData,
@@ -3823,62 +3980,7 @@ function setChart(elId, kbId, type, next = false) {
                                 series: series,
                                 chart: echarts.init($(tabN)[0]),
                             };
-                            pTableOrChart[tabN].chart.setOption({
-                                tooltip: {
-                                    trigger: 'axis'
-                                },
-                                grid: {
-                                    left: '3%',
-                                    right: '6%',
-                                    bottom: '3%',
-                                    containLabel: true
-                                },
-                                color: ["#00a65a", "red", "#ff00ff", "#cc3300", "#ff9900", "#9933ff", "blue", "#0099ff", "#660066"],
-                                xAxis: {
-                                    name: xName ? xName : cField.Field,
-                                    nameTextStyle: {
-                                        color: "white",
-                                        fontWeight: "bold",
-                                        fontSize: 14,
-                                    },
-                                    type: 'category',
-                                    boundaryGap: false,
-                                    data: xData,
-                                    axisLine: {
-                                        lineStyle: {
-                                            color: "white",
-                                            fontWeight: "bold",
-                                            fontSize: 19,
-                                        }
-                                    },
-                                },
-                                yAxis: {
-                                    name: vField ? vField.Column : "",
-                                    nameTextStyle: {
-                                        color: "white",
-                                        fontWeight: "bold",
-                                        fontSize: 14,
-                                    },
-                                    //boundaryGap: [0, '20%'],
-                                    type: 'value',
-                                    axisLine: {
-                                        lineStyle: {
-                                            color: "white",
-                                            fontWeight: "bold",
-                                            fontSize: 16,
-                                        }
-                                    },
-                                },
-                                legend: {
-                                    data: lData,
-                                    textStyle: {
-                                        color: "white",
-                                        fontWeight: "bold",
-                                        fontSize: 16,
-                                    }
-                                },
-                                series: series
-                            }, true);
+                            pTableOrChart[tabN].chart.setOption(option, true);
 
                             $(tabN).resize(function () {
                                 for (var k in pTableOrChart) {
@@ -3887,22 +3989,18 @@ function setChart(elId, kbId, type, next = false) {
                                 }
                             });
                         } else {
-                            var option = {};
                             var update = false;
                             if (!isEqual(pTableOrChart[tabN].lData, lData)) {
                                 update = true;
-                                option.legend = lData;
                             }
                             if (!isEqual(pTableOrChart[tabN].xData, xData)) {
                                 update = true;
-                                option.xAxis = { data: xData };
                             }
                             if (!isEqual(pTableOrChart[tabN].series, series)) {
                                 update = true;
-                                option.series = series;
                             }
                             if (update) {
-                                pTableOrChart[tabN].chart.setOption(option);
+                                pTableOrChart[tabN].chart.setOption(option, true);
                                 pTableOrChart[tabN].lData = lData;
                                 pTableOrChart[tabN].xData = xData;
                                 pTableOrChart[tabN].series = series;

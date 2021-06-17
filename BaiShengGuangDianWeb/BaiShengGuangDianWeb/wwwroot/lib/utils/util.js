@@ -1319,6 +1319,34 @@ function selectMany(t, key) {
     return t.map(x => x[key]).reduce((a, b, i) => a.concat(b));
 }
 
+//https://blog.csdn.net/weixin_33810006/article/details/88980650
+//分组
+//let list = [
+//    { "name": "John", "Average": 15, "High": 10, "DtmStamp": 1358226000000 },
+//    { "name": "Jane", "Average": 16, "High": 92, "DtmStamp": 1358226000000 },
+//    { "name": "Jane", "Average": 17, "High": 45, "DtmStamp": 1358226000000 },
+//    { "name": "John", "Average": 18, "High": 87, "DtmStamp": 1358226000000 },
+//    { "name": "Jane", "Average": 15, "High": 10, "DtmStamp": 1358226060000 },
+//    { "name": "John", "Average": 16, "High": 87, "DtmStamp": 1358226060000 },
+//    { "name": "John", "Average": 17, "High": 45, "DtmStamp": 1358226060000 },
+//    { "name": "Jane", "Average": 18, "High": 92, "DtmStamp": 1358226060000 }
+//];
+
+//let sorted = groupBy(list, function (item) {
+//    return [item.name];
+//});
+function groupBy(array, f) {
+    let groups = {};
+    array.forEach(function (o) {
+        let group = JSON.stringify(f(o));
+        groups[group] = groups[group] || [];
+        groups[group].push(o);
+    });
+    return Object.keys(groups).map(function (group) {
+        return groups[group];
+    });
+}
+
 //数组对象实现字母、数字的混合排序：
 function SortNumberString(array, par) {
     return array.sort(function (a, b) {
@@ -1851,6 +1879,7 @@ function fullScreen(isShow) {
     //        || (document.exitFullscreen && document.exitFullscreen());
     //}
 }
+
 //假进度条
 function addFakeProgress() {
     var op = `<div class="alert alert-info alert-dismissible" style="width: 300px; position: fixed; top: 40%; left: 50%;transform: translateX(-50%);z-index:999999" id="progress_wrap">
@@ -1894,6 +1923,11 @@ function setOptions(data, name, color = false) {
 }
 
 //options设置
+function setOptionsArray(data, color = false) {
+    return data.reduce((a, b, i) => `${a}<option value="${i}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${b}</option>`, '');
+}
+
+//options设置
 function setOptionsWithNames(data, names, separator, color = false) {
     return data.reduce((a, b, i) => `${a}<option value="${b.Id}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${(names.map(x => b[x]).join(separator))}</option >`, '');
 }
@@ -1907,6 +1941,7 @@ function setOptionsWithKey(data, id, name, color = false) {
 function setOptionsWithKeyNames(data, id, names, separator, color = false) {
     return data.reduce((a, b, i) => `${a}<option value="${b[id]}"${(!color ? "" : ` style="color:${optionColors[(i > optionColors.length ? (i % optionColors.length) : i)]}"`)}>${(names.map(x => b[x]).join(separator))}</option>`, '');
 }
+
 //将数字金额转换为大写人民币汉字
 function convertCurrency(money) {
     //汉字的数字
@@ -2903,6 +2938,7 @@ function getChartW(id, columns, border = 0) {
         </div>`;
     return table;
 }
+
 function showPermissions(uiName, list) {
     var permissionTypes = `<div class="box box-solid noShadow" style="margin-bottom: 0;">
                             <div class="box-header no-padding">
