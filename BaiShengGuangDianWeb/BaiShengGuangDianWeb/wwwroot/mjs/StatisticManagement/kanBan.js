@@ -557,10 +557,9 @@ function pageReady() {
 
             showPreProduct();
         });
-    var ii = 0;
     $('#kanBanProductDetail')
         .on('change ifChanged', '.dOther', function () {
-            console.log(ii++)
+
 
             const el = $(this).closest(".kb_div1");
             const id = $(el).attr("value") >> 0;
@@ -2136,8 +2135,8 @@ function getKanBanList(resolve) {
         firstNav && $('#tabBox a:not(:first)').first().click();
         $('#setKanBan').nextAll().remove().end().after(tabs);
         //todo
-        $('#kanBanType').val(3).trigger("change");
-        $('#kanBanList').val(16).trigger("select2:select");
+        //$('#kanBanType').val(3).trigger("change");
+        //$('#kanBanList').val(16).trigger("select2:select");
         rData = rData.filter(d => d.Id !== 0);
         //$('[href="#kanBan_6"]').click();
         resolve && resolve(rData);
@@ -3964,6 +3963,7 @@ function setChart(elId, kbId, type, next = false) {
                                 },
                             },
                             legend: {
+                                icon: 'circle',
                                 data: lData,
                                 textStyle: {
                                     color: "white",
