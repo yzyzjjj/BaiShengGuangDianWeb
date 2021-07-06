@@ -37,7 +37,7 @@ function getGroup() {
         $('#groupSelect').append(options);
         getProcessor();
         getScoreList();
-    });
+    }, 0);
 }
 
 //获取操作员
@@ -63,7 +63,7 @@ function getProcessor() {
             options += option.format(d.Id, d.Processor, d.Account);
         }
         $('#processorSelect').append(options);
-    });
+    }, 0);
 }
 
 //任务绩效表
@@ -92,7 +92,7 @@ function getScoreList() {
             trs += `<tr><td>${i + 1}</td><td>${d.Processor}</td><td>${d.Score}</td></tr>`;
         }
         $('#scoreList').append(trs);
-    });
+    }, 0);
 }
 
 var _taskData = null;

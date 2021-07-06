@@ -9,8 +9,9 @@ function pageReady() {
     if (!_permissionList[445].have) {
         $('.updateGroup').addClass('hidden');
     }
-    $(".ms2").select2();
+    $(".ms2").select2({ matcher });
     $(".ms3").select2({
+        matcher,
         allowClear: true,
         placeholder: "请选择",
         multiple: true
@@ -139,9 +140,12 @@ function getGroupList(resolve, groupId = 0) {
 
 //获取操作工
 function getAllProcessorList(resolve) {
-    var data = {}
-    data.opType = 248;
-    ajaxPost("/Relay/Post", data, function (ret) {
+    ajaxPost("/Relay/Post", {
+        opType: 248,
+        opData: JSON.stringify({
+            menu: true
+        })
+    }, ret => {
         if (resolve != null)
             resolve('success');
 
@@ -150,7 +154,7 @@ function getAllProcessorList(resolve) {
             return;
         }
         _allProcessors = ret.datas;
-    });
+    }, 0);
 }
 
 function initProcessorSelect(groupId, resolve = null) {
@@ -169,28 +173,10 @@ function initProcessorSelect(groupId, resolve = null) {
                 layer.msg(ret.errmsg);
                 return;
             }
-            var processor = [];
             var list = ret.datas;
-            var len = list.length;
-            var options = '';
-            var i, d;
-            for (i = 0; i < len; i++) {
-                d = list[i];
-                processor[d.ProcessorId] = d;
-                options += option.format(d.Id, d.Processor);
-            }
-            $('#ProcessorSelect').append(options);
-
-            $('#AllProcessorSelect').empty();
-            len = _allProcessors.length;
-            options = '';
-            for (i = 0; i < len; i++) {
-                d = _allProcessors[i];
-                if (!processor[d.Id])
-                    options += option.format(d.Id, d.ProcessorName);
-            }
-            _allProcessorOptions = options;
-            $('#AllProcessorSelect').append(options);
+            $('#ProcessorSelect').html(setOptions(list, "Processor"));
+            var newList = _allProcessors.filter(x => !list.filter(y => y.ProcessorId == x.Id).length);
+            $('#AllProcessorSelect').html(setOptions(newList, "Name"));
         });
     }
 }
@@ -201,21 +187,20 @@ function deleteGroup() {
     if (isStrEmptyOrUndefined(groupId)) {
         return;
     }
-    var doSth = function () {
-        var data = {}
-        data.opType = 1080;
-        data.opData = JSON.stringify({
-            ids: [groupId]
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
+    showConfirm("删除项目组：" + $("#GroupSelect option:selected").text(),
+        () => {
+            ajaxPost("/Relay/Post", {
+                opType: 1080,
+                opData: JSON.stringify({
+                    ids: [groupId]
+                })
+            }, ret => {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     init();
                 }
             });
-    }
-    showConfirm("删除项目组：" + $("#GroupSelect option:selected").text(), doSth);
+        });
 }
 
 //添加分组
@@ -229,14 +214,15 @@ function addGroup() {
     if (groupName == oldGroupName) {
         return;
     }
-    var doSth = function () {
-        var data = {}
-        data.opType = 1079;
-        data.opData = JSON.stringify({
-            Group: groupName
-        });
-        ajaxPost("/Relay/Post", data,
-            function (ret) {
+
+    showConfirm("新增项目组：" + groupName,
+        () => {
+            ajaxPost("/Relay/Post", {
+                opType: 1079,
+                opData: JSON.stringify({
+                    Group: groupName
+                })
+            }, ret => {
                 layer.msg(ret.errmsg);
                 if (ret.errno == 0) {
                     var groupId = $("#GroupSelect").val();
@@ -246,8 +232,7 @@ function addGroup() {
                     init(groupId, true);
                 }
             });
-    }
-    showConfirm("新增项目组：" + groupName, doSth);
+        });
 }
 
 //修改分组

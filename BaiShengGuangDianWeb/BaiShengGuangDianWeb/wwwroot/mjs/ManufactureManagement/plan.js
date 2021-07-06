@@ -337,7 +337,7 @@ function getTaskState() {
         }
         $('#selectState').append(options);
         getPlanConfig();
-    });
+    }, 0);
 }
 
 var _taskConfigOp = null;
@@ -357,7 +357,7 @@ function getTaskConfig() {
             var d = list[i];
             _taskConfigOp += option.format(d.Id, d.Task);
         }
-    });
+    }, 0);
 }
 
 //获取任务配置项Tr

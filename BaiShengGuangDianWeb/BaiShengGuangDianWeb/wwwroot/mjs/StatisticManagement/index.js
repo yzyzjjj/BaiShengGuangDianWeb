@@ -18,8 +18,8 @@ function pageReady() {
     });
     $("#selectDevice").on("select2:select", function () {
         const v = $(this).val();
-        if (v.indexOf("0,所有设备") > -1) {
-            $(this).val("0,所有设备").trigger("change");
+        if (v.indexOf("0") > -1) {
+            $(this).val("0").trigger("change");
         }
     });
     getWorkShopList();
@@ -28,14 +28,14 @@ function pageReady() {
     $("#selectWorkShop").on("select2:select", function () {
         $("#recordChart").empty();
         var v = $(this).val();
-        new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice').empty().append(`<option value="0">所有设备</option>${e}`));
+        new Promise(resolve => v == '0' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice').empty().append(`<option value="0">所有设备</option>${e}`));
     });
     var tf = true;
     $("#selectWorkShop1").on("select2:select", function () {
         $("#processDetailList").empty();
         $("#checkAll").iCheck("uncheck");
         var v = $(this).val();
-        new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice1').empty().append(e));
+        new Promise(resolve => v == '0' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#selectDevice1').empty().append(e));
     });
     $("#checkAll").on("ifChanged", function () {
         var i, len = $("#selectDevice1").find("option").length;
@@ -87,7 +87,7 @@ function pageReady() {
         new Promise(resolve => v == '所有车间' ? getDeviceList(resolve) : getWorkShopDevice(resolve, v)).then(e => $('#productionDevice').empty().append(e).trigger('select2:select'));
     });
     $('#productionDevice').on('select2:select', function () {
-        $('#deviceType').text(_deviceType[$(this).val()]);
+        $('#deviceType').text($(this).val() ? _deviceType[$(this).val()] : "");
     });
     var time = 0;
     $('#production_chart').on('resize', function () {
@@ -149,14 +149,8 @@ function getWorkShopList() {
             layer.msg(ret.errmsg);
             return;
         }
-        var list = ret.datas;
-        var op = '<option value = "{0}">{0}</option>';
-        var ops = '<option value = "所有车间">所有车间</option>';
-        for (var i = 0, len = list.length; i < len; i++) {
-            var d = list[i];
-            ops += op.format(d.Name);
-        }
-        $("#selectWorkShop,#selectWorkShop1,#productionWorkShop").empty().append(ops);
+        var ops = '<option value = "0">所有车间</option>';
+        $("#selectWorkShop,#selectWorkShop1,#productionWorkShop").html(ops + setOptions(ret.datas, "Name"));
     });
 }
 
@@ -197,21 +191,15 @@ function getWorkShopDevice(resolve, workShop) {
     var data = {}
     data.opType = 163;
     data.opData = JSON.stringify({
-        workshopName: workShop
+        qId: workShop
     });
     ajaxPost("/Relay/Post", data, ret => {
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
             return;
         }
-        var rData = ret.datas;
-        var op = '<option value="{0}">{1}</option>';
-        var ops = '';
-        for (var i = 0, len = rData.length; i < len; i++) {
-            var d = rData[i];
-            ops += op.format(d.Id, d.Code);
-        }
-        resolve(ops);
+
+        resolve(setOptions(ret.datas, "Code"));
     });
 }
 
@@ -281,7 +269,7 @@ function createChart(start1, end1) {
     var data = {}
     data.opType = 502;
     data.opData = JSON.stringify({
-        WorkshopName: workShop == '所有车间' ? '' : workShop,
+        WorkshopId: workShop,
         DeviceId: deviceId.join(","),
         StartTime: start,
         EndTime: end,
@@ -658,7 +646,9 @@ function selectPlan() {
         });
 }
 
+var dataTables = []
 function getProcessDetail() {
+    dataTables = [];
     var deviceId = $("#selectDevice1").val();
     if (isStrEmptyOrUndefined(deviceId)) {
         layer.msg("请选择车间设备");
@@ -717,12 +707,6 @@ function getProcessDetail() {
                 </div>`;
             var i, len = ret.datas.length;
             $("#processDetailData").empty();
-            var op = function (data, type, row) {
-                return data.OpName == "加工"
-                    ? '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'
-                        .format(escape(data.ProcessData))
-                    : "";
-            }
             var order = function (data, type, row, meta) {
                 return ++meta.row;
             }
@@ -734,6 +718,12 @@ function getProcessDetail() {
             }
             var totalTime = function (data, type, row) {
                 return codeTime(data.TotalTime);
+            }
+            var op = function (data, type, row) {
+                return data.ProcessType != 0
+                    ? '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'
+                        .format(escape(data.ProcessData))
+                    : "";
             }
             var actualThickness = function (data, type, row) {
                 return data.ActualThickness == "0" ? "" : data.ActualThickness;
@@ -750,26 +740,12 @@ function getProcessDetail() {
                     var codeName = processData.Logs[0].Code;
                     code.push(codeName);
                     $("#code" + i).prepend(codeName);
-                    $(`#num1_${i}`).text(`总加工次数：${processData.Count}次`);
-                    $(`#num2_${i}`).text(`日均加工次数：${processData.CountAvg}次`);
-                    //var meanTime = 0;
-                    //var k, timeLen = processData.Logs.length;
-                    //var arr = [];
-                    //for (k = 0; k < timeLen; k++) {
-                    //    var d = processData.Logs[k];
-                    //    if (d.OpName == "加工") {
-                    //        var t = d.TotalTime;
-                    //        meanTime += t;
-                    //        arr.push(d.FlowCardName);
-                    //    }
-                    //}
-                    //timeLen = distinct(arr).length;
-                    //if (timeLen) {
-                    //    meanTime = Math.round(meanTime / timeLen);
-                    //}
                     $(`#time1_${i}`).text("总加工时间：" + codeTime(processData.Time));
                     $(`#time2_${i}`).text("单次加工时间：" + codeTime(processData.TimeAvg));
-                    $("#processList" + i).DataTable({
+                    $(`#num1_${i}`).text(`总加工次数：${processData.Count}次`);
+                    $(`#num2_${i}`).text(`日均加工次数：${processData.CountAvg}次`);
+                    var tn = "#processList" + i;
+                    dataTables[tn] = $(tn).DataTable({
                         dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
                         "destroy": true,
                         "paging": true,
@@ -829,75 +805,24 @@ function rateList(i, deviceId, startTime, endTime, plan) {
             layer.msg(ret.errmsg);
             return;
         }
-        var processCount = ret.datas[0].Count + "次";
-        var rData = ret.datas[0].Logs;
-        $("#num" + i).text("每日加工次数：" + processCount);
-        var order = function (data, type, row, meta) {
-            return ++meta.row;
+        var processData = {
+            Logs: [],
+            Time: 0,
+            TimeAvg: 0,
+            Count: 0,
+            CountAvg: 0,
         }
-        var opName = function (data, type, row, meta) {
-            return data == "闲置" ? `<span class="text-red">${data}</span>` : data;
+        if (ret.datas.length) {
+            processData = ret.datas[0];
         }
-        var time = function (data, type, row) {
-            return data.EndTime == "0001-01-01 00:00:00" ? "加工中" : data.EndTime;
-        }
-        var totalTime = function (data, type, row) {
-            return codeTime(data.TotalTime);
-        }
-        var op = function (data, type, row) {
-            return data.OpName == "加工"
-                ? '<button type="button" class="btn btn-info btn-xs" onclick="showProcessDetailModel(\'{0}\')">详情</button>'
-                    .format(escape(data.ProcessData))
-                : "";
-        }
-        var actualThickness = function (data, type, row) {
-            return data.ActualThickness == "0" ? "" : data.ActualThickness;
-        }
-        var requirementMid = function (data, type, row) {
-            return data.RequirementMid == "0" ? "" : data.RequirementMid;
-        }
-        $("#processList" + i).empty();
-        $("#processList" + i).DataTable({
-            dom: '<"pull-left"l><"pull-right"f>rt<"col-sm-5"i><"col-sm-7"p>',
-            "destroy": true,
-            "paging": true,
-            "deferRender": false,
-            "bLengthChange": false,
-            "searching": false,
-            "language": oLanguage,
-            "data": rData,
-            "aLengthMenu": [5, 10, 15], //更改显示记录数选项  
-            "iDisplayLength": 5, //默认显示的记录数  
-            "columns": [
-                { "data": null, "title": "序号", "render": order },
-                { "data": "OpName", "title": "操作", "render": opName },
-                { "data": "StartTime", "title": "开始时间" },
-                { "data": null, "title": "结束时间", "render": time },
-                { "data": null, "title": "加工时间", "render": totalTime },
-                { "data": "ProductionProcessName", "title": "计划号" },
-                { "data": "FlowCardName", "title": "流程卡号" },
-                { "data": null, "title": "工艺", "render": op },
-                { "data": null, "title": "片厚", "render": actualThickness },
-                { "data": null, "title": "要求", "render": requirementMid },
-                { "data": "ProcessorName", "title": "加工人" }
-            ]
-        });
-        var meanTime = 0;
-        var k, timeLen = rData.length;
-        var arr = [];
-        for (k = 0; k < timeLen; k++) {
-            var d = rData[k];
-            if (d.OpName == "加工") {
-                var t = d.TotalTime;
-                meanTime += t;
-                arr.push(d.FlowCardName);
-            }
-        }
-        timeLen = distinct(arr).length;
-        if (timeLen) {
-            meanTime = Math.round(meanTime / timeLen);
-        }
-        $("#meanTime" + i).text("平均加工时间：" + codeTime(meanTime));
+
+        var tn = "#processList" + i;
+        if (dataTables[tn])
+            updateTable(dataTables[tn], processData.Logs);
+        $(`#time1_${i}`).text("总加工时间：" + codeTime(processData.Time));
+        $(`#time2_${i}`).text("单次加工时间：" + codeTime(processData.TimeAvg));
+        $(`#num1_${i}`).text(`总加工次数：${processData.Count}次`);
+        $(`#num2_${i}`).text(`日均加工次数：${processData.CountAvg}次`);
     });
 }
 

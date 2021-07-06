@@ -44,7 +44,7 @@ function getGroup() {
         }
         $('#groupSelect').append(options);
         getProcessor(true);
-    });
+    }, 0);
 }
 
 //获取操作员
@@ -73,7 +73,7 @@ function getProcessor(isFirst) {
         if (isFirst) {
             getCheckTask();
         }
-    });
+    }, 0);
 }
 
 //获取检验任务
@@ -98,10 +98,10 @@ function getCheckTask() {
     data.opType = 1012;
     data.opData = JSON.stringify({ account, gId });
     ajaxPost('/Relay/Post', data, function (ret) {
-        getCheckList(0, '#waitCheckList');
-        getCheckList(1, '#passCheckList');
-        getCheckList(2, '#redoCheckList');
-        getCheckList(3, '#blockCheckList');
+        getCheckList(0, '#waitCheckList', 0);
+        getCheckList(1, '#passCheckList', 0);
+        getCheckList(2, '#redoCheckList', 0);
+        getCheckList(3, '#blockCheckList', 0);
         $('#checkDetailBox').removeClass('hidden');
         if (ret.errno != 0) {
             layer.msg(ret.errmsg);
@@ -109,6 +109,8 @@ function getCheckTask() {
             return;
         }
         $('#startBtn,#pauseBtn,#boxContext').removeClass('hidden');
+        if (!ret.datas.length)
+            return;
         var rData = ret.datas[0];
         _taskData.TaskId = rData.Id;
         var state = rData.State;
@@ -323,7 +325,7 @@ function updateImg() {
 }
 
 //获取待检验 检验通过 检验返工 阻塞表格数据
-function getCheckList(num, el) {
+function getCheckList(num, el, cover = 1) {
     var opType = null;
     switch (num) {
         case 0:
@@ -377,7 +379,7 @@ function getCheckList(num, el) {
                 { "data": "Id", "title": "任务流程", "render": detail }
             ]
         });
-    });
+    }, cover);
 }
 
 //检验详情

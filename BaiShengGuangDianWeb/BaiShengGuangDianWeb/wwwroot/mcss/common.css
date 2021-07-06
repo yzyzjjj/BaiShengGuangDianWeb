@@ -4,9 +4,14 @@
     color: red;
     font-weight: 600;
 }
+.mMargin {
+    margin: 3px;
+}
 .mPadding {
     padding-left: 5px;
     padding-right: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 .no-box-shadow {
     box-shadow: 0 0px 0px #000000;
@@ -282,6 +287,11 @@ select, .pointer {
     text-overflow: ellipsis;
 }
 
+.text-wrap {
+    white-space: normal;
+    word-break: normal;
+}
+
 .text-nowrap {
     white-space: nowrap;
 }
@@ -357,6 +367,7 @@ select, .pointer {
 .flexStyle {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .table-flex {

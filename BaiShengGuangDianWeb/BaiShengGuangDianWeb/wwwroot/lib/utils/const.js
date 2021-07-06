@@ -208,6 +208,21 @@ FieldFunc["datetime"] = {
         desc: "时间转小时",
         func: getHour
     },
+    //2021-5-12 14:44:10 -> 5-12 14:44:10
+    mdTime: {
+        desc: "时间转月日时分秒",
+        func: convertMonthDayHMS
+    },
+    //2021-5-12 14:44:10 -> 2021-5-12
+    mdHM: {
+        desc: "时间转月日时分",
+        func: convertMonthDayHM
+    },
+    //2021-5-12 14:44:10 -> 2021-5-12
+    mdH: {
+        desc: "时间转月日时",
+        func: convertMonthDayH
+    },
 };
 
 //数据类型为年月日

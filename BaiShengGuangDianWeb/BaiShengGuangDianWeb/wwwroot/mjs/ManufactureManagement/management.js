@@ -16,8 +16,9 @@ function pageReady() {
     window.onload = () => {
         $("#spTime,#epTime,#startTime,#endTime").removeAttr("readonly");
     }
-    new Promise(resolve => getPlan(resolve)).then(() => getGroup());
-    getState();
+    var fc1 = new Promise(resolve => getPlan(resolve));
+    var fc2 = new Promise(resolve => getState(resolve));
+    Promise.all([fc1, fc2]).then(() => getGroup());
     $('#groupSelect').on('select2:select', function () {
         $('#processorAll').iCheck('uncheck');
         getProcessor();
@@ -243,8 +244,8 @@ function getPlan(resolve) {
             options += option.format(d.Id, d.Plan, d.TaskId);
         }
         $('#planSelect').append(options);
-        resolve('success');
-    });
+        resolve && resolve('success');
+    }, 0);
 }
 
 //获取分组
@@ -274,7 +275,7 @@ function getGroup(resolve) {
         } else {
             resolve(options);
         }
-    });
+    }, 0);
 }
 
 var _processor = null;
@@ -321,7 +322,7 @@ function getProcessor(resolve) {
 }
 
 //获取任务状态
-function getState() {
+function getState(resolve) {
     var data = {}
     data.opType = 1024;
     ajaxPost('/Relay/Post', data, function (ret) {
@@ -339,7 +340,8 @@ function getState() {
         $('#stateCheck').append(ops);
         setCheckStyle('#stateCheck');
         $('#stateAll').iCheck('check');
-    });
+        resolve && resolve('success');
+    }, 0);
 }
 
 //计划日志弹窗

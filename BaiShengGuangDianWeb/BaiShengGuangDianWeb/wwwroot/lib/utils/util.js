@@ -2878,7 +2878,7 @@ function getTableW(id, columns, border = 0) {
             Column: "序号",
             Field: "XvHao",
             Width: "60"
-        })
+        });
     const column = columns && columns.length > 0 ? columns.reduce((a, col, i) => {
         var width = col.Width && col.Width !== "auto" ? `width: ${col.Width}px;` : `width: auto;`;
         var color = col.Color ? `color: ${col.Color};` : ``;
@@ -2890,6 +2890,30 @@ function getTableW(id, columns, border = 0) {
                 <thead>
                     <tr>
                         ${column}
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
+
+    return table;
+}
+
+//获取
+function getChartW(id) {
+    const table =
+        `<div class="kb_item_tablebox" id="${id}" >
+        </div>`;
+    return table;
+}
+
+//获取
+function getTableT(id) {
+    const table =
+        `<div class="kb_item_tablebox">
+            <table class="table table-hover table-striped" id="${id}" style="table-layout:fixed;">
+                <thead>
+                    <tr>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -2922,21 +2946,37 @@ function scrollTable(obj, timer, tableId) {
     }).trigger('mouseleave');
 }
 
-//停止滚动table
-function stopScrollTable(obj, timer, tableId) {
+function autoTurn(tableId, trNum) {
+    const tb = $(`#${tableId} tbody`);
+    const outerHeight = tb.find('tr:first').height();
+    // 改变table的margin-top，定时将第一行tr挪至（列表）最后
+    tb.animate({ 'marginTop': -outerHeight + 'px' }, 2000, () => {
+        tb.css({ margin: 0 }).find('tr:first').appendTo(tb);
+    });
+}
+
+//翻页table
+function turnTable(obj, timer, tableId, trNum) {
+    clearInterval(obj[timer]);
+    const $this = $(`#${tableId}`); // table或者tablebox的id
+    $this.hover(() => {
+        clearInterval(obj[timer]);
+    }, () => {
+        obj[timer] = setInterval(() => {
+            //console.log(tableId);
+            autoTurn(tableId, trNum);
+        }, 2000);
+    }).trigger('mouseleave');
+}
+
+//停止滚动或翻页table
+function stopTableEffect(obj, timer, tableId) {
     //$(`#${tableId}`).off("hover");
     $(`#${tableId}`).unbind('mouseenter mouseleave');
     clearInterval(obj[timer]);
     //obj[timer] = "";
     delete obj[timer];
-}
-
-//获取
-function getChartW(id, columns, border = 0) {
-    const table =
-        `<div class="kb_item_tablebox" id="${id}" >
-        </div>`;
-    return table;
+    return obj;
 }
 
 function showPermissions(uiName, list) {
@@ -3029,4 +3069,10 @@ function meetCondition(d, con, conv) {
         case 5: return d != conv;
     }
     return false;
+}
+
+//es6反单引号模板字符串压缩方法（去除换行和空格）
+function minimize(raw) {
+    return raw.split('\n').map(i => i.trim()).join('');
+    //return raw.join().split('\n').map(i => i.trim()).join('');
 }

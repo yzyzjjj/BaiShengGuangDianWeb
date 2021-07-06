@@ -509,6 +509,58 @@ function convertTimeHMS(time) {
     return time == '0001-01-01 00:00:00' ? "" : time.split(' ')[1];
 }
 
+//时间显示月日时分秒
+function convertMonthDayHMS(time, type = 0) {
+    time = new Date(time);
+    var year = time.getFullYear();
+    var month = time.getMonth() + 1;
+    var day = time.getDate();
+    var h = time.getHours();
+    var m = time.getMinutes();
+    var s = time.getSeconds();
+    switch (type) {
+        case 0: return `${month}月${day}日 ${h}:${m}:${s}`;
+        case 1: return `${month}/${day} ${h}:${m}:${s}`;
+        case 2: return `${month}-${day} ${h}:${m}:${s}`;
+    }
+    return ``;
+}
+
+//时间显示月日时分
+function convertMonthDayHM(time, type = 0) {
+    time = new Date(time);
+    var year = time.getFullYear();
+    var month = time.getMonth() + 1;
+    var day = time.getDate();
+    var h = time.getHours();
+    var m = time.getMinutes();
+    var s = time.getSeconds();
+    var hm = hms && hmss.length > 1 ? ` ${hmss[0]}: ${hmss[1]}` : '';
+    switch (type) {
+        case 0: return `${month}月${day}日 ${h}:${m}`;
+        case 1: return `${month}/${day} ${h}:${m}`;
+        case 2: return `${month}-${day} ${h}:${m}`;
+    }
+    return ``;
+}
+
+//时间显示月日时
+function convertMonthDayH(time, type = 0) {
+    time = new Date(time);
+    var year = time.getFullYear();
+    var month = time.getMonth() + 1;
+    var day = time.getDate();
+    var h = time.getHours();
+    var m = time.getMinutes();
+    var s = time.getSeconds();
+    switch (type) {
+        case 0: return `${month}月${day}日 ${h}`;
+        case 1: return `${month}/${day} ${h}`;
+        case 2: return `${month}-${day} ${h}`;
+    }
+    return ``;
+}
+
 //时间格式转换 mon月day日
 function monthDay(time, type = 0) {
     time = new Date(time);

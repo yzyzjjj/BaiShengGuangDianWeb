@@ -138,7 +138,7 @@ function pageReady() {
     $('#moduleSelect').on('select2:select', function () {
         $('#newModule').val($(this).find("option:checked").text());
     });
-    $('.maxHeight').css('maxHeight', innerHeight * 0.7);
+    //$('.maxHeight').css('maxHeight', innerHeight * 0.7);
 }
 
 //设置操作员选项
@@ -178,7 +178,7 @@ function getTaskConfig() {
         $('.selectConfig').append(options);
         $('#configSelect').val(0).trigger('change');
         taskTrData();
-    });
+    }, 0);
 }
 
 //获取分组
@@ -203,7 +203,7 @@ function getGroup(resolve) {
         if (resolve != null) {
             resolve(options);
         }
-    });
+    }, 0);
 }
 
 var _processor = null;
@@ -230,7 +230,7 @@ function getProcessor(resolve) {
         if (resolve != null) {
             resolve(options);
         }
-    });
+    }, 0);
 }
 
 var _moduleName = null;
@@ -258,7 +258,7 @@ function getModule(resolve) {
         if (resolve != null) {
             resolve(options);
         }
-    });
+    }, 0);
 }
 //获取任务名
 function getTaskName(resolve) {
@@ -283,7 +283,7 @@ function getTaskName(resolve) {
         if (resolve != null) {
             resolve(options);
         }
-    });
+    }, 0);
 }
 
 //表格设置
@@ -297,7 +297,7 @@ function setTableStyle() {
         checkboxClass: 'icheckbox_minimal-blue',
         increaseArea: '20%'
     });
-    $('#configItem').find('.ms2').select2();
+    $('#configItem').find('.ms2').select2({ matcher });
     $('#configItem .moveUp').removeClass('hidden');
     $('#configItem .moveUp').eq(0).addClass('hidden');
 }
@@ -336,7 +336,7 @@ function taskTrData() {
             </div>
             </td>
             <td><span class="textOn">{5}</span><input type="text" class="form-control text-center textIn hidden score toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
-            <td class="no-padding"><span class="textOn">{6}</span><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
+            <td class="no-padding"><pre class="textOn">{6}</pre><textarea class="form-control textIn hidden desc" maxlength="500" style="resize: vertical;margin:auto"></textarea></td>
             <td><span class="textOn relationText">{7}</span><input type="text" class="form-control text-center textIn hidden relation toZero" maxlength="10" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
             </tr>`;
@@ -357,7 +357,7 @@ function taskTrData() {
             </div>
             </td>
             <td><input type="text" class="form-control text-center score toZero" maxlength="3" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
-            <td class="no-padding"><textarea class="form-control desc" maxlength="500" style="resize: vertical;width:180px;margin:auto"></textarea></td>
+            <td class="no-padding"><textarea class="form-control desc" maxlength="500" style="resize: vertical;margin:auto"></textarea></td>
             <td><input type="text" class="form-control text-center relation toZero" maxlength="10" onkeyup="onInput(this, 3, 0)" onblur="onInputEnd(this)" style="width:80px;margin:auto" value="0"></td>
             <td><button type="button" class="btn btn-primary btn-sm moveUp">上移</button></td>
             </tr>`;

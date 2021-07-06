@@ -26,10 +26,10 @@
         <div class="nav-tabs-custom" id="tabBox">
             <ul class="nav nav-tabs ui-sortable-handle" id="navUl">
                 <li class="active" id="firstNavLi"><a class="text-red text-bold" href="#setKanBan" data-toggle="tab" aria-expanded="true">设置相关</a></li>
-                @*<li id="kanBan-1NavLi"><a href="#kanBan_6" class="kanBan" data-toggle="tab" aria-expanded="true">设备状态</a></li>*@
+                <li id="kanBan-1NavLi"><a href="#kanBan_6" class="kanBan" data-toggle="tab" aria-expanded="true">设备状态</a></li>
             </ul>
             <div class="tab-content no-padding" style="position: relative">
-                <div class="tab-pane active" id="setKanBan">
+                <div class="tab-pane fade in active" id="setKanBan">
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs ui-sortable-handle">
                             <li class="active" id="setTabLi"><a href="#setTab" data-toggle="tab" aria-expanded="true">设置</a></li>
@@ -135,9 +135,9 @@
 
                                         <div class="form-group productEl hidden">
                                             <label class="control-label">选择数据：</label>
-                                            <div class="form-group no-margin" style="display: -webkit-inline-box">
-                                                <div class="flexStyle" id="kanBanItems">
-                                                </div>
+                                            <div class="form-group no-margin flexStyle" style="display: -webkit-inline-box" id="kanBanItems">
+                                                @*<div class="flexStyle" id="kanBanItems">
+                                                    </div>*@
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -152,7 +152,10 @@
                                         <div class="form-group stateEl hidden" id="kanBanScript">
                                         </div>
                                         <div class="form-group productEl hidden">
-                                            <h3 class="control-label text-bold text-red">布局预览：</h3>
+                                            <h3 class="control-label text-bold text-red">
+                                                布局预览：
+                                                <button class="btn btn-danger btn-flat" onclick="clearProductPre()" style="width: 80px">清空</button>
+                                            </h3>
                                             <div class="form-group kb_item_pre_div1 kb_body" id="kanBanProduct">
                                                 <h3 class="text-center" style="padding-top: 10px; color: cyan; padding: 10px;">标题</h3>
                                                 <div class="form-group kb_item_pre_div2" id="kanBanProductDetail">
@@ -218,6 +221,143 @@
                     </div>
                 </div>
 
+                <div class="tab-pane fade in kb_body" id="kanBan_6">
+                    <div class="form-group no-margin">
+                        <label class="control-label textOverTop no-margin middle" style="position: absolute; top: 10px; left: 5px; z-index: 1">时间信息：<span id="{0}_time"></span></label>
+                        <span class="glyphicon glyphicon-fullscreen pointer fullScreenBtn" target="kanBan_6"
+                              style="position: absolute; top: 10px; right: 15px; font-size: 20px; z-index: 1; color: white;" title="全屏放大" aria-hidden="true"></span>
+                    </div>
+                    <div class="box box-primary kb_body" style="border-top-color:cyan">
+                        <div class="box-header">
+                        </div>
+                        <div class="box-body" id="productDiv_1">
+                            <div class="kb_div1">
+                                <div class="kb_border1">
+                                    <div class="kb_border2">
+                                        <div class="form-group text-center no-margin" style="">
+                                            <h4 class="text-bold kb_title2"><span class="tt1">流程卡追踪</span><span class="tt2">(58)</span></h4>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages no-margin" style="width: 100%; height: 95%;">
+                                            <div class="kb_item_tablebox">
+                                                <table class="table table-hover table-striped" id="rateList">
+                                                    <thead>
+                                                        <tr>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="kb_step_tr1">
+                                                            <td class="kb_step_div1 text-bold">
+                                                                2106162351
+                                                                <br />
+                                                                GT45230
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx text-bold" style="color: cyan;">粗抛</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">罗兴健</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">36/35/1(<span class="text-bold text-red">95%</span>)</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">6/16 8:00:00</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">1小时1分1秒</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx text-bold" style="color: cyan;">粗抛</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">罗兴健</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">35/35/0(<span class="text-bold text-red">100%</span>)</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">6/16 8:00:00</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">1小时1分1秒</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_wait_div">
+                                                                    <p class="no-margin gx">外观检验</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">罗兴健&nbsp;&nbsp;&nbsp;&nbsp;35/-/-</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">1小时1分1秒</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                        </tr>
+
+                                                        <tr class="kb_step_tr1">
+                                                            <td class="kb_step_div1 text-bold">
+                                                                2106162351
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx text-bold" style="color: cyan;">粗抛</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">罗兴健</p>
+                                                                    <p class="no-margin jgr" style="font-size: 1.8rem">36/35/1(<span class="text-bold" style="color: yellow">95%</span>)</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">6/16 8:00:00</p>
+                                                                    <p class="no-margin text-wrap jgdate" style="font-size: 1.8rem">1小时1分1秒</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx">粗抛</p>
+                                                                    <p class="no-margin jgr">罗兴健</p>
+                                                                    <p class="no-margin jgr">35/35/0</p>
+                                                                    <p class="no-margin jgdate">2021-06-16</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx">粗抛</p>
+                                                                    <p class="no-margin jgr">罗兴健</p>
+                                                                    <p class="no-margin jgr">35/35/0</p>
+                                                                    <p class="no-margin jgdate">2021-06-16</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_doing_div">
+                                                                    <p class="no-margin gx">精抛</p>
+                                                                    <p class="no-margin jgr">罗兴健</p>
+                                                                    <p class="no-margin jgr">35/-/-</p>
+                                                                    <p class="no-margin jgdate">2021-06-16</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                        </tr>
+
+                                                        <tr class="kb_step_tr1">
+                                                            <td class="kb_step_div1 text-bold">
+                                                                2106162351
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx">粗抛</p>
+                                                                    <p class="no-margin jgr">罗兴健</p>
+                                                                    <p class="no-margin jgr">36/35/1</p>
+                                                                    <p class="no-margin jgdate">2021-06-16</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1">
+                                                                <div class="kb_step_done_div">
+                                                                    <p class="no-margin gx">粗抛</p>
+                                                                    <p class="no-margin jgr">罗兴健</p>
+                                                                    <p class="no-margin jgr">35/35/0</p>
+                                                                    <p class="no-margin jgdate">2021-06-16</p>
+                                                                </div>
+                                                            </td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                            <td class="kb_step_div1"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -248,33 +388,46 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group flexStyle" style="justify-content: center">
+                    <div class="form-group flexStyle colorChose" style="justify-content: center">
                         <label class="control-label text-nowrap">颜色处理：</label>
                         <div style="flex-basis: 150px">
                             <select class="form-control" id="colorFunc" style="width:100%">
                                 <option value="0">无</option>
                                 <option value="1">与列同色</option>
-                                <option value="2">条件变色</option>
+                                <option value="2" target="conDiv">条件变色</option>
+                                <option value="3" target="customDiv">自定义</option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-group flexStyle conDiv hidden" style="justify-content: center">
+                    <div class="form-group flexStyle colorDiv conDiv hidden" style="justify-content: center">
                         <label class="control-label text-nowrap">条件：</label>
                         <div style="flex-basis: 150px">
                             <table class="table table-striped no-margin">
                                 <thead>
-                                    <tr>
-                                        <th>序号</th>
-                                        <th>条件(从上往下判断)</th>
-                                        <th>颜色</th>
-                                        <th>操作</th>
-                                    </tr>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>条件(从上往下判断)</th>
+                                    <th>颜色</th>
+                                    <th>操作</th>
+                                </tr>
                                 </thead>
                                 <tbody id="conFunc"></tbody>
                             </table>
                             <br>
                             <div style="width: 100%;text-align: center;">
                                 <button type="button" class="btn btn-success btn-sm" onclick="addConTr()"><i class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group flexStyle colorDiv customDiv hidden" style="justify-content: center">
+                        <label class="control-label text-nowrap">&nbsp;&nbsp;自&nbsp;定&nbsp;义：</label>
+                        <div style="flex-basis: 150px">
+                            <div class="input-group color_custom">
+                                <input type="text" class="form-control hidden tcolor_custom" style="width: auto;" readonly value="#333333">
+                                <div class="input-group-addon" style="border-left: 1px solid #ccc;">
+                                    <i class="ccolor_custom" style="background-color: #333333"></i>
+                                </div>
                             </div>
                         </div>
                     </div>

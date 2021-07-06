@@ -3,7 +3,7 @@ var defId;
 function pageReady() {
     _permissionList[174] = { uIds: ['setCodeVarParBtn'] };
     _permissionList = checkPermissionUi(_permissionList);
-    $(".ms2").select2();
+    $(".ms2").select2({ matcher });
     defId = getQueryString("id");
     getCodeList();
     $("#selectCode").on("select2:select", function () {
@@ -15,7 +15,7 @@ function getCodeList() {
     var data = {};
     data.opType = 100;
     data.opData = JSON.stringify({
-        detail : true,
+        detail: true,
         state: true,
         valid: true
     });
@@ -50,13 +50,7 @@ function getVarTypeList() {
             layer.msg(ret.errmsg);
             return;
         }
-        $("#selectVarType").empty();
-        var option = '<option value="{0}">{1}</option>';
-        var i, len = ret.datas.length;
-        for (i = 0; i < len; i++) {
-            var d = ret.datas[i];
-            $("#selectVarType").append(option.format(d.Id, d.VariableName));
-        }
+        $("#selectVarType").html(setOptions(ret.datas, "VariableName"));
     });
 }
 
