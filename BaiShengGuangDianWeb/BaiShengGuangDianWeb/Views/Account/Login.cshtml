@@ -1,0 +1,83 @@
+﻿@using Microsoft.AspNetCore.Http
+@using ModelBase.Base.Utils
+@using ServiceStack
+@using Swashbuckle.AspNetCore.Swagger
+@{
+    ViewBag.Title = "登录";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link href="~/lib/AdminLTE-2.3.11/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/AdminLTE-2.3.11/dist/css/AdminLTE.min.css" rel="stylesheet" />
+    <link href="~/lib/AdminLTE-2.3.11/plugins/iCheck/square/blue.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/mfont/iconfont.css" />
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#">欢迎登录<b>百盛光电</b></a>
+        </div>
+        <div class="login-box-body">
+            <p class="login-box-msg">登录</p>
+            <form>
+                <div class="form-group has-feedback">
+                    <div style="display: flex; align-items: center">
+                        <div style="flex: 1">
+                            <input class="form-control" data-val="true" data-val-required="请填账号" id="account" placeholder="账号" autocomplete="off" type="text" style="ime-mode: disabled" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["n"]" />
+                            <span class="glyphicon glyphicon-user form-control-feedback" style="right: 30px;top:4px"></span>
+                        </div>
+                        <span class="iconfont icon-saoyisao" style="font-size: 30px; cursor: pointer" id="scanning"></span>
+                    </div>
+                    <p id="accountTip" style="color: red" class="adt"></p>
+                </div>
+                <div class="form-group has-feedback">
+                    <input class="form-control" data-val="true" data-val-required="请填写密码" id="password" placeholder="密码" type="password" onfocusin="focusIn($(this), 'adt')" maxlength="42" value="@ViewData["p"]" />
+                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    <p id="passwordTip" style="color: red" class="adt"></p>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <input type="checkbox" id="rememberMe" class="icb_minimal" @((bool)@ViewData["r"] ? "checked='checked'" : "")>
+                        <span class="text-info media-middle">记住我</span>
+                    </div>
+                    <div class="col-xs-4">
+                        <button id="loginBtn" type="button" class="btn btn-primary btn-block btn-flat">登录</button>
+                    </div>
+                </div>
+            </form>
+            <p class="text-center">忘记密码请联系管理员</p>
+        </div>
+    </div>
+    <section class="content"></section>
+    <script src="~/lib/AdminLTE-2.3.11/plugins/jquery/jquery-2.2.3.min.js"></script>
+    <script src="~/lib/AdminLTE-2.3.11/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/AdminLTE-2.3.11/plugins/iCheck/icheck.min.js"></script>
+    @*<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>*@
+    @*<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>*@
+    <script src="~/lib/utils/md5.min.js"></script>
+    <script src="~/lib/utils/base64.min.js"></script>
+    <script src="~/lib/qrcode/qrcode.min.js"></script>
+    <environment include="Development">
+        <script src="~/lib/layer/layer.js"></script>
+        <script src="~/lib/utils/util.js"></script>
+        <script src="~/lib/utils/date.js"></script>
+        <script src="~/lib/utils/const.js"></script>
+        <script src="~/mjs/Account/login.js"></script>
+    </environment>
+    <environment include="Staging,Production">
+        <script src="~/lib/layer/layer.min.js"></script>
+        <script src="~/lib/utils/util.min.js"></script>
+        <script src="~/lib/utils/date.min.js"></script>
+        <script src="~/lib/utils/const.min.js"></script>
+        <script src="~/mminjs/Account/login.min.js"></script>
+    </environment>
+</body>
+</html>

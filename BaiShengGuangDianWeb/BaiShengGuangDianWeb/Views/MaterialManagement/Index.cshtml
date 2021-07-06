@@ -1,0 +1,623 @@
+﻿@model object
+@{
+    ViewBag.Title = "物料管理";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/index.js"></script>
+    <script src="/lib/utils/xlsx.core.min.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/index.min.js"></script>
+    <script src="/lib/utils/xlsx.core.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>物料管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="text-right">
+                <button type="button" class="btn btn-warning btn-sm" onclick="createQrModal()" id="createQrModalBtn">
+                    <span class="glyphicon glyphicon-qrcode"></span>&nbsp;<span>生成</span>
+                </button>
+                <button type="button" class="btn btn-primary btn-sm fastIncreaseModelBtn" onclick="showFastIncreaseModel()">快捷入库</button>
+                <button type="button" class="btn btn-primary btn-sm fastIncreaseModelBtn" onclick="showIncreaseModel()">入库</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showConsumeModel()" id="showConsumeModelBtn">领用</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showReversalModel()" id="showReversalModelBtn">冲正</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(1)" id="putLogBtn">入库日志</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(2)" id="receiveLogBtn">领用日志</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(0)" id="handleLogBtn">操作日志</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="refresh()">刷新</button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="flexStyle" style="flex-wrap: wrap">
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">类别：</label>
+                    <select class="ms2 form-control categorySelect" id="categorySelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">名称：</label>
+                    <select class="ms2 form-control" id="nameSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">供应商：</label>
+                    <select class="ms2 form-control" id="supplierSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">规格：</label>
+                    <select class="ms2 form-control" id="specificationSelect" style="width:95%"></select>
+                </div>
+                <div style="flex: 1">
+                    <label class="control-label text-nowrap no-margin">位置：</label>
+                    <select class="ms2 form-control" id="siteSelect" style="width:95%"></select>
+                </div>
+            </div>
+            <div style="padding-top:5px">
+                <label class="control-label textOverTop">货品数量：<span id="codeCount" style="color: green;font-size:20px"></span></label>
+                <label class="control-label textOverTop" style="margin-left:20px">总价格：<span style="color: red"><span id="codeSum" style="font-size:20px"></span>元</span></label>
+            </div>
+            <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped" id="materialList"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 入库模态框 -->
+    <div class="modal fade" tabindex="-1" id="increaseModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">入库</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#increaseList',0)"><i class="fa fa-refresh"></i> 重置</button>
+                    </div>
+                    <div class="text-right">
+                        <label class="control-label textOverTop">当前总价为：<span id="increasePrice" style="color: red; font-size: 20px">0元</span></label>
+                    </div>
+                    <div class="form-group maxHeight" id="increaseListTable" style="overflow: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>来源</th>
+                                    <th>类别</th>
+                                    <th>名称</th>
+                                    <th>供应商</th>
+                                    <th>规格</th>
+                                    <th>单价</th>
+                                    <th>位置</th>
+                                    <th>入库数量</th>
+                                    <th>单位</th>
+                                    <th>采购/退回人</th>
+                                    <th>货品编号</th>
+                                    <th>剩余库存</th>
+                                    <th>货品详情</th>
+                                    <th>删除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="increaseList" data-index="0"></tbody>
+                        </table>
+                    </div>
+                    <div class="flexStyle" style="justify-content: center">
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(0)" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="addIncreaseListBtn" onclick="addListTr(0)"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="copyBtn" onclick="copyTable('#increaseList')">拷贝</button>
+                    <button type="button" class="btn btn-info" id="exportBtn" onclick="exportExcel('#increaseList')" title="导出Excel">导出</button>
+                    <button type="button" class="btn btn-primary" id="increaseBtn" onclick="increase.call(this,false)">入库</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--快捷入库模态框 -->
+    <div class="modal fade" tabindex="-1" id="fastIncreaseModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">快捷入库</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="resetList('#fastIncreaseList', 4)"><i class="fa fa-refresh"></i> 重置</button>
+                    </div>
+                    <div class="text-right">
+                        <label class="control-label textOverTop">当前总价为：<span id="fastIncreasePrice" style="color: red; font-size: 20px">0元</span></label>
+                    </div>
+                    <div class="form-group maxHeight" id="fastIncreaseListTable" style="overflow: auto">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>类别</th>
+                                    <th>名称</th>
+                                    <th>供应商</th>
+                                    <th>规格</th>
+                                    <th>单价</th>
+                                    <th>位置</th>
+                                    <th>入库数量</th>
+                                    <th>单位</th>
+                                    <th>采购/退回人</th>
+                                    <th>货品编号</th>
+                                    <th>删除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fastIncreaseList" data-index="4"></tbody>
+                        </table>
+                    </div>
+                    <div class="flexStyle" style="justify-content: center">
+                        <span class="iconfont icon-saoyisao" onclick="scanAdd(4)" style="font-size: 30px; cursor: pointer"></span>
+                        <button type="button" class="btn btn-default btn-sm" id="addFastIncreaseListBtn" onclick="addListTr(4)"><i class="fa fa-plus"></i> 添加新项</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="fastCopyBtn" onclick="copyTable('#fastIncreaseList')">拷贝</button>
+                    <button type="button" class="btn btn-info" id="fastExportBtn" onclick="exportExcel('#fastIncreaseList')" title="导出Excel">导出</button>
+                    <button type="button" class="btn btn-primary" id="fastIncreaseBtn" onclick="increase.call(this,true)">入库</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 领用模态框 -->
+    <div class="modal fade" tabindex="-1" id="consumeModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">领用</h4>
+                </div>
+                <div class="modal-body" style="padding-top: inherit;">
+                    <div class="row">
+                        <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs ui-sortable-handle">
+                                <li class="active"><a id="planConsumeLi" href="#planConsume" data-toggle="tab" aria-expanded="true">计划</a></li>
+                                <li><a href="#otherConsume" data-toggle="tab" aria-expanded="false">其他</a></li>
+                            </ul>
+                            <div class="tab-content no-padding">
+                                <div class="tab-pane active in" id="planConsume">
+                                    <div class="box box-primary">
+                                        <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: space-between">
+                                                <div class="form-group">
+                                                    <label class="control-label" for="consumePlanSelect">计划：</label>
+                                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                                        <select class="ms2 form-control" id="consumePlanSelect" style="width: 160px"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-warning btn-sm" onclick="receiveStick(1)">粘贴</button>
+                                                    <div class="btn btn-info btn-sm btn-file">
+                                                        导入
+                                                        <input type="file" data-index="1" id="planInto" title="请选择Excel导入" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                                    </div>
+                                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#consumePlanList')"><i class="fa fa-refresh"></i> 重置</button>
+                                                </div>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: space-between">
+                                                <label class="control-label" style="white-space: nowrap">清单：</label>
+                                                <div class="flexStyle">
+                                                    <select class="form-control thText" onchange="searchTr.call(this, '#consumePlanList')" style="flex-basis: 140px">
+                                                        <option value="code">货品编号</option>
+                                                        <option value="category">货品类别</option>
+                                                        <option value="name">货品名称</option>
+                                                        <option value="supplier">供应商</option>
+                                                        <option value="specification">规格型号</option>
+                                                        <option value="site">货品位置</option>
+                                                    </select>
+                                                    <select class="form-control sym" onchange="searchTr.call(this, '#consumePlanList')" style="flex-basis: 140px">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input class="form-control val" id="consumePlanCondition" oninput="searchTr.call(this,'#consumePlanList')" maxlength="20" style="flex-basis: 140px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group maxHeight" id="consumePlanListTable" style="overflow: auto">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>序号</th>
+                                                            <th class="text-blue">货品编号</th>
+                                                            <th class="text-info">货品类别</th>
+                                                            <th class="text-info">货品名称</th>
+                                                            <th class="text-info">供应商</th>
+                                                            <th class="text-info">规格型号</th>
+                                                            <th class="text-info">单价</th>
+                                                            <th class="text-info">位置</th>
+                                                            <th>领用数量</th>
+                                                            <th>计划用量</th>
+                                                            <th>实际用量</th>
+                                                            <th class="text-red">剩余库存</th>
+                                                            <th>领用人</th>
+                                                            <th>货品详情</th>
+                                                            <th>日志</th>
+                                                            <th>删除</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="consumePlanList" data-index="1"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: center">
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(1)" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" id="addConsumePlanListBtn" onclick="addListTr(1)" style="margin-left: 3px"><i class="fa fa-plus"></i> 添加新项</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade in" id="otherConsume">
+                                    <div class="box box-primary">
+                                        <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: space-between">
+                                                <div class="form-group flexStyle">
+                                                    <label class="control-label" for="consumeOther" style="white-space:nowrap">用途：</label>
+                                                    <input class="form-control" id="consumeOther" onfocusin="focusIn($(this))" maxlength="200" style="flex-basis:180px">
+                                                </div>
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-warning btn-sm" onclick="receiveStick(2)">粘贴</button>
+                                                    <div class="btn btn-info btn-sm btn-file">
+                                                        导入
+                                                        <input type="file" data-index="2" id="otherInto" title="请选择Excel导入" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                                                    </div>
+                                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#consumeOtherList')"><i class="fa fa-refresh"></i> 重置</button>
+                                                </div>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: space-between">
+                                                <label class="control-label" style="white-space:nowrap">清单：</label>
+                                                <div class="flexStyle">
+                                                    <select class="form-control thText" onchange="searchTr.call(this,'#consumeOtherList')" style="flex-basis: 140px">
+                                                        <option value="code">货品编号</option>
+                                                        <option value="category">货品类别</option>
+                                                        <option value="name">货品名称</option>
+                                                        <option value="supplier">供应商</option>
+                                                        <option value="specification">规格型号</option>
+                                                        <option value="site">货品位置</option>
+                                                    </select>
+                                                    <select class="form-control sym" onchange="searchTr.call(this,'#consumeOtherList')" style="flex-basis: 140px">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input class="form-control val" id="consumeOtherCondition" oninput="searchTr.call(this,'#consumeOtherList')" maxlength="20" style="flex-basis: 140px">
+                                                </div>
+                                            </div>
+                                            <div class="form-group maxHeight" id="consumeOtherListTable" style="overflow: auto">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>序号</th>
+                                                            <th class="text-blue">货品编号</th>
+                                                            <th class="text-info">货品类别</th>
+                                                            <th class="text-info">货品名称</th>
+                                                            <th class="text-info">供应商</th>
+                                                            <th class="text-info">规格型号</th>
+                                                            <th class="text-info">单价</th>
+                                                            <th class="text-info">位置</th>
+                                                            <th>领用数量</th>
+                                                            <th class="text-red">剩余库存</th>
+                                                            <th>领用人</th>
+                                                            <th>货品详情</th>
+                                                            <th>日志</th>
+                                                            <th>删除</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="consumeOtherList" data-index="2"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="flexStyle" style="justify-content: center">
+                                                <span class="iconfont icon-saoyisao" onclick="scanAdd(2)" style="font-size: 30px; cursor: pointer"></span>
+                                                <button type="button" class="btn btn-default btn-sm" id="addConsumeOtherListBtn" onclick="addListTr(2)"><i class="fa fa-plus"></i> 添加新项</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="consumeConfirm()">领用</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 领用确认模态框 -->
+    <div class="modal fade" tabindex="-1" id="consumeConfirmModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">领用确认</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="consumePurpose">用途：</label>
+                        <label class="control-label text-red" id="consumePurpose"></label>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="consumeConfirmList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="consume()">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 生成二维码弹窗 -->
+    <div class="modal fade" tabindex="-1" id="createQrModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">生成二维码</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group" style="display: flex">
+                            <div style="flex: 1">
+                                <label class="control-label" style="white-space: nowrap; margin: 0">货品类别：</label>
+                                <select class="ms2 form-control" id="categoryQr" style="width: 95%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label" style="white-space: nowrap; margin: 0">货品名称：</label>
+                                <select class="ms2 form-control" id="nameQr" style="width: 95%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label" style="white-space: nowrap; margin: 0">供应商：</label>
+                                <select class="ms2 form-control" id="supplierQr" style="width: 95%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label" style="white-space: nowrap; margin: 0">规格型号：</label>
+                                <select class="ms2 form-control" id="specificationQr" style="width: 95%"></select>
+                            </div>
+                            <div style="flex: 1">
+                                <label class="control-label" style="white-space: nowrap; margin: 0">位置：</label>
+                                <select class="ms2 form-control" id="siteQr" style="width: 95%"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group" style="display: flex;justify-content: space-between">
+                                <button type="button" class="btn btn-warning btn-sm" onclick="getQrList()">
+                                    <span class="glyphicon glyphicon-qrcode"></span>&nbsp;<span>生成</span>
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="printCode('#qrCodeList')">
+                                    <span class="glyphicon glyphicon-print"></span>&nbsp;<span>打印</span>
+                                </button>
+                            </div>
+                            <div id="qrCodeList" style="display: flex; flex-wrap: wrap"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 冲正模态框 -->
+    <div class="modal fade" tabindex="-1" id="reversalModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">冲正</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle" id="reversalUl">
+                            <li class="active" id="reversalAllLi"><a href="#reversalAll" data-toggle="tab" aria-expanded="true">冲正</a></li>
+                            <li id="reversalEntryLi"><a href="#reversalEntry" data-toggle="tab" aria-expanded="false">入库修正</a></li>
+                            <li id="reversalConsumeLi"><a href="#reversalConsume" data-toggle="tab" aria-expanded="false">领用修正</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active in" id="reversalAll">
+                                <div class="text-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="resetList('#reversalList')"><i class="fa fa-refresh"></i> 重置</button>
+                                    <button type="button" class="btn btn-success btn-sm" onclick="showLogModel(3)">日志</button>
+                                </div>
+                                <div class="form-group maxHeight" id="reversalListTable" style="overflow: auto">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>货品编号</th>
+                                                <th>类别</th>
+                                                <th>名称</th>
+                                                <th>供应商</th>
+                                                <th>规格</th>
+                                                <th>单价</th>
+                                                <th>位置</th>
+                                                <th>单位</th>
+                                                <th class="text-red">剩余库存</th>
+                                                <th class="text-info">库存修改</th>
+                                                <th>备注</th>
+                                                <th>货品详情</th>
+                                                <th>日志</th>
+                                                <th>删除</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reversalList" data-index="3"></tbody>
+                                    </table>
+                                </div>
+                                <div class="flexStyle" style="justify-content: center;padding-bottom:10px">
+                                    <span class="iconfont icon-saoyisao" onclick="scanAdd(3)" style="font-size: 30px; cursor: pointer"></span>
+                                    <button type="button" class="btn btn-default btn-sm" id="addReversalListBtn" onclick="addListTr(3)"><i class="fa fa-plus"></i> 添加新项</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="reversalEntry">
+                                <div class="pull-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="getReversalAll(1)"><i class="fa fa-refresh"></i> 重置</button>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding: 10px 0">
+                                    <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                    <div class="flexStyle">
+                                        <input type="text" id="reversalEntrySTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                        <label class="control-label" style="margin: 5px">-</label>
+                                        <input type="text" id="reversalEntryETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                    </div>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding-bottom: 10px">
+                                    <label class="control-label no-margin middle text-nowrap">货品编号：</label>
+                                    <select class="ms2 form-control" id="reversalEntryCode" style="width: 160px"></select>
+                                </div>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="reversalEntryList"></table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="reversalConsume">
+                                <div class="pull-right" style="padding: 10px 0">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="getReversalAll(2)"><i class="fa fa-refresh"></i> 重置</button>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding: 10px 0">
+                                    <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                    <div class="flexStyle">
+                                        <input type="text" id="reversalConsumeSTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                        <label class="control-label" style="margin: 5px">-</label>
+                                        <input type="text" id="reversalConsumeETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                    </div>
+                                </div>
+                                <div class="flexStyle" style="flex-wrap: wrap; padding-bottom: 10px">
+                                    <label class="control-label no-margin middle text-nowrap">货品编号：</label>
+                                    <select class="ms2 form-control" id="reversalConsumeCode" style="width: 160px"></select>
+                                </div>
+                                <div class="table-responsive mailbox-messages">
+                                    <table class="table table-hover table-striped" id="reversalConsumeList"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="reversalConModal()" id="reversalBtn">冲正</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 冲正确认模态框 -->
+    <div class="modal fade" tabindex="-1" id="reversalConModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">冲正确认</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="reversalConList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="reversalCon()">确认</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="flexStyle" style="flex-wrap: wrap">
+                            <label class="control-label textOverTop">编号：<span class="spanStyle" id="detailCode"></span></label>
+                            <label class="control-label textOverTop">类别：<span class="spanStyle" id="detailCategory"></span></label>
+                            <label class="control-label textOverTop">名称：<span class="spanStyle" id="detailName"></span></label>
+                            <label class="control-label textOverTop">供应商：<span class="spanStyle" id="detailSupplier"></span></label>
+                            <label class="control-label textOverTop">规格：<span class="spanStyle" id="detailSpecification"></span></label>
+                            <label class="control-label textOverTop">位置：<span class="spanStyle" id="detailSite"></span></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label text-nowrap">图片：</label>
+                            <div class="form-group">
+                                <div class="row" id="detailImgList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志模态框 -->
+    <div class="modal fade" tabindex="-1" id="logModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="logTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="logStartDate">时间范围：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <input type="text" id="logStartDate" class="form_date form-control pointer text-center" style="width: 130px">
+                            <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                            <input type="text" id="logEndDate" class="form_date form-control pointer text-center" style="width: 130px">
+                        </div>
+                    </div>
+                    <div class="form-group" id="logPlanBox">
+                        <label class="control-label" for="logBillSelect">计划号：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="logPlanSelect" style="width: 160px"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="logBillSelect">货品编号：</label>
+                        <div class="form-group no-margin" style="display: -webkit-inline-box">
+                            <select class="ms2 form-control" id="logBillSelect" style="width: 160px"></select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="billInfo">
+                        <div class="flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label textOverTop" for="logCategory">货品类别：<span class="spanStyle" id="logCategory"></span></label>
+                            <label class="control-label textOverTop" for="logName">货品名称：<span class="spanStyle" id="logName"></span></label>
+                            <label class="control-label textOverTop" for="logSupplier">供应商：<span class="spanStyle" id="logSupplier"></span></label>
+                            <label class="control-label textOverTop" for="logSpecification">规格型号：<span class="spanStyle" id="logSpecification"></span></label>
+                            <label class="control-label textOverTop" for="logPrice">单价：<span class="spanStyle" id="logPrice"></span></label>
+                        </div>
+                    </div>
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="logList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

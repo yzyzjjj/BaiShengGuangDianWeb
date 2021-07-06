@@ -1,0 +1,57 @@
+[
+  //{
+  //https://blog.csdn.net/weixin_33701564/article/details/91859766
+  //  // 要输出的捆绑文件名称。 可以包含中的相对路径bundleconfig.json文件。 必填
+  //  "outputFileName": "wwwroot/build/xxx.xxx.com/min.css",
+  //  // 要将捆绑在一起的文件的数组。 这些是配置文件的相对路径。 可选，* 空值会在空的输出文件。 组合支持模式。
+  //  "inputFiles": [
+  //    "wwwroot/bootstrap/bootstrap.css"
+  //  ]
+  //},
+  //{
+  //  "outputFileName": "wwwroot/build/xxx.xxx.com/min.js",
+  //  "inputFiles": [
+  //    "wwwroot/jquery/jquery.min.js",
+  //    "wwwroot/knockout/knockout-3.4.2.js"
+  //  ],
+  //  // "输出类型缩减选项。
+  //  // "可选，默认值-minify": { "enabled": true },
+  //  "minify": {
+  //    "enabled": true,
+  //    "renameLocals": true
+  //  },
+  //  //  指示是否生成捆绑的文件的源映射的标志。 可选，默认-false
+  //  "sourceMap": true,
+  //  // "指示是否将生成的文件添加到项目文件的标志。" "可选，默认-false",
+  //  "includeInProject": true
+  //  // 用于存储生成的源代码映射文件的根路径。
+  //  //"sourceMapRootPath": ""
+  //},
+  {
+    "outputFileName": "wwwroot/lib/utils/all.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/const.js",
+      "wwwroot/lib/utils/date.js",
+      "wwwroot/lib/utils/tpl.js",
+      "wwwroot/lib/utils/util.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/lib/layer/layer.min.js",
+    "inputFiles": [
+      "wwwroot/lib/layer/layer.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/lib/utils/const.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/const.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/lib/utils/util.min.js",
+    "inputFiles": [
+      "wwwroot/lib/utils/util.js"
+    ]
+  }
+]

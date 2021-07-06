@@ -1,0 +1,234 @@
+﻿@model object
+@{
+    ViewBag.Title = "预警记录";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/Warning/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/Warning/index.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>预警管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#deviceData" data-toggle="tab" aria-expanded="true">设备数据</a></li>
+                <li id="productionBox"><a href="#productionData" data-toggle="tab" aria-expanded="false">生产数据</a></li>
+                <li><a href="#faultData" data-toggle="tab" aria-expanded="false">故障数据</a></li>
+                <li><a href="#otherData" data-toggle="tab" aria-expanded="false">其他数据</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="deviceData">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a href="#deviceRecord" data-toggle="tab" aria-expanded="true">记录</a></li>
+                            <li id="devCurrentLi"><a href="#deviceCurrent" data-toggle="tab" aria-expanded="false">当前</a></li>
+                            <li id="devDealLogLi"><a href="#deviceDealLog" data-toggle="tab" aria-expanded="false">解决记录</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active in" id="deviceRecord">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border" style="padding-bottom: 5px">
+                                        <div class="flexStyle" style="flex-wrap: wrap">
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                                <select class="ms2 form-control device-warn" id="deviceWarn" style="width: 160px"></select>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                                <div class="flexStyle">
+                                                    <input type="text" id="deviceSTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                    <label class="control-label" style="margin: 5px">-</label>
+                                                    <input type="text" id="deviceETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                </div>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px; margin-left: 5px">
+                                                <button class="btn btn-primary btn-sm pull-right" onclick="getDeviceData(false)">刷新</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="hidden form-group form-inline no-margin deviceInfo">
+                                            <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="deviceWarnType"></span></label>
+                                            <label class="control-label textOverTop">脚本：<span class="spanStyle" id="deviceWarnScript"></span></label>
+                                            <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="deviceWarnDevice"></span></label>
+                                        </div>
+                                        <div id="deviceWarnDeal">
+                                            <div class="hidden form-group form-inline deviceInfo">
+                                                <label class="control-label textOverTop">已选设备：</label>
+                                                <select class="form-control deviceSelect"></select>
+                                                <button class="btn btn-primary btn-sm" onclick="dealWarning('device')">解决</button>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="deviceList"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="deviceCurrent">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div class="flexStyle" style="flex-wrap: wrap">
+                                            <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                            <select class="ms2 form-control device-warn" id="deviceWarnCurrent" style="width: 160px"></select>
+                                            <button class="btn btn-primary btn-sm pull-right" onclick="getDeviceData(true)">刷新</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle hidden" style="flex-wrap: wrap" id="deviceInfoCurrent">
+                                            <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="deviceWarnTypeCurrent"></span></label>
+                                            <label class="control-label textOverTop">脚本：<span class="spanStyle" id="deviceWarnScriptCurrent"></span></label>
+                                            <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="deviceWarnDeviceCurrent"></span></label>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="deviceListCurrent"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="deviceDealLog">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border" style="padding-bottom: 5px">
+                                        <div class="flexStyle" style="flex-wrap: wrap">
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                                <select class="ms2 form-control device-warn" id="deviceWarnLog" style="width: 160px"></select>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                                <div class="flexStyle">
+                                                    <input type="text" id="deviceSTimeLog" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                    <label class="control-label" style="margin: 5px">-</label>
+                                                    <input type="text" id="deviceETimeLog" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                </div>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px; margin-left: 5px">
+                                                <button class="btn btn-primary btn-sm pull-right" onclick="getDealLog('device')">刷新</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="hidden form-group form-inline no-margin deviceInfoLog">
+                                            <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="deviceWarnTypeLog"></span></label>
+                                            <label class="control-label textOverTop">脚本：<span class="spanStyle" id="deviceWarnScriptLog"></span></label>
+                                            <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="deviceWarnDeviceLog"></span></label>
+                                        </div>
+                                        <div id="deviceWarnDealLog">
+                                            <div class="hidden form-group form-inline deviceInfoLog">
+                                                <label class="control-label textOverTop">已选设备：</label>
+                                                <select class="form-control deviceSelectLog"></select>
+                                                <button class="btn btn-primary btn-sm" onclick="getDealLog('device')">查询</button>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="deviceListLog"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade in" id="productionData">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs ui-sortable-handle">
+                            <li class="active"><a href="#productionRecord" data-toggle="tab" aria-expanded="true">记录</a></li>
+                            <li id="productionCurrentLi"><a href="#productionCurrent" data-toggle="tab" aria-expanded="false">当前</a></li>
+                        </ul>
+                        <div class="tab-content no-padding">
+                            <div class="tab-pane active in" id="productionRecord">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border" style="padding-bottom: 5px">
+                                        <div class="flexStyle" style="flex-wrap: wrap">
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                                <select class="ms2 form-control production-warn" id="productionWarn" style="width: 160px"></select>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px">
+                                                <label class="control-label no-margin middle text-nowrap">时间范围：</label>
+                                                <div class="flexStyle">
+                                                    <input type="text" id="productionSTime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                    <label class="control-label" style="margin: 5px">-</label>
+                                                    <input type="text" id="productionETime" class="form_date form-control text-center pointer" style="min-width: 80px">
+                                                </div>
+                                            </div>
+                                            <div class="flexStyle" style="flex-wrap: wrap; margin-bottom: 5px; margin-left: 5px">
+                                                <button class="btn btn-primary btn-sm pull-right" onclick="getProductionData(false)">刷新</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle hidden form-group" style="flex-wrap: wrap" id="productionInfo">
+                                            <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="productionWarnType"></span></label>
+                                            <label class="control-label textOverTop">设备类型：<span class="spanStyle" id="productionWarnCategory"></span></label>
+                                            <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="productionWarnDevice"></span></label>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="productionList"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade in" id="productionCurrent">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <div class="flexStyle" style="flex-wrap: wrap">
+                                            <label class="control-label no-margin middle text-nowrap">预警名：</label>
+                                            <select class="ms2 form-control production-warn" id="productionWarnCurrent" style="width: 160px"></select>
+                                            <button class="btn btn-primary btn-sm pull-right" onclick="getProductionData(true)">刷新</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="flexStyle hidden" style="flex-wrap: wrap" id="productionInfoCurrent">
+                                            <label class="control-label textOverTop">设备分类：<span class="spanStyle" id="productionWarnTypeCurrent"></span></label>
+                                            <label class="control-label textOverTop">设备类型：<span class="spanStyle" id="productionWarnCategoryCurrent"></span></label>
+                                            <label class="control-label textOverTop">已选设备：<span class="spanStyle" id="productionWarnDeviceCurrent"></span></label>
+                                        </div>
+                                        <div class="table-responsive mailbox-messages">
+                                            <table class="table table-hover table-striped" id="productionListCurrent"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade in" id="faultData"></div>
+
+                <div class="tab-pane fade in" id="otherData"></div>
+            </div>
+        </div>
+    </div>
+    <!--预警记录详情弹窗-->
+    <div class="modal fade" tabindex="-1" id="showDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">预警记录详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped" id="warnLogDetailList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

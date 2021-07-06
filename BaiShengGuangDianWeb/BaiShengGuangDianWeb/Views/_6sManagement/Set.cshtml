@@ -1,0 +1,80 @@
+﻿@model object
+@{
+    ViewBag.Title = "6s检查设置";
+    //Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/_6sManagement/set.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/_6sManagement/set.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>6s检查</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="form-group">
+                <label class="control-label" for="new6sGroupTxt">6s新分组：</label>
+                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                    <input class="form-control" id="new6sGroupTxt" oninput="new6sGroupTxt()" maxlength="20">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="6sGroupSelect">6s分组：</label>
+                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                    <select class="ms2 form-control" id="6sGroupSelect" style="width: 200px"></select>
+                </div>
+                <input id="6sGroupChangeCheck" type="checkbox" class="icb_minimal">
+                <label id="6sGroupChangeCheckLbl" class="control-label text-red" onclick="_6sGroupChangeLabel()">修改分组名</label>
+                <button type="button" class="btn btn-primary btn-danger pull-right" onclick="delGroup()" id="delGroupBtn">删除分组</button>
+            </div>
+            <div class="form-group hidden" id="6sGroupChangeDiv">
+                <label class="control-label" for="6sGroupChangeTxt">分组修改：</label>
+                <div class="form-group no-margin" style="display: -webkit-inline-box">
+                    <input class="form-control" id="6sGroupChangeTxt" onfocusin="focusIn($(this))" maxlength="20">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="surveyorSelect">检验员：</label>
+                <div class="form-group no-margin">
+                    <select class="ms3 form-control" id="surveyorSelect" style="width: 100%"></select>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group pull-right no-margin">
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveItemList()" id="saveItemListBtn">保存</button>
+                <button type="button" class="btn btn-default btn-sm" onclick="resetItemList()"><i class="fa fa-refresh"></i> 重置</button>
+                <button type="button" class="btn btn-default btn-sm" onclick="addOneItemList()"><i class="fa fa-plus"></i> 添加新项</button>
+            </div>
+            <div class="form-group">
+                <label class="control-label">检查项：<span class="text-red">(对分组操作请先选择分组)</span></label>
+            </div>
+        </div>
+        <div class="form-group" style="overflow-x: auto">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>选择</th>
+                        <th>序号</th>
+                        <th>显示顺序</th>
+                        <th>检查项目</th>
+                        <th>启用</th>
+                        <th>标准分</th>
+                        <th>要求及目标</th>
+                        <th>频次</th>
+                        <th>负责人</th>
+                        <th>删除</th>
+                    </tr>
+                </thead>
+                <tbody id="itemList"></tbody>
+            </table>
+        </div>
+    </div>
+</section>

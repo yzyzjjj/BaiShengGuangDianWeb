@@ -1,0 +1,184 @@
+﻿@model object
+@{
+    ViewBag.Title = "数据报表";
+    Layout = "_Layout";
+}
+
+<environment include="Development">
+    <script src="~/mjs/ManufactureManagement/statistic.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ManufactureManagement/statistic.min.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>生产管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active" id="aa"><a href="#performance_nav" data-toggle="tab" aria-expanded="true">绩效统计表</a></li>
+                <li id="plan_li"><a href="#plan_time_nav" data-toggle="tab" aria-expanded="false">计划实际用时统计表</a></li>
+                <li id="task_li"><a href="#task_time_nav" data-toggle="tab" aria-expanded="false">任务平均用时统计表</a></li>
+                <li id="finish_li"><a href="#task_finish_nav" data-toggle="tab" aria-expanded="false">任务完成情况汇总表</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="performance_nav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="form-inline">
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">切换工作组：</label>
+                                    <select class="ms2 form-control work-group" id="workGroupSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">开始时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="sTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">结束时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="eTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                    <button type="button" class="btn btn-primary" onclick="getPerformanceChart()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="hidden" id="performance_chart" style="width: 100%; height: 500px"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="plan_time_nav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="form-inline">
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">切换工作组：</label>
+                                    <select class="ms2 form-control work-group" id="planGroupSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">开始时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="plansTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">结束时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="planeTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                    <button type="button" class="btn btn-primary" onclick="getPlanTimeChart()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle" style="align-items: flex-start">
+                                <div style="position: relative;min-height: 16px;">
+                                    <div class="form-group" id="plan_time_item" style="width: 150px">
+                                        <label class="control-label text-nowrap">选择计划号：</label>
+                                        <label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" id="planAll" value="全选"><span class="textOverTop" style="margin-left: 5px">全选</span></label>
+                                        <div style="margin-left: 20px; max-height: 450px; overflow: auto" id="planItem"></div>
+                                    </div>
+                                    <span class="glyphicon glyphicon-triangle-left pointer" aria-hidden="true" title="收起" onclick="foldList.call(this, '#plan_time_item')" style="position: absolute; right: -5px; top: 5%; font-size: 20px; color: #00A9FC"></span>
+                                </div>
+                                <div class="hidden" id="plan_chart" style="width: 100%; height: 500px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="task_time_nav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="form-inline">
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">切换工作组：</label>
+                                    <select class="ms2 form-control work-group" id="taskGroupSelect" style="width: 150px"></select>
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">开始时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="tasksTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                </div>
+                                <div class="form-group flexStyle">
+                                    <label class="control-label text-nowrap no-margin">结束时间：</label>
+                                    <input type="text" class="form_date form-control text-center pointer" id="taskeTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                    <button type="button" class="btn btn-primary" onclick="getTaskTimeChart()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle" style="align-items: flex-start">
+                                <div style="position: relative;min-height: 16px;">
+                                    <div class="form-group" id="task_time_item" style="width: 150px">
+                                        <label class="control-label text-nowrap">选择计划号：</label>
+                                        <label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" id="taskAll" value="全选"><span class="textOverTop" style="margin-left: 5px">全选</span></label>
+                                        <div style="margin-left: 20px; max-height: 450px; overflow: auto" id="taskItem"></div>
+                                    </div>
+                                    <span class="glyphicon glyphicon-triangle-left pointer" aria-hidden="true" title="收起" onclick="foldList.call(this, '#task_time_item')" style="position: absolute; right: -5px; top: 5%; font-size: 20px; color: #00A9FC"></span>
+                                </div>
+                                <div class="hidden" id="task_chart" style="width: 100%; height: 500px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="task_finish_nav">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="flexStyle">
+                                <label class="control-label text-nowrap no-margin">选择月份：</label>
+                                <input type="text" class="form_month form-control text-center pointer" id="monthTime" autocomplete="off" style="min-width: 100px; max-width: 150px">
+                                <button type="button" class="btn btn-primary" onclick="getTaskFinishChart()" style="margin-left: 3px">查询</button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="flexStyle" style="align-items: flex-start">
+                                <div style="position: relative;min-height: 16px">
+                                    <div class="form-group" id="task_finish_item" style="width: 150px">
+                                        <label class="control-label text-nowrap">操作员：</label>
+                                        <div class="form-group">
+                                            <label class="control-label text-nowrap">选择工作组：</label>
+                                            <select class="ms2 form-control work-group" id="finishGroupSelect" style="width: 100%"></select>
+                                        </div>
+                                        @*<label class="flexStyle pointer"><input type="checkbox" class="icb_minimal" id="finishAll" value="全选"><span class="textOverTop" style="margin-left: 5px">全选</span></label>*@
+                                        <div style="margin-left: 10px; max-height: 376px; overflow: auto" id="finishItem"></div>
+                                    </div>
+                                    <span class="glyphicon glyphicon-triangle-left pointer" aria-hidden="true" title="收起" onclick="foldList.call(this, '#task_finish_item')" style="position: absolute; right: -5px; top: 5%; font-size: 20px; color: #00A9FC"></span>
+                                </div>
+                                <div style="margin: 0 auto;overflow:auto">
+                                    <div class="hidden" id="finish_chart" style="width: 1270px; height: 650px"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 详情模态框 -->
+    <div class="modal fade" tabindex="-1" id="showFinishModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">任务完成情况</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group flexStyle" style="flex-wrap:wrap">
+                            <label class="control-label text-nowrap">时间：<span class="spanStyle" id="finishTime"></span></label>
+                            <label class="control-label text-nowrap">操作员：<span class="spanStyle" id="finishProcessor"></span></label>
+                        </div>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped" id="finishList"></table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

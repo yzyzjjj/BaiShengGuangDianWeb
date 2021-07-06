@@ -1,0 +1,70 @@
+﻿@model object
+@{
+    ViewBag.Title = "货品位置管理";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/MaterialManagement/site.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/MaterialManagement/site.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>物料管理</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="text-right">
+                <button type="button" class="btn btn-primary btn-sm" onclick="updateSite()" id="updateSiteBtn">保存</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addSiteModal()" id="addSiteModalBtn">添加</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="delSite()" id="delSiteBtn">删除</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="getCargoSiteList()">刷新</button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="table-responsive mailbox-messages">
+                <table class="table table-hover table-striped" id="cargoSiteList"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 添加位置模态框 -->
+    <div class="modal fade" tabindex="-1" id="addSiteModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加新位置</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>新位置：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addSite" onfocusin="focusIn($(this))" maxlength="20">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">备注：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="addRemark" onfocusin="focusIn($(this))" maxlength="200">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addSite()">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

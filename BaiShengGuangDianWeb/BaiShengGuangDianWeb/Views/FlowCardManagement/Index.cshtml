@@ -1,0 +1,535 @@
+﻿@model object
+@{
+    ViewBag.Title = "流程卡管理";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/FlowCardManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/FlowCardManagement/index.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+</section>
+<section class="content ">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#flowCardMgs" data-toggle="tab" aria-expanded="true">流程卡管理</a></li>
+                <li><a href="#productionProcessMgs" data-toggle="tab" aria-expanded="false">计划号管理</a></li>
+                <li><a href="#rawMateriaMgs" data-toggle="tab" aria-expanded="false">原料管理</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="flowCardMgs">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">流程卡</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-primary btn-sm" id="showAddFlowCardModel" onclick="showAddFlowCardModel()">添加流程卡</button>
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label">查询方式：</label>
+                                <div class="fcHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">流程卡</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">计划号</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="fcBody form-group">
+                                    <label class="control-label" for="flowCardId" style="vertical-align:middle">流程卡号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box;vertical-align:middle">
+                                        <input type="tel" id="flowCardId" autocomplete="off" class="form-control" placeholder="请输入流程卡号" style="width: 160px" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
+                                    </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="flowCardStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="flowCardStartDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                        <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                                        <input type="text" id="flowCardEndDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                    </div>
+                                </div>
+                                <div class="fcBody form-group hidden">
+                                    <label class="control-label" for="selectPlanList">计划号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="ms2 form-control" id="selectPlanList" style="width: 160px"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="fcBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getFlowCardList()" id="getFlowCardListBtn" style="margin-left: 4px">查询</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="flowCardList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="productionProcessMgs">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">计划号</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-primary btn-sm" id="showProductionProcessModel" onclick="showProductionProcessModel(0)">添加计划号</button>
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label">查询方式：</label>
+                                <div class="jhHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">计划号</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="jhBody form-group">
+                                    <label class="control-label" for="selectJhList">计划号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="ms2 form-control" id="selectJhList"></select>
+                                    </div>
+                                </div>
+                                <div class="jhBody form-group hidden">
+                                    <label class="control-label" for="jhStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="jhStartDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                        <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                                        <input type="text" id="jhEndDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="jhBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getProductionProcessList()" id="getProductionProcessListBtn" style="margin-left: 4px">查询</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="productionProcessList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="rawMateriaMgs">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">原料</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-primary btn-sm" id="showAddRawMateriaModel" onclick="showAddRawMateriaModel()">添加原料</button>
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group form-inline">
+                                <label class="control-label" for="flowCardStartDate">查询方式：</label>
+                                <div class="ylHead" style="display: -webkit-inline-box">
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal" checked="checked"><span style="margin-left: 5px">原料批号</span></label>
+                                    <label style="margin-left: 5px;cursor:pointer"><input type="checkbox" class="icb_minimal"><span style="margin-left: 5px">修改时间</span></label>
+                                </div>
+                            </div>
+                            <div class="form-group form-inline">
+                                <div class="ylBody form-group">
+                                    <label class="control-label" for="selectYlList">原料批号：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <select class="ms2 form-control" id="selectYlList" style="width: 260px"></select>
+                                    </div>
+                                </div>
+                                <div class="ylBody form-group hidden">
+                                    <label class="control-label" for="ylStartDate">修改时间：</label>
+                                    <div class="form-group no-margin" style="display: -webkit-inline-box">
+                                        <input type="text" id="ylStartDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                        <span style="display: table-cell; vertical-align: middle; height: 33px">&nbsp;-&nbsp;</span>
+                                        <input type="text" id="ylEndDate" class="form_date form-control" style="width: 130px; cursor: pointer">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label hidden" id="ylBtn">所有内容：</label>
+                                    <button type="button" class="btn btn-primary" onclick="getRawMateriaList()" id="getRawMateriaListBtn" style="margin-left: 4px">查询</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive mailbox-messages">
+                                <table class="table table-hover table-striped" id="rawMateriaList"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 流程卡 -->
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addFlowCardModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加流程卡</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="afProductionProcess">请选择计划号：</label>
+                        <select class="ms2 form-control" id="afProductionProcess"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afRawMateria">请选择原料批次：</label>
+                        <select class="ms2 form-control" id="afRawMateria"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afPriority">请选择紧急程度：</label>
+                        <select class="form-control" id="afPriority">
+                            <option value="0">低</option>
+                            <option value="1">中</option>
+                            <option value="2">高</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afRawMaterialQuantity"><span class="text-red">* </span>原料数量：</label>
+                        <input class="form-control" id="afRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="9">
+                        <label class="adt label-danger" id="afRawMaterialQuantityTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afStartFlowCard"><span class="text-red">* </span>起始流程卡号：</label>
+                        <input class="form-control" id="afStartFlowCard" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger" id="afStartFlowCardTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afFlowCardNumber"><span class="text-red">* </span>流程卡数：</label>
+                        <input class="form-control" id="afFlowCardNumber" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="3">
+                        <label class="adt label-danger" id="afFlowCardNumberTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afSender">@*<span class="text-red">* </span>*@发片人：</label>
+                        <input class="form-control" id="afSender" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger" id="afSenderTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afInboundNum">@*<span class="text-red">* </span>*@入库号：</label>
+                        <input class="form-control" id="afInboundNum" onfocusin="focusIn($(this))" maxlength="32">
+                        <label class="adt label-danger" id="afInboundNumTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="afRemarks">备注：</label>
+                        <input class="form-control" id="afRemarks" maxlength="255">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addFlowCard()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="updateFlowCardModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">流程卡详情</h4>
+                    <label class="hidden" id="updateFCId"></label>
+                </div>
+                <div class="modal-body col-sm-12">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label" for="ufProductionProcess"><span class="text-red">* </span>计划号：</label>
+                            <input class="form-control" id="ufProductionProcess" disabled="disabled">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufRawMateria"><span class="text-red">* </span>原料批次：</label>
+                            <input class="form-control" id="ufRawMateria" disabled="disabled">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufPriority">请选择紧急程度：</label>
+                            <select class="form-control" id="ufPriority">
+                                <option value="0">低</option>
+                                <option value="1">中</option>
+                                <option value="2">高</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufRawMaterialQuantity"><span class="text-red">* </span>原料数量：</label>
+                            <input class="form-control" id="ufRawMaterialQuantity" oninput="value=value.replace(/[^\d]/g,'')" onfocusin="focusIn($(this))" maxlength="9">
+                            <label class="adt label-danger" id="ufRawMaterialQuantityTip"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufFlowCardName"><span class="text-red">* </span>流程卡号：</label>
+                            <input class="form-control" id="ufFlowCardName" disabled="disabled" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufSender">@*<span class="text-red">* </span>*@发片人：</label>
+                            <input class="form-control" id="ufSender" onfocusin="focusIn($(this))" maxlength="20">
+                            <label class="adt label-danger" id="ufSenderTip"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufInboundNum">@*<span class="text-red">* </span>*@入库号：</label>
+                            <input class="form-control" id="ufInboundNum" onfocusin="focusIn($(this))" maxlength="32">
+                            <label class="adt label-danger" id="ufInboundNumTip"></label>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="ufRemarks">备注：</label>
+                            <input class="form-control" id="ufRemarks" maxlength="255">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-8">
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-default btn-sm" onclick="showUpdateFlowCard(-1)" id="ufReBtn"><i class="fa fa-repeat"></i> 恢复默认</button>
+                        </div>
+                        <div class="form-group" style="overflow-x: auto">
+                            <label class="control-label">规格：</label>
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>序号</td>
+                                        <td>规格名</td>
+                                        <td>规格值</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="ufGGBody"></tbody>
+                            </table>
+                            <div class="form-group text-right">
+                                <button type="button" class="dd btn btn-default btn-sm" onclick="ufResetGG()"><i class="fa fa-refresh"></i> 重置</button>
+                                <button type="button" class="btn btn-default btn-sm" onclick="ufAddOtherGG()"><i class="fa fa-plus"></i> 添加新项</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="overflow-x: auto">
+                            <label class="control-label">工序：</label>
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>序号</td>
+                                        <td>工序名称</td>
+                                        <td>加工要求(<span class="text-info">例:0.25±0.05mm</span>)</td>
+                                        <td>合格值(<span class="text-info">例:0.25</span>)</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody id="ufGXBody"></tbody>
+                            </table>
+                            <div class="form-group text-right">
+                                <button type="button" class="dd btn btn-default btn-sm" onclick="ufResetGX()"><i class="fa fa-refresh"></i> 重置</button>
+                                <button type="button" class="btn btn-default btn-sm" onclick="ufAddOtherGX()"><i class="fa fa-plus"></i> 添加新项</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateFlowCard()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="changeFlowCardModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">工序详情</h4>
+                    <label class="hidden" id="changeFCId"></label>
+                    <label class="hidden" id="changeFCName"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="showChangeFlowCard(-1)" id="cfReBtn"><i class="fa fa-repeat"></i> 恢复默认</button>
+                    </div>
+                    <div class="form-group" style="overflow-x: auto">
+                        <table class="table table-bordered table-hover" id="gxList"></table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="changeFlowCard()">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 计划号 -->
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="productionProcessModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">计划号详情</h4>
+                    <label class="hidden" id="updateppId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="box">
+                        <div class="box-body col-sm-12">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="control-label" for="productionProcessName"><span class="text-red">* </span>计划号：</label>
+                                    <input class="form-control" id="productionProcessName" onfocusin="focusIn($(this))" maxlength="20">
+                                    <label class="adt label-danger hidden" id="productionProcessNameTip"></label>
+                                </div>
+                                <div class="form-group text-right">
+                                    <button type="button" class="pp btn btn-default btn-sm" onclick="showProductionProcessModel(-1)" id="ppReBtn"><i class="fa fa-repeat"></i> 恢复默认</button>
+                                </div>
+                                <div class="form-group" style="overflow-x:auto">
+                                    <label class="control-label">规格：</label>
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <td>序号</td>
+                                                <td>规格名</td>
+                                                <td>规格值</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apGGBody"></tbody>
+                                    </table>
+                                    <div class="form-group text-right">
+                                        <button type="button" class="dd btn btn-default btn-sm" onclick="addResetGG()"><i class="fa fa-refresh"></i> 重置</button>
+                                        <button type="button" class="btn btn-default btn-sm" onclick="addOtherGG()"><i class="fa fa-plus"></i> 添加新项</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-group" style="overflow-x:auto">
+                                    <label class="control-label">工序：</label>
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <td>序号</td>
+                                                <td>工序名称</td>
+                                                <td>加工要求(<span class="text-info">例:0.25±0.05mm</span>)</td>
+                                                <td>合格值(<span class="text-info">例:0.25</span>)</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apGXBody"></tbody>
+                                    </table>
+                                    <div class="form-group text-right">
+                                        <button type="button" class="dd btn btn-default btn-sm" onclick="addResetGX()"><i class="fa fa-refresh"></i> 重置</button>
+                                        <button type="button" class="btn btn-default btn-sm" onclick="addOtherGX()"><i class="fa fa-plus"></i> 添加新项</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="pp btn btn-primary" onclick="addProductionProcess()" id="appBtn">添加</button>
+                    <button type="button" class="pp btn btn-primary" onclick="updateProductionProcess()" id="uppBtn">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 原料 -->
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addRawMateriaModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">添加原料批次</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="arRawMateriaName"><span class="text-red">* </span>原料批次：</label>
+                        <input class="form-control" id="arRawMateriaName" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger" id="arRawMateriaNameTip"></label>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="reset()"><i class="fa fa-refresh"></i> 重置规格</button>
+                    </div>
+                    <div class="form-group" style="overflow-x:auto">
+                        <label class="control-label">规格：</label>
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td>序号</td>
+                                    <td>规格名</td>
+                                    <td>规格值</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="arBody">
+                                <tr id="ar1">
+                                    <td><label class="control-label" id="arx1">1</label></td>
+                                    <td><input class="form-control" id="arm1" maxlength="20"></td>
+                                    <td><input class="form-control" id="arz1" maxlength="20"></td>
+                                    <td><button type="button" class="btn btn-default btn-sm" onclick="delSelf(1)"><i class="fa fa-minus"></i> 删除</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-default btn-sm" onclick="addOther()"><i class="fa fa-plus"></i> 添加新项</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="addRawMateria()">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="updateRawMateriaModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">原料批次详情</h4>
+                    <label class="hidden" id="updateId"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="urRawMateriaName"><span class="text-red">* </span>原料批次：</label>
+                        <input class="form-control" id="urRawMateriaName" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger" id="urRawMateriaNameTip"></label>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-default btn-sm" onclick="recovery()"><i class="fa fa-repeat"></i> 恢复默认</button>
+                        <button type="button" class="btn btn-default btn-sm" onclick="reset1()"><i class="fa fa-refresh"></i> 重置规格</button>
+                    </div>
+                    <div class="form-group" style="overflow-x:auto">
+                        <label class="control-label">规格：</label>
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td>序号</td>
+                                    <td>规格名</td>
+                                    <td>规格值</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="urBody"></tbody>
+                        </table>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-default btn-sm" onclick="addOther1()"><i class="fa fa-plus"></i> 添加新项</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" onclick="updateRawMateria()">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

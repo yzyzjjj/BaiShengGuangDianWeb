@@ -1,0 +1,202 @@
+﻿@model object
+
+@{
+    ViewBag.Title = "工艺管理";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/ProcessManagement/index.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/ProcessManagement/index.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title"></h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-primary btn-sm" onclick="tableToExcel()">导出</button>
+                <button type="button" class="btn btn-primary btn-sm" id="showAddModel" onclick="showAddModel()">添加工艺编号</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="getProcessList(-1)">刷新</button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group pull-right">
+                <button type="button" class="btn btn-primary btn-sm" onclick="getProcessList(307)" id="getProcessListBtn307">按工艺编号显示</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="getProcessList(308)" id="getProcessListBtn308">按产品型号显示</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="getProcessList(309)" id="getProcessListBtn309">按设备型号显示</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="getProcessList(310)" id="getProcessListBtn310">按机台号显示</button>
+            </div>
+            <div class="table-responsive mailbox-messages" style="width:100%">
+                <table class="table table-hover table-striped" id="processList"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="processDetailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">工艺详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="dd 307">
+                        <div class="form-group">
+                            <label class="control-label" for="pdProcess1">工艺编号：</label>
+                            <select class="ms2 form-control" id="pdProcess1"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="pdDeviceModel1">适用设备型号：</label>
+                            <textarea class="form-control" readonly="readonly" id="pdDeviceModel1" style="resize: vertical;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="pdProductionProcessName1">适用产品型号：</label>
+                            <textarea class="form-control" readonly="readonly" id="pdProductionProcessName1" style="resize: vertical;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="pdCode1">适用机台号：</label>
+                            <textarea class="form-control" readonly="readonly" id="pdCode1" style="resize: vertical;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="pdProcessDataList1">工艺数据：</label>
+                            <div class="table-responsive mailbox-messages" style="width:100%">
+                                <table class="table table-hover table-striped" id="pdProcessDataList1"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dd 308">
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdProductionProcessName2">产品型号：</label>
+                            <select class="ms2 form-control" id="pdProductionProcessName2" style="width: 88%"></select>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdProcessList2">工艺列表：</label>
+                            <div class="table-responsive mailbox-messages" style="width:100%">
+                                <table class="table table-hover table-striped" id="pdProcessList2"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dd 309">
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdDeviceModel3">设备型号：</label>
+                            <select class="ms2 form-control" id="pdDeviceModel3" style="width: 88%"></select>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdProcessList3">工艺列表：</label>
+                            <div class="table-responsive mailbox-messages" style="width:100%">
+                                <table class="table table-hover table-striped" id="pdProcessList3"></table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dd 310">
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdCode4">机台号：</label>
+                            <select class="ms2 form-control" id="pdCode4" style="width: 88%"></select>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdDeviceModel4">设备型号：</label>
+                            <label class="control-label" id="pdDeviceModel4"></label>
+                        </div>
+                        <div class="form-group form-inline">
+                            <label class="control-label" for="pdProcessList4">工艺列表：</label>
+                            <div class="table-responsive mailbox-messages" style="width:100%">
+                                <table class="table table-hover table-striped" id="pdProcessList4"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="addProcessModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">工艺详情</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="apProcess"><span class="text-red">* </span>工艺编号：</label>
+                        <input class="form-control" id="apProcess" onfocusin="focusIn($(this))" maxlength="20">
+                        <label class="adt label-danger hidden" id="apProcessTip"></label>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="apDeviceModel">适用设备型号：</label>
+                        <select class="ms3 form-control" id="apDeviceModel" multiple="multiple" style="width: 100%"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="apProductionProcessName">适用产品型号：</label>
+                        <select class="ms2 form-control" id="apProductionProcessName" style="width: 100%"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="apCode">适用机台号：</label>
+                        <select class="ms3 form-control" id="apCode" multiple="multiple" style="width: 100%"></select>
+                    </div>
+                    <div class="form-group" style="overflow-x:auto">
+                        <label class="control-label" for="apBody">工艺数据：</label>
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <td>NO</td>
+                                    <td>加压时间(M)</td>
+                                    <td>加压时间(S)</td>
+                                    <td>工序时间(M)</td>
+                                    <td>工序时间(S)</td>
+                                    <td>设定压力(Kg)</td>
+                                    <td>下盘速度(rpm)</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="apBody"></tbody>
+                        </table>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-default btn-sm" onclick="apReset()"><i class="fa fa-refresh"></i> 重置</button>
+                            <button type="button" class="btn btn-default btn-sm" onclick="addOther()" id="addOtherBtn"><i class="fa fa-plus"></i> 添加新项</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="opb btn btn-primary" onclick="addProcess()" id="addProcess">添加</button>
+                    <button type="button" class="opb btn btn-primary" onclick="updateProcess()" id="updateProcess">修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" tabindex="-1" id="detailModel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="detailTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea class="form-control" disabled="disabled" id="detail" style="resize: vertical; height: 200px; overflow-y: scroll;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

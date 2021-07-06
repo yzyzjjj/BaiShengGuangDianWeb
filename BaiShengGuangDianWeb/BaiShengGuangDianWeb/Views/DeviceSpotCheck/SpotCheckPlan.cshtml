@@ -1,0 +1,147 @@
+﻿@model object
+@{
+    ViewBag.Title = "点检计划设置";
+    Layout = "_Layout";
+}
+<environment include="Development">
+    <script src="~/mjs/DeviceSpotCheck/spotCheckPlan.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/DeviceSpotCheck/spotCheckPlan.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>设备点检</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content ">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <div class="row">
+                <div class="form-group col-md-5" style="display: flex;align-items: center">
+                    <label class="control-label" style="white-space: nowrap">点检计划：</label>
+                    <select class="ms2 spotPlanSelect form-control" id="spotPlanSelect"></select>
+                </div>
+                <div class="col-md-7">
+                    <div class="box-tools pull-right">
+                        <div class="pull-right" style="margin-bottom: 10px">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addSpotPlanCheckModal(0)" id="addSpotPlanCheckModalBtn">添加计划</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="showUpdateSpotPlan()" id="showUpdateSpotPlanBtn">修改计划</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delSpotPlan()" id="delSpotPlanBtn">删除计划</button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addSpotPlanCheckModal(1)" id="addSpotCheckModalBtn">添加点检项</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="updateSportPlanCheck()" id="updateSportPlanCheckBtn">保存修改</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="delSpotPlanCheck()" id="delSpotPlanCheckBtn">删除点检</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="form-group">
+                <div class="form-group flexStyle" style="justify-content: space-between">
+                    <label class="control-label">已添加点检项：</label>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="getSpotCheckList()">刷新</button>
+                </div>
+                <div class="table-responsive mailbox-messages">
+                    <table class="table table-hover table-striped" id="spotCheckList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 修改计划模态框 -->
+    <div class="modal fade" tabindex="-1" id="updateSpotPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">修改计划</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>点检计划：</label>
+                                <div class="col-sm-10">
+                                    <select class="ms2 spotPlanSelect form-control" id="updateSpotPlanSelect" style="width: 100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"><span class="text-red">* </span>计划名：</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" id="updateSpotPlan" onfocusin="focusIn($(this))" maxlength="20">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateSpotPlan()">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 添加新计划/点检项模态框 -->
+    <div class="modal fade" tabindex="-1" id="addSpotPlanModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="addSpotPlanModalTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-body box">
+                        <div class="form-group planCheckOp">
+                            <label class="control-label"><span class="text-red">* </span>新计划：</label>
+                            <div style="display: -webkit-inline-box;width:84%">
+                                <input class="form-control" id="addSpotPlan" onfocusin="focusIn($(this))" maxlength="20">
+                            </div>
+                        </div>
+                        <div class="form-group planCheckOp">
+                            <label class="control-label"><span class="text-red">* </span>点检计划：</label>
+                            <select class="ms2 spotPlanSelect form-control" id="addSpotPlanCheck" style="width: 50%"></select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info btn-sm" id="addSpotPlanCheckBtn"><i class="fa fa-plus">点检项</i></button>
+                        </div>
+                        <div id="addSpotPlanCheckTable">
+                            <label class="control-label textOverTop">点检项：</label>
+                            <div class="form-group" style="overflow-x: auto">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>点检名称</th>
+                                            <th>启用</th>
+                                            <th>提醒</th>
+                                            <th>下限</th>
+                                            <th>上限</th>
+                                            <th>单位</th>
+                                            <th>参考标准</th>
+                                            <th>备注</th>
+                                            <th>提醒间隔</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="addSpotPlanBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addSpotPlan()">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

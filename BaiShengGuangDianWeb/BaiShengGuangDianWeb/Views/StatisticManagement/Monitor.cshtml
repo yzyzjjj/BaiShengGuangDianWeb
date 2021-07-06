@@ -1,0 +1,882 @@
+﻿@model object
+@{
+    ViewBag.Title = "监控数据";
+    Layout = "_Layout";
+}
+<link type="text/css" href="~/mcss/css/public.css" rel="stylesheet">
+<link type="text/css" href="~/mcss/css/index.css" rel="stylesheet">
+<environment include="Development">
+    <script src="~/mjs/StatisticManagement/monitor.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<environment include="Staging,Production">
+    <script src="~/mminjs/StatisticManagement/monitor.min.js"></script>
+    <script src="~/lib/echarts/echarts.min.js"></script>
+</environment>
+<section class="content-header">
+    <h1>@ViewBag.Title</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i>数据统计</a></li>
+        <li class="active">@ViewBag.Title</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs ui-sortable-handle">
+                <li class="active"><a href="#realQuery" data-toggle="tab" aria-expanded="true">实时查询</a></li>
+                <li id="historyPage"><a href="#historyData" data-toggle="tab" aria-expanded="false">历史数据</a></li>
+                <li><a href="#kanBanData" data-toggle="tab" aria-expanded="false">示例</a></li>
+            </ul>
+            <div class="tab-content no-padding">
+                <div class="tab-pane active in" id="realQuery">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="flexStyle" style="flex: 1; flex-wrap: wrap">
+                                <label class="control-label text-nowrap">选择设备：</label>
+                                <div class="flexStyle">
+                                    <select class="ms2 form-control" id="selectCode" style="min-width: 120px"></select>
+                                    <button type="button" class="btn btn-primary" onclick="getCodeDetail()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="script"></span></label>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">变量</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'valList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'valList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'valList')">
+                                            </div>
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="valList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">输入</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'insList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'insList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'insList')">
+                                            </div>
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="insList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="box box-info">
+                                        <div class="box-header with-border">
+                                            <h3 class="box-title">输出</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="flexStyle" style="justify-content: flex-end">
+                                                <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'outList')">
+                                                    <option value="0">序号</option>
+                                                    <option value="1">名称</option>
+                                                    <option value="2">地址</option>
+                                                    <option value="3">值</option>
+                                                </select>
+                                                <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'outList')">
+                                                    <option value="0">等于</option>
+                                                    <option value="1">不等于</option>
+                                                    <option value="2">包含</option>
+                                                </select>
+                                                <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'outList')">
+                                            </div>
+                                            <div class="table-responsive mailbox-messages">
+                                                <table class="table table-hover table-striped" id="outList"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="historyData">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <div class="col-sm-4">
+                                <label class="control-label text-nowrap">选择设备：</label>
+                                <select class="ms2 form-control" id="selectCodeHistory" style="width: 100%"></select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label text-nowrap">时间：</label>
+                                <div class="flexStyle" style="width: 100%">
+                                    <input type="text" id="sDate" class="form_date form-control text-center pointer">
+                                    <input type="text" id="sTime" class="form_time form-control text-center pointer">
+                                    <label class="control-label" style="margin: 5px">-</label>
+                                    <input type="text" id="eDate" class="form_date form-control text-center pointer">
+                                    <input type="text" id="eTime" class="form_time form-control text-center pointer">
+                                </div>
+                            </div>
+                            <div class="col-sm-4" style="margin-top: 24px">
+                                <div class="flexStyle">
+                                    <select class="form-control" id="chartTypeSelect" style="min-width: 100px">
+                                        <option value="0">独立表</option>
+                                        <option value="1">合并表</option>
+                                    </select>
+                                    <select class="form-control hidden" id="chartSelect" style="min-width: 100px">
+                                        <option value="1">表1</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary" onclick="getHistoryData()" style="margin-left: 3px">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label textOverTop">脚本：<span class="spanStyle" id="historyScript"></span></label>
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">变量</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyValList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyValList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyValList')">
+                                                </div>
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyValList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">输入</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyInsList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyInsList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyInsList')">
+                                                </div>
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyInsList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="box box-info">
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title">输出</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <div class="flexStyle" style="justify-content: flex-end">
+                                                    <select class="form-control thText" style="max-width: 80px" onchange="dataTableSearch.call(this, 'historyOutList')">
+                                                        <option value="0">序号</option>
+                                                        <option value="1">名称</option>
+                                                        <option value="2">地址</option>
+                                                    </select>
+                                                    <select class="form-control sym" style="max-width: 100px" onchange="dataTableSearch.call(this, 'historyOutList')">
+                                                        <option value="0">等于</option>
+                                                        <option value="1">不等于</option>
+                                                        <option value="2">包含</option>
+                                                    </select>
+                                                    <input type="text" class="form-control val" placeholder="搜索" style="max-width: 150px" oninput="dataTableSearch.call(this,'historyOutList')">
+                                                </div>
+                                                <div class="table-responsive mailbox-messages">
+                                                    <table class="table table-hover table-striped" id="historyOutList"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" id="tableChart"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade in" id="kanBanData">
+                    <div class="bg">
+                        <div class="title">车间看板</div>
+                        <div class="leftMain">
+                            <div class="leftMain_top">
+                                <div class="leftMain_topIn">
+                                    <ul>
+                                        <li>
+                                            <div class="liIn">
+                                                <h3>线切割</h3>
+                                                <p class="shu"><span class="shu1">68%</span><i>月产能</i></p>
+                                                <div class="zi"><span class="span1">设备数量：36</span><span>生产效率：50%</span></div>
+                                                <span class="border_bg_leftTop"></span>
+                                                <span class="border_bg_rightTop"></span>
+                                                <span class="border_bg_leftBottom"></span>
+                                                <span class="border_bg_rightBottom"></span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="liIn">
+                                                <h3>蓝玻璃</h3>
+                                                <p class="shu"><span class="shu1">80%</span><i>月产能</i></p>
+                                                <div class="zi"><span class="span1">设备数量：116</span><span>生产效率：80%</span></div>
+                                                <span class="border_bg_leftTop"></span>
+                                                <span class="border_bg_rightTop"></span>
+                                                <span class="border_bg_leftBottom"></span>
+                                                <span class="border_bg_rightBottom"></span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="liIn">
+                                                <h3>抛光</h3>
+                                                <p class="shu"><span class="shu1">59%</span><i>月产能</i></p>
+                                                <div class="zi"><span class="span1">设备数量：55</span><span>生产效率：63%</span></div>
+                                                <span class="border_bg_leftTop"></span>
+                                                <span class="border_bg_rightTop"></span>
+                                                <span class="border_bg_leftBottom"></span>
+                                                <span class="border_bg_rightBottom"></span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="liIn">
+                                                <h3>压电</h3>
+                                                <p class="shu"><span class="shu1">95%</span><i>月产能</i></p>
+                                                <div class="zi"><span class="span1">设备数量：26</span><span>生产效率：77%</span></div>
+                                                <span class="border_bg_leftTop"></span>
+                                                <span class="border_bg_rightTop"></span>
+                                                <span class="border_bg_leftBottom"></span>
+                                                <span class="border_bg_rightBottom"></span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="leftMain_middle">
+                                <div class="leftMain_middle_left">
+                                    <div class="leftMain_middle_leftIn">
+                                        <h3>设备利用率</h3>
+                                        <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                                        <div class="biaoge" style="width:100%; height:25vh" id="chartmain"></div>
+                                        <script type="text/javascript">
+                                            //window.onload = function () {
+                                            //指定图表的配置项和数据
+                                            var dataAxis = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'];
+                                            var data = [44, 36, 39, 47, 58, 66, 62, 25, 88, 64, 18, 30, 42, 24, 40];
+                                            var yMax = 100;
+                                            var dataShadow = [];
+
+                                            for (var i = 0; i < data.length; i++) {
+                                                dataShadow.push(yMax);
+                                            }
+
+                                            option = {
+                                                title: {
+                                                    text: '',
+                                                    subtext: ''
+                                                },
+                                                grid: {
+                                                    x: 40,
+                                                    y: 40,
+                                                    x2: 20,
+                                                    y2: 20,
+
+                                                },
+                                                xAxis: {
+                                                    data: dataAxis,
+                                                    axisLabel: {
+                                                        /*inside: true,*/
+                                                        interval: 0,
+                                                        textStyle: {
+                                                            color: '#fff',
+                                                            fontSize: 12
+
+                                                        }
+                                                    },
+                                                    axisTick: {
+                                                        show: false,
+                                                    },
+                                                    axisLine: {
+                                                        show: true,
+                                                        symbol: ['none', 'arrow'],
+                                                        symbolOffset: 12,
+                                                        lineStyle: {
+                                                            color: '#fff',
+                                                        }
+                                                    },
+                                                    z: 10
+                                                },
+                                                yAxis: {
+                                                    type: 'value',
+                                                    name: '单位：百分比',
+                                                    axisLine: {
+                                                        show: true,
+                                                        symbol: ['none', 'arrow'],
+                                                        symbolOffset: 12,
+                                                        lineStyle: {
+                                                            color: '#fff',
+                                                        }
+                                                    },
+                                                    axisTick: {
+                                                        show: false
+                                                    },
+                                                    axisLabel: {
+                                                        textStyle: {
+                                                            color: '#fff',
+                                                            fontSize: 12
+                                                        }
+                                                    }
+                                                },
+
+                                                dataZoom: [
+                                                    {
+                                                        type: 'inside'
+                                                    }
+                                                ],
+                                                series: [
+                                                    { // For shadow
+                                                        type: 'bar',
+                                                        itemStyle: {
+                                                            color: 'rgba(0,0,0,0.05)'
+                                                        },
+                                                        barGap: '-100%',
+                                                        barCategoryGap: '40%',
+                                                        data: dataShadow,
+                                                        animation: false
+                                                    },
+                                                    {
+                                                        type: 'bar',
+                                                        itemStyle: {
+                                                            color: new echarts.graphic.LinearGradient(
+                                                                0, 0, 0, 1,
+                                                                [
+                                                                    { offset: 0, color: '#0efdff' },
+                                                                    { offset: 0.5, color: '#188df0' },
+                                                                    { offset: 1, color: '#188df0' }
+                                                                ]
+                                                            )
+                                                        },
+                                                        emphasis: {
+                                                            itemStyle: {
+                                                                color: new echarts.graphic.LinearGradient(
+                                                                    0, 0, 0, 1,
+                                                                    [
+                                                                        { offset: 0, color: '#2378f7' },
+                                                                        { offset: 0.7, color: '#2378f7' },
+                                                                        { offset: 1, color: '#0efdff' }
+                                                                    ]
+                                                                )
+                                                            }
+                                                        },
+                                                        data: data
+                                                    }
+                                                ]
+                                            };
+
+                                            // Enable data zoom when user click bar.
+                                            /*var zoomSize = 6;
+                                            myChart.on('click', function (params) {
+                                                console.log(dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)]);
+                                                myChart.dispatchAction({
+                                                    type: 'dataZoom',
+                                                    startValue: dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)],
+                                                    endValue: dataAxis[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+                                                });
+                                            });*/
+
+                                            //获取dom容器
+                                            var myChart = echarts.init(document.getElementById('chartmain'));
+                                            // 使用刚指定的配置项和数据显示图表。
+                                            myChart.setOption(option);
+                                            //};
+                                        </script>
+                                        <span class="border_bg_leftTop"></span>
+                                        <span class="border_bg_rightTop"></span>
+                                        <span class="border_bg_leftBottom"></span>
+                                        <span class="border_bg_rightBottom"></span>
+                                    </div>
+                                </div>
+                                <div class="leftMain_middle_right">
+                                    <div class="leftMain_middle_rightIn">
+                                        <h3>线切割效率排名</h3>
+                                        <div class="biaoge biaoge_pai" style="width:100%; height:25vh">
+                                            <div class="biaoge_paiIn">
+                                                <ul>
+                                                    <li>
+                                                        <div class="liIn">
+                                                            <div class="liIn_left"><span class="bot text-center">1</span><span class="zi">线切割一</span></div>
+                                                            <div class="liIn_line"><div class="line_lineIn" style="width:98.5%;"></div></div>
+                                                            <p class="num">98.5%</p>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="liIn liIn2">
+                                                            <div class="liIn_left"><span class="bot text-center">2</span><span class="zi">线切割二</span></div>
+                                                            <div class="liIn_line"><div class="line_lineIn" style="width:88.5%;"></div></div>
+                                                            <p class="num">88.5%</p>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="liIn liIn3">
+                                                            <div class="liIn_left"><span class="bot text-center">3</span><span class="zi">线切割三</span></div>
+                                                            <div class="liIn_line"><div class="line_lineIn" style="width:68.5%;"></div></div>
+                                                            <p class="num">68.5%</p>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="liIn liIn4">
+                                                            <div class="liIn_left"><span class="bot text-center">4</span><span class="zi">线切割四</span></div>
+                                                            <div class="liIn_line"><div class="line_lineIn" style="width:40.5%;"></div></div>
+                                                            <p class="num">40.5%</p>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="liIn liIn5">
+                                                            <div class="liIn_left"><span class="bot text-center">5</span><span class="zi">线切割五</span></div>
+                                                            <div class="liIn_line"><div class="line_lineIn" style="width:22.5%;"></div></div>
+                                                            <p class="num">22.5%</p>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <span class="border_bg_leftTop"></span>
+                                        <span class="border_bg_rightTop"></span>
+                                        <span class="border_bg_leftBottom"></span>
+                                        <span class="border_bg_rightBottom"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="leftMain_middle">
+                                <div class="leftMain_middle_left">
+                                    <div class="leftMain_middle_leftIn">
+                                        <h3>今日产量监控</h3>
+                                        <div class="biaoge" style="width:100%; height:25vh" id="chartmain_zhe"></div>
+                                        <script type="text/javascript">
+                                            //window.onload = function (){
+                                            //指定图表的配置项和数据
+
+                                            option = {
+                                                title: {
+                                                    text: ''
+                                                },
+                                                tooltip: {
+                                                    trigger: 'axis'
+                                                },
+                                                legend: {
+                                                    textStyle: {
+                                                        color: '#fff',
+                                                        fontSize: 12,
+                                                    },
+                                                    right: '10%',
+                                                    data: ['线切割一', '线切割二','线切割三', '线切割四', '线切割五']
+                                                },
+                                                grid: {
+                                                    x: 40,
+                                                    y: 40,
+                                                    x2: 20,
+                                                    y2: 20,
+                                                },
+                                                toolbox: {
+                                                    feature: {
+                                                        //saveAsImage: {}
+                                                    }
+                                                },
+                                                xAxis: {
+                                                    type: 'category',
+                                                    boundaryGap: false,
+                                                    axisLabel: {
+                                                        /*inside: true,*/
+                                                        interval: 0,
+                                                        textStyle: {
+                                                            color: '#fff',
+                                                            fontSize: 12
+
+                                                        }
+                                                    },
+                                                    axisTick: {
+                                                        show: false,
+                                                    },
+                                                    axisLine: {
+                                                        show: true,
+                                                        symbol: ['none', 'arrow'],
+                                                        symbolOffset: 12,
+                                                        lineStyle: {
+                                                            color: '#fff',
+                                                        }
+                                                    },
+                                                    data: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00']
+                                                },
+                                                yAxis: {
+                                                    type: 'value',
+                                                    axisLabel: {
+                                                        textStyle: {
+                                                            color: '#fff',
+                                                            fontSize: 12
+                                                        }
+                                                    }
+                                                },
+                                                series: [
+                                                    {
+                                                        name: '线切割一',
+                                                        type: 'line',
+                                                        data: [280, 102, 191, 134, 390, 230, 210]
+                                                    },
+                                                    {
+                                                        name: '线切割二',
+                                                        type: 'line',
+                                                        data: [100, 132, 131, 234, 290, 330, 110]
+                                                    },
+                                                    {
+                                                        name: '线切割三',
+                                                        type: 'line',
+                                                        data: [200, 150, 260, 220, 60, 130, 160]
+                                                    },
+                                                    {
+                                                        name: '线切割四',
+                                                        type: 'line',
+                                                        data: [80, 204, 88, 160, 50, 250, 200]
+                                                    },
+                                                    {
+                                                        name: '线切割五',
+                                                        type: 'line',
+                                                        data: [220, 99, 50, 100, 159, 200, 286]
+                                                    },
+                                                ]
+                                            };
+                                            //获取dom容器
+                                            var myChart = echarts.init(document.getElementById('chartmain_zhe'));
+                                            // 使用刚指定的配置项和数据显示图表。
+                                            myChart.setOption(option);
+                                            //};
+                                        </script>
+                                        <span class="border_bg_leftTop"></span>
+                                        <span class="border_bg_rightTop"></span>
+                                        <span class="border_bg_leftBottom"></span>
+                                        <span class="border_bg_rightBottom"></span>
+                                    </div>
+                                </div>
+                                <div class="leftMain_middle_right">
+                                    <div class="leftMain_middle_rightIn">
+                                        <h3>线切割生产详情</h3>
+                                        <div class="biaoge biaoge_bi" style="width:100%; height:25vh">
+                                            <ul>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu1">230</p>
+                                                        <p class="zi">今日生产数量</p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu2">1500</p>
+                                                        <p class="zi">本月生产数量</p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu3">9999</p>
+                                                        <p class="zi">历史生产数量</p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu4">90%</p>
+                                                        <p class="zi">今日设备利用率</p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu5">88%</p>
+                                                        <p class="zi">本月设备利用率</p>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="liIn">
+                                                        <p class="shu shu6">80%</p>
+                                                        <p class="zi">历史设备利用率</p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+
+                                        </div>
+                                        <span class="border_bg_leftTop"></span>
+                                        <span class="border_bg_rightTop"></span>
+                                        <span class="border_bg_leftBottom"></span>
+                                        <span class="border_bg_rightBottom"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rightMain">
+                            <div class="rightMain_top">
+                                <div class="rightMain_topIn">
+                                    <h3>设备状态</h3>
+                                    <div class="biaoge" style="width:100%; height:30vh" id="chartmain_bing"></div>
+                                    <script type="text/javascript">
+                                        option = {
+                                            title: {
+                                                text: '总数量：117',
+                                                subtext: '',
+                                                left: 'left',
+                                                textStyle: {
+                                                    color: '#fff',
+                                                    fontSize: 12
+                                                }
+                                            },
+                                            tooltip: {
+                                                trigger: 'item'
+                                            },
+                                            legend: {
+                                                // orient: 'vertical',
+                                                // top: 'middle',
+                                                type: 'scroll',
+                                                orient: 'vertical',
+                                                right: 10,
+                                                top: 90,
+                                                bottom: 20,
+                                                left: 'right',
+                                                data: ['正常运行', '加工中', '闲置中', '故障中', '连接异常'],
+                                                textStyle: {
+                                                    color: '#fff',
+                                                    fontSize: 12
+                                                }
+
+                                            },
+                                            grid: {
+                                                x: '-10%',
+                                                y: 50,
+                                                x2: 20,
+                                                y2: 20
+                                            },
+                                            color: ['#09d0fb', '#f88cfb', '#95f8fe', '#f9f390', '#ecfeb7'],
+                                            series: [
+                                                {
+                                                    type: 'pie',
+                                                    radius: '65%',
+                                                    center: ['50%', '50%'],
+                                                    selectedMode: 'single',
+                                                    data: [
+                                                        { value: 15, name: '正常运行'},
+                                                        { value: 80, name: '加工中' },
+                                                        { value: 5, name: '闲置中' },
+                                                        { value: 10, name: '故障中' },
+                                                        { value: 7, name: '连接异常' }
+                                                    ],
+                                                    emphasis: {
+                                                        itemStyle: {
+                                                            shadowBlur: 10,
+                                                            shadowOffsetX: 0,
+                                                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        };
+                                        //获取dom容器
+                                        var myChart = echarts.init(document.getElementById('chartmain_bing'));
+                                        // 使用刚指定的配置项和数据显示图表。
+                                        myChart.setOption(option);
+
+                                    </script>
+                                    <span class="border_bg_leftTop"></span>
+                                    <span class="border_bg_rightTop"></span>
+                                    <span class="border_bg_leftBottom"></span>
+                                    <span class="border_bg_rightBottom"></span>
+                                </div>
+                            </div>
+                            <div class="rightMain_bottom">
+                                <div class="rightMain_bottomIn">
+                                    <h3>设备详情</h3>
+                                    <div class="biaoge biaoge_list" style="width:100%; height:36vh">
+                                        <div class="biaoge_listIn">
+                                            <ul class="ul_title">
+                                                <li>设备名</li>
+                                                <li>类型</li>
+                                                <li>操作员</li>
+                                                <li>状态</li>
+                                                <li>时长</li>
+                                            </ul>
+                                            <div class="ul_list">
+                                                <div class="ul_listIn">
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                    <ul class="ul_con">
+                                                        <li>1</li>
+                                                        <li>研磨机</li>
+                                                        <li>张三</li>
+                                                        <li>运行中</li>
+                                                        <li>10h</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="border_bg_leftTop"></span>
+                                    <span class="border_bg_rightTop"></span>
+                                    <span class="border_bg_leftBottom"></span>
+                                    <span class="border_bg_rightBottom"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="clear:both;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="back-top" id="backTop" title="回到顶部"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>
+</section>
