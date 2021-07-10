@@ -2046,7 +2046,9 @@ function getKanBanList(resolve) {
                         <label class="control-label text-bold no-margin mPadding text-center" style="width: 15%; font-size: 17px; background: gray; color:white;">
                             未连接：<label class="control-label no-margin" id="{0}_wlj" style="font-size: 17px;">0</label>
                         </label>
-                        <label class="control-label text-bold no-margin mPadding text-center" style="width: 15%; color: cyan; font-size: 17px;">
+                    </div>
+                    <div class="form-group no-margin mPadding" id="{0}_deviceInfo">
+                        <label class="control-label text-bold no-margin mPadding text-center" style="color: cyan; font-size: 17px;">
                             共：<label class="control-label no-margin" id="{0}_sum" style="font-size: 17px;">0</label>台
                         </label>
                     </div>
@@ -3580,6 +3582,50 @@ function setChart(elId, kbId, type, next = false) {
                 $(`${flag}_gz`).text(ret.gz);
                 $(`${flag}_wlj`).text(ret.wlj);
                 $(`${flag}_sum`).text(ret.sum);
+
+                var workshop = workshopTmp[workshopId];
+                var rateHtml = (par, shifts, cType, cPre, cClass, st, v, color) => {
+                    return shifts.reduce((a, b, i) => `${a}<label class="control-label text-bold no-margin mPadding text-center ${cClass} ${cClass}_${i + st}" style="color: ${color}; font-size: 17px;white-space: nowrap;">
+                                <span>${b}${cType}：</span><label class="control-label no-margin" id="${par}_${cClass}_${i + st}" style="font-size: 17px;">${v[i + st]}${cPre}</label>
+                            </label>`, '');
+                }
+
+                var rClasses = ["time", "qualified"];
+                var rTypes = ["时间稼动率", "合格率"];
+                var rColor = ["limegreen", "gold"];
+                var rPres = ["%", "%"];
+                var rNames = ["日"].concat(workshop.ShiftNameList);
+                rClasses.forEach((rClass, i) => {
+                    var rV = ret[`${rClass}Rate`];
+                    var els = $(`${flag}_deviceInfo .${rClass}`);
+                    if (els.length > rNames.length) {
+                        for (var l = rNames.length; l < els.length; l++) {
+                            $(`${flag}_deviceInfo .${rClass}_${i}`).remove();
+                        }
+                    } else {
+                        var oldShifts = sliceArray(rNames, els.length, 0);
+                        oldShifts.forEach((rName, j) => {
+                            var actClass = `${rClass}_${j}`;
+                            var v = rV[j] ? rV[j] : 0;
+                            if (els.length > j) {
+                                if ($(`${flag}_deviceInfo .${actClass} span`).text() != `${rName}${rTypes[i]}：`)
+                                    $(`${flag}_deviceInfo .${actClass} span`).text(`${rName}${rTypes[i]}`);
+                                if ($(`${flag}_${actClass}`).text() != `${v}${rPres[i]}`)
+                                    $(`${flag}_${actClass}`).text(`${v}${rPres[i]}`);
+                            }
+                        });
+                        if (els.length < rNames.length) {
+                            var newShifts = sliceArray(rNames, rNames.length, els.length);
+                            var shiftsHtml = rateHtml(elId, newShifts, rTypes[i], rPres[i], rClass, els.length, rV, rColor[i % rColor.length]);
+                            if (els.length) {
+                                $(`${flag}_deviceInfo .${rClass}_${els.length - 1}`).append(shiftsHtml);
+                            } else {
+                                $(`${flag}_deviceInfo`).append(shiftsHtml);
+                            }
+                        }
+                    }
+                });
+
                 var els = $(".ds");
                 var margin = els.length > 0 ? ($(els[0]).css("margin").replace("px", "") >> 0) * 2 : 5;
                 var padding = ($(ds).css("padding").replace("px", "") >> 0) * 2;
@@ -4575,7 +4621,7 @@ function getTrackContent(tdd, cFieldList, sFieldList) {
     switch (tdd.State) {
         //等待
         case 0:
-            ps = 
+            ps =
                 `<div class="kb_step_wait_div">
                     <p class="no-margin ${stepSet.bold}" style="${stepSet.width}${stepSet.color}">
                         ${stepSet.pre}${stepSet.d}${stepSet.suffix}
@@ -4596,7 +4642,7 @@ function getTrackContent(tdd, cFieldList, sFieldList) {
             break;
         //加工
         case 1:
-            ps = 
+            ps =
                 `<div class="kb_step_doing_div">
                     <p class="no-margin ${stepSet.bold}" style='${stepSet.width}${stepSet.color}'>
                         ${stepSet.pre}${stepSet.d}${stepSet.suffix}
@@ -4611,7 +4657,7 @@ function getTrackContent(tdd, cFieldList, sFieldList) {
                         /<span style="font-size: 1.8rem;${unqualifiedSet.width}${unqualifiedSet.color}">${unqualifiedSet.pre}-${unqualifiedSet.suffix}</span>
                     </p>
                         ${(!timeSet ? "" :
-                        `<p class="no-margin ${timeSet.bold}" style="font-size: 1.8rem;${timeSet.width}${timeSet.color}">
+                    `<p class="no-margin ${timeSet.bold}" style="font-size: 1.8rem;${timeSet.width}${timeSet.color}">
                         ${timeSet.pre}${timeSet.d}${timeSet.suffix}
                     </p>`)}
                     <p class="no-margin ${costTimeSet.bold}" style="font-size: 1.8rem;${costTimeSet.width}${costTimeSet.color}">
@@ -4621,7 +4667,7 @@ function getTrackContent(tdd, cFieldList, sFieldList) {
             break;
         //完成
         case 2:
-            ps = 
+            ps =
                 `<div class="kb_step_done_div">
                     <p class="no-margin ${stepSet.bold}" style="${stepSet.width}${stepSet.color}">
                         ${stepSet.pre}${stepSet.d}${stepSet.suffix}
@@ -4637,7 +4683,7 @@ function getTrackContent(tdd, cFieldList, sFieldList) {
                         ${(!rateSet ? "" : `(<span style="font-size: 1.8rem;${rateSet.width}${rateSet.color}">${rateSet.pre}${rateSet.d}%${rateSet.suffix}</span>)`)}
                     </p>
                     ${(!timeSet ? "" :
-                        `<p class="no-margin ${timeSet.bold}" style="font-size: 1.8rem;${timeSet.width}${timeSet.color}">
+                    `<p class="no-margin ${timeSet.bold}" style="font-size: 1.8rem;${timeSet.width}${timeSet.color}">
                         ${timeSet.pre}${timeSet.d}${timeSet.suffix}
                     </p>`)}
                     <p class="no-margin ${costTimeSet.bold}" style="font-size: 1.8rem;${costTimeSet.width}${costTimeSet.color}">

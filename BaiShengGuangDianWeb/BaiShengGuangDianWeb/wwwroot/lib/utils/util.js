@@ -209,7 +209,8 @@ function ajaxPost(url, data, func, tf) {
         }
         func(e);
     }
-    $.post(url, data, funcC).error(reLogin);
+    $.post(url, data, funcC).error(() => console.log("error"));
+    //$.post(url, data, funcC).error(reLogin);
 }
 
 //ajax 包装 data 必须是张表，或者null,带token
@@ -246,7 +247,8 @@ function ajaxGet(url, data, func) {
         func(e);
     }
     url = url + paramStr;
-    $.get(url, funcC).error(reLogin);
+    $.get(url, funcC).error(()=> console.log("error"));
+    //$.get(url, funcC).error(reLogin);
 }
 
 //在请求的表中添加token 信息
